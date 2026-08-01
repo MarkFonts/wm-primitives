@@ -1,0 +1,15 @@
+{
+  "name": "@markfonts/wm-primitives",
+  "version": "0.0.1",
+  "description": "Shared cross-app UI primitives for WORDMARK's font tools (font-proofer, ReCal Sans). Consumed as a git submodule; each app's Vite/tsc compiles the source directly.",
+  "type": "module",
+  "main": "index.ts",
+  "types": "index.ts",
+  "sideEffects": ["*.css"],
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "license": "UNLICENSED",
+  "private": false
+}
