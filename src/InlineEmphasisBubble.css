@@ -1,0 +1,31 @@
+/* InlineEmphasisBubble — a floating selection toolbar. Token-based with fallbacks
+   so it bridges either app's theme (font-proofer's --bg-elevated / --bg-hover and
+   ReCal's --surface-2 / --surface-3 both resolve). The label fonts come from the
+   inline styles each app passes, so the chrome font here is just a fallback. */
+.inline-emph-menu {
+  position: fixed;
+  transform: translate(0, -100%); /* above-and-right: bottom-left at the selection corner */
+  z-index: 200;
+  display: flex;
+  gap: 1px;
+  padding: 1px;
+  background: var(--surface-2, var(--bg-elevated, #1a1a1a));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.14));
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  animation: emph-pop 0.12s ease;
+}
+.inline-emph-menu--left { transform: translate(-100%, -100%); } /* flipped: tuck at the top-LEFT corner */
+@keyframes emph-pop { from { opacity: 0; } }
+.inline-emph-btn {
+  background: none;
+  border: 0;
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: var(--text, #f0f0f0);
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.inline-emph-btn:hover { background: var(--surface-3, var(--bg-hover, rgba(255, 255, 255, 0.08))); }

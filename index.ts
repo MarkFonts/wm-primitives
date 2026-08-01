@@ -5,3 +5,6 @@ export type {
   ScopeChipKind, ScopeChip, ScopeRow,
   StyleScopeDropdownProps, StyleScopeListProps,
 } from './src/StyleScopeDropdown'
+
+export { InlineEmphasisBubble } from './src/InlineEmphasisBubble'
+export type { InlineEmphasisBubbleProps } from './src/InlineEmphasisBubble'
