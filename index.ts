@@ -8,3 +8,5 @@ export type {
 
 export { InlineEmphasisBubble } from './src/InlineEmphasisBubble'
 export type { InlineEmphasisBubbleProps } from './src/InlineEmphasisBubble'
+
+export { placeCaretAtStart, placeCaretAtEnd, placeCaretAtOffset, caretCharOffset } from './src/caret'
