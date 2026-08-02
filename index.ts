@@ -10,3 +10,6 @@ export { InlineEmphasisBubble } from './src/InlineEmphasisBubble'
 export type { InlineEmphasisBubbleProps } from './src/InlineEmphasisBubble'
 
 export { placeCaretAtStart, placeCaretAtEnd, placeCaretAtOffset, caretCharOffset } from './src/caret'
+
+export { splitInlineMarkup, isPlainRun } from './src/inlineMarkup'
+export type { InlineTokenType, InlineToken } from './src/inlineMarkup'
