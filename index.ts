@@ -13,3 +13,6 @@ export { placeCaretAtStart, placeCaretAtEnd, placeCaretAtOffset, caretCharOffset
 
 export { splitInlineMarkup, isPlainRun } from './src/inlineMarkup'
 export type { InlineTokenType, InlineToken } from './src/inlineMarkup'
+
+// UI-kit board (component gallery preview). JS module — consumers on tsc need allowJs.
+export { default as UiKitBoard } from './src/UiKitBoard'
