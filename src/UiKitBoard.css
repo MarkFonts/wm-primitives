@@ -38,7 +38,8 @@
    every card in the column matches (cards fill 100% of the column). */
 .coss-col { display: flex; flex-direction: column; gap: 16px; width: 270px; }
 .coss-col--wide { width: 420px; }
-.ukit-strip::-webkit-scrollbar { width: 9px; height: 9px; }
+.ukit-strip::-webkit-scrollbar { width: 9px; height: 9px; background: transparent; }
+.ukit-strip::-webkit-scrollbar-track { background: transparent; }
 .ukit-strip::-webkit-scrollbar-thumb { background: var(--surface-3, var(--bg-hover, #383838)); border-radius: 5px; }
 .ukit-strip::-webkit-scrollbar-thumb:hover { background: var(--border); }
 /* Where the h+v scrollbars meet: unstyled it defaults to white (a triangle in dark mode). */
