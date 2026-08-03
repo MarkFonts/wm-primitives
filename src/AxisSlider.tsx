@@ -10,7 +10,7 @@
 //   • marker  — a ◆ "baked default" indicator before the value
 //   • onRangePointerDown — hook on the range thumb (e.g. drag-to-flash a zone)
 //   • disabled — dim/lock the control (e.g. a frozen axis)
-import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
 import './AxisSlider.css'
 
@@ -50,6 +50,28 @@ export function AxisSlider({
   variant = 'default', reference, suffix,
 }: AxisSliderProps) {
   const [numFocused, setNumFocused] = useState(false)
+
+  // Scroll-to-adjust: hover the control and wheel to nudge by ±step. Needs a
+  // non-passive native listener (React onWheel is passive → can't preventDefault the
+  // page scroll). A ref carries the latest props so the listener never goes stale.
+  const rowRef = useRef<HTMLDivElement>(null)
+  const wheel = useRef({ value, min, max, step, onChange, allowAuto, autoValue, disabled })
+  wheel.current = { value, min, max, step, onChange, allowAuto, autoValue, disabled }
+  useEffect(() => {
+    const el = rowRef.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      const s = wheel.current
+      if (s.disabled) return
+      e.preventDefault()
+      const st = s.step ?? 1
+      const base = s.value === 'auto' ? (s.autoValue ?? s.min) : (s.value as number)
+      const next = Math.min(s.max, Math.max(s.min, +(base + (e.deltaY < 0 ? st : -st)).toFixed(6)))
+      s.onChange(next)
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [])
   const refPct = reference != null
     ? Math.max(0, Math.min(100, ((reference - min) / (max - min)) * 100))
     : null
@@ -75,7 +97,7 @@ export function AxisSlider({
     : (value as number)
 
   return (
-    <div className={`slider-row${disabled ? ' slider-row--off' : ''}${variant !== 'default' ? ` slider-row--${variant}` : ''}`}>
+    <div ref={rowRef} className={`slider-row${disabled ? ' slider-row--off' : ''}${variant !== 'default' ? ` slider-row--${variant}` : ''}`}>
       {hintPos && createPortal(
         <div className="slider-auto-hint" style={{ top: hintPos.top, left: hintPos.left }}>
           hint: type &quot;a&quot; for auto
