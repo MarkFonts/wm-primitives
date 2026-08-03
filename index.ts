@@ -20,3 +20,6 @@ export { default as UiKitBoard } from './src/UiKitBoard'
 // Auto-deploy: a push touching src/ or this file fires .github/workflows/notify.yml,
 // which dispatches font-proofer + ReCal to rebuild against latest and redeploy to
 // wordmark — so a primitive change ships everywhere without bumping each app.
+
+export { AxisSlider } from './src/AxisSlider'
+export type { AxisSliderProps } from './src/AxisSlider'

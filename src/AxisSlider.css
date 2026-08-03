@@ -1,0 +1,103 @@
+/* AxisSlider — moved from font-proofer's slider CSS, with token fallbacks so it
+   themes in both apps (font-proofer's --bg-*/--track-empty; ReCal's --surface-*).
+   The number field stays essentially native — color-scheme drives its light/dark
+   up/down steppers, so each app just needs `color-scheme` on its root. */
+
+.slider-row { display: flex; flex-direction: column; gap: 3px; }
+.slider-row--off { opacity: 0.4; }
+
+.slider-label { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.slider-label-left {
+  display: flex; align-items: baseline; gap: 5px;
+  min-width: 0; overflow: visible; padding-bottom: 2px;
+}
+.slider-label-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'CalSansUI', var(--ui-font, system-ui), sans-serif;
+  white-space: nowrap; overflow: visible; text-overflow: clip;
+}
+.slider-label-text--tagged { flex: 0 0 105px; }
+.slider-tag {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'CalSansUI', var(--ui-font, system-ui), sans-serif;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  font-feature-settings: "tnum";
+}
+
+/* value = optional ◆ marker + the editable number/auto field */
+.slider-value { display: flex; align-items: baseline; gap: 5px; flex-shrink: 0; }
+.slider-marker {
+  font-size: 9px; line-height: 1;
+  color: var(--marker-default, var(--accent, currentColor));
+  transform: translateY(-1px);
+}
+.slider-number {
+  font-family: 'CalSansUI', var(--ui-font, system-ui), sans-serif;
+  font-size: 12px;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  text-align: right;
+  width: 66px;
+  padding: 2px 0;
+  font-feature-settings: "tnum";
+  color-scheme: inherit;   /* native steppers follow the app's light/dark scheme */
+}
+.slider-number:focus { outline: none; }
+.slider-number:disabled { cursor: default; }
+
+.slider-track-wrap { position: relative; }
+.slider-track-wrap input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 24px;
+  background: transparent; cursor: pointer; margin: 0; display: block;
+}
+.slider-track-wrap input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    var(--border) 0%,
+    var(--border) var(--locked-pct, 100%),
+    var(--track-empty, var(--surface-3, #2b2b2b)) var(--locked-pct, 100%),
+    var(--track-empty, var(--surface-3, #2b2b2b)) 100%
+  );
+  border-radius: 1px;
+}
+.slider-track-wrap input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--text); margin-top: -6px; cursor: pointer;
+}
+.slider-track-wrap input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    var(--border) 0%,
+    var(--border) var(--locked-pct, 100%),
+    var(--track-empty, var(--surface-3, #2b2b2b)) var(--locked-pct, 100%),
+    var(--track-empty, var(--surface-3, #2b2b2b)) 100%
+  );
+  border-radius: 1px;
+}
+.slider-track-wrap input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--text); border: none; cursor: pointer;
+}
+
+.slider-auto-hint {
+  position: fixed;
+  font-size: 11px;
+  color: var(--text);
+  background: var(--bg-elevated, var(--surface-2, #2e2e2e));
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 6px);
+  padding: 4px 8px;
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+  animation: hint-fade 3s forwards;
+}
+@keyframes hint-fade { 0% { opacity: 1; } 60% { opacity: 1; } 100% { opacity: 0; } }
