@@ -121,8 +121,9 @@
 /* Burned stock reference — a faint ghost dot at the shipped value, behind the thumb. */
 .slider-ref {
   position: absolute; top: 12px; width: 8px; height: 8px; margin-left: -4px;
-  border-radius: 50%; background: var(--text-muted); opacity: 0.28;
-  transform: translateY(-50%); pointer-events: none; z-index: 0;
+  border-radius: 1px; background: var(--text-muted); opacity: 0.28;
+  transform: translateY(-50%) rotate(45deg); /* rhombus, mirrors the thumb */
+  pointer-events: none; z-index: 0;
 }
 
 /* ── variant: skeletal — thin/minimal, for ephemeral preview/demo sliders. */
