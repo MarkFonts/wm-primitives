@@ -29,18 +29,27 @@ export interface AxisSliderProps {
   /** Enable the `a`-for-auto text field (e.g. opsz). */
   allowAuto?: boolean
   autoValue?: number
-  /** Optional ◆ "baked default" marker before the value. */
+  /** Optional ◆ "baked default" marker before the value (suppressed for variant="diamond"). */
   marker?: boolean
   /** Optional hook on the range thumb's pointer-down (e.g. drag-to-flash). */
   onRangePointerDown?: (e: ReactPointerEvent<HTMLInputElement>) => void
   /** Dim/disable the control (e.g. a frozen axis). */
   disabled?: boolean
+  /** Thumb style: 'default' round thumb · 'diamond' rotate-45 marker-default thumb (Type-Matrix
+   *  style, for default-editing rails) · 'skeletal' thin/minimal (preview/demo). */
+  variant?: 'default' | 'diamond' | 'skeletal'
+  /** Stock/original value → a faint "burned" reference marker on the track (see how far you moved). */
+  reference?: number
 }
 
 export function AxisSlider({
   label, tag, value, min, max, step, onChange, display,
   lockedAbove, allowAuto, autoValue, marker, onRangePointerDown, disabled,
+  variant = 'default', reference,
 }: AxisSliderProps) {
+  const refPct = reference != null
+    ? Math.max(0, Math.min(100, ((reference - min) / (max - min)) * 100))
+    : null
   const lockedPct = lockedAbove != null
     ? Math.max(0, Math.min(100, ((lockedAbove - min) / (max - min)) * 100))
     : null
@@ -63,7 +72,7 @@ export function AxisSlider({
     : (value as number)
 
   return (
-    <div className={`slider-row${disabled ? ' slider-row--off' : ''}`}>
+    <div className={`slider-row${disabled ? ' slider-row--off' : ''}${variant !== 'default' ? ` slider-row--${variant}` : ''}`}>
       {hintPos && createPortal(
         <div className="slider-auto-hint" style={{ top: hintPos.top, left: hintPos.left }}>
           hint: type &quot;a&quot; for auto
@@ -76,7 +85,7 @@ export function AxisSlider({
           {tag && <span className="slider-tag">{tag}</span>}
         </span>
         <span className="slider-value">
-          {marker && <span className="slider-marker" aria-hidden="true">◆</span>}
+          {marker && variant !== 'diamond' && <span className="slider-marker" aria-hidden="true">◆</span>}
           <input
             ref={inputRef}
             className="slider-number"
@@ -100,6 +109,7 @@ export function AxisSlider({
         className="slider-track-wrap"
         style={lockedPct != null ? ({ '--locked-pct': `${lockedPct}%` } as CSSProperties) : undefined}
       >
+        {refPct != null && <span className="slider-ref" style={{ left: `${refPct}%` }} aria-hidden="true" />}
         <input
           type="range"
           min={min}

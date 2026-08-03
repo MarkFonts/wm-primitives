@@ -101,3 +101,30 @@
   animation: hint-fade 3s forwards;
 }
 @keyframes hint-fade { 0% { opacity: 1; } 60% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ── variant: diamond — rotate-45 marker-default thumb (Type-Matrix style), for
+   default-editing rails. Pairs with `reference` to burn the stock value behind it. */
+.slider-row--diamond input[type="range"]::-webkit-slider-thumb {
+  width: 12px; height: 12px; border-radius: 2px;
+  background: var(--marker-default, var(--accent, var(--text)));
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 1px var(--bg, #0f0f0f);
+  margin-top: -5px;
+}
+.slider-row--diamond input[type="range"]::-moz-range-thumb {
+  width: 12px; height: 12px; border-radius: 2px;
+  background: var(--marker-default, var(--accent, var(--text)));
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 1px var(--bg, #0f0f0f);
+}
+
+/* Burned stock reference — a faint ghost dot at the shipped value, behind the thumb. */
+.slider-ref {
+  position: absolute; top: 12px; width: 8px; height: 8px; margin-left: -4px;
+  border-radius: 50%; background: var(--text-muted); opacity: 0.28;
+  transform: translateY(-50%); pointer-events: none; z-index: 0;
+}
+
+/* ── variant: skeletal — thin/minimal, for ephemeral preview/demo sliders. */
+.slider-row--skeletal input[type="range"]::-webkit-slider-thumb { width: 10px; height: 10px; margin-top: -4px; }
+.slider-row--skeletal input[type="range"]::-moz-range-thumb { width: 10px; height: 10px; }
