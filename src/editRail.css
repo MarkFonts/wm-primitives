@@ -1,0 +1,28 @@
+/* edit-rail — the canonical "you're editing this / you can type here" affordance.
+   A 3px left-edge bar on any editable region, shown:
+     • while the field is focused (:focus / :focus-within) — i.e. while editing
+     • persistently on whatever a style menu currently targets (.edit-rail--target)
+   Same look in every scene and both apps (extracted from ReCal Scale's .tier-sel).
+   Color is tokenized (--edit-rail) so light themes can darken it.
+
+   Apply `edit-rail` to any contentEditable block; add `edit-rail--target` for the
+   persistent menu-target rail. The host just needs the element to allow a -10px
+   left overflow (blocks inside a padded column already do). */
+
+.edit-rail { position: relative; }
+.edit-rail::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--edit-rail, rgba(255, 255, 255, 0.28));
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+.edit-rail:focus::before,
+.edit-rail:focus-within::before,
+.edit-rail--target::before { opacity: 1; }
