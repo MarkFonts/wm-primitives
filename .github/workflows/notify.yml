@@ -1,6 +1,6 @@
 # On any source change, tell the consuming apps (font-proofer, ReCal) to rebuild +
 # redeploy, so a primitive tweak reaches wordmark without manually bumping each app.
-# No-ops until the DISPATCH_TOKEN secret is added (a PAT that can dispatch to the apps).
+# No-ops until the WORDMARK_DEPLOY_TOKEN4 secret is added (a PAT that can dispatch to the apps).
 name: Notify consumers
 on:
   push:
@@ -17,10 +17,10 @@ jobs:
     steps:
       - name: Trigger ${{ matrix.repo }} deploy
         env:
-          TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+          TOKEN: ${{ secrets.WORDMARK_DEPLOY_TOKEN4 }}
         run: |
           if [ -z "$TOKEN" ]; then
-            echo "DISPATCH_TOKEN not set — skipping. Add the secret to enable auto-deploy."
+            echo "WORDMARK_DEPLOY_TOKEN4 not set — skipping. Add the secret to enable auto-deploy."
             exit 0
           fi
           curl -fsS -X POST \
