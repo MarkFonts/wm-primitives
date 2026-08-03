@@ -40,13 +40,16 @@ export interface AxisSliderProps {
   variant?: 'default' | 'diamond' | 'skeletal'
   /** Stock/original value → a faint "burned" reference marker on the track (see how far you moved). */
   reference?: number
+  /** Static unit label shown just after the editable field (e.g. "px", "%", "em"). Never inside it. */
+  suffix?: string
 }
 
 export function AxisSlider({
   label, tag, value, min, max, step, onChange, display,
   lockedAbove, allowAuto, autoValue, marker, onRangePointerDown, disabled,
-  variant = 'default', reference,
+  variant = 'default', reference, suffix,
 }: AxisSliderProps) {
+  const [numFocused, setNumFocused] = useState(false)
   const refPct = reference != null
     ? Math.max(0, Math.min(100, ((reference - min) / (max - min)) * 100))
     : null
@@ -94,7 +97,8 @@ export function AxisSlider({
             step={allowAuto ? undefined : step}
             value={numberValue}
             disabled={disabled}
-            onFocus={handleFocus}
+            onFocus={() => { handleFocus(); setNumFocused(true) }}
+            onBlur={() => setNumFocused(false)}
             onKeyDown={e => { if (allowAuto && e.key === 'a') { e.preventDefault(); onChange('auto') } }}
             onChange={e => {
               if (!allowAuto) { onChange(parseFloat(e.target.value)); return }
@@ -103,6 +107,9 @@ export function AxisSlider({
               onChange(parseFloat(raw))
             }}
           />
+          {suffix && (
+            <span className={`slider-suffix${numFocused ? ' slider-suffix--hidden' : ''}`} aria-hidden="true">{suffix}</span>
+          )}
         </span>
       </div>
       <div
