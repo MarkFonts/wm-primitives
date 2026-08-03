@@ -1,7 +1,7 @@
-/* AxisSlider — moved from font-proofer's slider CSS, with token fallbacks so it
-   themes in both apps (font-proofer's --bg-*/--track-empty; ReCal's --surface-*).
-   The number field stays essentially native — color-scheme drives its light/dark
-   up/down steppers, so each app just needs `color-scheme` on its root. */
+/* AxisSlider — moved from the font-proofer slider CSS, with token fallbacks so it
+   themes in both apps (font-proofer --bg-* / --track-empty and ReCal --surface-*).
+   The number field stays essentially native: color-scheme drives its light/dark
+   up/down steppers, so each app just needs color-scheme on its root. */
 
 .slider-row { display: flex; flex-direction: column; gap: 3px; }
 .slider-row--off { opacity: 0.4; }
@@ -44,7 +44,7 @@
   width: 66px;
   padding: 2px 0;
   font-feature-settings: "tnum";
-  color-scheme: inherit;   /* native steppers follow the app's light/dark scheme */
+  color-scheme: inherit;   /* native steppers follow the app light/dark scheme */
 }
 .slider-number:focus { outline: none; }
 .slider-number:disabled { cursor: default; }
