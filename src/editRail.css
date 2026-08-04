@@ -1,28 +1,46 @@
-/* edit-rail — the canonical "you're editing this / you can type here" affordance.
-   A 3px left-edge bar on any editable region, shown:
-     • while the field is focused (:focus / :focus-within) — i.e. while editing
-     • persistently on whatever a style menu currently targets (.edit-rail--target)
-   Same look in every scene and both apps (extracted from ReCal Scale's .tier-sel).
-   Color is tokenized (--edit-rail) so light themes can darken it.
+/* edit-rail — the canonical editing / param-target affordance, shared across
+   font-proofer + ReCal. Left/right edge bars on any editable region:
 
-   Apply `edit-rail` to any contentEditable block; add `edit-rail--target` for the
-   persistent menu-target rail. The host just needs the element to allow a -10px
-   left overflow (blocks inside a padded column already do). */
+     • EDITING (focus): BOTH edges light up (neutral --edit-rail) — the block is
+       "framed" at the view edges, a Canva/Notion-style block activation that
+       reads as "you can type here".                       ..... class `edit-rail`
+     • PARAM TARGET (persistent): the LEFT bar goes accent (--edit-rail-target =
+       --accent) — "slider/menu edits land HERE" (Scale multi-select, Paragraph
+       style-target). Wins the left edge even while focused.  add `edit-rail--target`
+
+   So the LEFT bar carries identity (neutral = just editing · accent = target) and
+   the RIGHT bar appears while editing, completing the frame. Extracted from ReCal
+   Scale's old .tier-sel. Colors tokenized so light themes can darken them. Host
+   just needs to allow a small left/right overflow (padded columns already do). */
 
 .edit-rail { position: relative; }
-.edit-rail::before {
+.edit-rail::before,
+.edit-rail::after {
   content: '';
   position: absolute;
-  left: -10px;
   top: 0;
   bottom: 0;
   width: 3px;
   border-radius: 2px;
   background: var(--edit-rail, rgba(255, 255, 255, 0.28));
   opacity: 0;
-  transition: opacity 0.12s ease;
+  transition: opacity 0.12s ease, background 0.12s ease;
   pointer-events: none;
 }
+.edit-rail::before { left: -12px; }
+.edit-rail::after  { right: -12px; }
+
+/* editing focus — both edges frame the block */
 .edit-rail:focus::before,
+.edit-rail:focus::after,
 .edit-rail:focus-within::before,
-.edit-rail--target::before { opacity: 1; }
+.edit-rail:focus-within::after { opacity: 1; }
+
+/* param target / multi-select — accent LEFT bar, persistent, wins the left even
+   while focused (listed after; :focus variants tie specificity with focus). */
+.edit-rail--target::before,
+.edit-rail--target:focus::before,
+.edit-rail--target:focus-within::before {
+  opacity: 1;
+  background: var(--edit-rail-target, var(--accent, currentColor));
+}
