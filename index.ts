@@ -36,3 +36,8 @@ export { nbMinus } from './src/format'
 // caret capture/restore). Pairs with caret.ts + editRail.css.
 export { EditableTextBlock } from './src/EditableTextBlock'
 export type { EditableTextBlockProps } from './src/EditableTextBlock'
+
+// Interactive glyph browser: equal-sized cell grid + viewer/U+ readout, search,
+// copy-to-clipboard, ssXX alternate groups (wm-primitives #2).
+export { GlyphPicker } from './src/GlyphPicker'
+export type { GlyphPickerProps, GlyphPickerGroup } from './src/GlyphPicker'

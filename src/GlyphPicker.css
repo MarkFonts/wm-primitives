@@ -1,0 +1,97 @@
+/* GlyphPicker — tokenized to the house vars with fallbacks, dark-first.
+   The grid is EQUAL-SIZED cells (auto-fill columns, square boxes) — every glyph in
+   the same box regardless of its advance width. */
+
+.gp {
+  display: flex;
+  gap: 28px;
+  min-height: 0;
+  color: var(--text, #eee);
+}
+
+/* ── Left: search + big viewer ── */
+.gp-side {
+  flex: 0 0 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+.gp-search {
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text, #eee);
+  background: var(--surface-1, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border, #333);
+  border-radius: var(--radius, 8px);
+  outline: none;
+}
+.gp-search:focus { border-color: var(--text-dim, #777); }
+.gp-viewer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  font: inherit;
+  font-size: 148px;
+  line-height: 1;
+  color: var(--text, #eee);
+  background: var(--surface-1, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-subtle, #222);
+  border-radius: var(--radius, 8px);
+  cursor: copy;
+}
+.gp-viewer:hover { border-color: var(--border, #333); }
+.gp-viewer-code {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #999);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Right: groups of equal-sized cells ── */
+.gp-groups {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+.gp-group { margin-bottom: 26px; }
+.gp-group-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim, #666);
+  margin-bottom: 10px;
+}
+.gp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 4px;
+}
+.gp-cell {
+  aspect-ratio: 1;             /* every glyph in the same square box */
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font: inherit;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text, #eee);
+  background: var(--surface-1, rgba(255, 255, 255, 0.05));
+  border: none;
+  border-radius: var(--radius, 8px);
+  cursor: pointer;
+  padding: 0;
+}
+.gp-cell:hover { background: var(--surface-2, rgba(255, 255, 255, 0.1)); }
+.gp-cell--active {
+  background: var(--accent, #e8e8e8);
+  color: var(--bg, #111);
+}
+.gp-cell--invisible { color: var(--text-faint, #444); }
