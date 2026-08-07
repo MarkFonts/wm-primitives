@@ -28,3 +28,6 @@ export type { AxisSliderProps } from './src/AxisSlider'
 // extra groups / alternates on top of the shared base groups.
 export { makeGlyphSets, parseCmapRanges, isSupported } from './src/glyphset'
 export type { CmapRanges, GlyphGroups } from './src/glyphset'
+
+// Small text / number formatting helpers.
+export { nbMinus } from './src/format'
