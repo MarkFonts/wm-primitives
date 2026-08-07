@@ -31,3 +31,8 @@ export type { CmapRanges, GlyphGroups } from './src/glyphset'
 
 // Small text / number formatting helpers.
 export { nbMinus } from './src/format'
+
+// Canonical contentEditable text-block lifecycle (raw-while-focused, commit-on-blur,
+// caret capture/restore). Pairs with caret.ts + editRail.css.
+export { EditableTextBlock } from './src/EditableTextBlock'
+export type { EditableTextBlockProps } from './src/EditableTextBlock'
