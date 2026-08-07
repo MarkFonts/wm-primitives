@@ -1,0 +1,23 @@
+/* House scrollbar — one thin 6px bar everywhere, shared by ReCal + font-proofer.
+   Global on purpose: every scrollable container in both apps gets the same bar
+   (explicit webkit width also keeps it always-visible on macOS overlay setups).
+   Tokens (override per app/theme):
+     --scrollbar-thumb        thumb color        (default: --border)
+     --scrollbar-thumb-hover  thumb hover color  (default: --text-dim)
+   A container needing NO bar keeps `scrollbar-width: none` / `display: none`
+   (more specific, still wins). */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb, var(--border, rgba(128, 128, 128, 0.5))) transparent;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, var(--border, rgba(128, 128, 128, 0.5)));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, var(--text-dim, rgba(160, 160, 160, 0.8)));
+}
+::-webkit-scrollbar-corner { background: transparent; }
