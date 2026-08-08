@@ -139,9 +139,10 @@ separately, and spending either means not also changing role.
 | `body` | 16 | 1.55 | 0 | auto | — (content norm) |
 | `lede` | 18 | 1.5 | 0 | auto | size |
 | `title` | 26 | 1.2 | 0 | auto | size |
-| `display` | 40 | 1.1 | 0 | auto | size |
+| `display` | 45 | 1.1 | 0 | auto ᵐ | size |
 
-ᶜ compensation, not a signal · ᵖ pinned by policy (chrome must not drift between surfaces)
+ᶜ compensation, not a signal · ᵖ pinned by policy (chrome must not drift between surfaces) ·
+ᵐ 45 is the top of Cal Sans’ `opsz` range, so `display` sits exactly at the axis ceiling
 
 Plus two non-roles: `readout` (= `ui` + `tnum`, so digits don't jitter) and `code`
 (the only sanctioned monospace).
@@ -174,8 +175,11 @@ size its context calls for:
 
 ## IV. The poster scale
 
-The seven roles top out at `display` (40) — that is the largest size *chrome* has any
-business being. Above it lives another instrument: the monster sample. The hero word
+The seven roles top out at `display` (45) — and that number is not arbitrary. With
+`font-optical-sizing: auto`, a 45px setting puts Cal Sans at `opsz` 45, the top of its
+range. `display` is therefore the last step that still has optical sizing left to
+give; above it the axis is pinned at its maximum whatever you do. Text ends where the
+axis ends. Above that lives another instrument: the monster sample. The hero word
 on a family page, the Words scene, a specimen waterfall.
 
 Up there the rules change, and it is worth saying why. At text sizes you name the
