@@ -77,17 +77,21 @@ colour means "important," it stops being able to mean anything else.
 
 ### Tracking: one value, for capitals
 
-**`letter-spacing` is zero everywhere except strings of capitals.** One token,
-`--track-caps: .12em`, and no other tracking value exists in the system.
+**Tracking may only ever be positive, and only on capitals. It is never negative.**
+One token, `--track-caps: .12em`, and no other tracking value exists in the system.
 
-The reasoning matters more than the rule. Hand-tracking display type — the reflex to
-pull -.02em, -.03em, -.04em as sizes climb — is what you do when a font has no
-optical size axis. It is a manual imitation of optical sizing. Cal Sans *has* `opsz`,
-and it is already tightening the fit at every step; tracking it again by hand
-double-counts the axis the whole product is built on, and the two corrections fight
-each other at the extremes.
+The direction is the whole rule, because the two cases are not symmetric. *Positive*
+tracking **adds** space that capitals genuinely lack — no axis supplies it, so
+hand-work is the only way. *Negative* tracking **removes** space to imitate a display
+cut, which is exactly what `opsz` already does, and does properly: by redrawing the
+letters, not merely closing the gaps between them.
 
-The exception is real and narrow: capitals are drawn with sidebearings tuned for
+So the reflex to pull -.02em, -.03em, -.04em as sizes climb is what you do when a
+font has no optical size axis. Cal Sans *has* one, it is already tightening the fit
+at every step, and doing it again by hand double-counts the axis the whole product is
+built on — the two corrections then fight each other at the extremes.
+
+The positive case is real and narrow: capitals are drawn with sidebearings tuned for
 mixed-case setting, so a run of them crowds. Bringhurst §3.2.1 — letterspace all
 strings of capitals and small caps. That is the only place, so it gets the only value.
 
