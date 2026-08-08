@@ -40,4 +40,5 @@ export type { EditableTextBlockProps } from './src/EditableTextBlock'
 // Interactive glyph browser: equal-sized cell grid + viewer/U+ readout, search,
 // copy-to-clipboard, ssXX alternate groups (wm-primitives #2).
 export { GlyphPicker } from './src/GlyphPicker'
-export type { GlyphPickerProps, GlyphPickerGroup } from './src/GlyphPicker'
+export { measureGlyphMetrics } from './src/GlyphPicker'
+export type { GlyphPickerProps, GlyphPickerGroup, GlyphPickerCell, GlyphPickerMetrics, GlyphCellState } from './src/GlyphPicker'

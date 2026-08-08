@@ -10,17 +10,36 @@
 // arrives as CSS on the root so axis changes re-render nothing; optional cmap ranges
 // filter unsupported chars; optional `metrics` prop (from real font data) draws the
 // rules — without it the specimen just centers.
-import { memo, useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react'
 import type { CSSProperties } from 'react'
 import { isSupported, type CmapRanges } from './glyphset'
+import { loadNamePages, algorithmicName } from './glyphNames'
 import './GlyphPicker.css'
+
+/** One cell. `ffs` is a raw font-feature-settings fragment for this cell (e.g.
+    `"ss02" 1` or `'aalt' 3, 'rclt' 1`); `note` is appended to the U+ readout when
+    selected (e.g. "aalt 3"); `key` disambiguates cells sharing a char. */
+export interface GlyphPickerCell {
+  ch: string
+  ffs?: string
+  note?: string
+  key?: string
+}
 
 export interface GlyphPickerGroup {
   label: string
-  chars: string
-  /** OpenType feature tag — cells render chars WITH this feature on (ssXX alternates). */
-  feat?: string
+  /** Shorthand: plain string of chars (cmap-filtered). */
+  chars?: string
+  /** Explicit cells (pre-scoped to the font — no cmap filter). */
+  cells?: GlyphPickerCell[]
+  /** Group-wide ffs fragment; a cell's own ffs overrides. */
+  ffs?: string
 }
+
+/** App-driven per-cell decoration (flash effects etc). Return undefined for none.
+    `nonce` re-keys the cell so a CSS animation restarts. */
+export type GlyphCellState = (cell: GlyphPickerCell) =>
+  { className?: string; style?: CSSProperties; nonce?: number; onAnimationEnd?: () => void } | undefined
 
 /** Font-unit metrics (from the font's real tables / design data). baseline is 0. */
 export interface GlyphPickerMetrics {
@@ -66,8 +85,15 @@ export interface GlyphPickerProps {
   fontFamily: string
   fontVariationSettings?: string
   fontFeatureSettings?: string
-  /** cmap ranges to filter unsupported chars (feat groups skip the filter). */
+  fontOpticalSizing?: 'auto' | 'none'
+  /** cmap ranges to filter unsupported chars (explicit-cells groups skip the filter). */
   ranges?: CmapRanges | null
+  /** App-driven per-cell decoration (flash effects etc). */
+  cellState?: GlyphCellState
+  /** Glyph names: 'nice' (AGLFN), 'unicode' (official), 'both', or a custom resolver.
+      Data is page-chunked and lazy-loaded for only the codepoints on screen; cells
+      grow a caption beneath the glyph. */
+  names?: 'nice' | 'unicode' | 'both' | ((cell: GlyphPickerCell) => string | undefined)
   /** Draw metric rules + sidebearing verticals around the big glyph. */
   metrics?: GlyphPickerMetrics
   /** 'side' = specimen column left of the grid; 'bottom' = grid on top, specimen band docked below. */
@@ -76,7 +102,7 @@ export interface GlyphPickerProps {
   specimenSpan?: 1 | 2
   /** Escape hatch: exact CSS size for the specimen column width (side) / band height (bottom). */
   specimenSize?: number | string
-  onSelect?: (char: string, feat: string | null) => void
+  onSelect?: (cell: GlyphPickerCell) => void
   className?: string
   style?: CSSProperties
 }
@@ -87,23 +113,38 @@ const INVISIBLE_CPS = new Set([
   0x200d, 0x000d, 0x000a, 0x0009,
 ])
 const isInvisible = (ch: string) => !ch.trim() || INVISIBLE_CPS.has(ch.codePointAt(0) ?? 0)
-// Combining marks (Mn) render blank alone — hang them on a dotted circle.
-const display = (ch: string) => (/\p{Mn}/u.test(ch) ? '◌' + ch : ch)
-const hex = (ch: string) => (ch.codePointAt(0) ?? 0).toString(16).toUpperCase().padStart(4, '0')
+// Combining marks (Mn) render blank alone — hang them on a dotted circle. Anchored
+// to the string START so pre-composed cells (already "◌̀") don't get a second ◌.
+const display = (ch: string) => (/^\p{Mn}/u.test(ch) ? '◌' + ch : ch)
+// The reported codepoint skips a leading dotted-circle scaffold (◌̀ → U+0300, the
+// mark itself, not U+25CC).
+const codeOf = (s: string) => {
+  const cps = [...s].map(c => c.codePointAt(0) ?? 0)
+  return cps.find(cp => cp !== 0x25cc) ?? cps[0] ?? 0
+}
+const hex = (ch: string) => codeOf(ch).toString(16).toUpperCase().padStart(4, '0')
+
+const cellId = (c: GlyphPickerCell) => c.key ?? `${c.ch}|${c.ffs ?? ''}`
 
 // Memoized so selecting a glyph re-renders only the two cells whose `active` flips —
-// not the whole (potentially ~2,500-cell) grid.
-const Cell = memo(function Cell({ char, feat, active, onPick }: {
-  char: string; feat: string | null; active: boolean
-  onPick: (char: string, feat: string | null) => void
+// not the whole (potentially ~2,500-cell) grid. `state` (flash etc) is compared by
+// identity, so only cells whose state entry changed re-render.
+const Cell = memo(function Cell({ cell, active, state, name, onPick }: {
+  cell: GlyphPickerCell; active: boolean
+  state?: { className?: string; style?: CSSProperties; nonce?: number; onAnimationEnd?: () => void }
+  name?: string
+  onPick: (cell: GlyphPickerCell) => void
 }) {
   return (
     <button
-      className={`gp-cell${active ? ' gp-cell--active' : ''}${isInvisible(char) ? ' gp-cell--invisible' : ''}`}
-      style={feat ? { fontFeatureSettings: `"${feat}" 1` } : undefined}
-      onClick={() => onPick(char, feat)}
-      title={`U+${hex(char)}${feat ? ' · ' + feat : ''}`}>
-      {display(char)}
+      key={state?.nonce}
+      className={`gp-cell${active ? ' gp-cell--active' : ''}${isInvisible(cell.ch) ? ' gp-cell--invisible' : ''}${name !== undefined ? ' gp-cell--named' : ''}${state?.className ? ' ' + state.className : ''}`}
+      style={cell.ffs || state?.style ? { ...(cell.ffs ? { fontFeatureSettings: cell.ffs } : null), ...state?.style } : undefined}
+      onClick={() => onPick(cell)}
+      onAnimationEnd={state?.onAnimationEnd}
+      title={`U+${hex(cell.ch)}${cell.note ? ' · ' + cell.note : ''}${name ? ' · ' + name : ''}`}>
+      <span className="gp-cell-ch">{display(cell.ch)}</span>
+      {name !== undefined && <span className="gp-cell-name">{name || '\u00a0'}</span>}
     </button>
   )
 })
@@ -136,8 +177,8 @@ function placeLabels(desired: number[], minGap = 11): number[] {
 }
 
 // The unboxed specimen: glyph on metric rules ending at sidebearing verticals.
-function Specimen({ char, feat, metrics, fontKey }: {
-  char: string; feat: string | null; metrics?: GlyphPickerMetrics; fontKey: string
+function Specimen({ cell, metrics, fontKey }: {
+  cell: GlyphPickerCell; metrics?: GlyphPickerMetrics; fontKey: string
 }) {
   const boxRef = useRef<HTMLDivElement | null>(null)
   const glyphRef = useRef<HTMLSpanElement | null>(null)
@@ -161,13 +202,13 @@ function Specimen({ char, feat, metrics, fontKey }: {
     const ro = new ResizeObserver(measure)
     if (boxRef.current) ro.observe(boxRef.current)
     return () => ro.disconnect()
-  }, [char, feat, fontKey, metrics])
+  }, [cell.ch, cell.ffs, fontKey, metrics])
 
   if (!metrics) {
     return (
       <div className="gp-specimen gp-specimen--bare" ref={boxRef}>
         <span ref={glyphRef} className="gp-specimen-glyph"
-          style={feat ? { fontFeatureSettings: `"${feat}" 1` } : undefined}>{display(char)}</span>
+          style={cell.ffs ? { fontFeatureSettings: cell.ffs } : undefined}>{display(cell.ch)}</span>
       </div>
     )
   }
@@ -206,50 +247,81 @@ function Specimen({ char, feat, metrics, fontKey }: {
       <div className="gp-specimen-line">
         <span ref={strutRef} className="gp-strut" aria-hidden />
         <span ref={glyphRef} className="gp-specimen-glyph"
-          style={feat ? { fontFeatureSettings: `"${feat}" 1` } : undefined}>{display(char)}</span>
+          style={cell.ffs ? { fontFeatureSettings: cell.ffs } : undefined}>{display(cell.ch)}</span>
       </div>
     </div>
   )
 }
 
 export function GlyphPicker({
-  groups, fontFamily, fontVariationSettings, fontFeatureSettings,
+  groups, fontFamily, fontVariationSettings, fontFeatureSettings, fontOpticalSizing,
   ranges = null, metrics, layout = 'side', specimenSpan = 1, specimenSize,
-  onSelect, className, style,
+  cellState, names, onSelect, className, style,
 }: GlyphPickerProps) {
-  const [active, setActive] = useState<{ char: string; feat: string | null }>({ char: 'A', feat: null })
+  const [active, setActive] = useState<GlyphPickerCell>({ ch: 'A' })
   const [query, setQuery] = useState('')
   const [copied, setCopied] = useState(false)
 
-  const pick = useCallback((char: string, feat: string | null) => {
-    setActive({ char, feat })
+  const pick = useCallback((cell: GlyphPickerCell) => {
+    setActive(cell)
     setCopied(false)
-    onSelect?.(char, feat)
+    onSelect?.(cell)
   }, [onSelect])
 
   const copyActive = useCallback(() => {
-    navigator.clipboard?.writeText(active.char).then(() => {
+    navigator.clipboard?.writeText(active.ch).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }).catch(() => {})
-  }, [active.char])
+  }, [active.ch])
 
-  // cmap-filter base groups (feat groups are pre-scoped to the font); then apply the
+  // Resolve each group to cells: `chars` shorthand gets cmap-filtered; explicit
+  // `cells` are pre-scoped. Group ffs applies unless the cell has its own. Then the
   // search query — match by char or by U+ hex fragment.
   const visibleGroups = useMemo(() => {
     const q = query.trim().toLowerCase()
     return groups
       .map(g => {
-        let chars = [...g.chars]
-        if (!g.feat) chars = chars.filter(c => isSupported(c, ranges, /\p{Mn}/u.test(c)))
-        if (q) chars = chars.filter(c => c.toLowerCase() === q || hex(c).toLowerCase().includes(q))
-        return { ...g, list: chars }
+        let list: GlyphPickerCell[] = g.cells
+          ? g.cells.map(c => ({ ...c, ffs: c.ffs ?? g.ffs }))
+          : [...(g.chars ?? '')]
+              .filter(c => isSupported(c, ranges, /\p{Mn}/u.test(c)))
+              .map(ch => ({ ch, ffs: g.ffs }))
+        if (q) list = list.filter(c => c.ch.toLowerCase() === q || hex(c.ch).toLowerCase().includes(q))
+        return { label: g.label, list }
       })
       .filter(g => g.list.length > 0)
   }, [groups, ranges, query])
 
-  const specimen: CSSProperties = { fontFamily, fontVariationSettings, fontFeatureSettings }
-  const fontKey = `${fontFamily}|${fontVariationSettings ?? ''}|${fontFeatureSettings ?? ''}`
+  // Lazy name data: load only the pages covering the codepoints actually present.
+  const [nameData, setNameData] = useState<Map<number, [string | 0, string | 0]> | null>(null)
+  useEffect(() => {
+    if (!names || typeof names === 'function') { setNameData(null); return }
+    let alive = true
+    const cps = new Set<number>()
+    for (const g of groups) {
+      for (const c of g.cells ?? []) cps.add(codeOf(c.ch))
+      for (const ch of g.chars ?? '') cps.add(codeOf(ch))
+    }
+    loadNamePages(cps).then(m => { if (alive) setNameData(m) })
+    return () => { alive = false }
+  }, [names, groups])
+
+  // Caption for a cell (short form) + full name line for the console.
+  const nameParts = useCallback((cell: GlyphPickerCell): { nice?: string; uni?: string } => {
+    const cp = codeOf(cell.ch)
+    const e = nameData?.get(cp)
+    return { nice: e?.[0] || undefined, uni: (e?.[1] || undefined) ?? algorithmicName(cp) }
+  }, [nameData])
+  const captionFor = useCallback((cell: GlyphPickerCell): string | undefined => {
+    if (!names) return undefined
+    if (typeof names === 'function') return names(cell)
+    const { nice, uni } = nameParts(cell)
+    return (names === 'unicode' ? uni ?? nice : nice ?? uni) ?? ''
+  }, [names, nameParts])
+
+  const specimen: CSSProperties = { fontFamily, fontVariationSettings, fontFeatureSettings, fontOpticalSizing }
+  const fontKey = `${fontFamily}|${fontVariationSettings ?? ''}|${fontFeatureSettings ?? ''}|${fontOpticalSizing ?? ''}`
 
   // Specimen room: span presets (1 ≈ 280px / 2 ≈ 560px column; 50% / 66% band) or an
   // exact size. The glyph scales with the container (cqw), so more room = bigger glyph.
@@ -260,12 +332,17 @@ export function GlyphPicker({
   // Specimen + console: glyph first, then ITS data (U+ / copy), then the grid tool (search).
   const side = (
     <div className="gp-side" style={{ flexBasis: sizeCss }}>
-      <Specimen char={active.char} feat={active.feat} metrics={metrics} fontKey={fontKey} />
+      <Specimen cell={active} metrics={metrics} fontKey={fontKey} />
       <div className="gp-console">
         <button className="gp-copy" onClick={copyActive} title="Copy character to clipboard">
-          <span className="gp-code">U+{hex(active.char)}{active.feat ? ` · ${active.feat}` : ''}</span>
+          <span className="gp-code">U+{hex(active.ch)}{active.note ? ` · ${active.note}` : ''}</span>
           <CopyIcon ok={copied} />
         </button>
+        {names && typeof names !== 'function' && (() => {
+          const { nice, uni } = nameParts(active)
+          const line = [nice, uni].filter(Boolean).join(' — ')
+          return line ? <div className="gp-name">{line}</div> : null
+        })()}
         <input
           className="gp-search" type="search" placeholder="Search glyph or U+ code…"
           value={query} onChange={e => setQuery(e.target.value)} spellCheck={false} />
@@ -282,8 +359,10 @@ export function GlyphPicker({
             <div className="gp-group-label">{g.label}</div>
             <div className="gp-grid">
               {g.list.map((c, i) => (
-                <Cell key={i} char={c} feat={g.feat ?? null}
-                  active={active.char === c && active.feat === (g.feat ?? null)}
+                <Cell key={c.key ?? i} cell={c}
+                  active={cellId(active) === cellId(c)}
+                  state={cellState?.(c)}
+                  name={captionFor(c)}
                   onPick={pick} />
               ))}
             </div>
