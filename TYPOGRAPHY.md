@@ -66,10 +66,12 @@ actually mean. Three:
 ```
 
 Ink is **opacity on the text colour**, not a separate hex — so it composes over any
-ground and stays honest in both themes. `--text-rgb` already exists for exactly this:
+ground and stays honest in both themes. `--text-rgb` already exists for exactly this,
+and it is **comma-separated**, so use the `rgba()` form (the space/slash syntax needs
+`232 232 232` and will silently drop the whole declaration):
 
 ```css
-color: rgb(var(--text-rgb) / var(--ink-quiet));
+color: rgba(var(--text-rgb), var(--ink-quiet));
 ```
 
 The old `--text-faint` tier (0.24) retires. Anything that quiet is either structure
