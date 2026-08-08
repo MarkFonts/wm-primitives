@@ -1,6 +1,7 @@
 /* GlyphPicker — tokenized to the house vars with fallbacks, dark-first.
-   The grid is EQUAL-SIZED cells (auto-fill columns, square boxes) — every glyph in
-   the same box regardless of its advance width. */
+   The grid is EQUAL-SIZED cells (auto-fill columns, square boxes); the specimen is
+   UNBOXED — the selected glyph sits on metric rules that end at its sidebearing
+   verticals (the glyph's own cell, font-editor style). */
 
 .gp {
   display: flex;
@@ -8,16 +9,112 @@
   min-height: 0;
   color: var(--text, #eee);
 }
+.gp--bottom { flex-direction: column; }
+/* bottom preset: grid on top; the band is ONE centered cluster — the glyph as the
+   hero with its console directly beneath — docked behind a hairline divider. */
+.gp--bottom .gp-groups { order: 0; flex: 1 1 50%; }
+.gp--bottom .gp-side {
+  order: 1;
+  flex: 0 0 50%;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;   /* undo the side column's flex-start — the band spans full width */
+  gap: 12px;
+  position: static;
+  border-top: 1px solid var(--border-subtle, #222);
+  padding-top: 16px;
+}
+.gp--bottom .gp-specimen { flex: 1; min-height: 0; align-self: stretch; }
+.gp--bottom .gp-console { flex: none; flex-direction: row; align-items: center; gap: 18px; }
 
-/* ── Left: search + big viewer ── */
+/* ── Specimen column: glyph-on-rules → its data (U+/copy) → the grid tool (search) ── */
 .gp-side {
-  flex: 0 0 260px;
+  flex: 0 0 280px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   position: sticky;
   top: 0;
   align-self: flex-start;
+}
+/* The side column is a size container: the glyph scales with whatever room the app
+   grants (specimenSpan / specimenSize) — more room = bigger glyph, rules and all. */
+.gp-side { container-type: inline-size; }
+.gp-specimen {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;   /* stretched layouts (bottom band) center the glyph line */
+  font-size: 64cqw;
+  line-height: 1;
+  /* reserve the descender band (+ a whisker of accent overshoot room) inside the
+     specimen so the DESC rule never collides with the console below */
+  padding-bottom: var(--gp-desc, 0.25em);
+  padding-top: 0.06em;
+}
+.gp--bottom .gp-side { container-type: size; }
+.gp--bottom .gp-specimen { font-size: 52cqh; }
+.gp-specimen--bare { align-items: center; min-height: 260px; }
+.gp-specimen-glyph { white-space: pre; }
+/* flex-baseline strut: zero-width, its height = ascender (em) above the baseline —
+   pins the shared baseline at exactly that distance from the specimen top. */
+.gp-specimen-line { display: flex; align-items: baseline; }
+.gp-strut {
+  display: inline-block;
+  width: 0;
+  height: var(--gp-asc, 0.72em);
+}
+
+/* metric rules — hairlines ending at the sidebearings, label in the overhang */
+.gp-rule {
+  position: absolute;
+  height: 0;
+  border-top: 1px solid var(--border, #333);
+  pointer-events: none;
+}
+.gp-rule--base { border-top-color: var(--text-dim, #666); }
+/* labels are their own layer: right edge magnets to the rule overhang, y comes from
+   placeLabels (coincident rules split above/below the shared line). */
+.gp-rule-label {
+  position: absolute;
+  transform: translate(-100%, -50%);
+  font-family: var(--ui-font, system-ui, sans-serif);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim, #666);
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* sidebearing verticals — the glyph's own cell walls (top/height set inline,
+   spanning ascender → descender) */
+.gp-sb {
+  position: absolute;
+  width: 0;
+  border-left: 1px solid var(--border-subtle, #222);
+  pointer-events: none;
+}
+
+/* ── Console ── */
+.gp-console { display: flex; flex-direction: column; gap: 10px; }
+.gp-copy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font: inherit;
+  background: none;
+  border: none;
+  color: var(--text-muted, #999);
+  cursor: pointer;
+}
+.gp-copy:hover { color: var(--text, #eee); }
+.gp-code {
+  font-family: var(--ui-font, system-ui, sans-serif);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
 }
 .gp-search {
   padding: 9px 12px;
@@ -30,30 +127,8 @@
   outline: none;
 }
 .gp-search:focus { border-color: var(--text-dim, #777); }
-.gp-viewer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 1;
-  font: inherit;
-  font-size: 148px;
-  line-height: 1;
-  color: var(--text, #eee);
-  background: var(--surface-1, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--border-subtle, #222);
-  border-radius: var(--radius, 8px);
-  cursor: copy;
-}
-.gp-viewer:hover { border-color: var(--border, #333); }
-.gp-viewer-code {
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  color: var(--text-muted, #999);
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
 
-/* ── Right: groups of equal-sized cells ── */
+/* ── Grid: groups of equal-sized cells ── */
 .gp-groups {
   flex: 1;
   min-width: 0;
