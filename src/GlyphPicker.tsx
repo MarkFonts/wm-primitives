@@ -313,11 +313,14 @@ export function GlyphPicker({
     const e = nameData?.get(cp)
     return { nice: e?.[0] || undefined, uni: (e?.[1] || undefined) ?? algorithmicName(cp) }
   }, [nameData])
+  // Official Unicode names are ALL CAPS by convention — display them lowercased;
+  // nice names keep their casing (Aacute vs aacute is meaningful).
   const captionFor = useCallback((cell: GlyphPickerCell): string | undefined => {
     if (!names) return undefined
     if (typeof names === 'function') return names(cell)
     const { nice, uni } = nameParts(cell)
-    return (names === 'unicode' ? uni ?? nice : nice ?? uni) ?? ''
+    const luni = uni?.toLowerCase()
+    return (names === 'unicode' ? luni ?? nice : nice ?? luni) ?? ''
   }, [names, nameParts])
 
   // The specimen font travels as CSS custom props consumed ONLY by glyph-bearing
@@ -349,7 +352,7 @@ export function GlyphPicker({
         </button>
         {names && typeof names !== 'function' && (() => {
           const { nice, uni } = nameParts(active)
-          const line = [nice, uni].filter(Boolean).join(' — ')
+          const line = [nice, uni?.toLowerCase()].filter(Boolean).join(' — ')
           return line ? <div className="gp-name">{line}</div> : null
         })()}
         <input
