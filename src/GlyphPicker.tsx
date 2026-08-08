@@ -320,7 +320,16 @@ export function GlyphPicker({
     return (names === 'unicode' ? uni ?? nice : nice ?? uni) ?? ''
   }, [names, nameParts])
 
-  const specimen: CSSProperties = { fontFamily, fontVariationSettings, fontFeatureSettings, fontOpticalSizing }
+  // The specimen font travels as CSS custom props consumed ONLY by glyph-bearing
+  // elements (.gp-specimen / .gp-cell) — inherited font-variation-settings on the
+  // root would drift the picker's own chrome in hosts whose UI font shares the
+  // variable font (ReCal). Axis changes still re-render nothing.
+  const specimen: CSSProperties = {
+    ['--gp-font' as string]: fontFamily,
+    ['--gp-fvs' as string]: fontVariationSettings ?? 'normal',
+    ['--gp-ffs' as string]: fontFeatureSettings ?? 'normal',
+    ['--gp-opsz' as string]: fontOpticalSizing ?? 'auto',
+  }
   const fontKey = `${fontFamily}|${fontVariationSettings ?? ''}|${fontFeatureSettings ?? ''}|${fontOpticalSizing ?? ''}`
 
   // Specimen room: span presets (1 ≈ 280px / 2 ≈ 560px column; 50% / 66% band) or an

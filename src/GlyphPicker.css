@@ -9,6 +9,22 @@
   min-height: 0;
   color: var(--text, #eee);
 }
+/* The specimen font applies ONLY to glyph-bearing elements; picker chrome keeps the
+   host's UI font. Hosts whose UI font is itself variable pin its instance via
+   --gp-ui-fvs (e.g. ReCal: 'opsz' 10, 'GEOM' 25). */
+/* (.gp prefix beats .gp-cell's later `font: inherit` shorthand, which resets the
+   font-variation/feature longhands to inherit.) */
+.gp .gp-specimen, .gp .gp-cell {
+  font-family: var(--gp-font, inherit);
+  font-variation-settings: var(--gp-fvs, normal);
+  font-feature-settings: var(--gp-ffs, normal);
+  font-optical-sizing: var(--gp-opsz, auto);
+}
+.gp .gp-search, .gp .gp-code, .gp .gp-name, .gp .gp-cell-name, .gp .gp-group-label, .gp .gp-rule-label {
+  font-variation-settings: var(--gp-ui-fvs, normal);
+  font-feature-settings: normal;
+  font-optical-sizing: auto;
+}
 .gp--bottom { flex-direction: column; }
 /* bottom preset: grid on top; the band is ONE centered cluster — the glyph as the
    hero with its console directly beneath — docked behind a hairline divider. */
