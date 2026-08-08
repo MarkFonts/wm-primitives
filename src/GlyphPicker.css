@@ -200,8 +200,12 @@
   padding: 6px 3px 5px;
 }
 .gp-cell--named .gp-cell-ch { flex: 1; display: flex; align-items: center; }
-.gp-cell-name {
-  font-size: 9px;
+.gp .gp-cell-name {
+  font-size: 8px;
+  /* captions are the smallest type here — let optical sizing FLEX to that size
+     instead of inheriting the chrome's pinned instance (--gp-ui-fvs). */
+  font-variation-settings: normal;
+  font-optical-sizing: auto;
   line-height: 1.2;
   color: var(--text-dim, #666);
   max-width: 100%;
