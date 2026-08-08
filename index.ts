@@ -26,7 +26,7 @@ export type { AxisSliderProps } from './src/AxisSlider'
 
 // Glyph-set matching + cmap parsing (Glyphs scene). Each app composes its own
 // extra groups / alternates on top of the shared base groups.
-export { makeGlyphSets, parseCmapRanges, isSupported } from './src/glyphset'
+export { makeGlyphSets, parseCmapRanges, isSupported, enumerateCmap } from './src/glyphset'
 export type { CmapRanges, GlyphGroups } from './src/glyphset'
 
 // Small text / number formatting helpers.

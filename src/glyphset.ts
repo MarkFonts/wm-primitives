@@ -120,3 +120,22 @@ export function isSupported(glyph: string, ranges: CmapRanges | null, combining 
   for (const [s, e] of ranges) if (cp >= s && cp <= e) return true
   return false
 }
+
+// Enumerate EVERY encoded codepoint in the font's cmap as displayable cell strings —
+// the true "All" for an arbitrary font (curated groups are hand-picked subsets).
+// Controls/space-likes are skipped; combining marks ride a dotted circle.
+export function enumerateCmap(ranges: CmapRanges): string[] {
+  const out: string[] = []
+  for (const [s, e] of ranges) {
+    for (let cp = s; cp <= e; cp++) {
+      if (cp < 0x21) continue                    // controls + space
+      if (cp >= 0x7f && cp <= 0xa0) continue     // C1 controls + NBSP
+      if (cp >= 0x2000 && cp <= 0x200f) continue // spaces + joiners/marks
+      if (cp >= 0xd800 && cp <= 0xdfff) continue // surrogates
+      if (cp === 0xfeff || cp === 0x25cc) continue
+      const raw = String.fromCodePoint(cp)
+      out.push(/\p{Mn}/u.test(raw) ? '\u25cc' + raw : raw)
+    }
+  }
+  return out
+}
