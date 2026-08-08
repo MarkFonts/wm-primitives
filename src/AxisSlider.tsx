@@ -6,6 +6,13 @@
 // …plus a range track below. Font-agnostic: the tag is just a label, nothing here
 // knows about any specific font. Extracted from font-proofer's SliderRow.
 //
+// Labelling contract — the row reads:  <label>  <tag>  <range>  …  <value><suffix>
+//   <AxisSlider label="Weight" tag="wght" showRange min={200} max={800} … />
+//   →           Weight  wght  200–800                              400
+// `label` is the HUMAN name and `tag` is the OpenType axis tag; don't put the tag in
+// `label`, and don't hand-type a range into `tag` — pass showRange and it's derived
+// from min/max (so it can never go stale).
+//
 // Optional extras (used by ReCal's rail, ignored elsewhere):
 //   • marker  — a ◆ "baked default" indicator before the value
 //   • onRangePointerDown — hook on the range thumb (e.g. drag-to-flash a zone)
@@ -15,7 +22,12 @@ import { createPortal } from 'react-dom'
 import './AxisSlider.css'
 
 export interface AxisSliderProps {
+  /** Human-readable name, shown first — "Weight", "Optical size", "size".
+   *  NOT the OpenType tag: pass that as `tag`. */
   label: string
+  /** OpenType axis tag, shown muted after the label — "wght", "opsz", "GEOM".
+   *  Omit for non-axis controls (size/tracking/leading). For a min–max readout use
+   *  `showRange` — never hand-type a range here. */
   tag?: string
   value: number | 'auto'
   min: number
@@ -42,12 +54,15 @@ export interface AxisSliderProps {
   reference?: number
   /** Static unit label shown just after the editable field (e.g. "px", "%", "em"). Never inside it. */
   suffix?: string
+  /** Show the axis range (e.g. "200–800") after the tag, derived from min/max so it
+   *  always matches the track. */
+  showRange?: boolean
 }
 
 export function AxisSlider({
   label, tag, value, min, max, step, onChange, display,
   lockedAbove, allowAuto, autoValue, marker, onRangePointerDown, disabled,
-  variant = 'default', reference, suffix,
+  variant = 'default', reference, suffix, showRange,
 }: AxisSliderProps) {
   const [numFocused, setNumFocused] = useState(false)
 
@@ -108,6 +123,7 @@ export function AxisSlider({
         <span className="slider-label-left">
           <span className={`slider-label-text${tag ? ' slider-label-text--tagged' : ''}`}>{label}</span>
           {tag && <span className="slider-tag">{tag}</span>}
+          {showRange && <span className="slider-range">{min}–{max}</span>}
         </span>
         <span className="slider-value">
           {marker && variant !== 'diamond' && <span className="slider-marker" aria-hidden="true">◆</span>}

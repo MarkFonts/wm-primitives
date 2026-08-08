@@ -14,17 +14,23 @@
 .slider-label-text {
   font-size: 12px;
   color: var(--text-muted);
-  font-family: 'CalSansUI', var(--ui-font, system-ui), sans-serif;
+  font-family: var(--ui-font, system-ui, sans-serif);
   white-space: nowrap; overflow: visible; text-overflow: clip;
 }
 .slider-label-text--tagged { flex: 0 0 105px; }
 .slider-tag {
   font-size: 10px;
   color: var(--text-muted);
-  font-family: 'CalSansUI', var(--ui-font, system-ui), sans-serif;
+  font-family: var(--ui-font, system-ui, sans-serif);
   letter-spacing: 0.04em;
   flex-shrink: 0;
   font-feature-settings: "tnum";
+}
+/* min–max readout: quieter than the tag, tabular so it doesn't jitter while dragging */
+.slider-range {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* value = optional ◆ marker + the editable number/auto field */
@@ -35,7 +41,7 @@
   transform: translateY(-1px);
 }
 .slider-number {
-  font-family: 'CalSansUI', var(--ui-font, system-ui), sans-serif;
+  font-family: var(--ui-font, system-ui, sans-serif);
   font-size: 12px;
   color: var(--text);
   background: transparent;
