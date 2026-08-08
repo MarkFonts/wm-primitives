@@ -18,119 +18,145 @@ both wordmark.nyc and the apps (`--accent`, `--surface-1..3`, `--text-*`, `--bor
 
 Type is the hole. 838 hand-placed declarations, no vocabulary. The tell: sizes run
 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5 — half-pixel drift from nudging values in
-place instead of picking from a scale. Same story in two units at once on
-wordmark.nyc (`.5625rem`, `.6rem`, `.625rem`, `.65rem` = 9, 9.6, 10, 10.4px).
+place instead of picking from a scale.
 
-## The two rules that make this a *typography* system
+---
 
-**1. A type token is a bundle, not a number.**
-With a variable font carrying `opsz`, a size on its own is a half-truth: 11px set at
-`opsz 32` is a different typeface than 11px at `opsz 11`. So a role resolves to
-**size · leading · opsz · weight · tracking · measure** — the whole instrument
-setting. This is ReCal's own thesis applied to our chrome.
+## I. Compensations are free. Signals are budgeted.
 
-**2. Tokens govern the Face. The Specimen is deliberately untokenized.**
-`--ui-font: "Face"` is the chrome; `--spec: "Specimen"` is the thing under test.
-Type tokens describe **chrome only**. Specimen size/leading/axes are the user's
-parameter space — systematising them would be systematising the *subject* of the
-tool. Keep that border bright; it's the one both apps already got right by instinct.
+The distinction the whole system hangs on, and the one we were getting wrong.
 
-## Vocabulary: roles, not sizes
+**A compensation** is a change the type *requires* to stay itself at a new setting.
+It carries no meaning; it prevents a defect. Reading it as emphasis is a
+misreading — nothing was said.
 
-No `text-xs … text-9xl`. Ladders like that describe magnitude; we want the job, so
-the value can change without the name lying.
+- **`opsz` tracking size.** Given, always, invisible. Our own product's thesis.
+- **Tracking on caps and on small sizes.** Bringhurst §3.2.1: letterspace all
+  strings of capitals. Small optical sizes want air; large sizes want less.
+- **Leading responding to measure and size.**
 
-| role | size | leading | opsz | wght | tracking | used for |
-|---|---|---|---|---|---|---|
-| `micro` | 8 | 1.2 | auto | 400 | .08em | glyph captions, rule labels |
-| `label` | 10 | 1.3 | auto | 500 | .12em | section labels, uppercase eyebrows |
-| `tag` | 11 | 1.2 | auto | 400 | .04em | axis tags, codes, chips |
-| `ui` | 12 | 1.4 | 10 | 400 | 0 | dense controls, sliders, menus |
-| `ui-lg` | 13 | 1.45 | 10 | 400 | 0 | buttons, inputs, tabs |
-| `body` | 16 | 1.55 | auto | 400 | 0 | prose, docs, marketing copy |
-| `lede` | 18 | 1.5 | auto | 400 | -.005em | intros, standfirsts |
-| `title` | 26 | 1.2 | auto | 640 | -.01em | panel + page titles |
-| `display` | 40 | 1.1 | auto | 700 | -.02em | hero, big statements |
+**A signal** is a change made to *say* something: this is a heading, this is
+secondary, this is a label. Signals cost. There are four:
 
-Nine roles replace forty-four sizes. Two extras, both real needs already in the code:
-`readout` (= `ui` + `tnum`, for numeric values that must not jitter) and `code`
-(the only sanctioned monospace, for the copyable CSS string).
+**size · case · ink · weight**
 
-### The `opsz` column is the point
+### The budget
 
-- **`auto`** — the default. `font-optical-sizing: auto` already ties opsz to
-  font-size; content roles just need us to *stop fighting it*.
-- **pinned (10)** — chrome only, and only where text is small and must stay
-  optically identical across contexts. This is exactly the existing
-  `--ui-fvs: "opsz" 10, "GEOM" 25`.
+> **One signal per distinction.** A role may differ from the text around it by
+> **one** signal. Compensations ride along free and are never counted.
 
-The two failure modes to encode against: pinning opsz on content (kills the reason
-we ship a variable font) and letting auto loose on chrome (labels drift between
-surfaces).
+> **The absolute:** never **ink + size + case** together. Three ways of saying
+> "minor" is not emphasis, it is a lack of confidence.
 
-## Shape of the API
+`opsz` moving with size is the given. The exception that proves it: `opsz`
+*pinned* while size changes — a deliberate mismatch — is no longer a compensation.
+It is a signal, and it is spent.
+
+## II. Ink
+
+Grey is a signal, and we have been spending it like punctuation. Four levels
+(`--text`, `--text-muted`, `--text-dim`, `--text-faint`) resolve to inks of
+**1.00 · 0.64 · 0.40 · 0.24** on our ground — a finer gradation than any page can
+actually mean. Three:
 
 ```css
-/* type.css — one bundle per role */
-:root {
-  --type-ui-size: 12px;  --type-ui-leading: 1.4;
-  --type-ui-wght: 400;   --type-ui-track: 0;   --type-ui-opsz: 10;
-}
-.type-ui {
-  font-family: var(--ui-font);
-  font-size: var(--type-ui-size);
-  line-height: var(--type-ui-leading);
-  letter-spacing: var(--type-ui-track);
-  font-variation-settings: "opsz" var(--type-ui-opsz), "wght" var(--type-ui-wght);
-}
+--ink-full:  1;      /* the text is the text */
+--ink-quiet: .62;    /* subordinate: captions, annotations, spec data */
+--ink-faint: .38;    /* structural only: rules, disabled, watermarks */
 ```
 
-```ts
-// type.ts — same bundle for inline styles / React
-type('ui')          // → CSSProperties
-type('title', { measure: '32ch' })
+Ink is **opacity on the text colour**, not a separate hex — so it composes over any
+ground and stays honest in both themes. `--text-rgb` already exists for exactly this:
+
+```css
+color: rgb(var(--text-rgb) / var(--ink-quiet));
 ```
 
-Both, because our surfaces are split: CSS classes for static markup (wordmark.nyc),
-the helper for computed styles (the primitives already build inline styles).
+The old `--text-faint` tier (0.24) retires. Anything that quiet is either structure
+(use a border token) or shouldn't be on the page.
 
-## Phases
+## III. Roles
 
-**0 · Freeze the vocabulary.** Agree the table above — names and opsz policy, not
-final numbers. Nothing ships. *Done when the role list stops changing.*
+No `text-xs … text-9xl`. Ladders describe magnitude; we want the job, so the value
+can change without the name lying.
 
-**1 · `type.css` + `type.ts` in wm-primitives.** Tokens, nine role classes, the
-helper. Additive; nothing consumes it yet. *Done when both apps build unchanged.*
+Every role below spends **size** and nothing else. Ink and case are applied
+separately, and spending either means not also changing role.
 
-**2 · Adopt inside the primitives (74 decls).** Smallest surface, hardest cases
-(AxisSlider labels/tags/values are four roles in one row). If the vocabulary
-survives this, it's real. *Done when `shared/src/*.css` has no raw `font-size`.*
+| role | size | leading | tracking | opsz | spends |
+|---|---|---|---|---|---|
+| `micro` | 8 | 1.2 | .06em ᶜ | auto | size |
+| `label` | 12 | 1.3 | .12em ᶜ | 10 ᵖ | **case** (see below) |
+| `ui` | 12 | 1.4 | 0 | 10 ᵖ | — (chrome norm) |
+| `body` | 16 | 1.55 | 0 | auto | — (content norm) |
+| `lede` | 18 | 1.5 | -.005em ᶜ | auto | size |
+| `title` | 26 | 1.2 | -.01em ᶜ | auto | size |
+| `display` | 40 | 1.1 | -.02em ᶜ | auto | size |
 
-**3 · ReCal chrome (197), then font-proofer (43).** Rail, dock, panels, scene
-chrome. Explicitly **not** the specimen surfaces. *Done when the only raw sizes left
-are specimen-driven.*
+ᶜ compensation, not a signal · ᵖ pinned by policy (chrome must not drift between surfaces)
 
-**4 · wordmark.nyc (524).** Biggest and least urgent — do it with a codemod once the
-scale is proven, mapping the 44 sizes onto the nine roles. Expect ~10 genuine
-one-offs; give those a `--type-once-*` and a comment saying why.
+Plus two non-roles: `readout` (= `ui` + `tnum`, so digits don't jitter) and `code`
+(the only sanctioned monospace).
 
-**5 · Hold the line.** A stylelint rule banning raw `font-size` outside `type.css`,
-and the density/theme extension (`compact` chrome for the instrument's dense rails)
-once the base is stable.
+### What changed, and why
 
-## House style — what to avoid
+- **`label` no longer shrinks.** It was 10px **+** uppercase **+** wght 500 **+**
+  muted ink — four signals for one idea. Now it sits at `ui` size in full ink and
+  distinguishes itself by **case alone**, letterspaced because caps require it.
+  A label is not less important than the thing it labels; it is a different kind of
+  thing.
+- **`tag` and `ui-lg` are gone.** `tag` (11) sat one pixel from `ui` (12) and
+  `ui-lg` (13) one the other way — three roles inside three pixels, none of which a
+  reader can distinguish. One chrome size: 12.
+- **`title` and `display` dropped their weight bumps.** At 26 and 40px, size has
+  already said it. Adding 640/700 was a second signal spent on a distinction that
+  was already made.
 
-Notes for anyone (human or agent) extending this, because the default instincts are
-all slightly wrong for a type foundry's own tools:
+Seven roles, from nine, from forty-four sizes.
+
+### Where quiet comes from
+
+Not from a smaller role. A caption that recedes should recede by **ink**, at the
+size its context calls for:
+
+```html
+<p class="t-ui ink-quiet">34px · opsz 45 — drawn for display.</p>   <!-- one signal -->
+<p class="t-micro ink-faint">34px · opsz 45 — drawn for display.</p><!-- two: don't -->
+```
+
+## IV. Face and Specimen
+
+`--ui-font: "Face"` is the chrome; `--spec: "Specimen"` is the thing under test.
+Type tokens describe **chrome only**. Specimen size, leading and axes are the user's
+parameter space — systematising them would systematise the *subject* of the tool.
+
+## V. Phases
+
+**0 · Freeze the vocabulary.** Seven roles, three inks, the signal budget. Nothing
+ships. *Done when the role list stops changing.*
+
+**1 · `type.css` + `type.ts` in wm-primitives.** Role classes, ink modifiers, the
+helper. Additive. *Done when both apps build unchanged.*
+
+**2 · Adopt inside the primitives (74 decls).** Smallest surface, hardest cases: an
+AxisSlider row is label + value + tag + track in one line, and under the budget most
+of them must differ by ink alone. If the rule survives that row, it is real.
+
+**3 · ReCal chrome (197), then font-proofer (43).** Chrome only, never the specimen.
+
+**4 · wordmark.nyc (524).** Codemod once the scale is proven: 44 sizes → 7 roles.
+Expect ~10 genuine one-offs; give those `--type-once-*` and a comment saying why.
+
+**5 · Hold the line.** Lint raw `font-size` outside `type.css`. Then density.
+
+## VI. House style
 
 - **No invented ramps.** The neutral scale, accent, radii, spring and durations
-  already exist and are shared. Extending type means adding `--type-*` only.
-- **No `rem` gymnastics.** Chrome is device-anchored: px. Use `em`/`ch` for
-  *relationships* — measure, indents, optical padding — where they're the honest unit.
-- **No generic scale names.** `text-lg` tells you nothing about whether it may
-  change; `lede` does.
+  already exist and are shared. Type adds `--type-*` and `--ink-*`, nothing else.
+- **No `rem` gymnastics.** Chrome is device-anchored: px. `em`/`ch` for
+  *relationships* — measure, indents, optical padding.
+- **Count the signals before adding a rule.** If a new class changes two of
+  size/case/ink/weight at once, the distinction it makes is not clear enough to need
+  two.
 - **Don't expose the scale in the UI.** The system is invisible infrastructure. The
-  only type controls a user sees are the instrument's own — which act on the
-  Specimen, never on the Face.
-- **Don't tokenize the Specimen.** Repeating it because it's the one that'll get
-  broken: the proofed font's size, leading and axes belong to the user.
+  only type controls a user sees act on the Specimen, never on the Face.
