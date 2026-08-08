@@ -124,15 +124,65 @@ size its context calls for:
 <p class="t-micro ink-faint">34px · opsz 45 — drawn for display.</p><!-- two: don't -->
 ```
 
-## IV. Face and Specimen
+## IV. The poster scale
+
+The seven roles top out at `display` (40) — that is the largest size *chrome* has any
+business being. Above it lives another instrument: the monster sample. The hero word
+on a family page, the Words scene, a specimen waterfall.
+
+Up there the rules change, and it is worth saying why. At text sizes you name the
+**job**, because size alone does not tell a reader what a thing is. At display sizes
+the job *is* magnitude — a 96px word is not a different kind of thing from a 136px
+word, it is the same thing, larger. So here a ladder is honest, where in the text
+scale it would have been a dodge.
+
+```css
+--poster-1:  48px;   --poster-2:  68px;   --poster-3:  96px;
+--poster-4: 136px;   --poster-5: 192px;
+```
+
+**Ratio: √2.** The paper ratio — the one the A-series is built on — so every second
+step doubles exactly (48 → 96 → 192). Tailwind's 5xl–9xl (48, 60, 72, 96, 128) walks
+1.25, 1.20, 1.33, 1.33: four different intervals pretending to be a scale. Ours has
+one interval, and two of the five steps (68, 96) are already in the codebase.
+
+| step | size | leading | tracking | spends |
+|---|---|---|---|---|
+| `poster-1` | 48 | 1.05 | -.020em ᶜ | size |
+| `poster-2` | 68 | 1.02 | -.025em ᶜ | size |
+| `poster-3` | 96 | 1.00 | -.030em ᶜ | size |
+| `poster-4` | 136 | 0.98 | -.035em ᶜ | size |
+| `poster-5` | 192 | 0.96 | -.040em ᶜ | size |
+
+Leading tightens and tracking goes negative as the steps climb — both compensations.
+Large type has too much air between lines and between letters if you leave text
+settings on it; closing them up is repair, not expression.
+
+### It is face-agnostic, and that is the point
+
+The poster scale sets **size, leading and tracking. Nothing else.** It never touches
+an axis. `font-optical-sizing: auto` then does the right thing for whichever face it
+is pointed at — and this is exactly why we never pin `opsz` here.
+
+That is what lets one scale serve both sides of the boundary without breaking it:
+
+- On the **Face**, poster sets a hero headline on wordmark.nyc.
+- On the **Specimen**, poster sets the monster sample — while size, leading and axes
+  stay the user's to drive. The scale offers a step; the instrument still owns the
+  parameters.
+
+The rule from §V holds: tokens govern the Face. The poster scale is not an exception
+to it, because it governs *setting*, not the typeface.
+
+## V. Face and Specimen
 
 `--ui-font: "Face"` is the chrome; `--spec: "Specimen"` is the thing under test.
 Type tokens describe **chrome only**. Specimen size, leading and axes are the user's
 parameter space — systematising them would systematise the *subject* of the tool.
 
-## V. Phases
+## VI. Phases
 
-**0 · Freeze the vocabulary.** Seven roles, three inks, the signal budget. Nothing
+**0 · Freeze the vocabulary.** Seven roles, five poster steps, three inks, the signal budget. Nothing
 ships. *Done when the role list stops changing.*
 
 **1 · `type.css` + `type.ts` in wm-primitives.** Role classes, ink modifiers, the
@@ -149,7 +199,7 @@ Expect ~10 genuine one-offs; give those `--type-once-*` and a comment saying why
 
 **5 · Hold the line.** Lint raw `font-size` outside `type.css`. Then density.
 
-## VI. House style
+## VII. House style
 
 - **No invented ramps.** The neutral scale, accent, radii, spring and durations
   already exist and are shared. Type adds `--type-*` and `--ink-*`, nothing else.
