@@ -23,7 +23,7 @@
   border-radius: 5px;
   padding: 1px 5px;
   color: var(--text, #f0f0f0);
-  font-family: system-ui, sans-serif;
+  font-family: var(--ui-font, system-ui, sans-serif);
   font-size: 10px;
   cursor: pointer;
   white-space: nowrap;

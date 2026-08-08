@@ -25,12 +25,14 @@
   font-feature-settings: normal;
   font-optical-sizing: auto;
 }
-/* Chrome takes the HOST's UI font. `inherit` is right for everything that hangs off
-   .gp; captions live inside .gp-cell (which carries the specimen font), so they need
-   the explicit token — hosts set --gp-ui-font or --ui-font. Never fall back to
-   system-ui: on macOS that IS SF Pro, which reads as the loaded font leaking. */
-.gp .gp-search, .gp .gp-code, .gp .gp-name, .gp .gp-group-label { font-family: inherit; }
-.gp .gp-cell-name, .gp .gp-rule-label { font-family: var(--gp-ui-font, var(--ui-font, sans-serif)); }
+/* Chrome takes the HOST's UI font — always via the token, never `inherit`: hosts may
+   mount the picker inside a specimen-font container (ReCal's .stage sets
+   CalSansPreview), so inheriting silently dresses the UI in the proofed font. And
+   never fall back to system-ui: on macOS that IS SF Pro, which reads as a leak. */
+.gp .gp-search, .gp .gp-code, .gp .gp-name, .gp .gp-group-label,
+.gp .gp-cell-name, .gp .gp-rule-label, .gp .gp-copy {
+  font-family: var(--gp-ui-font, var(--ui-font, sans-serif));
+}
 .gp--bottom { flex-direction: column; }
 /* bottom preset: grid on top; the band is ONE centered cluster — the glyph as the
    hero with its console directly beneath — docked behind a hairline divider. */
