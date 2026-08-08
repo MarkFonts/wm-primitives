@@ -124,6 +124,9 @@ const codeOf = (s: string) => {
 }
 const hex = (ch: string) => codeOf(ch).toString(16).toUpperCase().padStart(4, '0')
 
+// Loose match key for name search: case/space/dash/underscore-insensitive.
+const loose = (s: string) => s.toLowerCase().replace(/[\s_-]+/g, '')
+
 const cellId = (c: GlyphPickerCell) => c.key ?? `${c.ch}|${c.ffs ?? ''}`
 
 // Memoized so selecting a glyph re-renders only the two cells whose `active` flips —
@@ -275,24 +278,6 @@ export function GlyphPicker({
     }).catch(() => {})
   }, [active.ch])
 
-  // Resolve each group to cells: `chars` shorthand gets cmap-filtered; explicit
-  // `cells` are pre-scoped. Group ffs applies unless the cell has its own. Then the
-  // search query — match by char or by U+ hex fragment.
-  const visibleGroups = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return groups
-      .map(g => {
-        let list: GlyphPickerCell[] = g.cells
-          ? g.cells.map(c => ({ ...c, ffs: c.ffs ?? g.ffs }))
-          : [...(g.chars ?? '')]
-              .filter(c => isSupported(c, ranges, /\p{Mn}/u.test(c)))
-              .map(ch => ({ ch, ffs: g.ffs }))
-        if (q) list = list.filter(c => c.ch.toLowerCase() === q || hex(c.ch).toLowerCase().includes(q))
-        return { label: g.label, list }
-      })
-      .filter(g => g.list.length > 0)
-  }, [groups, ranges, query])
-
   // Lazy name data: load only the pages covering the codepoints actually present.
   const [nameData, setNameData] = useState<Map<number, [string | 0, string | 0]> | null>(null)
   useEffect(() => {
@@ -306,6 +291,31 @@ export function GlyphPicker({
     loadNamePages(cps).then(m => { if (alive) setNameData(m) })
     return () => { alive = false }
   }, [names, groups])
+
+  // Resolve each group to cells: `chars` shorthand gets cmap-filtered; explicit
+  // `cells` are pre-scoped. Group ffs applies unless the cell has its own. Then the
+  // search query — match by char or by U+ hex fragment.
+  const visibleGroups = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    const qLoose = loose(q)
+    return groups
+      .map(g => {
+        let list: GlyphPickerCell[] = g.cells
+          ? g.cells.map(c => ({ ...c, ffs: c.ffs ?? g.ffs }))
+          : [...(g.chars ?? '')]
+              .filter(c => isSupported(c, ranges, /\p{Mn}/u.test(c)))
+              .map(ch => ({ ch, ffs: g.ffs }))
+        if (q) list = list.filter(c => {
+          if (c.ch.toLowerCase() === q || hex(c.ch).toLowerCase().includes(q)) return true
+          const e = nameData?.get(codeOf(c.ch))
+          // names match loosely: spaces/dashes ignored, so "number" finds numbersign
+          // and "NUMBER SIGN"; "small phi" finds LATIN SMALL LETTER PHI.
+          return !!e && [e[0], e[1]].some(n => n && loose(n).includes(qLoose))
+        })
+        return { label: g.label, list }
+      })
+      .filter(g => g.list.length > 0)
+  }, [groups, ranges, query, nameData])
 
   // Caption for a cell (short form) + full name line for the console.
   const nameParts = useCallback((cell: GlyphPickerCell): { nice?: string; uni?: string } => {
@@ -356,7 +366,7 @@ export function GlyphPicker({
           return line ? <div className="gp-name">{line}</div> : null
         })()}
         <input
-          className="gp-search" type="search" placeholder="Search glyph or U+ code…"
+          className="gp-search" type="search" placeholder="Search name, glyph, or U+ code…"
           value={query} onChange={e => setQuery(e.target.value)} spellCheck={false} />
       </div>
     </div>
