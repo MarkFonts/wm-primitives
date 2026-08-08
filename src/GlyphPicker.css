@@ -25,6 +25,12 @@
   font-feature-settings: normal;
   font-optical-sizing: auto;
 }
+/* Chrome takes the HOST's UI font. `inherit` is right for everything that hangs off
+   .gp; captions live inside .gp-cell (which carries the specimen font), so they need
+   the explicit token — hosts set --gp-ui-font or --ui-font. Never fall back to
+   system-ui: on macOS that IS SF Pro, which reads as the loaded font leaking. */
+.gp .gp-search, .gp .gp-code, .gp .gp-name, .gp .gp-group-label { font-family: inherit; }
+.gp .gp-cell-name, .gp .gp-rule-label { font-family: var(--gp-ui-font, var(--ui-font, sans-serif)); }
 .gp--bottom { flex-direction: column; }
 /* bottom preset: grid on top; the band is ONE centered cluster — the glyph as the
    hero with its console directly beneath — docked behind a hairline divider. */
@@ -94,7 +100,6 @@
 .gp-rule-label {
   position: absolute;
   transform: translate(-100%, -50%);
-  font-family: var(--ui-font, system-ui, sans-serif);
   font-size: 9px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -127,7 +132,6 @@
 }
 .gp-copy:hover { color: var(--text, #eee); }
 .gp-code {
-  font-family: var(--ui-font, system-ui, sans-serif);
   font-size: 12px;
   letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
@@ -197,7 +201,6 @@
 }
 .gp-cell--named .gp-cell-ch { flex: 1; display: flex; align-items: center; }
 .gp-cell-name {
-  font-family: var(--ui-font, system-ui, sans-serif);
   font-size: 9px;
   line-height: 1.2;
   color: var(--text-dim, #666);
@@ -210,7 +213,6 @@
 
 /* full name line under the U+ readout in the console */
 .gp-name {
-  font-family: var(--ui-font, system-ui, sans-serif);
   font-size: 11px;
   line-height: 1.4;
   text-align: center;
