@@ -31,9 +31,9 @@ It carries no meaning; it prevents a defect. Reading it as emphasis is a
 misreading — nothing was said.
 
 - **`opsz` tracking size.** Given, always, invisible. Our own product's thesis.
-- **Tracking on caps and on small sizes.** Bringhurst §3.2.1: letterspace all
-  strings of capitals. Small optical sizes want air; large sizes want less.
 - **Leading responding to measure and size.**
+
+Tracking is *not* on this list, and that is a rule, not an omission — see below.
 
 **A signal** is a change made to *say* something: this is a heading, this is
 secondary, this is a label. Signals cost. There are five:
@@ -75,6 +75,25 @@ Hue is not on the list of five on purpose. Reserve it for pointing at the thing 
 discussion — an annotation, a highlighted value — never for hierarchy. The moment a
 colour means "important," it stops being able to mean anything else.
 
+### Tracking: one value, for capitals
+
+**`letter-spacing` is zero everywhere except strings of capitals.** One token,
+`--track-caps: .12em`, and no other tracking value exists in the system.
+
+The reasoning matters more than the rule. Hand-tracking display type — the reflex to
+pull -.02em, -.03em, -.04em as sizes climb — is what you do when a font has no
+optical size axis. It is a manual imitation of optical sizing. Cal Sans *has* `opsz`,
+and it is already tightening the fit at every step; tracking it again by hand
+double-counts the axis the whole product is built on, and the two corrections fight
+each other at the extremes.
+
+The exception is real and narrow: capitals are drawn with sidebearings tuned for
+mixed-case setting, so a run of them crowds. Bringhurst §3.2.1 — letterspace all
+strings of capitals and small caps. That is the only place, so it gets the only value.
+
+Small sizes are not an exception either. An 8px caption at `opsz 8` is already the
+small-optical cut, drawn with the air it needs.
+
 ## II. Ink
 
 Grey is a signal, and we have been spending it like punctuation. Four levels
@@ -110,13 +129,13 @@ separately, and spending either means not also changing role.
 
 | role | size | leading | tracking | opsz | spends |
 |---|---|---|---|---|---|
-| `micro` | 8 | 1.2 | .06em ᶜ | auto | size |
-| `label` | 12 | 1.3 | .12em ᶜ | 10 ᵖ | **case** (see below) |
+| `micro` | 8 | 1.2 | 0 | auto | size |
+| `label` | 12 | 1.3 | `--track-caps` ᶜ | 10 ᵖ | **case** (see below) |
 | `ui` | 12 | 1.4 | 0 | 10 ᵖ | — (chrome norm) |
 | `body` | 16 | 1.55 | 0 | auto | — (content norm) |
-| `lede` | 18 | 1.5 | -.005em ᶜ | auto | size |
-| `title` | 26 | 1.2 | -.01em ᶜ | auto | size |
-| `display` | 40 | 1.1 | -.02em ᶜ | auto | size |
+| `lede` | 18 | 1.5 | 0 | auto | size |
+| `title` | 26 | 1.2 | 0 | auto | size |
+| `display` | 40 | 1.1 | 0 | auto | size |
 
 ᶜ compensation, not a signal · ᵖ pinned by policy (chrome must not drift between surfaces)
 
@@ -173,20 +192,22 @@ one interval, and two of the five steps (68, 96) are already in the codebase.
 
 | step | size | leading | tracking | spends |
 |---|---|---|---|---|
-| `poster-1` | 48 | 1.05 | -.020em ᶜ | size |
-| `poster-2` | 68 | 1.02 | -.025em ᶜ | size |
-| `poster-3` | 96 | 1.00 | -.030em ᶜ | size |
-| `poster-4` | 136 | 0.98 | -.035em ᶜ | size |
-| `poster-5` | 192 | 0.96 | -.040em ᶜ | size |
+| `poster-1` | 48 | 1.05 | 0 | size |
+| `poster-2` | 68 | 1.02 | 0 | size |
+| `poster-3` | 96 | 1.00 | 0 | size |
+| `poster-4` | 136 | 0.98 | 0 | size |
+| `poster-5` | 192 | 0.96 | 0 | size |
 
-Leading tightens and tracking goes negative as the steps climb — both compensations.
-Large type has too much air between lines and between letters if you leave text
-settings on it; closing them up is repair, not expression.
+Leading tightens as the steps climb — a compensation, since a line box built for
+reading is too loose once the words are this large. **Tracking stays at zero**, and
+the poster scale is exactly where that rule earns its keep: negative tracking on
+display type is a hand-made substitute for optical sizing, and `opsz` is already
+doing it here.
 
 ### It is face-agnostic, and that is the point
 
-The poster scale sets **size, leading and tracking. Nothing else.** It never touches
-an axis. `font-optical-sizing: auto` then does the right thing for whichever face it
+The poster scale sets **size and leading. Nothing else.** It never touches an axis,
+and it never tracks. `font-optical-sizing: auto` then does the right thing for whichever face it
 is pointed at — and this is exactly why we never pin `opsz` here.
 
 That is what lets one scale serve both sides of the boundary without breaking it:
