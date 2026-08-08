@@ -36,9 +36,13 @@ misreading — nothing was said.
 - **Leading responding to measure and size.**
 
 **A signal** is a change made to *say* something: this is a heading, this is
-secondary, this is a label. Signals cost. There are four:
+secondary, this is a label. Signals cost. There are five:
 
-**size · case · ink · weight**
+**size · case · ink · weight · rule**
+
+`rule` is the quietest of them — a hairline under the words, everything else held
+constant. It is also the one our own proof sheets reach for most, and it deserves to
+be in the vocabulary rather than improvised each time.
 
 ### The budget
 
@@ -51,6 +55,25 @@ secondary, this is a label. Signals cost. There are four:
 `opsz` moving with size is the given. The exception that proves it: `opsz`
 *pinned* while size changes — a deliberate mismatch — is no longer a compensation.
 It is a signal, and it is spent.
+
+### The weight-and-colour habit
+
+The pairing hardest to catch, because each half looks reasonable alone: making a
+heading **bolder** *and* giving it a different hue. That is two signals for one idea,
+and it is how most interfaces drift into shouting.
+
+```html
+<h3 style="font-weight:640; color:var(--accent)">Messina Serif</h3>  <!-- two -->
+<h3 class="rule">Messina Serif</h3>                                  <!-- one -->
+```
+
+Same size, same weight, same colour, same case — only a rule beneath. Prefer it to a
+weight bump whenever the distinction is *structural* (this is a heading) rather than
+*urgent* (read this first). Weight is for urgency; a rule is for structure.
+
+Hue is not on the list of five on purpose. Reserve it for pointing at the thing under
+discussion — an annotation, a highlighted value — never for hierarchy. The moment a
+colour means "important," it stops being able to mean anything else.
 
 ## II. Ink
 
@@ -203,6 +226,10 @@ Expect ~10 genuine one-offs; give those `--type-once-*` and a comment saying why
 
 ## VII. House style
 
+- **Never let the browser synthesise a style.** Cal Sans has a drawn italic on the
+  `ital` axis; `font-style: italic` makes the browser shear the upright instead, which
+  is a counterfeit. Address the axis: `font-variation-settings: "ital" 1` with
+  `font-style: normal`. Same for weight — no synthetic bolding when `wght` exists.
 - **No invented ramps.** The neutral scale, accent, radii, spring and durations
   already exist and are shared. Type adds `--type-*` and `--ink-*`, nothing else.
 - **No `rem` gymnastics.** Chrome is device-anchored: px. `em`/`ch` for
