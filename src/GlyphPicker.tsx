@@ -124,7 +124,9 @@ const codeOf = (s: string) => {
 }
 const hex = (ch: string) => codeOf(ch).toString(16).toUpperCase().padStart(4, '0')
 
-// Loose match key for name search: case/space/dash/underscore-insensitive.
+// Match key for name search: case folded, separators ignored. Deliberately
+// INCLUSIVE — plain substring, so "ger" finds germandbls AND dagger, and names
+// without spaces (most AGLFN names) still match mid-word.
 const loose = (s: string) => s.toLowerCase().replace(/[\s_-]+/g, '')
 
 const cellId = (c: GlyphPickerCell) => c.key ?? `${c.ch}|${c.ffs ?? ''}`
@@ -308,8 +310,6 @@ export function GlyphPicker({
         if (q) list = list.filter(c => {
           if (c.ch.toLowerCase() === q || hex(c.ch).toLowerCase().includes(q)) return true
           const e = nameData?.get(codeOf(c.ch))
-          // names match loosely: spaces/dashes ignored, so "number" finds numbersign
-          // and "NUMBER SIGN"; "small phi" finds LATIN SMALL LETTER PHI.
           return !!e && [e[0], e[1]].some(n => n && loose(n).includes(qLoose))
         })
         return { label: g.label, list }
