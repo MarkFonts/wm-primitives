@@ -98,6 +98,32 @@ strings of capitals and small caps. That is the only place, so it gets the only 
 Small sizes are not an exception either. An 8px caption at `opsz 8` is already the
 small-optical cut, drawn with the air it needs.
 
+### A note on `opsz`, points and pixels
+
+The `opsz` axis is defined in **points** — Cal Sans' range of 8–45 means 8pt–45pt, and
+45pt is 60px at 96dpi. Browsers do not honour that. `font-optical-sizing: auto` feeds
+the axis the **computed pixel** number, and no CSS unit changes it:
+
+| declared | computed | `auto` applies |
+|---|---|---|
+| `24px` | 24px | `opsz` 24 |
+| `1.5rem` (root 16px) | 24px | `opsz` 24 |
+| `1.5rem` (root 20px) | 30px | `opsz` 30 |
+| `18pt` | 24px | `opsz` 24 — *not* 18 |
+
+Measured in Blink, by comparing advance widths against explicitly-set axis values.
+`pt` is converted to px at parse time, so it changes nothing.
+
+The consequence is worth knowing rather than fixing: under `auto`, Cal Sans reaches
+the top of its optical range at **45px**, where it was drawn to reach it at **60px**.
+Every browser runs the face about a third optically "hot".
+
+The only lever that restores design intent is setting the axis by hand —
+`font-variation-settings: "opsz" (px × 0.75)` — at the cost of every role carrying its
+own value and diverging from how the rest of the web renders. We take `auto`: one less
+number per role, and consistent with every other site the type appears on. Choosing
+`display` at 45px is a size decision, not an attempt to sit on the ceiling.
+
 ## II. Ink
 
 Grey is a signal, and we have been spending it like punctuation. Four levels
@@ -139,10 +165,9 @@ separately, and spending either means not also changing role.
 | `body` | 16 | 1.55 | 0 | auto | — (content norm) |
 | `lede` | 18 | 1.5 | 0 | auto | size |
 | `title` | 26 | 1.2 | 0 | auto | size |
-| `display` | 45 | 1.1 | 0 | auto ᵐ | size |
+| `display` | 45 | 1.1 | 0 | auto | size |
 
-ᶜ compensation, not a signal · ᵖ pinned by policy (chrome must not drift between surfaces) ·
-ᵐ 45 is the top of Cal Sans’ `opsz` range, so `display` sits exactly at the axis ceiling
+ᶜ compensation, not a signal · ᵖ pinned by policy (chrome must not drift between surfaces)
 
 Plus two non-roles: `readout` (= `ui` + `tnum`, so digits don't jitter) and `code`
 (the only sanctioned monospace).
@@ -175,11 +200,8 @@ size its context calls for:
 
 ## IV. The poster scale
 
-The seven roles top out at `display` (45) — and that number is not arbitrary. With
-`font-optical-sizing: auto`, a 45px setting puts Cal Sans at `opsz` 45, the top of its
-range. `display` is therefore the last step that still has optical sizing left to
-give; above it the axis is pinned at its maximum whatever you do. Text ends where the
-axis ends. Above that lives another instrument: the monster sample. The hero word
+The seven roles top out at `display` (45px) — the largest size chrome has any business
+being. Above it lives another instrument: the monster sample. The hero word
 on a family page, the Words scene, a specimen waterfall.
 
 Up there the rules change, and it is worth saying why. At text sizes you name the
@@ -261,8 +283,10 @@ Expect ~10 genuine one-offs; give those `--type-once-*` and a comment saying why
   `font-style: normal`. Same for weight — no synthetic bolding when `wght` exists.
 - **No invented ramps.** The neutral scale, accent, radii, spring and durations
   already exist and are shared. Type adds `--type-*` and `--ink-*`, nothing else.
-- **No `rem` gymnastics.** Chrome is device-anchored: px. `em`/`ch` for
-  *relationships* — measure, indents, optical padding.
+- **Declare in `rem`, write in px.** The scale is authored in `rem` against a 16px
+  root so it follows the reader's own text size; prose, tables and spec rails quote px,
+  because that is how type is talked about. `em`/`ch` stay for *relationships* —
+  measure, indents, optical padding.
 - **Count the signals before adding a rule.** If a new class changes two of
   size/case/ink/weight at once, the distinction it makes is not clear enough to need
   two.
