@@ -100,29 +100,40 @@ small-optical cut, drawn with the air it needs.
 
 ### A note on `opsz`, points and pixels
 
-The `opsz` axis is defined in **points** — Cal Sans' range of 8–45 means 8pt–45pt, and
-45pt is 60px at 96dpi. Browsers do not honour that. `font-optical-sizing: auto` feeds
-the axis the **computed pixel** number, and no CSS unit changes it:
+The axis is specified in points, which reads at first like a mismatch with CSS. It
+is not. From the OpenType spec:
+
+> The scale for the Optical size axis is text size in points. For these purposes, the
+> text size is as determined by the document or application for its intended use; the
+> actual physical size on a display may be different due to platform or application
+> scaling methods or intended viewing distance.
+
+So "points" here is a **nominal** scale — whatever number the document uses for text
+size — and physical size is explicitly out of scope. On the web the document declares
+text size in CSS px, so the px number *is* that number, and a browser handing the
+computed px to the axis is implementing the spec rather than ignoring it.
+
+Which it does, consistently, whatever unit you author in:
 
 | declared | computed | `auto` applies |
 |---|---|---|
 | `24px` | 24px | `opsz` 24 |
 | `1.5rem` (root 16px) | 24px | `opsz` 24 |
 | `1.5rem` (root 20px) | 30px | `opsz` 30 |
-| `18pt` | 24px | `opsz` 24 — *not* 18 |
+| `18pt` | 24px | `opsz` 24 |
 
-Measured in Blink, by comparing advance widths against explicitly-set axis values.
-`pt` is converted to px at parse time, so it changes nothing.
+Measured in Blink against explicitly-set axis values. `pt` is converted to px at parse
+time, so it changes nothing — and needs to change nothing.
 
-The consequence is worth knowing rather than fixing: under `auto`, Cal Sans reaches
-the top of its optical range at **45px**, where it was drawn to reach it at **60px**.
-Every browser runs the face about a third optically "hot".
+Two consequences worth holding on to. Cal Sans' 8–45 range maps onto exactly the sizes
+web UI uses, so the whole axis gets exercised rather than the top half sitting idle.
+And `display` at 45px does sit on the ceiling: at that size `auto` applies `opsz` 45,
+the maximum. Text ends where the axis ends.
 
-The only lever that restores design intent is setting the axis by hand —
-`font-variation-settings: "opsz" (px × 0.75)` — at the cost of every role carrying its
-own value and diverging from how the rest of the web renders. We take `auto`: one less
-number per role, and consistent with every other site the type appears on. Choosing
-`display` at 45px is a size decision, not an attempt to sit on the ceiling.
+The one case that still needs a hand: `rem` means the computed px — and therefore the
+optical grade — follows the reader's root size. That is the correct behaviour, but if
+a surface ever needs a fixed optical grade regardless of the reader, pin it with
+`font-variation-settings` rather than trusting `auto`.
 
 ## II. Ink
 
@@ -165,9 +176,10 @@ separately, and spending either means not also changing role.
 | `body` | 16 | 1.55 | 0 | auto | — (content norm) |
 | `lede` | 18 | 1.5 | 0 | auto | size |
 | `title` | 26 | 1.2 | 0 | auto | size |
-| `display` | 45 | 1.1 | 0 | auto | size |
+| `display` | 45 | 1.1 | 0 | auto ᵐ | size |
 
-ᶜ compensation, not a signal · ᵖ pinned by policy (chrome must not drift between surfaces)
+ᶜ compensation, not a signal · ᵖ pinned by policy (chrome must not drift between surfaces) ·
+ᵐ at 45px `auto` applies `opsz` 45 — the top of the axis
 
 Plus two non-roles: `readout` (= `ui` + `tnum`, so digits don't jitter) and `code`
 (the only sanctioned monospace).
@@ -200,8 +212,11 @@ size its context calls for:
 
 ## IV. The poster scale
 
-The seven roles top out at `display` (45px) — the largest size chrome has any business
-being. Above it lives another instrument: the monster sample. The hero word
+The seven roles top out at `display` (45px), and the number is not arbitrary: at 45px
+`font-optical-sizing: auto` applies `opsz` 45, the top of Cal Sans' range. `display` is
+the last step that still has optical sizing left to give — above it the axis is pinned
+at maximum whatever you do. Text ends where the axis ends, and above that lives
+another instrument: the monster sample. The hero word
 on a family page, the Words scene, a specimen waterfall.
 
 Up there the rules change, and it is worth saying why. At text sizes you name the
