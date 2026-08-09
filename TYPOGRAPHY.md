@@ -100,8 +100,10 @@ small-optical cut, drawn with the air it needs.
 
 ### A note on `opsz`, points and pixels
 
-The axis is specified in points, which reads at first like a mismatch with CSS. It
-is not. From the OpenType spec:
+The axis is specified in points, which reads at first like a mismatch with CSS. It is
+not — and the clause that resolves it is easy to miss, because the designer-facing
+descriptions (Google Fonts' among them) quote the "points" part and stop there. From
+Microsoft's OpenType axis-tag registry, which is the normative definition:
 
 > The scale for the Optical size axis is text size in points. For these purposes, the
 > text size is as determined by the document or application for its intended use; the
@@ -109,7 +111,10 @@ is not. From the OpenType spec:
 > scaling methods or intended viewing distance.
 
 So "points" here is a **nominal** scale — whatever number the document uses for text
-size — and physical size is explicitly out of scope. On the web the document declares
+size — and physical size is explicitly out of scope. Google's description ("optimized
+for use at singular specific sizes, such as 14 pt or 144 pt") is describing the same
+thing from the design side, and is not in conflict; it simply omits the sentence that
+tells you the number is not a physical measurement. On the web the document declares
 text size in CSS px, so the px number *is* that number, and a browser handing the
 computed px to the axis is implementing the spec rather than ignoring it.
 
