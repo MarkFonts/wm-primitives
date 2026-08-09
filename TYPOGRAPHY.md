@@ -64,9 +64,19 @@ count.
 
 Three rules govern it:
 
-- **Spend it in landings, not values.** A11y (0–10), UI (25, the chrome default),
-  Base (~50), Geo (~90). Nudging to GEOM 37 is the same error as nudging a size to
-  13.5px — it reads as drift rather than decision.
+- **Spend it in landings, not values.** There are four, and they are round numbers:
+
+  | landing | value | pad | job |
+  |---|---|---|---|
+  | A11y | **0** | 0–10 | strings a reader transcribes rather than reads — code, IDs, keys |
+  | UI | **25** | 16–34 | running copy and all chrome; the value pinned into `--ui-fvs` |
+  | Base | **50** | 40–60 | headings sitting above UI copy |
+  | Geo | **100** | 80–100 | short capitalised strings — eyebrows, wordmarks, numbers |
+
+  The pad is the font's, not ours: inside it the drawing barely moves, so precision buys
+  nothing; between pads it moves fastest. That is what makes a landing a plateau you can
+  return to rather than a number you happened to drag to. Write the round value — a 37
+  belongs to no pad and reads as drift, the same way 13.5px does.
 - **Spend it where construction is visible.** At 12px chrome the difference is nearly
   invisible, so it is wasted there; it earns its keep at `title`, `display` and the
   poster steps.
