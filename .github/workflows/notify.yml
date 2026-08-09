@@ -8,6 +8,7 @@ on:
     paths:
       - 'src/**'
       - 'index.ts'
+      - 'fonts/**'      # the canonical Cal Sans lives here; a rebuild must follow it
 jobs:
   dispatch:
     runs-on: ubuntu-latest
@@ -20,8 +21,10 @@ jobs:
           TOKEN: ${{ secrets.WORDMARK_DEPLOY_TOKEN4 }}
         run: |
           if [ -z "$TOKEN" ]; then
-            echo "WORDMARK_DEPLOY_TOKEN4 not set — skipping. Add the secret to enable auto-deploy."
-            exit 0
+            echo "::error::WORDMARK_DEPLOY_TOKEN4 is not set — ${{ matrix.repo }} was NOT told to rebuild."
+            echo "A green run here previously meant 'dispatched OR silently skipped', which is"
+            echo "indistinguishable from a successful deploy. Failing loudly instead."
+            exit 1
           fi
           curl -fsS -X POST \
             -H "Authorization: Bearer $TOKEN" \
