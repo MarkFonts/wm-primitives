@@ -205,11 +205,16 @@ means *important*, it can no longer mean *this is the one I'm talking about*, an
 later use has to fight the one before it. Headings get a rule or a size; the blue stays
 free to point.
 
-The zone colours (`--zone-a11y`, `--zone-ui`, `--zone-base`, `--zone-geo`) are **not
-part of this system at all**. They mean something only inside ReCal, where they name
-regions of the GEOM axis, and they carry that meaning nowhere else — a zone colour on
-wordmark.nyc or in font-proofer is just a colour, and a confusing one. Don't borrow
-them for accents, states or hierarchy.
+The zone colours (`--zone-a11y`, `--zone-ui`, `--zone-base`, `--zone-geo`) are a
+**ReCal-scoped vocabulary**, and a real one: inside ReCal each names a region of the
+GEOM axis, so a colour there is a statement about the font's geometry — which zone a
+glyph belongs to, which band a threshold sits in. That is a legitimate third job for
+colour, and it is exactly why it has to stay inside ReCal.
+
+Outside ReCal the same colours mean nothing. A zone colour on wordmark.nyc or in
+font-proofer is just a colour, and a misleading one, because it looks like it is
+saying something about GEOM. Don't borrow them for accents, states or hierarchy
+anywhere else.
 
 ## III. Roles
 
