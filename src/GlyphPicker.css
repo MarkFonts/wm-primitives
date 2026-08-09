@@ -143,7 +143,7 @@
   font: inherit;
   font-size: 13px;
   color: var(--text, #eee);
-  background: var(--surface-1, rgba(255, 255, 255, 0.05));
+  background: var(--surface, rgba(255, 255, 255, 0.05));
   border: 1px solid var(--border, #333);
   border-radius: var(--radius, 8px);
   outline: none;
@@ -180,7 +180,7 @@
   font-size: 26px;
   line-height: 1;
   color: var(--text, #eee);
-  background: var(--surface-1, rgba(255, 255, 255, 0.05));
+  background: var(--surface, rgba(255, 255, 255, 0.05));
   border: none;
   border-radius: var(--radius, 8px);
   cursor: pointer;
@@ -191,7 +191,7 @@
 .gp-cell:hover { box-shadow: inset 0 0 0 1px var(--border, #444); }
 .gp-cell--active {
   box-shadow: inset 0 0 0 1.5px var(--accent, #e8e8e8);
-  background: var(--surface-2, rgba(255, 255, 255, 0.08));
+  background: var(--surface, rgba(255, 255, 255, 0.08));
 }
 
 /* names mode: the square glyph area keeps its feel; a caption hangs beneath */

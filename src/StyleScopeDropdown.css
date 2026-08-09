@@ -1,6 +1,6 @@
 /* StyleScopeDropdown — shared primitive styling.
    Token-based with fallbacks so each app's own theme vars flow in unchanged:
-   ReCal defines --surface-1/2/3 + --text-dim + --ui-font; font-proofer defines
+   Both apps define --bg/--surface/--surface-hi + --text-dim + --ui-font; font-proofer also defines
    --bg/-elevated/-hover + --text-muted. The fallbacks bridge the gap either way. */
 
 .ssd { position: relative; }
@@ -12,7 +12,7 @@
   gap: 8px;
   width: 100%;
   padding: 9px 12px;
-  background: var(--surface-3, var(--bg-elevated));
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text);
@@ -32,7 +32,7 @@
   z-index: 40;
   min-width: 240px;
   padding: 5px;
-  background: var(--surface-2, var(--bg-elevated));
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
@@ -64,7 +64,7 @@
   cursor: pointer;
 }
 .ssd-row:hover,
-.ssd-row.on { background: var(--surface-3, var(--bg-hover)); }
+.ssd-row.on { background: var(--surface-hi); }
 
 .ssd-check { width: 14px; flex: 0 0 auto; color: var(--text-muted); }
 .ssd-name  { margin-right: auto; white-space: nowrap; font-size: 16px; line-height: 1.1; }
