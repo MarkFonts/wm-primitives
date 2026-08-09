@@ -224,4 +224,8 @@
   text-align: center;
   color: var(--text-muted, #999);
 }
-.gp-cell--invisible { color: var(--text-faint, #444); }
+/* Unsupported glyphs recede by ink, not by a fixed grey. The old #444 fallback was
+   dark-first: on font-proofer's light theme it sits a hair off the #111 body text, so
+   "this glyph is missing" stopped reading at all. Ink follows the theme in both apps.
+   ReCal's deliberate --text-faint still wins where it is defined. */
+.gp-cell--invisible { color: var(--text-faint, rgba(var(--text-rgb), var(--ink-faint, .38))); }
