@@ -192,6 +192,21 @@ sit between `quiet` and `faint`, the answer is that it doesn't. The old `--text-
 tier (0.24) retires: anything that quiet is either structure (use a border token) or
 shouldn't be on the page.
 
+### Ink is relative, not a rank
+
+Which element gets `full` is a question about the surface, not about the element. On a
+marketing page the heading leads and the paragraph supports it, so the heading takes
+full ink and the body goes quiet — that is how the Cal Sans page is set, with ink as
+the *only* difference between head and body. In a document the body is the thing being
+read and the annotations support it, so the body takes full ink and the captions go
+quiet.
+
+Both are one signal. What stays constant is the relationship: `quiet` means
+*subordinate to what surrounds it*, and something on the surface has to be `full`. The
+mistake is not choosing wrongly between the two, it is using ink to mark a rank the
+element carries everywhere — that leads to quiet body copy on a page with nothing loud
+to be quiet against.
+
 ### Hue is not an ink
 
 `--signal` (`#eeff41` on dark, `#5c6b00` on light) is not part of the ink scale and is
