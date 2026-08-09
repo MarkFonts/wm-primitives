@@ -90,6 +90,12 @@ the page alone.
 > plus a loud one is three ways of saying "minor", which is not emphasis but a lack of
 > confidence.
 
+This is a rule of thumb for looking at a page, not an accounting system. There is no
+partial credit and nothing to tot up: if a distinction reads clearly and you can name
+the one thing carrying it — or the two quiet things — it is fine. The rule exists to
+catch the case where nobody can name it, which is reliably the case where four
+things changed at once.
+
 The Cal Sans page is the worked example: headings sit at **GEOM 50 (Base) in full ink**,
 body copy at **GEOM 25 (UI) in quiet ink** — two quiet signals, and the pair still reads
 subtler than a single weight bump would. That is the budget working as intended, not an
