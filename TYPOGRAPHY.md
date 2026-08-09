@@ -77,6 +77,22 @@ Three rules govern it:
   nothing; between pads it moves fastest. That is what makes a landing a plateau you can
   return to rather than a number you happened to drag to. Write the round value — a 37
   belongs to no pad and reads as drift, the same way 13.5px does.
+
+  This is measurable, not a feel. Cal Sans swaps glyphs at exactly these points, and the
+  landings sit in the still water between them:
+
+  | swaps at | glyphs |
+  |---|---|
+  | 10 | `I` `l` `0` |
+  | 34 | `a` |
+  | 40 | `g` `u` `f` `t` `j` `y` — the last four flatten their extenders |
+  | 59 · 74 | `y`, then `f` `t` `j` |
+  | 80 | `C` `c` `M` `1` `5` `0` — the capitals and figures, all at once |
+
+  So the useful thing to say about a landing is which letters it actually buys you. UI to
+  Base redraws seven (`a`, then `g u f t j y`); nothing else on the line changes. And the
+  capitals hold one drawing until 80, which is the entire argument for Geo being where
+  short capitalised strings go — below it, a capitalised eyebrow gains nothing.
 - **Spend it where construction is visible.** At 12px chrome the difference is nearly
   invisible, so it is wasted there; it earns its keep at `title`, `display` and the
   poster steps.
