@@ -186,16 +186,19 @@
   cursor: pointer;
   padding: 0;
 }
-/* Cell states on the three-step scale:
+/* Cell states:
      resting   --surface
-     rollover  --surface-hi          — the cell lifts one step
-     selected  --surface-hi + ring   — same lift, plus the accent ring
-   Rollover used to be a hairline with no fill, on the rule "never a light fill". It stays
-   dark-first: --surface-hi is a LIFT, not an inversion, so the glyph never changes weight
-   under the cursor — but a whole grid of cells needs the rollover to be findable, and a
-   1px inset rule is not. Hover and selected share the fill; the ring is what separates
-   "you are pointing at this" from "this is chosen". */
-.gp-cell:hover { background: var(--surface-hi, rgba(255, 255, 255, 0.08)); }
+     rollover  INVERTED — light fill, dark glyph
+     selected  --surface-hi + accent ring
+   Rollover inverts on purpose. The old rule here was "never a light fill", which produced
+   a 1px hairline you cannot find in a grid of 1500 cells. Inverting is the loudest thing a
+   cell can do and rollover is the one state that is momentary, so it can afford to be loud.
+   It is written as accent-on-bg rather than white-on-black, so it inverts correctly in both
+   themes: light fill / dark glyph on a dark page, dark fill / light glyph on a light one. */
+.gp-cell:hover {
+  background: var(--accent, #e8e8e8);
+  color: var(--bg, #0f0f0f);
+}
 .gp-cell--active {
   box-shadow: inset 0 0 0 1.5px var(--accent, #e8e8e8);
   background: var(--surface-hi, rgba(255, 255, 255, 0.08));
