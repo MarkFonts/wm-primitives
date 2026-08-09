@@ -186,12 +186,16 @@
   cursor: pointer;
   padding: 0;
 }
-/* Dark-first states: a thin rule on rollover and an accent ring when selected —
-   never a light fill, the glyph never inverts. */
+/* Dark-first states: a thin rule on rollover and an accent ring + a lift when selected —
+   never a light fill, the glyph never inverts.
+   The selected cell must sit on --surface-hi, one step ABOVE the resting cell. The
+   four-to-three collapse mapped the old --surface-1 (resting) and --surface-2 (selected)
+   both onto --surface, which flattened them to the same value and left the ring doing all
+   the work on its own. */
 .gp-cell:hover { box-shadow: inset 0 0 0 1px var(--border, #444); }
 .gp-cell--active {
   box-shadow: inset 0 0 0 1.5px var(--accent, #e8e8e8);
-  background: var(--surface, rgba(255, 255, 255, 0.08));
+  background: var(--surface-hi, rgba(255, 255, 255, 0.08));
 }
 
 /* names mode: the square glyph area keeps its feel; a caption hangs beneath */
