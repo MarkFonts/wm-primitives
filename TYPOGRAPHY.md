@@ -209,12 +209,17 @@ shouldn't be on the page.
 
 ### Ink is relative, not a rank
 
-Which element gets `full` is a question about the surface, not about the element. On a
-marketing page the heading leads and the paragraph supports it, so the heading takes
-full ink and the body goes quiet — that is how the Cal Sans page is set, with ink as
-the *only* difference between head and body. In a document the body is the thing being
-read and the annotations support it, so the body takes full ink and the captions go
-quiet.
+Which element gets `full` is a question about the surface, not about the element, and
+the two conventions run opposite ways:
+
+- **UI** — the *content* is what the user came for, so content takes full ink and
+  section headings, labels and chrome are tinted down. The heading is a wayfinding
+  device, not the thing itself.
+- **Editorial** — the heading leads and the paragraph supports it, so the heading
+  takes full ink and the body goes quiet.
+
+Get this backwards and a UI reads as a brochure: headings shouting over the data
+someone is actually trying to use. Our apps are UI; wordmark.nyc is editorial.
 
 Both are one signal. What stays constant is the relationship: `quiet` means
 *subordinate to what surrounds it*, and something on the surface has to be `full`. The
