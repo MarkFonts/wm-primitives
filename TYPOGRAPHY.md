@@ -187,8 +187,26 @@ and it is **comma-separated**, so use the `rgba()` form (the space/slash syntax 
 color: rgba(var(--text-rgb), var(--ink-quiet));
 ```
 
-The old `--text-faint` tier (0.24) retires. Anything that quiet is either structure
-(use a border token) or shouldn't be on the page.
+Three values, and only three. An arbitrary alpha is not an ink — if a thing needs to
+sit between `quiet` and `faint`, the answer is that it doesn't. The old `--text-faint`
+tier (0.24) retires: anything that quiet is either structure (use a border token) or
+shouldn't be on the page.
+
+### Hue is not an ink
+
+`--signal` (our blue) is not part of the ink scale and is not one of the five signals.
+It has exactly one job: **pointing at the thing under discussion** — the value being
+explained, the word a sentence is about, the cell a control is editing. It never marks
+hierarchy and it never means "important."
+
+The reason is that a colour can only carry one meaning at a time. The moment blue
+means *important*, it can no longer mean *this is the one I'm talking about*, and every
+later use has to fight the one before it. Headings get a rule or a size; the blue stays
+free to point.
+
+Zone colours (`--zone-a11y`, `--zone-ui`, `--zone-base`, `--zone-geo`) are a separate
+vocabulary again — they name a region of the GEOM axis, are defined by the product, and
+never participate in type hierarchy either.
 
 ## III. Roles
 
