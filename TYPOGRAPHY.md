@@ -194,7 +194,8 @@ shouldn't be on the page.
 
 ### Hue is not an ink
 
-`--signal` (our blue) is not part of the ink scale and is not one of the five signals.
+`--signal` (`#eeff41` on dark, `#5c6b00` on light) is not part of the ink scale and is
+not one of the five signals.
 It has exactly one job: **pointing at the thing under discussion** — the value being
 explained, the word a sentence is about, the cell a control is editing. It never marks
 hierarchy and it never means "important."
@@ -204,9 +205,11 @@ means *important*, it can no longer mean *this is the one I'm talking about*, an
 later use has to fight the one before it. Headings get a rule or a size; the blue stays
 free to point.
 
-Zone colours (`--zone-a11y`, `--zone-ui`, `--zone-base`, `--zone-geo`) are a separate
-vocabulary again — they name a region of the GEOM axis, are defined by the product, and
-never participate in type hierarchy either.
+The zone colours (`--zone-a11y`, `--zone-ui`, `--zone-base`, `--zone-geo`) are **not
+part of this system at all**. They mean something only inside ReCal, where they name
+regions of the GEOM axis, and they carry that meaning nowhere else — a zone colour on
+wordmark.nyc or in font-proofer is just a colour, and a confusing one. Don't borrow
+them for accents, states or hierarchy.
 
 ## III. Roles
 
