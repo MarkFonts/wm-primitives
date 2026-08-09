@@ -42,3 +42,10 @@ export type { EditableTextBlockProps } from './src/EditableTextBlock'
 export { GlyphPicker } from './src/GlyphPicker'
 export { measureGlyphMetrics } from './src/GlyphPicker'
 export type { GlyphPickerProps, GlyphPickerGroup, GlyphPickerCell, GlyphPickerMetrics, GlyphCellState } from './src/GlyphPicker'
+
+// Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/
+// --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so
+// importing it cannot reach existing markup. Apps import the CSS from their entry
+// stylesheet and must supply --ui-font and --text-rgb (comma-separated).
+export { ROLES, POSTER, INK, TRACK_CAPS, LANDINGS, type as typeStyle, ink } from './src/type'
+export type { Role, Landing } from './src/type'

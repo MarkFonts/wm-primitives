@@ -1,0 +1,96 @@
+/* type.css — the WORDMARK type tokens. See TYPOGRAPHY.md for the reasoning.
+ *
+ * Purely additive: importing this file changes nothing on its own. Nothing here styles an
+ * element type or a bare selector, so it cannot reach existing markup by accident — you opt
+ * in per element by adding a `t-*` class.
+ *
+ * Sizes are declared in rem against a 16px root so they follow the reader's own text size.
+ * We talk about them in px because that is how type is discussed.
+ *
+ * Two things the host app must provide, because they are the app's, not ours:
+ *   --ui-font   the chrome face
+ *   --text-rgb  the text colour as "R, G, B" — COMMA-separated, because ink is written
+ *               rgba(var(--text-rgb), α). The rgb(… / α) slash form silently fails here.
+ * Both have fallbacks below so a missing one degrades rather than breaks, but an app that
+ * relies on the fallback is not on the system.
+ */
+
+:root {
+  /* ---- roles: each spends SIZE and nothing else ---- */
+  --type-micro-size: 0.5rem;      --type-micro-lead: 1.2;    /*   8px */
+  --type-label-size: 0.75rem;     --type-label-lead: 1.3;    /*  12px */
+  --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       /*  12px */
+  --type-body-size: 1rem;         --type-body-lead: 1.55;    /*  16px */
+  --type-lede-size: 1.125rem;     --type-lede-lead: 1.5;     /*  18px */
+  --type-title-size: 1.625rem;    --type-title-lead: 1.2;    /*  26px */
+  --type-display-size: 2.8125rem; --type-display-lead: 1.1;  /*  45px */
+
+  /* ---- poster: the monster scale, ratio root-2 so every second step doubles.
+     Sets size and leading only — never an axis — so it serves any face. ---- */
+  --poster-1: 3rem;    --poster-2: 4.25rem;  --poster-3: 6rem;   /*  48 /  68 /  96px */
+  --poster-4: 8.5rem;  --poster-5: 12rem;                        /* 136 / 192px */
+
+  /* ---- ink: opacity on the text colour. Three levels, never four. ---- */
+  --ink-full: 1;  --ink-quiet: .62;  --ink-faint: .38;
+
+  /* ---- the ONLY tracking value in the system. Capitals must be letterspaced and
+     nothing else may be: tracking by size is opsz's job, and doing it by hand
+     double-counts the axis. There is deliberately no negative value here. ---- */
+  --track-caps: .12em;
+
+  /* Fallbacks. An app on the system overrides both. */
+  --text-rgb: 232, 232, 232;
+}
+
+/* ---- the API ---- */
+.t-micro, .t-label, .t-ui, .t-body, .t-lede, .t-title, .t-display {
+  font-family: var(--ui-font, system-ui, sans-serif);
+  font-variation-settings: var(--ui-fvs, normal);
+}
+/* Everything at reading size and up lets opsz track the size, per TYPOGRAPHY.md §I —
+   that is a compensation and costs nothing. The two chrome roles pin it instead: they
+   sit at 12px and 8px, where the axis would otherwise run to its small extreme and make
+   chrome look like a different family from the content it labels. */
+.t-body, .t-lede, .t-title, .t-display { font-optical-sizing: auto; }
+.t-micro, .t-label, .t-ui { font-optical-sizing: none; }
+.t-micro, .t-label, .t-ui { font-variation-settings: "opsz" 10, var(--ui-fvs, normal); }
+
+.t-micro   { font-size: var(--type-micro-size);   line-height: var(--type-micro-lead); }
+.t-ui      { font-size: var(--type-ui-size);      line-height: var(--type-ui-lead); }
+.t-body    { font-size: var(--type-body-size);    line-height: var(--type-body-lead); }
+.t-lede    { font-size: var(--type-lede-size);    line-height: var(--type-lede-lead); }
+.t-title   { font-size: var(--type-title-size);   line-height: var(--type-title-lead); }
+.t-display { font-size: var(--type-display-size); line-height: var(--type-display-lead); }
+
+/* label is the one role that spends CASE rather than size — it sits at chrome size in
+   full ink and is distinguished by being capitalised. Small + caps + muted + heavy is
+   four signals for one idea, and is the habit this role exists to replace. */
+.t-label {
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lead);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+}
+
+.p1, .p2, .p3, .p4, .p5 {
+  font-family: var(--ui-font, system-ui, sans-serif);
+  font-variation-settings: var(--ui-fvs, normal);
+  font-optical-sizing: auto;
+}
+.p1 { font-size: var(--poster-1); line-height: 1.05; }
+.p2 { font-size: var(--poster-2); line-height: 1.02; }
+.p3 { font-size: var(--poster-3); line-height: 1.00; }
+.p4 { font-size: var(--poster-4); line-height: .98; }
+.p5 { font-size: var(--poster-5); line-height: .96; }
+
+.ink-full  { color: rgba(var(--text-rgb), var(--ink-full)); }
+.ink-quiet { color: rgba(var(--text-rgb), var(--ink-quiet)); }
+.ink-faint { color: rgba(var(--text-rgb), var(--ink-faint)); }
+
+/* rule — the quietest signal there is. Same size, weight, colour and case; only a
+   hairline under the words. */
+.sig-rule {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .28em;
+}
