@@ -45,9 +45,23 @@ constant. It is also the one our own proof sheets reach for most, and it deserve
 be in the vocabulary rather than improvised each time.
 
 `geom` is the one no other type system has. Moving along Cal Sans' GEOM axis changes
-how the letters are *built* — single- vs double-storey a, serifed vs plain I — while
-size, weight, colour and case all hold. It says "a different kind of thing", which
-makes it kin to `case` rather than to `weight`; it is a change of voice, not of rank.
+how the letters are *built* while size, weight, colour and case all hold. It says "a
+different kind of thing", which makes it kin to `case` rather than to `weight`: a
+change of voice, not of rank.
+
+**Why it is quiet is worth being precise about**, because it is the mechanism that
+makes the pairing on the Cal Sans page legal. The axis does not restyle the alphabet;
+it swaps a named set of glyphs at specific thresholds. Between UI (25) and Base (50)
+exactly **six** letters redraw — `a` (at 35), `f`, `j`, `t` (all at 40), `G` (at 41)
+and `y` (at 40). Between Base and Geo (90) it is **nine** — `j` and `t` again at 74,
+`y` and `u` at 60, `C`, `c`, `M`, `0` and `1` at 79. Across the full span from UI to
+Geo, twelve.
+
+So a heading set at Base against copy at UI differs in six characters out of the
+alphabet, and in a given word usually two or three. Weight, by contrast, redraws every
+glyph on the line. That ratio *is* the subtlety — it is not a matter of taste, it is a
+count.
+
 Three rules govern it:
 
 - **Spend it in landings, not values.** A11y (0–10), UI (25, the chrome default),
