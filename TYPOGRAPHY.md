@@ -130,6 +130,13 @@ Which it does, consistently, whatever unit you author in:
 Measured in Blink against explicitly-set axis values. `pt` is converted to px at parse
 time, so it changes nothing — and needs to change nothing.
 
+The same rule holds outside the browser, which is what makes it a rule rather than a
+quirk: **every application maps its own text-size number 1:1 onto the axis.**
+InDesign's number is points, so 60pt gives `opsz` 60; Figma does the same, with a
+checkbox for it; the browser's number is px, so 60px gives `opsz` 60. One behaviour,
+different units — precisely what "as determined by the document or application"
+describes.
+
 Two consequences worth holding on to. Cal Sans' 8–45 range maps onto exactly the sizes
 web UI uses, so the whole axis gets exercised rather than the top half sitting idle.
 And `display` at 45px does sit on the ceiling: at that size `auto` applies `opsz` 45,
