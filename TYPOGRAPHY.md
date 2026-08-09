@@ -36,13 +36,28 @@ misreading — nothing was said.
 Tracking is *not* on this list, and that is a rule, not an omission — see below.
 
 **A signal** is a change made to *say* something: this is a heading, this is
-secondary, this is a label. Signals cost. There are five:
+secondary, this is a label. Signals cost. There are six:
 
-**size · case · ink · weight · rule**
+**size · case · ink · weight · rule · geom**
 
 `rule` is the quietest of them — a hairline under the words, everything else held
 constant. It is also the one our own proof sheets reach for most, and it deserves to
 be in the vocabulary rather than improvised each time.
+
+`geom` is the one no other type system has. Moving along Cal Sans' GEOM axis changes
+how the letters are *built* — single- vs double-storey a, serifed vs plain I — while
+size, weight, colour and case all hold. It says "a different kind of thing", which
+makes it kin to `case` rather than to `weight`; it is a change of voice, not of rank.
+Three rules govern it:
+
+- **Spend it in landings, not values.** A11y (0–10), UI (25, the chrome default),
+  Base (~50), Geo (~90). Nudging to GEOM 37 is the same error as nudging a size to
+  13.5px — it reads as drift rather than decision.
+- **Spend it where construction is visible.** At 12px chrome the difference is nearly
+  invisible, so it is wasted there; it earns its keep at `title`, `display` and the
+  poster steps.
+- **It is Cal Sans-scoped**, like the GEOM half of the chrome pin and like the zone
+  colours. Re-face the chrome and this signal disappears; the other five survive.
 
 ### The budget
 
