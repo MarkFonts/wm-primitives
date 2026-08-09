@@ -61,11 +61,26 @@ Three rules govern it:
 
 ### The budget
 
-> **One signal per distinction.** A role may differ from the text around it by
-> **one** signal. Compensations ride along free and are never counted.
+Signals are not equal in loudness, so counting them flat is too blunt. Two of them
+restate the text's importance; four change its character while leaving its weight in
+the page alone.
 
-> **The absolute:** never **ink + size + case** together. Three ways of saying
-> "minor" is not emphasis, it is a lack of confidence.
+| | signals | what they do |
+|---|---|---|
+| **loud** | size · weight | change how much room the text takes and how hard it pushes |
+| **quiet** | ink · case · rule · geom | change what kind of thing it is, at the same visual weight |
+
+> **One loud signal, or two quiet ones. Never both, and never three.**
+
+> **The absolute:** never **ink + size + case** together — that pair of quiet signals
+> plus a loud one is three ways of saying "minor", which is not emphasis but a lack of
+> confidence.
+
+The Cal Sans page is the worked example: headings sit at **GEOM 50 (Base) in full ink**,
+body copy at **GEOM 25 (UI) in quiet ink** — two quiet signals, and the pair still reads
+subtler than a single weight bump would. That is the budget working as intended, not an
+exception to it. It is *an* example rather than the pattern for everywhere; other
+surfaces will spend their allowance differently.
 
 `opsz` moving with size is the given. The exception that proves it: `opsz`
 *pinned* while size changes — a deliberate mismatch — is no longer a compensation.
