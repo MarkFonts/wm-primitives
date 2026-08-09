@@ -240,6 +240,12 @@ separately, and spending either means not also changing role.
 Plus two non-roles: `readout` (= `ui` + `tnum`, so digits don't jitter) and `code`
 (the only sanctioned monospace).
 
+**What "pinned" pins.** Chrome runs at a fixed instance of the Face —
+`--ui-fvs: "opsz" 10, "GEOM" 25` — so labels and controls read identically on every
+surface. `opsz` is the general part of that rule. `GEOM` is not: it is a Cal Sans axis,
+and 25 is the UI zone of it, so that half of the pin only means anything while the Face
+is Cal Sans. Re-face the chrome and `GEOM` drops out of the token; `opsz` stays.
+
 ### What changed, and why
 
 - **`label` no longer shrinks.** It was 10px **+** uppercase **+** wght 500 **+**
