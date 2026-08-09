@@ -142,6 +142,24 @@ web UI uses, so the whole axis gets exercised rather than the top half sitting i
 And `display` at 45px does sit on the ceiling: at that size `auto` applies `opsz` 45,
 the maximum. Text ends where the axis ends.
 
+#### Decision: we accept the px convention
+
+Cal Sans' masters are calibrated in points, so the web's mapping hands every size the
+cut drawn for something a third larger — `body` at 16px gets the 16pt cut at ~12pt
+physical. We keep `auto` anyway:
+
+- The 8–45 range lands exactly across the 8–45px band UI actually occupies. Under a
+  points mapping the axis floor (8pt ≈ 10.7px) sits *above* our smallest roles, so
+  `micro` and `label` would clamp and lose optical sizing altogether.
+- Every site using Cal Sans that we don't control renders under `auto`. Pinning our
+  own would make wordmark.nyc the odd one out — the font would look like itself
+  everywhere except at home.
+- It is consistent. "Hot" applied uniformly at every size is a house characteristic;
+  applied unevenly it is a bug.
+
+Revisit only if Cal Sans is ever recut for screen, in which case the fix belongs in
+the font (an `avar` remap), not in every consumer's CSS.
+
 The one case that still needs a hand: `rem` means the computed px — and therefore the
 optical grade — follows the reader's root size. That is the correct behaviour, but if
 a surface ever needs a fixed optical grade regardless of the reader, pin it with
