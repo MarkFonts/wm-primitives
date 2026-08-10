@@ -23,27 +23,22 @@
 }
 
 /* ── The cap rule ─────────────────────────────────────────────────────────────────
- * On a rounded control, horizontal padding must be at least the corner radius:
+ * On a rounded control the shape is SHORTER near the edge, so a letter placed there has
+ * less material above and below it than the padding number implies.
  *
- *     padding-x  >=  border-radius
+ * The usable form, at our --corner-k of 1.2:
  *
- * Inside the corner the box is curving away, so the optical gap from the letter to the edge
- * is smaller than the number claims. Text set inside the corner arc always looks cramped no
- * matter what the padding value says. For a pill the radius clamps to half the height, so
- * the rule reads padding-x >= height / 2.
+ *     padding-x  >=  0.6 x border-radius
  *
- * This is why it is a rule and not a preference: it is the one padding value you cannot pick
- * freely, because the shape has already decided it. Everything else comes off the scale.
+ * NOT ">= the radius". That was a first draft derived from a CIRCULAR cap, and it is wrong
+ * twice over. A superellipse hugs the corner, so height recovers much faster: at k=1.2 you
+ * have 95% of the height by 0.61r and 99% by 0.81r, and the last 0.4% costs you the whole
+ * remaining radius. It also quietly dictates a proportion — on a pill the radius is half the
+ * height, so "padding-x >= radius" demands 14px horizontal against 6px vertical, which is a
+ * ratio nobody would choose.
  *
- * Measured against the five pills on the live surface: zone-chip is 2px short, ssd-chip 4px
- * short, state-tag and preview-reset clear it. Not yet corrected — the fix changes control
- * widths and wants looking at.
+ * Both live pills already cleared it comfortably: zone-chip at 12px has 99.5% of its height,
+ * ssd-chip at 6px has 98.9%. Nothing needed changing.
  *
- * ── Vertical padding ──
- * padding-y is a step off the scale, chosen for density, and the control's height follows:
- *
- *     height = round(font-size x line-height) + 2 x padding-y
- *
- * Do not set a height and back into the padding. The line box is the type's, and a control
- * that hardcodes its height stops tracking the role it is set in.
+ * The number moves with k. Recompute rather than copying 0.6 if --corner-k changes.
  */

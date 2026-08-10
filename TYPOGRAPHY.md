@@ -122,20 +122,21 @@ reach for when something needs to be "a bit tighter".
 
 ### The cap rule
 
-On a rounded control, **horizontal padding must be at least the corner radius**.
+A rounded control is **shorter near its edge**, so a letter placed there has less material
+above and below it than the padding number implies.
 
-> `padding-x  ≥  border-radius`
+> `padding-x  ≥  0.6 × border-radius`   (at `--corner-k: 1.2`)
 
-Inside the corner the box is curving away, so the optical gap from the letter to the edge is
-smaller than the number claims. Text set inside the corner arc looks cramped no matter what
-the padding value says. On a pill the radius clamps to half the height, so it reads
-`padding-x ≥ height / 2`.
+Not "≥ the radius" — that was a first draft taken from a *circular* cap and it is wrong two
+ways. A superellipse hugs the corner, so the height comes back much faster: at k = 1.2 you
+have 95% of the height by `0.61r` and 99% by `0.81r`, and buying the last 0.4% costs the
+entire remaining radius. And on a pill the radius is half the height, so "≥ radius" demands
+14px horizontal against 6px vertical — a proportion nobody would pick.
 
-This is the one padding value you do not get to pick: the shape has already decided it.
-Everything else comes off the scale.
+Both live pills already clear it: `zone-chip` at 12px has **99.5%** of its height, `ssd-chip`
+at 6px has **98.9%**. This is a floor to check against, not a change to make.
 
-Measured on the live pills: `zone-chip` is 2px short, `ssd-chip` 4px short; `state-tag` and
-`preview-reset` clear it.
+The coefficient tracks `--corner-k`. Recompute it rather than copying 0.6 if k moves.
 
 ### Height follows the type
 
