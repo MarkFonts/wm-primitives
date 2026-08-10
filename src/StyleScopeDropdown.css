@@ -77,9 +77,11 @@
   font-family: var(--ui-font, inherit);
   font-feature-settings: 'tnum' 1;
 }
+/* padding-x = the cap radius (half the 20px height): at 6px the text sat inside the
+   curve. See TYPOGRAPHY.md §Space. */
 .ssd-chip {
   font-size: var(--type-micro-size);
-  padding: 2px 6px;
+  padding: 2px 10px;
   border-radius: 999px; /* pill chips */
   border: 1px solid var(--border);
   color: var(--text-dim, var(--text-muted));
