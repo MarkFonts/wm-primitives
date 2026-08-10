@@ -11,7 +11,8 @@
 }
 /* The specimen font applies ONLY to glyph-bearing elements; picker chrome keeps the
    host's UI font. Hosts whose UI font is itself variable pin its instance via
-   --gp-ui-fvs (e.g. ReCal: 'opsz' 10, 'GEOM' 25). */
+   --gp-ui-fvs (e.g. ReCal: 'GEOM' 25). Do not put opsz in it — the axis tracks each
+   element's own size, which is where the small-size letterfit comes from. */
 /* (.gp prefix beats .gp-cell's later `font: inherit` shorthand, which resets the
    font-variation/feature longhands to inherit.) */
 .gp .gp-specimen, .gp .gp-cell {

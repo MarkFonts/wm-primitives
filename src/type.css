@@ -47,13 +47,19 @@
   font-family: var(--ui-font, system-ui, sans-serif);
   font-variation-settings: var(--ui-fvs, normal);
 }
-/* Everything at reading size and up lets opsz track the size, per TYPOGRAPHY.md §I —
-   that is a compensation and costs nothing. The two chrome roles pin it instead: they
-   sit at 12px and 8px, where the axis would otherwise run to its small extreme and make
-   chrome look like a different family from the content it labels. */
-.t-body, .t-lede, .t-title, .t-display { font-optical-sizing: auto; }
-.t-micro, .t-label, .t-ui { font-optical-sizing: none; }
-.t-micro, .t-label, .t-ui { font-variation-settings: "opsz" 10, var(--ui-fvs, normal); }
+/* opsz tracks the size. Every role, no exceptions.
+   The chrome roles used to pin opsz 10 so labels would not "drift" from content. That threw
+   away the two things the axis is for:
+     — SIDEBEARINGS. Every glyph gains letterfit between opsz 10 and 8. This is the whole
+       point of the axis and it applies to all text, not to special characters: at 200px the
+       same string measures 657.4 at opsz 8 against 646.2 at opsz 10.
+     — the a, which swaps at opsz 8 (a and its accented forms). Only the a. The serifed I
+       and l are A11y-landing forms and need low GEOM as well, so they are a separate thing.
+   Small type needs the extra fit more than large type needs anything, so the role that most
+   needed the axis was the one we froze.
+   Pin opsz only to override spacing deliberately, or to make a cvXX choice on purpose —
+   never as a default. */
+.t-micro, .t-label, .t-ui, .t-body, .t-lede, .t-title, .t-display { font-optical-sizing: auto; }
 
 .t-micro   { font-size: var(--type-micro-size);   line-height: var(--type-micro-lead); }
 .t-ui      { font-size: var(--type-ui-size);      line-height: var(--type-ui-lead); }
