@@ -42,3 +42,30 @@
  *
  * The number moves with k. Recompute rather than copying 0.6 if --corner-k changes.
  */
+
+/* ── The alignment rule ───────────────────────────────────────────────────────────
+ * Horizontal padding is not free to round to the nearest step. When one control sits
+ * above another, the reader sees their TEXT edges, and a text edge is the sum of every
+ * padding and border between it and the shared box edge:
+ *
+ *     text inset  =  sum(border) + sum(padding-left)  down the nesting chain
+ *
+ * Controls that stack must land on the same total. Check the sum, not the step.
+ *
+ * StyleScopeDropdown is the worked example, and it was BROKEN before the tokens went in
+ * — three sibling surfaces disagreed because each padding had been chosen on its own:
+ *
+ *     .ssd-btn                 1 border + 12          = 13
+ *     .ssd-list + .ssd-row     1 border +  5 + 10     = 16   <- 3px off
+ *     .ssd-list--dense .row    1 border +  5 + 12     = 18   <- 5px off
+ *
+ * The scale fixes it because the steps compose: 4 + 8 = 12, the button's own step.
+ *
+ *     .ssd-btn                 1 + --pad-4            = 13
+ *     .ssd-list + .ssd-row     1 + --pad-1 + --pad-3  = 13
+ *     .ssd-list--dense .row    1 + --pad-1 + --pad-3  = 13
+ *
+ * That is the argument for a scale whose steps sum to other steps, and it is why the
+ * dense variant now differs from the normal one ONLY in the vertical (--pad-2 vs
+ * --pad-3) — which is what "dense" was ever supposed to mean.
+ */
