@@ -39,23 +39,6 @@ input[type="range"]::-moz-range-thumb {
   corner-shape: round;
 }
 
-/* ── Pills at 2:1 ─────────────────────────────────────────────────────────────────
-   A short label in a pill reads as a lozenge; at 2:1 it always keeps a straight run equal
-   to its own height and reads as a pill.
-   The ratio is relative to EACH pill's own height, not to one global value. A first pass
-   used a single --pill-h: 27px and rescaled the 16px scope chip and the 20px state tag to
-   27px tall — a height rule pretending to be a ratio rule. Each pill declares its own
-   height; only min-width is derived. Measured after: only .zone-chip's "UI" was under 2:1
-   (1.41), everything else already cleared it, so this changes exactly one control. */
-.zone-chip     { --pill-h: 27px; }
-.ssd-chip      { --pill-h: 16px; }
-.state-tag     { --pill-h: 20px; }
-.preview-reset { --pill-h: 26px; }
-.pill-reset-btn{ --pill-h: 25px; }
-.zone-chip, .ssd-chip, .ui-chip, .state-tag, .preview-reset, .pill-reset-btn {
-  min-width: calc(var(--pill-h) * 2);
-}
-
 /* ── Press ────────────────────────────────────────────────────────────────────────
    The stroke lands before the fill: it acknowledges the tap, the fill confirms on release.
    :active deliberately beats whatever selected or filled state sits under it. */
