@@ -1,0 +1,67 @@
+/* corners.css — one corner law for every control in the house.
+ *
+ * corner-shape is a NO-OP when border-radius is 0, so a universal rule reaches every rounded
+ * corner without touching a single existing declaration. `*` also has zero specificity, so
+ * the exclusions below win by being named once rather than by editing every circle.
+ *
+ * k is CSS's superellipse parameter and the real exponent is 2^k — verified against the
+ * engine, which folds superellipse(1) to `round` and superellipse(2) to `squircle`. At 1.2 a
+ * pill keeps its round cap while curvature eases to zero before the straight edge, so the cap
+ * no longer meets the side at a curvature break.
+ *
+ * SAFARI has no corner-shape and fails it SILENTLY — plain border-radius, no warning. That is
+ * the intended degradation: the corner every app shipped before this file. Nothing regresses.
+ * Do not reach for a clip-path polyfill at this scale; clip-path also clips shadows, focus
+ * rings and overflow.
+ */
+
+:root {
+  --corner-k: 1.2;
+  --stroke-hover: 1.2px;
+  --stroke-press: 1.8px;
+
+}
+
+*, *::before, *::after { corner-shape: superellipse(var(--corner-k, 1.2)); }
+
+/* ── Circles opt out ──────────────────────────────────────────────────────────────
+   Every one is a true circle on a square box — a knob, a dot, a radio, a spinner — where a
+   superellipse reads as a rounded square rather than a shape decision. There are no 50%
+   radii on non-square boxes, so this list is complete and needs no judgement per site.
+   Native range thumbs are named explicitly: vendor pseudo-elements are not reliably reached
+   by the universal rule above. */
+.spinner, .ui-spinner, .gg-geom-dot, .vslider-thumb, .preview-dot, .mode-throb,
+.ui-dot, .ui-avatar, .ui-thumb, .ui-radio, .ui-radio.on::after, .ui-switch::after,
+.ui-sk--circle, .ui-tl-dot, .ui-step-n, .ui-alert-ic,
+input[type="radio"], input[type="radio"]:checked::after,
+input[type="range"]::-webkit-slider-thumb,
+input[type="range"]::-moz-range-thumb {
+  corner-shape: round;
+}
+
+/* ── Pills at 2:1 ─────────────────────────────────────────────────────────────────
+   A short label in a pill reads as a lozenge; at 2:1 it always keeps a straight run equal
+   to its own height and reads as a pill.
+   The ratio is relative to EACH pill's own height, not to one global value. A first pass
+   used a single --pill-h: 27px and rescaled the 16px scope chip and the 20px state tag to
+   27px tall — a height rule pretending to be a ratio rule. Each pill declares its own
+   height; only min-width is derived. Measured after: only .zone-chip's "UI" was under 2:1
+   (1.41), everything else already cleared it, so this changes exactly one control. */
+.zone-chip     { --pill-h: 27px; }
+.ssd-chip      { --pill-h: 16px; }
+.state-tag     { --pill-h: 20px; }
+.preview-reset { --pill-h: 26px; }
+.pill-reset-btn{ --pill-h: 25px; }
+.zone-chip, .ssd-chip, .ui-chip, .state-tag, .preview-reset, .pill-reset-btn {
+  min-width: calc(var(--pill-h) * 2);
+}
+
+/* ── Press ────────────────────────────────────────────────────────────────────────
+   The stroke lands before the fill: it acknowledges the tap, the fill confirms on release.
+   :active deliberately beats whatever selected or filled state sits under it. */
+.ui-btn:active:not(:disabled), .ui-seg > span:active, .ui-tab:active, .ui-chip:active,
+.ui-tool:active, .gp-copy:active:not(:disabled), .ssd-btn:active:not(:disabled),
+.inline-emph-btn:active:not(:disabled) {
+  background: none;
+  box-shadow: inset 0 0 0 var(--stroke-press, 1.8px) currentColor;
+}
