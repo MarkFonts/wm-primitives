@@ -1,0 +1,49 @@
+/* space.css — the padding scale. See TYPOGRAPHY.md §Space.
+ *
+ * Derived from what the live surface already used, not invented: 117 padding numbers across
+ * 21 distinct values. This scale snaps 78 of them exactly, moves 39, and moves NOTHING by
+ * more than 25%. Every alternative tested was worse — dropping 6 breaks 12 declarations by a
+ * third, and a strict 4-grid moves 25 of them past 25%.
+ *
+ * Structure is the poster scale's: every second step doubles.
+ *     4 → 8 → 16 → 32 → 64      with 6, 12, 24, 48 as the midpoints
+ * 1/2/3 are not part of that progression. They are hairline insets — a 1px ring, a 2px nudge
+ * on a 3px bar — where the number is not spacing, it is optical alignment.
+ */
+
+:root {
+  /* hairline insets — optical alignment, not spacing */
+  --pad-hair: 1px;
+  --pad-nudge: 2px;
+  --pad-tick: 3px;
+
+  /* the scale */
+  --pad-1: 4px;    --pad-2: 6px;    --pad-3: 8px;    --pad-4: 12px;
+  --pad-5: 16px;   --pad-6: 24px;   --pad-7: 32px;   --pad-8: 48px;   --pad-9: 64px;
+}
+
+/* ── The cap rule ─────────────────────────────────────────────────────────────────
+ * On a rounded control, horizontal padding must be at least the corner radius:
+ *
+ *     padding-x  >=  border-radius
+ *
+ * Inside the corner the box is curving away, so the optical gap from the letter to the edge
+ * is smaller than the number claims. Text set inside the corner arc always looks cramped no
+ * matter what the padding value says. For a pill the radius clamps to half the height, so
+ * the rule reads padding-x >= height / 2.
+ *
+ * This is why it is a rule and not a preference: it is the one padding value you cannot pick
+ * freely, because the shape has already decided it. Everything else comes off the scale.
+ *
+ * Measured against the five pills on the live surface: zone-chip is 2px short, ssd-chip 4px
+ * short, state-tag and preview-reset clear it. Not yet corrected — the fix changes control
+ * widths and wants looking at.
+ *
+ * ── Vertical padding ──
+ * padding-y is a step off the scale, chosen for density, and the control's height follows:
+ *
+ *     height = round(font-size x line-height) + 2 x padding-y
+ *
+ * Do not set a height and back into the padding. The line box is the type's, and a control
+ * that hardcodes its height stops tracking the role it is set in.
+ */

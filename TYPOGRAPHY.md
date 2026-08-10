@@ -99,6 +99,53 @@ Three rules govern it:
 - **It is Cal Sans-scoped**, like the GEOM half of the chrome pin and like the zone
   colours. Re-face the chrome and this signal disappears; the other five survive.
 
+## Space
+
+One scale, derived from what the surface already used rather than invented — 117 padding
+numbers across 21 distinct values. This snaps 78 of them exactly and moves nothing by more
+than 25%; every alternative tested was worse.
+
+| step | value | | step | value |
+|---|---|---|---|---|
+| `--pad-1` | 4px | | `--pad-6` | 24px |
+| `--pad-2` | 6px | | `--pad-7` | 32px |
+| `--pad-3` | 8px | | `--pad-8` | 48px |
+| `--pad-4` | 12px | | `--pad-9` | 64px |
+| `--pad-5` | 16px | | | |
+
+Same structure as the poster scale: **every second step doubles** — 4 → 8 → 16 → 32 → 64,
+with 6, 12, 24, 48 between them.
+
+`--pad-hair` (1px), `--pad-nudge` (2px) and `--pad-tick` (3px) sit outside the progression.
+They are optical alignment on hairlines and 3px bars, not spacing, and they are not steps you
+reach for when something needs to be "a bit tighter".
+
+### The cap rule
+
+On a rounded control, **horizontal padding must be at least the corner radius**.
+
+> `padding-x  ≥  border-radius`
+
+Inside the corner the box is curving away, so the optical gap from the letter to the edge is
+smaller than the number claims. Text set inside the corner arc looks cramped no matter what
+the padding value says. On a pill the radius clamps to half the height, so it reads
+`padding-x ≥ height / 2`.
+
+This is the one padding value you do not get to pick: the shape has already decided it.
+Everything else comes off the scale.
+
+Measured on the live pills: `zone-chip` is 2px short, `ssd-chip` 4px short; `state-tag` and
+`preview-reset` clear it.
+
+### Height follows the type
+
+> `height = round(font-size × line-height) + 2 × padding-y`
+
+`padding-y` is a step off the scale, picked for density. Never set a height and back into the
+padding — the line box belongs to the type, and a control with a hardcoded height stops
+tracking the role it is set in.
+
+
 ### The budget
 
 Signals are not equal in loudness, so counting them flat is too blunt. Two of them
