@@ -78,7 +78,7 @@
   font-feature-settings: 'tnum' 1;
 }
 .ssd-chip {
-  font-size: 10px;
+  font-size: var(--type-micro-size);
   padding: 2px 6px;
   border-radius: 999px; /* pill chips */
   border: 1px solid var(--border);

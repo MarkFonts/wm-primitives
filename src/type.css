@@ -16,8 +16,12 @@
  */
 
 :root {
-  /* ---- roles: each spends SIZE and nothing else ---- */
-  --type-micro-size: 0.5rem;      --type-micro-lead: 1.2;    /*   8px */
+  /* ---- roles: each spends SIZE and nothing else ----
+     micro is the ANNOTATION size: metric-rule labels, axis tags, slider end-markers,
+     group labels, glyph captions. Things pinned to something else that name it. It sat at
+     8px, where exactly one declaration used it, while the real annotations were at 9 and
+     10 — so 9 is where they actually live, and 8 was a size we were not using. ---- */
+  --type-micro-size: 0.5625rem;   --type-micro-lead: 1.2;    /*   9px */
   --type-label-size: 0.75rem;     --type-label-lead: 1.3;    /*  12px */
   --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       /*  12px */
   --type-body-size: 1rem;         --type-body-lead: 1.55;    /*  16px */

@@ -19,7 +19,7 @@
 }
 .slider-label-text--tagged { flex: 0 0 105px; }
 .slider-tag {
-  font-size: 10px;
+  font-size: var(--type-micro-size);
   color: var(--text-muted);
   font-family: var(--ui-font, system-ui, sans-serif);
   letter-spacing: 0.04em;
@@ -36,7 +36,7 @@
 /* value = optional ◆ marker + the editable number/auto field */
 .slider-value { display: flex; align-items: baseline; gap: 5px; flex-shrink: 0; }
 .slider-marker {
-  font-size: 9px; line-height: 1;
+  font-size: var(--type-micro-size); line-height: 1;
   color: var(--marker-default, var(--accent, currentColor));
   transform: translateY(-1px);
 }

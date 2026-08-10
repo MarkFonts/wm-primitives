@@ -103,7 +103,7 @@
 .gp-rule-label {
   position: absolute;
   transform: translate(-100%, -50%);
-  font-size: 9px;
+  font-size: var(--type-micro-size);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-dim, #666);
@@ -159,7 +159,7 @@
 }
 .gp-group { margin-bottom: 26px; }
 .gp-group-label {
-  font-size: 10px;
+  font-size: var(--type-micro-size);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-dim, #666);
