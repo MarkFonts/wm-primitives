@@ -134,14 +134,14 @@
 }
 .gp-copy:hover { color: var(--text, #eee); }
 .gp-code {
-  font-size: 12px;
+  font-size: var(--type-ui-size);
   letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
 }
 .gp-search {
   padding: 9px 12px;
   font: inherit;
-  font-size: 13px;
+  font-size: var(--type-ui-size);
   color: var(--text, #eee);
   background: var(--surface, rgba(255, 255, 255, 0.05));
   border: 1px solid var(--border, #333);
@@ -213,7 +213,7 @@
 }
 .gp-cell--named .gp-cell-ch { flex: 1; display: flex; align-items: center; }
 .gp .gp-cell-name {
-  font-size: 8px;
+  font-size: var(--type-micro-size);
   /* captions are the smallest type here — let optical sizing FLEX to that size
      instead of inheriting the chrome's pinned instance (--gp-ui-fvs). */
   font-variation-settings: normal;
@@ -229,7 +229,7 @@
 
 /* full name line under the U+ readout in the console */
 .gp-name {
-  font-size: 11px;
+  font-size: var(--type-ui-size);
   line-height: 1.4;
   text-align: center;
   color: var(--text-muted, #999);

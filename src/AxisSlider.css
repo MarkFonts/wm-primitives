@@ -12,7 +12,7 @@
   min-width: 0; overflow: visible; padding-bottom: 2px;
 }
 .slider-label-text {
-  font-size: 12px;
+  font-size: var(--type-ui-size);
   color: var(--text-muted);
   font-family: var(--ui-font, system-ui, sans-serif);
   white-space: nowrap; overflow: visible; text-overflow: clip;
@@ -42,7 +42,7 @@
 }
 .slider-number {
   font-family: var(--ui-font, system-ui, sans-serif);
-  font-size: 12px;
+  font-size: var(--type-ui-size);
   color: var(--text);
   background: transparent;
   border: none;
@@ -95,7 +95,7 @@
 
 .slider-auto-hint {
   position: fixed;
-  font-size: 11px;
+  font-size: var(--type-ui-size);
   color: var(--text);
   background: var(--bg-elevated, var(--surface, #2e2e2e));
   border: 1px solid var(--border);
@@ -139,7 +139,7 @@
 /* Static unit label after the editable field (px/%/em) — hides while the field is
    focused so you edit just the raw number, reappears on blur. No layout shift. */
 .slider-suffix {
-  font-size: 12px; color: var(--text-muted);
+  font-size: var(--type-ui-size); color: var(--text-muted);
   font-feature-settings: "tnum"; margin-left: -3px; pointer-events: none;
 }
 .slider-suffix--hidden { visibility: hidden; }
