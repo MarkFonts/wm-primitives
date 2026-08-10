@@ -1,0 +1,2035 @@
+<!doctype html><meta charset=utf-8><title>corners — ReCal only, no COSS</title><style>
+@font-face{font-family:"CalSansVF";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
+@font-face{font-family:"Face";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
+*{box-sizing:border-box}
+body{margin:0;background:#0f0f0f;color:#e8e8e8;font-family:"CalSansVF",system-ui,sans-serif;
+ font-optical-sizing:auto;font-variation-settings:"GEOM" 25;padding:32px 28px 90px}
+h1{font-size:23px;margin:0 0 5px} .lede{color:#999;font-size:13px;margin:0 0 20px;max-width:82ch}
+h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:32px 0 12px;padding-bottom:7px;
+ border-bottom:1px solid #222;display:flex;justify-content:space-between}
+h2 span{color:#666;letter-spacing:0;text-transform:none;font-size:10px}
+.bar{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.bar b{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#666;font-weight:400}
+.bar button{font-family:inherit;font-size:11px;padding:5px 11px;border-radius:999px;border:1px solid #333;
+ background:transparent;color:#999;cursor:pointer;corner-shape:superellipse(1.2)}
+.bar button.on{background:#e8e8e8;color:#0f0f0f;border-color:#e8e8e8}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#222;border:1px solid #222;
+ border-radius:10px;overflow:hidden}
+.grid4{grid-template-columns:repeat(4,1fr)}
+.c{background:#141414;padding:18px 16px 13px;display:flex;flex-direction:column;gap:9px;min-height:132px}
+.c-demo{flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.c-name{font-size:12px} .c-src{font-size:9px;color:#666;font-family:ui-monospace,Menlo,monospace}
+.c-n{font-size:9px;color:#4a7fd4;font-family:ui-monospace,Menlo,monospace}
+.pr{display:flex;align-items:center;gap:9px}
+.tag{font-size:9px;color:#555;font-family:ui-monospace,Menlo,monospace;width:32px;flex:none}
+.pb{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.r21 .zone-chip,.r21 .ssd-chip,.r21 span[style*="999px"],.r21 button[style*="999px"],.r21 .preview-reset{
+  --ph:27px;min-height:var(--ph);min-width:calc(var(--ph)*2);
+  display:inline-grid;place-items:center}
+body[data-force="on"] .c *{corner-shape:superellipse(var(--k,1.2)) !important}
+/* type.css — the WORDMARK type tokens. See TYPOGRAPHY.md for the reasoning.
+ *
+ * Purely additive: importing this file changes nothing on its own. Nothing here styles an
+ * element type or a bare selector, so it cannot reach existing markup by accident — you opt
+ * in per element by adding a `t-*` class.
+ *
+ * Sizes are declared in rem against a 16px root so they follow the reader's own text size.
+ * We talk about them in px because that is how type is discussed.
+ *
+ * Two things the host app must provide, because they are the app's, not ours:
+ *   --ui-font   the chrome face
+ *   --text-rgb  the text colour as "R, G, B" — COMMA-separated, because ink is written
+ *               rgba(var(--text-rgb), α). The rgb(… / α) slash form silently fails here.
+ * Both have fallbacks below so a missing one degrades rather than breaks, but an app that
+ * relies on the fallback is not on the system.
+ */
+
+:root {
+  /* ---- roles: each spends SIZE and nothing else ----
+     micro is the ANNOTATION size: metric-rule labels, axis tags, slider end-markers,
+     group labels, glyph captions. Things pinned to something else that name it. It sat at
+     8px, where exactly one declaration used it, while the real annotations were at 9 and
+     10 — so 9 is where they actually live, and 8 was a size we were not using. ---- */
+  --type-micro-size: 0.5625rem;   --type-micro-lead: 1.2;    /*   9px */
+  --type-label-size: 0.75rem;     --type-label-lead: 1.3;    /*  12px */
+  --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       /*  12px */
+  --type-body-size: 1rem;         --type-body-lead: 1.55;    /*  16px */
+  --type-lede-size: 1.125rem;     --type-lede-lead: 1.5;     /*  18px */
+  --type-title-size: 1.625rem;    --type-title-lead: 1.2;    /*  26px */
+  --type-display-size: 2.8125rem; --type-display-lead: 1.1;  /*  45px */
+
+  /* ---- poster: the monster scale, ratio root-2 so every second step doubles.
+     Sets size and leading only — never an axis — so it serves any face. ---- */
+  --poster-1: 3rem;    --poster-2: 4.25rem;  --poster-3: 6rem;   /*  48 /  68 /  96px */
+  --poster-4: 8.5rem;  --poster-5: 12rem;                        /* 136 / 192px */
+
+  /* ---- ink: opacity on the text colour. Three levels, never four. ---- */
+  --ink-full: 1;  --ink-quiet: .62;  --ink-faint: .38;
+
+  /* ---- the ONLY tracking value in the system. Capitals must be letterspaced and
+     nothing else may be: tracking by size is opsz's job, and doing it by hand
+     double-counts the axis. There is deliberately no negative value here. ---- */
+  --track-caps: .12em;
+
+  /* Fallbacks. An app on the system overrides both. */
+  --text-rgb: 232, 232, 232;
+}
+
+/* ---- the API ---- */
+.t-micro, .t-label, .t-ui, .t-body, .t-lede, .t-title, .t-display {
+  font-family: var(--ui-font, system-ui, sans-serif);
+  font-variation-settings: var(--ui-fvs, normal);
+}
+/* opsz tracks the size. Every role, no exceptions.
+   The chrome roles used to pin opsz 10 so labels would not "drift" from content. That threw
+   away the two things the axis is for:
+     — SIDEBEARINGS. Every glyph gains letterfit between opsz 10 and 8. This is the whole
+       point of the axis and it applies to all text, not to special characters: at 200px the
+       same string measures 657.4 at opsz 8 against 646.2 at opsz 10.
+     — the a, which swaps at opsz 8 (a and its accented forms). Only the a. The serifed I
+       and l are A11y-landing forms and need low GEOM as well, so they are a separate thing.
+   Small type needs the extra fit more than large type needs anything, so the role that most
+   needed the axis was the one we froze.
+   Pin opsz only to override spacing deliberately, or to make a cvXX choice on purpose —
+   never as a default. */
+.t-micro, .t-label, .t-ui, .t-body, .t-lede, .t-title, .t-display { font-optical-sizing: auto; }
+
+.t-micro   { font-size: var(--type-micro-size);   line-height: var(--type-micro-lead); }
+.t-ui      { font-size: var(--type-ui-size);      line-height: var(--type-ui-lead); }
+.t-body    { font-size: var(--type-body-size);    line-height: var(--type-body-lead); }
+.t-lede    { font-size: var(--type-lede-size);    line-height: var(--type-lede-lead); }
+.t-title   { font-size: var(--type-title-size);   line-height: var(--type-title-lead); }
+.t-display { font-size: var(--type-display-size); line-height: var(--type-display-lead); }
+
+/* label is the one role that spends CASE rather than size — it sits at chrome size in
+   full ink and is distinguished by being capitalised. Small + caps + muted + heavy is
+   four signals for one idea, and is the habit this role exists to replace. */
+.t-label {
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lead);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+}
+
+.p1, .p2, .p3, .p4, .p5 {
+  font-family: var(--ui-font, system-ui, sans-serif);
+  font-variation-settings: var(--ui-fvs, normal);
+  font-optical-sizing: auto;
+}
+.p1 { font-size: var(--poster-1); line-height: 1.05; }
+.p2 { font-size: var(--poster-2); line-height: 1.02; }
+.p3 { font-size: var(--poster-3); line-height: 1.00; }
+.p4 { font-size: var(--poster-4); line-height: .98; }
+.p5 { font-size: var(--poster-5); line-height: .96; }
+
+.ink-full  { color: rgba(var(--text-rgb), var(--ink-full)); }
+.ink-quiet { color: rgba(var(--text-rgb), var(--ink-quiet)); }
+.ink-faint { color: rgba(var(--text-rgb), var(--ink-faint)); }
+
+/* rule — the quietest signal there is. Same size, weight, colour and case; only a
+   hairline under the words. */
+.sig-rule {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .28em;
+}
+
+/* AxisSlider — moved from the font-proofer slider CSS, with token fallbacks so it
+   themes in both apps (font-proofer --bg-* / --track-empty and ReCal --surface-*).
+   The number field stays essentially native: color-scheme drives its light/dark
+   up/down steppers, so each app just needs color-scheme on its root. */
+
+.slider-row { display: flex; flex-direction: column; gap: 3px; }
+.slider-row--off { opacity: 0.4; }
+
+.slider-label { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.slider-label-left {
+  display: flex; align-items: baseline; gap: 5px;
+  min-width: 0; overflow: visible; padding-bottom: 2px;
+}
+.slider-label-text {
+  font-size: var(--type-ui-size);
+  color: var(--text-muted);
+  font-family: var(--ui-font, system-ui, sans-serif);
+  white-space: nowrap; overflow: visible; text-overflow: clip;
+}
+.slider-label-text--tagged { flex: 0 0 105px; }
+.slider-tag {
+  font-size: var(--type-micro-size);
+  color: var(--text-muted);
+  font-family: var(--ui-font, system-ui, sans-serif);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  font-feature-settings: "tnum";
+}
+/* min–max readout: quieter than the tag, tabular so it doesn't jitter while dragging */
+.slider-range {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* value = optional ◆ marker + the editable number/auto field */
+.slider-value { display: flex; align-items: baseline; gap: 5px; flex-shrink: 0; }
+.slider-marker {
+  font-size: var(--type-micro-size); line-height: 1;
+  color: var(--marker-default, var(--accent, currentColor));
+  transform: translateY(-1px);
+}
+.slider-number {
+  font-family: var(--ui-font, system-ui, sans-serif);
+  font-size: var(--type-ui-size);
+  color: var(--text);
+  background: transparent;
+  border: none;
+  text-align: right;
+  width: 66px;
+  padding: 2px 0;
+  font-feature-settings: "tnum";
+  color-scheme: inherit;   /* native steppers follow the app light/dark scheme */
+}
+.slider-number:focus { outline: none; }
+.slider-number:disabled { cursor: default; }
+
+.slider-track-wrap { position: relative; }
+.slider-track-wrap input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 24px;
+  background: transparent; cursor: pointer; margin: 0; display: block;
+}
+.slider-track-wrap input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    var(--border) 0%,
+    var(--border) var(--locked-pct, 100%),
+    var(--track-empty, var(--surface-hi, #2b2b2b)) var(--locked-pct, 100%),
+    var(--track-empty, var(--surface-hi, #2b2b2b)) 100%
+  );
+  border-radius: 1px;
+}
+.slider-track-wrap input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--text); margin-top: -6px; cursor: pointer;
+}
+.slider-track-wrap input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    var(--border) 0%,
+    var(--border) var(--locked-pct, 100%),
+    var(--track-empty, var(--surface-hi, #2b2b2b)) var(--locked-pct, 100%),
+    var(--track-empty, var(--surface-hi, #2b2b2b)) 100%
+  );
+  border-radius: 1px;
+}
+.slider-track-wrap input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--text); border: none; cursor: pointer;
+}
+
+.slider-auto-hint {
+  position: fixed;
+  font-size: var(--type-ui-size);
+  color: var(--text);
+  background: var(--bg-elevated, var(--surface, #2e2e2e));
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 6px);
+  padding: 4px 8px;
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+  animation: hint-fade 3s forwards;
+}
+@keyframes hint-fade { 0% { opacity: 1; } 60% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ── variant: diamond — rotate-45 marker-default thumb (Type-Matrix style), for
+   default-editing rails. Pairs with `reference` to burn the stock value behind it. */
+.slider-row--diamond input[type="range"]::-webkit-slider-thumb {
+  width: 12px; height: 12px; border-radius: 2px;
+  background: var(--marker-default, var(--accent, var(--text)));
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 1px var(--bg, #0f0f0f);
+  margin-top: -5px;
+}
+.slider-row--diamond input[type="range"]::-moz-range-thumb {
+  width: 12px; height: 12px; border-radius: 2px;
+  background: var(--marker-default, var(--accent, var(--text)));
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 1px var(--bg, #0f0f0f);
+}
+
+/* Burned stock reference — a faint ghost dot at the shipped value, behind the thumb. */
+.slider-ref {
+  position: absolute; top: 12px; width: 8px; height: 8px; margin-left: -4px;
+  border-radius: 1px; background: var(--text-muted); opacity: 0.28;
+  transform: translateY(-50%) rotate(45deg); /* rhombus, mirrors the thumb */
+  pointer-events: none; z-index: 0;
+}
+
+/* ── variant: skeletal — thin/minimal, for ephemeral preview/demo sliders. */
+.slider-row--skeletal input[type="range"]::-webkit-slider-thumb { width: 10px; height: 10px; margin-top: -4px; }
+.slider-row--skeletal input[type="range"]::-moz-range-thumb { width: 10px; height: 10px; }
+
+/* Static unit label after the editable field (px/%/em) — hides while the field is
+   focused so you edit just the raw number, reappears on blur. No layout shift. */
+.slider-suffix {
+  font-size: var(--type-ui-size); color: var(--text-muted);
+  font-feature-settings: "tnum"; margin-left: -3px; pointer-events: none;
+}
+.slider-suffix--hidden { visibility: hidden; }
+
+/* GlyphPicker — tokenized to the house vars with fallbacks, dark-first.
+   The grid is EQUAL-SIZED cells (auto-fill columns, square boxes); the specimen is
+   UNBOXED — the selected glyph sits on metric rules that end at its sidebearing
+   verticals (the glyph's own cell, font-editor style). */
+
+.gp {
+  display: flex;
+  gap: 28px;
+  min-height: 0;
+  color: var(--text, #eee);
+}
+/* The specimen font applies ONLY to glyph-bearing elements; picker chrome keeps the
+   host's UI font. Hosts whose UI font is itself variable pin its instance via
+   --gp-ui-fvs (e.g. ReCal: 'GEOM' 25). Do not put opsz in it — the axis tracks each
+   element's own size, which is where the small-size letterfit comes from. */
+/* (.gp prefix beats .gp-cell's later `font: inherit` shorthand, which resets the
+   font-variation/feature longhands to inherit.) */
+.gp .gp-specimen, .gp .gp-cell {
+  font-family: var(--gp-font, inherit);
+  font-variation-settings: var(--gp-fvs, normal);
+  font-feature-settings: var(--gp-ffs, normal);
+  font-optical-sizing: var(--gp-opsz, auto);
+}
+.gp .gp-search, .gp .gp-code, .gp .gp-name, .gp .gp-cell-name, .gp .gp-group-label, .gp .gp-rule-label {
+  font-variation-settings: var(--gp-ui-fvs, normal);
+  font-feature-settings: normal;
+  font-optical-sizing: auto;
+}
+/* Chrome takes the HOST's UI font — always via the token, never `inherit`: hosts may
+   mount the picker inside a specimen-font container (ReCal's .stage sets
+   CalSansPreview), so inheriting silently dresses the UI in the proofed font. And
+   never fall back to system-ui: on macOS that IS SF Pro, which reads as a leak. */
+.gp .gp-search, .gp .gp-code, .gp .gp-name, .gp .gp-group-label,
+.gp .gp-cell-name, .gp .gp-rule-label, .gp .gp-copy {
+  font-family: var(--gp-ui-font, var(--ui-font, sans-serif));
+}
+.gp--bottom { flex-direction: column; }
+/* bottom preset: grid on top; the band is ONE centered cluster — the glyph as the
+   hero with its console directly beneath — docked behind a hairline divider. */
+.gp--bottom .gp-groups { order: 0; flex: 1 1 50%; }
+.gp--bottom .gp-side {
+  order: 1;
+  flex: 0 0 50%;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;   /* undo the side column's flex-start — the band spans full width */
+  gap: 12px;
+  position: static;
+  border-top: 1px solid var(--border-subtle, #222);
+  padding-top: 16px;
+}
+.gp--bottom .gp-specimen { flex: 1; min-height: 0; align-self: stretch; }
+.gp--bottom .gp-console { flex: none; flex-direction: row; align-items: center; gap: 18px; }
+
+/* ── Specimen column: glyph-on-rules → its data (U+/copy) → the grid tool (search) ── */
+.gp-side {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+/* The side column is a size container: the glyph scales with whatever room the app
+   grants (specimenSpan / specimenSize) — more room = bigger glyph, rules and all. */
+.gp-side { container-type: inline-size; }
+.gp-specimen {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;   /* stretched layouts (bottom band) center the glyph line */
+  font-size: 64cqw;
+  line-height: 1;
+  /* reserve the descender band (+ a whisker of accent overshoot room) inside the
+     specimen so the DESC rule never collides with the console below */
+  padding-bottom: var(--gp-desc, 0.25em);
+  padding-top: 0.06em;
+}
+.gp--bottom .gp-side { container-type: size; }
+.gp--bottom .gp-specimen { font-size: 52cqh; }
+.gp-specimen--bare { align-items: center; min-height: 260px; }
+.gp-specimen-glyph { white-space: pre; }
+/* flex-baseline strut: zero-width, its height = ascender (em) above the baseline —
+   pins the shared baseline at exactly that distance from the specimen top. */
+.gp-specimen-line { display: flex; align-items: baseline; }
+.gp-strut {
+  display: inline-block;
+  width: 0;
+  height: var(--gp-asc, 0.72em);
+}
+
+/* metric rules — hairlines ending at the sidebearings, label in the overhang */
+.gp-rule {
+  position: absolute;
+  height: 0;
+  border-top: 1px solid var(--border, #333);
+  pointer-events: none;
+}
+.gp-rule--base { border-top-color: var(--text-dim, #666); }
+/* labels are their own layer: right edge magnets to the rule overhang, y comes from
+   placeLabels (coincident rules split above/below the shared line). */
+.gp-rule-label {
+  position: absolute;
+  transform: translate(-100%, -50%);
+  font-size: var(--type-micro-size);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim, #666);
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* sidebearing verticals — the glyph's own cell walls (top/height set inline,
+   spanning ascender → descender) */
+.gp-sb {
+  position: absolute;
+  width: 0;
+  border-left: 1px solid var(--border-subtle, #222);
+  pointer-events: none;
+}
+
+/* ── Console ── */
+.gp-console { display: flex; flex-direction: column; gap: 10px; }
+.gp-copy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font: inherit;
+  background: none;
+  border: none;
+  color: var(--text-muted, #999);
+  cursor: pointer;
+}
+.gp-copy:hover { color: var(--text, #eee); }
+.gp-code {
+  font-size: var(--type-ui-size);
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+.gp-search {
+  padding: 9px 12px;
+  font: inherit;
+  font-size: var(--type-ui-size);
+  color: var(--text, #eee);
+  background: var(--surface, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border, #333);
+  border-radius: var(--radius, 8px);
+  outline: none;
+}
+.gp-search:focus { border-color: var(--text-dim, #777); }
+
+/* ── Grid: groups of equal-sized cells ── */
+.gp-groups {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+.gp-group { margin-bottom: 26px; }
+.gp-group-label {
+  font-size: var(--type-micro-size);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim, #666);
+  margin-bottom: 10px;
+}
+.gp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 4px;
+}
+.gp-cell {
+  aspect-ratio: 1;             /* every glyph in the same square box */
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font: inherit;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text, #eee);
+  background: var(--surface, rgba(255, 255, 255, 0.05));
+  border: none;
+  border-radius: var(--radius, 8px);
+  cursor: pointer;
+  padding: 0;
+}
+/* Cell states:
+     resting   --surface
+     rollover  INVERTED — light fill, dark glyph
+     selected  --surface-hi + accent ring
+   Rollover inverts on purpose. The old rule here was "never a light fill", which produced
+   a 1px hairline you cannot find in a grid of 1500 cells. Inverting is the loudest thing a
+   cell can do and rollover is the one state that is momentary, so it can afford to be loud.
+   It is written as accent-on-bg rather than white-on-black, so it inverts correctly in both
+   themes: light fill / dark glyph on a dark page, dark fill / light glyph on a light one. */
+.gp-cell:hover {
+  background: var(--accent, #e8e8e8);
+  color: var(--bg, #0f0f0f);
+}
+.gp-cell--active {
+  box-shadow: inset 0 0 0 1.5px var(--accent, #e8e8e8);
+  background: var(--surface-hi, rgba(255, 255, 255, 0.08));
+}
+
+/* names mode: the square glyph area keeps its feel; a caption hangs beneath */
+.gp-cell--named {
+  aspect-ratio: auto;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 3px 5px;
+}
+.gp-cell--named .gp-cell-ch { flex: 1; display: flex; align-items: center; }
+.gp .gp-cell-name {
+  font-size: var(--type-micro-size);
+  /* captions are the smallest type here — let optical sizing FLEX to that size
+     instead of inheriting the chrome's pinned instance (--gp-ui-fvs). */
+  font-variation-settings: normal;
+  font-optical-sizing: auto;
+  line-height: 1.2;
+  color: var(--text-dim, #666);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gp-cell--active .gp-cell-name { color: var(--text-muted, #999); }
+
+/* full name line under the U+ readout in the console */
+.gp-name {
+  font-size: var(--type-ui-size);
+  line-height: 1.4;
+  text-align: center;
+  color: var(--text-muted, #999);
+}
+/* Unsupported glyphs recede by ink, not by a fixed grey. The old #444 fallback was
+   dark-first: on font-proofer's light theme it sits a hair off the #111 body text, so
+   "this glyph is missing" stopped reading at all. Ink follows the theme in both apps.
+   ReCal's deliberate --text-faint still wins where it is defined. */
+.gp-cell--invisible { color: var(--text-faint, rgba(var(--text-rgb), var(--ink-faint, .38))); }
+
+/* StyleScopeDropdown — shared primitive styling.
+   Token-based with fallbacks so each app's own theme vars flow in unchanged:
+   Both apps define --bg/--surface/--surface-hi + --text-dim + --ui-font; font-proofer also defines
+   --bg/-elevated/-hover + --text-muted. The fallbacks bridge the gap either way. */
+
+.ssd { position: relative; }
+
+/* trigger — a full-width labelled button (active scope name + caret) */
+.ssd-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.ssd-btn:hover { border-color: var(--text-muted); }
+.ssd-btn-label { margin-right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ssd-caret { color: var(--text-muted); font-size: var(--type-ui-size); flex: 0 0 auto; }
+
+/* popover list */
+.ssd-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  min-width: 240px;
+  padding: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+}
+.ssd-list--multi { max-height: 340px; overflow: auto; }
+/* nested inside a host popover: no box of its own, just the rows */
+.ssd-list--inline {
+  position: static;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+/* row = label + chips */
+.ssd-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ssd-row:hover,
+.ssd-row.on { background: var(--surface-hi); }
+
+.ssd-check { width: 14px; flex: 0 0 auto; color: var(--text-muted); }
+.ssd-name  { margin-right: auto; white-space: nowrap; font-size: var(--type-body-size); line-height: 1.1; }
+
+/* metadata chips — dim, UI face, tabular */
+.ssd-chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-family: var(--ui-font, inherit);
+  font-feature-settings: 'tnum' 1;
+}
+.ssd-chip {
+  font-size: var(--type-micro-size);
+  padding: 2px 6px;
+  border-radius: 999px; /* pill chips */
+  border: 1px solid var(--border);
+  color: var(--text-dim, var(--text-muted));
+}
+/* the markup chip (# / ## / ### / —) reads as syntax, so mono if available */
+.ssd-chip--markup { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+/* an axis chip the style overrides locally (font-proofer's --local flag) */
+.ssd-chip--local { color: var(--text-muted); }
+
+/* Dense variant — for rows that carry many chips (e.g. every variable axis, as in
+   the cal/coss role pickers). Tighter rows + one-line chips, so an 8-chip row stays
+   as compact as a hand-built spec row instead of wrapping to two lines. */
+.ssd-list--dense .ssd-row { padding: 7px 12px; }
+/* Chips size to content and stay on one line. Columns line up because every row
+   carries the same specs in the same order, tnum makes digits equal-width, and the
+   chip text is trimmed to equal char counts per column (opsz A; negative tracking
+   drops a trailing zero + real minus). No fixed width — nothing gets bloated. */
+.ssd-list--dense .ssd-chips { flex-wrap: nowrap; flex-shrink: 0; }
+
+/* InlineEmphasisBubble — a floating selection toolbar. Token-based with fallbacks
+   so it bridges either app's theme (font-proofer's --bg-elevated / --bg-hover and
+   --surface / --surface-hi resolve in both apps). The label fonts come from the
+   inline styles each app passes, so the chrome font here is just a fallback. */
+.inline-emph-menu {
+  position: fixed;
+  transform: translate(0, -100%); /* above-and-right: bottom-left at the selection corner */
+  z-index: 200;
+  display: flex;
+  gap: 1px;
+  padding: 1px;
+  background: var(--surface, #1a1a1a);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.14));
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  animation: emph-pop 0.12s ease;
+}
+.inline-emph-menu--left { transform: translate(-100%, -100%); } /* flipped: tuck at the top-LEFT corner */
+@keyframes emph-pop { from { opacity: 0; } }
+.inline-emph-btn {
+  background: none;
+  border: 0;
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: var(--text, #f0f0f0);
+  font-family: var(--ui-font, system-ui, sans-serif);
+  font-size: var(--type-micro-size);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.inline-emph-btn:hover { background: var(--surface-hi, rgba(255, 255, 255, 0.08)); }
+
+/* Instrument-model design tokens.
+   Every value is extracted from the existing ReCal / wordmark.nyc palette
+   (docs/control-mapping.md §5, spec directive 2) — no new hues invented, and no
+   terracotta/orange accent. Zone colours reuse the existing four exactly. */
+
+:root {
+  color-scheme: dark;   /* native form controls (AxisSlider number steppers) render dark */
+  /* ── Surfaces (existing dark scale) ── */
+  /* Below --bg, and deliberately outside the surface scale. The VMetrics stage is a
+     PROOFING GROUND, not a UI surface: the big word sits on it and the metric lines are
+     measured against it, so it wants maximum contrast and no tint at all. It is the only
+     place in the app darker than --bg. Do not fold it into --bg or into a surface step
+     during any collapse — a #0f0f0f stage puts a grey cast behind the specimen. */
+  --stage-deep: #000;
+  --bg:        #0f0f0f;
+  /* Three steps, house-wide (wm-primitives#3). The old four had --surface-1 at #111 —
+     two values above --bg — which is why GlyphPicker's cells were invisible here while
+     they read fine in font-proofer off a hardcoded fallback. #111 is gone; what used it
+     now sits on --surface. --stage-deep is NOT part of this scale, see above. */
+  --surface:    #1a1a1a;   /* raised: panels, cards, cells, inputs */
+  --surface-hi: #252525;   /* hover / active / selected */
+
+  /* ── Text (existing scale) ── */
+  --text:       #e8e8e8;
+  --text-muted: #999;
+  --text-dim:   #666;
+  --text-faint: #444;
+  /* --text as "R, G, B" for the ink levels in type.css. COMMA-separated on purpose:
+     ink is written rgba(var(--text-rgb), a), and the rgb(... / a) slash form needs
+     space-separated channels, so mixing them drops the colour silently. */
+  --text-rgb: 232, 232, 232;
+
+  /* ── Lines ── */
+  --border:        #333;
+  --border-subtle: #222;
+  --edit-rail:     rgba(255, 255, 255, 0.28);  /* "you can type here" left rail */
+  --scrollbar-thumb:       var(--surface-hi);   /* house 6px scrollbar (wm-primitives) */
+  --scrollbar-thumb-hover: var(--text-dim);
+  /* GlyphPicker chrome pin: the UI font is CalSansVF itself, so picker chrome text
+     locks to the Text-UI instance instead of inheriting the specimen's axes. */
+  /* GlyphPicker chrome: GEOM only. opsz is left to track each element's own size. */
+  --gp-ui-fvs: 'GEOM' 25;
+
+  /* ── Accent & origin markers ──
+     ◆ baked-default marker takes the site accent; ● preview marker a neutral —
+     two different visual species (control-mapping §5, spec directive 3). */
+  --accent:         #e8e8e8;        /* primary action + ◆ */
+  --marker-default: var(--accent);  /* ◆ YOUR default */
+  --marker-preview: #999;           /* ● PREVIEWING */
+  --state-stock:    #c97050;        /* STOCK narrator only (= the A11Y zone hue) */
+
+  /* ── Freezer (ssXX/cvXX manual override) ──
+     Gold marks a glyph pinned off the GEOM continuum by a frozen feature — a
+     deliberately separate hue from the four GEOM zones (user directive: "color …
+     distinguishing ss-frozen from GEOM-driven"). The only warm accent besides the
+     A11Y terracotta, kept muted so it reads as "held" rather than an alert. */
+  --freeze-gold:     #d9a441;
+
+  /* Status triad — ok / warn / err. Previously three raw literals repeated across
+     coss.css and UiKitBoard.css with no token anywhere, which is why the terracotta
+     family survived here after it was dropped elsewhere. Named now so the palette is
+     a three-line change rather than a grep. */
+  --ok:   #46c07a;
+  --warn: #e0a23a;
+  --err:  #e0603a;
+  --freeze-gold-dim: rgba(217, 164, 65, .16);
+
+  /* ── Zones (reuse existing exactly) ── */
+  /* The zones as they render in the Type Matrix and the glyph strips: muted, because there
+     they are a wash behind dense content and a background classification, not a control. */
+  --zone-a11y:       #c97050;
+  --zone-ui:         #999;   /* neutral: UI is the default, it should not announce itself */
+  --zone-ui-on-grid: #fff;   /* UI renders white inside the zone grid */
+  --zone-base:       #4a7fd4;
+  --zone-geo:        #4aad5c;
+
+  /* The same four as CHIPS. A chip is a control you press, so it gets the hue at full
+     strength — same hue angles, more chroma and lightness. UI takes the on-grid white,
+     since a chip group always has something selected and grey there reads as disabled. */
+  --zone-a11y-chip:  #e08a63;
+  --zone-ui-chip:    var(--zone-ui-on-grid);
+  --zone-base-chip:  #6f9ee8;
+  --zone-geo-chip:   #5fc678;
+
+  /* ── Motion (house spring, spec directive 4) ── */
+  --spring:   cubic-bezier(.34, 1.45, .64, 1);
+  --dur-fast: 140ms;
+  --dur:      240ms;
+
+  /* ── Shape ── */
+  --radius:      8px;
+  --radius-pill: 999px;
+  /* Corner geometry. CSS superellipse(k) uses exponent 2^k: k=1 is a circular arc, k=2 is
+     Apple's squircle. At 1.2 a pill keeps its round cap while curvature eases to zero
+     before the straight edge, so the cap no longer meets the side at a G1 break. */
+  --corner-k: 1.2;
+  /* Chip states. Weight is the signal for a primary action; the strokes acknowledge. */
+  --chip-wght-off: 450;
+  --chip-wght-on:  630;
+  --stroke-hover:  1.2px;
+  --stroke-press:  1.8px;
+
+  /* ── Type: Cal Sans is the UI typeface for everything ── */
+  --ui-font: 'CalSansVF', sans-serif;
+}
+
+/* The UI-type recipe = GEOM 25 (the UI landing) and nothing else. wght is omitted so
+   font-weight still drives bold UI elements, and opsz is omitted so the axis can do its
+   job: every glyph gains sidebearing between opsz 10 and 8, which is precisely the
+   letterfit small chrome needs. This used to pin 'opsz' 10 with optical-sizing:none, which
+   froze the whole tree one step above the floor — 8px labels were being set with 10px
+   letterfit, and the a drawn for opsz 8 could never appear. Scoped to the instrument tree
+   so it never collides with the classic App.css `body` rule — both stylesheets are bundled
+   together and always load. */
+.instrument-root {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ui-font);
+  font-optical-sizing: auto;
+  font-variation-settings: 'GEOM' 25;
+}
+
+/* Numeric readouts / value columns: Cal Sans + tabular figures, never a mono
+   (spec directive 1). Apply to any aligned number column. */
+.tnum {
+  font-feature-settings: 'tnum' 1;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .instrument-root *,
+  .instrument-root *::before,
+  .instrument-root *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+/* Phase 2 shell — rail / canvas / floor grid. All colour/type from tokens.css. */
+
+.shell {
+  display: grid;
+  grid-template-columns: 264px 1fr;
+  grid-template-areas: "rail canvas";
+  height: 100vh;
+  overflow: hidden;
+  transition: grid-template-columns var(--dur) ease;
+}
+
+/* ── Rail — the font mutator (◆ file layer) ── */
+.rail {
+  grid-area: rail;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  /* No vertical padding: it lives on the header (below) so the sticky seams pin flush
+     to the rail's top/bottom edges — padding here would leave a strip above/below a
+     stuck seam that scrolling content bleeds through. */
+  padding: 0 16px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Narrow window collapses the rail to a strip showing just its label; clicking the
+   strip expands it. Width-only, independent of edit/demo mode. No chevron. */
+.rail-collapsed-label { display: none; }
+.shell--rail-collapsed { grid-template-columns: 44px 1fr; }
+.rail--collapsed { padding: 16px 0; gap: 0; overflow: hidden; cursor: pointer; align-items: center; }
+.rail--collapsed > *:not(.rail-collapsed-label) { display: none; }
+.rail--collapsed .rail-collapsed-label {
+  display: block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--ui-font);
+  font-size: 15px; font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.rail--collapsed:hover .rail-collapsed-label { color: var(--text); }
+.rail-header { display: flex; flex-direction: column; gap: 3px; padding-top: 20px; }
+/* Title + Reset share the top row (aligned); subtitle gets its own full-width row
+   below, so it stays one line and never collides with the button. */
+.rail-header-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.rail-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+/* One line always — otherwise it re-wraps (and jiggles) as the Reset button
+   appears/disappears and squeezes this column's width. */
+.rail-sub { font-size: 11px; color: var(--text-dim); margin-top: 3px; white-space: nowrap; }
+.rail-reset {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-family: var(--ui-font);
+  font-size: 12px;
+  cursor: pointer;
+}
+/* :not(:disabled) bumps specificity above App.css's global button:hover so the
+   fill doesn't go light-on-light — keep dark text on any light fill. */
+.rail-reset:hover:not(:disabled) { background: var(--surface-hi); color: var(--text); border-color: var(--text-dim); }
+.rail-reset:disabled { cursor: default; }
+
+/* hold-to-compare — text in the floor beside Download; held = STOCK-hue bold+underline. */
+.hold-text {
+  padding: 8px 8px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--ui-font);
+  font-weight: 400;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hold-text::after {
+  content: attr(data-label);
+  font-weight: 700;
+  height: 0; overflow: hidden; visibility: hidden; pointer-events: none;
+}
+.hold-text:hover { color: var(--text); }
+.hold-text.held {
+  color: var(--state-stock);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.hold-text:focus-visible {
+  outline: none;
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2.5px;
+  text-underline-offset: 4px;
+}
+
+.floor-toggle {
+  font-family: var(--ui-font, inherit); display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+.floor-toggle input { accent-color: var(--accent); }
+.floor-toggle a { color: var(--text); text-decoration: underline; }
+.rail-group { display: flex; flex-direction: column; gap: 12px; }
+.rail-group-label {
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+/* group header row: label on the left, an inline toggle on the right */
+.rail-group-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+/* ◆ pin row: label + value + track */
+.pin { display: flex; flex-direction: column; gap: 5px; }
+.pin--off { opacity: .38; }                          /* grayed until Freeze opsz is on */
+.pin--off input[type="range"] { cursor: default; }
+.pin-head { display: flex; justify-content: space-between; align-items: baseline; }
+.pin-label { font-size: 13px; }
+.pin-tag { font-size: 10px; color: var(--text-dim); }
+.pin-val { font-size: 13px; color: var(--marker-default); }
+.pin-val::before { content: "◆ "; font-size: 9px; vertical-align: 1px; }
+
+/* Stepped opsz-multiplier control */
+.stepper { display: flex; gap: 4px; }
+.stepper button {
+  flex: 1;
+  padding: 6px 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--ui-font);
+  font-size: 13px;
+}
+.stepper button.on { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+
+.rail-toggle {
+  font-family: var(--ui-font, inherit); display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.rail-toggle input { accent-color: var(--accent); }
+
+/* "Start from…" preset dropdown */
+.rail-preset {
+  width: 100%;
+  padding: 7px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--ui-font);
+  font-size: 13px;
+  cursor: pointer;
+}
+.rail-preset:hover { border-color: var(--text-dim); }
+
+/* Bottom of the rail: state tag + CSS readout (moved out of the canvas bar) */
+.rail-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+.rail-footer .state-tag { align-self: flex-start; }
+.rail-readout {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  word-break: break-word;
+}
+
+/* ── Canvas — the dominant stage (shows the baked ◆ default at rest) ── */
+.canvas {
+  grid-area: canvas;
+  position: relative;   /* anchors the Font info overlay to the top of the screen */
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;        /* let the 1fr row shrink so the stage scrolls, not the floor */
+}
+/* Everything below the top bar; anchors the Font info overlay (this box doesn't
+   scroll — the stage inside it does), so the overlay stays put vertically and
+   covers the scene controls + play bar. */
+.canvas-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* reserve the collapsed play-bar height so the stage/scene-bar clear it and the
+     stage height stays constant whether the play bloom is open or closed */
+  padding-bottom: 54px;
+}
+/* UI (COSS) has no bottom ● dock, so it reclaims that reserved height (no bottom crop). */
+.canvas-body--full { padding-bottom: 0; }
+/* …and the COSS board manages its own inset, so drop the scroll box's big bottom padding
+   (the 64px blank band under the board). */
+.stage-scroll.stage-scroll--flush { padding: 28px 48px 0; }
+/* Vertical Metrics: the letterbox preview is full-bleed — no padding, no scroll gutter. */
+.stage-scroll.stage-scroll--bleed { padding: 0; scrollbar-gutter: auto; overflow: hidden; }
+.canvas-bar {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+}
+
+/* Mode label + its per-mode submenu on one baseline-aligned row, single left inset so
+   they line up under "Words" and nothing jumps when the submenu shows/hides. */
+.mode-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-height: 42px;            /* = tab-button row (32) + the 10px bottom padding, reserved
+                                  with or without a submenu so the label never jumps up on
+                                  Words/UI (no controls). box-sizing is border-box. */
+  padding: 0 24px 10px 32px;   /* 32px = canvas-bar 24 + mode-btn 8 → aligns with "Words" */
+}
+/* Fixed 154px box = distance from "Words" to "Scale", so the submenu after the label
+   always sits under the "Scale" tab and never jumps as the label swaps DEMO/EDIT/Saved. */
+.mode-row .mode-label { padding: 0; width: 154px; flex: 0 0 auto; white-space: nowrap; }
+.mode-row .scene-bar { flex-direction: row; align-items: center; gap: 12px; padding: 0; }
+/* The Body-pairing label has no button padding; inset it 8px so its text lines up with
+   the tab-text column (tab buttons inset their own text by 8px). */
+.mode-row .body-pairing { padding-left: 8px; }
+
+/* ── Mode label — below the scene tabs, aligned with the "Words" text. Bold italic;
+   throbs in EDIT. Leaving EDIT shows the save throbber → green check. ── */
+.mode-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 24px 12px 32px;   /* 32px = canvas-bar 24 + mode-btn 8 → aligns with "Words" */
+  font-family: var(--ui-font);
+  font-size: 15px;
+  color: var(--text-muted);
+  /* real ital axis + bold, never a synthesized slant */
+  font-style: normal;
+  font-synthesis: none;
+  font-variation-settings: 'opsz' 10, 'GEOM' 25, 'wght' 700, 'ital' 1;
+}
+.mode-label--edit { color: var(--accent); }
+.mode-label--throb { animation: recal-throb 1.6s ease-in-out infinite; }
+@keyframes recal-throb { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+@media (prefers-reduced-motion: reduce) { .mode-label--throb { animation: none; } }
+.mode-throb {
+  width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid var(--text-dim); border-top-color: var(--text);
+  animation: wm-spin .6s linear infinite;
+}
+/* Shared rotate keyframe — also used by .spinner (App.css). */
+@keyframes wm-spin { to { transform: rotate(360deg); } }
+.mode-check { color: var(--zone-geo); font-style: normal; font-weight: 700; }
+
+/* DEMO mode: the rail stays full width; its controls just fade to .2 (still
+   clickable — clicking one enters EDIT). "ReCal Builder" stays 1; no Reset button. */
+.rail--demo .rail-reset,
+.rail--demo .rail-sub,
+.rail--demo .rail-group,
+.rail--demo .rail-footer { opacity: .2; transition: opacity var(--dur) ease; }
+.rail--demo .rail-title { opacity: 1; }
+.rail .rail-group, .rail .rail-footer, .rail .rail-sub { transition: opacity var(--dur) ease; }
+.state-tag {
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 700;
+}
+.stage {
+  position: relative;    /* anchor for the Font info overlay — this box does NOT scroll */
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  /* Specimens render the REBUILT preview font when ◆ differs from stock (opsz-axis
+     rescale + FeatureVariations), falling back to raw CalSansVF otherwise. Chrome
+     outside the stage keeps --ui-font (CalSansVF). */
+  font-family: 'CalSansPreview', 'CalSansVF', sans-serif;
+}
+.stage-scroll {
+  height: 100%;
+  overflow-y: auto;      /* the scene content scrolls here; the overlay stays put */
+  overflow-x: hidden;    /* Scale bleed clips at the canvas edge — no h-scrollbar */
+  scrollbar-gutter: stable;
+  padding: 40px 48px 64px;
+}
+
+/* Scrollbars now come from the shared house scrollbar (wm-primitives scrollbar.css, 6px). */
+.specimen {
+  font-family: 'CalSansPreview', 'CalSansVF', sans-serif;   /* rebuilt preview font, falls back to raw VF */
+  font-optical-sizing: none;
+  font-feature-settings: 'rclt' 1;
+  color: var(--text);
+  margin: 0 0 8px;
+  line-height: 1.02;
+  word-break: break-word;
+}
+.specimen-cap { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin: 0 0 28px; }
+.para {
+  font-family: var(--ui-font);
+  font-optical-sizing: none;
+  font-feature-settings: 'rclt' 1;
+  color: var(--text);
+  max-width: 34em;
+  margin: 32px 0 0;
+}
+
+/* ── Font info — persistent right panel. Uniform UI-size rows, one translucent
+   A11y colour (owner spec). Right-aligned, like the reference. ── */
+.info-panel {
+  position: absolute;              /* overlays .canvas — top-of-screen aligned, covers play */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  z-index: 4;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding: 16px 20px 24px;
+  text-align: right;
+  --info-color: rgba(201, 112, 80, .6);   /* 0.6 opacity of the A11y hue (#c97050) */
+  color: var(--info-color);
+  font-size: 13px;                          /* UI font size — every piece the same */
+  line-height: 1.5;
+  background: var(--bg);           /* opaque — masks whatever is behind it in the canvas */
+}
+.info-sec { margin-bottom: 16px; }
+.info-h { font-weight: 700; color: rgba(201, 112, 80, .85); margin-bottom: 3px; }
+.info-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.info-k { color: rgba(201, 112, 80, .5); }
+.info-arrow { color: rgba(201, 112, 80, .4); }
+.info-v { color: var(--info-color); }
+.info-yours { color: var(--marker-default); font-weight: 700; }
+.info-block { color: var(--info-color); }
+.info-nameinput {
+  font-family: var(--ui-font);
+  font-size: 13px;
+  text-align: right;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(201, 112, 80, .35);
+  color: var(--marker-default);
+  padding: 1px 0;
+  min-width: 90px;
+  max-width: 150px;
+}
+.info-nameinput:focus { outline: none; border-bottom-color: var(--accent); }
+
+/* ── Bottom preview-control surface (● play / Previewer) ──
+   Absolute overlay at the bottom of canvas-body, so opening/closing it never
+   resizes the stage — scene vertical centering stays put. */
+.preview-surface {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 12px 24px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Caption far-left; it holds exactly the group-label column (64px + 16px gap) so
+   the Reset button's left edge lines up with the "size" control below it. */
+/* min-height reserves the Reset button's row height even when it's unmounted
+   (collapsed), so the caption doesn't drop toward the edge on collapse. */
+.preview-surface-head { display: flex; align-items: center; gap: 0; min-height: 26px; }
+.preview-surface-head .preview-surface-cap { flex: 0 0 80px; }
+.preview-surface-cap {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim);
+  /* real ital axis (never a synthesized slant); animates 0→1 on collapse */
+  font-variation-settings: 'ital' 0; font-synthesis: none; font-style: normal;
+  transition: font-variation-settings var(--dur) ease;
+}
+.preview-surface-cap--collapsed { font-variation-settings: 'ital' 1; }
+/* Dot: the ring is always there; the fill fades in as the tray expands. */
+.preview-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  border: 1.5px solid var(--marker-preview);
+  background-color: var(--marker-preview);
+  transition: background-color var(--dur) ease;
+}
+.preview-surface-cap--collapsed .preview-dot { background-color: transparent; }
+.preview-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--marker-preview);
+  font-family: var(--ui-font);
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--dur-fast) ease, border-color var(--dur-fast) ease;
+}
+.preview-reset svg { flex-shrink: 0; }
+.preview-reset:disabled { opacity: .35; cursor: default; }
+.preview-reset:not(:disabled):hover { color: var(--text); border-color: var(--marker-preview); }
+.preview-reset:not(:disabled):active svg { transform: rotate(-320deg); transition: transform var(--dur) var(--spring); }
+/* Bloom: collapsed shows only the handle; expands on pointer entry / focus. */
+.preview-body {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height var(--dur) var(--spring), opacity var(--dur-fast) ease;
+}
+.preview-surface.open .preview-body { max-height: 42vh; opacity: 1; overflow-y: auto; scrollbar-gutter: stable; }
+/* EDIT mode: the play bloom only surfaces at .2 opacity (you're building, not previewing) */
+.preview-surface--dim.open .preview-body { opacity: .2; }
+@media (prefers-reduced-motion: reduce) { .preview-body { transition: none; } }
+.preview-body { display: flex; flex-direction: column; gap: 8px; }
+/* Features + Sets are one OpenType block — no vertical gutter between the two rows. */
+.play-opentype { display: flex; flex-direction: column; gap: 0; }
+/* Pull the chip rows left by the chip's side padding so the first chip's TEXT
+   ("Ligatures" / "ss01") aligns with the slider labels ("size" / "wght"). */
+.play-group .feature-chips { margin-left: -6px; }
+.play-group .ss-chips { margin-left: -5px; }
+
+/* Differentiated groups: Type · Axes · OpenType, each with a small left label.
+   Baseline-aligned so the label sits on the same baseline as the first control's text. */
+.play-group { display: flex; align-items: baseline; gap: 16px; }
+.play-group-label {
+  width: 64px;
+  flex-shrink: 0;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.preview-rows { display: flex; gap: 20px; flex-wrap: wrap; flex: 1; }
+.prow { display: flex; flex-direction: column; gap: 5px; min-width: 118px; }
+/* Compare mode: axes the referent font can't express (see PreviewSurface). */
+.prow--na { opacity: .28; pointer-events: none; }
+.prow-head { display: flex; justify-content: space-between; font-size: 11px; }
+.prow-label { color: var(--text-muted); }
+.prow-val { color: var(--marker-preview); }
+.prow.on .prow-val::before { content: "● "; font-size: 8px; vertical-align: 1px; }
+/* opsz-auto: tiny "auto" label + native checkbox at .7 opacity, inline with the label */
+.opsz-auto {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  font-size: 10px;
+  color: var(--text-dim);
+  opacity: .7;
+  cursor: pointer;
+}
+.opsz-auto input { width: 11px; height: 11px; margin: 0; accent-color: var(--marker-preview); }
+
+/* ── Floor — the transaction ── */
+.floor {
+  grid-area: floor;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.floor-label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); }
+.zone-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+/* The GEOM zones are near-primary actions, so they carry weight, not just colour.
+   ACTIVE zone takes a fill (zone colour IS information); inactive keeps its hue at full
+   strength — the old .6 opacity made them read as disabled.
+   Weight DOES change between states now. It used to be banned to avoid reflow; instead
+   each chip renders its own label a second time at the heavier weight, hidden and stacked
+   underneath, so the box is always sized for the bold form and nothing moves. */
+.zone-chip {
+  display: inline-grid;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  corner-shape: superellipse(var(--corner-k, 1.2));
+  border: none;
+  background: transparent;
+  font-family: var(--ui-font);
+  font-size: 13px;
+  font-variation-settings: 'GEOM' 25, 'wght' var(--chip-wght-off, 450);
+  cursor: pointer;
+}
+.zone-chip > span { grid-area: 1 / 1; }
+.zone-chip::after {
+  content: attr(data-label);
+  grid-area: 1 / 1;
+  visibility: hidden;
+  pointer-events: none;
+  font-variation-settings: 'GEOM' 25, 'wght' var(--chip-wght-on, 630);
+}
+.zone-chip.on {
+  color: var(--bg);
+  font-variation-settings: 'GEOM' 25, 'wght' var(--chip-wght-on, 630);
+}
+.zone-chip:not(.on):hover:not(:disabled) {
+  background: none;
+  box-shadow: inset 0 0 0 var(--stroke-hover, 1.2px) currentColor;
+}
+/* Press: the stroke lands before the fill does. Beats .on deliberately — the stroke
+   acknowledges the tap, the fill confirms it on release. */
+.zone-chip:active:not(:disabled) {
+  background: none;
+  box-shadow: inset 0 0 0 var(--stroke-press, 1.8px) currentColor;
+}
+.zone-chip:focus-visible { outline: none; box-shadow: inset 0 0 0 var(--stroke-press, 1.8px) var(--accent); }
+.floor-spacer { flex: 1; }
+.floor-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-hi);
+  color: var(--text);
+  font-family: var(--ui-font);
+  font-size: 13px;
+  cursor: pointer;
+}
+.floor-btn:disabled { opacity: .45; cursor: default; }
+.floor-btn--primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+
+/* Fused SEO pages: the fixed panels fade while reading the article below the app
+   (body.past-app is toggled by a scroll effect in Shell; the root page never scrolls). */
+.type-panel, .dock-download { transition: opacity .25s; }
+body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-events: none; }
+
+/* Floating download dock — OFL + Download, bottom-right of the canvas (no floor row). */
+.dock-download {
+  position: fixed;
+  right: 20px; bottom: 16px;
+  z-index: 50;
+  display: flex; align-items: center; gap: 14px;
+  padding: 8px 10px 8px 16px;
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .45);
+}
+.dock-error { font-size: 12px; color: var(--text-muted); }
+
+/* Floating TYPE panel — viewport/render controls; draggable by its header. */
+.type-panel {
+  position: fixed;
+  top: 56px; right: 20px;
+  z-index: 40;
+  width: 178px;
+  display: flex; flex-direction: column; gap: 13px;
+  padding: 10px 14px 14px;
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .4);
+}
+.type-panel-title {
+  font-family: var(--ui-font);
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-dim);
+  margin: -4px -8px 2px;   /* widen the grab target a touch */
+  padding: 6px 8px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.type-panel-title:active { cursor: grabbing; }
+.type-panel .prow { min-width: 0; }
+
+/* Paragraph style menu (which style the TYPE controls target) */
+.style-menu { position: relative; }
+.style-menu-btn {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 9px; border-radius: var(--radius);
+  background: var(--surface-hi); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--ui-font); font-size: 13px; cursor: pointer;
+}
+/* App.css's global button:hover paints buttons white; keep it, but flip the text to
+   black so it stays readable (:not(:disabled) beats the global rule's specificity). */
+.style-menu-btn:hover:not(:disabled) { background: var(--text); color: var(--bg); border-color: var(--text); }
+.style-menu-btn:hover:not(:disabled) .style-menu-caret { color: var(--bg); }
+.style-menu-caret { color: var(--text-dim); font-size: 10px; }
+.style-menu-list {
+  position: absolute; top: calc(100% + 4px); left: 0; min-width: 212px; z-index: 60;
+  display: flex; flex-direction: column; padding: 4px;
+  border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+}
+.style-menu-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 6px 8px; border: none; border-radius: 6px; background: none;
+  color: var(--text); font-family: var(--ui-font); font-size: 13px; cursor: pointer; text-align: left;
+}
+.style-menu-item.on { background: var(--surface-hi); }
+.style-menu-item:hover:not(:disabled) { background: var(--text); color: var(--bg); }
+.style-menu-item:hover .style-badge { color: var(--bg); border-color: rgba(0, 0, 0, .35); }
+.style-menu-item:hover .style-menu-check { color: var(--bg); }
+.style-menu-name { white-space: nowrap; margin-right: auto; }
+.style-menu-check { flex-shrink: 0; width: 12px; font-size: 11px; color: var(--text-dim); }
+.style-menu-item.on .style-menu-check { color: var(--accent, var(--text)); }
+.style-menu-list--scroll { max-height: 340px; overflow-y: auto; }
+.style-menu-badges { display: flex; gap: 4px; flex-shrink: 0; }
+.style-badge {
+  font-size: 10px; color: var(--text-dim); white-space: nowrap;
+  padding: 1px 5px; border-radius: 4px; border: 1px solid var(--border);
+}
+
+.ofl-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.ofl-check input { accent-color: var(--accent); }
+.ofl-check a { color: var(--text); text-decoration: underline; }
+
+/* Shared slider look (native range on tokens) */
+.shell input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+/* Skeletal play sliders: 1px track, small ● thumb. */
+.preview-surface input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  cursor: pointer;
+}
+.preview-surface input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 9px; height: 9px; border-radius: 50%; background: var(--marker-preview);
+}
+.preview-surface input[type="range"]::-moz-range-thumb {
+  width: 9px; height: 9px; border: none; border-radius: 50%; background: var(--marker-preview);
+}
+.preview-surface input[type="range"]:hover::-webkit-slider-thumb,
+.preview-surface .prow.on input[type="range"]::-webkit-slider-thumb { background: var(--text); }
+.preview-surface input[type="range"]:focus-visible { outline: none; }
+.preview-surface input[type="range"]:focus-visible::-webkit-slider-thumb {
+  background: var(--text); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* ── descent seams: a bottom chevron replaces a tab bar ──────────────────────
+   Both chevrons point down. The holo one travels down into the matrix; the
+   muted one (top of the matrix) pushes the matrix back down. */
+.rail-seam {
+  all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  width: 100%;   /* full-width hit area — padding/margins never shrink the rollover */
+  gap: 10px; cursor: pointer; user-select: none; padding: 20px 16px;
+  font-family: var(--ui-font); font-size: 12px; letter-spacing: .18em;
+  /* Pin to the rail's scroll edges: the up-seam sticks to the top, the down-seam to the
+     bottom, so a seam stays flush with the viewport while the panel scrolls past — and
+     only slides in normal flow once the panel's own edge reaches it. Opaque bg + z so
+     the scrolling content passes cleanly behind. */
+  position: sticky; z-index: 4; background: var(--surface);
+}
+.rail-seam:focus-visible { outline: 1.5px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.rail-seam-chv { width: 20px; height: 9px; display: block; }
+.rail-seam-lbl { white-space: nowrap; }
+
+.rail-seam--down { bottom: 0; color: #b9c4d6; border-top: 1px solid var(--border-subtle); }
+/* ↓ Holographic seam tab — the fill, motion, V chevrons and hover weight all live in
+   holo.css (imported by Shell.tsx), tunable from the custom properties at its top. */
+
+/* App.css has a global button:hover that paints buttons white — override it so the
+   seam NEVER flashes white in dark mode. :not(:disabled) wins the specificity race. */
+.rail-seam:hover:not(:disabled),
+.rail-seam:focus-visible:not(:disabled) { background: var(--surface); }
+
+.rail-seam--up { top: 0; color: rgba(232,232,232,.3); border-bottom: 1px solid var(--border-subtle); }
+.rail-seam--up:hover:not(:disabled) { color: rgba(232,232,232,.6); }
+
+.rail-matrix, .rail-blank, .rail-freezer, .rail-vmetrics { display: flex; flex-direction: column; gap: 14px; }
+.rail-blank-body { min-height: 260px; }
+
+/* ── ssXX Freezer (rail group 2) ── Keynote Typography-panel rows: base → variant in
+   the live font, name, toggle. Gold = frozen (held off the GEOM continuum). */
+.freezer { display: flex; flex-direction: column; padding: 0 7px; }
+.freezer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.freezer-title { font-family: var(--ui-font); font-size: 12px; letter-spacing: .04em; color: var(--text-muted); text-transform: uppercase; }
+.freezer-reset {
+  font-family: var(--ui-font); font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
+  padding: 3px 8px; border: none; border-radius: 5px; cursor: pointer; background: none;
+}
+.freezer-reset:not(:disabled) { color: var(--text); font-weight: 600; background: var(--surface-hi); }
+.freezer-reset:hover:not(:disabled) { background: var(--surface); }
+.freezer-reset:disabled { color: var(--text-faint); font-weight: 400; cursor: default; }
+
+.freezer-section { display: flex; flex-direction: column; margin-bottom: 4px; }
+.freezer-section-title {
+  font-family: var(--ui-font); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-dim); padding: 10px 4px 4px;
+}
+.freezer-list { display: flex; flex-direction: column; }
+.freezer-row {
+  display: grid; grid-template-columns: auto 1fr 18px; align-items: center; gap: 9px;
+  width: 100%; padding: 5px 6px; border: none; background: none; cursor: pointer; text-align: left;
+  border-radius: 6px;
+}
+.freezer-row:hover { background: var(--surface); }
+
+/* before → after aligned around the arrow (Keynote): a fixed before-cell so the before
+   glyphs share a left edge, a fixed arrow column so the arrows form a vertical line, and
+   the after glyph flowing right. No overflow clip — descenders (g/j/y) must show. */
+.freezer-ba {
+  display: grid; grid-template-columns: 30px auto auto; align-items: baseline;
+  column-gap: 7px; font-size: 15px; line-height: 1.4;
+}
+/* before right-aligned (hugs the arrow) + after left-aligned, with equal gaps around
+   the arrow → arrows sit centered between the pair and still line up down the column. */
+.freezer-glyph { color: var(--text-dim); text-align: right; }
+.freezer-glyph--after { color: var(--text-muted); text-align: left; }
+.freezer-glyph--after.on { color: var(--freeze-gold); }
+.freezer-arrow { font-size: 10px; color: var(--text-faint); }
+
+/* Single-line name; ellipsis rather than wrap/overlap if a label still runs long. */
+.freezer-name {
+  font-family: var(--ui-font); font-size: 11px; color: var(--text-dim);
+  min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.freezer-row.on .freezer-name { color: var(--text); }
+
+/* Rounded checkbox: neutral checked state (accent, NOT gold — gold is reserved for the
+   swapped glyphs themselves, in the specimen and the "after" sample). */
+.freezer-check {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 18px; height: 18px; border-radius: 5px;
+  background: var(--surface-hi); border: 1px solid var(--border); color: transparent;
+  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+}
+.freezer-row:hover .freezer-check { border-color: var(--text-dim); }
+.freezer-check.on {
+  background: var(--accent); border-color: var(--accent); color: var(--bg);
+}
+
+.freezer-note { font-size: 11px; color: var(--text-dim); line-height: 1.5; margin-top: 14px; padding: 0 4px; }
+.freezer-note-gold { color: var(--freeze-gold); font-weight: 600; }
+
+/* Descent transition, direction-aware. Descend (down-seam): current slides UP + out,
+   next rides up from below. Ascend (up-seam): the mirror — current slides DOWN + out,
+   next comes from above. Keyed by group index, so each arrival is a fresh mount. */
+.rail-descent { display: flex; flex-direction: column; gap: 22px; }
+.rail-descent--fwd  { animation: descend-enter .4s var(--spring); }
+.rail-descent--back { animation: ascend-enter  .4s var(--spring); }
+.rail-descent--fwd.rail-descent--leaving  { animation: descend-leave .15s ease-in forwards; }
+.rail-descent--back.rail-descent--leaving { animation: ascend-leave  .15s ease-in forwards; }
+@keyframes descend-enter { from { opacity: 0; transform: translateY(30px); }  to { opacity: 1; transform: translateY(0); } }
+@keyframes descend-leave { from { opacity: 1; transform: translateY(0); }     to { opacity: 0; transform: translateY(-24px); } }
+@keyframes ascend-enter  { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ascend-leave  { from { opacity: 1; transform: translateY(0); }     to { opacity: 0; transform: translateY(24px); } }
+@media (prefers-reduced-motion: reduce) { .rail-descent { animation: none !important; } }
+
+/* ── GEOM swap editor (type matrix), instrument-styled ── */
+/* Horizontal padding insets everything together (bands, shade, axis labels are all
+   positioned within this box), so nothing jams the rail edge. */
+.matrix { display: flex; flex-direction: column; padding: 0 7px; }
+.matrix-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.matrix-title { font-family: var(--ui-font); font-size: 12px; letter-spacing: .04em; color: var(--text-muted); text-transform: uppercase; }
+.matrix-reset {
+  all: unset; cursor: pointer; font-family: var(--ui-font); font-size: 12px; color: var(--text-muted);
+  padding: 2px 8px; border-radius: 5px; transition: color .12s, background .12s, opacity .12s;
+}
+/* Engaged (there are edits to undo) — full-opacity white + pill so it clearly reads
+   as actionable, not the muted header gray. */
+.matrix-reset:not(:disabled) { color: var(--text); font-weight: 600; background: var(--surface-hi); }
+.matrix-reset:hover:not(:disabled) { background: var(--surface); }
+.matrix-reset:disabled { color: var(--text-faint); font-weight: 400; background: none; cursor: default; }
+.matrix-axis { position: relative; height: 12px; margin-bottom: 8px; }
+.matrix-axis-tick { position: absolute; top: 0; font-family: var(--ui-font); font-size: 10px; letter-spacing: .04em; color: rgba(255,255,255,.2); }
+.matrix-axis-tick--mid { transform: translateX(-50%); }
+.matrix-axis-tick--end { transform: translateX(-100%); }
+.matrix-rows { display: flex; flex-direction: column; gap: 4px; position: relative; }
+/* Fade the shade in/out vertically so the band eases in at the top and out at the
+   bottom instead of hard-cutting at the first / last lane. */
+.matrix-geom-shade {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 10px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 10px), transparent 100%);
+}
+/* No z-index here: the lane must NOT form a stacking context, so its ◆ handles (z:3)
+   win the click over the GEOM grabber (z:2) wherever they overlap the default line. */
+.matrix-lane { position: relative; height: 34px; }
+.matrix-band { position: absolute; top: 25px; height: 3px; border-radius: 2px; opacity: .38; transition: opacity var(--dur-fast); }
+.matrix-band.on { opacity: 1; }
+.matrix-vglyph {
+  position: absolute; top: 1px; transform: translateX(-50%); white-space: nowrap;
+  font-size: 17px; line-height: 1; color: var(--text-dim); opacity: .4; pointer-events: none;
+  transition: opacity var(--dur-fast), color var(--dur-fast);
+}
+.matrix-vglyph.on { color: var(--text); opacity: 1; }
+/* Your ◆ remapping — the draggable handle, in the rail's ◆ accent language. */
+.matrix-handle {
+  position: absolute; top: 21px; width: 12px; height: 12px; margin-left: -6px; border-radius: 2px;
+  background: var(--accent); transform: rotate(45deg);
+  box-shadow: 0 0 0 1px var(--bg); cursor: ew-resize; touch-action: none; z-index: 3;
+}
+.matrix-handle:hover { background: #fff; }
+/* Cal Sans shipped default — a ghostly ● behind the track; stays put when you drag ◆ away. */
+.matrix-shipped {
+  position: absolute; top: 23px; width: 8px; height: 8px; margin-left: -4px; border-radius: 1px;
+  background: var(--text-muted); opacity: .28; pointer-events: none; transform: rotate(45deg); /* rhombus, mirrors the handle */
+}
+/* Transparent drag grabber on the hard line where the two shades meet (ew-resize). */
+.matrix-geom { position: absolute; top: 0; bottom: 0; width: 11px; margin-left: -5.5px; z-index: 2; cursor: ew-resize; touch-action: none; }
+.matrix-note { font-size: 11px; color: var(--text-dim); line-height: 1.5; margin-top: 16px; }
+
+/* Drag-only value chip: rises up from the dial you grabbed, fades down on release. */
+.matrix-val {
+  position: absolute; top: 3px; transform: translateX(-50%);
+  font-family: var(--ui-font); font-size: 10px; letter-spacing: .02em; color: var(--text);
+  background: var(--surface-hi); padding: 1px 6px; border-radius: 5px; box-shadow: 0 1px 4px rgba(0,0,0,.4);
+  pointer-events: none; z-index: 5; white-space: nowrap;
+}
+.matrix-val--geom { top: -2px; }
+.matrix-val--in { animation: matrix-val-in .18s var(--spring); }
+.matrix-val--out { animation: matrix-val-out .24s ease-in forwards; }
+@keyframes matrix-val-in { from { opacity: 0; transform: translateX(-50%) translateY(6px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@keyframes matrix-val-out { from { opacity: 1; transform: translateX(-50%) translateY(0); } to { opacity: 0; transform: translateX(-50%) translateY(6px); } }
+
+/* ── Vertical Metrics panel (rail group 3) ──────────────────────────────────────
+   Reuses the Freezer's frame (VERTICAL METRICS header → Line Metrics section). A preset
+   dropdown seeds the numbers, an hhea-strategy dropdown re-derives them, then a Line Gap
+   field, the Use-Typo toggle, the Ascender (YTAS) pin and a live readout of the three
+   metric sets. The note flags (in white/bold) when the win box crops a glyph. */
+.vmetrics-panel .freezer-section { gap: 11px; }
+.vm-head-right { display: flex; align-items: center; gap: 10px; }
+.vm-lh { font-family: var(--ui-font); font-size: 12px; color: var(--text-muted); }
+.vmetrics-panel .rail-preset { margin-top: 2px; }
+.vm-strategy { color: var(--text-muted); }
+
+.vm-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.vm-row-label { font-size: 13px; color: var(--text-muted); }
+.vm-num {
+  width: 84px; text-align: right; font-family: var(--ui-font); font-size: 13px; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 9px;
+}
+
+/* toggle: checkbox + a single text run so the label flows as one block (no per-word scrunch) */
+.vm-toggle {
+  font-family: var(--ui-font, inherit); display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+.vm-toggle input { accent-color: var(--accent); margin-top: 2px; flex: none; }
+.vm-toggle-lbl { line-height: 1.4; }
+.vm-warn { display: block; color: var(--text-dim); font-size: 11px; }
+
+/* the reused Ascender (YTAS) pin gets extra air before and after it */
+.vm-pin { margin: 6px 0; }
+
+.vm-table { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--border-subtle); font-size: 12px; }
+.vm-tr { display: grid; grid-template-columns: 46px 1fr 1fr 1fr; }
+.vm-tr span:first-child { color: var(--text-muted); }
+.vm-tr span:not(:first-child) { text-align: right; color: var(--text); }
+.vm-tr--head span { color: var(--text-dim); }
+
+.vm-note { margin: 4px 0 0; font-size: 12px; line-height: 1.4; color: var(--text-muted); }
+.vm-note b { color: var(--text); font-weight: 700; }
+
+/* House press + corner, shared with .zone-chip. Rail and floor controls.
+   PRESS: the stroke lands before the fill — it acknowledges the tap, the fill confirms on
+   release. Applied to :active so it beats whatever selected/filled state is underneath.
+   CORNER: superellipse(--corner-k) so a pill, a rounded rect and a circular button all
+   follow one curvature law. CSS parameterises k as exponent 2^k: 1 is a circular arc. */
+.floor-btn,
+.floor-toggle,
+.rail-preset,
+.rail-toggle,
+.rail-reset,
+.style-menu-btn,
+.matrix-reset,
+.preview-reset,
+.freezer-reset {
+  corner-shape: superellipse(var(--corner-k, 1.2));
+}
+.floor-btn:active:not(:disabled),
+.floor-toggle:active:not(:disabled),
+.rail-preset:active:not(:disabled),
+.rail-toggle:active:not(:disabled),
+.rail-reset:active:not(:disabled),
+.style-menu-btn:active:not(:disabled),
+.matrix-reset:active:not(:disabled),
+.preview-reset:active:not(:disabled),
+.freezer-reset:active:not(:disabled) {
+  background: none;
+  box-shadow: inset 0 0 0 var(--stroke-press, 1.8px) currentColor;
+}
+
+/* Phase 4 scene styles. Buttons override the global App.css `button` rule. */
+
+/* ── Modebar ── */
+/* De-chromed canvas controls: naked text, three tones (active --text / idle
+   --text-muted / disabled --text-dim), active carries a 1.5px accent underline.
+   Transparent padding keeps hit targets ≥32px. House-style focus, never the UA ring. */
+/* De-chromed canvas controls (right panel): naked text, regular weight when idle;
+   active = full text colour, BOLD + 1.5px accent underline. Rollover = a thin inset
+   rule, never a fill. Scoped under .canvas so it beats App.css's global button rules.
+   Transparent padding keeps hit targets ≥32px. House-style focus, never the UA ring. */
+.canvas .mode-btn, .canvas .text-tab, .canvas .chip {
+  padding: 8px 8px;
+  border: none;
+  background: none;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-family: var(--ui-font);
+  font-weight: 400;
+  font-size: 13px;
+  cursor: pointer;
+  /* reserve the BOLD width always so active/idle weight never shifts layout */
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+.canvas .mode-btn::after, .canvas .text-tab::after, .canvas .chip::after {
+  content: attr(data-label);
+  font-weight: 700;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+.canvas .mode-btn { font-size: 14px; }
+/* OpenType/body chips: one step smaller (secondary tier), tighter side padding.
+   Vertical padding keeps the ≥32px tap height; the horizontal gutter is free. */
+.canvas .chip { font-size: 12px; padding: 9px 6px; }
+.canvas .mode-btn:hover, .canvas .text-tab:hover, .canvas .chip:hover {
+  background: none;
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--border);   /* thin rule on rollover, no fill */
+}
+.canvas .mode-btn.on, .canvas .text-tab.on, .canvas .chip.on {
+  background: none;
+  box-shadow: none;
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 5px;
+}
+.canvas .mode-btn:disabled, .canvas .text-tab:disabled, .canvas .chip:disabled {
+  color: var(--text-dim);
+  box-shadow: none;
+  cursor: default;
+}
+.canvas .mode-btn:focus-visible, .canvas .text-tab:focus-visible, .canvas .chip:focus-visible {
+  outline: none;
+  color: var(--text);
+  box-shadow: none;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2.5px;
+  text-underline-offset: 5px;
+}
+
+.modebar { display: flex; gap: 4px; }
+
+/* Every scene's content is a horizontally-centered column. */
+.stage-pad {
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Words ── */
+.words-scene { min-height: 100%; justify-content: center; }   /* vertical centering */
+.words-edit { outline: none; word-break: break-word; width: 100%; }
+.words-edit:focus { outline: none; }
+
+/* ── Paragraph ── */
+.text-tabs { display: flex; gap: 14px; flex-wrap: wrap; }
+.para-doc { color: var(--text); }
+/* All heading levels + body share one colour — override any leaked App.css h1/h2 rules. */
+.para-block { margin: 0 0 14px; color: var(--text); font-weight: inherit; outline: none; caret-color: var(--text); }
+.para-block--h1, .para-block--h2, .para-block--h3 { margin-top: 10px; }
+.para-block:empty::before { content: '\200b'; color: transparent; }   /* keep empty blocks clickable */
+/* Compare swap — a line of text under the paragraph (fused SEO pages only). The
+   button renders the target's name in the target font: the label is the preview. */
+/* "Set in <font>" caption — names the actual rendered font, flips with the toggle. */
+.compare-caption {
+  margin-top: 24px;
+  font-family: 'CalSansPreview', 'CalSansVF', sans-serif;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+.compare-caption + .compare-inline { margin-top: 8px; }
+.compare-inline {
+  margin-top: 26px;
+  font-family: 'CalSansPreview', 'CalSansVF', sans-serif;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+.compare-inline-btn {
+  font-family: var(--ui-font, inherit);
+  font-size: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  transition: color .15s;
+}
+.compare-inline-btn:hover { color: var(--accent); }
+/* Disabled compare (no embeddable webfont) — grayed, non-interactive. */
+.compare-inline--disabled { color: var(--text-muted); }
+.compare-inline--disabled .compare-inline-btn { color: var(--text-dim); cursor: default; text-decoration-style: dotted; }
+.compare-inline--disabled .compare-inline-btn:hover { color: var(--text-dim); }
+.compare-inline-note { opacity: .7; }
+/* Static referent specimen (real outlines) — inherits --text via currentColor.
+   Pinned to the 544px column (rendered at the app's real point sizes) so it displays
+   1:1 with the Cal Sans specimen; scales down on narrow viewports. */
+.compare-svg { color: var(--text); width: 544px; max-width: 100%; margin-bottom: 26px; }
+.compare-svg svg { width: 100%; height: auto; display: block; }
+.drawer-row { display: flex; align-items: center; gap: 12px; max-width: 360px; }
+/* Section labels (not controls) — bold so they read as headers above the chips. */
+.drawer-label { font-size: 12px; font-weight: 700; color: var(--text-muted); width: 90px; }
+.drawer-val { font-size: 12px; color: var(--text-dim); width: 44px; text-align: right; }
+.feature-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Stylistic-set tokens: 1px gutter (they only surface on the bloomed play bar).
+   32px tap height stays via vertical padding; only the horizontal gutter goes tight. */
+.ss-chips { gap: 1px; }
+.canvas .ss-chips .chip { padding: 9px 5px; }
+
+/* Persistent per-scene control bar — lives in the canvas above the stage, so it
+   never covers scrolling scene content (fixes the hidden first eyebrow). */
+/* Scene control bar: docked at the scene's bottom margin, grouped by space — no
+   border, no background fill. */
+.scene-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 2px 24px 10px 32px;   /* 32px left → aligns chips/tabs under "Words" */
+}
+.body-pairing { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+/* 8px inset so the plain text aligns to the tab-text column (buttons get it from padding). */
+.ui-credit { font-size: 13px; color: var(--text-muted); padding-left: 8px; }
+.ui-credit-link { color: var(--text); text-decoration: underline; text-underline-offset: 2px; }
+.ui-credit-link:hover { color: var(--accent); }
+
+/* Hairline slider (measure / per-scene): 2px track, small round thumb. */
+.scene-bar input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 200px;
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.scene-bar input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+.scene-bar input[type="range"]::-moz-range-thumb {
+  width: 12px; height: 12px; border: none; border-radius: 50%; background: var(--text-muted);
+}
+.scene-bar input[type="range"]:hover::-webkit-slider-thumb { background: var(--text); }
+.scene-bar input[type="range"]:focus-visible { outline: none; }
+.scene-bar input[type="range"]:focus-visible::-webkit-slider-thumb {
+  background: var(--text);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* ── Scale tiers (font-proofer type scale) ── */
+/* Width set inline to the measure, so the in-between rule (border-bottom) is exactly
+   as wide as the measure; the head bleeds past it. */
+.tier-block { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle); max-width: 100%; }
+/* Tiers the Scale menu currently targets get a subtle rail so it's clear what edits hit.
+   Applied per line (head or body), so a paired body isn't highlighted unless it's picked. */
+/* Scale tier target/focus rail is now the shared edit-rail (edit-rail / --target);
+   see wm-primitives/src/editRail.css. */
+.tier-block .tier-head { overflow: visible; }
+.tier-label { margin-bottom: 8px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.tier-token { font-size: 12px; color: var(--text-muted); letter-spacing: .04em; }
+.tier-px { margin-left: 8px; color: var(--text-faint); }
+.tier-with { font-size: 11px; color: var(--text-dim); }
+.tier-head { color: var(--text); line-height: 1.02; white-space: nowrap; outline: none; caret-color: var(--text); }
+.tier-body { color: var(--text); max-width: 46em; margin: 12px 0 0; line-height: 1.5; outline: none; caret-color: var(--text); }
+
+/* OpenType feature chips row inside the play bar */
+.feature-row { display: flex; align-items: flex-start; gap: 12px; }
+.feature-row-label { font-size: 11px; color: var(--text-muted); padding-top: 6px; white-space: nowrap; }
+
+/* ── Glyphs ── */
+/* The scene is now the shared GlyphPicker (wm-primitives); full-width, its side
+   column sticks while the grid scrolls with the stage. */
+.stage-pad--glyphs { align-items: stretch; width: 100%; }
+.glyph-block { margin-bottom: 24px; }
+.glyph-block-label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); }
+.glyph-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 10px; width: 100%; }
+.glyph-cell {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: var(--text);
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+/* GEOM swap flash (grid cells + inline text glyphs).
+   v2 — two states of the same colour, chosen by whether the rail GEOM slider is held:
+   · geom-flash-hold: while dragging, the glyph HOLDS its zone accent with no
+     transition — crossings hard-switch the colour / hard-off in place (live map).
+   · geom-flash: on release (or a one-shot chip/keyboard change) the glyph eases
+     from its zone accent back to the resting colour, then un-wraps. */
+.geom-flash-hold { color: var(--flash-color); transition: none; }
+.geom-flash { animation: glyph-flash .5s ease-out; }
+@keyframes glyph-flash {
+  0%, 40% { color: var(--flash-color); }   /* start at 100%, hold ~0.2s, then ease out */
+  100%    { color: var(--text); }
+}
+
+/* Freezer gold — same hold/fade model as the GEOM zone flash, but its own hue: the
+   glyphs a frozen feature governs, lit while you toggle a freeze or drag GEOM, then
+   eased back to rest. Not persistent — the specimen is clean when idle. */
+.freeze-gold-hold { color: var(--freeze-gold); transition: none; }
+.freeze-gold { animation: freeze-gold-fade .5s ease-out; }
+@keyframes freeze-gold-fade {
+  0%, 40% { color: var(--freeze-gold); }
+  100%    { color: var(--text); }
+}
+
+
+/* ── Vertical Metrics preview (canvas, on the Vertical Metrics rail tab) ─────────
+   "Ắ Match fpv" with reference lines measured live off the current instance (SVG
+   getBBox honours the variation settings), plus black bars showing how some apps
+   crop to the win box — tighten the ascent below Ắ's 993 and the top bar bites it. */
+/* The black stage IS the letterbox: it fills the whole preview, and the content band is
+   flex-centred within it (like the Words specimen), so the specimen sits at the vertical
+   centre and the black reaches every edge. The band's width is 100% at a fixed viewBox
+   width → constant scale, so a bolder weight never rescales it. */
+/* The whole canvas goes black on this tab (under the tabs, EDIT mode and the dock), so the
+   letterbox is full-bleed. The stage keeps the normal tab layout, so the specimen centres
+   exactly where the Words specimen does and the dock overlays without shifting it. */
+.canvas--vm, .canvas--vm .mode-row, .canvas--vm .canvas-bar { background: var(--stage-deep); }
+.canvas-body--vm { background: var(--stage-deep); }
+/* Padding matches the normal scroll box (40 top / 64 bottom) so the band centres exactly
+   where the Words specimen does; the black bg paints under the padding, staying full-bleed. */
+.vmetrics-stage { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 40px 0 64px; box-sizing: border-box; overflow: hidden; background: var(--stage-deep); }
+.vm-svg { display: block; width: 100%; height: auto; }
+.vm-slot { fill: var(--bg); }
+/* editable specimen (inside the SVG via foreignObject, so it scales with the metric lines) */
+.vm-spec-edit { color: var(--text); outline: none; white-space: nowrap; width: max-content; caret-color: var(--text); }
+
+.vm-line { stroke: var(--text-dim); stroke-width: 1; }
+.vm-line.vm-line--base { stroke: var(--text-muted); }
+.vm-line.vm-cropedge { stroke: var(--state-stock); stroke-width: 2; stroke-dasharray: 7 5; }
+.vm-line-lbl { fill: var(--text-muted); font-family: var(--ui-font); font-size: 25px; }
+.vm-crop-lbl { fill: var(--state-stock); font-family: var(--ui-font); font-size: 25px; }
+
+/* The letterbox bars are translucent, not opaque: over empty stage they read as solid black
+   (black on black), but a glyph poking into the clip zone shows through dimmed — suggesting
+   "this gets clipped" rather than chopping it off. */
+.vm-crop { fill: var(--stage-deep); opacity: .72; }
+
+/* House press + corner, shared with .zone-chip. Scene controls.
+   PRESS: the stroke lands before the fill — it acknowledges the tap, the fill confirms on
+   release. Applied to :active so it beats whatever selected/filled state is underneath.
+   CORNER: superellipse(--corner-k) so a pill, a rounded rect and a circular button all
+   follow one curvature law. CSS parameterises k as exponent 2^k: 1 is a circular arc. */
+.mode-btn,
+.text-tab,
+.chip,
+.compare-inline-btn {
+  corner-shape: superellipse(var(--corner-k, 1.2));
+}
+.mode-btn:active:not(:disabled),
+.text-tab:active:not(:disabled),
+.chip:active:not(:disabled),
+.compare-inline-btn:active:not(:disabled) {
+  background: none;
+  box-shadow: inset 0 0 0 var(--stroke-press, 1.8px) currentColor;
+}
+
+</style>
+<h1>Corners — ReCal only</h1>
+<p class="lede">The COSS demo kit is out: it was <b>81 of the original 168</b>. What remains is
+<b>87</b> corners — 13 circles excluded, 74 taking the law, and of those 32 are in the frozen
+<code>App.css</code>. The live surface is 42.</p>
+<div class="bar"><b>k</b><button data-k="1.1">1.1</button><button data-k="1.2" class="on">1.2</button>
+ <button data-k="1.5">1.5</button><button data-k="2">2</button>
+ <b style="margin-left:14px">circles</b>
+ <button id="bOff" class="on">excluded</button><button id="bOn">force squircle</button></div>
+
+<h2>The 13 circles <span>excluded — every one a true circle on a square box</span></h2>
+<div class="grid grid4"><div class="c"><div class="c-demo"><div class="slider-track-wrap" style="width:150px"><input type="range" value="40"></div></div><div class="c-name">slider thumb</div>
+  <div class="c-src">AxisSlider.css:74·89 · shell.css:614·617 · scenes.css:158·162</div><div class="c-n">6 decl</div></div><div class="c"><div class="c-demo"><span class="preview-dot"></span></div><div class="c-name">.preview-dot</div>
+  <div class="c-src">shell.css:373</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><span class="mode-throb"></span></div><div class="c-name">.mode-throb</div>
+  <div class="c-src">shell.css:241</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><span style="width:9px;height:9px;border-radius:50%;background:#e8e8e8;display:inline-block"></span></div><div class="c-name">.gg-geom-dot</div>
+  <div class="c-src">App.css:1236</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><span style="width:14px;height:14px;border-radius:50%;background:#e8e8e8;display:inline-block"></span></div><div class="c-name">.vslider-thumb</div>
+  <div class="c-src">App.css:1826</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><span style="width:16px;height:16px;border-radius:50%;border:2px solid #333;border-top-color:#e8e8e8;display:inline-block"></span></div><div class="c-name">.spinner</div>
+  <div class="c-src">App.css:216</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><input type="radio" checked><input type="radio"></div><div class="c-name">radio input</div>
+  <div class="c-src">App.css:2181·2197</div><div class="c-n">2 decl</div></div></div>
+
+<h2>The 5 pills <span>your 2:1 rule — min-width = 2 &times; height</span></h2>
+<div class="grid"><div class="c"><div class="c-name">zone-chip<span class="c-src" style="margin-left:8px">shell.css:463</span></div>
+      <div class="pr"><span class="tag">today</span><div class="pb"><button class="zone-chip on" data-label="UI" style="background:#e8e8e8;color:#0f0f0f"><span>UI</span></button><button class="zone-chip" data-label="Base" style="color:#6f9ee8"><span>Base</span></button></div></div>
+      <div class="pr"><span class="tag">2:1</span><div class="pb r21"><button class="zone-chip on" data-label="UI" style="background:#e8e8e8;color:#0f0f0f"><span>UI</span></button><button class="zone-chip" data-label="Base" style="color:#6f9ee8"><span>Base</span></button></div></div></div><div class="c"><div class="c-name">ssd-chip<span class="c-src" style="margin-left:8px">StyleScopeDropdown.css:80</span></div>
+      <div class="pr"><span class="tag">today</span><div class="pb"><span class="ssd-chip">all</span><span class="ssd-chip ssd-chip--local">local</span></div></div>
+      <div class="pr"><span class="tag">2:1</span><div class="pb r21"><span class="ssd-chip">all</span><span class="ssd-chip ssd-chip--local">local</span></div></div></div><div class="c"><div class="c-name">state-tag<span class="c-src" style="margin-left:8px">shell.css:258</span></div>
+      <div class="pr"><span class="tag">today</span><div class="pb"><span style="border:1px solid #333;padding:3px 9px;font-size:10px;border-radius:999px;display:inline-block">STOCK</span></div></div>
+      <div class="pr"><span class="tag">2:1</span><div class="pb r21"><span style="border:1px solid #333;padding:3px 9px;font-size:10px;border-radius:999px;display:inline-block">STOCK</span></div></div></div><div class="c"><div class="c-name">preview-reset<span class="c-src" style="margin-left:8px">shell.css:384</span></div>
+      <div class="pr"><span class="tag">today</span><div class="pb"><button class="preview-reset">Reset</button></div></div>
+      <div class="pr"><span class="tag">2:1</span><div class="pb r21"><button class="preview-reset">Reset</button></div></div></div><div class="c"><div class="c-name">pill-reset-btn<span class="c-src" style="margin-left:8px">App.css:1741</span></div>
+      <div class="pr"><span class="tag">today</span><div class="pb"><button style="border-radius:999px;border:1px solid #333;background:none;color:#999;padding:5px 12px;font:inherit;font-size:11px">Reset</button></div></div>
+      <div class="pr"><span class="tag">2:1</span><div class="pb r21"><button style="border-radius:999px;border:1px solid #333;background:none;color:#999;padding:5px 12px;font:inherit;font-size:11px">Reset</button></div></div></div></div>
+<script>
+const b=document.body;
+document.getElementById('bOff').onclick=e=>{b.removeAttribute('data-force');e.target.classList.add('on');bOn.classList.remove('on')};
+document.getElementById('bOn').onclick=e=>{b.dataset.force='on';e.target.classList.add('on');bOff.classList.remove('on')};
+document.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
+  document.querySelectorAll('.bar button[data-k]').forEach(y=>y.classList.remove('on'));
+  x.classList.add('on'); document.documentElement.style.setProperty('--k',x.dataset.k);});
+</script>

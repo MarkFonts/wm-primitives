@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+<defs>
+  <style type="text/css"><![CDATA[
+    @font-face {
+      font-family: 'CalSansVF';
+      src: url(../../fonts/CalSansVF.ttf) format('woff2-variations');
+      font-weight: 400 700;
+    }
+    .calsans { font-family: 'CalSansVF', sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace; }
+
+  /* Dark-mode tokens. Zone hues keep their exact hue angle and only lift in lightness so
+     GEOM's four landings stay identifiable across themes. Only three carry a hue:
+     the UI landing is the neutral --g-ink, matching ReCal's --zone-ui. --g-chip/--g-on-chip are the
+     reversed default-marker pill, which must invert as a PAIR. Prefixed --g-* so this is
+     safe to inline into a host page: :root is the <svg> standalone and <html> inline, and
+     the theme toggle stamps data-theme, which has to win over the media query both ways. */
+  :root {
+    --g-bg: #fafaf7;
+    --g-panel: #ffffff;
+    --g-ink: #000000;
+    --g-ink1: #1a1a1a;
+    --g-ink2: #3a3a3a;
+    --g-dim: #9a958a;
+    --g-rule: #dcd9d1;
+    --g-rule2: #e0ddd5;
+    --g-rule3: #e8e6df;
+    --g-rule4: #d4d2cb;
+    --g-hatch: #999999;
+    --g-geo: #00c700;
+    --g-base: #00a0ff;
+    --g-a11y: #ff6b35;
+    --g-chip: #1a1a1a;
+    --g-on-chip: #ffffff;
+    --g-wash: .07;
+  }
+  @media (prefers-color-scheme: dark) { :root {
+    --g-bg: #100f0e;
+    --g-panel: #1a1917;
+    --g-ink: #f4f1ea;
+    --g-ink1: #e9e5dd;
+    --g-ink2: #c4c0b7;
+    --g-dim: #827e75;
+    --g-rule: #302f2c;
+    --g-rule2: #2a2926;
+    --g-rule3: #242320;
+    --g-rule4: #38362f;
+    --g-hatch: #6f6b62;
+    --g-geo: #33e033;
+    --g-base: #4db5ff;
+    --g-a11y: #ff8557;
+    --g-chip: #e9e5dd;
+    --g-on-chip: #100f0e;
+    --g-wash: .11;
+  } }
+  :root[data-theme="dark"] {
+    --g-bg: #100f0e;
+    --g-panel: #1a1917;
+    --g-ink: #f4f1ea;
+    --g-ink1: #e9e5dd;
+    --g-ink2: #c4c0b7;
+    --g-dim: #827e75;
+    --g-rule: #302f2c;
+    --g-rule2: #2a2926;
+    --g-rule3: #242320;
+    --g-rule4: #38362f;
+    --g-hatch: #6f6b62;
+    --g-geo: #33e033;
+    --g-base: #4db5ff;
+    --g-a11y: #ff8557;
+    --g-chip: #e9e5dd;
+    --g-on-chip: #100f0e;
+    --g-wash: .11;
+  }
+  :root[data-theme="light"] {
+    --g-bg: #fafaf7;
+    --g-panel: #ffffff;
+    --g-ink: #000000;
+    --g-ink1: #1a1a1a;
+    --g-ink2: #3a3a3a;
+    --g-dim: #9a958a;
+    --g-rule: #dcd9d1;
+    --g-rule2: #e0ddd5;
+    --g-rule3: #e8e6df;
+    --g-rule4: #d4d2cb;
+    --g-hatch: #999999;
+    --g-geo: #00c700;
+    --g-base: #00a0ff;
+    --g-a11y: #ff6b35;
+    --g-chip: #1a1a1a;
+    --g-on-chip: #ffffff;
+    --g-wash: .07;
+  }
+  .wash { opacity: var(--g-wash); }
+  ]]></style>
+</defs>
+<rect width="1920" height="1080" fill="var(--g-bg)"/>
+<rect x="190.0" y="205" width="156.0" height="809" fill="var(--g-a11y)" class="wash"/>
+<rect x="439.6" y="205" width="280.80000000000007" height="809" fill="var(--g-ink)" class="wash"/>
+<rect x="814.0" y="205" width="312.0" height="809" fill="var(--g-base)" class="wash"/>
+<rect x="1438.0" y="205" width="312.0" height="809" fill="var(--g-geo)" class="wash"/>
+<g stroke="var(--g-rule3)" stroke-width="1" opacity="0.2"><line x1="0" y1="0" x2="0" y2="1080"/><line x1="60" y1="0" x2="60" y2="1080"/><line x1="120" y1="0" x2="120" y2="1080"/><line x1="180" y1="0" x2="180" y2="1080"/><line x1="240" y1="0" x2="240" y2="1080"/><line x1="300" y1="0" x2="300" y2="1080"/><line x1="360" y1="0" x2="360" y2="1080"/><line x1="420" y1="0" x2="420" y2="1080"/><line x1="480" y1="0" x2="480" y2="1080"/><line x1="540" y1="0" x2="540" y2="1080"/><line x1="600" y1="0" x2="600" y2="1080"/><line x1="660" y1="0" x2="660" y2="1080"/><line x1="720" y1="0" x2="720" y2="1080"/><line x1="780" y1="0" x2="780" y2="1080"/><line x1="840" y1="0" x2="840" y2="1080"/><line x1="900" y1="0" x2="900" y2="1080"/><line x1="960" y1="0" x2="960" y2="1080"/><line x1="1020" y1="0" x2="1020" y2="1080"/><line x1="1080" y1="0" x2="1080" y2="1080"/><line x1="1140" y1="0" x2="1140" y2="1080"/><line x1="1200" y1="0" x2="1200" y2="1080"/><line x1="1260" y1="0" x2="1260" y2="1080"/><line x1="1320" y1="0" x2="1320" y2="1080"/><line x1="1380" y1="0" x2="1380" y2="1080"/><line x1="1440" y1="0" x2="1440" y2="1080"/><line x1="1500" y1="0" x2="1500" y2="1080"/><line x1="1560" y1="0" x2="1560" y2="1080"/><line x1="1620" y1="0" x2="1620" y2="1080"/><line x1="1680" y1="0" x2="1680" y2="1080"/><line x1="1740" y1="0" x2="1740" y2="1080"/><line x1="1800" y1="0" x2="1800" y2="1080"/><line x1="1860" y1="0" x2="1860" y2="1080"/></g>
+<text class="mono" x="80" y="40" font-size="12" fill="var(--g-dim)" letter-spacing="1.2">CAL SANS v2.000 · GEOM AXIS · 4 LANDINGS / 3 TRANSITIONS · UI=DEFAULT</text>
+<text class="mono" x="1840" y="40" font-size="12" fill="var(--g-dim)" text-anchor="end" letter-spacing="1.2">GEOM = 25 / 100</text>
+<text class="calsans" x="80" y="150" 
+    font-size="72" font-weight="500" fill="var(--g-ink1)"
+    style="font-variation-settings: 'GEOM' 25, 'wght' 500, 'opsz' 10;">Gage City’s quick joint frugality.</text>
+<line x1="190" y1="215" x2="1750" y2="215" stroke="var(--g-rule4)" stroke-width="2"/>
+<text class="mono" x="268.0" y="193" font-size="11" fill="var(--g-a11y)" text-anchor="middle" font-weight="700" letter-spacing="2">A11y</text>
+<text class="mono" x="580.0" y="193" font-size="11" fill="var(--g-ink)" text-anchor="middle" font-weight="700" letter-spacing="2">UI · DEFAULT</text>
+<text class="mono" x="970.0" y="193" font-size="11" fill="var(--g-base)" text-anchor="middle" font-weight="700" letter-spacing="2">Base</text>
+<text class="mono" x="1594.0" y="193" font-size="11" fill="var(--g-geo)" text-anchor="middle" font-weight="700" letter-spacing="2">Geo</text>
+<rect x="190.0" y="211" width="156.0" height="8" fill="var(--g-a11y)" opacity="0.85" rx="1"/>
+<rect x="439.6" y="211" width="280.80000000000007" height="8" fill="var(--g-ink)" opacity="0.85" rx="1"/>
+<rect x="814.0" y="211" width="312.0" height="8" fill="var(--g-base)" opacity="0.85" rx="1"/>
+<rect x="1438.0" y="211" width="312.0" height="8" fill="var(--g-geo)" opacity="0.85" rx="1"/>
+<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+  <line x1="0" y1="0" x2="0" y2="6" stroke="var(--g-hatch)" stroke-width="1.4" opacity="0.4"/></pattern></defs>
+<rect x="346.0" y="211" width="93.60000000000002" height="8" fill="url(#hatch)"/>
+<rect x="720.4000000000001" y="211" width="93.59999999999991" height="8" fill="url(#hatch)"/>
+<rect x="1126.0" y="211" width="312.0" height="8" fill="url(#hatch)"/>
+<line x1="190.0" y1="219" x2="190.0" y2="226" stroke="var(--g-a11y)" stroke-width="1.5"/>
+<text class="mono" x="190.0" y="241" font-size="11" fill="var(--g-a11y)" text-anchor="middle">0</text>
+<line x1="346.0" y1="219" x2="346.0" y2="226" stroke="var(--g-a11y)" stroke-width="1.5"/>
+<text class="mono" x="346.0" y="241" font-size="11" fill="var(--g-a11y)" text-anchor="middle">10</text>
+<line x1="580.0" y1="219" x2="580.0" y2="226" stroke="var(--g-ink)" stroke-width="1.5"/>
+<text class="mono" x="580.0" y="241" font-size="11" fill="var(--g-ink)" text-anchor="middle">25</text>
+<line x1="720.4000000000001" y1="219" x2="720.4000000000001" y2="226" stroke="var(--g-ink)" stroke-width="1.5"/>
+<text class="mono" x="720.4000000000001" y="241" font-size="11" fill="var(--g-ink)" text-anchor="middle">34</text>
+<line x1="814.0" y1="219" x2="814.0" y2="226" stroke="var(--g-base)" stroke-width="1.5"/>
+<text class="mono" x="814.0" y="241" font-size="11" fill="var(--g-base)" text-anchor="middle">40</text>
+<line x1="1126.0" y1="219" x2="1126.0" y2="226" stroke="var(--g-base)" stroke-width="1.5"/>
+<text class="mono" x="1126.0" y="241" font-size="11" fill="var(--g-base)" text-anchor="middle">60</text>
+<line x1="1438.0" y1="219" x2="1438.0" y2="226" stroke="var(--g-geo)" stroke-width="1.5"/>
+<text class="mono" x="1438.0" y="241" font-size="11" fill="var(--g-geo)" text-anchor="middle">80</text>
+<line x1="1750.0" y1="219" x2="1750.0" y2="226" stroke="var(--g-geo)" stroke-width="1.5"/>
+<text class="mono" x="1750.0" y="241" font-size="11" fill="var(--g-geo)" text-anchor="middle">100</text>
+<text class="mono" x="80" y="219" font-size="12" font-weight="700" fill="var(--g-ink1)">GEOM</text>
+<line x1="190" y1="268.0" x2="1750" y2="268.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="288.0" x2="1750" y2="288.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="299.0" x2="1840" y2="299.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="310.0" x2="1750" y2="310.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="330.0" x2="1750" y2="330.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="341.0" x2="1840" y2="341.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="352.0" x2="1750" y2="352.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="372.0" x2="1750" y2="372.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="392.0" x2="1750" y2="392.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="403.0" x2="1840" y2="403.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="414.0" x2="1750" y2="414.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="434.0" x2="1750" y2="434.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="454.0" x2="1750" y2="454.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="465.0" x2="1840" y2="465.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="476.0" x2="1750" y2="476.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="496.0" x2="1750" y2="496.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="516.0" x2="1750" y2="516.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="527.0" x2="1840" y2="527.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="538.0" x2="1750" y2="538.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="558.0" x2="1750" y2="558.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="578.0" x2="1750" y2="578.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="589.0" x2="1840" y2="589.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="600.0" x2="1750" y2="600.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="620.0" x2="1750" y2="620.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="640.0" x2="1750" y2="640.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="651.0" x2="1840" y2="651.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="662.0" x2="1750" y2="662.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="682.0" x2="1750" y2="682.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="702.0" x2="1750" y2="702.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="713.0" x2="1840" y2="713.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="724.0" x2="1750" y2="724.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="744.0" x2="1750" y2="744.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="755.0" x2="1840" y2="755.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="766.0" x2="1750" y2="766.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="786.0" x2="1750" y2="786.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="797.0" x2="1840" y2="797.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="808.0" x2="1750" y2="808.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="828.0" x2="1750" y2="828.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="839.0" x2="1840" y2="839.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="850.0" x2="1750" y2="850.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="870.0" x2="1750" y2="870.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="881.0" x2="1840" y2="881.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="892.0" x2="1750" y2="892.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="912.0" x2="1750" y2="912.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="923.0" x2="1840" y2="923.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="934.0" x2="1750" y2="934.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="954.0" x2="1750" y2="954.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="80" y1="965.0" x2="1840" y2="965.0" stroke="var(--g-rule2)" stroke-width="1"/>
+<line x1="190" y1="976.0" x2="1750" y2="976.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<line x1="190" y1="996.0" x2="1750" y2="996.0" stroke="var(--g-rule)" stroke-width="1" opacity="0.3"/>
+<rect x="190.0" y="265.5" width="156.0" height="5" rx="2" fill="var(--g-a11y)" opacity="0.45"/>
+<text class="mono" x="354.0" y="272.0" font-size="10" fill="var(--g-a11y)" opacity="0.45">0–10</text>
+<rect x="346.0" y="283.5" width="1404.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="1758.0" y="292.0" font-size="12" fill="var(--g-ink)" opacity="1.0">10–100</text>
+<rect x="190.0" y="307.5" width="156.0" height="5" rx="2" fill="var(--g-a11y)" opacity="0.45"/>
+<text class="mono" x="354.0" y="314.0" font-size="10" fill="var(--g-a11y)" opacity="0.45">0–10</text>
+<rect x="346.0" y="325.5" width="1404.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="1758.0" y="334.0" font-size="12" fill="var(--g-ink)" opacity="1.0">10–100</text>
+<rect x="190.0" y="349.5" width="202.8" height="5" rx="2" fill="var(--g-a11y)" opacity="0.45"/>
+<text class="mono" x="400.8" y="356.0" font-size="10" fill="var(--g-a11y)" opacity="0.45">0–13</text>
+<rect x="392.8" y="367.5" width="327.6000000000001" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="728.4000000000001" y="376.0" font-size="12" fill="var(--g-ink)" opacity="1.0">13–34</text>
+<rect x="720.4000000000001" y="389.5" width="1029.6" height="5" rx="2" fill="var(--g-base)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="396.0" font-size="10" fill="var(--g-base)" opacity="0.45">34–100</text>
+<rect x="190.0" y="411.5" width="249.60000000000002" height="5" rx="2" fill="var(--g-a11y)" opacity="0.45"/>
+<text class="mono" x="447.6" y="418.0" font-size="10" fill="var(--g-a11y)" opacity="0.45">0–16</text>
+<rect x="439.6" y="429.5" width="374.4" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="822.0" y="438.0" font-size="12" fill="var(--g-ink)" opacity="1.0">16–40</text>
+<rect x="814.0" y="451.5" width="936.0" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="458.0" font-size="10" fill="var(--g-geo)" opacity="0.45">40–100</text>
+<rect x="190.0" y="471.5" width="624.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="822.0" y="480.0" font-size="12" fill="var(--g-ink)" opacity="1.0">0–40</text>
+<rect x="814.0" y="493.5" width="530.4000000000001" height="5" rx="2" fill="var(--g-base)" opacity="0.45"/>
+<text class="mono" x="1352.4" y="500.0" font-size="10" fill="var(--g-base)" opacity="0.45">40–74</text>
+<rect x="1344.4" y="513.5" width="405.5999999999999" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="520.0" font-size="10" fill="var(--g-geo)" opacity="0.45">74–100</text>
+<rect x="190.0" y="533.5" width="624.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="822.0" y="542.0" font-size="12" fill="var(--g-ink)" opacity="1.0">0–40</text>
+<rect x="814.0" y="555.5" width="530.4000000000001" height="5" rx="2" fill="var(--g-base)" opacity="0.45"/>
+<text class="mono" x="1352.4" y="562.0" font-size="10" fill="var(--g-base)" opacity="0.45">40–74</text>
+<rect x="1344.4" y="575.5" width="405.5999999999999" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="582.0" font-size="10" fill="var(--g-geo)" opacity="0.45">74–100</text>
+<rect x="190.0" y="595.5" width="624.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="822.0" y="604.0" font-size="12" fill="var(--g-ink)" opacity="1.0">0–40</text>
+<rect x="814.0" y="617.5" width="530.4000000000001" height="5" rx="2" fill="var(--g-base)" opacity="0.45"/>
+<text class="mono" x="1352.4" y="624.0" font-size="10" fill="var(--g-base)" opacity="0.45">40–74</text>
+<rect x="1344.4" y="637.5" width="405.5999999999999" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="644.0" font-size="10" fill="var(--g-geo)" opacity="0.45">74–100</text>
+<rect x="190.0" y="657.5" width="624.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="822.0" y="666.0" font-size="12" fill="var(--g-ink)" opacity="1.0">0–40</text>
+<rect x="814.0" y="679.5" width="296.4000000000001" height="5" rx="2" fill="var(--g-base)" opacity="0.45"/>
+<text class="mono" x="1118.4" y="686.0" font-size="10" fill="var(--g-base)" opacity="0.45">40–59</text>
+<rect x="1110.4" y="699.5" width="639.5999999999999" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="706.0" font-size="10" fill="var(--g-geo)" opacity="0.45">59–100</text>
+<rect x="190.0" y="719.5" width="624.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="822.0" y="728.0" font-size="12" fill="var(--g-ink)" opacity="1.0">0–40</text>
+<rect x="814.0" y="741.5" width="936.0" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="748.0" font-size="10" fill="var(--g-geo)" opacity="0.45">40–100</text>
+<rect x="190.0" y="761.5" width="1248.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="1446.0" y="770.0" font-size="12" fill="var(--g-ink)" opacity="1.0">0–80</text>
+<rect x="1438.0" y="783.5" width="312.0" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="790.0" font-size="10" fill="var(--g-geo)" opacity="0.45">80–100</text>
+<rect x="190.0" y="803.5" width="1248.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="1446.0" y="812.0" font-size="12" fill="var(--g-ink)" opacity="1.0">0–80</text>
+<rect x="1438.0" y="825.5" width="312.0" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="832.0" font-size="10" fill="var(--g-geo)" opacity="0.45">80–100</text>
+<rect x="190.0" y="845.5" width="1248.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="1446.0" y="854.0" font-size="12" fill="var(--g-ink)" opacity="1.0">0–80</text>
+<rect x="1438.0" y="867.5" width="312.0" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="874.0" font-size="10" fill="var(--g-geo)" opacity="0.45">80–100</text>
+<rect x="190.0" y="887.5" width="1248.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="1446.0" y="896.0" font-size="12" fill="var(--g-ink)" opacity="1.0">0–80</text>
+<rect x="1438.0" y="909.5" width="312.0" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="916.0" font-size="10" fill="var(--g-geo)" opacity="0.45">80–100</text>
+<rect x="190.0" y="929.5" width="1248.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="1446.0" y="938.0" font-size="12" fill="var(--g-ink)" opacity="1.0">0–80</text>
+<rect x="1438.0" y="951.5" width="312.0" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="958.0" font-size="10" fill="var(--g-geo)" opacity="0.45">80–100</text>
+<rect x="190.0" y="971.5" width="1248.0" height="9" rx="2" fill="var(--g-ink)" opacity="1.0"/>
+<text class="mono" x="1446.0" y="980.0" font-size="12" fill="var(--g-ink)" opacity="1.0">0–80</text>
+<rect x="1438.0" y="993.5" width="312.0" height="5" rx="2" fill="var(--g-geo)" opacity="0.45"/>
+<text class="mono" x="1758.0" y="1000.0" font-size="10" fill="var(--g-geo)" opacity="0.45">80–100</text>
+<text class="calsans" x="105" y="276.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-a11y)" 
+            style="font-variation-settings: 'GEOM' 5, 'opsz' 10, 'wght' 700;">I</text>
+<text class="calsans" x="125" y="296.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">I</text>
+<text class="calsans" x="105" y="318.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-a11y)" 
+            style="font-variation-settings: 'GEOM' 5, 'opsz' 10, 'wght' 700;">l</text>
+<text class="calsans" x="125" y="338.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">l</text>
+<text class="calsans" x="105" y="360.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-a11y)" 
+            style="font-variation-settings: 'GEOM' 5, 'opsz' 10, 'wght' 700;">a</text>
+<text class="calsans" x="125" y="380.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">a</text>
+<text class="calsans" x="145" y="400.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-base)" 
+            style="font-variation-settings: 'GEOM' 50, 'opsz' 10, 'wght' 700;">a</text>
+<text class="calsans" x="105" y="422.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-a11y)" 
+            style="font-variation-settings: 'GEOM' 5, 'opsz' 10, 'wght' 700;">g</text>
+<text class="calsans" x="125" y="442.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">g</text>
+<text class="calsans" x="145" y="462.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">g</text>
+<text class="calsans" x="105" y="484.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">f</text>
+<text class="calsans" x="125" y="504.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-base)" 
+            style="font-variation-settings: 'GEOM' 50, 'opsz' 10, 'wght' 700;">f</text>
+<text class="calsans" x="145" y="524.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">f</text>
+<text class="calsans" x="105" y="546.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">t</text>
+<text class="calsans" x="125" y="566.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-base)" 
+            style="font-variation-settings: 'GEOM' 50, 'opsz' 10, 'wght' 700;">t</text>
+<text class="calsans" x="145" y="586.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">t</text>
+<text class="calsans" x="105" y="608.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">j</text>
+<text class="calsans" x="125" y="628.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-base)" 
+            style="font-variation-settings: 'GEOM' 50, 'opsz' 10, 'wght' 700;">j</text>
+<text class="calsans" x="145" y="648.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">j</text>
+<text class="calsans" x="105" y="670.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">y</text>
+<text class="calsans" x="125" y="690.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-base)" 
+            style="font-variation-settings: 'GEOM' 50, 'opsz' 10, 'wght' 700;">y</text>
+<text class="calsans" x="145" y="710.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">y</text>
+<text class="calsans" x="105" y="732.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">u</text>
+<text class="calsans" x="125" y="752.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">u</text>
+<text class="calsans" x="105" y="774.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">C</text>
+<text class="calsans" x="125" y="794.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">C</text>
+<text class="calsans" x="105" y="816.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">c</text>
+<text class="calsans" x="125" y="836.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">c</text>
+<text class="calsans" x="105" y="858.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">M</text>
+<text class="calsans" x="125" y="878.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">M</text>
+<text class="calsans" x="105" y="900.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">1</text>
+<text class="calsans" x="125" y="920.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">1</text>
+<text class="calsans" x="105" y="942.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">5</text>
+<text class="calsans" x="125" y="962.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">5</text>
+<text class="calsans" x="105" y="984.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-ink)" 
+            style="font-variation-settings: 'GEOM' 25, 'opsz' 10, 'wght' 700;">0</text>
+<text class="calsans" x="125" y="1004.0" 
+            font-size="25" font-weight="700" text-anchor="middle" fill="var(--g-geo)" 
+            style="font-variation-settings: 'GEOM' 90, 'opsz' 10, 'wght' 700;">0</text>
+<rect x="578.5" y="180" width="3" height="834" fill="var(--g-ink1)" class="wash"/>
+<line x1="580.0" y1="180" x2="580.0" y2="1014" stroke="var(--g-ink1)" stroke-width="2"/>
+<circle cx="580.0" cy="218" r="13" fill="var(--g-ink)" opacity="0.15"/>
+<circle cx="580.0" cy="215" r="13" fill="var(--g-panel)" stroke="var(--g-ink1)" stroke-width="3"/>
+<circle cx="580.0" cy="215" r="4" fill="var(--g-ink1)"/>
+<rect x="555.0" y="166" width="50" height="24" rx="4" fill="var(--g-chip)"/>
+<polygon points="575.0,190 585.0,190 580.0,196" fill="var(--g-chip)"/>
+<text class="mono" x="580.0" y="182.0" font-size="13" font-weight="700" fill="var(--g-on-chip)" text-anchor="middle">25</text>
+<rect x="80" y="1042" width="12" height="12" fill="var(--g-a11y)"/>
+<text class="mono" x="98" y="1053" font-size="12" fill="var(--g-ink2)">0–10  A11y</text>
+<rect x="280" y="1042" width="12" height="12" fill="var(--g-ink)"/>
+<text class="mono" x="298" y="1053" font-size="12" fill="var(--g-ink2)">16–34  UI · DEFAULT</text>
+<rect x="480" y="1042" width="12" height="12" fill="var(--g-base)"/>
+<text class="mono" x="498" y="1053" font-size="12" fill="var(--g-ink2)">40–60  Base</text>
+<rect x="680" y="1042" width="12" height="12" fill="var(--g-geo)"/>
+<text class="mono" x="698" y="1053" font-size="12" fill="var(--g-ink2)">80–100  Geo</text>
+<text class="mono" x="1840" y="1053" font-size="12" fill="var(--g-dim)" text-anchor="end">15 GROUPS · rclt · 6 AXES (+ital)</text>
+</svg>
