@@ -33,11 +33,19 @@
 .spinner, .ui-spinner, .gg-geom-dot, .vslider-thumb, .preview-dot, .mode-throb,
 .ui-dot, .ui-avatar, .ui-thumb, .ui-radio, .ui-radio.on::after, .ui-switch::after,
 .ui-sk--circle, .ui-tl-dot, .ui-step-n, .ui-alert-ic,
-input[type="radio"], input[type="radio"]:checked::after,
-input[type="range"]::-webkit-slider-thumb,
-input[type="range"]::-moz-range-thumb {
+input[type="radio"], input[type="radio"]:checked::after {
   corner-shape: round;
 }
+
+/* Each vendor thumb gets its OWN rule, and that is not a style preference.
+   A comma-separated selector list is all-or-nothing: one selector the engine cannot
+   parse invalidates the WHOLE rule. ::-moz-range-thumb is a SyntaxError in Chrome and
+   ::-webkit-slider-thumb is one in Firefox, so listing them together with the circles
+   above silently deleted every exclusion — avatars, dots, radios and switch knobs all
+   rendered as superellipses. Keep them apart, and never fold a vendor pseudo-element
+   into a shared list. */
+input[type="range"]::-webkit-slider-thumb { corner-shape: round; }
+input[type="range"]::-moz-range-thumb { corner-shape: round; }
 
 /* ── Press ────────────────────────────────────────────────────────────────────────
    The stroke lands before the fill: it acknowledges the tap, the fill confirms on release.
