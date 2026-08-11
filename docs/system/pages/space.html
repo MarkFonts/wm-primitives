@@ -46,7 +46,7 @@ th{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:#666;font-w
  *
  * Two things the host app must provide, because they are the app's, not ours:
  *   --ui-font   the chrome face
- *   --text-rgb  the text colour as "R, G, B" — COMMA-separated, because ink is written
+ *   --text-rgb  the text color as "R, G, B" — COMMA-separated, because ink is written
  *               rgba(var(--text-rgb), α). The rgb(… / α) slash form silently fails here.
  * Both have fallbacks below so a missing one degrades rather than breaks, but an app that
  * relies on the fallback is not on the system.
@@ -71,7 +71,7 @@ th{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:#666;font-w
   --poster-1: 3rem;    --poster-2: 4.25rem;  --poster-3: 6rem;   /*  48 /  68 /  96px */
   --poster-4: 8.5rem;  --poster-5: 12rem;                        /* 136 / 192px */
 
-  /* ---- ink: opacity on the text colour. Three levels, never four. ---- */
+  /* ---- ink: opacity on the text color. Three levels, never four. ---- */
   --ink-full: 1;  --ink-quiet: .62;  --ink-faint: .38;
 
   /* ---- the ONLY tracking value in the system. Capitals must be letterspaced and
@@ -134,7 +134,7 @@ th{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:#666;font-w
 .ink-quiet { color: rgba(var(--text-rgb), var(--ink-quiet)); }
 .ink-faint { color: rgba(var(--text-rgb), var(--ink-faint)); }
 
-/* rule — the quietest signal there is. Same size, weight, colour and case; only a
+/* rule — the quietest signal there is. Same size, weight, color and case; only a
    hairline under the words. */
 .sig-rule {
   text-decoration: underline;
@@ -736,7 +736,7 @@ input[type="range"]::-moz-range-thumb {
 /* Instrument-model design tokens.
    Every value is extracted from the existing ReCal / wordmark.nyc palette
    (docs/control-mapping.md §5, spec directive 2) — no new hues invented, and no
-   terracotta/orange accent. Zone colours reuse the existing four exactly. */
+   terracotta/orange accent. Zone colors reuse the existing four exactly. */
 
 :root {
   color-scheme: dark;   /* native form controls (AxisSlider number steppers) render dark */
@@ -762,7 +762,7 @@ input[type="range"]::-moz-range-thumb {
   --text-faint: #444;
   /* --text as "R, G, B" for the ink levels in type.css. COMMA-separated on purpose:
      ink is written rgba(var(--text-rgb), a), and the rgb(... / a) slash form needs
-     space-separated channels, so mixing them drops the colour silently. */
+     space-separated channels, so mixing them drops the color silently. */
   --text-rgb: 232, 232, 232;
 
   /* ── Lines ── */
@@ -873,7 +873,7 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
-/* Phase 2 shell — rail / canvas / floor grid. All colour/type from tokens.css. */
+/* Phase 2 shell — rail / canvas / floor grid. All color/type from tokens.css. */
 
 .shell {
   display: grid;
@@ -1191,7 +1191,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ── Font info — persistent right panel. Uniform UI-size rows, one translucent
-   A11y colour (owner spec). Right-aligned, like the reference. ── */
+   A11y color (owner spec). Right-aligned, like the reference. ── */
 .info-panel {
   position: absolute;              /* overlays .canvas — top-of-screen aligned, covers play */
   top: 0;
@@ -1357,8 +1357,8 @@ input[type="range"]::-moz-range-thumb {
 }
 .floor-label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); }
 .zone-chips { display: flex; gap: 4px; flex-wrap: wrap; }
-/* The GEOM zones are near-primary actions, so they carry weight, not just colour.
-   ACTIVE zone takes a fill (zone colour IS information); inactive keeps its hue at full
+/* The GEOM zones are near-primary actions, so they carry weight, not just color.
+   ACTIVE zone takes a fill (zone color IS information); inactive keeps its hue at full
    strength — the old .6 opacity made them read as disabled.
    Weight DOES change between states now. It used to be banned to avoid reflow; instead
    each chip renders its own label a second time at the heavier weight, hidden and stacked
@@ -1782,7 +1782,7 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
    --text-muted / disabled --text-dim), active carries a 1.5px accent underline.
    Transparent padding keeps hit targets ≥32px. House-style focus, never the UA ring. */
 /* De-chromed canvas controls (right panel): naked text, regular weight when idle;
-   active = full text colour, BOLD + 1.5px accent underline. Rollover = a thin inset
+   active = full text color, BOLD + 1.5px accent underline. Rollover = a thin inset
    rule, never a fill. Scoped under .canvas so it beats App.css's global button rules.
    Transparent padding keeps hit targets ≥32px. House-style focus, never the UA ring. */
 .canvas .mode-btn, .canvas .text-tab, .canvas .chip {
@@ -1860,7 +1860,7 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
 /* ── Paragraph ── */
 .text-tabs { display: flex; gap: 14px; flex-wrap: wrap; }
 .para-doc { color: var(--text); }
-/* All heading levels + body share one colour — override any leaked App.css h1/h2 rules. */
+/* All heading levels + body share one color — override any leaked App.css h1/h2 rules. */
 .para-block { margin: 0 0 14px; color: var(--text); font-weight: inherit; outline: none; caret-color: var(--text); }
 .para-block--h1, .para-block--h2, .para-block--h3 { margin-top: 10px; }
 .para-block:empty::before { content: '\200b'; color: transparent; }   /* keep empty blocks clickable */
@@ -1996,11 +1996,11 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
   border-radius: var(--radius);
 }
 /* GEOM swap flash (grid cells + inline text glyphs).
-   v2 — two states of the same colour, chosen by whether the rail GEOM slider is held:
+   v2 — two states of the same color, chosen by whether the rail GEOM slider is held:
    · geom-flash-hold: while dragging, the glyph HOLDS its zone accent with no
-     transition — crossings hard-switch the colour / hard-off in place (live map).
+     transition — crossings hard-switch the color / hard-off in place (live map).
    · geom-flash: on release (or a one-shot chip/keyboard change) the glyph eases
-     from its zone accent back to the resting colour, then un-wraps. */
+     from its zone accent back to the resting color, then un-wraps. */
 .geom-flash-hold { color: var(--flash-color); transition: none; }
 .geom-flash { animation: glyph-flash .5s ease-out; }
 @keyframes glyph-flash {
@@ -2095,7 +2095,7 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
 .cap-key i{display:inline-block;width:14px;height:2px;vertical-align:middle;margin-right:5px}
 .k-cap{background:#e08a63} .k-txt{background:#6f9ee8}
 
-/* Do / Don't -- guidelines framing. Colours are the house status tokens, used for
+/* Do / Don't -- guidelines framing. Colors are the house status tokens, used for
    judgement (this is right / this is wrong), which is what they are for. */
 .dd{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line,#2a2a2a);
   border-radius:10px;overflow:hidden;margin:18px 0 14px}
@@ -2111,7 +2111,7 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
 @media (max-width:720px){.dd{grid-template-columns:1fr}
   .dd-col+.dd-col{border-left:none;border-top:1px solid var(--line,#2a2a2a)}}
 
-/* Each label is bound to ITS OWN line, and carries that line's colour: the blue label
+/* Each label is bound to ITS OWN line, and carries that line's color: the blue label
    rides the moving padding bar, the orange one stays on the fixed 0.6r threshold. They
    used to stack above the same tick, so both appeared to measure the same thing. */
 .bar-lbl{position:absolute;top:-26px;transform:translateX(-50%);font-size:9px;color:#6f9ee8;

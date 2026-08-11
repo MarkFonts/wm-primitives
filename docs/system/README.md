@@ -1,6 +1,6 @@
 # The system page
 
-The illustrated view of wm-primitives — type, corners, circles, space, and colour — as one
+The illustrated view of wm-primitives — type, corners, circles, space, and color — as one
 long-form document. Published by GitHub Pages from `docs/`:
 
 **https://markfonts.github.io/wm-primitives/**
@@ -69,4 +69,4 @@ Edit the source in `docs/system/pages/`, re-run the build, and check the result 
 committing — the failure modes above are all invisible in the source and only show up in
 the rendered page. Useful checks: every `var()` resolves (a dropped rule leaves
 `border-radius: 0`, and `corner-shape` is a no-op without a radius), the GEOM map paints in
-colour rather than black, and no request 404s.
+color rather than black, and no request 404s.

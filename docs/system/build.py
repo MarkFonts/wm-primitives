@@ -23,8 +23,8 @@ SECTIONS = [
     ("corners", "The corner law",SD/"corner-law.html",        "superellipse(1.2), and 2^k"),
     ("circles", "Circles",       SD/"circles.html",           "what opts out, and why"),
     ("space",   "Space",         SD/"space.html",             "the pad scale, cap + alignment"),
-    ("colour",  "Colour",        SD/"colour-audit.html",      "every declaration, audited"),
-    ("usage",   "Who uses what", SD/"colour-usage.html",      "the usage map"),
+    ("color",  "Color",        SD/"color-audit.html",      "every declaration, audited"),
+    ("usage",   "Who uses what", SD/"color-usage.html",      "the usage map"),
 ]
 
 # ---------------------------------------------------------------- css scoping
@@ -99,7 +99,7 @@ def build_section(sid, label, path, kicker):
     css = re.sub(r'/\*.*?\*/', '', css, flags=re.S)
     # SVG <style> is CDATA-wrapped. Those markers are legal in SVG and INVALID inside an
     # HTML <style>, so the CSS parser stops dead at '<![CDATA[' and silently drops every
-    # rule after it -- which is how the GEOM map lost all its --g-* colours and painted
+    # rule after it -- which is how the GEOM map lost all its --g-* colors and painted
     # black while --radius, declared earlier, still resolved.
     css = css.replace('<![CDATA[', '').replace(']]>', '')
     js  = "\n".join(re.findall(r'<script[^>]*>(.*?)</script>', raw, re.S))
@@ -457,10 +457,10 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
         class="wm-mr wm-mr-base"><u>base</u></i><i class="wm-mr wm-mr-desc"><u>desc</u></i><i
         class="wm-sb wm-sb-l"></i><i class="wm-sb wm-sb-r"></i></span><br>Every surface.</h1>
     <div class="wm-close">
-      <p class="wm-dek">Type, corners, circles, space, and colour, each decided once and written
+      <p class="wm-dek">Type, corners, circles, space, and color, each decided once and written
         down here &mdash; so a <b>Glyphs plugin</b>, a <b>React proofing page</b>, and
         <b>wordmark.nyc</b> round the same corners, spend the same space, and mean the same thing
-        by a colour. This is the long form: every law in one scroll, with the outline on the
+        by a color. This is the long form: every law in one scroll, with the outline on the
         left. Each parameter earns its own page as the system grows.</p>
       <div class="wm-stats">
         <div class="wm-stat"><b>6</b><i>laws, one page</i></div>

@@ -20,7 +20,7 @@
 //
 // Written in TSX so ReCal's `tsc` build type-checks it; font-proofer's esbuild strips
 // the types. Styling is token-based (see StyleScopeDropdown.css) so each app's theme
-// colours flow in unchanged. Destined to move into the shared `wm-primitives` submodule.
+// colors flow in unchanged. Destined to move into the shared `wm-primitives` submodule.
 // ─────────────────────────────────────────────────────────────────────────────
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type MouseEvent as ReactMouseEvent } from 'react'
 import './StyleScopeDropdown.css'

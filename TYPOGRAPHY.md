@@ -12,9 +12,9 @@ handle type. Companion to the primitives in `src/`.
 | wm-primitives | 74 | 17 | 0 |
 | font-proofer | 43 | 14 | 0 |
 
-Colour, motion and shape are **already a shared system** — 26 token names appear in
+Color, motion and shape are **already a shared system** — 26 token names appear in
 both wordmark.nyc and the apps (`--accent`, `--surface-1..3`, `--text-*`, `--border*`,
-`--radius`, `--radius-pill`, `--spring`, `--dur`, the zone colours, `--marker-*`).
+`--radius`, `--radius-pill`, `--spring`, `--dur`, the zone colors, `--marker-*`).
 
 Type is the hole. 838 hand-placed declarations, no vocabulary. The tell: sizes run
 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5 — half-pixel drift from nudging values in
@@ -45,7 +45,7 @@ constant. It is also the one our own proof sheets reach for most, and it deserve
 be in the vocabulary rather than improvised each time.
 
 `geom` is the one no other type system has. Moving along Cal Sans' GEOM axis changes
-how the letters are *built* while size, weight, colour and case all hold. It says "a
+how the letters are *built* while size, weight, color and case all hold. It says "a
 different kind of thing", which makes it kin to `case` rather than to `weight`: a
 change of voice, not of rank.
 
@@ -97,7 +97,7 @@ Three rules govern it:
   invisible, so it is wasted there; it earns its keep at `title`, `display` and the
   poster steps.
 - **It is Cal Sans-scoped**, like the GEOM half of the chrome pin and like the zone
-  colours. Re-face the chrome and this signal disappears; the other five survive.
+  colors. Re-face the chrome and this signal disappears; the other five survive.
 
 ## Space
 
@@ -180,7 +180,7 @@ surfaces will spend their allowance differently.
 *pinned* while size changes — a deliberate mismatch — is no longer a compensation.
 It is a signal, and it is spent.
 
-### The weight-and-colour habit
+### The weight-and-color habit
 
 The pairing hardest to catch, because each half looks reasonable alone: making a
 heading **bolder** *and* giving it a different hue. That is two signals for one idea,
@@ -191,13 +191,13 @@ and it is how most interfaces drift into shouting.
 <h3 class="rule">Messina Serif</h3>                                  <!-- one -->
 ```
 
-Same size, same weight, same colour, same case — only a rule beneath. Prefer it to a
+Same size, same weight, same color, same case — only a rule beneath. Prefer it to a
 weight bump whenever the distinction is *structural* (this is a heading) rather than
 *urgent* (read this first). Weight is for urgency; a rule is for structure.
 
 Hue is not on the list of five on purpose. Reserve it for pointing at the thing under
 discussion — an annotation, a highlighted value — never for hierarchy. The moment a
-colour means "important," it stops being able to mean anything else.
+color means "important," it stops being able to mean anything else.
 
 ### Tracking: one value, for capitals
 
@@ -302,7 +302,7 @@ actually mean. Three:
 --ink-faint: .38;    /* structural only: rules, disabled, watermarks */
 ```
 
-Ink is **opacity on the text colour**, not a separate hex — so it composes over any
+Ink is **opacity on the text color**, not a separate hex — so it composes over any
 ground and stays honest in both themes. `--text-rgb` already exists for exactly this,
 and it is **comma-separated**, so use the `rgba()` form (the space/slash syntax needs
 `232 232 232` and will silently drop the whole declaration):
@@ -344,19 +344,19 @@ It has exactly one job: **pointing at the thing under discussion** — the value
 explained, the word a sentence is about, the cell a control is editing. It never marks
 hierarchy and it never means "important."
 
-The reason is that a colour can only carry one meaning at a time. The moment blue
+The reason is that a color can only carry one meaning at a time. The moment blue
 means *important*, it can no longer mean *this is the one I'm talking about*, and every
 later use has to fight the one before it. Headings get a rule or a size; the blue stays
 free to point.
 
-The zone colours (`--zone-a11y`, `--zone-ui`, `--zone-base`, `--zone-geo`) are a
+The zone colors (`--zone-a11y`, `--zone-ui`, `--zone-base`, `--zone-geo`) are a
 **ReCal-scoped vocabulary**, and a real one: inside ReCal each names a region of the
-GEOM axis, so a colour there is a statement about the font's geometry — which zone a
+GEOM axis, so a color there is a statement about the font's geometry — which zone a
 glyph belongs to, which band a threshold sits in. That is a legitimate third job for
-colour, and it is exactly why it has to stay inside ReCal.
+color, and it is exactly why it has to stay inside ReCal.
 
-Outside ReCal the same colours mean nothing. A zone colour on wordmark.nyc or in
-font-proofer is just a colour, and a misleading one, because it looks like it is
+Outside ReCal the same colors mean nothing. A zone color on wordmark.nyc or in
+font-proofer is just a color, and a misleading one, because it looks like it is
 saying something about GEOM. Don't borrow them for accents, states or hierarchy
 anywhere else.
 

@@ -1,7 +1,7 @@
 # wm-primitives
 
 **→ [The system, illustrated](https://markfonts.github.io/wm-primitives/)** — type,
-corners, circles, space, and colour, with every rule shown as live CSS rather than a
+corners, circles, space, and color, with every rule shown as live CSS rather than a
 screenshot. Source and build in [`docs/system/`](docs/system/README.md).
 
 Shared, cross-app UI primitives for WORDMARK's font tools — **font-proofer** and

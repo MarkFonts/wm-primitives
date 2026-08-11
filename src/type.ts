@@ -23,7 +23,7 @@ export type Role = keyof typeof ROLES
 /** The poster scale. Ratio root-2, so every second step doubles. */
 export const POSTER = [48, 68, 96, 136, 192] as const
 
-/** Ink — opacity on the text colour. Three levels, never four. */
+/** Ink — opacity on the text color. Three levels, never four. */
 export const INK = { full: 1, quiet: 0.62, faint: 0.38 } as const
 
 /** The only tracking value in the system: capitals, and nothing else. */

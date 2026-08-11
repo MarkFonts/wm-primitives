@@ -4,7 +4,7 @@
 
 Three products, one vocabulary. A **Glyphs plugin**, a **React proofing page**, and
 **wordmark.nyc** should be recognisably the same studio's work — not because someone
-remembered to match a colour, but because the decision was made once, written down as CSS,
+remembered to match a color, but because the decision was made once, written down as CSS,
 and imported.
 
 That is the whole ambition. It is not a component library.
@@ -61,7 +61,7 @@ contract, and CSS is only its first runtime.
 
 ## What it must not become
 
-A fork of somebody else's kit with our colours swapped in. The COSS board in this repo is
+A fork of somebody else's kit with our colors swapped in. The COSS board in this repo is
 deliberately exempt from our rules — it is a gallery of Pasquale Vitiello's components,
 rendered in Cal Sans to prove the face works in real UI micro-typography. It is a specimen,
 not a dependency, and nothing in it aligns against our chrome.

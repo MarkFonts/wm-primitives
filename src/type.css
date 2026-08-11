@@ -9,7 +9,7 @@
  *
  * Two things the host app must provide, because they are the app's, not ours:
  *   --ui-font   the chrome face
- *   --text-rgb  the text colour as "R, G, B" — COMMA-separated, because ink is written
+ *   --text-rgb  the text color as "R, G, B" — COMMA-separated, because ink is written
  *               rgba(var(--text-rgb), α). The rgb(… / α) slash form silently fails here.
  * Both have fallbacks below so a missing one degrades rather than breaks, but an app that
  * relies on the fallback is not on the system.
@@ -34,7 +34,7 @@
   --poster-1: 3rem;    --poster-2: 4.25rem;  --poster-3: 6rem;   /*  48 /  68 /  96px */
   --poster-4: 8.5rem;  --poster-5: 12rem;                        /* 136 / 192px */
 
-  /* ---- ink: opacity on the text colour. Three levels, never four. ---- */
+  /* ---- ink: opacity on the text color. Three levels, never four. ---- */
   --ink-full: 1;  --ink-quiet: .62;  --ink-faint: .38;
 
   /* ---- the ONLY tracking value in the system. Capitals must be letterspaced and
@@ -97,7 +97,7 @@
 .ink-quiet { color: rgba(var(--text-rgb), var(--ink-quiet)); }
 .ink-faint { color: rgba(var(--text-rgb), var(--ink-faint)); }
 
-/* rule — the quietest signal there is. Same size, weight, colour and case; only a
+/* rule — the quietest signal there is. Same size, weight, color and case; only a
    hairline under the words. */
 .sig-rule {
   text-decoration: underline;
