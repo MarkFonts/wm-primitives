@@ -185,6 +185,36 @@ def build_type_page():
     assert not re.search(r"__[A-Z]+__", out), "unsubstituted placeholder"
     (SD/"type-tokens.built.html").write_text(out)
 
+def six_outline():
+    """The hero's 6, straight out of the Face at GEOM 100 -- real contours, not a
+    drawing of them. Quadratic TT is compiled form; Qu2Cu gives back the cubic
+    shape of the source drawing, which is what handles should feel like."""
+    import json
+    from fontTools.ttLib import TTFont
+    from fontTools.pens.recordingPen import RecordingPen
+    from fontTools.pens.qu2cuPen import Qu2CuPen
+    f = TTFont(DOCS/"fonts"/"CalSansVF.ttf")
+    gname = f.getBestCmap()[ord("6")]
+    loc = {a.axisTag: a.defaultValue for a in f["fvar"].axes} if "fvar" in f else {}
+    if "GEOM" in loc: loc["GEOM"] = 100
+    gs = f.getGlyphSet(location=loc or None)
+    rec = RecordingPen()
+    gs[gname].draw(Qu2CuPen(rec, max_err=2.0, all_cubic=True))
+    cmds, xs, ys = [], [], []
+    for op, pts in rec.value:
+        pts = [(round(x), round(-y)) for x, y in pts]   # y-flip once, here
+        for x, y in pts: xs.append(x); ys.append(y)
+        if op == "moveTo":  cmds.append(["M", *pts[0]])
+        elif op == "lineTo": cmds.append(["L", *pts[0]])
+        elif op == "curveTo": cmds.append(["C", *pts[0], *pts[1], *pts[2]])
+        elif op == "closePath": cmds.append(["Z"])
+        else: raise ValueError(f"unexpected op {op} in six outline")
+    m = 70
+    vb = f"{min(xs)-m} {min(ys)-m} {max(xs)-min(xs)+2*m} {max(ys)-min(ys)+2*m}"
+    return json.dumps(cmds, separators=(",", ":")), vb
+
+SIX_CMDS, SIX_VB = six_outline()
+
 build_type_page()
 secs = [build_section(*s) for s in SECTIONS]
 
@@ -252,13 +282,29 @@ html,body{margin:0;padding:0;background:var(--bg)}
       documented behaviour. The eyebrow runs vertical at the right margin. */
 .wm-head{position:relative;min-height:100svh;box-sizing:border-box;display:flex;
   flex-direction:column;padding:44px 0 0;overflow:hidden}
-.wm-six{position:absolute;top:50%;right:-4vw;transform:translateY(-50%);z-index:0;
-  font-size:175svh;line-height:1;font-variation-settings:"GEOM" 100;
-  color:var(--line);pointer-events:none;user-select:none}
+/* The 6 is not a picture of the Face -- it is the Face: real contours extracted at
+   GEOM 100, shown the way the editor shows them. Everything at FULL ink, outlines
+   only. The nodes are live: hover gets the grab hand and the signal hue -- the
+   node under your cursor is literally the thing under discussion. */
+.wm-six{position:absolute;top:50%;right:clamp(28px,3.2vw,64px);transform:translateY(-50%);z-index:2;
+  height:108svh;width:auto;overflow:visible;pointer-events:none;user-select:none;
+  mix-blend-mode:difference}
+/* difference lives on the dark ground only: on paper it would invert the whole
+   drawing into fog, so light keeps normal paint */
+@media (prefers-color-scheme:light){.wm-six{mix-blend-mode:normal}}
+:root[data-theme="light"] .wm-six{mix-blend-mode:normal}
+:root[data-theme="dark"] .wm-six{mix-blend-mode:difference}
+.wm6-path{fill:none;stroke:var(--ink);stroke-width:1.5px;vector-effect:non-scaling-stroke}
+.wm6-h{stroke:var(--ink);stroke-width:1px;vector-effect:non-scaling-stroke}
+.wm6-on,.wm6-off{pointer-events:auto;cursor:grab;touch-action:none}
+.wm6-on{fill:var(--ink)}
+.wm6-off{fill:var(--bg);stroke:var(--ink);stroke-width:1.25px;vector-effect:non-scaling-stroke}
+.wm6-on:hover,.wm6-off:hover,.wm6-on.drag,.wm6-off.drag{fill:var(--signal);stroke:var(--signal)}
+.wm6-on.drag,.wm6-off.drag{cursor:grabbing}
 .wm-eyebrow{position:absolute;top:44px;right:0;z-index:2;writing-mode:vertical-rl;
   font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
   margin:0;font-variation-settings:"GEOM" 100}
-.wm-stack{position:relative;z-index:1;display:flex;flex-direction:column;
+.wm-stack{position:relative;display:flex;flex-direction:column;
   margin:clamp(16px,7vh,84px) 24px 0 0;font-size:clamp(2.4rem,8.6vw,10rem);line-height:1.07;
   font-weight:400;letter-spacing:.12em;text-transform:uppercase;
   font-variation-settings:"GEOM" 100}
@@ -266,10 +312,34 @@ html,body{margin:0;padding:0;background:var(--bg)}
 /* the rule-fill runs each open line out to the shared right rail; its weight sits
    near the caps' stroke and its seat at the optical mid of a 720 cap */
 .wm-stack i{flex:1 1 0;height:.072em;background:currentColor;
-  transform:translateY(-.035em)}
+  transform:translateY(-.035em);position:relative;z-index:3}
+/* the rules and the bend ride ABOVE the blend layer: a hairline crossing a rule
+   inverted it into a visible chop, and a rule is furniture, not type */
 .wm-l2{margin-left:11vw}
-.wm-l3{margin-left:3.5vw}
+.wm-l3{margin-left:3.5vw;position:relative}
 .wm-l4{margin-left:16vw}
+/* the EVERY rule does not stop at the rail: it bends and runs down the page, and
+   the corner it turns is a lecture: a looping G0 -> G1 -> G2 morph wearing its own
+   curvature comb, teeth on the outside, envelope in the signal hue -- position,
+   tangent, curvature, the house law landing on G2. The label reads along the
+   descender. The chevron now lives in the 6's counter and rides it. */
+.wm-l3 i{margin-right:3em}
+.wm-bendsvg{position:absolute;right:0;top:calc(50% - .071em);width:3em;height:5.6em;
+  overflow:visible;pointer-events:none;z-index:3}
+.wmb-path{fill:none;stroke:var(--ink);stroke-width:7.2}
+.wmb-tooth{stroke:var(--ink);stroke-width:1.2}
+.wmb-fill{fill:var(--signal);stroke:none}
+.wm6-fill{fill:var(--signal);stroke:none}
+.wm-bendlbl{position:absolute;right:.35em;top:1.15em;z-index:3;writing-mode:vertical-rl;
+  text-decoration:none;font-style:normal;font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink);font-variation-settings:"GEOM" 100;
+  white-space:nowrap}
+.wm6-combg line{stroke:var(--ink);stroke-width:1px;vector-effect:non-scaling-stroke}
+.wm6-chev{fill:none;stroke:var(--ink);stroke-width:8;
+  animation:wm6chev 2.6s ease-in-out infinite}
+@keyframes wm6chev{0%{transform:translateY(-26px);opacity:0}35%{opacity:1}
+  100%{transform:translateY(30px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.wm6-chev{animation:none}}
 /* the bottom of the poster is its credit line: dek, then the counts on a hairline */
 .wm-close{position:relative;z-index:1;margin-top:auto;padding-bottom:40px}
 .wm-dek{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:52ch;margin:0 0 40px}
@@ -416,6 +486,223 @@ css_parts = "\n".join(f"/* ===== {s['sid']} ===== */\n{s['css']}" for s in secs)
             "\n/* ===== page-furniture resets ===== */\n" + resets
 js_parts  = "\n".join(s["js"] for s in secs if s["js"].strip())
 
+HERO_TMPL = """
+(function(){
+  var svg=document.getElementById('wm6'); if(!svg||!svg.createSVGPoint) return;
+  var CMDS=__SIX__, NS='http://www.w3.org/2000/svg';
+  function mk(t,cls){var e=document.createElementNS(NS,t);if(cls)e.setAttribute('class',cls);return e}
+  function se(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)}
+  var P=[],K=[];
+  CMDS.forEach(function(c){var op=c[0];
+    if(op==='M'||op==='L'){P.push({x:c[1],y:c[2],on:1});K.push({op:op,i:[P.length-1]});}
+    else if(op==='C'){P.push({x:c[1],y:c[2],on:0});P.push({x:c[3],y:c[4],on:0});
+      P.push({x:c[5],y:c[6],on:1});K.push({op:'C',i:[P.length-3,P.length-2,P.length-1]});}
+    else K.push({op:'Z',i:[]});});
+  function d(){return K.map(function(k){if(k.op==='Z')return 'Z';
+    return k.op+k.i.map(function(i){return P[i].x+' '+P[i].y}).join(' ');}).join('')}
+  var fillG=mk('g'),combG=mk('g','wm6-combg');
+  svg.appendChild(fillG);svg.appendChild(combG);
+  var path=mk('path','wm6-path');svg.appendChild(path);
+  var chev=mk('path','wm6-chev');svg.appendChild(chev);
+  function onBefore(j){for(var t=j-1;t>=0;t--){if(K[t].i.length)return K[t].i[K[t].i.length-1]}return 0}
+  var stems=[];K.forEach(function(k,j){if(k.op!=='C')return;
+    stems.push([onBefore(j),k.i[0]]);stems.push([k.i[2],k.i[1]]);});
+  var stemEls=stems.map(function(){var l=mk('line','wm6-h');svg.appendChild(l);return l});
+  var nodeEls=P.map(function(p){var e;
+    if(p.on){e=mk('rect','wm6-on');e.setAttribute('width',14);e.setAttribute('height',14);}
+    else{e=mk('circle','wm6-off');e.setAttribute('r',7);}
+    svg.appendChild(e);return e});
+  var SEGJ=[],SEGC=[],ci=0;
+  K.forEach(function(k,j){if(k.op==='Z'){ci++;return}
+    if(k.op==='C'){SEGJ.push(j);SEGC.push(ci);}});
+  var TN=9,NT=SEGJ.length*TN;
+  var teeth=[],B=[];
+  for(var t3=0;t3<NT;t3++){var l=mk('line');combG.appendChild(l);teeth.push(l);
+    B.push({x:0,y:0,ox:0,oy:0,c:SEGC[Math.floor(t3/TN)]});}
+  // contour ranges + fill quads between neighbouring teeth of the same contour
+  var ranges={};B.forEach(function(b,i){if(!(b.c in ranges))ranges[b.c]={s:i,e:i};ranges[b.c].e=i;});
+  var quads=[];
+  Object.keys(ranges).forEach(function(c){for(var i=ranges[c].s;i<ranges[c].e;i++){
+    var pg=mk('polygon','wm6-fill');pg.setAttribute('opacity',0);fillG.appendChild(pg);
+    quads.push({el:pg,a:i,b:i+1});}
+    // close the seam: the contour's last tooth back to its first
+    var pw=mk('polygon','wm6-fill');pw.setAttribute('opacity',0);fillG.appendChild(pw);
+    quads.push({el:pw,a:ranges[c].e,b:ranges[c].s});});
+  function contours(){var cs=[],cur=[];
+    K.forEach(function(k){if(k.op==='Z'){if(cur.length)cs.push(cur);cur=[];return}
+      if(k.op==='M'&&cur.length){cs.push(cur);cur=[];}
+      k.i.forEach(function(i){if(P[i].on)cur.push(i)});});
+    if(cur.length)cs.push(cur);return cs}
+  function areas(){return contours().map(function(c){var A=0;
+    for(var i=0;i<c.length;i++){var a=P[c[i]],b=P[c[(i+1)%c.length]];A+=a.x*b.y-b.x*a.y}
+    return A/2})}
+  var AR=[];
+  function comb(){AR=areas();var ti=0;
+    var big=0;AR.forEach(function(A,i){if(Math.abs(A)>Math.abs(AR[big]))big=i});
+    var flip=AR.map(function(A,i){var f=A>0?-1:1;return i===big?f:-f});
+    SEGJ.forEach(function(j,si){var f=flip[SEGC[si]]||1;
+      var k=K[j],a=P[onBefore(j)],b=P[k.i[0]],c=P[k.i[1]],e=P[k.i[2]];
+      var x1=3*(b.x-a.x),y1=3*(b.y-a.y),x2=3*(c.x-b.x),y2=3*(c.y-b.y),x3=3*(e.x-c.x),y3=3*(e.y-c.y);
+      for(var s2=0;s2<TN;s2++){var t=s2/(TN-1),mt=1-t;
+        var dx=mt*mt*x1+2*mt*t*x2+t*t*x3, dy=mt*mt*y1+2*mt*t*y2+t*t*y3;
+        var ddx=2*(mt*(x2-x1)+t*(x3-x2)), ddy=2*(mt*(y2-y1)+t*(y3-y2));
+        var px=mt*mt*mt*a.x+3*mt*mt*t*b.x+3*mt*t*t*c.x+t*t*t*e.x;
+        var py=mt*mt*mt*a.y+3*mt*mt*t*b.y+3*mt*t*t*c.y+t*t*t*e.y;
+        var sp=Math.sqrt(dx*dx+dy*dy)||1;
+        var kap=Math.abs((dx*ddy-dy*ddx)/(sp*sp*sp));
+        var len=Math.min(110,kap*9000)*f;
+        var bb=B[ti++];bb.x=px;bb.y=py;bb.ox=-dy/sp*len;bb.oy=dx/sp*len;}});}
+  // the comb breathes: populate clockwise from each contour's origin, pause on the
+  // full configuration, retract home, rest. A drag holds it out -- never edit blind.
+  var POP=900,HOLD=1800,RET=900,HIDE=1100,CYC=POP+HOLD+RET+HIDE;
+  var t0=performance.now(),drag=-1;
+  function factor(u,now,c){
+    if(drag>=0)return 1;
+    var ph=(now-t0-(c||0)*650)%CYC;if(ph<0)ph+=CYC;
+    if(ph<POP){return se((se(ph/POP)*1.18-u)/0.18)}
+    ph-=POP;if(ph<HOLD)return 1;
+    ph-=HOLD;if(ph<RET){return 1-se((se(ph/RET)*1.18-u)/0.18)}
+    return 0}
+  function applyComb(now){
+    var i,n,u,f,b,tx,ty;
+    for(i=0;i<NT;i++){b=B[i];var r=ranges[b.c];n=r.e-r.s;
+      u=n?(i-r.s)/n:0;
+      if((AR[b.c]||0)<=0)u=1-u;   // sweep visually clockwise on every contour
+      f=factor(u,now,b.c);         // contours take turns: the counter trails a beat
+      tx=b.x+b.ox*f;ty=b.y+b.oy*f;
+      var l=teeth[i];
+      l.setAttribute('x1',b.x);l.setAttribute('y1',b.y);
+      l.setAttribute('x2',tx);l.setAttribute('y2',ty);
+      b.fx=tx;b.fy=ty;b.f=f;}
+    quads.forEach(function(q){var a=B[q.a],c=B[q.b];
+      var mag=Math.max(Math.hypot(a.ox,a.oy),Math.hypot(c.ox,c.oy))/110;
+      var op=Math.min(a.f,c.f)*Math.pow(mag,1.6)*.45;
+      q.el.setAttribute('points',a.x+','+a.y+' '+c.x+','+c.y+' '+c.fx+','+c.fy+' '+a.fx+','+a.fy);
+      q.el.setAttribute('opacity',op.toFixed(3));});}
+  function chevPos(){var cs=contours();if(cs.length<2)return null;
+    var best=null,bA=1e18;
+    cs.forEach(function(c,i){var A=Math.abs(AR[i]||0);if(A<bA){bA=A;best=c}});
+    var mx=0,my=0;best.forEach(function(i){mx+=P[i].x;my+=P[i].y});
+    return{x:mx/best.length,y:my/best.length}}
+  function paint(){path.setAttribute('d',d());
+    stems.forEach(function(st,k2){var l=stemEls[k2];
+      l.setAttribute('x1',P[st[0]].x);l.setAttribute('y1',P[st[0]].y);
+      l.setAttribute('x2',P[st[1]].x);l.setAttribute('y2',P[st[1]].y);});
+    P.forEach(function(p,i){var e=nodeEls[i];
+      if(p.on){e.setAttribute('x',p.x-7);e.setAttribute('y',p.y-7);}
+      else{e.setAttribute('cx',p.x);e.setAttribute('cy',p.y);}});
+    comb();
+    var cp=chevPos();
+    if(cp){var w=46,h=26;
+      chev.setAttribute('d','M'+(cp.x-w/2)+' '+(cp.y-h/2)+'L'+cp.x+' '+(cp.y+h/2)+'L'+(cp.x+w/2)+' '+(cp.y-h/2));}}
+  paint();
+  // start mid-HOLD so a still frame (hidden tab, screenshot) shows the configuration
+  t0=performance.now()-POP-200;
+  applyComb(performance.now());
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce){(function tick(){applyComb(performance.now());requestAnimationFrame(tick)})();}
+  window.__wm6={chev:chev};
+  var hist=[];
+  function snap(){return P.map(function(p){return{x:p.x,y:p.y,on:p.on}})}
+  addEventListener('keydown',function(ev){
+    if((ev.metaKey||ev.ctrlKey)&&!ev.shiftKey&&(ev.key==='z'||ev.key==='Z')){
+      if(hist.length){P=hist.pop();paint();applyComb(performance.now());ev.preventDefault();}}});
+  function loc(ev){var pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse())}
+  nodeEls.forEach(function(e,i){
+    e.addEventListener('pointerdown',function(ev){
+      hist.push(snap());if(hist.length>120)hist.shift();
+      drag=i;e.classList.add('drag');e.setPointerCapture(ev.pointerId);ev.preventDefault();});
+    e.addEventListener('pointermove',function(ev){if(drag!==i)return;
+      var q=loc(ev);P[i].x=Math.round(q.x);P[i].y=Math.round(q.y);paint();applyComb(performance.now());});
+    e.addEventListener('pointerup',function(){drag=-1;t0=performance.now()-POP;e.classList.remove('drag');});
+    e.addEventListener('lostpointercapture',function(){drag=-1;t0=performance.now()-POP;e.classList.remove('drag');});
+  });
+})();
+(function(){
+  var svg=document.getElementById('wmbend'); if(!svg) return;
+  var NS='http://www.w3.org/2000/svg';
+  function mk(t,c){var e=document.createElementNS(NS,t);if(c)e.setAttribute('class',c);return e}
+  function se(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)}
+  var W=300,SW=7.2,R=85,xv=W-SW/2,hy=SW/2,x1=xv-R,cy=hy+R,H=300;
+  var NC=40,NF=10,total=NF+NC+NF;
+  function corner(mode){var pts=[],i,t;
+    for(i=0;i<NC;i++){t=i/(NC-1);
+      if(mode===1){pts.push(t<0.5?[x1+R*(t*2),hy]:[xv,hy+R*((t-0.5)*2)]);}
+      else if(mode===2){var th=t*Math.PI/2;pts.push([x1+R*Math.sin(th),cy-R*Math.cos(th)]);}
+      else{var n=2.2974,th2=t*Math.PI/2;
+        pts.push([x1+R*Math.pow(Math.sin(th2),2/n),cy-R*Math.pow(Math.cos(th2),2/n)]);}}
+    return pts}
+  function flats(pts){var out=[],i;
+    for(i=0;i<NF;i++)out.push([x1*(i/NF),hy]);
+    out=out.concat(pts);
+    for(i=1;i<=NF;i++)out.push([xv,cy+Math.max(20,H-cy)*(i/NF)]);
+    return out}
+  var MODES=[corner(0),corner(1),corner(2)];
+  var LBL=['G2 · curvature','G0 · position','G1 · tangent'];
+  var quads=[];for(var q2=0;q2<total-1;q2++){var pg=mk('polygon','wmb-fill');svg.appendChild(pg);quads.push(pg)}
+  var TEETH=[];for(var i2=0;i2<total;i2++){var l2=mk('line','wmb-tooth');svg.appendChild(l2);TEETH.push(l2)}
+  var path=mk('path','wmb-path');svg.appendChild(path);
+  var lbl=document.getElementById('wmbendlbl');
+  function render(pts,ff){
+    path.setAttribute('d','M'+pts.map(function(p){return p[0].toFixed(1)+' '+p[1].toFixed(1)}).join('L'));
+    var tips=[],lens=[],fs=[],n=pts.length;
+    for(var i=0;i<n;i++){
+      var a=pts[Math.max(0,i-1)],b=pts[i],c=pts[Math.min(n-1,i+1)];
+      var ux=c[0]-a[0],uy=c[1]-a[1],ul=Math.sqrt(ux*ux+uy*uy)||1;
+      var ax=b[0]-a[0],ay=b[1]-a[1],bx=c[0]-b[0],by=c[1]-b[1];
+      var la=Math.sqrt(ax*ax+ay*ay),lb=Math.sqrt(bx*bx+by*by),
+          lc=Math.sqrt((c[0]-a[0])*(c[0]-a[0])+(c[1]-a[1])*(c[1]-a[1]));
+      var kap=(la&&lb&&lc)?2*(ax*by-ay*bx)/(la*lb*lc):0;
+      var len=Math.max(-95,Math.min(95,kap*4600));
+      var f=ff(i/(n-1));
+      var tx=b[0]+uy/ul*len*f,ty=b[1]-ux/ul*len*f;
+      var t=TEETH[i];
+      t.setAttribute('x1',b[0]);t.setAttribute('y1',b[1]);
+      t.setAttribute('x2',tx);t.setAttribute('y2',ty);
+      tips.push([tx,ty]);lens.push(Math.abs(len));fs.push(f);}
+    for(var q=0;q<total-1;q++){
+      var op=Math.min(fs[q],fs[q+1])*(Math.max(lens[q],lens[q+1])/95)*.8;
+      var el2=quads[q];
+      el2.setAttribute('points',pts[q][0]+','+pts[q][1]+' '+pts[q+1][0]+','+pts[q+1][1]+' '+tips[q+1][0]+','+tips[q+1][1]+' '+tips[q][0]+','+tips[q][1]);
+      el2.setAttribute('opacity',op.toFixed(3));}}
+  function position(){
+    var w6=window.__wm6; if(!w6) return;
+    var cb=w6.chev.getBoundingClientRect(); if(!cb.width) return;
+    var l3=svg.closest('.wm-l3'); if(!l3) return;
+    var st=l3.parentElement.getBoundingClientRect();
+    var chevX=cb.left+cb.width/2, extra=st.right-chevX-4;
+    if(extra>0&&extra<st.width*.6) l3.style.marginRight=extra+'px';
+    var fpx=parseFloat(getComputedStyle(l3).fontSize);
+    var l3r=l3.getBoundingClientRect(), barY=l3r.top+l3r.height/2;
+    var dy=cb.top-10-barY;
+    if(dy>fpx*.9){svg.style.height=dy+'px';H=dy*100/fpx;
+      svg.setAttribute('viewBox','0 0 300 '+Math.round(H));}}
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  position();
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){position();
+    if(reduce)render(flats(MODES[0]),function(){return 1});});
+  addEventListener('resize',function(){position()});
+  render(flats(MODES[0]),function(){return 1});if(lbl)lbl.textContent=LBL[0];
+  if(reduce)return;
+  // the corner stays G2 -- the law is not up for debate; only the comb breathes,
+  // on the same grammar as the 6, off its beat
+  var POP=700,HOLD2=1400,RET=700,GAP=1000,SEG=POP+HOLD2+RET+GAP;
+  var t0=performance.now()-POP-200-1150;
+  var G2PTS=flats(MODES[0]);
+  function frame(now){var ph=(now-t0)%SEG,ff;
+    if(ph<POP){var e=se(ph/POP);ff=function(u2){return se((e*1.18-u2)/0.18)}}
+    else if(ph<POP+HOLD2){ff=function(){return 1}}
+    else if(ph<POP+HOLD2+RET){var e2=se((ph-POP-HOLD2)/RET);
+      ff=function(u2){return 1-se((e2*1.18-u2)/0.18)}}
+    else{ff=function(){return 0}}
+    G2PTS=flats(MODES[0]);   // H may change on resize/position
+    render(G2PTS,ff);requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+})();
+"""
+HERO = HERO_TMPL.replace("__SIX__", SIX_CMDS)
+
 SPY = """
 (function(){
   var rail=document.querySelector('.wm-axis'); if(!rail) return;
@@ -455,10 +742,11 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
     <span class="wm-rail-foot">wm&#8209;primitives</span></div></nav>
   <div class="wm-main">
   <header class="wm-head">
-    <div class="wm-six" aria-hidden="true">6</div>
+    <svg class="wm-six" id="wm6" viewBox="{SIX_VB}" aria-hidden="true"></svg>
     <p class="wm-eyebrow">wm-primitives &middot; the house system</p>
     <h1 class="wm-stack"><span class="wm-l1">Six<i></i></span><span
-      class="wm-l2">laws.</span><span class="wm-l3">Every<i></i></span><span
+      class="wm-l2">laws.</span><span class="wm-l3">Every<i></i><svg class="wm-bendsvg" id="wmbend"
+      viewBox="0 0 300 560" aria-hidden="true"></svg><u class="wm-bendlbl" id="wmbendlbl"></u></span><span
       class="wm-l4">surface.</span></h1>
     <div class="wm-close">
       <p class="wm-dek">Type, corners, circles, space, and color, each decided once and written
@@ -483,6 +771,7 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
   </div>
 </div>
 <script>{js_parts}
+{HERO}
 {SPY}</script>{TAIL}
 """
 
