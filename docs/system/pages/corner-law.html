@@ -1998,11 +1998,22 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
   box-shadow: inset 0 0 0 var(--stroke-press, 1.8px) currentColor;
 }
 
+
+.lede--sub{color:var(--text-muted,#999);margin-top:-2px}
+.lede--sub sup{font-size:.7em;vertical-align:super;line-height:0}
 </style>
 <h1>The corner law</h1>
-<p class="lede">ReCal only — the COSS demo kit is excluded, it was 81 of the original 168 corners.
-<b>87</b> remain: 13 circles carved out, 74 taking the law, 32 of those in the frozen <code>App.css</code>.
-Live surface: <b>42</b>.</p>
+<p class="lede">A rounded rectangle meets its straight edge at a curvature break: the cap is
+bending at 1/r, the side at zero, and the eye reads the seam even when it cannot name it.
+<code>superellipse(1.2)</code> eases curvature to zero <em>before</em> the join instead
+&mdash; G2 continuity, which is how Cal Sans itself is drawn. The UI rounds the way the
+letterforms do.</p>
+<p class="lede lede--sub">The parameter is not the exponent. CSS folds
+<code>superellipse(1)</code> to <code>round</code> and <code>superellipse(2)</code> to
+<code>squircle</code>, so the real exponent is 2<sup>k</sup> &mdash; k&nbsp;1.2 is
+&asymp;&nbsp;2.30, just past a circle. Scope below is ReCal only, the COSS kit excluded:
+of 168 corners, <b>87</b> take the law, 13 are circles carved out, and 32 sit in the frozen
+<code>App.css</code>. Live surface: <b>42</b>.</p>
 <div class="bar"><b>k</b><button data-k="1">1 round</button><button data-k="1.1">1.1</button><button data-k="1.2" class="on">1.2</button>
  <button data-k="1.5">1.5</button><button data-k="2">2</button></div>
 
