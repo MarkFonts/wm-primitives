@@ -1,0 +1,19 @@
+name: lint-tokens
+
+# The system is only a system if drifting off it fails something. Every rule this checks
+# was cleaned up by hand once; without this the next literal goes in unnoticed.
+on:
+  push:
+    paths: ['src/**', 'scripts/lint-tokens.mjs', '.tokenlint.json']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - run: node scripts/lint-tokens.mjs

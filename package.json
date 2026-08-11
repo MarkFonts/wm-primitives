@@ -5,11 +5,16 @@
   "type": "module",
   "main": "index.ts",
   "types": "index.ts",
-  "sideEffects": ["*.css"],
+  "sideEffects": [
+    "*.css"
+  ],
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"
   },
   "license": "UNLICENSED",
-  "private": false
+  "private": false,
+  "scripts": {
+    "lint:tokens": "node scripts/lint-tokens.mjs"
+  }
 }

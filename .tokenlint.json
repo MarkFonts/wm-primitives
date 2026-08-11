@@ -1,0 +1,9 @@
+{
+  "roots": [
+    "src"
+  ],
+  "exempt": [
+    "src/UiKitBoard.css"
+  ],
+  "typeParity": "src"
+}
