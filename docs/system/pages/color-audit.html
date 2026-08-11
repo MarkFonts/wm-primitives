@@ -42,19 +42,20 @@ h3 { font-size:12px; font-weight:500; color:var(--ink2); margin:22px 0 7px; font
 .sw { width:13px; height:13px; border-radius:3px; display:inline-block; flex:none;
   border:1px solid rgba(128,128,128,.45); vertical-align:-2px }
 section { overflow-x:auto }
-table { width:100%; border-collapse:collapse; font-size:12.5px; margin-bottom:4px;
-  table-layout:fixed }
+table { width:100%; min-width:760px; border-collapse:collapse; font-size:12.5px;
+  margin-bottom:4px; table-layout:fixed }
 /* one column grid for every table on the page -- the audit reads as one instrument,
    not per-file schemas. WHERE is hidden here: rows already sit under their file's
    heading, so the column only ever repeated it. */
-th:nth-child(1){width:16%} th:nth-child(2){width:24%}
-th:nth-child(3){width:20%} th:nth-child(4){width:40%}
+th:nth-child(1){width:21%} th:nth-child(2){width:23%}
+th:nth-child(3){width:18%} th:nth-child(4){width:38%}
 th:nth-child(5), td.l { display:none }
 th { text-align:left; font-weight:400; color:var(--ink3); font-size:10.5px; text-transform:uppercase;
   letter-spacing:.09em; padding:5px 10px 5px 0; border-bottom:1px solid var(--line); white-space:nowrap }
 td { padding:4px 10px 4px 0; border-bottom:1px solid var(--line); vertical-align:top }
 code { font-family:ui-monospace,Menlo,monospace; font-size:11.5px }
-.c { white-space:nowrap } .c code { margin-left:7px }
+.c { white-space:nowrap; overflow:hidden; text-overflow:ellipsis } .c code { margin-left:7px }
+td.c:hover { white-space:normal; overflow:visible; word-break:break-all }
 .m { color:var(--ink); white-space:nowrap }
 .p code, .s { color:var(--ink2) }
 .s { font-family:ui-monospace,Menlo,monospace; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
