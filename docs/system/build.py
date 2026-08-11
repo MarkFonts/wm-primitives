@@ -237,12 +237,37 @@ SHELL = """
 .wm *,.wm *::before,.wm *::after{corner-shape:superellipse(1.2)}
 .wm-col{max-width:1180px;margin:0;padding:0 40px 0 0}
 
-/* ---- Header, in the type page's voice: eyebrow, two-line statement, dek, counts ---- */
-.wm-head{padding:96px 0 40px}
+/* ---- Header: one full viewport, set like a proof sheet ----
+   The statement is a SPECIMEN: the first line sits on its own metric rules (asc/cap/
+   x/base/desc, drawn from the font's real values -- upm 1000, asc 900, desc -245,
+   cap 720, x 515; with line-height .98 the half-leading is (.98-1.145)/2 = -.0825em,
+   so baseline = .9 - .0825 = .8175em from the line-box top). The second line just
+   speaks. micro does the annotating, which is micro's declared job.
+   The size clamp travels the poster scale between its end stops: poster-1 (3rem) to
+   poster-5 (12rem). No weight bump and no tracking -- at this size, size has already
+   said it, and the tracking law has no negative value to give. */
+.wm-head{min-height:100svh;box-sizing:border-box;display:flex;flex-direction:column;
+  padding:44px 0 0;overflow-x:clip}
 .wm-eyebrow{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
-  margin:0 0 26px;font-variation-settings:"GEOM" 100}
-.wm-h1{font-size:clamp(40px,5.6vw,68px);line-height:1.0;margin:0 0 26px;font-weight:700;
-  letter-spacing:-.02em;font-variation-settings:"GEOM" 50}
+  margin:0;font-variation-settings:"GEOM" 100}
+.wm-h1{font-size:clamp(3rem,12vw,12rem);line-height:.98;margin:auto 0;padding:.35em 0 .3em;
+  font-weight:400;font-variation-settings:"GEOM" 50}
+.wm-spec{position:relative;display:inline-block}
+.wm-mr{position:absolute;left:-20px;width:calc(100% + 20px + 8vw);height:0;
+  border-top:1px solid var(--line);pointer-events:none}
+.wm-mr-base{border-top-color:var(--ink-3)}
+.wm-mr-asc{top:-.0825em}.wm-mr-cap{top:.0975em}.wm-mr-x{top:.3025em}
+.wm-mr-base{top:.8175em}.wm-mr-desc{top:1.0625em}
+.wm-mr u{position:absolute;left:calc(100% + 10px);top:0;transform:translateY(-50%);
+  text-decoration:none;font-style:normal;font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);font-variation-settings:"GEOM" 100;
+  white-space:nowrap;line-height:1}
+/* sidebearing verticals -- the line's own cell walls, asc to desc */
+.wm-sb{position:absolute;top:-.0825em;bottom:calc(1em - 1.0625em);width:0;
+  border-left:1px solid var(--line);pointer-events:none}
+.wm-sb-l{left:0}.wm-sb-r{left:100%}
+/* the bottom of the poster is its credit line: dek, then the counts on a hairline */
+.wm-close{margin-top:auto;padding-bottom:40px}
 .wm-dek{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:62ch;margin:0 0 40px}
 .wm-dek b{color:var(--ink);font-weight:600}
 /* Counts, not a claim. The type section's strip is boxed and spends the accent hue
@@ -335,7 +360,12 @@ SHELL = """
   .wm-lvl0{padding:14px 15px}
   .wm-lvl0::before,.wm-lvl0.on::before{display:none}
   .wm-main{margin-left:0;padding:0 20px}
-  .wm-head{padding:52px 0 32px}
+  .wm-head{padding:32px 0 0}
+}
+/* below ~90px of statement the five labels start colliding (asc-cap is .18em);
+   keep the two that teach — x and base — and let the rules speak for the rest */
+@media (max-width:720px){
+  .wm-mr-asc u,.wm-mr-cap u,.wm-mr-desc u{display:none}
 }
 """
 
@@ -422,17 +452,22 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
   <div class="wm-main">
   <header class="wm-head">
     <p class="wm-eyebrow">wm-primitives &middot; the house system</p>
-    <h1 class="wm-h1">Six laws.<br>Every surface.</h1>
-    <p class="wm-dek">Type, corners, circles, space, and colour, each decided once and written
-      down here &mdash; so a <b>Glyphs plugin</b>, a <b>React proofing page</b>, and
-      <b>wordmark.nyc</b> round the same corners, spend the same space, and mean the same thing
-      by a colour. This is the long form: every law in one scroll, with the outline on the
-      left. Each parameter earns its own page as the system grows.</p>
-    <div class="wm-stats">
-      <div class="wm-stat"><b>6</b><i>laws, one page</i></div>
-      <div class="wm-stat"><b>7</b><i>type roles</i></div>
-      <div class="wm-stat"><b>12</b><i>space steps</i></div>
-      <div class="wm-stat"><b>G2</b><i>corners, as the font is drawn</i></div>
+    <h1 class="wm-h1"><span class="wm-spec">Six laws.<i class="wm-mr wm-mr-asc"><u>asc</u></i><i
+        class="wm-mr wm-mr-cap"><u>cap</u></i><i class="wm-mr wm-mr-x"><u>x</u></i><i
+        class="wm-mr wm-mr-base"><u>base</u></i><i class="wm-mr wm-mr-desc"><u>desc</u></i><i
+        class="wm-sb wm-sb-l"></i><i class="wm-sb wm-sb-r"></i></span><br>Every surface.</h1>
+    <div class="wm-close">
+      <p class="wm-dek">Type, corners, circles, space, and colour, each decided once and written
+        down here &mdash; so a <b>Glyphs plugin</b>, a <b>React proofing page</b>, and
+        <b>wordmark.nyc</b> round the same corners, spend the same space, and mean the same thing
+        by a colour. This is the long form: every law in one scroll, with the outline on the
+        left. Each parameter earns its own page as the system grows.</p>
+      <div class="wm-stats">
+        <div class="wm-stat"><b>6</b><i>laws, one page</i></div>
+        <div class="wm-stat"><b>7</b><i>type roles</i></div>
+        <div class="wm-stat"><b>12</b><i>space steps</i></div>
+        <div class="wm-stat"><b>G2</b><i>corners, as the font is drawn</i></div>
+      </div>
     </div>
   </header>
   {''.join(body_parts)}
