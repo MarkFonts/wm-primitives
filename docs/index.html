@@ -24,6 +24,9 @@
   --bg:#f4f4f2;--surface:#fff;--surface-hi:#ebebe8;--line:rgba(22,22,22,.16);
   --a11y:#a85136;--ui:#6b6b6b;--base:#2f5fae;--geo:#2f8a44;--signal:#5c6b00}
 
+/* The linked build ships bare — no artifact wrapper, no reset — so the UA's 8px body
+   margin shows the page-default white as a hairline gutter around .wm. Own the root. */
+html,body{margin:0;padding:0;background:var(--bg)}
 .wm{background:var(--bg);color:var(--ink);font-family:var(--ui-font);
   font-optical-sizing:auto;-webkit-font-smoothing:antialiased;min-height:100vh}
 .wm *,.wm *::before,.wm *::after{corner-shape:superellipse(1.2)}
