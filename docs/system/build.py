@@ -240,38 +240,39 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm *,.wm *::before,.wm *::after{corner-shape:superellipse(1.2)}
 .wm-col{max-width:1180px;margin:0;padding:0 40px 0 0}
 
-/* ---- Header: one full viewport, set like a proof sheet ----
-   The statement is a SPECIMEN: the first line sits on its own metric rules (asc/cap/
-   x/base/desc, drawn from the font's real values -- upm 1000, asc 900, desc -245,
-   cap 720, x 515; with line-height .98 the half-leading is (.98-1.145)/2 = -.0825em,
-   so baseline = .9 - .0825 = .8175em from the line-box top). The second line just
-   speaks. micro does the annotating, which is micro's declared job.
-   The size clamp travels the poster scale between its end stops: poster-1 (3rem) to
-   poster-5 (12rem). No weight bump and no tracking -- at this size, size has already
-   said it, and the tracking law has no negative value to give. */
-.wm-head{min-height:100svh;box-sizing:border-box;display:flex;flex-direction:column;
-  padding:44px 0 0;overflow-x:clip}
-.wm-eyebrow{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
+/* ---- Header: one full viewport, set like a poster ----
+   Three moves, each with a name in the system:
+   -- the statement is four short capitalised strings, which is GEO's declared job,
+      so the stack runs GEOM 100 with the mandatory caps tracking, staggered on the
+      grid, rule-fills running out to a shared right rail;
+   -- the numeral 6 (six laws) is a MONSTER SAMPLE (SS.IV: past poster-5 lives
+      "another instrument"), viewport-scale, cropped by the frame;
+   -- it is painted in the faint ink, whose charter says "structural only: rules,
+      disabled, WATERMARKS". opsz rides auto to its ceiling up there, which is the
+      documented behaviour. The eyebrow runs vertical at the right margin. */
+.wm-head{position:relative;min-height:100svh;box-sizing:border-box;display:flex;
+  flex-direction:column;padding:44px 0 0;overflow:hidden}
+.wm-six{position:absolute;top:50%;right:-4vw;transform:translateY(-50%);z-index:0;
+  font-size:175svh;line-height:1;font-variation-settings:"GEOM" 100;
+  color:var(--line);pointer-events:none;user-select:none}
+.wm-eyebrow{position:absolute;top:44px;right:0;z-index:2;writing-mode:vertical-rl;
+  font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
   margin:0;font-variation-settings:"GEOM" 100}
-.wm-h1{font-size:clamp(3rem,12vw,12rem);line-height:.98;margin:auto 0;padding:.35em 0 .3em;
-  font-weight:400;font-variation-settings:"GEOM" 50}
-.wm-spec{position:relative;display:inline-block}
-.wm-mr{position:absolute;left:-20px;width:calc(100% + 20px + 8vw);height:0;
-  border-top:1px solid var(--line);pointer-events:none}
-.wm-mr-base{border-top-color:var(--ink-3)}
-.wm-mr-asc{top:-.0825em}.wm-mr-cap{top:.0975em}.wm-mr-x{top:.3025em}
-.wm-mr-base{top:.8175em}.wm-mr-desc{top:1.0625em}
-.wm-mr u{position:absolute;left:calc(100% + 10px);top:0;transform:translateY(-50%);
-  text-decoration:none;font-style:normal;font-size:9px;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--ink-3);font-variation-settings:"GEOM" 100;
-  white-space:nowrap;line-height:1}
-/* sidebearing verticals -- the line's own cell walls, asc to desc */
-.wm-sb{position:absolute;top:-.0825em;bottom:calc(1em - 1.0625em);width:0;
-  border-left:1px solid var(--line);pointer-events:none}
-.wm-sb-l{left:0}.wm-sb-r{left:100%}
+.wm-stack{position:relative;z-index:1;display:flex;flex-direction:column;
+  margin:clamp(16px,7vh,84px) 24px 0 0;font-size:clamp(2.4rem,8.6vw,10rem);line-height:1.07;
+  font-weight:400;letter-spacing:.12em;text-transform:uppercase;
+  font-variation-settings:"GEOM" 100}
+.wm-stack span{display:flex;align-items:center;gap:.38em}
+/* the rule-fill runs each open line out to the shared right rail; its weight sits
+   near the caps' stroke and its seat at the optical mid of a 720 cap */
+.wm-stack i{flex:1 1 0;height:.072em;background:currentColor;
+  transform:translateY(-.035em)}
+.wm-l2{margin-left:11vw}
+.wm-l3{margin-left:3.5vw}
+.wm-l4{margin-left:16vw}
 /* the bottom of the poster is its credit line: dek, then the counts on a hairline */
-.wm-close{margin-top:auto;padding-bottom:40px}
-.wm-dek{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:62ch;margin:0 0 40px}
+.wm-close{position:relative;z-index:1;margin-top:auto;padding-bottom:40px}
+.wm-dek{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:52ch;margin:0 0 40px}
 .wm-dek b{color:var(--ink);font-weight:600}
 /* Counts, not a claim. The type section's strip is boxed and spends the accent hue
    because it argues 44-sizes-today AGAINST 7/5/3 -- the hue points at the thing under
@@ -454,11 +455,11 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
     <span class="wm-rail-foot">wm&#8209;primitives</span></div></nav>
   <div class="wm-main">
   <header class="wm-head">
+    <div class="wm-six" aria-hidden="true">6</div>
     <p class="wm-eyebrow">wm-primitives &middot; the house system</p>
-    <h1 class="wm-h1"><span class="wm-spec">Six laws.<i class="wm-mr wm-mr-asc"><u>asc</u></i><i
-        class="wm-mr wm-mr-cap"><u>cap</u></i><i class="wm-mr wm-mr-x"><u>x</u></i><i
-        class="wm-mr wm-mr-base"><u>base</u></i><i class="wm-mr wm-mr-desc"><u>desc</u></i><i
-        class="wm-sb wm-sb-l"></i><i class="wm-sb wm-sb-r"></i></span><br>Every surface.</h1>
+    <h1 class="wm-stack"><span class="wm-l1">Six<i></i></span><span
+      class="wm-l2">laws.</span><span class="wm-l3">Every<i></i></span><span
+      class="wm-l4">surface.</span></h1>
     <div class="wm-close">
       <p class="wm-dek">Type, corners, circles, space, and color, each decided once and written
         down here &mdash; so a <b>Glyphs plugin</b>, a <b>React proofing page</b>, and
