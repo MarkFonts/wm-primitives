@@ -730,7 +730,14 @@ SPY = """
 
 HEAD = ("" if not LINKED else
   '<!doctype html>\n<html lang="en"><head><meta charset="utf-8">'
-  '<meta name="viewport" content="width=device-width,initial-scale=1">\n')
+  '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+  '<meta property="og:title" content="Six laws. Every surface.">\n'
+  '<meta property="og:description" content="The WORDMARK house system &mdash; type, corners, circles, space, and color, each decided once. Grab the 6 by its handles.">\n'
+  '<meta property="og:image" content="https://markfonts.github.io/wm-primitives/og.png">\n'
+  '<meta property="og:image:width" content="2400"><meta property="og:image:height" content="1260">\n'
+  '<meta property="og:type" content="website">\n'
+  '<meta property="og:url" content="https://markfonts.github.io/wm-primitives/">\n'
+  '<meta name="twitter:card" content="summary_large_image">\n')
 TAIL = ("" if not LINKED else "\n</body></html>")
 
 page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
