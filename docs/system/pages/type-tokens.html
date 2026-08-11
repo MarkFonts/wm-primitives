@@ -19,7 +19,7 @@
     /* roles - each spends size and nothing else */
     /* Declared in rem (root 16px) so the scale follows the reader's own text size.
        We quote px in writing, because that is how type is talked about. */
-    --type-micro-size: 0.5rem;      --type-micro-lead: 1.2;    /*  8px */
+    --type-micro-size: 0.5625rem;   --type-micro-lead: 1.2;    /*  9px */
     --type-label-size: 0.75rem;     --type-label-lead: 1.3;    /* 12px */
     --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       /* 12px */
     --type-body-size: 1rem;         --type-body-lead: 1.55;    /* 16px */
@@ -58,13 +58,14 @@
   }
 
   /* ---- the API ---- */
-  .t-ui, .t-label, .t-ui, .t-body, .t-lede, .t-title, .t-display { font-family: var(--ui-font); }
-  .t-ui, .t-body, .t-lede, .t-title, .t-display { font-optical-sizing: auto; }
-  .t-label, .t-ui { font-optical-sizing: none; }
+  /* opsz rides auto in every role, chrome included — the pin threw away the sidebearing
+     letterfit small type needs most. The chrome pin is GEOM only (--ui-fvs). */
+  .t-micro, .t-label, .t-ui, .t-body, .t-lede, .t-title, .t-display { font-family: var(--ui-font); }
+  .t-micro, .t-label, .t-ui, .t-body, .t-lede, .t-title, .t-display { font-optical-sizing: auto; }
 
-  .t-ui   { font-size: var(--type-micro-size);   line-height: var(--type-micro-lead);   font-variation-settings: var(--ui-fvs); }
-  .t-label   { font-size: var(--type-label-size);   line-height: var(--type-label-lead);   letter-spacing: var(--track-caps);   font-variation-settings: "opsz" 10, var(--ui-fvs); text-transform: uppercase; }
-  .t-ui      { font-size: var(--type-ui-size);      line-height: var(--type-ui-lead);      font-variation-settings: "opsz" 10, var(--ui-fvs); }
+  .t-micro   { font-size: var(--type-micro-size);   line-height: var(--type-micro-lead);   font-variation-settings: var(--ui-fvs); }
+  .t-label   { font-size: var(--type-label-size);   line-height: var(--type-label-lead);   letter-spacing: var(--track-caps);   font-variation-settings: var(--ui-fvs); text-transform: uppercase; }
+  .t-ui      { font-size: var(--type-ui-size);      line-height: var(--type-ui-lead);      font-variation-settings: var(--ui-fvs); }
   .t-body    { font-size: var(--type-body-size);    line-height: var(--type-body-lead);    font-variation-settings: var(--ui-fvs); }
   .t-lede    { font-size: var(--type-lede-size);    line-height: var(--type-lede-lead);    font-variation-settings: var(--ui-fvs); }
   .t-title   { font-size: var(--type-title-size);   line-height: var(--type-title-lead);   font-variation-settings: var(--ui-fvs); }
@@ -201,7 +202,7 @@
     background: var(--border-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius); overflow: hidden; }
   .split > div { background: var(--surface-1); padding: 26px 24px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
   .split .governed { color: var(--signal); }
-  .sample-face { font-size: 30px; font-variation-settings: "opsz" 10, var(--ui-fvs); }
+  .sample-face { font-size: 30px; font-variation-settings: var(--ui-fvs); }
   .sample-spec { font-family: var(--spec); font-size: 30px; }
   .split p { margin: 0; }
 
@@ -406,7 +407,7 @@
         <div class="role-sample t-micro">latin small letter a with ring above</div>
         <div class="role-meta">
           <div class="t-ui">micro <span class="ink-faint">&#183; glyph captions</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>8px</span><span>1.2</span><span class="spends">size</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>9px</span><span>1.2</span><span class="spends">size</span></div>
         </div>
       </div>
       <div class="role">

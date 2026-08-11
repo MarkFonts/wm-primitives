@@ -2076,7 +2076,9 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
 .cap-hd{font-size:12px;font-family:ui-monospace,Menlo,monospace;color:#999;display:flex;
  justify-content:space-between;gap:12px}
 .cap-hd b{color:#e8e8e8;font-weight:400}
-.cap-stage{position:relative;align-self:flex-start}
+/* the padding-x label floats 26px above the stage (top:-26px) — the margin is its air;
+   without it the label lands in the header line and "10px padding-x" reads as one garble */
+.cap-stage{position:relative;align-self:flex-start;margin-top:22px}
 .cap-pill{height:88px;background:#2a2a2a;border-radius:999px;display:inline-flex;align-items:center;
  corner-shape:superellipse(1.2)}
 .cap-txt{font-size:30px;color:#e8e8e8}
