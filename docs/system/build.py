@@ -189,18 +189,14 @@ build_type_page()
 secs = [build_section(*s) for s in SECTIONS]
 
 # ---------------------------------------------------------------- the faces
-def face(fn):
-    b64 = (SD/fn).read_text().strip()
-    if not b64.startswith("data:"):
-        b64 = "data:font/ttf;base64," + b64
-    assert b64.startswith("data:font/ttf;base64,AAEAAAA"), f"{fn} is not a TTF data URI"
-    return b64
+def face(name):
+    """Base64 the TTF straight out of docs/fonts. Encoding at build time keeps the repo
+    free of megabyte base64 blobs while still allowing the self-contained build."""
+    import base64
+    raw = (DOCS/"fonts"/name).read_bytes()
+    assert raw[:4] in (b"\x00\x01\x00\x00", b"OTTO", b"true"), f"{name} is not a TTF"
+    return "data:font/ttf;base64," + base64.b64encode(raw).decode()
 
-# Two ways to carry the faces.
-#   default  -- data URIs, one self-contained file, required for a published Artifact
-#               because its CSP blocks every external host including fonts.
-#   --linked -- relative URLs, for the GitHub Pages copy. Keeps the HTML ~250KB instead of
-#               3.9MB so a rebuild is a small diff rather than 3.9MB of base64 in history.
 LINKED = "--linked" in sys.argv
 
 if LINKED:
@@ -210,7 +206,7 @@ if LINKED:
 @font-face{font-family:"Specimen";src:url(fonts/CalSansSpecimen.ttf) format("truetype");font-display:swap}
 """
 else:
-    FACE, SPEC = face("font-Face-full.txt"), face("font-Specimen.txt")
+    FACE, SPEC = face("CalSansVF.ttf"), face("CalSansSpecimen.ttf")
     FONTS = f"""
 @font-face{{font-family:"Face";src:url({FACE}) format("truetype");font-display:swap}}
 @font-face{{font-family:"CalSansVF";src:url({FACE}) format("truetype");font-display:swap}}

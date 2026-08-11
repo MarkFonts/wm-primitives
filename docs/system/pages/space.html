@@ -2106,10 +2106,6 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
 .dd-col ul{margin:0;padding:0;list-style:none}
 .dd-col li{margin:0 0 13px;font-size:13px;line-height:1.5;color:var(--text-muted,#999)}
 .dd-col li b{color:var(--text,#e8e8e8);font-weight:600}
-.dd-map{font-size:12px;color:var(--text-muted,#999);font-family:ui-monospace,Menlo,monospace;
-  margin:0 0 6px}
-.dd-map span{display:block;font-family:inherit;font-size:9px;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--text-dim,#666);margin-bottom:7px}
 @media (max-width:720px){.dd{grid-template-columns:1fr}
   .dd-col+.dd-col{border-left:none;border-top:1px solid var(--line,#2a2a2a)}}
 
@@ -2119,6 +2115,9 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
 .bar-lbl{position:absolute;top:-26px;transform:translateX(-50%);font-size:9px;color:#6f9ee8;
   font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
 .cap-hd b{color:#e8e8e8;font-weight:400}
+
+.dd-note{font-size:12.5px;line-height:1.5;color:var(--text-muted,#999);margin:14px 0 0;max-width:70ch}
+.dd-note b{color:var(--text,#e8e8e8);font-weight:600}
 </style>
 <h1>The padding scale</h1>
 <p class="lede">Derived from the live surface, not invented: <b>117</b> padding numbers across
@@ -2262,6 +2261,7 @@ comes after, so it gets copied, and the copy is what drifts.</p>
   </div>
 </div>
 
-<p class="dd-map"><span>near-misses, and the step each was reaching for</span>
-5&rarr;4 &nbsp; 7&rarr;6 &nbsp; 9&rarr;8 &nbsp; 10&rarr;8 &nbsp; 14&rarr;12 &nbsp;
-20&rarr;16 &nbsp; 28&rarr;24 &nbsp; 40&rarr;32 &nbsp; 54&rarr;48</p>
+<p class="dd-note">The primitives and the instrument chrome already sit on the scale. Two
+places deliberately do not, and neither is an oversight: <b>App.css</b> is frozen, and the
+UI-kit board is a gallery of COSS components rather than house UI &mdash; nothing in it
+aligns against our chrome, so it keeps its own numbers.</p>
