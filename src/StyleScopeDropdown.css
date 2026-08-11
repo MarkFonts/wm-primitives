@@ -52,7 +52,7 @@
 .ssd-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--pad-3, 8px);
   width: 100%;
   padding: var(--pad-3, 8px);
   background: none;

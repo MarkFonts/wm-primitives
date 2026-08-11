@@ -9,9 +9,9 @@
  */
 
 export const ROLES = {
-  micro:   { size: 8,  lead: 1.2,  opsz: 10 },
-  label:   { size: 12, lead: 1.3,  opsz: 10 },
-  ui:      { size: 12, lead: 1.4,  opsz: 10 },
+  micro:   { size: 9,  lead: 1.2,  opsz: null },
+  label:   { size: 12, lead: 1.3,  opsz: null },
+  ui:      { size: 12, lead: 1.4,  opsz: null },
   body:    { size: 16, lead: 1.55, opsz: null },
   lede:    { size: 18, lead: 1.5,  opsz: null },
   title:   { size: 26, lead: 1.2,  opsz: null },

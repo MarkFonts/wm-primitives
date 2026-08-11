@@ -53,11 +53,15 @@ for (const root of cfg.roots ?? ['src']) {
     lines.forEach((line, i) => {
       const at = `${rel}:${i + 1}`
 
-      for (const m of line.matchAll(/(?<![-\w])(padding[-\w]*)\s*:\s*([^;}]+)/g)) {
+      /* gap is spacing on the same scale as padding, and sits inches away from it in the
+         same rule -- checking one and not the other is how 10px gaps survived a padding
+         audit. flex/grid gap only; the word also appears in shorthand grid properties,
+         which this deliberately does not touch. */
+      for (const m of line.matchAll(/(?<![-\w])((?:row-|column-)?gap|padding[-\w]*)\s*:\s*([^;}]+)/g)) {
         for (const px of stripFallbacks(m[2]).matchAll(/(\d*\.?\d+)px/g)) {
           const n = Number(px[1])
           if (!STEPS.has(n))
-            problems.push(`${at}  padding ${n}px is off the scale  (${m[1]}: ${m[2].trim()})`)
+            problems.push(`${at}  ${m[1]} ${n}px is off the scale  (${m[1]}: ${m[2].trim()})`)
         }
       }
 

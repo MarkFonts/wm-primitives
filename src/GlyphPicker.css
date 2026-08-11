@@ -5,7 +5,7 @@
 
 .gp {
   display: flex;
-  gap: 28px;
+  gap: var(--pad-6, 24px);
   min-height: 0;
   color: var(--text, #eee);
 }
@@ -50,7 +50,7 @@
   padding-top: var(--pad-5, 16px);
 }
 .gp--bottom .gp-specimen { flex: 1; min-height: 0; align-self: stretch; }
-.gp--bottom .gp-console { flex: none; flex-direction: row; align-items: center; gap: 18px; }
+.gp--bottom .gp-console { flex: none; flex-direction: row; align-items: center; gap: var(--pad-5, 16px); }
 
 /* ── Specimen column: glyph-on-rules → its data (U+/copy) → the grid tool (search) ── */
 .gp-side {
@@ -120,7 +120,7 @@
 }
 
 /* ── Console ── */
-.gp-console { display: flex; flex-direction: column; gap: 10px; }
+.gp-console { display: flex; flex-direction: column; gap: var(--pad-3, 8px); }
 .gp-copy {
   display: flex;
   align-items: center;

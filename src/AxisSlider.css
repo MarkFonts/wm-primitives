@@ -8,7 +8,7 @@
 
 .slider-label { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .slider-label-left {
-  display: flex; align-items: baseline; gap: 5px;
+  display: flex; align-items: baseline; gap: var(--pad-1, 4px);
   min-width: 0; overflow: visible; padding-bottom: var(--pad-nudge, 2px);
 }
 .slider-label-text {
@@ -34,7 +34,7 @@
 }
 
 /* value = optional ◆ marker + the editable number/auto field */
-.slider-value { display: flex; align-items: baseline; gap: 5px; flex-shrink: 0; }
+.slider-value { display: flex; align-items: baseline; gap: var(--pad-1, 4px); flex-shrink: 0; }
 .slider-marker {
   font-size: var(--type-micro-size); line-height: 1;
   color: var(--marker-default, var(--accent, currentColor));
