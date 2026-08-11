@@ -5519,7 +5519,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
   applyComb(performance.now());
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(!reduce){(function tick(){applyComb(performance.now());requestAnimationFrame(tick)})();}
-  window.__wm6={chev:chev};
+  window.__wm6={chev:chev,svg:svg};
   var hist=[];
   function snap(){return P.map(function(p){return{x:p.x,y:p.y,on:p.on}})}
   addEventListener('keydown',function(ev){
@@ -5585,15 +5585,21 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       el2.setAttribute('points',pts[q][0]+','+pts[q][1]+' '+pts[q+1][0]+','+pts[q+1][1]+' '+tips[q+1][0]+','+tips[q+1][1]+' '+tips[q][0]+','+tips[q][1]);
       el2.setAttribute('opacity',op.toFixed(3));}}
   function position(){
-    var w6=window.__wm6; if(!w6) return;
-    var cb=w6.chev.getBoundingClientRect(); if(!cb.width) return;
+    var w6=window.__wm6; if(!w6||!w6.chev.getBBox) return;
+    // measure the chevron's BASE, not its marching self: getBBox + the outer svg's
+    // CTM sidesteps the CSS travel, then the descender clears the whole march
+    var bb; try{bb=w6.chev.getBBox()}catch(e){return}
+    if(!bb.width) return;
+    var m=w6.svg.getScreenCTM(); if(!m) return;
+    var pt=w6.svg.createSVGPoint();
+    pt.x=bb.x+bb.width/2; pt.y=bb.y; var scr=pt.matrixTransform(m);
     var l3=svg.closest('.wm-l3'); if(!l3) return;
     var st=l3.parentElement.getBoundingClientRect();
-    var chevX=cb.left+cb.width/2, extra=st.right-chevX-4;
+    var chevX=scr.x, extra=st.right-chevX-4;
     if(extra>0&&extra<st.width*.6) l3.style.marginRight=extra+'px';
     var fpx=parseFloat(getComputedStyle(l3).fontSize);
     var l3r=l3.getBoundingClientRect(), barY=l3r.top+l3r.height/2;
-    var dy=cb.top-10-barY;
+    var dy=scr.y-40-barY;
     if(dy>fpx*.9){svg.style.height=dy+'px';H=dy*100/fpx;
       svg.setAttribute('viewBox','0 0 300 '+Math.round(H));}}
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
