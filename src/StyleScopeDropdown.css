@@ -17,7 +17,7 @@
   border-radius: 8px;
   color: var(--text);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--type-ui-size, 0.75rem);
   cursor: pointer;
 }
 .ssd-btn:hover { border-color: var(--text-muted); }
