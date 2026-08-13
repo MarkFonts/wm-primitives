@@ -415,8 +415,13 @@ html,body{margin:0;padding:0;background:var(--bg)}
    viewport, where overflow clipped them. It stays in the column and scrolls its own
    overflow instead. */
 .wm-body{position:relative;overflow-x:auto}
-.wm-foot{padding:72px 0 110px;color:var(--ink-3);font-size:12.5px;
+.wm-foot{padding:72px 0 40px;color:var(--ink-3);font-size:12.5px;
   border-top:1px solid var(--line);margin-top:64px;max-width:70ch}
+/* The colophon: the house wordmark, scanned and packed with prose by letterbox.js
+   (ported from wordmark.nyc). It is the last thing on the page for the same reason
+   the 6 is the first -- the system signing its own document in its own face. */
+.wm-lb{padding:0 0 24px}
+.wm-lb canvas{display:block;margin:0;background:transparent;cursor:crosshair}
 .wm-foot a{color:var(--ink-2)}
 
 /* The page sits to the right of the rail. Below the breakpoint the rail becomes a
@@ -709,6 +714,11 @@ HERO_TMPL = """
 """
 HERO = HERO_TMPL.replace("__SIX__", SIX_CMDS)
 
+# letterbox.js is authored as its own file (it is a port of wordmark.nyc's, and worth
+# diffing against that original) and inlined here like every other script on the page.
+LETTERBOX = (HERE / "letterbox.js").read_text()
+assert not [c for c in LETTERBOX if ord(c) > 127], "letterbox.js must stay ASCII"
+
 SPY = """
 (function(){
   var rail=document.querySelector('.wm-axis'); if(!rail) return;
@@ -781,11 +791,13 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
     corners really are superellipses and the padding really is the token. Corner shapes need
     Chrome 148+; Safari falls back to plain radii, which is the intended degradation.
   </footer>
+  <div class="wm-lb"><canvas id="lb-footer" aria-label="WORDMARK"></canvas></div>
   </div>
 </div>
 <script>{js_parts}
 {HERO}
-{SPY}</script>{TAIL}
+{SPY}
+{LETTERBOX}</script>{TAIL}
 """
 
 bad = [(i, repr(c)) for i, c in enumerate(page) if ord(c) > 127]
