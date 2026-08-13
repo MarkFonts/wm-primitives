@@ -18,6 +18,16 @@
   --bg:#0f0f0f; --surface:#1a1a1a; --surface-hi:#252525; --line:rgba(232,232,232,.14);
   --a11y:#c97050; --ui:#999; --base:#4a7fd4; --geo:#4aad5c; --signal:#eeff41;
   --ui-font:"Face","CalSansVF",system-ui,sans-serif;
+  /* the column's own geometry. The colophon breaks OUT of it by exactly these, so
+     they are tokens rather than three copies of 202 -- the alignment rule applies to
+     a negative margin the same way it applies to padding: the sum has to agree. */
+  --rail-w:202px; --edge-l:0px; --edge-r:28px;
+  /* How far the colophon's glyphs may fly before the canvas raster cuts them off.
+     letterbox.js READS this value and grows the canvas by it, then the negative
+     margin below takes the same amount back out of the layout -- so the drawing
+     surface is bigger than the box it occupies, and the box still ends on the
+     wordmark's last row. Change it here and both halves follow. */
+  --lb-bleed:520px;
 }
 @media (prefers-color-scheme: light){
   :root{--ink:#161616;--ink-2:rgba(22,22,22,.66);--ink-3:rgba(22,22,22,.42);
@@ -129,8 +139,11 @@ html,body{margin:0;padding:0;background:var(--bg)}
    hairline rule with ticks, a diamond handle that slides to the current chapter, and the
    ink scale carrying the state. It is ReCal's own rail, which is the point -- this is a
    document about the instrument, so it is navigated like one. ---- */
-.wm-rail{position:fixed;left:0;top:0;height:100vh;width:202px;z-index:90;
-  display:flex;align-items:center;pointer-events:none}
+.wm-rail{position:fixed;left:0;top:0;height:100vh;width:var(--rail-w);z-index:90;
+  display:flex;align-items:center;pointer-events:none;transition:opacity .3s ease}
+/* the rail retires when the colophon arrives: there is nothing left to navigate to,
+   and the wordmark wants the full width it is about to take */
+.wm.at-end .wm-rail{opacity:0;pointer-events:none}
 .wm-axis{position:relative;padding:0 0 0 40px;width:100%;max-height:88vh;overflow-y:auto;
   scrollbar-width:none;pointer-events:auto}
 .wm-axis::-webkit-scrollbar{display:none}
@@ -189,14 +202,65 @@ html,body{margin:0;padding:0;background:var(--bg)}
 /* The colophon: the house wordmark, scanned and packed with prose by letterbox.js
    (ported from wordmark.nyc). It is the last thing on the page for the same reason
    the 6 is the first -- the system signing its own document in its own face. */
-.wm-lb{padding:0 0 24px}
-.wm-lb canvas{display:block;margin:0;background:transparent;cursor:crosshair}
+/* THE COLOPHON MUST NEVER BE CLIPPED. Stated three times, on purpose: the canvas is
+   deliberately taller than its box, so any ancestor that starts clipping silently
+   decapitates the effect and it looks like a rendering bug rather than a CSS one.
+   If you are adding overflow:hidden to a wrapper, it does not belong on this chain. */
+.wm{overflow:visible}
+.wm-main{overflow:visible}
+.wm-lb{margin:12vh calc(-1 * var(--edge-r)) 0 calc(-1 * (var(--rail-w) + var(--edge-l)));
+  padding:0;overflow:visible;position:relative;z-index:5;cursor:crosshair;
+  /* flow-root, and it is load-bearing: with no border or padding here the canvas's
+     negative top margin COLLAPSES with this element's own, which drags the box up
+     instead of hanging the canvas above it -- the bleed silently becomes 0 and the
+     glyphs clip again. A block formatting context stops the collapse, and unlike
+     overflow:hidden it clips nothing. Do not "simplify" this away. */
+  display:flow-root}
+/*  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+ *
+ *   YOU FOUND THE COLOPHON.
+ *
+ *   The wordmark below is not an image and not a font rendering. It is the word
+ *   WORDMARK drawn at display size on an offscreen canvas, scanned row by row for
+ *   runs of ink, and every run packed with prose -- Jerome K. Jerome, "Three Men
+ *   in a Boat", 1889, public domain -- until the next glyph will not fit.
+ *
+ *   Push your cursor into it. The letters scatter and swell, and they are allowed
+ *   to leave: NOTHING here clips to the box (see --lb-bleed above; there is no
+ *   overflow:hidden on this rule, and that absence is deliberate). Hold the mouse
+ *   down and the field gets stronger.
+ *
+ *   A seeded sixth of the glyphs fade to the signal hue on five phase groups.
+ *   Seeded, not random -- resize the window and the same sixth comes back, because
+ *   the pattern belongs to the wordmark rather than to when you loaded the page.
+ *
+ *   The knobs, all in letterbox.js:  ACID_SHARE (1/6) . ACID_GROUPS (5)
+ *   ACID_SPEED (~4s) . fillSize (10px) . minFillSize (6px) . axes (SHRP 0-100)
+ *
+ *   It is a port of the footer on wordmark.nyc, which runs two canvases so that
+ *   work images can sit between the layers. There are no images here, so this one
+ *   runs on a single canvas and computes the colour per glyph instead.
+ *
+ *   -- built by hand, in the open, with the same six laws the page argues for.
+ *
+ *  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  */
+/* Nothing below this rule. The canvas is sized to the letterforms exactly, then grown
+   by --lb-bleed and pulled back by the same amount -- so the document ends on the
+   wordmark's last row and the scroll has nowhere further to go, while the glyphs still
+   have somewhere to fly. */
+.wm-lb canvas{display:block;margin:calc(-1 * var(--lb-bleed, 0px)) 0 0;
+  background:transparent;
+  /* The canvas does no hit-testing. It overhangs the content above it by --lb-bleed,
+     and a transparent element that swallows clicks over half a page of text is a bug
+     waiting to be reported; letterbox.js tracks the cursor on `window` instead, which
+     also means the glyphs start reacting as you approach from above the box. */
+  pointer-events:none}
 .wm-foot a{color:var(--ink-2)}
 
 /* The page sits to the right of the rail. Below the breakpoint the rail becomes a
    horizontal scroller pinned to the top, because a fixed column would eat the width the
    demos need. */
-.wm-main{margin-left:202px;padding:0 28px 0 0}
+.wm-main{margin-left:var(--rail-w);padding:0 var(--edge-r) 0 var(--edge-l)}
 @media (max-width:1080px){
   .wm-rail{position:sticky;top:0;height:auto;width:auto;
     background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);
@@ -207,8 +271,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
   .wm-lvl1{display:none}
   .wm-lvl0{padding:14px 15px}
   .wm-lvl0::before,.wm-lvl0.on::before{display:none}
+  :root{--rail-w:0px;--edge-l:20px;--edge-r:20px}
   .wm-main{margin-left:0;padding:0 20px}
   .wm-head{padding:32px 0 0}
+  .wm-lb{margin-top:8vh}
 }
 /* below ~90px of statement the five labels start colliding (asc-cap is .18em);
    keep the two that teach — x and base — and let the rules speak for the rest */
@@ -5694,10 +5760,14 @@ var LB_CONFIG = {
   ],
   maxWidth:       Infinity,
   heroHeightFrac: 0,
-  topPadVh:       0.06,
+  topPadVh:       0,      // the gap above is .wm-lb's margin; the canvas is the letters
   extraTopPad:    0,
   extraBottomPad: 0,
-  minFillSize:    6
+  minFillSize:    6,
+  // Read from --lb-bleed at init: the canvas grows by this much at the top so
+  // repelled glyphs are not cut off by the raster edge, and the CSS takes the same
+  // amount back out of the layout. One value, declared once, in the stylesheet.
+  bleedTop:       260
 };
 
 (function () {
@@ -5757,6 +5827,7 @@ var LB_CONFIG = {
     return x - Math.floor(x);
   }
 
+  var BLEED   = CFG.bleedTop;
   var FILL_SZ = CFG.fillSize;
   var LINE_H  = Math.ceil(1.3 * FILL_SZ);
 
@@ -5834,7 +5905,7 @@ var LB_CONFIG = {
 
     var refW2  = Math.min(CW, 850);
     var topPad = LINE_H * CFG.verticalPad + (CFG.extraTopPad || 0) * (refW2 / 850) + (CFG.topPadVh || 0) * window.innerHeight;
-    var yOff   = Math.max(topPad, (heroH - totalH) / 2);
+    var yOff   = Math.max(topPad, (heroH - totalH) / 2) + BLEED;
 
     var sc = document.createElement('canvas').getContext('2d');
     sc.font = CFG.fillWeight + ' ' + FILL_SZ + 'px ' + CFG.fillFontFamily;
@@ -5993,11 +6064,15 @@ var LB_CONFIG = {
     var capW    = isFinite(CFG.maxWidth) ? CFG.maxWidth : parentW;
     CW          = Math.max(Math.min(parentW, capW), 320);
 
+    var declared = parseFloat(getComputedStyle(document.documentElement)
+                    .getPropertyValue('--lb-bleed'));
+    BLEED = isNaN(declared) ? CFG.bleedTop : declared;
+
     FILL_SZ = Math.max(CFG.minFillSize || 0, CFG.fillSize * Math.pow(Math.min(CW, 850) / 850, 1.4));
     LINE_H  = Math.ceil(1.3 * FILL_SZ);
 
     var heroH = CFG.heroHeightFrac > 0 ? Math.round(window.innerHeight * CFG.heroHeightFrac) : 0;
-    CH = computeCanvasHeight(CW, CW, heroH);
+    CH = computeCanvasHeight(CW, CW, heroH) + BLEED;
 
     canvasEl.style.width  = CW + 'px';
     canvasEl.style.height = CH + 'px';
@@ -6011,15 +6086,20 @@ var LB_CONFIG = {
 
   function loop(nowMs) {
     rafId = null;
+    endWatch();
     drawFrame(chars, CW, CH, dpr, mp, nowMs);
     rafId = requestAnimationFrame(loop);
   }
 
-  canvasEl.addEventListener('mousemove', function (e) {
+  // Tracked on `window`, not on the canvas: the canvas is pointer-events:none (it
+  // overhangs the content above it), and this way the field also reaches out past the
+  // box -- glyphs lean away from the cursor before it has arrived. The repel is
+  // distance-gated anyway, so a cursor at the top of the page costs nothing.
+  window.addEventListener('mousemove', function (e) {
     var r = canvasEl.getBoundingClientRect();
     mp = { x: e.clientX - r.left, y: e.clientY - r.top };
   });
-  canvasEl.addEventListener('mouseleave', function () { mp = null; });
+  document.addEventListener('mouseleave', function () { mp = null; });
 
   // theme: the explicit toggle stamps data-theme, the OS preference fires matchMedia
   new MutationObserver(function () {
@@ -6031,6 +6111,24 @@ var LB_CONFIG = {
       if (chars.length) drawFrame(chars, CW, CH, dpr, mp, performance.now());
     });
   }
+
+  // The rail steps aside once the colophon arrives. Deliberately a scroll check and
+  // not an IntersectionObserver: IO needs a laid-out viewport to fire, so it silently
+  // does nothing in a headless capture or a zero-height pane -- which makes it
+  // untestable exactly where this page gets verified.
+  var wm = document.querySelector('.wm');
+  function endWatch() {
+    if (!wm) return;
+    var top = canvasEl.parentElement.getBoundingClientRect().top;
+    wm.classList.toggle('at-end', top < window.innerHeight - 40);
+  }
+  // Driven from the render loop below rather than a scroll listener. The loop is
+  // already running every frame, so this costs one rect read, and it holds in the
+  // places a scroll listener does not: headless captures and zero-height panes
+  // dispatch no scroll events at all, which is how the first two attempts at this
+  // (IntersectionObserver, then addEventListener('scroll')) both passed review and
+  // did nothing. If it renders, it tracks.
+  endWatch();
 
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(init);

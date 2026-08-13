@@ -36,10 +36,14 @@ var LB_CONFIG = {
   ],
   maxWidth:       Infinity,
   heroHeightFrac: 0,
-  topPadVh:       0.06,
+  topPadVh:       0,      // the gap above is .wm-lb's margin; the canvas is the letters
   extraTopPad:    0,
   extraBottomPad: 0,
-  minFillSize:    6
+  minFillSize:    6,
+  // Read from --lb-bleed at init: the canvas grows by this much at the top so
+  // repelled glyphs are not cut off by the raster edge, and the CSS takes the same
+  // amount back out of the layout. One value, declared once, in the stylesheet.
+  bleedTop:       260
 };
 
 (function () {
@@ -99,6 +103,7 @@ var LB_CONFIG = {
     return x - Math.floor(x);
   }
 
+  var BLEED   = CFG.bleedTop;
   var FILL_SZ = CFG.fillSize;
   var LINE_H  = Math.ceil(1.3 * FILL_SZ);
 
@@ -176,7 +181,7 @@ var LB_CONFIG = {
 
     var refW2  = Math.min(CW, 850);
     var topPad = LINE_H * CFG.verticalPad + (CFG.extraTopPad || 0) * (refW2 / 850) + (CFG.topPadVh || 0) * window.innerHeight;
-    var yOff   = Math.max(topPad, (heroH - totalH) / 2);
+    var yOff   = Math.max(topPad, (heroH - totalH) / 2) + BLEED;
 
     var sc = document.createElement('canvas').getContext('2d');
     sc.font = CFG.fillWeight + ' ' + FILL_SZ + 'px ' + CFG.fillFontFamily;
@@ -335,11 +340,15 @@ var LB_CONFIG = {
     var capW    = isFinite(CFG.maxWidth) ? CFG.maxWidth : parentW;
     CW          = Math.max(Math.min(parentW, capW), 320);
 
+    var declared = parseFloat(getComputedStyle(document.documentElement)
+                    .getPropertyValue('--lb-bleed'));
+    BLEED = isNaN(declared) ? CFG.bleedTop : declared;
+
     FILL_SZ = Math.max(CFG.minFillSize || 0, CFG.fillSize * Math.pow(Math.min(CW, 850) / 850, 1.4));
     LINE_H  = Math.ceil(1.3 * FILL_SZ);
 
     var heroH = CFG.heroHeightFrac > 0 ? Math.round(window.innerHeight * CFG.heroHeightFrac) : 0;
-    CH = computeCanvasHeight(CW, CW, heroH);
+    CH = computeCanvasHeight(CW, CW, heroH) + BLEED;
 
     canvasEl.style.width  = CW + 'px';
     canvasEl.style.height = CH + 'px';
@@ -353,15 +362,20 @@ var LB_CONFIG = {
 
   function loop(nowMs) {
     rafId = null;
+    endWatch();
     drawFrame(chars, CW, CH, dpr, mp, nowMs);
     rafId = requestAnimationFrame(loop);
   }
 
-  canvasEl.addEventListener('mousemove', function (e) {
+  // Tracked on `window`, not on the canvas: the canvas is pointer-events:none (it
+  // overhangs the content above it), and this way the field also reaches out past the
+  // box -- glyphs lean away from the cursor before it has arrived. The repel is
+  // distance-gated anyway, so a cursor at the top of the page costs nothing.
+  window.addEventListener('mousemove', function (e) {
     var r = canvasEl.getBoundingClientRect();
     mp = { x: e.clientX - r.left, y: e.clientY - r.top };
   });
-  canvasEl.addEventListener('mouseleave', function () { mp = null; });
+  document.addEventListener('mouseleave', function () { mp = null; });
 
   // theme: the explicit toggle stamps data-theme, the OS preference fires matchMedia
   new MutationObserver(function () {
@@ -373,6 +387,24 @@ var LB_CONFIG = {
       if (chars.length) drawFrame(chars, CW, CH, dpr, mp, performance.now());
     });
   }
+
+  // The rail steps aside once the colophon arrives. Deliberately a scroll check and
+  // not an IntersectionObserver: IO needs a laid-out viewport to fire, so it silently
+  // does nothing in a headless capture or a zero-height pane -- which makes it
+  // untestable exactly where this page gets verified.
+  var wm = document.querySelector('.wm');
+  function endWatch() {
+    if (!wm) return;
+    var top = canvasEl.parentElement.getBoundingClientRect().top;
+    wm.classList.toggle('at-end', top < window.innerHeight - 40);
+  }
+  // Driven from the render loop below rather than a scroll listener. The loop is
+  // already running every frame, so this costs one rect read, and it holds in the
+  // places a scroll listener does not: headless captures and zero-height panes
+  // dispatch no scroll events at all, which is how the first two attempts at this
+  // (IntersectionObserver, then addEventListener('scroll')) both passed review and
+  // did nothing. If it renders, it tracks.
+  endWatch();
 
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(init);
