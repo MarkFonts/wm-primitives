@@ -370,11 +370,15 @@ html,body{margin:0;padding:0;background:var(--bg)}
    hairline rule with ticks, a diamond handle that slides to the current chapter, and the
    ink scale carrying the state. It is ReCal's own rail, which is the point -- this is a
    document about the instrument, so it is navigated like one. ---- */
-.wm-rail{position:fixed;left:0;top:0;height:100vh;width:var(--rail-w);z-index:90;
-  display:flex;align-items:center;pointer-events:none;transition:opacity .3s ease}
-/* the rail retires when the colophon arrives: there is nothing left to navigate to,
-   and the wordmark wants the full width it is about to take */
-.wm.at-end .wm-rail{opacity:0;pointer-events:none}
+/* The document is a two-column grid; the colophon is NOT in it. That single fact
+   does three jobs that used to need three mechanisms: the rail can be sticky instead
+   of fixed, so it leaves because it ran out of document rather than because a script
+   faded it; the wordmark is full-bleed structurally, with no negative margins to keep
+   in sync; and neither can overlap the other, because they are no longer siblings in
+   the same column. */
+.wm-doc{display:grid;grid-template-columns:var(--rail-w) minmax(0,1fr)}
+.wm-rail{position:sticky;top:0;align-self:start;height:100vh;z-index:90;
+  display:flex;align-items:center;pointer-events:none}
 .wm-axis{position:relative;padding:0 0 0 40px;width:100%;max-height:88vh;overflow-y:auto;
   scrollbar-width:none;pointer-events:auto}
 .wm-axis::-webkit-scrollbar{display:none}
@@ -439,8 +443,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
    If you are adding overflow:hidden to a wrapper, it does not belong on this chain. */
 .wm{overflow:visible}
 .wm-main{overflow:visible}
-.wm-lb{margin:12vh calc(-1 * var(--edge-r)) 0 calc(-1 * (var(--rail-w) + var(--edge-l)));
-  padding:0;overflow:visible;position:relative;z-index:5;cursor:crosshair;
+.wm-lb{margin:12vh 0 0;padding:0;overflow:visible;position:relative;cursor:crosshair;
   /* flow-root, and it is load-bearing: with no border or padding here the canvas's
      negative top margin COLLAPSES with this element's own, which drags the box up
      instead of hanging the canvas above it -- the bleed silently becomes 0 and the
@@ -491,8 +494,9 @@ html,body{margin:0;padding:0;background:var(--bg)}
 /* The page sits to the right of the rail. Below the breakpoint the rail becomes a
    horizontal scroller pinned to the top, because a fixed column would eat the width the
    demos need. */
-.wm-main{margin-left:var(--rail-w);padding:0 var(--edge-r) 0 var(--edge-l)}
+.wm-main{min-width:0;padding:0 var(--edge-r) 0 var(--edge-l)}
 @media (max-width:1080px){
+  .wm-doc{display:block}
   .wm-rail{position:sticky;top:0;height:auto;width:auto;
     background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);
     border-bottom:1px solid var(--line)}
@@ -503,7 +507,6 @@ html,body{margin:0;padding:0;background:var(--bg)}
   .wm-lvl0{padding:14px 15px}
   .wm-lvl0::before,.wm-lvl0.on::before{display:none}
   :root{--rail-w:0px;--edge-l:20px;--edge-r:20px}
-  .wm-main{margin-left:0;padding:0 20px}
   .wm-head{padding:32px 0 0}
   .wm-lb{margin-top:8vh}
 }
@@ -827,6 +830,7 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 {css_parts}
 </style>
 <div class="wm">
+  <div class="wm-doc">
   <nav class="wm-rail"><div class="wm-axis">{rail}
     <span class="wm-rail-foot">wm&#8209;primitives</span></div></nav>
   <div class="wm-main">
@@ -857,8 +861,9 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
     corners really are superellipses and the padding really is the token. Corner shapes need
     Chrome 148+; Safari falls back to plain radii, which is the intended degradation.
   </footer>
-  <div class="wm-lb"><canvas id="lb-footer" aria-label="WORDMARK"></canvas></div>
   </div>
+  </div>
+  <div class="wm-lb"><canvas id="lb-footer" aria-label="WORDMARK"></canvas></div>
 </div>
 <script>{js_parts}
 {HERO}

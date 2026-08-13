@@ -362,7 +362,6 @@ var LB_CONFIG = {
 
   function loop(nowMs) {
     rafId = null;
-    endWatch();
     drawFrame(chars, CW, CH, dpr, mp, nowMs);
     rafId = requestAnimationFrame(loop);
   }
@@ -387,24 +386,6 @@ var LB_CONFIG = {
       if (chars.length) drawFrame(chars, CW, CH, dpr, mp, performance.now());
     });
   }
-
-  // The rail steps aside once the colophon arrives. Deliberately a scroll check and
-  // not an IntersectionObserver: IO needs a laid-out viewport to fire, so it silently
-  // does nothing in a headless capture or a zero-height pane -- which makes it
-  // untestable exactly where this page gets verified.
-  var wm = document.querySelector('.wm');
-  function endWatch() {
-    if (!wm) return;
-    var top = canvasEl.parentElement.getBoundingClientRect().top;
-    wm.classList.toggle('at-end', top < window.innerHeight - 40);
-  }
-  // Driven from the render loop below rather than a scroll listener. The loop is
-  // already running every frame, so this costs one rect read, and it holds in the
-  // places a scroll listener does not: headless captures and zero-height panes
-  // dispatch no scroll events at all, which is how the first two attempts at this
-  // (IntersectionObserver, then addEventListener('scroll')) both passed review and
-  // did nothing. If it renders, it tracks.
-  endWatch();
 
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(init);

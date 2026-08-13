@@ -139,11 +139,15 @@ html,body{margin:0;padding:0;background:var(--bg)}
    hairline rule with ticks, a diamond handle that slides to the current chapter, and the
    ink scale carrying the state. It is ReCal's own rail, which is the point -- this is a
    document about the instrument, so it is navigated like one. ---- */
-.wm-rail{position:fixed;left:0;top:0;height:100vh;width:var(--rail-w);z-index:90;
-  display:flex;align-items:center;pointer-events:none;transition:opacity .3s ease}
-/* the rail retires when the colophon arrives: there is nothing left to navigate to,
-   and the wordmark wants the full width it is about to take */
-.wm.at-end .wm-rail{opacity:0;pointer-events:none}
+/* The document is a two-column grid; the colophon is NOT in it. That single fact
+   does three jobs that used to need three mechanisms: the rail can be sticky instead
+   of fixed, so it leaves because it ran out of document rather than because a script
+   faded it; the wordmark is full-bleed structurally, with no negative margins to keep
+   in sync; and neither can overlap the other, because they are no longer siblings in
+   the same column. */
+.wm-doc{display:grid;grid-template-columns:var(--rail-w) minmax(0,1fr)}
+.wm-rail{position:sticky;top:0;align-self:start;height:100vh;z-index:90;
+  display:flex;align-items:center;pointer-events:none}
 .wm-axis{position:relative;padding:0 0 0 40px;width:100%;max-height:88vh;overflow-y:auto;
   scrollbar-width:none;pointer-events:auto}
 .wm-axis::-webkit-scrollbar{display:none}
@@ -208,8 +212,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
    If you are adding overflow:hidden to a wrapper, it does not belong on this chain. */
 .wm{overflow:visible}
 .wm-main{overflow:visible}
-.wm-lb{margin:12vh calc(-1 * var(--edge-r)) 0 calc(-1 * (var(--rail-w) + var(--edge-l)));
-  padding:0;overflow:visible;position:relative;z-index:5;cursor:crosshair;
+.wm-lb{margin:12vh 0 0;padding:0;overflow:visible;position:relative;cursor:crosshair;
   /* flow-root, and it is load-bearing: with no border or padding here the canvas's
      negative top margin COLLAPSES with this element's own, which drags the box up
      instead of hanging the canvas above it -- the bleed silently becomes 0 and the
@@ -260,8 +263,9 @@ html,body{margin:0;padding:0;background:var(--bg)}
 /* The page sits to the right of the rail. Below the breakpoint the rail becomes a
    horizontal scroller pinned to the top, because a fixed column would eat the width the
    demos need. */
-.wm-main{margin-left:var(--rail-w);padding:0 var(--edge-r) 0 var(--edge-l)}
+.wm-main{min-width:0;padding:0 var(--edge-r) 0 var(--edge-l)}
 @media (max-width:1080px){
+  .wm-doc{display:block}
   .wm-rail{position:sticky;top:0;height:auto;width:auto;
     background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);
     border-bottom:1px solid var(--line)}
@@ -272,7 +276,6 @@ html,body{margin:0;padding:0;background:var(--bg)}
   .wm-lvl0{padding:14px 15px}
   .wm-lvl0::before,.wm-lvl0.on::before{display:none}
   :root{--rail-w:0px;--edge-l:20px;--edge-r:20px}
-  .wm-main{margin-left:0;padding:0 20px}
   .wm-head{padding:32px 0 0}
   .wm-lb{margin-top:8vh}
 }
@@ -3536,6 +3539,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 #s-corners .grid.g3,#s-circles .grid.g3,#s-space .grid.g3{grid-template-columns:repeat(auto-fit,minmax(430px,1fr))}
 </style>
 <div class="wm">
+  <div class="wm-doc">
   <nav class="wm-rail"><div class="wm-axis"><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1">The 5 pills</a><a class="wm-lvl1" href="#corners-c2">The radius ladder</a><a class="wm-lvl1" href="#corners-c3">Asymmetric corners</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-circles"><u>03</u>Circles</a><a class="wm-lvl1" href="#circles-c1">The 13 circles</a><a class="wm-lvl1" href="#circles-c2">The 5 pills</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1">The steps</a><a class="wm-lvl1" href="#space-c2">The cap rule</a><a class="wm-lvl1" href="#space-c3">Use a step</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1">The vocabulary</a><a class="wm-lvl1" href="#color-c2">Literal colors outside App.css</a><a class="wm-lvl1" href="#color-c3">Fallbacks inside var()</a><a class="wm-lvl1" href="#color-c4">App.css (frozen)</a><a class="wm-lvl1" href="#color-c5">The GEOM zones</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div>
     <span class="wm-rail-foot">wm&#8209;primitives</span></div></nav>
   <div class="wm-main">
@@ -5459,8 +5463,9 @@ the ones a value-to-token sweep would silently merge.</p>
     corners really are superellipses and the padding really is the token. Corner shapes need
     Chrome 148+; Safari falls back to plain radii, which is the intended degradation.
   </footer>
-  <div class="wm-lb"><canvas id="lb-footer" aria-label="WORDMARK"></canvas></div>
   </div>
+  </div>
+  <div class="wm-lb"><canvas id="lb-footer" aria-label="WORDMARK"></canvas></div>
 </div>
 <script>(function(){var ROOT=document.getElementById('s-corners');if(!ROOT)return;
 ROOT.querySelectorAll('.bar button').forEach(b=>b.onclick=()=>{
@@ -6086,7 +6091,6 @@ var LB_CONFIG = {
 
   function loop(nowMs) {
     rafId = null;
-    endWatch();
     drawFrame(chars, CW, CH, dpr, mp, nowMs);
     rafId = requestAnimationFrame(loop);
   }
@@ -6111,24 +6115,6 @@ var LB_CONFIG = {
       if (chars.length) drawFrame(chars, CW, CH, dpr, mp, performance.now());
     });
   }
-
-  // The rail steps aside once the colophon arrives. Deliberately a scroll check and
-  // not an IntersectionObserver: IO needs a laid-out viewport to fire, so it silently
-  // does nothing in a headless capture or a zero-height pane -- which makes it
-  // untestable exactly where this page gets verified.
-  var wm = document.querySelector('.wm');
-  function endWatch() {
-    if (!wm) return;
-    var top = canvasEl.parentElement.getBoundingClientRect().top;
-    wm.classList.toggle('at-end', top < window.innerHeight - 40);
-  }
-  // Driven from the render loop below rather than a scroll listener. The loop is
-  // already running every frame, so this costs one rect read, and it holds in the
-  // places a scroll listener does not: headless captures and zero-height panes
-  // dispatch no scroll events at all, which is how the first two attempts at this
-  // (IntersectionObserver, then addEventListener('scroll')) both passed review and
-  // did nothing. If it renders, it tracks.
-  endWatch();
 
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(init);
