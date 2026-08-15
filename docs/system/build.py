@@ -247,7 +247,7 @@ SHELL = """
 :root{
   --ink:#e8e8e8; --ink-2:rgba(232,232,232,.62); --ink-3:rgba(232,232,232,.38);
   --bg:#0f0f0f; --surface:#1a1a1a; --surface-hi:#252525; --line:rgba(232,232,232,.14);
-  --a11y:#c97050; --ui:#999; --base:#4a7fd4; --geo:#4aad5c; --signal:#eeff41;
+  --a11y:#c97050; --ui:#999; --base:#4a7fd4; --geo:#4aad5c; --signal:#eeff41; --signal:color(display-p3 0.9333 1 0.2549);
   --ui-font:"Face","CalSansVF",system-ui,sans-serif;
   /* the column's own geometry. The colophon breaks OUT of it by exactly these, so
      they are tokens rather than three copies of 202 -- the alignment rule applies to
@@ -263,14 +263,14 @@ SHELL = """
 @media (prefers-color-scheme: light){
   :root{--ink:#161616;--ink-2:rgba(22,22,22,.66);--ink-3:rgba(22,22,22,.42);
     --bg:#f4f4f2;--surface:#fff;--surface-hi:#ebebe8;--line:rgba(22,22,22,.16);
-    --a11y:#a85136;--ui:#6b6b6b;--base:#2f5fae;--geo:#2f8a44;--signal:#5c6b00}
+    --a11y:#a85136;--ui:#6b6b6b;--base:#2f5fae;--geo:#2f8a44;--signal:#5c6b00; --signal:color(display-p3 0.3608 0.4196 0)}
 }
 :root[data-theme="dark"]{--ink:#e8e8e8;--ink-2:rgba(232,232,232,.62);--ink-3:rgba(232,232,232,.38);
   --bg:#0f0f0f;--surface:#1a1a1a;--surface-hi:#252525;--line:rgba(232,232,232,.14);
-  --a11y:#c97050;--ui:#999;--base:#4a7fd4;--geo:#4aad5c;--signal:#eeff41}
+  --a11y:#c97050;--ui:#999;--base:#4a7fd4;--geo:#4aad5c;--signal:#eeff41; --signal:color(display-p3 0.9333 1 0.2549)}
 :root[data-theme="light"]{--ink:#161616;--ink-2:rgba(22,22,22,.66);--ink-3:rgba(22,22,22,.42);
   --bg:#f4f4f2;--surface:#fff;--surface-hi:#ebebe8;--line:rgba(22,22,22,.16);
-  --a11y:#a85136;--ui:#6b6b6b;--base:#2f5fae;--geo:#2f8a44;--signal:#5c6b00}
+  --a11y:#a85136;--ui:#6b6b6b;--base:#2f5fae;--geo:#2f8a44;--signal:#5c6b00; --signal:color(display-p3 0.3608 0.4196 0)}
 
 /* The linked build ships bare — no artifact wrapper, no reset — so the UA's 8px body
    margin shows the page-default white as a hairline gutter around .wm. Own the root. */
@@ -377,7 +377,23 @@ html,body{margin:0;padding:0;background:var(--bg)}
    in sync; and neither can overlap the other, because they are no longer siblings in
    the same column. */
 .wm-doc{display:grid;grid-template-columns:var(--rail-w) minmax(0,1fr)}
-.wm-rail{position:sticky;top:0;align-self:start;height:100vh;z-index:90;
+/* Where the index stops. The rail travels the sections it indexes and no further: the
+   closing note is not in the outline, so the outline has no business riding it down.
+   That is what .wm-railcol is for -- a sticky box is bounded by its nearest ancestor's
+   content box, and MEASURED, not assumed: Chrome bounds a sticky GRID ITEM by the grid
+   container, so putting the footer in its own row moved nothing (verified, both unpinned
+   at the same scroll). An ordinary wrapper that ends with row 1 does bound it. The
+   footer keeps its own row in column 2 so the wrapper can end there without the closing
+   note sliding under the rail. */
+/* ITALIC IS AN AXIS HERE, NOT A SECOND FILE. <em> and <i> arrive italic from the UA
+   sheet, and Face has no italic file to switch to -- so the browser slants the upright
+   instead, skewing curves that were drawn, not sheared. Set the style back to normal and
+   drive the axis. This lives in the shell because the trigger is the UA sheet, which
+   reaches every section: fixing it per page fixed one page. */
+.wm em,.wm i,.wm cite,.wm dfn,.wm var{font-style:normal;font-variation-settings:'ital' 1}
+.wm-foot{grid-column:2}
+.wm-railcol{grid-row:1;min-height:100%}
+.wm-rail{position:sticky;top:0;height:100vh;z-index:90;
   display:flex;align-items:center;pointer-events:none}
 .wm-axis{position:relative;padding:0 0 0 40px;width:100%;max-height:88vh;overflow-y:auto;
   scrollbar-width:none;pointer-events:auto}
@@ -468,12 +484,14 @@ html,body{margin:0;padding:0;background:var(--bg)}
  *   Seeded, not random -- resize the window and the same sixth comes back, because
  *   the pattern belongs to the wordmark rather than to when you loaded the page.
  *
- *   The knobs, all in letterbox.js:  ACID_SHARE (1/6) . ACID_GROUPS (5)
- *   ACID_SPEED (~4s) . fillSize (10px) . minFillSize (6px) . axes (SHRP 0-100)
+ *   The knobs are the config this page passes to the primitive (src/letterbox.js,
+ *   inlined below):  speckle.share (1/6) . speckle.groups (5) . speckle.speed (~4s)
+ *   fillSize (10px) . minFillSize (6px) . axes (SHRP 0-100)
  *
- *   It is a port of the footer on wordmark.nyc, which runs two canvases so that
- *   work images can sit between the layers. There are no images here, so this one
- *   runs on a single canvas and computes the colour per glyph instead.
+ *   It is the same engine as the footer on wordmark.nyc, which runs two canvases so
+ *   that work images can sit between the layers -- the primitive's `layers` option.
+ *   There are no images here, so this one stays on a single canvas and computes the
+ *   colour per glyph instead (`speckle`).
  *
  *   -- built by hand, in the open, with the same six laws the page argues for.
  *
@@ -497,6 +515,9 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-main{min-width:0;padding:0 var(--edge-r) 0 var(--edge-l)}
 @media (max-width:1080px){
   .wm-doc{display:block}
+  /* the rail is a top bar here, and a bar that stops at the end of the sections would
+     stop being a bar -- display:contents takes the wrapper back out of the layout */
+  .wm-railcol{display:contents}
   .wm-rail{position:sticky;top:0;height:auto;width:auto;
     background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);
     border-bottom:1px solid var(--line)}
@@ -783,10 +804,42 @@ HERO_TMPL = """
 """
 HERO = HERO_TMPL.replace("__SIX__", SIX_CMDS)
 
-# letterbox.js is authored as its own file (it is a port of wordmark.nyc's, and worth
-# diffing against that original) and inlined here like every other script on the page.
-LETTERBOX = (HERE / "letterbox.js").read_text()
+# The colophon runs the shared primitive, src/letterbox.js -- the same engine
+# wordmark.nyc's hero and footer use. It is inlined here like every other script on the
+# page, and it stays ASCII so the single-file build cannot mojibake. It is an ES module,
+# so it goes in its own <script type="module"> below; the config that makes it THIS
+# page's colophon travels with it, in the same module scope.
+LETTERBOX = (HERE.parent.parent / "src" / "letterbox.js").read_text()
 assert not [c for c in LETTERBOX if ord(c) > 127], "letterbox.js must stay ASCII"
+
+LB_BOOT = """
+var lb = createLetterbox(document.getElementById('lb-footer'), {
+  words:           ['WORDMARK'],
+  largeFontFamily: '"Face", "CalSansVF", -apple-system, sans-serif',
+  fillFontFamily:  '"Face", "CalSansVF", -apple-system, sans-serif',
+  fillSize:        10,
+  widthFraction:   0.98,
+  // SHRP only. wordmark.nyc's config also animates 'wdth' and CalSansVF has no such
+  // axis (fvar: opsz, GEOM, wght, YTAS, SHRP, ital), so that half moved nothing. SHRP
+  // is also the safe one to spend -- it is not one of the six signals; GEOM and wght are.
+  axes:            [{ tag: 'SHRP', min: 0, max: 100, speed: 8, mult: 0.9 }],
+  // A seeded sixth of the glyphs fade ink -> --signal on five phase groups. Not the
+  // two-canvas juggle wordmark.nyc runs: nothing sits between the layers here, so the
+  // split would buy an extra canvas and no effect.
+  speckle:         { share: 1 / 6, groups: 5 },
+  // The acid is a P3-SCALED token now, so the canvas needs a P3 buffer to hold it --
+  // an sRGB buffer would clamp the speckle back to the hex the page falls back to.
+  colorSpace:      'display-p3',
+  // Read from --lb-bleed: the canvas grows at the top so repelled glyphs are not cut
+  // off by the raster edge, and the CSS takes the same amount back out of the layout.
+  bleedTop:        260,
+  minFillSize:     6,
+});
+if (lb) {
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(lb.init);
+  else lb.init();
+}
+"""
 
 SPY = """
 (function(){
@@ -831,8 +884,8 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 </style>
 <div class="wm">
   <div class="wm-doc">
-  <nav class="wm-rail"><div class="wm-axis">{rail}
-    <span class="wm-rail-foot">wm&#8209;primitives</span></div></nav>
+  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis">{rail}
+    <span class="wm-rail-foot">wm&#8209;primitives</span></div></nav></div>
   <div class="wm-main">
   <header class="wm-head">
     <svg class="wm-six" id="wm6" viewBox="{SIX_VB}" aria-hidden="true"></svg>
@@ -856,19 +909,20 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
     </div>
   </header>
   {''.join(body_parts)}
+  </div>
   <footer class="wm-foot">
     Built from the working pages, not screenshots &mdash; every demo here is live CSS, so the
     corners really are superellipses and the padding really is the token. Corner shapes need
     Chrome 148+; Safari falls back to plain radii, which is the intended degradation.
   </footer>
   </div>
-  </div>
   <div class="wm-lb"><canvas id="lb-footer" aria-label="WORDMARK"></canvas></div>
 </div>
 <script>{js_parts}
 {HERO}
-{SPY}
-{LETTERBOX}</script>{TAIL}
+{SPY}</script>
+<script type="module">{LETTERBOX}
+{LB_BOOT}</script>{TAIL}
 """
 
 bad = [(i, repr(c)) for i, c in enumerate(page) if ord(c) > 127]

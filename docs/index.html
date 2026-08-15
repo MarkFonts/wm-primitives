@@ -16,7 +16,7 @@
 :root{
   --ink:#e8e8e8; --ink-2:rgba(232,232,232,.62); --ink-3:rgba(232,232,232,.38);
   --bg:#0f0f0f; --surface:#1a1a1a; --surface-hi:#252525; --line:rgba(232,232,232,.14);
-  --a11y:#c97050; --ui:#999; --base:#4a7fd4; --geo:#4aad5c; --signal:#eeff41;
+  --a11y:#c97050; --ui:#999; --base:#4a7fd4; --geo:#4aad5c; --signal:#eeff41; --signal:color(display-p3 0.9333 1 0.2549);
   --ui-font:"Face","CalSansVF",system-ui,sans-serif;
   /* the column's own geometry. The colophon breaks OUT of it by exactly these, so
      they are tokens rather than three copies of 202 -- the alignment rule applies to
@@ -32,14 +32,14 @@
 @media (prefers-color-scheme: light){
   :root{--ink:#161616;--ink-2:rgba(22,22,22,.66);--ink-3:rgba(22,22,22,.42);
     --bg:#f4f4f2;--surface:#fff;--surface-hi:#ebebe8;--line:rgba(22,22,22,.16);
-    --a11y:#a85136;--ui:#6b6b6b;--base:#2f5fae;--geo:#2f8a44;--signal:#5c6b00}
+    --a11y:#a85136;--ui:#6b6b6b;--base:#2f5fae;--geo:#2f8a44;--signal:#5c6b00; --signal:color(display-p3 0.3608 0.4196 0)}
 }
 :root[data-theme="dark"]{--ink:#e8e8e8;--ink-2:rgba(232,232,232,.62);--ink-3:rgba(232,232,232,.38);
   --bg:#0f0f0f;--surface:#1a1a1a;--surface-hi:#252525;--line:rgba(232,232,232,.14);
-  --a11y:#c97050;--ui:#999;--base:#4a7fd4;--geo:#4aad5c;--signal:#eeff41}
+  --a11y:#c97050;--ui:#999;--base:#4a7fd4;--geo:#4aad5c;--signal:#eeff41; --signal:color(display-p3 0.9333 1 0.2549)}
 :root[data-theme="light"]{--ink:#161616;--ink-2:rgba(22,22,22,.66);--ink-3:rgba(22,22,22,.42);
   --bg:#f4f4f2;--surface:#fff;--surface-hi:#ebebe8;--line:rgba(22,22,22,.16);
-  --a11y:#a85136;--ui:#6b6b6b;--base:#2f5fae;--geo:#2f8a44;--signal:#5c6b00}
+  --a11y:#a85136;--ui:#6b6b6b;--base:#2f5fae;--geo:#2f8a44;--signal:#5c6b00; --signal:color(display-p3 0.3608 0.4196 0)}
 
 /* The linked build ships bare — no artifact wrapper, no reset — so the UA's 8px body
    margin shows the page-default white as a hairline gutter around .wm. Own the root. */
@@ -146,7 +146,23 @@ html,body{margin:0;padding:0;background:var(--bg)}
    in sync; and neither can overlap the other, because they are no longer siblings in
    the same column. */
 .wm-doc{display:grid;grid-template-columns:var(--rail-w) minmax(0,1fr)}
-.wm-rail{position:sticky;top:0;align-self:start;height:100vh;z-index:90;
+/* Where the index stops. The rail travels the sections it indexes and no further: the
+   closing note is not in the outline, so the outline has no business riding it down.
+   That is what .wm-railcol is for -- a sticky box is bounded by its nearest ancestor's
+   content box, and MEASURED, not assumed: Chrome bounds a sticky GRID ITEM by the grid
+   container, so putting the footer in its own row moved nothing (verified, both unpinned
+   at the same scroll). An ordinary wrapper that ends with row 1 does bound it. The
+   footer keeps its own row in column 2 so the wrapper can end there without the closing
+   note sliding under the rail. */
+/* ITALIC IS AN AXIS HERE, NOT A SECOND FILE. <em> and <i> arrive italic from the UA
+   sheet, and Face has no italic file to switch to -- so the browser slants the upright
+   instead, skewing curves that were drawn, not sheared. Set the style back to normal and
+   drive the axis. This lives in the shell because the trigger is the UA sheet, which
+   reaches every section: fixing it per page fixed one page. */
+.wm em,.wm i,.wm cite,.wm dfn,.wm var{font-style:normal;font-variation-settings:'ital' 1}
+.wm-foot{grid-column:2}
+.wm-railcol{grid-row:1;min-height:100%}
+.wm-rail{position:sticky;top:0;height:100vh;z-index:90;
   display:flex;align-items:center;pointer-events:none}
 .wm-axis{position:relative;padding:0 0 0 40px;width:100%;max-height:88vh;overflow-y:auto;
   scrollbar-width:none;pointer-events:auto}
@@ -237,12 +253,14 @@ html,body{margin:0;padding:0;background:var(--bg)}
  *   Seeded, not random -- resize the window and the same sixth comes back, because
  *   the pattern belongs to the wordmark rather than to when you loaded the page.
  *
- *   The knobs, all in letterbox.js:  ACID_SHARE (1/6) . ACID_GROUPS (5)
- *   ACID_SPEED (~4s) . fillSize (10px) . minFillSize (6px) . axes (SHRP 0-100)
+ *   The knobs are the config this page passes to the primitive (src/letterbox.js,
+ *   inlined below):  speckle.share (1/6) . speckle.groups (5) . speckle.speed (~4s)
+ *   fillSize (10px) . minFillSize (6px) . axes (SHRP 0-100)
  *
- *   It is a port of the footer on wordmark.nyc, which runs two canvases so that
- *   work images can sit between the layers. There are no images here, so this one
- *   runs on a single canvas and computes the colour per glyph instead.
+ *   It is the same engine as the footer on wordmark.nyc, which runs two canvases so
+ *   that work images can sit between the layers -- the primitive's `layers` option.
+ *   There are no images here, so this one stays on a single canvas and computes the
+ *   colour per glyph instead (`speckle`).
  *
  *   -- built by hand, in the open, with the same six laws the page argues for.
  *
@@ -266,6 +284,9 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-main{min-width:0;padding:0 var(--edge-r) 0 var(--edge-l)}
 @media (max-width:1080px){
   .wm-doc{display:block}
+  /* the rail is a top bar here, and a bar that stops at the end of the sections would
+     stop being a bar -- display:contents takes the wrapper back out of the layout */
+  .wm-railcol{display:contents}
   .wm-rail{position:sticky;top:0;height:auto;width:auto;
     background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);
     border-bottom:1px solid var(--line)}
@@ -290,7 +311,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     --bg: #0f0f0f;  --surface-1: #111111;  --surface-2: #1a1a1a;
     --text: #e8e8e8;  --text-rgb: 232, 232, 232;
     --border: #333333;  --border-subtle: #222222;
-    --accent: #e8e8e8;  --signal: #eeff41;
+    --accent: #e8e8e8;  --signal: #eeff41; --signal:color(display-p3 0.9333 1 0.2549);
     --radius: 8px;
     --ui-font: "Face", system-ui, sans-serif;
     --ui-fvs: "GEOM" 25;
@@ -319,18 +340,18 @@ html,body{margin:0;padding:0;background:var(--bg)}
       --bg: #f5faff; --surface-1: #eaf3fb; --surface-2: #ddeaf6;
       --text: #111111; --text-rgb: 17, 17, 17;
       --border: #c4d8eb; --border-subtle: #d9e8f5;
-      --accent: #111111; --signal: #5c6b00;
+      --accent: #111111; --signal: #5c6b00; --signal:color(display-p3 0.3608 0.4196 0);
     }
   }:root[data-theme="light"] #s-type{
     --bg: #f5faff; --surface-1: #eaf3fb; --surface-2: #ddeaf6;
     --text: #111111; --text-rgb: 17, 17, 17;
     --border: #c4d8eb; --border-subtle: #d9e8f5;
-    --accent: #111111; --signal: #5c6b00;
+    --accent: #111111; --signal: #5c6b00; --signal:color(display-p3 0.3608 0.4196 0);
   }:root[data-theme="dark"] #s-type{
     --bg: #0f0f0f; --surface-1: #111111; --surface-2: #1a1a1a;
     --text: #e8e8e8; --text-rgb: 232, 232, 232;
     --border: #333333; --border-subtle: #222222;
-    --accent: #e8e8e8; --signal: #eeff41;
+    --accent: #e8e8e8; --signal: #eeff41; --signal:color(display-p3 0.9333 1 0.2549);
   }#s-type .t-micro,#s-type .t-label,#s-type .t-ui,#s-type .t-body,#s-type .t-lede,#s-type .t-title,#s-type .t-display{ font-family: var(--ui-font); }#s-type .t-micro,#s-type .t-label,#s-type .t-ui,#s-type .t-body,#s-type .t-lede,#s-type .t-title,#s-type .t-display{ font-optical-sizing: auto; }#s-type .t-micro{ font-size: var(--type-micro-size);   line-height: var(--type-micro-lead);   font-variation-settings: var(--ui-fvs); }#s-type .t-label{ font-size: var(--type-label-size);   line-height: var(--type-label-lead);   letter-spacing: var(--track-caps);   font-variation-settings: var(--ui-fvs); text-transform: uppercase; }#s-type .t-ui{ font-size: var(--type-ui-size);      line-height: var(--type-ui-lead);      font-variation-settings: var(--ui-fvs); }#s-type .t-body{ font-size: var(--type-body-size);    line-height: var(--type-body-lead);    font-variation-settings: var(--ui-fvs); }#s-type .t-lede{ font-size: var(--type-lede-size);    line-height: var(--type-lede-lead);    font-variation-settings: var(--ui-fvs); }#s-type .t-title{ font-size: var(--type-title-size);   line-height: var(--type-title-lead);   font-variation-settings: var(--ui-fvs); }#s-type .t-display{ font-size: var(--type-display-size); line-height: var(--type-display-lead); font-variation-settings: var(--ui-fvs); }#s-type .p1,#s-type .p2,#s-type .p3,#s-type .p4,#s-type .p5{ font-optical-sizing: auto; font-variation-settings: var(--ui-fvs); white-space: nowrap; }#s-type .p1{ font-size: var(--poster-1); line-height: 1.05; }#s-type .p2{ font-size: var(--poster-2); line-height: 1.02; }#s-type .p3{ font-size: var(--poster-3); line-height: 1.00; }#s-type .p4{ font-size: var(--poster-4); line-height: .98; }#s-type .p5{ font-size: var(--poster-5); line-height: .96; }#s-type .spec-face{ font-family: var(--spec); }#s-type em,#s-type i,#s-type .ital{ font-style: normal; font-variation-settings: var(--ui-fvs), "ital" 1; }#s-type .sig-rule{ text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .28em; }#s-type .ink-full{ color: rgba(var(--text-rgb), var(--ink-full)); }#s-type .ink-quiet{ color: rgba(var(--text-rgb), var(--ink-quiet)); }#s-type .ink-faint{ color: rgba(var(--text-rgb), var(--ink-faint)); }#s-type *{ box-sizing: border-box; }#s-type{
     margin: 0; background: var(--bg); color: rgba(var(--text-rgb), var(--ink-full));
     font-family: var(--ui-font); font-variation-settings: var(--ui-fvs);
@@ -3515,10 +3536,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
 
 /* ===== color ===== */
 #s-color{ --ink:#e9e6df; --ink2:rgba(233,230,223,.62); --ink3:rgba(233,230,223,.40);
-  --gnd:#121213; --card:#191919; --line:#2a2a2a; --acc:#eeff41; }@media (prefers-color-scheme: light){#s-color{ --ink:#16161a; --ink2:rgba(22,22,26,.66); --ink3:rgba(22,22,26,.45);
-  --gnd:#fbfaf7; --card:#fff; --line:#e3e0d8; --acc:#5c6b00; } }:root[data-theme=dark] #s-color{ --ink:#e9e6df; --ink2:rgba(233,230,223,.62); --ink3:rgba(233,230,223,.40);
-  --gnd:#121213; --card:#191919; --line:#2a2a2a; --acc:#eeff41; }:root[data-theme=light] #s-color{ --ink:#16161a; --ink2:rgba(22,22,26,.66); --ink3:rgba(22,22,26,.45);
-  --gnd:#fbfaf7; --card:#fff; --line:#e3e0d8; --acc:#5c6b00; }#s-color{ margin:0; background:var(--gnd); color:var(--ink); padding:40px 28px 90px;
+  --gnd:#121213; --card:#191919; --line:#2a2a2a; --acc:#eeff41; --acc:color(display-p3 0.9333 1 0.2549); }@media (prefers-color-scheme: light){#s-color{ --ink:#16161a; --ink2:rgba(22,22,26,.66); --ink3:rgba(22,22,26,.45);
+  --gnd:#fbfaf7; --card:#fff; --line:#e3e0d8; --acc:#5c6b00; --acc:color(display-p3 0.3608 0.4196 0); } }:root[data-theme=dark] #s-color{ --ink:#e9e6df; --ink2:rgba(233,230,223,.62); --ink3:rgba(233,230,223,.40);
+  --gnd:#121213; --card:#191919; --line:#2a2a2a; --acc:#eeff41; --acc:color(display-p3 0.9333 1 0.2549); }:root[data-theme=light] #s-color{ --ink:#16161a; --ink2:rgba(22,22,26,.66); --ink3:rgba(22,22,26,.45);
+  --gnd:#fbfaf7; --card:#fff; --line:#e3e0d8; --acc:#5c6b00; --acc:color(display-p3 0.3608 0.4196 0); }#s-color{ margin:0; background:var(--gnd); color:var(--ink); padding:40px 28px 90px;
   font:15px/1.55 "Face","CalSansVF",ui-sans-serif,system-ui,sans-serif; }#s-color h1{ font-size:30px; margin:0 0 6px; letter-spacing:-.01em }#s-color .lede{ color:var(--ink2); max-width:70ch; margin:0 0 22px }#s-color h2{ font-size:13px; text-transform:uppercase; letter-spacing:.11em; margin:44px 0 4px }#s-color h3{ font-size:12px; font-weight:500; color:var(--ink2); margin:22px 0 7px; font-family:ui-monospace,Menlo,monospace }#s-color .note{ color:var(--ink2); max-width:74ch; margin:0 0 6px; font-size:13.5px }#s-color .n{ color:var(--acc); font-variant-numeric:tabular-nums; font-weight:400 }#s-color .chips{ display:flex; flex-wrap:wrap; gap:7px; margin:0 0 10px }#s-color .chip{ display:inline-flex; align-items:center; gap:6px; background:var(--card);
   border:1px solid var(--line); border-radius:999px; padding:4px 10px 4px 5px; font-size:12px }#s-color .chip b{ color:var(--ink3); font-weight:400; font-variant-numeric:tabular-nums }#s-color .sw{ width:13px; height:13px; border-radius:3px; display:inline-block; flex:none;
   border:1px solid rgba(128,128,128,.45); vertical-align:-2px }#s-color section{ overflow-x:auto }#s-color table{ width:100%; min-width:760px; border-collapse:collapse; font-size:12.5px;
@@ -3526,7 +3547,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   letter-spacing:.09em; padding:5px 10px 5px 0; border-bottom:1px solid var(--line); white-space:nowrap }#s-color td{ padding:4px 10px 4px 0; border-bottom:1px solid var(--line); vertical-align:top }#s-color code{ font-family:ui-monospace,Menlo,monospace; font-size:11.5px }#s-color .c{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }#s-color .c code{ margin-left:7px }#s-color td.c:hover{ white-space:normal; overflow:visible; word-break:break-all }#s-color .m{ color:var(--ink); white-space:nowrap }#s-color .p code,#s-color .s{ color:var(--ink2) }#s-color .s{ font-family:ui-monospace,Menlo,monospace; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }#s-color td.s:hover{ white-space:normal; overflow:visible; word-break:break-all }#s-color .l{ color:var(--ink3); font-family:ui-monospace,Menlo,monospace; font-size:11px; white-space:nowrap }#s-color .hs{ color:var(--ink3); font-size:10.5px; margin-left:7px; font-family:ui-monospace,Menlo,monospace }
 
 /* ===== usage ===== */
-#s-usage{--ink:#e9e6df;--ink2:rgba(233,230,223,.62);--ink3:rgba(233,230,223,.40);--gnd:#121213;--card:#191919;--line:#2a2a2a;--acc:#eeff41;--warn:#ff8557}@media(prefers-color-scheme:light){#s-usage{--ink:#16161a;--ink2:rgba(22,22,26,.66);--ink3:rgba(22,22,26,.45);--gnd:#fbfaf7;--card:#fff;--line:#e3e0d8;--acc:#5c6b00;--warn:#c05320}}:root[data-theme=dark] #s-usage{--ink:#e9e6df;--ink2:rgba(233,230,223,.62);--ink3:rgba(233,230,223,.40);--gnd:#121213;--card:#191919;--line:#2a2a2a;--acc:#eeff41;--warn:#ff8557}:root[data-theme=light] #s-usage{--ink:#16161a;--ink2:rgba(22,22,26,.66);--ink3:rgba(22,22,26,.45);--gnd:#fbfaf7;--card:#fff;--line:#e3e0d8;--acc:#5c6b00;--warn:#c05320}#s-usage{margin:0;background:var(--gnd);color:var(--ink);padding:40px 26px 90px;font:15px/1.55 "Face","CalSansVF",ui-sans-serif,system-ui,sans-serif}#s-usage h1{font-size:29px;margin:0 0 6px;letter-spacing:-.01em}#s-usage .lede{color:var(--ink2);max-width:76ch;margin:0 0 26px}#s-usage details{background:var(--card);border:1px solid var(--line);border-radius:9px;margin-bottom:7px;overflow:hidden}#s-usage summary{cursor:pointer;padding:11px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;list-style:none}#s-usage summary::-webkit-details-marker{display:none}#s-usage .sw{width:15px;height:15px;border-radius:4px;display:inline-block;flex:none;border:1px solid rgba(128,128,128,.45)}#s-usage summary code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}#s-usage .warn{color:var(--warn);font-weight:400;font-size:11.5px}#s-usage .ok{color:var(--ink3);font-weight:400;font-size:11.5px}#s-usage .n{color:var(--ink3);font-size:11.5px;font-variant-numeric:tabular-nums}#s-usage .tags{display:flex;gap:5px;flex-wrap:wrap}#s-usage .tag{font-size:10.5px;border:1px solid var(--line);border-radius:99px;padding:1px 7px;color:var(--ink2)}#s-usage .meta{flex-basis:100%;color:var(--ink3);font-size:11px}#s-usage table{width:100%;border-collapse:collapse;font-size:12px;border-top:1px solid var(--line)}#s-usage td{padding:4px 12px 4px 14px;border-bottom:1px solid var(--line);vertical-align:top}#s-usage .r{color:var(--ink);white-space:nowrap}#s-usage .p code,#s-usage .s{color:var(--ink2)}#s-usage .s{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;max-width:34ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#s-usage .t{color:var(--ink3);font-size:11px;white-space:nowrap}#s-usage .l{color:var(--ink3);font-family:ui-monospace,Menlo,monospace;font-size:10.5px;white-space:nowrap;text-align:right}
+#s-usage{--ink:#e9e6df;--ink2:rgba(233,230,223,.62);--ink3:rgba(233,230,223,.40);--gnd:#121213;--card:#191919;--line:#2a2a2a;--acc:#eeff41; --acc:color(display-p3 0.9333 1 0.2549);--warn:#ff8557}@media(prefers-color-scheme:light){#s-usage{--ink:#16161a;--ink2:rgba(22,22,26,.66);--ink3:rgba(22,22,26,.45);--gnd:#fbfaf7;--card:#fff;--line:#e3e0d8;--acc:#5c6b00; --acc:color(display-p3 0.3608 0.4196 0);--warn:#c05320}}:root[data-theme=dark] #s-usage{--ink:#e9e6df;--ink2:rgba(233,230,223,.62);--ink3:rgba(233,230,223,.40);--gnd:#121213;--card:#191919;--line:#2a2a2a;--acc:#eeff41; --acc:color(display-p3 0.9333 1 0.2549);--warn:#ff8557}:root[data-theme=light] #s-usage{--ink:#16161a;--ink2:rgba(22,22,26,.66);--ink3:rgba(22,22,26,.45);--gnd:#fbfaf7;--card:#fff;--line:#e3e0d8;--acc:#5c6b00; --acc:color(display-p3 0.3608 0.4196 0);--warn:#c05320}#s-usage{margin:0;background:var(--gnd);color:var(--ink);padding:40px 26px 90px;font:15px/1.55 "Face","CalSansVF",ui-sans-serif,system-ui,sans-serif}#s-usage h1{font-size:29px;margin:0 0 6px;letter-spacing:-.01em}#s-usage .lede{color:var(--ink2);max-width:76ch;margin:0 0 26px}#s-usage details{background:var(--card);border:1px solid var(--line);border-radius:9px;margin-bottom:7px;overflow:hidden}#s-usage summary{cursor:pointer;padding:11px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;list-style:none}#s-usage summary::-webkit-details-marker{display:none}#s-usage .sw{width:15px;height:15px;border-radius:4px;display:inline-block;flex:none;border:1px solid rgba(128,128,128,.45)}#s-usage summary code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}#s-usage .warn{color:var(--warn);font-weight:400;font-size:11.5px}#s-usage .ok{color:var(--ink3);font-weight:400;font-size:11.5px}#s-usage .n{color:var(--ink3);font-size:11.5px;font-variant-numeric:tabular-nums}#s-usage .tags{display:flex;gap:5px;flex-wrap:wrap}#s-usage .tag{font-size:10.5px;border:1px solid var(--line);border-radius:99px;padding:1px 7px;color:var(--ink2)}#s-usage .meta{flex-basis:100%;color:var(--ink3);font-size:11px}#s-usage table{width:100%;border-collapse:collapse;font-size:12px;border-top:1px solid var(--line)}#s-usage td{padding:4px 12px 4px 14px;border-bottom:1px solid var(--line);vertical-align:top}#s-usage .r{color:var(--ink);white-space:nowrap}#s-usage .p code,#s-usage .s{color:var(--ink2)}#s-usage .s{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;max-width:34ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#s-usage .t{color:var(--ink3);font-size:11px;white-space:nowrap}#s-usage .l{color:var(--ink3);font-family:ui-monospace,Menlo,monospace;font-size:10.5px;white-space:nowrap;text-align:right}
 
 /* ===== page-furniture resets ===== */
 #s-type{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
@@ -3540,8 +3561,8 @@ html,body{margin:0;padding:0;background:var(--bg)}
 </style>
 <div class="wm">
   <div class="wm-doc">
-  <nav class="wm-rail"><div class="wm-axis"><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1">The 5 pills</a><a class="wm-lvl1" href="#corners-c2">The radius ladder</a><a class="wm-lvl1" href="#corners-c3">Asymmetric corners</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-circles"><u>03</u>Circles</a><a class="wm-lvl1" href="#circles-c1">The 13 circles</a><a class="wm-lvl1" href="#circles-c2">The 5 pills</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1">The steps</a><a class="wm-lvl1" href="#space-c2">The cap rule</a><a class="wm-lvl1" href="#space-c3">Use a step</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1">The vocabulary</a><a class="wm-lvl1" href="#color-c2">Literal colors outside App.css</a><a class="wm-lvl1" href="#color-c3">Fallbacks inside var()</a><a class="wm-lvl1" href="#color-c4">App.css (frozen)</a><a class="wm-lvl1" href="#color-c5">The GEOM zones</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div>
-    <span class="wm-rail-foot">wm&#8209;primitives</span></div></nav>
+  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1">The 5 pills</a><a class="wm-lvl1" href="#corners-c2">The radius ladder</a><a class="wm-lvl1" href="#corners-c3">Asymmetric corners</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-circles"><u>03</u>Circles</a><a class="wm-lvl1" href="#circles-c1">The 13 circles</a><a class="wm-lvl1" href="#circles-c2">The 5 pills</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1">The steps</a><a class="wm-lvl1" href="#space-c2">The cap rule</a><a class="wm-lvl1" href="#space-c3">Use a step</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1">The vocabulary</a><a class="wm-lvl1" href="#color-c2">Literal colors outside App.css</a><a class="wm-lvl1" href="#color-c3">Fallbacks inside var()</a><a class="wm-lvl1" href="#color-c4">App.css (frozen)</a><a class="wm-lvl1" href="#color-c5">The GEOM zones</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div>
+    <span class="wm-rail-foot">wm&#8209;primitives</span></div></nav></div>
   <div class="wm-main">
   <header class="wm-head">
     <svg class="wm-six" id="wm6" viewBox="-15 -790 621 873" aria-hidden="true"></svg>
@@ -5458,12 +5479,12 @@ the ones a value-to-token sweep would silently merge.</p>
 <table><tr><td class="r">painted as text</td><td class="p"><code>color</code></td><td class="s">.coss-no-more</td><td class="t">base</td><td class="l">font-proofer/App.css</td></tr></table></details>
 </div>
 </section>
+  </div>
   <footer class="wm-foot">
     Built from the working pages, not screenshots &mdash; every demo here is live CSS, so the
     corners really are superellipses and the padding really is the token. Corner shapes need
     Chrome 148+; Safari falls back to plain radii, which is the intended degradation.
   </footer>
-  </div>
   </div>
   <div class="wm-lb"><canvas id="lb-footer" aria-label="WORDMARK"></canvas></div>
 </div>
@@ -5726,115 +5747,206 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
   }
   addEventListener('scroll',tick,{passive:true}); addEventListener('resize',tick); tick();
 })();
-
-/* letterbox.js -- the colophon at the foot of the system page.
+</script>
+<script type="module">/* letterbox.js -- the house wordmark, scanned and packed with prose.
  *
- * Ported from wordmark.nyc (wordmark/js/letterbox.js): the same engine -- scan the
- * word at display size, slice it into LINE_H rows, walk each ink span filling it with
- * prose until the next glyph will not fit. Reduced here to the one-line footer case
- * and rewired to this page's tokens. Four deliberate differences:
+ * The pretext effect was created by Charlie Clark (https://charlieclark.co/); this is
+ * WORDMARK's engine built on it. Scan a word at display size into an alpha mask, slice
+ * the mask into LINE_H rows, walk each ink span filling it with fill-size glyphs until
+ * the next one will not fit. The cursor pushes and scales the glyphs it passes.
  *
- *   -- ONE canvas, not two. The two-layer split on wordmark.nyc exists so work images
- *      can sit BETWEEN the layers, hiding the full-ink back copy so only the fading
- *      front copy shows over the image. Nothing sits between them here, so the split
- *      would buy an extra canvas and no effect.
- *   -- The speckle is 1/6 of the glyphs and fades ink -> --signal, rather than 1/3
- *      fading in and out. Colour is computed per glyph and painted once; drawing the
- *      same glyph twice to blend it would accumulate antialiasing and fatten it, which
- *      is visible at 10px.
- *   -- Axes: SHRP only. The hero config animates 'wdth', and CalSansVF has no such
- *      axis (fvar reads opsz, GEOM, wght, YTAS, SHRP, ital), so that half of the
- *      animation was moving nothing. SHRP is also the safe one to spend: it is not one
- *      of the six signals, where GEOM and wght are.
- *   -- Colours come from --ink / --bg / --signal, so it follows the page's theme.
+ * ONE engine, three call sites that used to carry their own copy: wordmark.nyc's hero
+ * and footer, this repo's system-page colophon, and ReCal's footer. Everything they
+ * disagreed about is config; the defaults are the plain letterbox with neither of the
+ * two colour mechanisms on.
  *
- * Fill text: Jerome K. Jerome, "Three Men in a Boat" (1889), public domain.
+ * The two mechanisms are independent and composable:
+ *
+ *   -- SPECKLE (`speckle`) tints a seeded share of the glyphs from `ink` toward
+ *      `signal` on N phase groups. One canvas. The colour is computed per glyph and
+ *      painted ONCE: drawing the same glyph twice to blend it accumulates antialiasing
+ *      and fattens it, which is visible at 10px.
+ *   -- JUGGLE (`layers`) paints EVERY glyph on the back canvas at full ink and again on
+ *      the front canvas at a group-phased alpha. On flat ground the front copy is
+ *      invisible (ink over ink) and this buys nothing -- it pays only where something
+ *      sits BETWEEN the layers (wordmark.nyc slides work images through), because there
+ *      the back copy is hidden and only the fading front copy shows, so those letters
+ *      shimmer over the image. Gate it with `layers.minWidth`.
+ *
+ * ASCII ONLY. docs/system/build.py inlines this file into a single HTML document and
+ * asserts it; the one non-ASCII character the engine needs (a thin space) is written
+ * as an escape rather than as itself.
+ *
+ * Default fill text: Jerome K. Jerome, "Three Men in a Boat" (1889), public domain.
  */
-var LB_CONFIG = {
+
+export var JEROME =
+  "I do think that of all the silly irritating tomfoolishness by which we are plagued " +
+  "this weather forecast fraud is about the most aggravating It forecasts precisely what " +
+  "happened yesterday or the day before and precisely the opposite of what is going to " +
+  "happen to day I remember a holiday of mine being completely ruined one late autumn by " +
+  "our paying attention to the weather report of the local newspaper Heavy showers with " +
+  "thunderstorms may be expected to day it would say on Monday and so we would give up " +
+  "our picnic and stop indoors all day waiting for the rain And people would pass the " +
+  "house going off in wagonettes and coaches as jolly and merry as could be the sun " +
+  "shining out and not a cloud to be seen";
+
+var DEFAULTS = {
   words:           ['WORDMARK'],
-  largeFontFamily: '"Face", "CalSansVF", -apple-system, sans-serif',
+  largeFontFamily: '"CalSansVF", -apple-system, sans-serif',
   largeWeight:     700,
-  fillFontFamily:  '"Face", "CalSansVF", -apple-system, sans-serif',
+  fillFontFamily:  '"CalSansVF", -apple-system, sans-serif',
   fillWeight:      400,
-  fillSize:        10,
-  widthFraction:   0.98,
-  verticalPad:     0,
-  wordGap:         0,
-  axes: [
-    { tag: 'SHRP', min: 0, max: 100, speed: 8, mult: 0.9 }
-  ],
-  maxWidth:       Infinity,
-  heroHeightFrac: 0,
-  topPadVh:       0,      // the gap above is .wm-lb's margin; the canvas is the letters
-  extraTopPad:    0,
-  extraBottomPad: 0,
-  minFillSize:    6,
-  // Read from --lb-bleed at init: the canvas grows by this much at the top so
-  // repelled glyphs are not cut off by the raster edge, and the CSS takes the same
-  // amount back out of the layout. One value, declared once, in the stylesheet.
-  bleedTop:       260
+  fillSize:        10,        // px at the 850px reference width
+  widthFraction:   0.98,      // fraction of the layout width the words fill
+  verticalPad:     0,         // LINE_H units above and below the word block
+  wordGap:         0,         // LINE_H units between rows
+  maxWidth:        Infinity,  // layout cap in px; Infinity = the parent's width
+  heroHeightFrac:  0,         // fraction of vh to centre the block in (hero use)
+  topPadVh:        0,
+  extraTopPad:     0,         // px at the 850px reference width
+  extraBottomPad:  0,
+  minFillSize:     6,
+  pool:            null,      // fill text; null = JEROME
+  poolRepeat:      6,
+  axes:            [],        // [{tag, min, max, speed, mult}] animated per frame
+  fvs:             null,      // pinned font-variation-settings, e.g. "'opsz' 10"
+  ffs:             null,      // pinned font-feature-settings, e.g. "'rclt' 1"
+  ink:             '--ink',   // a custom property name, or any literal colour
+  signal:          '--signal',
+  inkFallback:     [232, 232, 232],
+  signalFallback:  [238, 255, 65],
+  // Top bleed: the canvas grows by this much so glyphs pushed up past the letters are
+  // not cut off by the raster edge, and the CSS takes the same amount back out of the
+  // layout. `bleedVar` lets the stylesheet own the number, declared once.
+  bleedTop:        0,
+  bleedVar:        '--lb-bleed',
+  // Where the cursor is read. 'window' lets the field reach outside the box, so glyphs
+  // lean away before the cursor arrives -- the right choice when the canvas overhangs
+  // its neighbours and is pointer-events:none. 'window-gated' does the same but drops
+  // the field once the cursor leaves the box. 'canvas' only ever sees its own hits.
+  pointer:         'window',
+  speckle:         null,      // {share, groups, speed, to, layer}
+  layers:          null,      // {front: [canvas], groups, speed, minWidth}
+  // 'display-p3' gives the canvas a wide buffer, so a P3 token paints as the neon it
+  // is instead of being clamped back into sRGB on the way in.
+  colorSpace:      'srgb',
+  autoResize:      true,
 };
 
-(function () {
-  'use strict';
+var SPECKLE_DEFAULTS = {
+  share: 1 / 6, groups: 5, speed: 0.0016,
+  to: null,        // colour the speckle fades toward; null = the config's `signal`
+  layer: 'back',   // 'back' | 'front' | 'split' -- which canvas the speckle paints on
+};
+var LAYER_DEFAULTS   = { front: [], groups: 3, speed: 0.0016, minWidth: 0 };
 
-  var canvasEl = document.getElementById('lb-footer');
-  if (!canvasEl) return;
 
-  var isMouseDown = false;
-  window.addEventListener('mousedown', function () { isMouseDown = true; });
-  window.addEventListener('mouseup',   function () { isMouseDown = false; });
+/* ---- colour --------------------------------------------------------------- */
+function parseRGB(str, fallback) {
+  str = (str || '').trim();
+  if (str.charAt(0) === '#') {
+    var h = str.slice(1);
+    if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+    var n = parseInt(h, 16);
+    if (!isNaN(n) && h.length === 6) return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  /* color(display-p3 .93 1 .25) -- components are 0..1 and the SPACE NAME CONTAINS A
+     DIGIT, so the plain number sweep below reads the 3 of "p3" as the red channel and
+     the colour comes out near black. Match the function form first, and only then fall
+     through. Carried back as 0-255 so everything downstream keeps one number space. */
+  var fn = str.match(/^color\(\s*([\w-]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)/i);
+  if (fn) return [+fn[2] * 255, +fn[3] * 255, +fn[4] * 255];
+  var m = str.match(/(\d+(?:\.\d+)?)/g);
+  if (m && m.length >= 3) return [+m[0], +m[1], +m[2]];
+  return fallback;
+}
 
-  var POOL = "I do think that of all the silly irritating tomfoolishness by which we are plagued this weather forecast fraud is about the most aggravating It forecasts precisely what happened yesterday or the day before and precisely the opposite of what is going to happen to day I remember a holiday of mine being completely ruined one late autumn by our paying attention to the weather report of the local newspaper Heavy showers with thunderstorms may be expected to day it would say on Monday and so we would give up our picnic and stop indoors all day waiting for the rain And people would pass the house going off in wagonettes and coaches as jolly and merry as could be the sun shining out and not a cloud to be seen".repeat(6);
+/* A colour is either the name of a custom property -- read live, so the theme toggle
+   and the OS preference both reach it -- or a literal the caller already resolved. */
+function resolveColour(spec, fallback) {
+  if (spec && spec.slice(0, 2) === '--') {
+    return parseRGB(getComputedStyle(document.documentElement).getPropertyValue(spec), fallback);
+  }
+  return parseRGB(spec, fallback);
+}
 
-  var CFG = LB_CONFIG;
-  var ctx = canvasEl.getContext('2d');
+function rgb(c) { return 'rgb(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ')'; }
 
-  /* ---- colour ------------------------------------------------------------- */
-  function parseRGB(str, fallback) {
-    str = (str || '').trim();
-    if (str.charAt(0) === '#') {
-      var h = str.slice(1);
-      if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
-      var n = parseInt(h, 16);
-      if (!isNaN(n) && h.length === 6) return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+
+/* `gain` is a multiple of SDR white: 1 is ordinary white, 3 is three times as bright as
+   the interface around it. On a plain canvas the gain is dropped -- there is nowhere
+   above white to put it -- so the same config degrades to today's rendering. */
+/* P3-SCALED, on purpose: the same 0-255 numbers read as P3 coordinates rather than
+   converted into P3. A colour-managed conversion would land back on the sRGB colour and
+   look identical; this one leaves the sRGB gamut and reads as the neon it is. Needs a
+   display-p3 canvas, or the buffer clamps it straight back. */
+function paintColour(c, p3On) {
+  if (p3On) {
+    return 'color(display-p3 ' + (c[0] / 255).toFixed(4) + ' ' +
+           (c[1] / 255).toFixed(4) + ' ' + (c[2] / 255).toFixed(4) + ')';
+  }
+  return rgb(c);
+}
+
+/* Seeded, not random: a resize rebuilds the same pattern, because the pattern is a
+   property of the wordmark rather than of when you loaded the page. */
+function seededFrac(i, salt) {
+  var x = Math.sin(i * 127.1 + 311.7 + salt) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+function buildFVS(cfg, axisValues) {
+  var parts = [];
+  if (cfg.fvs) parts.push(cfg.fvs);
+  for (var i = 0; i < axisValues.length; i++) {
+    parts.push('"' + axisValues[i].tag + '" ' + axisValues[i].value.toFixed(2));
+  }
+  return parts.length ? parts.join(', ') : 'normal';
+}
+
+/**
+ * Build one letterbox on a canvas. Returns { init, destroy }: `init` lays out and
+ * starts the loop (call it once fonts are ready, and it is safe to call again --
+ * that is what the resize handler does), `destroy` removes every listener it added.
+ */
+export function createLetterbox(canvasEl, config) {
+  if (!canvasEl) return null;
+
+  var CFG = Object.assign({}, DEFAULTS, config || {});
+  var SPK = CFG.speckle ? Object.assign({}, SPECKLE_DEFAULTS, CFG.speckle) : null;
+  var LYR = CFG.layers  ? Object.assign({}, LAYER_DEFAULTS,   CFG.layers)  : null;
+
+  var POOL = (CFG.pool || JEROME).repeat(CFG.poolRepeat);
+
+
+  var p3On = false;
+  function context(el) {
+    if (CFG.colorSpace === 'display-p3') {
+      var pc = el.getContext('2d', { colorSpace: 'display-p3' });
+      if (pc && pc.getContextAttributes && pc.getContextAttributes().colorSpace === 'display-p3') {
+        p3On = true;
+        return pc;
+      }
     }
-    var m = str.match(/(\d+(?:\.\d+)?)/g);
-    if (m && m.length >= 3) return [+m[0], +m[1], +m[2]];
-    return fallback;
+    return el.getContext('2d');
   }
 
-  function getThemeColours() {
-    var s = getComputedStyle(document.documentElement);
-    return {
-      ink:    parseRGB(s.getPropertyValue('--ink'),    [232, 232, 232]),
-      signal: parseRGB(s.getPropertyValue('--signal'), [238, 255, 65])
-    };
-  }
-
-  function rgb(c) { return 'rgb(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ')'; }
-
-  function buildFVS(axisValues) {
-    if (!axisValues || !axisValues.length) return 'normal';
-    return axisValues.map(function (a) {
-      return '"' + a.tag + '" ' + a.value.toFixed(2);
-    }).join(', ');
-  }
-
-  /* The speckle: a seeded sixth of the glyphs ride a phase group, fading between ink
-     and the signal hue. Seeded rather than random so a resize rebuilds the same set --
-     the pattern is a property of the wordmark, not of when you loaded the page. */
-  var ACID_SHARE   = 1 / 6;
-  var ACID_GROUPS  = 5;        // phase groups, so they do not pulse in unison
-  var ACID_SPEED   = 0.0016;   // rad/ms -- about a 4s cycle
-  function seededFrac(i, salt) {
-    var x = Math.sin(i * 127.1 + 311.7 + salt) * 43758.5453;
-    return x - Math.floor(x);
-  }
+  // allCtxs[0] is the back canvas (this one); allCtxs[1+] are the juggle's front layers.
+  var allEls  = [canvasEl].concat(LYR ? LYR.front : []);
+  var allCtxs = allEls.map(context);
+  // Refreshed per build so a breakpoint crossing takes effect on resize.
+  var splitActive = false;
 
   var BLEED   = CFG.bleedTop;
   var FILL_SZ = CFG.fillSize;
   var LINE_H  = Math.ceil(1.3 * FILL_SZ);
+
+  var isMouseDown = false;
+  function onDown() { isMouseDown = true; }
+  function onUp()   { isMouseDown = false; }
+  window.addEventListener('mousedown', onDown);
+  window.addEventListener('mouseup', onUp);
 
   /* ---- scanWord ----------------------------------------------------------- */
   function scanWord(word, fontSize, SCAN_SZ) {
@@ -5842,6 +5954,8 @@ var LB_CONFIG = {
     oc.width = oc.height = SCAN_SZ;
     var c = oc.getContext('2d');
     c.font = CFG.largeWeight + ' ' + fontSize + 'px ' + CFG.largeFontFamily;
+    if (CFG.fvs) c.fontVariationSettings = CFG.fvs;
+    if (CFG.ffs) c.fontFeatureSettings = CFG.ffs;
     c.textBaseline = 'alphabetic';
 
     var mW  = c.measureText(word);
@@ -5883,18 +5997,33 @@ var LB_CONFIG = {
     return { rows: rows, scanH: Math.max(1, yEnd - yStart) };
   }
 
-  /* ---- buildAllChars ------------------------------------------------------ */
-  function buildAllChars(CW, layoutCW, heroH) {
-    var probe   = document.createElement('canvas').getContext('2d');
-    var refSize = 200;
-    probe.font  = CFG.largeWeight + ' ' + refSize + 'px ' + CFG.largeFontFamily;
-    var maxWid  = 0;
+  /* ---- word width probe (shared by build + height) ------------------------ */
+  function maxWordWidth(probe, refSize) {
+    probe.font = CFG.largeWeight + ' ' + refSize + 'px ' + CFG.largeFontFamily;
+    if (CFG.fvs) probe.fontVariationSettings = CFG.fvs;
+    var maxWid = 0;
     for (var i = 0; i < CFG.words.length; i++) {
       var m = probe.measureText(CFG.words[i]);
       var w = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
       if (w > maxWid) maxWid = w;
     }
     if (maxWid < 1) maxWid = refSize * (CFG.words[0].length || 4) * 0.6;
+    return maxWid;
+  }
+
+  function topPadding(CW) {
+    var refW = Math.min(CW, 850);
+    return LINE_H * CFG.verticalPad + (CFG.extraTopPad || 0) * (refW / 850) +
+           (CFG.topPadVh || 0) * window.innerHeight;
+  }
+
+  /* ---- buildAllChars ------------------------------------------------------ */
+  function buildAllChars(CW, layoutCW, heroH) {
+    splitActive = !!LYR && allCtxs.length > 1 &&
+                  window.matchMedia('(min-width: ' + LYR.minWidth + 'px)').matches;
+
+    var refSize  = 200;
+    var maxWid   = maxWordWidth(document.createElement('canvas').getContext('2d'), refSize);
     var fontSize = (layoutCW * CFG.widthFraction / maxWid) * refSize;
 
     var SCAN_SZ         = Math.max(1000, Math.ceil(layoutCW * 1.1));
@@ -5908,14 +6037,14 @@ var LB_CONFIG = {
     var totalH   = WORD_GAP * (scans.length - 1);
     for (var si = 0; si < scans.length; si++) totalH += scans[si].scanH;
 
-    var refW2  = Math.min(CW, 850);
-    var topPad = LINE_H * CFG.verticalPad + (CFG.extraTopPad || 0) * (refW2 / 850) + (CFG.topPadVh || 0) * window.innerHeight;
-    var yOff   = Math.max(topPad, (heroH - totalH) / 2) + BLEED;
+    var yOff = Math.max(topPadding(CW), (heroH - totalH) / 2) + BLEED;
 
     var sc = document.createElement('canvas').getContext('2d');
     sc.font = CFG.fillWeight + ' ' + FILL_SZ + 'px ' + CFG.fillFontFamily;
+    if (CFG.fvs) sc.fontVariationSettings = CFG.fvs;
 
     var chars = [], pi = 0;
+    var TAU = 6.2832;
 
     for (var wi = 0; wi < scans.length; wi++) {
       var scan = scans[wi];
@@ -5924,20 +6053,27 @@ var LB_CONFIG = {
         var spans = scan.rows[ri];
         for (var spi = 0; spi < spans.length; spi++) {
           var span = spans[spi];
-          var x0   = span.x + xShift;
           var x1   = (span.x + span.w) + xShift;
-          var cx2  = x0;
+          var cx2  = span.x + xShift;
           while (cx2 < x1) {
             var ch = POOL[pi % POOL.length];
             if (ch === ' ') ch = '\u2009';   // word spaces render as thin spaces
             var cw = sc.measureText(ch).width;
             if (cx2 + cw > x1) break;   // does not fit -- leave it for the next span
             pi++;
-            var idx  = chars.length;
-            var acid = seededFrac(idx, 17) < ACID_SHARE;
-            var grp  = Math.floor(seededFrac(idx, 5) * ACID_GROUPS);
-            chars.push({ ch: ch, hx: cx2, hy: hy, dx: 0, dy: 0,
-                         acid: acid, phase: grp * (6.2832 / ACID_GROUPS) });
+            var idx = chars.length;
+            // Salts 17 (membership) and 5 (group) are load-bearing: they are what make
+            // an existing page rebuild the pattern it already had.
+            chars.push({
+              ch: ch, hx: cx2, hy: hy, dx: 0, dy: 0,
+              acid:   SPK ? seededFrac(idx, 17) < SPK.share : false,
+              aphase: SPK ? Math.floor(seededFrac(idx, 5) * SPK.groups) * (TAU / SPK.groups) : 0,
+              jphase: LYR ? Math.floor(seededFrac(idx, 5) * LYR.groups) * (TAU / LYR.groups) : 0,
+              // Which canvas this one's speckle lands on. 'split' seeds the choice, so
+              // the bright glyphs straddle both layers instead of sitting on one.
+              afront: SPK && LYR ? (SPK.layer === 'front' ||
+                       (SPK.layer === 'split' && seededFrac(idx, 31) < 0.5)) : false,
+            });
             cx2 += cw;
           }
         }
@@ -5950,21 +6086,15 @@ var LB_CONFIG = {
 
   /* ---- computeCanvasHeight ------------------------------------------------ */
   function computeCanvasHeight(CW, layoutCW, heroH) {
-    var probe   = document.createElement('canvas').getContext('2d');
-    var refSize = 200;
-    probe.font  = CFG.largeWeight + ' ' + refSize + 'px ' + CFG.largeFontFamily;
-    var maxWid  = 0, totalScanH = 0;
-    for (var i = 0; i < CFG.words.length; i++) {
-      var m = probe.measureText(CFG.words[i]);
-      var w = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
-      if (w > maxWid) maxWid = w;
-    }
-    if (maxWid < 1) maxWid = refSize * (CFG.words[0].length || 4) * 0.6;
+    var refSize  = 200;
+    var maxWid   = maxWordWidth(document.createElement('canvas').getContext('2d'), refSize);
     var fontSize = (layoutCW * CFG.widthFraction / maxWid) * refSize;
+    var totalScanH = 0;
 
     for (var wi = 0; wi < CFG.words.length; wi++) {
       var sc2 = document.createElement('canvas').getContext('2d');
       sc2.font = CFG.largeWeight + ' ' + fontSize + 'px ' + CFG.largeFontFamily;
+      if (CFG.fvs) sc2.fontVariationSettings = CFG.fvs;
       sc2.textBaseline = 'alphabetic';
       var mW2 = sc2.measureText(CFG.words[wi]);
       totalScanH += Math.ceil(mW2.actualBoundingBoxAscent + mW2.actualBoundingBoxDescent + LINE_H * 0.5);
@@ -5973,9 +6103,8 @@ var LB_CONFIG = {
     var WORD_GAP = LINE_H * CFG.wordGap;
     var totalH   = totalScanH + WORD_GAP * (CFG.words.length - 1);
     var refW     = Math.min(CW, 850);
-    var topPad   = LINE_H * CFG.verticalPad + (CFG.extraTopPad    || 0) * (refW / 850) + (CFG.topPadVh || 0) * window.innerHeight;
     var botPad   = LINE_H * CFG.verticalPad + (CFG.extraBottomPad || 0) * (refW / 850);
-    var yOff     = Math.max(topPad, (heroH - totalH) / 2);
+    var yOff     = Math.max(topPadding(CW), (heroH - totalH) / 2);
     return Math.ceil(yOff + totalH + botPad);
   }
 
@@ -5993,20 +6122,37 @@ var LB_CONFIG = {
   }
 
   /* ---- drawFrame ---------------------------------------------------------- */
+  function drawGlyph(g, c, tx, ty, scale, fillFont) {
+    if (scale > 1.05) {
+      var sz = FILL_SZ * scale;
+      g.font = CFG.fillWeight + ' ' + sz.toFixed(1) + 'px ' + CFG.fillFontFamily;
+      g.fillText(c.ch, tx, ty - (sz - FILL_SZ) * 0.5);
+      g.font = fillFont;
+    } else {
+      g.fillText(c.ch, tx, ty);
+    }
+  }
+
   function drawFrame(chars, CW, CH, dpr, mp, nowMs) {
-    var col      = getThemeColours();
-    var fvs      = buildFVS(getCurrentAxisValues(nowMs));
+    var inkC     = resolveColour(CFG.ink, CFG.inkFallback);
+    // The speckle's target: its own `to` when set, else the config's signal hue. Set
+    // `to` to the ink colour for a speckle that brightens without changing hue.
+    var sigC     = SPK ? resolveColour(SPK.to || CFG.signal, CFG.signalFallback) : inkC;
+    var inkStr   = paintColour(inkC, p3On);
+    var fvs      = buildFVS(CFG, getCurrentAxisValues(nowMs));
     var fillFont = CFG.fillWeight + ' ' + FILL_SZ + 'px ' + CFG.fillFontFamily;
 
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, CW, CH);
-    ctx.font                  = fillFont;
-    ctx.fontVariationSettings = fvs;
-    ctx.textBaseline          = 'top';
-
-    var inkStr = rgb(col.ink);
-    ctx.fillStyle = inkStr;
-    var cur = inkStr;
+    for (var li = 0; li < allCtxs.length; li++) {
+      var lc = allCtxs[li];
+      lc.setTransform(dpr, 0, 0, dpr, 0, 0);
+      lc.clearRect(0, 0, CW, CH);
+      lc.fillStyle             = inkStr;   // z-order alone makes the juggle
+      lc.font                  = fillFont;
+      lc.fontVariationSettings = fvs;
+      if (CFG.ffs) lc.fontFeatureSettings = CFG.ffs;
+      lc.textBaseline          = 'top';
+    }
+    var cur = inkStr, curFront = inkStr;
 
     var radius   = isMouseDown ? 250 : 100;
     var strength = isMouseDown ? 105 : 35;
@@ -6016,10 +6162,8 @@ var LB_CONFIG = {
       var c = chars[i];
 
       if (mp) {
-        var tx   = c.hx + c.dx;
-        var ty   = c.hy + c.dy;
-        var rx   = tx - mp.x;
-        var ry   = ty - mp.y;
+        var rx   = (c.hx + c.dx) - mp.x;
+        var ry   = (c.hy + c.dy) - mp.y;
         var dist = Math.sqrt(rx * rx + ry * ry);
         if (dist < radius && dist > 0) {
           var f = (1 - dist / radius) * strength * 0.3;
@@ -6039,29 +6183,36 @@ var LB_CONFIG = {
         if (d2 < radius) scale = 1 + (scalePk - 1) * (1 - d2 / radius);
       }
 
-      var want = inkStr;
-      if (c.acid) {
-        var a = 0.5 + 0.5 * Math.sin(nowMs * ACID_SPEED + c.phase);
-        a = a * a;   // squared, so a glyph reads as ink most of the cycle
-        want = rgb([col.ink[0] + (col.signal[0] - col.ink[0]) * a,
-                    col.ink[1] + (col.signal[1] - col.ink[1]) * a,
-                    col.ink[2] + (col.signal[2] - col.ink[2]) * a]);
+      // SPECKLE -- one paint, at a colour mixed for this glyph this frame. On a P3
+      // canvas that colour is the P3-scaled acid, which is where the neon comes from.
+      var acidStr = null;
+      if (SPK && c.acid) {
+        var a = 0.5 + 0.5 * Math.sin(nowMs * SPK.speed + c.aphase);
+        a = a * a;   // squared, so a glyph reads as ink for most of the cycle
+        acidStr = paintColour([inkC[0] + (sigC[0] - inkC[0]) * a,
+                               inkC[1] + (sigC[1] - inkC[1]) * a,
+                               inkC[2] + (sigC[2] - inkC[2]) * a], p3On);
       }
-      if (want !== cur) { ctx.fillStyle = want; cur = want; }
 
-      if (scale > 1.05) {
-        var sz = FILL_SZ * scale;
-        ctx.font = CFG.fillWeight + ' ' + sz.toFixed(1) + 'px ' + CFG.fillFontFamily;
-        ctx.fillText(c.ch, tx2, ty2 - (sz - FILL_SZ) * 0.5);
-        ctx.font = fillFont;
-      } else {
-        ctx.fillText(c.ch, tx2, ty2);
+      var backStr = (acidStr && !c.afront) ? acidStr : inkStr;
+      if (backStr !== cur) { allCtxs[0].fillStyle = backStr; cur = backStr; }
+      drawGlyph(allCtxs[0], c, tx2, ty2, scale, fillFont);
+
+      // JUGGLE -- the same glyph again on the front layer at a phased alpha.
+      if (splitActive) {
+        var ja = 0.5 + 0.5 * Math.sin(nowMs * LYR.speed + c.jphase);
+        var fc = allCtxs[1];
+        var frontStr = (acidStr && c.afront) ? acidStr : inkStr;
+        if (frontStr !== curFront) { fc.fillStyle = frontStr; curFront = frontStr; }
+        fc.globalAlpha = ja * ja;          // squared, so one group clearly dominates
+        drawGlyph(fc, c, tx2, ty2, scale, fillFont);
+        fc.globalAlpha = 1;
       }
     }
   }
 
   /* ---- init / loop -------------------------------------------------------- */
-  var chars = [], rafId = null, mp = null, CW, CH, dpr;
+  var chars = [], rafId = null, rafResize = null, mp = null, CW = 0, CH = 0, dpr = 1;
 
   function init() {
     dpr = window.devicePixelRatio || 1;
@@ -6069,9 +6220,11 @@ var LB_CONFIG = {
     var capW    = isFinite(CFG.maxWidth) ? CFG.maxWidth : parentW;
     CW          = Math.max(Math.min(parentW, capW), 320);
 
-    var declared = parseFloat(getComputedStyle(document.documentElement)
-                    .getPropertyValue('--lb-bleed'));
-    BLEED = isNaN(declared) ? CFG.bleedTop : declared;
+    if (CFG.bleedVar) {
+      var declared = parseFloat(getComputedStyle(document.documentElement)
+                      .getPropertyValue(CFG.bleedVar));
+      BLEED = isNaN(declared) ? CFG.bleedTop : declared;
+    }
 
     FILL_SZ = Math.max(CFG.minFillSize || 0, CFG.fillSize * Math.pow(Math.min(CW, 850) / 850, 1.4));
     LINE_H  = Math.ceil(1.3 * FILL_SZ);
@@ -6079,10 +6232,13 @@ var LB_CONFIG = {
     var heroH = CFG.heroHeightFrac > 0 ? Math.round(window.innerHeight * CFG.heroHeightFrac) : 0;
     CH = computeCanvasHeight(CW, CW, heroH) + BLEED;
 
-    canvasEl.style.width  = CW + 'px';
-    canvasEl.style.height = CH + 'px';
-    canvasEl.width  = Math.round(CW * dpr);
-    canvasEl.height = Math.round(CH * dpr);
+    for (var ei = 0; ei < allEls.length; ei++) {
+      var el = allEls[ei];
+      el.style.width  = CW + 'px';
+      el.style.height = CH + 'px';
+      el.width  = Math.round(CW * dpr);
+      el.height = Math.round(CH * dpr);
+    }
 
     chars = buildAllChars(CW, CW, heroH);
     drawFrame(chars, CW, CH, dpr, mp, performance.now());
@@ -6095,38 +6251,75 @@ var LB_CONFIG = {
     rafId = requestAnimationFrame(loop);
   }
 
-  // Tracked on `window`, not on the canvas: the canvas is pointer-events:none (it
-  // overhangs the content above it), and this way the field also reaches out past the
-  // box -- glyphs lean away from the cursor before it has arrived. The repel is
-  // distance-gated anyway, so a cursor at the top of the page costs nothing.
-  window.addEventListener('mousemove', function (e) {
+  /* ---- listeners ---------------------------------------------------------- */
+  var moveTarget = CFG.pointer === 'canvas' ? canvasEl : window;
+  function onMove(e) {
     var r = canvasEl.getBoundingClientRect();
-    mp = { x: e.clientX - r.left, y: e.clientY - r.top };
-  });
-  document.addEventListener('mouseleave', function () { mp = null; });
-
-  // theme: the explicit toggle stamps data-theme, the OS preference fires matchMedia
-  new MutationObserver(function () {
-    if (chars.length) drawFrame(chars, CW, CH, dpr, mp, performance.now());
-  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  if (window.matchMedia) {
-    var mq = matchMedia('(prefers-color-scheme: dark)');
-    if (mq.addEventListener) mq.addEventListener('change', function () {
-      if (chars.length) drawFrame(chars, CW, CH, dpr, mp, performance.now());
-    });
+    var x = e.clientX - r.left;
+    var y = e.clientY - r.top;
+    mp = (CFG.pointer === 'window-gated' && (x < 0 || x > r.width || y < 0 || y > r.height))
+       ? null : { x: x, y: y };
   }
+  function onLeave() { mp = null; }
+  moveTarget.addEventListener('mousemove', onMove);
+  (CFG.pointer === 'canvas' ? canvasEl : document).addEventListener('mouseleave', onLeave);
 
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(init);
-  } else {
-    init();
-  }
+  function redraw() { if (chars.length) drawFrame(chars, CW, CH, dpr, mp, performance.now()); }
 
-  var rafResize;
-  window.addEventListener('resize', function () {
+  // Theme: the explicit toggle stamps data-theme, the OS preference fires matchMedia.
+  var observer = new MutationObserver(redraw);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  var mq = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
+  if (mq && mq.addEventListener) mq.addEventListener('change', redraw);
+
+  function onResize() {
     cancelAnimationFrame(rafResize);
     rafResize = requestAnimationFrame(init);
-  });
-}());
+  }
+  if (CFG.autoResize) window.addEventListener('resize', onResize);
+
+  function destroy() {
+    if (rafId != null) cancelAnimationFrame(rafId);
+    rafId = null;
+    cancelAnimationFrame(rafResize);
+    window.removeEventListener('mousedown', onDown);
+    window.removeEventListener('mouseup', onUp);
+    moveTarget.removeEventListener('mousemove', onMove);
+    (CFG.pointer === 'canvas' ? canvasEl : document).removeEventListener('mouseleave', onLeave);
+    if (CFG.autoResize) window.removeEventListener('resize', onResize);
+    observer.disconnect();
+    if (mq && mq.removeEventListener) mq.removeEventListener('change', redraw);
+  }
+
+  return { init: init, destroy: destroy };
+}
+
+
+var lb = createLetterbox(document.getElementById('lb-footer'), {
+  words:           ['WORDMARK'],
+  largeFontFamily: '"Face", "CalSansVF", -apple-system, sans-serif',
+  fillFontFamily:  '"Face", "CalSansVF", -apple-system, sans-serif',
+  fillSize:        10,
+  widthFraction:   0.98,
+  // SHRP only. wordmark.nyc's config also animates 'wdth' and CalSansVF has no such
+  // axis (fvar: opsz, GEOM, wght, YTAS, SHRP, ital), so that half moved nothing. SHRP
+  // is also the safe one to spend -- it is not one of the six signals; GEOM and wght are.
+  axes:            [{ tag: 'SHRP', min: 0, max: 100, speed: 8, mult: 0.9 }],
+  // A seeded sixth of the glyphs fade ink -> --signal on five phase groups. Not the
+  // two-canvas juggle wordmark.nyc runs: nothing sits between the layers here, so the
+  // split would buy an extra canvas and no effect.
+  speckle:         { share: 1 / 6, groups: 5 },
+  // The acid is a P3-SCALED token now, so the canvas needs a P3 buffer to hold it --
+  // an sRGB buffer would clamp the speckle back to the hex the page falls back to.
+  colorSpace:      'display-p3',
+  // Read from --lb-bleed: the canvas grows at the top so repelled glyphs are not cut
+  // off by the raster edge, and the CSS takes the same amount back out of the layout.
+  bleedTop:        260,
+  minFillSize:     6,
+});
+if (lb) {
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(lb.init);
+  else lb.init();
+}
 </script>
 </body></html>
