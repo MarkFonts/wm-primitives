@@ -7,7 +7,7 @@
     --bg: #0f0f0f;  --surface-1: #111111;  --surface-2: #1a1a1a;
     --text: #e8e8e8;  --text-rgb: 232, 232, 232;
     --border: #333333;  --border-subtle: #222222;
-    --accent: #e8e8e8;  --signal: #eeff41;
+    --accent: #e8e8e8;  --signal: #eeff41; --signal:color(display-p3 0.9333 1 0.2549);
     --radius: 8px;
     --ui-font: "Face", system-ui, sans-serif;
     --ui-fvs: "GEOM" 25;
@@ -41,20 +41,20 @@
       --bg: #f5faff; --surface-1: #eaf3fb; --surface-2: #ddeaf6;
       --text: #111111; --text-rgb: 17, 17, 17;
       --border: #c4d8eb; --border-subtle: #d9e8f5;
-      --accent: #111111; --signal: #5c6b00;
+      --accent: #111111; --signal: #5c6b00; --signal:color(display-p3 0.3608 0.4196 0);
     }
   }
   :root[data-theme="light"] {
     --bg: #f5faff; --surface-1: #eaf3fb; --surface-2: #ddeaf6;
     --text: #111111; --text-rgb: 17, 17, 17;
     --border: #c4d8eb; --border-subtle: #d9e8f5;
-    --accent: #111111; --signal: #5c6b00;
+    --accent: #111111; --signal: #5c6b00; --signal:color(display-p3 0.3608 0.4196 0);
   }
   :root[data-theme="dark"] {
     --bg: #0f0f0f; --surface-1: #111111; --surface-2: #1a1a1a;
     --text: #e8e8e8; --text-rgb: 232, 232, 232;
     --border: #333333; --border-subtle: #222222;
-    --accent: #e8e8e8; --signal: #eeff41;
+    --accent: #e8e8e8; --signal: #eeff41; --signal:color(display-p3 0.9333 1 0.2549);
   }
 
   /* ---- the API ---- */
