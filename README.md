@@ -16,6 +16,13 @@ the CSS is right.
 
 ## Contents
 
+- **`createLetterbox` / `Letterbox`** — the house wordmark scanned at display size and
+  packed with prose (Charlie Clark's pretext effect). One engine for wordmark.nyc's hero
+  and footer, this repo's colophon, and ReCal. Two optional colour mechanisms:
+  `speckle` (a seeded share of glyphs tinted ink → `--signal`, one canvas) and `layers`
+  (every glyph repainted on front canvases at a phased alpha — only pays where something
+  sits *between* the layers). Plain-JS engine, because two call sites are static HTML
+  that script-tag it; `Letterbox` is the React form.
 - **`StyleScopeList` / `StyleScopeDropdown`** — the named-style / scope picker
   (rows + label + spec chips, single- or multi-select). Token-based CSS bridges to
   each app's theme via `var(--…)` fallbacks. A `.ssd-list--dense` variant keeps

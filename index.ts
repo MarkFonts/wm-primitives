@@ -43,6 +43,16 @@ export { GlyphPicker } from './src/GlyphPicker'
 export { measureGlyphMetrics } from './src/GlyphPicker'
 export type { GlyphPickerProps, GlyphPickerGroup, GlyphPickerCell, GlyphPickerMetrics, GlyphCellState } from './src/GlyphPicker'
 
+// The letterbox: the house wordmark scanned and packed with prose (Charlie Clark's
+// pretext effect). Plain-JS engine, because wordmark.nyc and this repo's system page
+// script-tag it directly; `Letterbox` is the React form. Consumers on tsc need allowJs.
+export { createLetterbox, JEROME } from './src/letterbox'
+export type {
+  LetterboxConfig, LetterboxHandle, LetterboxAxis, LetterboxSpeckle, LetterboxLayers,
+} from './src/letterbox'
+export { Letterbox } from './src/Letterbox'
+export type { LetterboxProps } from './src/Letterbox'
+
 // Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/
 // --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so
 // importing it cannot reach existing markup. Apps import the CSS from their entry

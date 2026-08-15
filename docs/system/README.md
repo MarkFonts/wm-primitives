@@ -14,6 +14,7 @@ This page *illustrates* the rules. It does not define them. The authoritative co
 | type roles, inks, signals | `src/type.css`, `TYPOGRAPHY.md` |
 | the corner law, circle exclusions | `src/corners.css` |
 | the `--pad-*` scale, cap rule, alignment rule | `src/space.css` |
+| the colophon's letterbox engine | `src/letterbox.js` (shared with wordmark.nyc) |
 
 If the page and the CSS disagree, **the CSS is right** — it ships, gets diffed, and is what
 the apps actually load. Fix the page.
