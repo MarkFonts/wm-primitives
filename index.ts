@@ -46,10 +46,10 @@ export type { GlyphPickerProps, GlyphPickerGroup, GlyphPickerCell, GlyphPickerMe
 // The letterbox: the house wordmark scanned and packed with prose (Charlie Clark's
 // pretext effect). Plain-JS engine, because wordmark.nyc and this repo's system page
 // script-tag it directly; `Letterbox` is the React form. Consumers on tsc need allowJs.
-export { createLetterbox, JEROME } from './src/letterbox'
+export { createLetterbox, JEROME } from './src/letterbox.js'
 export type {
   LetterboxConfig, LetterboxHandle, LetterboxAxis, LetterboxSpeckle, LetterboxLayers,
-} from './src/letterbox'
+} from './src/letterbox.js'
 export { Letterbox } from './src/Letterbox'
 export type { LetterboxProps } from './src/Letterbox'
 

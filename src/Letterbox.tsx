@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { createLetterbox, type LetterboxConfig } from './letterbox'
+// The .js extension is load-bearing. On a case-insensitive filesystem './letterbox'
+// resolves to THIS file (Letterbox.tsx), so the wrapper imported its own aliases and
+// tsc reported a circular definition -- which is how ReCal's build found it.
+import { createLetterbox, type LetterboxConfig } from './letterbox.js'
 
 /* React wrapper around the letterbox engine (src/letterbox.js). The engine is plain JS
  * because two call sites are static HTML; this is the React-app form.
