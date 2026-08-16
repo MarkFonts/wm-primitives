@@ -50,8 +50,8 @@ export { createLetterbox, JEROME } from './src/letterbox.js'
 export type {
   LetterboxConfig, LetterboxHandle, LetterboxAxis, LetterboxSpeckle, LetterboxLayers,
 } from './src/letterbox.js'
-export { Letterbox } from './src/Letterbox'
-export type { LetterboxProps } from './src/Letterbox'
+export { Letterbox } from './src/LetterboxCanvas'
+export type { LetterboxProps } from './src/LetterboxCanvas'
 
 // Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/
 // --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so

@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
-// The .js extension is load-bearing. On a case-insensitive filesystem './letterbox'
-// resolves to THIS file (Letterbox.tsx), so the wrapper imported its own aliases and
-// tsc reported a circular definition -- which is how ReCal's build found it.
+// This file is LetterboxCanvas, not Letterbox, and the difference is load-bearing: on a
+// case-insensitive filesystem a wrapper named Letterbox.tsx swallows './letterbox' AND
+// './letterbox.js' (tsc maps .js back to .ts/.tsx), so it imported its own aliases and
+// tsc called it a circular definition. Names that differ only by case cannot coexist here.
 import { createLetterbox, type LetterboxConfig } from './letterbox.js'
 
 /* React wrapper around the letterbox engine (src/letterbox.js). The engine is plain JS
