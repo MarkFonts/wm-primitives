@@ -45,13 +45,13 @@ export type { GlyphPickerProps, GlyphPickerGroup, GlyphPickerCell, GlyphPickerMe
 
 // The letterbox: the house wordmark scanned and packed with prose (Charlie Clark's
 // pretext effect). Plain-JS engine, because wordmark.nyc and this repo's system page
-// script-tag it directly; `Letterbox` is the React form. Consumers on tsc need allowJs.
+// script-tag it directly, and ReCal's landing pages load it as a module. No React
+// wrapper: three of the four call sites have no React at all, and a Letterbox.tsx
+// cannot sit beside a letterbox.js on a case-insensitive filesystem.
 export { createLetterbox, JEROME } from './src/letterbox.js'
 export type {
-  LetterboxConfig, LetterboxHandle, LetterboxAxis, LetterboxSpeckle, LetterboxLayers,
+  LetterboxConfig, LetterboxHandle, LetterboxSpeckle, LetterboxLayers,
 } from './src/letterbox.js'
-export { Letterbox } from './src/LetterboxCanvas'
-export type { LetterboxProps } from './src/LetterboxCanvas'
 
 // Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/
 // --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so

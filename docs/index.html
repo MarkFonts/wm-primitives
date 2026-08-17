@@ -5777,6 +5777,13 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
  * asserts it; the one non-ASCII character the engine needs (a thin space) is written
  * as an escape rather than as itself.
  *
+ * NO ANIMATED AXES, deliberately. Canvas 2D has no fontVariationSettings in Chrome and
+ * the @font-face descriptor does not reach it either -- measured, identical ink at GEOM 0
+ * and GEOM 100 through both -- so the `axes` config every copy of this carried was inert
+ * for its whole life and nobody missed it. A ladder of FontFaces does work, was built, and
+ * was removed: at fill size the motion is invisible, so it bought fourteen font
+ * registrations per instance and nothing else. Pin what you need with `fvs`.
+ *
  * Default fill text: Jerome K. Jerome, "Three Men in a Boat" (1889), public domain.
  */
 
@@ -5809,7 +5816,6 @@ var DEFAULTS = {
   minFillSize:     6,
   pool:            null,      // fill text; null = JEROME
   poolRepeat:      6,
-  axes:            [],        // [{tag, min, max, speed, mult}] animated per frame
   fvs:             null,      // pinned font-variation-settings, e.g. "'opsz' 10"
   ffs:             null,      // pinned font-feature-settings, e.g. "'rclt' 1"
   ink:             '--ink',   // a custom property name, or any literal colour
@@ -5894,15 +5900,6 @@ function paintColour(c, p3On) {
 function seededFrac(i, salt) {
   var x = Math.sin(i * 127.1 + 311.7 + salt) * 43758.5453;
   return x - Math.floor(x);
-}
-
-function buildFVS(cfg, axisValues) {
-  var parts = [];
-  if (cfg.fvs) parts.push(cfg.fvs);
-  for (var i = 0; i < axisValues.length; i++) {
-    parts.push('"' + axisValues[i].tag + '" ' + axisValues[i].value.toFixed(2));
-  }
-  return parts.length ? parts.join(', ') : 'normal';
 }
 
 /**
@@ -6108,19 +6105,6 @@ export function createLetterbox(canvasEl, config) {
     return Math.ceil(yOff + totalH + botPad);
   }
 
-  /* ---- axis animation ----------------------------------------------------- */
-  var startTime = null;
-
-  function getCurrentAxisValues(nowMs) {
-    if (startTime === null) startTime = nowMs;
-    var elapsed = (nowMs - startTime) / 1000;
-    return CFG.axes.map(function (axis) {
-      var period = axis.speed * axis.mult;
-      var t = Math.sin(Math.PI * (elapsed / period));
-      return { tag: axis.tag, value: axis.min + (axis.max - axis.min) * t * t };
-    });
-  }
-
   /* ---- drawFrame ---------------------------------------------------------- */
   function drawGlyph(g, c, tx, ty, scale, fillFont) {
     if (scale > 1.05) {
@@ -6139,7 +6123,7 @@ export function createLetterbox(canvasEl, config) {
     // `to` to the ink colour for a speckle that brightens without changing hue.
     var sigC     = SPK ? resolveColour(SPK.to || CFG.signal, CFG.signalFallback) : inkC;
     var inkStr   = paintColour(inkC, p3On);
-    var fvs      = buildFVS(CFG, getCurrentAxisValues(nowMs));
+    var fvs      = CFG.fvs || 'normal';
     var fillFont = CFG.fillWeight + ' ' + FILL_SZ + 'px ' + CFG.fillFontFamily;
 
     for (var li = 0; li < allCtxs.length; li++) {
@@ -6301,10 +6285,10 @@ var lb = createLetterbox(document.getElementById('lb-footer'), {
   fillFontFamily:  '"Face", "CalSansVF", -apple-system, sans-serif',
   fillSize:        10,
   widthFraction:   0.98,
-  // SHRP only. wordmark.nyc's config also animates 'wdth' and CalSansVF has no such
-  // axis (fvar: opsz, GEOM, wght, YTAS, SHRP, ital), so that half moved nothing. SHRP
-  // is also the safe one to spend -- it is not one of the six signals; GEOM and wght are.
-  axes:            [{ tag: 'SHRP', min: 0, max: 100, speed: 8, mult: 0.9 }],
+  // No animated axis. It never rendered: canvas 2D has no fontVariationSettings in
+  // Chrome, so the SHRP animation this config used to carry -- and the 'wdth' one
+  // wordmark.nyc carries, for an axis CalSansVF does not even have -- moved nothing at
+  // all. Measured, not assumed: identical ink at GEOM 0 and GEOM 100.
   // A seeded sixth of the glyphs fade ink -> --signal on five phase groups. Not the
   // two-canvas juggle wordmark.nyc runs: nothing sits between the layers here, so the
   // split would buy an extra canvas and no effect.

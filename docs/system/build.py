@@ -819,10 +819,10 @@ var lb = createLetterbox(document.getElementById('lb-footer'), {
   fillFontFamily:  '"Face", "CalSansVF", -apple-system, sans-serif',
   fillSize:        10,
   widthFraction:   0.98,
-  // SHRP only. wordmark.nyc's config also animates 'wdth' and CalSansVF has no such
-  // axis (fvar: opsz, GEOM, wght, YTAS, SHRP, ital), so that half moved nothing. SHRP
-  // is also the safe one to spend -- it is not one of the six signals; GEOM and wght are.
-  axes:            [{ tag: 'SHRP', min: 0, max: 100, speed: 8, mult: 0.9 }],
+  // No animated axis. It never rendered: canvas 2D has no fontVariationSettings in
+  // Chrome, so the SHRP animation this config used to carry -- and the 'wdth' one
+  // wordmark.nyc carries, for an axis CalSansVF does not even have -- moved nothing at
+  // all. Measured, not assumed: identical ink at GEOM 0 and GEOM 100.
   // A seeded sixth of the glyphs fade ink -> --signal on five phase groups. Not the
   // two-canvas juggle wordmark.nyc runs: nothing sits between the layers here, so the
   // split would buy an extra canvas and no effect.

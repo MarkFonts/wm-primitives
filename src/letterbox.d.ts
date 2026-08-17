@@ -2,15 +2,6 @@
  * its call sites are static HTML pages that script-tag it directly (wordmark.nyc, and
  * this repo's system page, which inlines the file); TS consumers get the shape here. */
 
-export interface LetterboxAxis {
-  tag: string
-  min: number
-  max: number
-  /** Seconds; the period is `speed * mult`. */
-  speed: number
-  mult: number
-}
-
 /** Tint a seeded share of the glyphs from `ink` toward `signal`. One canvas. */
 export interface LetterboxSpeckle {
   /** Fraction of glyphs that ride the effect. Default 1/6. */
@@ -60,17 +51,6 @@ export interface LetterboxConfig {
   /** Fill text. Default: the Jerome K. Jerome passage exported as `JEROME`. */
   pool?: string | null
   poolRepeat?: number
-  /**
-   * Animated axes. Canvas 2D has no fontVariationSettings in Chrome and the @font-face
-   * descriptor does not reach it either, so an animated axis is rendered as a ladder of
-   * FontFaces — one per step — and each frame asks for the nearest rung. The first axis
-   * animates. Requires `faceSrc`; without it the axes are inert.
-   */
-  axes?: LetterboxAxis[]
-  /** "url(...)" of the variable font, for building the ladder. */
-  faceSrc?: string | null
-  /** Rungs across the axis range. Default 14. */
-  faceSteps?: number
   /** Pinned font-variation-settings, e.g. "'opsz' 10, 'GEOM' 25". */
   fvs?: string | null
   /** Pinned font-feature-settings, e.g. "'rclt' 1". */
