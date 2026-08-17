@@ -59,7 +59,15 @@ var DEFAULTS = {
   minFillSize:     6,
   pool:            null,      // fill text; null = JEROME
   poolRepeat:      6,
-  axes:            [],        // [{tag, min, max, speed, mult}] animated per frame
+  // Animated axes. CANVAS 2D CANNOT DO THIS DIRECTLY: ctx.fontVariationSettings does not
+  // exist in Chrome, and the @font-face descriptor does not reach canvas either (measured:
+  // identical ink at GEOM 0 and GEOM 100 through both). The one thing that works is a
+  // FontFace registered WITH variationSettings -- so an animated axis is rendered as a
+  // LADDER of faces, one per step, and each frame asks for the nearest rung by name.
+  // Needs `faceSrc`; without it the axes are inert, which is what they were before.
+  axes:            [],        // [{tag, min, max, speed, mult}] -- the first one animates
+  faceSrc:         null,      // "url(...)" of the variable font, for the ladder
+  faceSteps:       14,        // rungs across the axis range
   fvs:             null,      // pinned font-variation-settings, e.g. "'opsz' 10"
   ffs:             null,      // pinned font-feature-settings, e.g. "'rclt' 1"
   ink:             '--ink',   // a custom property name, or any literal colour
@@ -360,6 +368,41 @@ export function createLetterbox(canvasEl, config) {
 
   /* ---- axis animation ----------------------------------------------------- */
   var startTime = null;
+  var ladder = null;          // [family] once the faces have loaded
+  var ladderId = 'lbf' + Math.random().toString(36).slice(2, 8);
+
+  function buildLadder() {
+    if (!CFG.faceSrc || !CFG.axes.length || typeof FontFace === 'undefined') return;
+    var axis = CFG.axes[0], steps = Math.max(2, CFG.faceSteps), names = [];
+    var pending = steps;
+    for (var i = 0; i < steps; i++) {
+      var t = i / (steps - 1);
+      var v = axis.min + (axis.max - axis.min) * t;
+      var vs = (CFG.fvs ? CFG.fvs + ', ' : '') + "'" + axis.tag + "' " + v.toFixed(2);
+      var name = ladderId + '-' + i;
+      names.push(name);
+      (function (nm) {
+        var f = new FontFace(nm, CFG.faceSrc, { variationSettings: vs });
+        f.load().then(function (loaded) {
+          document.fonts.add(loaded);
+          if (--pending === 0) ladder = names;   // swap in only once every rung exists
+        }, function () { pending--; });
+      })(name);
+    }
+  }
+
+  /* The rung for this instant. The value moves continuously; the faces do not, so the
+     motion is quantised -- 14 rungs across a range reads as smooth at fill size, and
+     the alternative is no motion at all. */
+  function ladderFamily(nowMs) {
+    if (!ladder) return null;
+    var axis = CFG.axes[0];
+    var vals = getCurrentAxisValues(nowMs);
+    if (!vals.length) return null;
+    var t = (vals[0].value - axis.min) / (axis.max - axis.min || 1);
+    var i = Math.round(Math.min(Math.max(t, 0), 1) * (ladder.length - 1));
+    return ladder[i];
+  }
 
   function getCurrentAxisValues(nowMs) {
     if (startTime === null) startTime = nowMs;
@@ -375,7 +418,9 @@ export function createLetterbox(canvasEl, config) {
   function drawGlyph(g, c, tx, ty, scale, fillFont) {
     if (scale > 1.05) {
       var sz = FILL_SZ * scale;
-      g.font = CFG.fillWeight + ' ' + sz.toFixed(1) + 'px ' + CFG.fillFontFamily;
+      // same family as the frame's font, so a scaled glyph does not drop off the ladder
+      var fam = fillFont.slice(fillFont.indexOf('px ') + 3);
+      g.font = CFG.fillWeight + ' ' + sz.toFixed(1) + 'px ' + fam;
       g.fillText(c.ch, tx, ty - (sz - FILL_SZ) * 0.5);
       g.font = fillFont;
     } else {
@@ -390,7 +435,11 @@ export function createLetterbox(canvasEl, config) {
     var sigC     = SPK ? resolveColour(SPK.to || CFG.signal, CFG.signalFallback) : inkC;
     var inkStr   = paintColour(inkC, p3On);
     var fvs      = buildFVS(CFG, getCurrentAxisValues(nowMs));
-    var fillFont = CFG.fillWeight + ' ' + FILL_SZ + 'px ' + CFG.fillFontFamily;
+    // A ladder rung wins over the family when one is loaded: it is the only form the
+    // canvas actually renders with the axis applied.
+    var rung     = ladderFamily(nowMs);
+    var family   = rung ? '"' + rung + '", ' + CFG.fillFontFamily : CFG.fillFontFamily;
+    var fillFont = CFG.fillWeight + ' ' + FILL_SZ + 'px ' + family;
 
     for (var li = 0; li < allCtxs.length; li++) {
       var lc = allCtxs[li];
@@ -490,6 +539,7 @@ export function createLetterbox(canvasEl, config) {
       el.height = Math.round(CH * dpr);
     }
 
+    if (!ladder) buildLadder();
     chars = buildAllChars(CW, CW, heroH);
     drawFrame(chars, CW, CH, dpr, mp, performance.now());
     if (!rafId) rafId = requestAnimationFrame(loop);
