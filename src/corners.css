@@ -44,6 +44,13 @@ input[type="radio"], input[type="radio"]:checked::after {
    above silently deleted every exclusion — avatars, dots, radios and switch knobs all
    rendered as superellipses. Keep them apart, and never fold a vendor pseudo-element
    into a shared list. */
+/* ── Mimics opt out ───────────────────────────────────────────────────────────────
+   font-proofer proofs type inside replicas of other people's products. Those surfaces
+   exist to look like Cal.com and Coss, so the house corner is exactly the signature they
+   must not carry — a squircle there is a wrong answer, not a house style. Namespace-wide,
+   because the replicas grow and nobody should have to remember to add each new part. */
+[class*="calcom-"], [class*="coss-"] { corner-shape: round; }
+
 input[type="range"]::-webkit-slider-thumb { corner-shape: round; }
 input[type="range"]::-moz-range-thumb { corner-shape: round; }
 
