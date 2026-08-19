@@ -12,14 +12,38 @@
  */
 
 :root {
-  /* hairline insets — optical alignment, not spacing */
-  --pad-hair: 1px;
-  --pad-nudge: 2px;
-  --pad-tick: 3px;
+  /* hairline insets — optical alignment, NOT spacing, which is why they carry no
+     step number. A 1px ring and a 2px nudge on a 3px bar are alignment decisions;
+     numbering them would invite picking one because it is "one step down". */
+  --hair: 1px;
+  --nudge: 2px;
+  --tick: 3px;
 
-  /* the scale */
-  --pad-1: 4px;    --pad-2: 6px;    --pad-3: 8px;    --pad-4: 12px;
-  --pad-5: 16px;   --pad-6: 24px;   --pad-7: 32px;   --pad-8: 48px;   --pad-9: 64px;
+  /* the scale — two-digit steps, Carbon's convention, our values.
+     Carbon has no 6, and 6 is load-bearing here: dropping it breaks 12
+     declarations by a third. Aliases below, t-shirt names for prose. */
+  --spacing-01: 0.25rem;    /*  4px   2xs */
+  --spacing-02: 0.375rem;   /*  6px   xs  */
+  --spacing-03: 0.5rem;     /*  8px   sm  */
+  --spacing-04: 0.75rem;    /* 12px   md  */
+  --spacing-05: 1rem;       /* 16px   lg  */
+  --spacing-06: 1.5rem;     /* 24px   xl  */
+  --spacing-07: 2rem;       /* 32px   2xl */
+  --spacing-08: 3rem;       /* 48px   3xl */
+  --spacing-09: 4rem;       /* 64px   4xl */
+
+  /* ── Compatibility aliases ──────────────────────────────────────────────────
+     The old names, kept so consuming apps keep rendering while they migrate.
+     When `grep -r -- '--pad-' src` is empty in wm-primitives, font-proofer and
+     ReCal, delete this block. Do not add new ones. */
+  --hair: var(--hair);
+  --nudge: var(--nudge);
+  --tick: var(--tick);
+  --spacing-01: var(--spacing-01);   --spacing-02: var(--spacing-02);
+  --spacing-03: var(--spacing-03);   --spacing-04: var(--spacing-04);
+  --spacing-05: var(--spacing-05);   --spacing-06: var(--spacing-06);
+  --spacing-07: var(--spacing-07);   --spacing-08: var(--spacing-08);
+  --spacing-09: var(--spacing-09);
 }
 
 /* ── The cap rule ─────────────────────────────────────────────────────────────────
@@ -61,11 +85,11 @@
  *
  * The scale fixes it because the steps compose: 4 + 8 = 12, the button's own step.
  *
- *     .ssd-btn                 1 + --pad-4            = 13
- *     .ssd-list + .ssd-row     1 + --pad-1 + --pad-3  = 13
- *     .ssd-list--dense .row    1 + --pad-1 + --pad-3  = 13
+ *     .ssd-btn                 1 + --spacing-04            = 13
+ *     .ssd-list + .ssd-row     1 + --spacing-01 + --spacing-03  = 13
+ *     .ssd-list--dense .row    1 + --spacing-01 + --spacing-03  = 13
  *
  * That is the argument for a scale whose steps sum to other steps, and it is why the
- * dense variant now differs from the normal one ONLY in the vertical (--pad-2 vs
- * --pad-3) — which is what "dense" was ever supposed to mean.
+ * dense variant now differs from the normal one ONLY in the vertical (--spacing-02 vs
+ * --spacing-03) — which is what "dense" was ever supposed to mean.
  */

@@ -8,7 +8,7 @@
   z-index: 200;
   display: flex;
   gap: 1px;
-  padding: var(--pad-hair, 1px);
+  padding: var(--hair, 1px);
   background: var(--surface, #1a1a1a);
   border: 1px solid var(--border, rgba(255, 255, 255, 0.14));
   border-radius: 8px;
@@ -21,7 +21,7 @@
   background: none;
   border: 0;
   border-radius: 5px;
-  padding: var(--pad-hair, 1px) var(--pad-2, 6px);
+  padding: var(--hair, 1px) var(--spacing-02, 6px);
   color: var(--text, #f0f0f0);
   font-family: var(--ui-font, system-ui, sans-serif);
   font-size: var(--type-micro-size);

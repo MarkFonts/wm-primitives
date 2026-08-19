@@ -5,7 +5,7 @@
 
 .gp {
   display: flex;
-  gap: var(--pad-6, 24px);
+  gap: var(--spacing-06, 24px);
   min-height: 0;
   color: var(--text, #eee);
 }
@@ -47,10 +47,10 @@
   gap: 12px;
   position: static;
   border-top: 1px solid var(--border-subtle, #222);
-  padding-top: var(--pad-5, 16px);
+  padding-top: var(--spacing-05, 16px);
 }
 .gp--bottom .gp-specimen { flex: 1; min-height: 0; align-self: stretch; }
-.gp--bottom .gp-console { flex: none; flex-direction: row; align-items: center; gap: var(--pad-5, 16px); }
+.gp--bottom .gp-console { flex: none; flex-direction: row; align-items: center; gap: var(--spacing-05, 16px); }
 
 /* ── Specimen column: glyph-on-rules → its data (U+/copy) → the grid tool (search) ── */
 .gp-side {
@@ -120,13 +120,13 @@
 }
 
 /* ── Console ── */
-.gp-console { display: flex; flex-direction: column; gap: var(--pad-3, 8px); }
+.gp-console { display: flex; flex-direction: column; gap: var(--spacing-03, 8px); }
 .gp-copy {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: var(--pad-3, 8px) var(--pad-4, 12px);
+  padding: var(--spacing-03, 8px) var(--spacing-04, 12px);
   font: inherit;
   background: none;
   border: none;
@@ -140,7 +140,7 @@
   font-variant-numeric: tabular-nums;
 }
 .gp-search {
-  padding: var(--pad-3, 8px) var(--pad-4, 12px);
+  padding: var(--spacing-03, 8px) var(--spacing-04, 12px);
   font: inherit;
   font-size: var(--type-ui-size);
   color: var(--text, #eee);
@@ -210,7 +210,7 @@
   aspect-ratio: auto;
   flex-direction: column;
   gap: 3px;
-  padding: var(--pad-2, 6px) var(--pad-tick, 3px) var(--pad-1, 4px);
+  padding: var(--spacing-02, 6px) var(--tick, 3px) var(--spacing-01, 4px);
 }
 .gp-cell--named .gp-cell-ch { flex: 1; display: flex; align-items: center; }
 .gp .gp-cell-name {

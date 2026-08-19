@@ -11,7 +11,7 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: var(--pad-3, 8px) var(--pad-4, 12px);
+  padding: var(--spacing-03, 8px) var(--spacing-04, 12px);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -31,7 +31,7 @@
   left: 0;
   z-index: 40;
   min-width: 240px;
-  padding: var(--pad-1, 4px);
+  padding: var(--spacing-01, 4px);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -52,9 +52,9 @@
 .ssd-row {
   display: flex;
   align-items: center;
-  gap: var(--pad-3, 8px);
+  gap: var(--spacing-03, 8px);
   width: 100%;
-  padding: var(--pad-3, 8px);
+  padding: var(--spacing-03, 8px);
   background: none;
   border: 0;
   border-radius: 7px;
@@ -79,7 +79,7 @@
 }
 .ssd-chip {
   font-size: var(--type-micro-size);
-  padding: var(--pad-nudge, 2px) var(--pad-2, 6px);
+  padding: var(--nudge, 2px) var(--spacing-02, 6px);
   border-radius: 999px; /* pill chips */
   border: 1px solid var(--border);
   color: var(--text-dim, var(--text-muted));
@@ -92,7 +92,7 @@
 /* Dense variant — for rows that carry many chips (e.g. every variable axis, as in
    the cal/coss role pickers). Tighter rows + one-line chips, so an 8-chip row stays
    as compact as a hand-built spec row instead of wrapping to two lines. */
-.ssd-list--dense .ssd-row { padding: var(--pad-2, 6px) var(--pad-3, 8px); }
+.ssd-list--dense .ssd-row { padding: var(--spacing-02, 6px) var(--spacing-03, 8px); }
 /* Chips size to content and stay on one line. Columns line up because every row
    carries the same specs in the same order, tnum makes digits equal-width, and the
    chip text is trimmed to equal char counts per column (opsz A; negative tracking

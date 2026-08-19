@@ -8,8 +8,8 @@
 
 .slider-label { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .slider-label-left {
-  display: flex; align-items: baseline; gap: var(--pad-1, 4px);
-  min-width: 0; overflow: visible; padding-bottom: var(--pad-nudge, 2px);
+  display: flex; align-items: baseline; gap: var(--spacing-01, 4px);
+  min-width: 0; overflow: visible; padding-bottom: var(--nudge, 2px);
 }
 .slider-label-text {
   font-size: var(--type-ui-size);
@@ -34,7 +34,7 @@
 }
 
 /* value = optional ◆ marker + the editable number/auto field */
-.slider-value { display: flex; align-items: baseline; gap: var(--pad-1, 4px); flex-shrink: 0; }
+.slider-value { display: flex; align-items: baseline; gap: var(--spacing-01, 4px); flex-shrink: 0; }
 .slider-marker {
   font-size: var(--type-micro-size); line-height: 1;
   color: var(--marker-default, var(--accent, currentColor));
@@ -48,7 +48,7 @@
   border: none;
   text-align: right;
   width: 66px;
-  padding: var(--pad-nudge, 2px) 0;
+  padding: var(--nudge, 2px) 0;
   font-feature-settings: "tnum";
   color-scheme: inherit;   /* native steppers follow the app light/dark scheme */
 }
@@ -100,7 +100,7 @@
   background: var(--bg-elevated, var(--surface, #2e2e2e));
   border: 1px solid var(--border);
   border-radius: var(--radius, 6px);
-  padding: var(--pad-1, 4px) var(--pad-3, 8px);
+  padding: var(--spacing-01, 4px) var(--spacing-03, 8px);
   pointer-events: none;
   z-index: 1000;
   white-space: nowrap;

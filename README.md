@@ -11,7 +11,7 @@ here.
 
 The rules live in the CSS, not in the page: `src/type.css` (roles, inks, signals),
 `src/corners.css` (the corner law and its circle exclusions), `src/space.css` (the
-`--pad-*` scale, the cap rule, the alignment rule). If the page and the CSS disagree,
+`--spacing-*` scale, the cap rule, the alignment rule). If the page and the CSS disagree,
 the CSS is right.
 
 ## Contents

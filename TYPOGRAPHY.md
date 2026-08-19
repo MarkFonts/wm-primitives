@@ -107,16 +107,16 @@ than 25%; every alternative tested was worse.
 
 | step | value | | step | value |
 |---|---|---|---|---|
-| `--pad-1` | 4px | | `--pad-6` | 24px |
-| `--pad-2` | 6px | | `--pad-7` | 32px |
-| `--pad-3` | 8px | | `--pad-8` | 48px |
-| `--pad-4` | 12px | | `--pad-9` | 64px |
-| `--pad-5` | 16px | | | |
+| `--spacing-01` | 4px | | `--spacing-06` | 24px |
+| `--spacing-02` | 6px | | `--spacing-07` | 32px |
+| `--spacing-03` | 8px | | `--spacing-08` | 48px |
+| `--spacing-04` | 12px | | `--spacing-09` | 64px |
+| `--spacing-05` | 16px | | | |
 
 Same structure as the poster scale: **every second step doubles** — 4 → 8 → 16 → 32 → 64,
 with 6, 12, 24, 48 between them.
 
-`--pad-hair` (1px), `--pad-nudge` (2px) and `--pad-tick` (3px) sit outside the progression.
+`--hair` (1px), `--nudge` (2px) and `--tick` (3px) sit outside the progression.
 They are optical alignment on hairlines and 3px bars, not spacing, and they are not steps you
 reach for when something needs to be "a bit tighter".
 
