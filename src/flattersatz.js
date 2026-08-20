@@ -237,7 +237,11 @@ function kpBreak(words, widths, space, target, m, limits) {
   // opened one; otherwise a space may give a third of itself and take a sixth, which
   // is close to TeX's interword glue and keeps the scoring honest.
   const stretch = Math.max(space * ((limits.maxWordSpacing || 100) / 100 - 1), space / 3)
-  const shrink = space / 6
+  // NO shrink. TeX gives interword glue a shrink component, but our fitter has none to
+  // spend — word spacing only opens — so a composer that counted on shrinking produced
+  // lines wider than the column (a 758 line in a 756 measure, seen in testing). Until
+  // there is a minimum word space to shrink INTO, the composer may only stretch.
+  const shrink = 0
 
   // prefix[i] = natural width of words 0..i-1 with single spaces
   const prefix = [0]
