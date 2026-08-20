@@ -1,0 +1,66 @@
+/* Fitting.css — the line-fitting controls. Tokens only, so each app's theme dresses it.
+   Metrics follow the house scale; the switch pair is a pill, which is why it presses
+   with a fill rather than the inset stroke (see the caveat in corners.css). */
+
+.fit-switches {
+  display: flex;
+  border: 1px solid var(--border, var(--line, #2a2a2a));
+  border-radius: 13px;              /* half the 26px height: a pill, not a rounded box */
+  overflow: hidden;
+  margin: var(--spacing-04, 12px) 0;
+}
+.fit-switch {
+  flex: 1;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-02, 6px);
+  padding: 0 var(--spacing-04, 12px);   /* clears the cap rule at r=12 */
+  background: none;
+  border: none;
+  color: var(--text-muted, #999);
+  font: inherit;
+  font-size: var(--type-ui-size, 0.75rem);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.fit-switch + .fit-switch { border-left: 1px solid var(--border, var(--line, #2a2a2a)); }
+/* The FILL has to be shaped too: the container clips, but a filled child still paints a
+   rectangle into the cap, so the active half showed square corners inside a round end. */
+.fit-switch:first-child { border-radius: 12px 0 0 12px; }
+.fit-switch:last-child { border-radius: 0 12px 12px 0; }
+.fit-switch:only-child { border-radius: 12px; }
+.fit-switch:hover:not(.active) { background: var(--bg-hover, rgba(255, 255, 255, .06)); }
+.fit-switch:active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text, #fff); }
+.fit-switch.active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text, #fff); }
+.fit-switch:focus-visible { outline: 1px solid var(--text-muted, #999); outline-offset: -2px; }
+.fit-switch-state { color: var(--text-dim, #555); font-size: 0.9em; letter-spacing: 0.04em; }
+
+/* Heights are driven inline by the component: the 0fr -> 1fr grid trick collapses in a
+   flex column that gives the box no definite height, and a class-based max-height lost
+   to something in font-proofer's cascade. Inline cannot lose. */
+.fit-options, .fit-row-collapse {
+  overflow: hidden;
+  transition: max-height var(--dur-med, .22s) cubic-bezier(.2, 0, 0, 1),
+              opacity var(--dur-fast, .12s) linear;
+}
+
+/* Alignment row. 28px, not 32: five buttons (a reset plus four alignments) have to fit
+   the width three used to have. */
+.fit-align-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius, 6px);
+  background: var(--bg-elevated, var(--surface-2, #1c1c1c));
+  color: var(--text-dim, #555);
+  border: 1px solid var(--border, var(--line, #2a2a2a));
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.fit-align-btn:hover { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text-muted, #999); }
+.fit-align-btn.active { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text, #fff); border-color: var(--text-muted, #999); }
