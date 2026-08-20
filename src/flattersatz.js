@@ -80,14 +80,17 @@ export const DEFAULTS = {
 /* What "Swiss Rag" arrives as. The zeroed budgets in DEFAULTS are the JUSTIFIED
  * starting point — a browser flexing word space and nothing else. A rag starts
  * somewhere else: a real measure band, and small tracking and word-space allowances
- * so the rag can be SHAPED toward its target rather than falling wherever the words
- * stop. Glyph scaling stays at 100; a proof must not quietly restretch the letters.
- * Values follow the original demo (rag 40, tracking 102) with word space held tighter.
+ * A rag's shape comes from the BAND, not from stretching: lines break against
+ * alternating measures and then stop where the words stop. The budgets start at zero
+ * for exactly that reason — even a 2% tracking allowance closes most of the gaps that
+ * greedy breaking leaves, and the "rag" comes out flush to two measures, which is what
+ * the original demo actually renders. Open the budgets to pull the rag tighter toward
+ * the band; leave them at zero for a true rag.
  */
 export const SWISS_PRESET = {
   ragWidth: 40,
-  maxTracking: 102,
-  maxWordSpacing: 105,
+  maxTracking: 100,
+  maxWordSpacing: 100,
   maxGlyphScaling: 100,
 }
 
