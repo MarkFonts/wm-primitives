@@ -37,17 +37,6 @@ input[type="radio"], input[type="radio"]:checked::after {
   corner-shape: round;
 }
 
-/* ── Pills opt out ────────────────────────────────────────────────────────────────
-   A superellipse eases its curvature to zero BEFORE the straight edge — that easing is
-   the whole point, and it needs a straight run to ease into. On a pill the radius is
-   half the height, so the two corners meet and there is no flat left: the curve has
-   nowhere to blend, and the cap reads as a lozenge rather than a half-circle.
-
-   Circles are excluded above for a related reason but by a test that cannot see this
-   case: 50% on a SQUARE box. A pill is 50% on an oblong one, which no selector can
-   detect, so pills are named. Mark one .pill and it keeps its round cap. */
-.pill, .pill::before, .pill::after { corner-shape: round; }
-
 /* Each vendor thumb gets its OWN rule, and that is not a style preference.
    A comma-separated selector list is all-or-nothing: one selector the engine cannot
    parse invalidates the WHOLE rule. ::-moz-range-thumb is a SyntaxError in Chrome and
