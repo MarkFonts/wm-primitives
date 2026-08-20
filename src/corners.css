@@ -56,7 +56,14 @@ input[type="range"]::-moz-range-thumb { corner-shape: round; }
 
 /* ── Press ────────────────────────────────────────────────────────────────────────
    The stroke lands before the fill: it acknowledges the tap, the fill confirms on release.
-   :active deliberately beats whatever selected or filled state sits under it. */
+   :active deliberately beats whatever selected or filled state sits under it.
+
+   CAVEAT, observed in Chromium: an inset box-shadow follows border-radius but NOT
+   corner-shape, so on a superellipse control this ring paints as a rounded rectangle
+   inside a squircle, and the mismatch shows while the tap is held. It is least
+   noticeable at small radii, which is where most of these controls live. Where a
+   control is a PILL — radius half its height, the whole edge curved — press it with a
+   background or border-colour change instead; both are clipped to the real shape. */
 .ui-btn:active:not(:disabled), .ui-seg > span:active, .ui-tab:active, .ui-chip:active,
 .ui-tool:active, .gp-copy:active:not(:disabled), .ssd-btn:active:not(:disabled),
 .inline-emph-btn:active:not(:disabled) {
