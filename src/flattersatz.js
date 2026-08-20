@@ -378,7 +378,10 @@ function kpBreak(items, target, m, limits) {
       if (overfull > target) break
       let demerits
       if (j === n) {
-        demerits = 0
+        // The last line is not STRETCHED, but it still has to FIT. Scoring it free
+        // regardless of width let the composer dump every remaining word onto it at no
+        // cost, and it ran off the measure — visible immediately in the proof.
+        demerits = overfull > 0 ? OVERFULL_PENALTY + overfull * OVERFULL_PENALTY : 0
       } else if (overfull > 0) {
         demerits = OVERFULL_PENALTY + overfull * OVERFULL_PENALTY
       } else {
