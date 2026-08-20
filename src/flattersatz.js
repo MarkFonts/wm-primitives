@@ -71,8 +71,8 @@ export const DEFAULTS = {
   // short. Open a budget deliberately and it is spent in both. This is also why moving
   // between Swiss Rag and Justify only adds or removes the rag width: nothing else
   // about the setting changes underneath you.
-  maxWordSpacing: 100,              // percent
-  maxTracking: 100,                 // percent
+  wordSpacing: 100,                 // percent — <100 tightens, >100 opens, 100 off
+  tracking: 100,                    // percent — same
   glyphScaling: 100,                // percent — <100 condenses, >100 stretches, 100 off
   center: false,                    // centred rag: split the shortfall onto both sides
   firstIndent: 0,
@@ -93,8 +93,8 @@ export const DEFAULTS = {
  */
 export const SWISS_PRESET = {
   ragWidth: 40,
-  maxTracking: 100,
-  maxWordSpacing: 100,
+  tracking: 100,
+  wordSpacing: 100,
   glyphScaling: 100,
 }
 
@@ -147,20 +147,39 @@ function makeMeasurer(reference) {
 const NONE = { wordSpacingPx: 0, trackingPx: 0, glyphScaling: 1 }
 
 /** One knob, two directions: below 100 is the condense floor, above it the stretch cap. */
-function condenseFloor(limits) {
-  return Math.min(100, limits.glyphScaling ?? 100)
-}
-function stretchCap(limits) {
-  return Math.max(100, limits.glyphScaling ?? 100)
-}
+const floorOf = v => Math.min(100, v ?? 100)
+const capOf = v => Math.max(100, v ?? 100)
+function condenseFloor(limits) { return floorOf(limits.glyphScaling) }
+function stretchCap(limits) { return capOf(limits.glyphScaling) }
+const countSpaces = t => (t.match(/[ \u00a0]/g) ?? []).length
 
 function fitLine(text, width, target, limits, m, isLast, flush) {
-  // Overset: the breaker took one more word than fits, on the promise that condensing
-  // is allowed. Squeeze to the target, never past the floor.
+  // ── Overset: the breaker took a word too many, on the promise of tightening ──
+  // Same three budgets, same order, their below-100 halves.
   if (width > target) {
+    const nSpaces = countSpaces(text)
+    const nGaps = Math.max(Array.from(text).length - 1, 0)
+    let excess = width - target
+    let ws = 100, tr = 100, sc = 100
+    const wsRoom = nSpaces * (1 - floorOf(limits.wordSpacing) / 100) * m.space
+    if (excess > 0 && wsRoom > 0) {
+      const spend = Math.min(excess, wsRoom)
+      ws = 100 - (100 - floorOf(limits.wordSpacing)) * (spend / wsRoom)
+      excess -= spend
+    }
+    const trRoom = nGaps * (1 - floorOf(limits.tracking) / 100) * m.em
+    if (excess > 0 && trRoom > 0) {
+      const spend = Math.min(excess, trRoom)
+      tr = 100 - (100 - floorOf(limits.tracking)) * (spend / trRoom)
+      excess -= spend
+    }
     const floor = condenseFloor(limits) / 100
-    if (floor >= 1) return NONE
-    return { ...NONE, glyphScaling: Math.max(floor, target / width) }
+    if (excess > 0 && floor < 1) sc = Math.max(floor, target / width) * 100
+    return {
+      wordSpacingPx: (ws / 100 - 1) * m.space,
+      trackingPx: (tr / 100 - 1) * m.em,
+      glyphScaling: sc / 100,
+    }
   }
   if (isLast || width >= target) return NONE
   const spaces = (text.match(/[  ]/g) ?? []).length
@@ -170,17 +189,19 @@ function fitLine(text, width, target, limits, m, isLast, flush) {
   let scaling = 100, tracking = 100, wordSpacing = 100
 
   // 1. tracking, capped
-  const trackRoom = gaps * (limits.maxTracking / 100 - 1) * m.em
+  const trackCap = capOf(limits.tracking)
+  const trackRoom = gaps * (trackCap / 100 - 1) * m.em
   if (deficit > 0 && trackRoom > 0) {
     const spend = Math.min(deficit, trackRoom)
-    tracking = 100 + (limits.maxTracking - 100) * (spend / trackRoom)
+    tracking = 100 + (trackCap - 100) * (spend / trackRoom)
     deficit -= spend
   }
   // 2. word spacing, capped
-  const wordRoom = spaces * (limits.maxWordSpacing / 100 - 1) * m.space
+  const wordCap = capOf(limits.wordSpacing)
+  const wordRoom = spaces * (wordCap / 100 - 1) * m.space
   if (deficit > 0 && wordRoom > 0) {
     const spend = Math.min(deficit, wordRoom)
-    wordSpacing = 100 + (limits.maxWordSpacing - 100) * (spend / wordRoom)
+    wordSpacing = 100 + (wordCap - 100) * (spend / wordRoom)
     deficit -= spend
   }
   // 3. glyph scaling, capped — last resort, and 100 (off) unless asked for
@@ -236,12 +257,11 @@ function kpBreak(words, widths, space, target, m, limits) {
   // Stretch and shrink per space, in px. The budgets set them where the user has
   // opened one; otherwise a space may give a third of itself and take a sixth, which
   // is close to TeX's interword glue and keeps the scoring honest.
-  const stretch = Math.max(space * ((limits.maxWordSpacing || 100) / 100 - 1), space / 3)
-  // NO shrink. TeX gives interword glue a shrink component, but our fitter has none to
-  // spend — word spacing only opens — so a composer that counted on shrinking produced
-  // lines wider than the column (a 758 line in a 756 measure, seen in testing). Until
-  // there is a minimum word space to shrink INTO, the composer may only stretch.
-  const shrink = 0
+  const stretch = Math.max(space * (capOf(limits.wordSpacing) / 100 - 1), space / 3)
+  // Shrink is exactly what the word-spacing control allows below 100 — the composer may
+  // only plan tightening the fitter can deliver. When it once assumed TeX's glue it
+  // produced a 758px line in a 756px measure.
+  const shrink = space * (1 - floorOf(limits.wordSpacing) / 100)
 
   // prefix[i] = natural width of words 0..i-1 with single spaces
   const prefix = [0]
