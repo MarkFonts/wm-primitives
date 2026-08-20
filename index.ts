@@ -59,3 +59,9 @@ export type {
 // stylesheet and must supply --ui-font and --text-rgb (comma-separated).
 export { ROLES, POSTER, INK, TRACK_CAPS, LANDINGS, type as typeStyle, ink } from './src/type'
 export type { Role, Landing } from './src/type'
+
+// Optical line fitting: justified, or flattersatz (an alternating measure fitted line
+// by line). Plain JS so a static page can script-tag it; `applyTo` fits an element in
+// place, `layoutParagraph` + `lineStyle` are for consumers that render their own lines.
+// Ported from Seth Thompson's demo, built on Cheng Lou's PreText.
+export { layoutParagraph, lineStyle, applyTo as applyFlattersatz, DEFAULTS as FLATTERSATZ_DEFAULTS } from './src/flattersatz'
