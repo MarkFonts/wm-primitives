@@ -59,6 +59,7 @@ export const DEFAULTS = {
   maxTracking: 102,                 // percent
   maxGlyphScaling: 100,             // percent — 100 is off; the UI caps it at 110,
                                     // because past that the proof is of a face you did not draw
+  center: false,                    // centred rag: split the shortfall onto both sides
   firstIndent: 0,
   indent: 0,                        // 0 by default: the blocks already carry
                                     // inter-paragraph space, and indent + space is
@@ -177,6 +178,11 @@ export function layoutParagraph(text, reference, opts, indentPx = 0) {
   const words = text.split(/\s+/).filter(Boolean)
   if (!words.length) return null
 
+  // Centred rag splits the shortfall between the two margins instead of hanging it all
+  // on the right: a line 40 short sits 20 in from each side, so the rag reads as a
+  // deliberate double edge rather than a ragged right with a flush left.
+  const offsetFor = target => (opts.center ? (columnWidth - target) / 2 : 0)
+
   const lines = []
   let line = [], lineWidth = 0, index = 0
   let indent = indentPx
@@ -186,7 +192,7 @@ export function layoutParagraph(text, reference, opts, indentPx = 0) {
     const w = m.measure(word)
     const withWord = line.length ? lineWidth + m.space + w : w
     if (line.length && withWord > target) {
-      lines.push({ text: line.join(' '), width: lineWidth, target, indentPx: indent })
+      lines.push({ text: line.join(' '), width: lineWidth, target, indentPx: indent + offsetFor(target) })
       index += 1
       indent = 0
       target = targetFor(columnWidth, opts.ragWidth, index, mode)
@@ -195,7 +201,7 @@ export function layoutParagraph(text, reference, opts, indentPx = 0) {
       line.push(word); lineWidth = withWord
     }
   }
-  if (line.length) lines.push({ text: line.join(' '), width: lineWidth, target, indentPx: indent })
+  if (line.length) lines.push({ text: line.join(' '), width: lineWidth, target, indentPx: indent + offsetFor(target) })
 
   return lines.map((l, i) => ({
     text: l.text,
