@@ -73,8 +73,7 @@ export const DEFAULTS = {
   // about the setting changes underneath you.
   maxWordSpacing: 100,              // percent
   maxTracking: 100,                 // percent
-  minGlyphScaling: 100,             // percent — below 100 permits condensing
-  maxGlyphScaling: 100,             // percent — above 100 permits stretching
+  glyphScaling: 100,                // percent — <100 condenses, >100 stretches, 100 off
   center: false,                    // centred rag: split the shortfall onto both sides
   firstIndent: 0,
   indent: 0,                        // 0 by default: the blocks already carry
@@ -96,8 +95,7 @@ export const SWISS_PRESET = {
   ragWidth: 40,
   maxTracking: 100,
   maxWordSpacing: 100,
-  minGlyphScaling: 100,
-  maxGlyphScaling: 100,
+  glyphScaling: 100,
 }
 
 /* ── Measurement ──────────────────────────────────────────────────────────────
@@ -148,8 +146,12 @@ function makeMeasurer(reference) {
 
 const NONE = { wordSpacingPx: 0, trackingPx: 0, glyphScaling: 1 }
 
+/** One knob, two directions: below 100 is the condense floor, above it the stretch cap. */
 function condenseFloor(limits) {
-  return limits.minGlyphScaling ?? 100
+  return Math.min(100, limits.glyphScaling ?? 100)
+}
+function stretchCap(limits) {
+  return Math.max(100, limits.glyphScaling ?? 100)
 }
 
 function fitLine(text, width, target, limits, m, isLast, flush) {
@@ -182,11 +184,12 @@ function fitLine(text, width, target, limits, m, isLast, flush) {
     deficit -= spend
   }
   // 3. glyph scaling, capped — last resort, and 100 (off) unless asked for
-  if (deficit > 0 && limits.maxGlyphScaling > 100) {
-    const room = width * (limits.maxGlyphScaling / 100 - 1)
+  const cap = stretchCap(limits)
+  if (deficit > 0 && cap > 100) {
+    const room = width * (cap / 100 - 1)
     if (room > 0) {
       const spend = Math.min(deficit, room)
-      scaling = 100 + (limits.maxGlyphScaling - 100) * (spend / room)
+      scaling = 100 + (cap - 100) * (spend / room)
       deficit -= spend
     }
   }
