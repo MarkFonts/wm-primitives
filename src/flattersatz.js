@@ -27,6 +27,11 @@
  *   2. word spacing    (word-spacing)           — the reader forgives it
  *   3. glyph scaling   (scaleX on the line)     — LAST, and off by default
  *
+ * Glyph scaling is a SYMMETRIC allowance around 100: 102 means the line may be set
+ * anywhere from 98% to 102%. Condensing is not decoration — it is how a line takes one
+ * more word instead of opening a hole, which is the choice a hand compositor makes and
+ * a browser cannot. 100 means neither, and 100 is the default.
+ *
  * Tracking before word spacing, because tracking distributes the correction across
  * every glyph gap while word spacing pools it into a handful of word gaps, which is
  * what rivers are made of. (InDesign orders these the other way; it is optimising for
@@ -142,7 +147,19 @@ function makeMeasurer(reference) {
 
 const NONE = { wordSpacingPx: 0, trackingPx: 0, glyphScaling: 1 }
 
+/** 102 -> 98: the far side of a symmetric allowance. */
+function condenseFloor(limits) {
+  return 200 - (limits.maxGlyphScaling || 100)
+}
+
 function fitLine(text, width, target, limits, m, isLast, flush) {
+  // Overset: the breaker took one more word than fits, on the promise that condensing
+  // is allowed. Squeeze to the target, never past the floor.
+  if (width > target) {
+    const floor = condenseFloor(limits) / 100
+    if (floor >= 1) return NONE
+    return { ...NONE, glyphScaling: Math.max(floor, target / width) }
+  }
   if (isLast || width >= target) return NONE
   const spaces = (text.match(/[  ]/g) ?? []).length
   const gaps = Math.max(Array.from(text).length - 1, 0)
@@ -219,7 +236,10 @@ export function layoutParagraph(text, reference, opts, indentPx = 0) {
   for (const word of words) {
     const w = m.measure(word)
     const withWord = line.length ? lineWidth + m.space + w : w
-    if (line.length && withWord > target) {
+    // A word that overruns by less than the condense allowance is TAKEN, and the line
+    // squeezed to fit — cheaper than the hole its absence would leave.
+    const squeezed = withWord * (condenseFloor(opts) / 100)
+    if (line.length && withWord > target && squeezed > target) {
       lines.push({ text: line.join(' '), width: lineWidth, target, indentPx: indent + offsetFor(target) })
       index += 1
       indent = 0
