@@ -75,6 +75,7 @@ export const DEFAULTS = {
   tracking: 100,                    // percent — same
   glyphScaling: 100,                // percent — <100 condenses, >100 stretches, 100 off
   center: false,                    // centred rag: split the shortfall onto both sides
+  hyphenate: false,                 // justified only; points come from the browser
   composer: 'kp',                   // justified only: 'kp' or 'greedy'. Not a feature —
                                     // it exists so the two can be measured against each
                                     // other on the same text at the same measure.
@@ -234,6 +235,74 @@ function targetFor(columnWidth, ragWidth, lineIndex, mode) {
   return lineIndex % 2 === 0 ? columnWidth : Math.max(MIN_MEASURE, columnWidth - ragWidth)
 }
 
+/* ── Hyphenation, without shipping a dictionary ───────────────────────────────
+ * Chrome already HAS Liang patterns for `hyphens: auto`, for every language it ships.
+ * Rather than bundling 35KB of our own, ask the browser where it would break a word and
+ * take those points: squeeze the word into a narrow box with hyphens:auto, read which
+ * character starts the second line, and that boundary is a candidate. Sweep the widths
+ * and the whole set falls out.
+ *
+ * A few layout reads per UNIQUE word, cached for the life of the page, for
+ * dictionary-quality points with no dependency and no language table of our own. The
+ * one requirement is a lang attribute: the browser picks its dictionary from it, and
+ * without one it hyphenates nothing.
+ *
+ * Soft hyphens already in the text (U+00AD) win outright — an author who marked their
+ * own breaks outranks any dictionary.
+ */
+const hyphenCache = new Map()
+let hyProbe = null
+
+function hyphenPoints(word, reference, lang) {
+  if (word.length < 5) return []
+  if (word.includes('\u00ad')) {
+    const out = []
+    let i = word.indexOf('\u00ad')
+    while (i >= 0) { out.push(i); i = word.indexOf('\u00ad', i + 1) }
+    return out
+  }
+  const key = lang + '|' + word
+  const hit = hyphenCache.get(key)
+  if (hit) return hit
+
+  if (!hyProbe) {
+    hyProbe = document.createElement('div')
+    hyProbe.setAttribute('aria-hidden', 'true')
+    hyProbe.style.cssText =
+      'position:absolute;visibility:hidden;top:-9999px;left:-9999px;' +
+      'hyphens:auto;-webkit-hyphens:auto;overflow-wrap:normal;white-space:normal;'
+    document.body.appendChild(hyProbe)
+  }
+  hyProbe.lang = lang
+  const cs = getComputedStyle(reference)
+  hyProbe.style.font = cs.font || (cs.fontSize + ' ' + cs.fontFamily)
+  hyProbe.style.fontVariationSettings = cs.fontVariationSettings
+  hyProbe.style.width = ''
+  hyProbe.textContent = word
+
+  const full = hyProbe.getBoundingClientRect().width
+  const step = Math.max(6, full / word.length)
+  const points = new Set()
+  const range = document.createRange()
+  for (let w = full - step; w > step * 1.5; w -= step) {
+    hyProbe.style.width = w + 'px'
+    let firstLineChars = 0, top = null
+    for (let i = 1; i <= word.length; i++) {
+      range.setStart(hyProbe.firstChild, i - 1)
+      range.setEnd(hyProbe.firstChild, i)
+      const rect = range.getBoundingClientRect()
+      if (top === null) top = rect.top
+      if (rect.top > top + 1) break
+      firstLineChars = i
+    }
+    if (firstLineChars > 1 && firstLineChars < word.length) points.add(firstLineChars)
+  }
+  hyProbe.style.width = ''
+  const out = [...points].sort((a, b) => a - b)
+  hyphenCache.set(key, out)
+  return out
+}
+
 /* ── Knuth–Plass, for justified setting only ──────────────────────────────────
  * Greedy breaking takes the most words each line can hold and lets the last lines pay
  * for it: one line ends up gaping while its neighbour is tight, and the gaps line up
@@ -253,36 +322,50 @@ function targetFor(columnWidth, ragWidth, lineIndex, mode) {
  * buy an easier paragraph with extra lines.
  */
 const LINE_PENALTY = 10
+const HYPHEN_PENALTY = 50   // TeX's default: a hyphen is allowed, never free
 const INFEASIBLE = 1e9
 
-function kpBreak(words, widths, space, target, m, limits) {
-  const n = words.length
-  // Stretch and shrink per space, in px. The budgets set them where the user has
-  // opened one; otherwise a space may give a third of itself and take a sixth, which
-  // is close to TeX's interword glue and keeps the scoring honest.
-  const stretch = Math.max(space * (capOf(limits.wordSpacing) / 100 - 1), space / 3)
+function kpBreak(items, target, m, limits) {
+  const n = items.length
+  const stretch = Math.max(m.space * (capOf(limits.wordSpacing) / 100 - 1), m.space / 3)
   // Shrink is exactly what the word-spacing control allows below 100 — the composer may
   // only plan tightening the fitter can deliver. When it once assumed TeX's glue it
   // produced a 758px line in a 756px measure.
-  const shrink = space * (1 - floorOf(limits.wordSpacing) / 100)
+  const shrink = m.space * (1 - floorOf(limits.wordSpacing) / 100)
+  const hyphenW = m.measure('-')
 
-  // prefix[i] = natural width of words 0..i-1 with single spaces
-  const prefix = [0]
-  for (let i = 0; i < n; i++) prefix.push(prefix[i] + widths[i] + (i < n - 1 ? space : 0))
+  // Natural width of items i..j-1, without the trailing space, plus the hyphen when the
+  // line ends mid-word.
+  const width = (i, j) => {
+    let w = 0
+    for (let k = i; k < j; k++) {
+      w += items[k].w
+      if (k < j - 1 && items[k].space) w += m.space
+    }
+    if (items[j - 1].hyphen) w += hyphenW
+    return w
+  }
+  const spacesIn = (i, j) => {
+    let c = 0
+    for (let k = i; k < j - 1; k++) if (items[k].space) c++
+    return c
+  }
 
   const cost = new Array(n + 1).fill(INFEASIBLE)
   const from = new Array(n + 1).fill(0)
   cost[0] = 0
 
   for (let j = 1; j <= n; j++) {
+    if (j < n && !items[j - 1].brk) continue          // not a legal break point
     for (let i = j - 1; i >= 0; i--) {
       if (cost[i] >= INFEASIBLE) continue
-      const natural = prefix[j] - prefix[i] - (j < n ? space : 0)
-      const spaces = j - i - 1
-      if (natural - spaces * shrink > target) break   // unfixably long: stop widening
+      if (i > 0 && !items[i - 1].brk) continue
+      const natural = width(i, j)
+      const spaces = spacesIn(i, j)
+      if (natural - spaces * shrink > target) break
       let demerits
       if (j === n) {
-        demerits = 0                                   // the last line may end short
+        demerits = 0
       } else {
         const slack = target - natural
         const give = slack >= 0 ? spaces * stretch : spaces * shrink
@@ -292,19 +375,53 @@ function kpBreak(words, widths, space, target, m, limits) {
           if (r < -1) continue
           const badness = 100 * Math.abs(r) ** 3
           demerits = (LINE_PENALTY + badness) ** 2
+          if (items[j - 1].hyphen) demerits += HYPHEN_PENALTY ** 2
         }
       }
       if (cost[i] + demerits < cost[j]) { cost[j] = cost[i] + demerits; from[j] = i }
     }
   }
-  if (cost[n] >= INFEASIBLE) return null               // nothing feasible: caller falls back
+  if (cost[n] >= INFEASIBLE) return null
 
   const breaks = []
   for (let j = n; j > 0; j = from[j]) breaks.unshift([from[j], j])
-  return breaks.map(([i, j]) => ({
-    text: words.slice(i, j).join(' '),
-    width: prefix[j] - prefix[i] - (j < n ? space : 0),
-  }))
+  return breaks.map(([i, j]) => {
+    let text = ''
+    for (let k = i; k < j; k++) {
+      text += items[k].t
+      if (k < j - 1 && items[k].space) text += ' '
+    }
+    if (items[j - 1].hyphen) text += '-'
+    return { text, width: width(i, j) }
+  })
+}
+
+/* Words -> composable items. With hyphenation off, one item per word. With it on, a
+ * word becomes its fragments, each breakable, each carrying a hyphen if a line ends
+ * there. The last fragment of a word is the one that owns the following space. */
+function buildItems(words, reference, m, opts) {
+  const lang = opts.lang || document.documentElement.lang || 'en'
+  const items = []
+  words.forEach((word, wi) => {
+    const last = wi === words.length - 1
+    const cuts = opts.hyphenate ? hyphenPoints(word, reference, lang) : []
+    if (!cuts.length) {
+      items.push({ t: word, w: m.measure(word), space: !last, brk: true, hyphen: false })
+      return
+    }
+    let prev = 0
+    for (const c of cuts) {
+      const frag = word.slice(prev, c)
+      items.push({ t: frag, w: m.measure(frag), space: false, brk: true, hyphen: true })
+      prev = c
+    }
+    const tail = word.slice(prev)
+    items.push({ t: tail, w: m.measure(tail), space: !last, brk: true, hyphen: false })
+  })
+  // A break is only legal where a space or a hyphen follows; the fragments before a cut
+  // already carry hyphen:true, so every item here is breakable except the very last.
+  if (items.length) items[items.length - 1].brk = true
+  return items
 }
 
 /* ── Breaking a paragraph ─────────────────────────────────────────────────── */
@@ -330,9 +447,8 @@ export function layoutParagraph(text, reference, opts, indentPx = 0) {
 
   // Justified composes the whole paragraph at once; a rag walks it line by line.
   if (mode === 'justified' && opts.composer !== 'greedy') {
-    const widths = words.map(w => m.measure(w))
     const target = columnWidth - indentPx
-    const composed = kpBreak(words, widths, m.space, target, m, opts)
+    const composed = kpBreak(buildItems(words, reference, m, opts), target, m, opts)
     if (composed) {
       return composed.map((l, i) => ({
         text: l.text,
