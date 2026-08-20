@@ -73,8 +73,8 @@ export const DEFAULTS = {
   // about the setting changes underneath you.
   maxWordSpacing: 100,              // percent
   maxTracking: 100,                 // percent
-  maxGlyphScaling: 100,             // percent — 100 is off; the UI caps it at 110,
-                                    // because past that the proof is of a face you did not draw
+  minGlyphScaling: 100,             // percent — below 100 permits condensing
+  maxGlyphScaling: 100,             // percent — above 100 permits stretching
   center: false,                    // centred rag: split the shortfall onto both sides
   firstIndent: 0,
   indent: 0,                        // 0 by default: the blocks already carry
@@ -96,6 +96,7 @@ export const SWISS_PRESET = {
   ragWidth: 40,
   maxTracking: 100,
   maxWordSpacing: 100,
+  minGlyphScaling: 100,
   maxGlyphScaling: 100,
 }
 
@@ -147,9 +148,8 @@ function makeMeasurer(reference) {
 
 const NONE = { wordSpacingPx: 0, trackingPx: 0, glyphScaling: 1 }
 
-/** 102 -> 98: the far side of a symmetric allowance. */
 function condenseFloor(limits) {
-  return 200 - (limits.maxGlyphScaling || 100)
+  return limits.minGlyphScaling ?? 100
 }
 
 function fitLine(text, width, target, limits, m, isLast, flush) {
