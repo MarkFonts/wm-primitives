@@ -14,11 +14,11 @@
  * JUSTIFIED — every line is fitted to one measure. Ordinary flush-both setting,
  * except that the fitting spends three things in order rather than only word space.
  *
- * FLATTERSATZ — the measure ALTERNATES: even lines get the full column, odd lines
- * get the column minus `ragWidth` (floored at MIN_MEASURE). Each line is then fitted
- * to its own target, so the right edge is a designed two-step rag rather than
- * wherever the words happened to stop. This is the trick the demo is built around,
- * and it is why the sample reads as "ragged" while every line is in fact flush.
+ * FLATTERSATZ — the measure ALTERNATES: even lines get the full column, odd lines get
+ * the column minus `ragWidth` (floored at MIN_MEASURE). Lines BREAK against their own
+ * target, so the right edge falls into a designed two-step band rather than wherever
+ * the words happened to stop — but they are not forced to fill it. The band shapes the
+ * rag; the rag stays a rag.
  *
  * THE BUDGET. A line short of its target has a deficit to spend, and spends it in
  * this order, each capped by its own limit before the next takes over:
@@ -40,8 +40,14 @@
  * quietly falsify. InDesign ships glyph scaling at 100/100/100 for the same reason.
  * So the order is inverted here, and maxGlyphScaling defaults to 100, meaning off.
  *
- * Whatever survives all three caps goes back to word spacing, uncapped: a line has to
- * reach its target, and a loose word space is the most forgivable way to get there.
+ * JUSTIFIED ONLY: whatever survives all three caps goes back to word spacing, uncapped,
+ * because a justified line has to reach its measure and a loose word space is the most
+ * forgivable way to get there.
+ *
+ * A RAG must never take that residue. Spending it is what makes every line flush, and a
+ * rag whose lines are all flush is just justified text at two measures — which is what
+ * this did before the residue was fenced off. In flattersatz the caps are the whole
+ * budget: a line spends what it can and then STOPS SHORT, which is the rag.
  *
  * The last line of a paragraph is never fitted, and neither is a line already at or
  * past its target.
@@ -114,7 +120,7 @@ function makeMeasurer(reference) {
 
 const NONE = { wordSpacingPx: 0, trackingPx: 0, glyphScaling: 1 }
 
-function fitLine(text, width, target, limits, m, isLast) {
+function fitLine(text, width, target, limits, m, isLast, flush) {
   if (isLast || width >= target) return NONE
   const spaces = (text.match(/[  ]/g) ?? []).length
   const gaps = Math.max(Array.from(text).length - 1, 0)
@@ -145,8 +151,8 @@ function fitLine(text, width, target, limits, m, isLast) {
       deficit -= spend
     }
   }
-  // 4. residue goes back to word spacing, uncapped: the line must reach its target
-  if (deficit > 0 && spaces > 0) {
+  // 4. justified only: residue goes back to word spacing, uncapped. A rag stops short.
+  if (flush && deficit > 0 && spaces > 0) {
     wordSpacing += ((deficit / spaces) / (scaling / 100)) / m.space * 100
   }
   return {
@@ -206,7 +212,7 @@ export function layoutParagraph(text, reference, opts, indentPx = 0) {
   return lines.map((l, i) => ({
     text: l.text,
     indentPx: l.indentPx,
-    ...fitLine(l.text, l.width, l.target - 1, opts, m, i === lines.length - 1),
+    ...fitLine(l.text, l.width, l.target - 1, opts, m, i === lines.length - 1, mode === 'justified'),
   }))
 }
 
