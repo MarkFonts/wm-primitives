@@ -255,6 +255,9 @@ function targetFor(columnWidth, ragWidth, lineIndex, mode) {
  * set does — but every break it offers is defensible, which the browser's were not.
  */
 const VOWELS = 'aeiouy'
+// Digraphs are ONE consonant and never split: typograp-hic and lengt-hen were both
+// produced by treating the second letter as a separate consonant.
+const DIGRAPHS = ['ph', 'th', 'ch', 'sh', 'wh', 'gh', 'ck', 'ng', 'qu', 'rh']
 const PREFIXES = ['anti', 'auto', 'circum', 'contra', 'counter', 'dis', 'extra', 'hyper',
   'inter', 'intra', 'micro', 'mis', 'mono', 'multi', 'non', 'over', 'post', 'pre', 'pro',
   'pseudo', 'quasi', 'retro', 'semi', 'sub', 'super', 'trans', 'ultra', 'under', 'un', 're']
@@ -287,8 +290,11 @@ function hyphenPoints(word) {
   }
   // VC|CV — the workhorse. Split between the consonants when a vowel sits on each side.
   const isV = c => VOWELS.includes(c)
+  const splitsDigraph = i => DIGRAPHS.includes(w.slice(i - 1, i + 1)) || DIGRAPHS.includes(w.slice(i, i + 2))
   for (let i = 2; i < w.length - 2; i++) {
-    if (isV(w[i - 2]) && !isV(w[i - 1]) && !isV(w[i]) && isV(w[i + 1]) && ok(i)) points.add(i)
+    if (isV(w[i - 2]) && !isV(w[i - 1]) && !isV(w[i]) && isV(w[i + 1]) && ok(i) && !splitsDigraph(i)) {
+      points.add(i)
+    }
   }
 
   // Two rules can fire a letter apart (a suffix boundary next to a VC|CV split), which
@@ -322,7 +328,8 @@ function hyphenPoints(word) {
  */
 const LINE_PENALTY = 10
 const HYPHEN_PENALTY = 50   // TeX's default: a hyphen is allowed, never free
-const OVERFULL_PENALTY = 1e6 // worse than any legal line, better than no paragraph
+const MAX_BADNESS = 10000    // TeX's ceiling: past this a line is not worth scoring
+const OVERFULL_PENALTY = 1e10 // worse than ANY legal line, better than no paragraph
 const INFEASIBLE = 1e9
 
 function kpBreak(items, target, m, limits) {
@@ -378,10 +385,13 @@ function kpBreak(items, target, m, limits) {
         const slack = target - natural
         const give = slack >= 0 ? spaces * stretch : spaces * shrink
         if (give <= 0) {
-          demerits = slack === 0 ? 0 : OVERFULL_PENALTY + slack * slack
+          demerits = slack === 0 ? 0 : (LINE_PENALTY + MAX_BADNESS) ** 2
         } else {
           const r = slack / give
-          const badness = 100 * Math.abs(r) ** 3
+          // Bounded, or the cube runs away: with a small stretch allowance a loose line
+          // scored 7e13 against an overfull line's 1e8, so the composer preferred
+          // overfull lines and the paragraph came out in short, wrong pieces.
+          const badness = Math.min(MAX_BADNESS, 100 * Math.abs(r) ** 3)
           demerits = (LINE_PENALTY + badness) ** 2
           if (items[j - 1].hyphen) demerits += HYPHEN_PENALTY ** 2
         }
