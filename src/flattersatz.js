@@ -210,6 +210,76 @@ function targetFor(columnWidth, ragWidth, lineIndex, mode) {
   return lineIndex % 2 === 0 ? columnWidth : Math.max(MIN_MEASURE, columnWidth - ragWidth)
 }
 
+/* ── Knuth–Plass, for justified setting only ──────────────────────────────────
+ * Greedy breaking takes the most words each line can hold and lets the last lines pay
+ * for it: one line ends up gaping while its neighbour is tight, and the gaps line up
+ * down the column as rivers. KP scores the WHOLE paragraph instead — every possible
+ * set of breaks — and picks the one whose lines are collectively least strained.
+ *
+ * Only justified uses it. A rag has nothing to optimise: its lines are not trying to
+ * reach anything, so the two-measure rhythm of the Swiss rag IS the design, and greedy
+ * breaking against those measures is exactly right.
+ *
+ * No hyphenation: break candidates are word boundaries only. A dictionary is a heavy
+ * dependency for a proof, and KP earns most of its keep without one.
+ *
+ * badness = 100·|r|³ where r is how far a line must stretch or shrink, in units of the
+ * space it has to give. r > 1 means it cannot reach; r < -1 means it overflows and the
+ * break is refused outright. Demerits add a flat line penalty so the composer does not
+ * buy an easier paragraph with extra lines.
+ */
+const LINE_PENALTY = 10
+const INFEASIBLE = 1e9
+
+function kpBreak(words, widths, space, target, m, limits) {
+  const n = words.length
+  // Stretch and shrink per space, in px. The budgets set them where the user has
+  // opened one; otherwise a space may give a third of itself and take a sixth, which
+  // is close to TeX's interword glue and keeps the scoring honest.
+  const stretch = Math.max(space * ((limits.maxWordSpacing || 100) / 100 - 1), space / 3)
+  const shrink = space / 6
+
+  // prefix[i] = natural width of words 0..i-1 with single spaces
+  const prefix = [0]
+  for (let i = 0; i < n; i++) prefix.push(prefix[i] + widths[i] + (i < n - 1 ? space : 0))
+
+  const cost = new Array(n + 1).fill(INFEASIBLE)
+  const from = new Array(n + 1).fill(0)
+  cost[0] = 0
+
+  for (let j = 1; j <= n; j++) {
+    for (let i = j - 1; i >= 0; i--) {
+      if (cost[i] >= INFEASIBLE) continue
+      const natural = prefix[j] - prefix[i] - (j < n ? space : 0)
+      const spaces = j - i - 1
+      if (natural - spaces * shrink > target) break   // unfixably long: stop widening
+      let demerits
+      if (j === n) {
+        demerits = 0                                   // the last line may end short
+      } else {
+        const slack = target - natural
+        const give = slack >= 0 ? spaces * stretch : spaces * shrink
+        if (give <= 0) { if (slack !== 0) continue; demerits = 0 }
+        else {
+          const r = slack / give
+          if (r < -1) continue
+          const badness = 100 * Math.abs(r) ** 3
+          demerits = (LINE_PENALTY + badness) ** 2
+        }
+      }
+      if (cost[i] + demerits < cost[j]) { cost[j] = cost[i] + demerits; from[j] = i }
+    }
+  }
+  if (cost[n] >= INFEASIBLE) return null               // nothing feasible: caller falls back
+
+  const breaks = []
+  for (let j = n; j > 0; j = from[j]) breaks.unshift([from[j], j])
+  return breaks.map(([i, j]) => ({
+    text: words.slice(i, j).join(' '),
+    width: prefix[j] - prefix[i] - (j < n ? space : 0),
+  }))
+}
+
 /* ── Breaking a paragraph ─────────────────────────────────────────────────── */
 
 /**
@@ -230,6 +300,21 @@ export function layoutParagraph(text, reference, opts, indentPx = 0) {
   // on the right: a line 40 short sits 20 in from each side, so the rag reads as a
   // deliberate double edge rather than a ragged right with a flush left.
   const offsetFor = target => (opts.center ? (columnWidth - target) / 2 : 0)
+
+  // Justified composes the whole paragraph at once; a rag walks it line by line.
+  if (mode === 'justified') {
+    const widths = words.map(w => m.measure(w))
+    const target = columnWidth - indentPx
+    const composed = kpBreak(words, widths, m.space, target, m, opts)
+    if (composed) {
+      return composed.map((l, i) => ({
+        text: l.text,
+        indentPx: i === 0 ? indentPx : 0,
+        ...fitLine(l.text, l.width, target - 1, opts, m, i === composed.length - 1, true),
+      }))
+    }
+    // fall through to greedy when nothing scored: better a plain paragraph than none
+  }
 
   const lines = []
   let line = [], lineWidth = 0, index = 0
