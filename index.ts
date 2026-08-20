@@ -72,3 +72,4 @@ export { layoutParagraph, lineStyle, applyTo as applyFlattersatz,
 // the floating Type panel. Alignment stays with the app; everything downstream travels.
 export { FittingControls, fittingMode, AlignmentButtons, ALIGNMENTS, FittedParagraph } from './src/Fitting'
 export type { FittingControlsProps, Alignment } from './src/Fitting'
+export type { FitMode, FitOptions, FittedLine } from './src/flattersatz'
