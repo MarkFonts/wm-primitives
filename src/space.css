@@ -21,7 +21,7 @@
 
   /* the scale — two-digit steps, Carbon's convention, our values.
      Carbon has no 6, and 6 is load-bearing here: dropping it breaks 12
-     declarations by a third. Aliases below, t-shirt names for prose. */
+     declarations by a third. The t-shirt names are for prose, not code. */
   --spacing-01: 0.25rem;    /*  4px   2xs */
   --spacing-02: 0.375rem;   /*  6px   xs  */
   --spacing-03: 0.5rem;     /*  8px   sm  */
@@ -31,19 +31,6 @@
   --spacing-07: 2rem;       /* 32px   2xl */
   --spacing-08: 3rem;       /* 48px   3xl */
   --spacing-09: 4rem;       /* 64px   4xl */
-
-  /* ── Compatibility aliases ──────────────────────────────────────────────────
-     The old names, kept so consuming apps keep rendering while they migrate.
-     When `grep -r -- '--pad-' src` is empty in wm-primitives, font-proofer and
-     ReCal, delete this block. Do not add new ones. */
-  --hair: var(--hair);
-  --nudge: var(--nudge);
-  --tick: var(--tick);
-  --spacing-01: var(--spacing-01);   --spacing-02: var(--spacing-02);
-  --spacing-03: var(--spacing-03);   --spacing-04: var(--spacing-04);
-  --spacing-05: var(--spacing-05);   --spacing-06: var(--spacing-06);
-  --spacing-07: var(--spacing-07);   --spacing-08: var(--spacing-08);
-  --spacing-09: var(--spacing-09);
 }
 
 /* ── The cap rule ─────────────────────────────────────────────────────────────────
