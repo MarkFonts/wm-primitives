@@ -9,8 +9,9 @@
  * drawing job nobody should do twice. Each app places the row where its chrome wants it
  * — font-proofer beside its reset, ReCal in the floating panel.
  */
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { AxisSlider } from './AxisSlider'
-import { DEFAULTS, type FitMode, type FitOptions } from './flattersatz'
+import { DEFAULTS, layoutParagraph, lineStyle, type FitMode, type FitOptions } from './flattersatz'
 import './Fitting.css'
 
 export type { FitMode, FitOptions }
@@ -130,5 +131,43 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag }:
           onChange={n => set({ indent: n as number })} />
       </div>
     </>
+  )
+}
+
+/* One paragraph, fitted line by line. Rendered only when a mode is on and the block is
+ * NOT focused — editing keeps the raw flow, which is the contract EditableTextBlock
+ * already has, so this needs nothing from it. Measurement happens against this wrapper,
+ * so it inherits the block's real font, axes and size.
+ *
+ * `fallback` is what the app would have rendered: inline markup, a flash overlay,
+ * whatever. It shows while the first measurement is pending, and permanently for any
+ * block the fitter will not touch.
+ */
+export function FittedParagraph({ text, opts, indentPx = 0, fallback }: {
+  text: string
+  opts: Partial<FitOptions>
+  indentPx?: number
+  fallback: ReactNode
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [lines, setLines] = useState<ReturnType<typeof layoutParagraph>>(null)
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const run = () => setLines(layoutParagraph(text, el, opts, indentPx))
+    run()
+    const ro = new ResizeObserver(run)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [text, indentPx, opts.mode, opts.center, opts.ragWidth, opts.wordSpacing,
+      opts.tracking, opts.glyphScaling, opts.hyphenate])
+
+  return (
+    <div ref={ref}>
+      {lines
+        ? lines.map((l, i) => <div key={i}><span style={lineStyle(l) as React.CSSProperties}>{l.text}</span></div>)
+        : fallback}
+    </div>
   )
 }

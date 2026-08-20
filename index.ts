@@ -70,5 +70,5 @@ export { layoutParagraph, lineStyle, applyTo as applyFlattersatz,
 // The line-fitting controls. The engine above is consumed directly by static pages; this
 // is the interface both paragraph views render — font-proofer in its sidebar, ReCal in
 // the floating Type panel. Alignment stays with the app; everything downstream travels.
-export { FittingControls, fittingMode, AlignmentButtons, ALIGNMENTS } from './src/Fitting'
+export { FittingControls, fittingMode, AlignmentButtons, ALIGNMENTS, FittedParagraph } from './src/Fitting'
 export type { FittingControlsProps, Alignment } from './src/Fitting'
