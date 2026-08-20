@@ -323,6 +323,7 @@ function hyphenPoints(word, reference, lang) {
  */
 const LINE_PENALTY = 10
 const HYPHEN_PENALTY = 50   // TeX's default: a hyphen is allowed, never free
+const OVERFULL_PENALTY = 1e6 // worse than any legal line, better than no paragraph
 const INFEASIBLE = 1e9
 
 function kpBreak(items, target, m, limits) {
@@ -362,17 +363,25 @@ function kpBreak(items, target, m, limits) {
       if (i > 0 && !items[i - 1].brk) continue
       const natural = width(i, j)
       const spaces = spacesIn(i, j)
-      if (natural - spaces * shrink > target) break
+      const overfull = natural - spaces * shrink - target
+      // Bound the search, but do NOT refuse the line. Refusing overfull lines outright
+      // made the whole paragraph infeasible at narrow measures — one impossible line and
+      // the composer returned nothing, so it fell back to greedy and every hyphen the
+      // browser offered went unused. TeX has the same problem and answers it the same
+      // way: an overfull line is allowed, at a price nothing else can match.
+      if (overfull > target) break
       let demerits
       if (j === n) {
         demerits = 0
+      } else if (overfull > 0) {
+        demerits = OVERFULL_PENALTY + overfull * OVERFULL_PENALTY
       } else {
         const slack = target - natural
         const give = slack >= 0 ? spaces * stretch : spaces * shrink
-        if (give <= 0) { if (slack !== 0) continue; demerits = 0 }
-        else {
+        if (give <= 0) {
+          demerits = slack === 0 ? 0 : OVERFULL_PENALTY + slack * slack
+        } else {
           const r = slack / give
-          if (r < -1) continue
           const badness = 100 * Math.abs(r) ** 3
           demerits = (LINE_PENALTY + badness) ** 2
           if (items[j - 1].hyphen) demerits += HYPHEN_PENALTY ** 2
