@@ -61,8 +61,13 @@ export const MIN_MEASURE = 140      // a rag line never gets narrower than this
 export const DEFAULTS = {
   mode: 'off',                      // 'off' | 'justified' | 'flattersatz'
   ragWidth: 40,
-  maxWordSpacing: 133,              // percent — InDesign's default maximum
-  maxTracking: 102,                 // percent
+  // All three budgets start at 100 — no stretching at all. Justified still reaches its
+  // measure, because the uncapped residue is fenced to that mode; a rag simply stops
+  // short. Open a budget deliberately and it is spent in both. This is also why moving
+  // between Swiss Rag and Justify only adds or removes the rag width: nothing else
+  // about the setting changes underneath you.
+  maxWordSpacing: 100,              // percent
+  maxTracking: 100,                 // percent
   maxGlyphScaling: 100,             // percent — 100 is off; the UI caps it at 110,
                                     // because past that the proof is of a face you did not draw
   center: false,                    // centred rag: split the shortfall onto both sides
@@ -70,6 +75,20 @@ export const DEFAULTS = {
   indent: 0,                        // 0 by default: the blocks already carry
                                     // inter-paragraph space, and indent + space is
                                     // two signals for one job
+}
+
+/* What "Swiss Rag" arrives as. The zeroed budgets in DEFAULTS are the JUSTIFIED
+ * starting point — a browser flexing word space and nothing else. A rag starts
+ * somewhere else: a real measure band, and small tracking and word-space allowances
+ * so the rag can be SHAPED toward its target rather than falling wherever the words
+ * stop. Glyph scaling stays at 100; a proof must not quietly restretch the letters.
+ * Values follow the original demo (rag 40, tracking 102) with word space held tighter.
+ */
+export const SWISS_PRESET = {
+  ragWidth: 40,
+  maxTracking: 102,
+  maxWordSpacing: 105,
+  maxGlyphScaling: 100,
 }
 
 /* ── Measurement ──────────────────────────────────────────────────────────────

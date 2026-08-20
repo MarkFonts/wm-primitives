@@ -64,4 +64,5 @@ export type { Role, Landing } from './src/type'
 // by line). Plain JS so a static page can script-tag it; `applyTo` fits an element in
 // place, `layoutParagraph` + `lineStyle` are for consumers that render their own lines.
 // Ported from Seth Thompson's demo, built on Cheng Lou's PreText.
-export { layoutParagraph, lineStyle, applyTo as applyFlattersatz, DEFAULTS as FLATTERSATZ_DEFAULTS } from './src/flattersatz'
+export { layoutParagraph, lineStyle, applyTo as applyFlattersatz,
+         DEFAULTS as FLATTERSATZ_DEFAULTS, SWISS_PRESET } from './src/flattersatz'
