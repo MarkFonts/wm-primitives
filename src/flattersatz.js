@@ -235,71 +235,70 @@ function targetFor(columnWidth, ragWidth, lineIndex, mode) {
   return lineIndex % 2 === 0 ? columnWidth : Math.max(MIN_MEASURE, columnWidth - ragWidth)
 }
 
-/* ── Hyphenation, without shipping a dictionary ───────────────────────────────
- * Chrome already HAS Liang patterns for `hyphens: auto`, for every language it ships.
- * Rather than bundling 35KB of our own, ask the browser where it would break a word and
- * take those points: squeeze the word into a narrow box with hyphens:auto, read which
- * character starts the second line, and that boundary is a candidate. Sweep the widths
- * and the whole set falls out.
+/* ── Hyphenation by rule, no dictionary ──────────────────────────────────────
+ * The first attempt asked the browser: squeeze a word into a narrow box with
+ * hyphens:auto and read where it broke. It does not work. Chromium here hyphenates
+ * NOTHING and breaks anywhere instead — comf|ort, typograp|hy, typ|ogr|aphy — and it
+ * does so silently, so the garbage arrives looking like dictionary output. Any such
+ * trick has to be validated against known words before it is trusted; ours was not,
+ * and it shipped "comf-" into a proof.
  *
- * A few layout reads per UNIQUE word, cached for the life of the page, for
- * dictionary-quality points with no dependency and no language table of our own. The
- * one requirement is a lang attribute: the browser picks its dictionary from it, and
- * without one it hyphenates nothing.
+ * So: rules. Liang's patterns are a dictionary by another name (~35KB), and the ask was
+ * for hyphens without one. English takes three rules a long way:
  *
- * Soft hyphens already in the text (U+00AD) win outright — an author who marked their
- * own breaks outranks any dictionary.
+ *   1. after a known prefix          un-usual, re-lation, trans-late
+ *   2. before a known suffix         read-ing, nation-al, comfort-able
+ *   3. between two consonants        com-fort, cen-tury, typog-raphy   (VC|CV)
+ *
+ * with at least three letters kept on each side, which is stricter than TeX's 2/3 and
+ * avoids the worst of the errors. It will not match a dictionary everywhere — no rule
+ * set does — but every break it offers is defensible, which the browser's were not.
  */
+const VOWELS = 'aeiouy'
+const PREFIXES = ['anti', 'auto', 'circum', 'contra', 'counter', 'dis', 'extra', 'hyper',
+  'inter', 'intra', 'micro', 'mis', 'mono', 'multi', 'non', 'over', 'post', 'pre', 'pro',
+  'pseudo', 'quasi', 'retro', 'semi', 'sub', 'super', 'trans', 'ultra', 'under', 'un', 're']
+const SUFFIXES = ['able', 'ible', 'ally', 'ance', 'ence', 'ment', 'ness', 'tion', 'sion',
+  'ship', 'ward', 'wise', 'ful', 'ing', 'ist', 'ity', 'ive', 'ize', 'ise', 'ous', 'est',
+  'ely', 'er', 'ly', 'al']
+const MIN_SIDE = 3
 const hyphenCache = new Map()
-let hyProbe = null
 
-function hyphenPoints(word, reference, lang) {
-  if (word.length < 5) return []
+function hyphenPoints(word) {
+  const w = word.toLowerCase()
+  if (w.length < MIN_SIDE * 2) return []
+
+  // An author's own soft hyphens outrank every rule below.
   if (word.includes('\u00ad')) {
     const out = []
     let i = word.indexOf('\u00ad')
     while (i >= 0) { out.push(i); i = word.indexOf('\u00ad', i + 1) }
     return out
   }
-  const key = lang + '|' + word
-  const hit = hyphenCache.get(key)
+  const hit = hyphenCache.get(w)
   if (hit) return hit
 
-  if (!hyProbe) {
-    hyProbe = document.createElement('div')
-    hyProbe.setAttribute('aria-hidden', 'true')
-    hyProbe.style.cssText =
-      'position:absolute;visibility:hidden;top:-9999px;left:-9999px;' +
-      'hyphens:auto;-webkit-hyphens:auto;overflow-wrap:normal;white-space:normal;'
-    document.body.appendChild(hyProbe)
-  }
-  hyProbe.lang = lang
-  const cs = getComputedStyle(reference)
-  hyProbe.style.font = cs.font || (cs.fontSize + ' ' + cs.fontFamily)
-  hyProbe.style.fontVariationSettings = cs.fontVariationSettings
-  hyProbe.style.width = ''
-  hyProbe.textContent = word
-
-  const full = hyProbe.getBoundingClientRect().width
-  const step = Math.max(6, full / word.length)
   const points = new Set()
-  const range = document.createRange()
-  for (let w = full - step; w > step * 1.5; w -= step) {
-    hyProbe.style.width = w + 'px'
-    let firstLineChars = 0, top = null
-    for (let i = 1; i <= word.length; i++) {
-      range.setStart(hyProbe.firstChild, i - 1)
-      range.setEnd(hyProbe.firstChild, i)
-      const rect = range.getBoundingClientRect()
-      if (top === null) top = rect.top
-      if (rect.top > top + 1) break
-      firstLineChars = i
-    }
-    if (firstLineChars > 1 && firstLineChars < word.length) points.add(firstLineChars)
+  const ok = i => i >= MIN_SIDE && i <= w.length - MIN_SIDE
+
+  for (const p of PREFIXES) if (w.startsWith(p) && ok(p.length)) points.add(p.length)
+  for (const suf of SUFFIXES) {
+    if (w.endsWith(suf) && ok(w.length - suf.length)) points.add(w.length - suf.length)
   }
-  hyProbe.style.width = ''
-  const out = [...points].sort((a, b) => a - b)
-  hyphenCache.set(key, out)
+  // VC|CV — the workhorse. Split between the consonants when a vowel sits on each side.
+  const isV = c => VOWELS.includes(c)
+  for (let i = 2; i < w.length - 2; i++) {
+    if (isV(w[i - 2]) && !isV(w[i - 1]) && !isV(w[i]) && isV(w[i + 1]) && ok(i)) points.add(i)
+  }
+
+  // Two rules can fire a letter apart (a suffix boundary next to a VC|CV split), which
+  // strands fragments: dis-rup-t-ing, exces-s-ive. Keep the points at least MIN_SIDE
+  // apart, so every piece a line can end on is a piece worth reading.
+  const out = []
+  for (const p of [...points].sort((a, b) => a - b)) {
+    if (!out.length || p - out[out.length - 1] >= MIN_SIDE) out.push(p)
+  }
+  hyphenCache.set(w, out)
   return out
 }
 
@@ -409,11 +408,10 @@ function kpBreak(items, target, m, limits) {
  * word becomes its fragments, each breakable, each carrying a hyphen if a line ends
  * there. The last fragment of a word is the one that owns the following space. */
 function buildItems(words, reference, m, opts) {
-  const lang = opts.lang || document.documentElement.lang || 'en'
   const items = []
   words.forEach((word, wi) => {
     const last = wi === words.length - 1
-    const cuts = opts.hyphenate ? hyphenPoints(word, reference, lang) : []
+    const cuts = opts.hyphenate ? hyphenPoints(word) : []
     if (!cuts.length) {
       items.push({ t: word, w: m.measure(word), space: !last, brk: true, hyphen: false })
       return
