@@ -75,6 +75,9 @@ export const DEFAULTS = {
   tracking: 100,                    // percent — same
   glyphScaling: 100,                // percent — <100 condenses, >100 stretches, 100 off
   center: false,                    // centred rag: split the shortfall onto both sides
+  composer: 'kp',                   // justified only: 'kp' or 'greedy'. Not a feature —
+                                    // it exists so the two can be measured against each
+                                    // other on the same text at the same measure.
   firstIndent: 0,
   indent: 0,                        // 0 by default: the blocks already carry
                                     // inter-paragraph space, and indent + space is
@@ -326,7 +329,7 @@ export function layoutParagraph(text, reference, opts, indentPx = 0) {
   const offsetFor = target => (opts.center ? (columnWidth - target) / 2 : 0)
 
   // Justified composes the whole paragraph at once; a rag walks it line by line.
-  if (mode === 'justified') {
+  if (mode === 'justified' && opts.composer !== 'greedy') {
     const widths = words.map(w => m.measure(w))
     const target = columnWidth - indentPx
     const composed = kpBreak(words, widths, m.space, target, m, opts)
@@ -339,6 +342,7 @@ export function layoutParagraph(text, reference, opts, indentPx = 0) {
     }
     // fall through to greedy when nothing scored: better a plain paragraph than none
   }
+  const flush = mode === 'justified'
 
   const lines = []
   let line = [], lineWidth = 0, index = 0
@@ -366,7 +370,7 @@ export function layoutParagraph(text, reference, opts, indentPx = 0) {
   return lines.map((l, i) => ({
     text: l.text,
     indentPx: l.indentPx,
-    ...fitLine(l.text, l.width, l.target - 1, opts, m, i === lines.length - 1, mode === 'justified'),
+    ...fitLine(l.text, l.width, l.target - 1, opts, m, i === lines.length - 1, flush),
   }))
 }
 
