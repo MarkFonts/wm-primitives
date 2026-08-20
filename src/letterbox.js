@@ -1,6 +1,7 @@
 /* letterbox.js -- the house wordmark, scanned and packed with prose.
  *
- * The pretext effect was created by Charlie Clark (https://charlieclark.co/); this is
+ * The effect descends from PreText, by Cheng Lou. This engine follows Charlie
+ * Clark's implementation of it (https://charlieclark.co/); this is
  * WORDMARK's engine built on it. Scan a word at display size into an alpha mask, slice
  * the mask into LINE_H rows, walk each ink span filling it with fill-size glyphs until
  * the next one will not fit. The cursor pushes and scales the glyphs it passes.
