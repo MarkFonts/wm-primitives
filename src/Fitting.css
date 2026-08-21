@@ -130,9 +130,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-01, 3px) var(--spacing-02, 6px);
-  /* The rail is narrow and the chip must not be the thing that gets clipped: it is the
-     whole point of the row when the font has an axis. So the label wraps under itself. */
-  flex-wrap: wrap;
+  flex-wrap: wrap;              /* the badge drops under the label rather than clipping */
   min-width: 0;
   color: var(--text-muted, #999);
   font-size: var(--type-ui-size, 0.75rem);
@@ -161,8 +159,16 @@
    shared box rather than drawing a fourth edge across the hairlines. */
 .fit-num:focus-visible { outline: 1px solid var(--text-muted, #999); outline-offset: -2px; }
 
-/* "wdth" — the axis was found in the font, so expansion is the designer's masters and
-   not a scaleX. It glows because for a variable font this is the good news. */
+/* font-proofer styles `input[type="number"]` app-wide at a fixed 64px, and an attribute
+   selector outranks a bare class — so the rail's fields kept their intrinsic width and
+   the maximum column hung off the edge whatever the track said. One selector, specific
+   enough to win, doing nothing but letting the field fit its column. */
+.fit-hj-row input.fit-num { width: 100%; min-width: 0; padding: 0; }
+
+/* What the expansion row is spending, shown only while it spends anything. `wdth` glows:
+   the font had an axis and the line is being filled with type the designer drew. `scaleX`
+   is muted: it works, it is seamless, and it is a distortion — the UI should not dress
+   that up as the same thing. */
 .fit-chip {
   padding: 0 var(--spacing-02, 6px);
   border-radius: var(--radius-sm, 4px);
@@ -173,9 +179,9 @@
   font-style: normal;
   letter-spacing: 0.06em;
 }
-
-/* font-proofer styles `input[type="number"]` app-wide at a fixed 64px, and an attribute
-   selector outranks a bare class — so the rail's fields kept their intrinsic width and
-   the maximum column hung off the edge whatever the track said. One selector, specific
-   enough to win, doing nothing but letting the field fit its column. */
-.fit-hj-row input.fit-num { width: 100%; min-width: 0; padding: 0; }
+.fit-chip--muted {
+  background: var(--bg-hover, rgba(255, 255, 255, .06));
+  box-shadow: none;
+  color: var(--text-dim, #555);
+}
+.fit-chip-row { display: flex; justify-content: flex-end; margin-top: calc(-1 * var(--spacing-02, 6px)); }

@@ -71,5 +71,11 @@ export { layoutParagraph, lineStyle, applyTo as applyFlattersatz,
 // is the interface both paragraph views render — font-proofer in its sidebar, ReCal in
 // the floating Type panel. Alignment stays with the app; everything downstream travels.
 export { FittingControls, fittingMode, AlignmentButtons, ALIGNMENTS, FittedParagraph } from './src/Fitting'
+
+// Long public-domain works: authored whole in specimens/<slug>.txt, served as the chunks
+// build-specimens.mjs cuts at each FORM FEED, fetched only as far as the reader asks.
+export { SPECIMENS, specimenChunks, parseSpecimen, loadSpecimen,
+         type SpecimenBlock } from './src/specimen'
+import './src/Specimen.css'
 export type { FittingControlsProps, Alignment } from './src/Fitting'
 export type { FitMode, FitOptions, FittedLine } from './src/flattersatz'

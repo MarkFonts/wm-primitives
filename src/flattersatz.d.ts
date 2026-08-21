@@ -2,7 +2,7 @@
    it into a static page (same reason as letterbox.js), so the types live here for the
    TSX consumers — ReCal type-checks with tsc, font-proofer strips with esbuild. */
 
-export type FitMode = 'off' | 'justified' | 'flattersatz'
+export type FitMode = 'off' | 'plain' | 'justified' | 'flattersatz'
 
 /** min/desired/max in percent of natural. A number is the legacy single knob. */
 export interface Band { min: number; desired: number; max: number }
@@ -28,8 +28,10 @@ export interface FitOptions {
   center: boolean
   /** justified only; break points come from rules, not a dictionary */
   hyphenate: boolean
-  /** justified only: 'kp' composes the paragraph, 'greedy' is for measuring against it */
-  composer: 'kp' | 'greedy'
+  /** justified only. 'paragraph' scores every break against every other; 'single-line'
+   *  fills each line and moves on. Not exposed — it exists to measure one against the
+   *  other. A rag is always single-line, because stopping short is the design. */
+  composer: 'paragraph' | 'single-line'
   firstIndent: number
   indent: number
 }

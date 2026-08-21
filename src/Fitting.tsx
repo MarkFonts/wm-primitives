@@ -9,9 +9,10 @@
  * drawing job nobody should do twice. Each app places the row where its chrome wants it
  * — font-proofer beside its reset, ReCal in the floating panel.
  */
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { AxisSlider } from './AxisSlider'
 import { band, DEFAULTS, layoutParagraph, lineStyle, type Band, type FitMode, type FitOptions } from './flattersatz'
+import { splitInlineMarkup } from './inlineMarkup'
 import './Fitting.css'
 
 export type { FitMode, FitOptions }
@@ -67,7 +68,10 @@ export function AlignmentButtons({ value, onChange, className = '' }: {
 /** justify -> justified, the rag switch -> flattersatz, neither -> off. Derived, never
  *  stored, so the two can never both be live. */
 export function fittingMode(textAlign: string, swissRag: boolean): FitMode {
-  return textAlign === 'justify' ? 'justified' : (swissRag ? 'flattersatz' : 'off')
+  // Neither justified nor ragged still MEASURES: 'plain' breaks the lines itself so the
+  // margin can hang its punctuation, and spends nothing while doing it. Only an explicit
+  // 'off' hands the paragraph back to the browser.
+  return textAlign === 'justify' ? 'justified' : (swissRag ? 'flattersatz' : 'plain')
 }
 
 export interface FittingControlsProps {
@@ -85,9 +89,10 @@ export interface FittingControlsProps {
    knob can only ever be a floor OR a cap, and never states what the line should aim for
    in the first place. Letter spacing is stored 100-centred like the others and shown
    0-centred, which is how type people read it. */
-function BandRow({ label, chip, title, value, offset, step, onChange }: {
+function BandRow({ label, chip, chipMuted, title, value, offset, step, onChange }: {
   label: string
   chip?: string
+  chipMuted?: boolean
   title?: string
   value: Band
   offset: number
@@ -109,7 +114,7 @@ function BandRow({ label, chip, title, value, offset, step, onChange }: {
     <div className="fit-hj-row" title={title}>
       <span className="fit-hj-label">
         {label}
-        {chip && <em className="fit-chip">{chip}</em>}
+        {chip && <em className={`fit-chip${chipMuted ? ' fit-chip--muted' : ''}`}>{chip}</em>}
       </span>
       {/* One box, three values. Three separate boxes could not fit the rail beside the
           label, and the arrows were not the thing to give up — so the row keeps ONE
@@ -127,6 +132,15 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, w
   // const off = mode === 'off'   // only the indent row read this — see below
   const rag = mode === 'flattersatz'
   const [hj, setHj] = useState(false)
+
+  /* The expansion row states what it is DOING, and only once it does anything. At rest
+     — 100/100/100 — it is just a control and wears no badge. Opened, the badge names the
+     mechanism, because these two are not the same act: `wdth` moves masters the designer
+     drew, `scaleX` stretches what is there. Showing only the good one would make its
+     absence ambiguous, so both are labelled and only the honest one glows. */
+  const spending = (b: Band) => b.max > 100 || b.min < 100
+  const expansionChip = (b: Band) =>
+    !spending(b) ? undefined : widthAxis ? 'wdth' : 'scaleX'
 
   const ragKnob = (k: 'tracking' | 'wordSpacing' | 'glyphScaling', label: string) => (
     <AxisSlider label={label} value={v.rag[k]} min={k === 'wordSpacing' ? 80 : 95}
@@ -185,7 +199,14 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, w
           <>
             {ragKnob('tracking', 'letter spacing')}
             {ragKnob('wordSpacing', 'word spacing')}
-            {ragKnob('glyphScaling', widthAxis ? 'expansion' : 'glyph scaling')}
+            {ragKnob('glyphScaling', 'glyph scaling')}
+            {expansionChip(band(v.rag.glyphScaling)) && (
+              <div className="fit-chip-row">
+                <em className={`fit-chip${widthAxis ? '' : ' fit-chip--muted'}`}>
+                  {expansionChip(band(v.rag.glyphScaling))}
+                </em>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -210,12 +231,13 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, w
               onChange={b => set({ wordSpacing: b })} />
             <BandRow label="letter spacing" offset={100} step={0.5} value={band(v.tracking)}
               onChange={b => set({ tracking: b })} />
-            {/* Zapf expanded and condensed with drawn masters, never a distortion. When
-                the proofed font ships a width axis the fitter moves THAT, so the row is
-                expansion and says which axis it is spending. Without one it is scaleX,
-                and it is called what it is. */}
-            <BandRow label={widthAxis ? 'expansion' : 'glyph scaling'}
-              chip={widthAxis ? 'wdth' : undefined}
+            {/* One name, whichever mechanism serves it: the row does the same job and
+                obeys the same numbers whether the font has a width axis to move or has
+                to be stretched. Which of the two it used is in the tooltip, not in a
+                label that changes shape from font to font. */}
+            <BandRow label="glyph scaling"
+              chip={expansionChip(band(v.glyphScaling))}
+              chipMuted={!widthAxis}
               title={widthAxis
                 ? 'This font has a width axis: expansion moves wdth and re-measures, so the line is filled with type the designer drew.'
                 : 'No width axis in this font: expansion falls back to scaleX, which distorts. Leave at 100 to keep the proof honest.'}
@@ -246,30 +268,60 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, w
  * whatever. It shows while the first measurement is pending, and permanently for any
  * block the fitter will not touch.
  */
-export function FittedParagraph({ text, opts, indentPx = 0, fallback }: {
+export function FittedParagraph({ text, opts, indentPx = 0, fallback, runStyle }: {
   text: string
   opts: Partial<FitOptions>
   indentPx?: number
   fallback: ReactNode
+  /** How this app draws emphasis. Used twice and it must be the same both times: to
+   *  MEASURE the run (an italic run is a different face, so different widths) and to
+   *  draw it. Omit and a marked-up block simply sets roman. */
+  runStyle?: (kind: 'bold' | 'italic' | 'underline') => CSSProperties
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [lines, setLines] = useState<ReturnType<typeof layoutParagraph>>(null)
 
+  // Tokenised HERE, from the string, so the effect below can depend on the string. Taking
+  // tokens as a prop would hand it a fresh array every render and re-fit the paragraph
+  // forever.
+  const runs = useMemo(() => splitInlineMarkup(text), [text])
+  // Keyed on the VALUES, not on the callback's identity: an app that passes an inline
+  // arrow — which is the natural way to write it — would otherwise hand this a new
+  // function every render and re-fit the paragraph forever.
+  const computed = runStyle && {
+    bold: runStyle('bold'), italic: runStyle('italic'), underline: runStyle('underline'),
+  }
+  const runStylesKey = JSON.stringify(computed ?? null)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const runStyles = useMemo(() => computed, [runStylesKey])
+
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    const run = () => setLines(layoutParagraph(text, el, opts, indentPx))
+    const run = () => setLines(layoutParagraph(runs, el, { ...opts, runStyles }, indentPx))
     run()
     const ro = new ResizeObserver(run)
     ro.observe(el)
     return () => ro.disconnect()
-  }, [text, indentPx, opts.mode, opts.center, opts.ragWidth, opts.wordSpacing,
-      opts.tracking, opts.glyphScaling, opts.hyphenate, opts.budgets, opts.rag])
+  }, [runs, runStyles, indentPx, opts.mode, opts.center, opts.ragWidth, opts.wordSpacing,
+      opts.tracking, opts.glyphScaling, opts.hyphenate, opts.budgets, opts.rag, opts.hang])
 
   return (
     <div ref={ref}>
       {lines
-        ? lines.map((l, i) => <div key={i}><span style={lineStyle(l) as React.CSSProperties}>{l.text}</span></div>)
+        ? lines.map((l, i) => (
+            <div key={i}>
+              <span style={lineStyle(l) as React.CSSProperties}>
+                {/* The line is one span — that is what carries its spacing and its
+                    expansion — and the emphasis lives in spans INSIDE it. A run can no
+                    longer send the whole block back to browser flow. */}
+                {(l.runs ?? [{ type: 'text', text: l.text }]).map((r, ri) =>
+                  r.type === 'text' || !runStyle
+                    ? r.text
+                    : <span key={ri} style={runStyle(r.type)}>{r.text}</span>)}
+              </span>
+            </div>
+          ))
         : fallback}
     </div>
   )

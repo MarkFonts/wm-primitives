@@ -1,0 +1,44 @@
+/* The tail of a part-loaded work fades out rather than stopping dead: the reader can see
+   that the text continues, which is the whole affordance — a hard cut reads as the end
+   of the specimen instead of the end of what has loaded. */
+.specimen-fade {
+  height: 7rem;
+  margin-top: -7rem;          /* sits over the last lines rather than after them */
+  pointer-events: none;       /* the text underneath stays clickable and editable */
+  background: linear-gradient(to bottom, transparent, var(--bg, #242424));
+}
+
+/* Read further, or leave. Right-aligned so the pair sits under the rag rather than
+   under the flush edge, and wraps to two rows on a narrow column instead of squeezing. */
+.specimen-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spacing-02, 6px);
+  margin: var(--spacing-04, 12px) 0 var(--spacing-08, 32px);
+}
+
+.specimen-more {
+  display: block;
+  padding: var(--spacing-02, 6px) var(--spacing-04, 12px);
+  background: var(--text, #fff);
+  color: var(--bg, #242424);
+  border: none;
+  border-radius: var(--radius, 6px);
+  font: inherit;
+  font-size: var(--type-ui-size, 0.75rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.specimen-more:hover { opacity: 0.85; }
+.specimen-more:focus-visible { outline: 1px solid var(--text-muted, #999); outline-offset: 2px; }
+.specimen-more[disabled] { opacity: 0.5; cursor: default; }
+
+/* Leaving is the quieter of the two: outlined, not filled. */
+.specimen-next {
+  background: none;
+  color: var(--text-muted, #999);
+  border: 1px solid var(--border, var(--line, #2a2a2a));
+}
+.specimen-next:hover { color: var(--text, #fff); opacity: 1; }

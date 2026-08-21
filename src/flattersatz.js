@@ -67,7 +67,14 @@ export const INERT = { min: 100, desired: 100, max: 100 }
 
 export const MIN_MEASURE = 140      // a rag line never gets narrower than this
 export const DEFAULTS = {
-  mode: 'off',                      // 'off' | 'justified' | 'flattersatz'
+  // 'plain' is the default a paragraph arrives in: the fitter DOES run — every line is
+  // measured and broken here — but it spends nothing and reaches for nothing. What it
+  // buys is protrusion, and that is the whole reason it exists: `hanging-punctuation` is
+  // Safari-only, so in Chrome a plain ragged column can only have clean margins if
+  // something measures the lines. 'off' hands the paragraph back to the browser and is
+  // kept for comparison, and for very long text where measuring everything is not worth
+  // it.
+  mode: 'plain',                    // 'off' | 'plain' | 'justified' | 'flattersatz'
   ragWidth: 40,
   // Each budget is a BAND — { min, desired, max } in percent of natural. Desired is
   // where the line starts before anything is spent; min and max are how far the fitter
@@ -82,7 +89,13 @@ export const DEFAULTS = {
   // distorts, so that fallback is the thing to watch.
   wordSpacing: { min: 75, desired: 85, max: 110 },
   tracking: { min: 98, desired: 100, max: 104 },      // shown 0-centred: -2 / 0 / +4
-  glyphScaling: { min: 98, desired: 100, max: 102 },  // expansion — see expandValue
+  // 100/100/100 — expansion permits NOTHING until it is opened. Picking Justify must not
+  // stretch the type: word spacing and letter spacing change the setting, this changes
+  // the letters, and a proof that quietly ships glyphs at 102% is lying about the face.
+  // Measured before this was fixed: four of thirteen lines were already at scaleX(1.02)
+  // on a font with no width axis, and zero on one that had it — inconsistent as well as
+  // uninvited. Open the row and it works exactly as before, axis or scaleX.
+  glyphScaling: { min: 100, desired: 100, max: 100 },  // expansion — see expandValue
   budgets: false,                   // rag only: a rag spends NOTHING unless asked. The
                                     // band is the design; spending closes the gaps
                                     // greedy leaves and the rag comes out flush.
@@ -93,9 +106,15 @@ export const DEFAULTS = {
   rag: { tracking: 100, wordSpacing: 100, glyphScaling: 100 },
   center: false,                    // centred rag: split the shortfall onto both sides
   hyphenate: false,                 // justified only; points come from the browser
-  composer: 'kp',                   // justified only: 'kp' or 'greedy'. Not a feature —
-                                    // it exists so the two can be measured against each
-                                    // other on the same text at the same measure.
+  // How a justified paragraph is composed. 'paragraph' scores every break in the whole
+  // paragraph against every other (Knuth–Plass); 'single-line' fills each line as far as
+  // it goes and moves on. Not a feature and not exposed: it exists so the two can be
+  // measured against each other on the same text at the same measure. A rag is
+  // single-line by definition — stopping short IS the design — so this only ever
+  // applies to justified.
+  composer: 'paragraph',            // 'paragraph' | 'single-line'
+  hang: true,                       // protrusion — see PROTRUSION. Off is a worse proof,
+                                    // but it has to be possible to see the difference.
   firstIndent: 0,
   indent: 0,                        // 0 by default: the blocks already carry
                                     // inter-paragraph space, and indent + space is
@@ -159,27 +178,38 @@ function setAxis(fvs, tag, value) {
 /** Widths for one style, keyed by string. Cleared whenever the style key moves.
  *  `measureAt` is the same probe with one axis moved — the only way to know what a
  *  width axis actually does to a string, since axis widths are not linear. */
-function makeMeasurer(reference) {
+function makeMeasurer(reference, runStyles) {
   const el = getProbe(reference)
+  const baseCss = el.style.cssText
   const baseFVS = getComputedStyle(reference).fontVariationSettings || ''
   const cache = new Map()
-  const measure = s => {
-    let w = cache.get(s)
+  // An italic run is a different face and therefore different widths: measuring it as
+  // roman is wrong by exactly the amount that makes the line not fit. The app owns how
+  // it draws emphasis, so it passes the styles in and the probe wears them.
+  const measure = (s, type) => {
+    const styled = type && type !== 'text' && runStyles && runStyles[type]
+    const key = styled ? type + '\u0000' + s : s
+    let w = cache.get(key)
     if (w === undefined) {
+      if (styled) Object.assign(el.style, styled)
       el.textContent = s
       w = el.getBoundingClientRect().width
-      cache.set(s, w)
+      if (styled) el.style.cssText = baseCss
+      cache.set(key, w)
     }
     return w
   }
-  const measureAt = (value, s) => {
-    const key = `${value}|${s}`
+  const measureAt = (value, s, type) => {
+    const styled = type && type !== 'text' && runStyles && runStyles[type]
+    const key = `${value}|${type || ''}|${s}`
     let w = cache.get(key)
     if (w === undefined) {
+      if (styled) Object.assign(el.style, styled)
       el.style.fontVariationSettings = setAxis(baseFVS, 'wdth', value)
       el.textContent = s
       w = el.getBoundingClientRect().width
-      el.style.fontVariationSettings = baseFVS
+      if (styled) el.style.cssText = baseCss
+      else el.style.fontVariationSettings = baseFVS
       cache.set(key, w)
     }
     return w
@@ -194,7 +224,7 @@ function withDesired(m, B) {
   const gap = (B.tracking.desired - 100) / 100 * m.em
   if (!gap && B.wordSpacing.desired === 100) return m
   return { ...m, base: m,
-    measure: s => m.measure(s) + Math.max(Array.from(s).length - 1, 0) * gap,
+    measure: (s, type) => m.measure(s, type) + Math.max(Array.from(s).length - 1, 0) * gap,
     space: m.space * B.wordSpacing.desired / 100 + gap }
 }
 
@@ -215,6 +245,7 @@ export function band(v) {
  *  gaps greedy leaves until the "rag" is flush to two measures. Justified always spends
  *  — reaching the measure is what justified means. */
 export function budgetsOf(limits) {
+  if (limits.mode === 'plain') return { wordSpacing: INERT, tracking: INERT, glyphScaling: INERT }
   if (limits.mode === 'flattersatz') {
     if (!limits.budgets) return { wordSpacing: INERT, tracking: INERT, glyphScaling: INERT }
     const r = limits.rag ?? {}
@@ -284,12 +315,17 @@ function axisFor(m, pct) {
 /** The expanded (or condensed) line, measured — never estimated from the sample, so a
  *  line can not overrun its measure because its letters happened to widen faster than
  *  the sample's. Null when the axis has nothing useful to offer. */
-function expandValue(m, text, want, wider, steps) {
-  const natural = m.measure(text)
+function expandValue(m, runs, want, wider, steps) {
+  // Run by run, because an italic run is a different face and widens along the axis at
+  // its own rate: measuring the line in one style would be wrong by the difference, and
+  // for a proof of a family that ships both wdth and ital that is exactly the line you
+  // most want to trust.
+  const widthAt = value => runs.reduce((sum, r) => sum + m.measureAt(value, r.text, r.type), 0)
+  const natural = runs.reduce((sum, r) => sum + m.measure(r.text, r.type), 0)
   let best = null
   for (let k = 1; k <= Math.min(steps, MAX_STEPS); k++) {
     const value = axisFor(m, wider ? 100 + k : 100 - k)
-    const w = m.measureAt(value, text)
+    const w = widthAt(value)
     if (wider) {
       if (w > want) break            // one step too far: keep the last that fitted
       best = { value, width: w }
@@ -304,9 +340,10 @@ function expandValue(m, text, want, wider, steps) {
   return best
 }
 
-function fitLine(text, width, target, limits, m, isLast, flush) {
+function fitLine(text, width, target, limits, m, isLast, flush, runs) {
   const B = budgetsOf(limits)
   const nat = m.base ?? m          // px conversions are against NATURAL space and em
+  const parts = runs && runs.length ? runs : [{ type: 'text', text }]
   const axis = (B.glyphScaling.max > 100 || B.glyphScaling.min < 100) && widthAxis(nat)
   // measureAt reports NATURAL widths; every other width here carries the desired shift.
   const shift = m.measure(text) - nat.measure(text)
@@ -341,7 +378,7 @@ function fitLine(text, width, target, limits, m, isLast, flush) {
       // What is LEFT to close, not the whole measure: word spacing and tracking have
       // already been spent, and aiming at the measure again overshot it — a line came
       // out 253px wide in a 249px column, expanded past a deficit that was already gone.
-      const found = axis && expandValue(nat, text, Math.max(width - excess, width * floor) - shift, false,
+      const found = axis && expandValue(nat, parts, Math.max(width - excess, width * floor) - shift, false,
                                         Math.round(100 - B.glyphScaling.min))
       if (found) wdth = found.value
       else sc = Math.max(floor, target / width) * 100
@@ -377,7 +414,7 @@ function fitLine(text, width, target, limits, m, isLast, flush) {
   if (deficit > 0 && cap > 100) {
     const ceiling = width * (cap / 100)
     // Only the remaining deficit — see the note in the overset branch above.
-    const found = axis && expandValue(nat, text, Math.min(width + deficit, ceiling) - shift, true,
+    const found = axis && expandValue(nat, parts, Math.min(width + deficit, ceiling) - shift, true,
                                       Math.round(cap - 100))
     if (found) {
       deficit -= (found.width + shift - width)
@@ -396,6 +433,35 @@ function fitLine(text, width, target, limits, m, isLast, flush) {
     wordSpacing += ((deficit / spaces) / (scaling / 100)) / nat.space * 100
   }
   return px(wordSpacing, tracking, scaling, wdth)
+}
+
+/* ── Protrusion: hanging punctuation ──────────────────────────────────────────
+ * A mark at the edge of a measure is a hole in the margin, because the eye reads the
+ * ink and not the box. hz called it optical margin alignment; pdfTeX ships it as
+ * character protrusion. A character that hangs hangs its OWN measured width — measured
+ * live, through the same probe that measures everything else, so it is right for this
+ * face at this size at this axis position and there is no table of units to go stale.
+ *
+ * Two rules, one per edge. Add a character to a class and it hangs.
+ */
+export const PROTRUSION = [
+  { edge: 'left',  match: /[“‘"'¿¡(\[]/u },
+  { edge: 'right', match: /[”’"',.;:!?)\]\-–—]/u },
+]
+
+/** How far this line's first and last characters may hang, in px. Measured, so it is
+ *  right for the instance actually on screen. */
+function protrude(runs, m, opts) {
+  if (opts.hang === false || !runs.length) return { left: 0, right: 0 }
+  const head = runs[0], tail = runs[runs.length - 1]
+  const first = Array.from(head.text)[0]
+  const last = Array.from(tail.text.trimEnd()).at(-1)
+  let left = 0, right = 0
+  for (const r of PROTRUSION) {
+    if (r.edge === 'left' && left === 0 && first && r.match.test(first)) left = m.measure(first, head.type)
+    if (r.edge === 'right' && right === 0 && last && r.match.test(last)) right = m.measure(last, tail.type)
+  }
+  return { left, right }
 }
 
 /** Even lines get the column; odd lines get the column less the rag. */
@@ -596,41 +662,90 @@ function kpBreak(items, target, m, limits) {
   const breaks = []
   for (let j = n; j > 0; j = from[j]) breaks.unshift([from[j], j])
   return breaks.map(([i, j]) => {
-    let text = ''
-    for (let k = i; k < j; k++) {
-      text += items[k].t
-      if (k < j - 1 && items[k].space) text += ' '
-    }
-    if (items[j - 1].hyphen) text += '-'
-    return { text, width: width(i, j) }
+    const runs = runsFrom(items, i, j)
+    return { runs, text: runs.map(r => r.text).join(''), width: width(i, j) }
   })
+}
+
+/* ── Runs, words, items ───────────────────────────────────────────────────────
+ * A paragraph arrives as RUNS — stretches of text that share an emphasis — because a
+ * fitted line is one span and a span cannot carry italic in its middle. Before this, a
+ * block with any inline markup skipped the fitter entirely and fell back to browser
+ * flow: unfitted, unhung, sitting among fitted paragraphs. A plain string is still
+ * accepted and is simply one run, so nothing that passes strings changes.
+ *
+ * Two words with no whitespace between them are ONE word that happens to change style
+ * mid-way (`un*believable*`), and a break there would be a lie. Those items carry
+ * brk:false, which is the only thing the breakers need to know about runs at all.
+ */
+function toRuns(input) {
+  if (typeof input === 'string') return [{ type: 'text', text: input }]
+  // `value` as well as `text`: that is the shape splitInlineMarkup already emits, and
+  // making the apps re-map it would be a second vocabulary for one idea.
+  return (input || [])
+    .map(r => (r && typeof r.value === 'string' ? { type: r.type, text: r.value } : r))
+    .filter(r => r && typeof r.text === 'string' && r.text !== '')
+}
+
+function runWords(runs) {
+  const words = []
+  for (let ri = 0; ri < runs.length; ri++) {
+    for (const part of runs[ri].text.split(/(\s+)/)) {
+      if (!part) continue
+      const prev = words[words.length - 1]
+      if (/^\s+$/.test(part)) { if (prev) prev.space = true; continue }
+      if (prev && !prev.space) prev.nobrk = true   // adjacent: same word, new style
+      words.push({ t: part, type: runs[ri].type, space: false })
+    }
+  }
+  return words
 }
 
 /* Words -> composable items. With hyphenation off, one item per word. With it on, a
  * word becomes its fragments, each breakable, each carrying a hyphen if a line ends
  * there. The last fragment of a word is the one that owns the following space. */
-function buildItems(words, reference, m, opts) {
+function buildItems(runs, m, opts) {
+  const words = runWords(runs)
   const items = []
   words.forEach((word, wi) => {
     const last = wi === words.length - 1
-    const cuts = opts.hyphenate ? hyphenPoints(word) : []
+    const cuts = opts.hyphenate ? hyphenPoints(word.t) : []
+    const tag = word.type
     if (!cuts.length) {
-      items.push({ t: word, w: m.measure(word), space: !last, brk: true, hyphen: false })
+      items.push({ t: word.t, w: m.measure(word.t, tag), space: word.space && !last,
+                   brk: !word.nobrk, hyphen: false, type: tag })
       return
     }
     let prev = 0
     for (const c of cuts) {
-      const frag = word.slice(prev, c)
-      items.push({ t: frag, w: m.measure(frag), space: false, brk: true, hyphen: true })
+      const frag = word.t.slice(prev, c)
+      items.push({ t: frag, w: m.measure(frag, tag), space: false, brk: true, hyphen: true, type: tag })
       prev = c
     }
-    const tail = word.slice(prev)
-    items.push({ t: tail, w: m.measure(tail), space: !last, brk: true, hyphen: false })
+    const tail = word.t.slice(prev)
+    items.push({ t: tail, w: m.measure(tail, tag), space: word.space && !last,
+                 brk: !word.nobrk, hyphen: false, type: tag })
   })
   // A break is only legal where a space or a hyphen follows; the fragments before a cut
   // already carry hyphen:true, so every item here is breakable except the very last.
   if (items.length) items[items.length - 1].brk = true
   return items
+}
+
+/** Items i..j as runs, merging neighbours that share an emphasis. `text` is the whole
+ *  line for the things that only need characters — counting spaces, finding the glyph
+ *  that hangs. */
+function runsFrom(items, i, j) {
+  const runs = []
+  for (let k = i; k < j; k++) {
+    const it = items[k]
+    const text = it.t + (k < j - 1 && it.space ? ' ' : '')
+    const prev = runs[runs.length - 1]
+    if (prev && prev.type === it.type) prev.text += text
+    else runs.push({ type: it.type, text })
+  }
+  if (runs.length && items[j - 1].hyphen) runs[runs.length - 1].text += '-'
+  return runs
 }
 
 /* ── Breaking a paragraph ─────────────────────────────────────────────────── */
@@ -639,67 +754,91 @@ function buildItems(words, reference, m, opts) {
  * @returns [{ text, indentPx, wordSpacingPx, trackingPx, glyphScaling }]
  * or null when the mode is off / the text cannot be measured yet.
  */
-export function layoutParagraph(text, reference, opts, indentPx = 0) {
+export function layoutParagraph(input, reference, opts, indentPx = 0) {
   const { mode } = opts
-  if (mode === 'off' || !reference || !text.trim()) return null
+  if (mode === 'off' || !reference) return null
+  const runs = toRuns(input)
+  if (!runs.some(r => r.text.trim())) return null
   const columnWidth = reference.clientWidth
   if (!columnWidth) return null
 
   // Desired is a baseline, not a spend: it shifts every width the breaker sees, so the
   // paragraph is composed as it will actually be set. The natural measurer stays
   // reachable as `.base`, which is what px conversions and the axis work use.
-  const m = withDesired(makeMeasurer(reference), budgetsOf(opts))
-  const words = text.split(/\s+/).filter(Boolean)
-  if (!words.length) return null
+  const m = withDesired(makeMeasurer(reference, opts.runStyles), budgetsOf(opts))
+  const items = buildItems(runs, m, opts)
+  if (!items.length) return null
 
   // Centred rag splits the shortfall between the two margins instead of hanging it all
   // on the right: a line 40 short sits 20 in from each side, so the rag reads as a
   // deliberate double edge rather than a ragged right with a flush left.
   const offsetFor = target => (opts.center ? (columnWidth - target) / 2 : 0)
 
+  /* A hanging character buys the line exactly its own width of extra room, on the side
+   * it hangs: shift left by what protrudes left, and let the measure run long by what
+   * protrudes right. The INK then lands on the measure, which is the only edge anybody
+   * sees. */
+  const finish = (line, target, indent, isLast, flush) => {
+    const p = protrude(line.runs, m, opts)
+    // An indented line does NOT hang left. The indent is a deliberate offset and the
+    // quote pulling back out of it reads as a broken indent rather than a straight
+    // margin — the eye has a stepped edge to measure against, so there is no hole to
+    // fix. Keyed on a real indent, not on the centred rag's offset, which is not one.
+    const left = line.indented || opts.center ? 0 : p.left
+    return {
+      text: line.text,
+      runs: line.runs,
+      indentPx: indent - left,
+      ...fitLine(line.text, line.width, target - 1 + left + p.right, opts, m, isLast, flush, line.runs),
+    }
+  }
+
   // Justified composes the whole paragraph at once; a rag walks it line by line.
-  if (mode === 'justified' && opts.composer !== 'greedy') {
+  if (mode === 'justified' && opts.composer !== 'single-line') {
     const target = columnWidth - indentPx
-    const composed = kpBreak(buildItems(words, reference, m, opts), target, m, opts)
+    const composed = kpBreak(items, target, m, opts)
     if (composed) {
-      return composed.map((l, i) => ({
-        text: l.text,
-        indentPx: i === 0 ? indentPx : 0,
-        ...fitLine(l.text, l.width, target - 1, opts, m, i === composed.length - 1, true),
-      }))
+      return composed.map((l, i) =>
+        finish({ ...l, indented: i === 0 && indentPx > 0 }, target,
+               i === 0 ? indentPx : 0, i === composed.length - 1, true))
     }
     // fall through to greedy when nothing scored: better a plain paragraph than none
   }
   const flush = mode === 'justified'
 
   const lines = []
-  let line = [], lineWidth = 0, index = 0
+  let start = 0, lineWidth = 0, index = 0
   let indent = indentPx
   let target = targetFor(columnWidth, opts.ragWidth, 0, mode) - indent
 
-  for (const word of words) {
-    const w = m.measure(word)
-    const withWord = line.length ? lineWidth + m.space + w : w
+  const push = (from, to) => {
+    lines.push({ ...(() => { const runs = runsFrom(items, from, to)
+                             return { runs, text: runs.map(r => r.text).join('') } })(),
+                 width: lineWidth, target, indented: indent > 0,
+                 indentPx: indent + offsetFor(target) })
+  }
+
+  for (let k = 0; k < items.length; k++) {
+    const it = items[k]
+    const gap = k > start && items[k - 1].space ? m.space : 0
+    const withWord = k === start ? it.w : lineWidth + gap + it.w
     // A word that overruns by less than the condense allowance is TAKEN, and the line
     // squeezed to fit — cheaper than the hole its absence would leave.
     const squeezed = withWord * (condenseFloor(opts) / 100)
-    if (line.length && withWord > target && squeezed > target) {
-      lines.push({ text: line.join(' '), width: lineWidth, target, indentPx: indent + offsetFor(target) })
+    // items[k-1].brk is what keeps a run boundary INSIDE a word from becoming a break.
+    if (k > start && withWord > target && squeezed > target && items[k - 1].brk) {
+      push(start, k)
       index += 1
       indent = 0
       target = targetFor(columnWidth, opts.ragWidth, index, mode)
-      line = [word]; lineWidth = w
+      start = k; lineWidth = it.w
     } else {
-      line.push(word); lineWidth = withWord
+      lineWidth = withWord
     }
   }
-  if (line.length) lines.push({ text: line.join(' '), width: lineWidth, target, indentPx: indent + offsetFor(target) })
+  if (start < items.length) push(start, items.length)
 
-  return lines.map((l, i) => ({
-    text: l.text,
-    indentPx: l.indentPx,
-    ...fitLine(l.text, l.width, l.target - 1, opts, m, i === lines.length - 1, flush),
-  }))
+  return lines.map((l, i) => finish(l, l.target, l.indentPx, i === lines.length - 1, flush))
 }
 
 /** Inline style for one fitted line. */
