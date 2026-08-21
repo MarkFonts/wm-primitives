@@ -8,8 +8,11 @@ export type FitMode = 'off' | 'plain' | 'justified' | 'flattersatz'
  *  because that is the shape splitInlineMarkup already emits. */
 export interface Run { type: string; text?: string; value?: string }
 
-/** CSS applied to a run when measuring AND when drawing it — the two must match. */
-export type RunStyles = Partial<Record<string, Record<string, string | number>>>
+/** CSS applied to a run when measuring AND when drawing it — the two must match.
+ *  Deliberately an object rather than a string map: React's CSSProperties has optional
+ *  properties, not an index signature, so a stricter type here rejects the very thing
+ *  every caller passes. The engine only ever Object.assigns it onto the probe. */
+export type RunStyles = Partial<Record<string, object>>
 
 /** min/desired/max in percent of natural. A number is the legacy single knob. */
 export interface Band { min: number; desired: number; max: number }

@@ -318,7 +318,7 @@ export function FittedParagraph({ text, opts, indentPx = 0, fallback, runStyle }
                 {(l.runs ?? [{ type: 'text', text: l.text }]).map((r, ri) =>
                   r.type === 'text' || !runStyle
                     ? r.text
-                    : <span key={ri} style={runStyle(r.type)}>{r.text}</span>)}
+                    : <span key={ri} style={runStyle(r.type as 'bold' | 'italic' | 'underline')}>{r.text}</span>)}
               </span>
             </div>
           ))
