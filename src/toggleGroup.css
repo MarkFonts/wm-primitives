@@ -1,0 +1,65 @@
+/* toggleGroup.css — the house Toggle Group: a shared state across a series of toggle
+ * buttons, exactly one of them on.
+ *
+ * Promoted out of UiKitBoard.css, where it was already named "Toggle Group" and already
+ * carried by corners.css's press list. It is here because wordmark.nyc and font-proofer had
+ * the same thirty lines copy-pasted for their Auto/Light/Dark control, differing only in the
+ * face and in whether the size was on the type scale.
+ *
+ * CHILDREN ARE BUTTONS, not spans. The gallery's `.ui-seg > span` is a swatch that never had
+ * to be operated; a real one-of-N control is a group of buttons, which is what both apps
+ * already shipped. corners.css presses `.ui-seg > span:active` with an inset box-shadow —
+ * that rule does not reach these buttons, and should not: this control is a PILL, and that
+ * file's own caveat is that an inset shadow follows border-radius but not corner-shape, so
+ * on a pill it paints a rounded rectangle inside a squircle. The press below is a background
+ * change, which is clipped to the real shape.
+ *
+ * WHAT THIS IS NOT: placement. Both apps park this control top-right at 60% opacity and
+ * bring it up on hover — that is a decision about a fixed affordance that should recede, not
+ * about what a toggle group is. It stays in the app.
+ *
+ * The host provides --ui-font. Every token carries a literal fallback, because this renders
+ * in roots that never import space.css or type.css, where a bare var() collapses padding to
+ * zero.
+ *
+ * Cap rule, checked: the track's radius resolves to ~10.5px, and 0.6 x that is 6.3px. The
+ * track's own 2px does not clear it — but a text edge is the sum down the nesting chain, and
+ * 1px border + 2px track + 6px button = 9px, which does. The buttons clear it outright
+ * (6px against 0.6 x ~7.5px = 4.5px).
+ */
+
+.ui-seg {
+  display: inline-flex;
+  gap: var(--hair, 1px);
+  padding: var(--nudge, 2px);
+  background: var(--bg, #242424);
+  border: 1px solid var(--muted, rgba(255, 255, 255, .42));
+  border-radius: 999px;
+  corner-shape: superellipse(var(--corner-k, 1.2));
+}
+
+.ui-seg > button {
+  font-family: var(--ui-font, inherit);
+  font-size: var(--type-micro-size, 0.5625rem);
+  line-height: var(--type-micro-lead, 1.2);
+  letter-spacing: 0.04em;
+  color: var(--muted, rgba(255, 255, 255, .42));
+  background: none;
+  border: none;
+  border-radius: 999px;
+  corner-shape: superellipse(var(--corner-k, 1.2));
+  padding: var(--nudge, 2px) var(--spacing-02, 6px);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.ui-seg > button:hover:not(.active) { color: var(--ink, #fff); }
+
+/* Background, not an inset ring: see the press note at the top. */
+.ui-seg > button:active { background: var(--muted, rgba(255, 255, 255, .42)); }
+
+.ui-seg > button.active {
+  background: var(--ink, #fff);
+  color: var(--bg, #242424);
+}
