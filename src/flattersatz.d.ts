@@ -4,6 +4,13 @@
 
 export type FitMode = 'off' | 'plain' | 'justified' | 'flattersatz'
 
+/** A stretch of text sharing one emphasis. `value` is accepted as well as `text`,
+ *  because that is the shape splitInlineMarkup already emits. */
+export interface Run { type: string; text?: string; value?: string }
+
+/** CSS applied to a run when measuring AND when drawing it — the two must match. */
+export type RunStyles = Partial<Record<string, Record<string, string | number>>>
+
 /** min/desired/max in percent of natural. A number is the legacy single knob. */
 export interface Band { min: number; desired: number; max: number }
 export type Budget = Band | number
@@ -28,6 +35,11 @@ export interface FitOptions {
   center: boolean
   /** justified only; break points come from rules, not a dictionary */
   hyphenate: boolean
+  /** protrusion: a hanging character hangs its own measured width. Default true. */
+  hang: boolean
+  /** How this app draws bold/italic/underline, so runs are measured in the face they
+   *  are set in. Omit and every run measures roman. */
+  runStyles: RunStyles
   /** justified only. 'paragraph' scores every break against every other; 'single-line'
    *  fills each line and moves on. Not exposed — it exists to measure one against the
    *  other. A rag is always single-line, because stopping short is the design. */
@@ -42,6 +54,8 @@ export interface FittedLine {
   wordSpacingPx: number
   trackingPx: number
   glyphScaling: number
+  /** The line's emphasis runs, in order. Concatenating their text gives `text`. */
+  runs?: { type: string; text: string }[]
   /** Present only when expansion moved a real width axis: the block's own
    *  font-variation-settings with `wdth` replaced. */
   fvs?: string
@@ -62,7 +76,7 @@ export function widthAxis(m: unknown): boolean
 
 /** Null when the mode is off, the text is empty, or the element cannot be measured yet. */
 export function layoutParagraph(
-  text: string,
+  input: string | readonly Run[],
   reference: HTMLElement,
   opts: Partial<FitOptions>,
   indentPx?: number,
