@@ -11,7 +11,7 @@
  */
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { AxisSlider } from './AxisSlider'
-import { DEFAULTS, layoutParagraph, lineStyle, type FitMode, type FitOptions } from './flattersatz'
+import { band, DEFAULTS, layoutParagraph, lineStyle, type Band, type FitMode, type FitOptions } from './flattersatz'
 import './Fitting.css'
 
 export type { FitMode, FitOptions }
@@ -76,12 +76,63 @@ export interface FittingControlsProps {
   mode: FitMode
   swissRag: boolean
   onSwissRag: (on: boolean) => void
+  /** The proofed font has a `wdth` axis, so expansion can be Zapf's rather than a
+   *  scaleX. The app knows this from fvar; the engine also detects it by measuring. */
+  widthAxis?: boolean
 }
 
-export function FittingControls({ value, onChange, mode, swissRag, onSwissRag }: FittingControlsProps) {
+/* One row of the H&J schema: minimum · desired · maximum. Three numbers because one
+   knob can only ever be a floor OR a cap, and never states what the line should aim for
+   in the first place. Letter spacing is stored 100-centred like the others and shown
+   0-centred, which is how type people read it. */
+function BandRow({ label, chip, title, value, offset, step, onChange }: {
+  label: string
+  chip?: string
+  title?: string
+  value: Band
+  offset: number
+  step: number
+  onChange: (b: Band) => void
+}) {
+  const field = (k: keyof Band) => (
+    <input
+      key={k}
+      className="fit-num"
+      type="number"
+      step={step}
+      aria-label={`${label} ${k}`}
+      value={+(value[k] - offset).toFixed(2)}
+      onChange={e => onChange({ ...value, [k]: +e.target.value + offset })}
+    />
+  )
+  return (
+    <div className="fit-hj-row" title={title}>
+      <span className="fit-hj-label">
+        {label}
+        {chip && <em className="fit-chip">{chip}</em>}
+      </span>
+      {/* One box, three values. Three separate boxes could not fit the rail beside the
+          label, and the arrows were not the thing to give up — so the row keeps ONE
+          border and one padding, and the values are divided by hairlines inside it. */}
+      <div className="fit-hj-fields">
+        {(['min', 'desired', 'max'] as const).map(field)}
+      </div>
+    </div>
+  )
+}
+
+export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, widthAxis = false }: FittingControlsProps) {
   const v = { ...DEFAULTS, ...value }
   const set = (patch: Partial<FitOptions>) => onChange({ ...value, ...patch })
-  const off = mode === 'off'
+  // const off = mode === 'off'   // only the indent row read this — see below
+  const rag = mode === 'flattersatz'
+  const [hj, setHj] = useState(false)
+
+  const ragKnob = (k: 'tracking' | 'wordSpacing' | 'glyphScaling', label: string) => (
+    <AxisSlider label={label} value={v.rag[k]} min={k === 'wordSpacing' ? 80 : 95}
+      max={k === 'wordSpacing' ? 133 : 105} step={k === 'wordSpacing' ? 1 : 0.1} suffix="%"
+      onChange={n => set({ rag: { ...v.rag, [k]: +(n as number).toFixed(1) } })} />
+  )
 
   return (
     <>
@@ -90,17 +141,21 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag }:
           are independent switches and not a two-way choice. */}
       <div className="fit-switches">
         <button
-          className={`fit-switch${swissRag ? ' active' : ''}`}
-          aria-pressed={swissRag}
+          className={`fit-switch${rag ? ' active' : ''}`}
+          aria-pressed={rag}
+          disabled={mode === 'justified'}
+          title={mode === 'justified' ? 'Justification replaces the rag — pick another alignment to set one' : undefined}
           onClick={() => {
-            // A rag arrives as a rag: the band, and no stretching. Zeros are where
-            // JUSTIFIED starts, which is a different question.
-            if (!swissRag) set({ ragWidth: DEFAULTS.ragWidth, tracking: 100, wordSpacing: 100, glyphScaling: 100 })
+            // A rag arrives as a rag: the band, and nothing spent. The H&J bands are
+            // where JUSTIFIED starts, which is a different question.
+            if (!swissRag) set({ ragWidth: DEFAULTS.ragWidth, budgets: false, rag: DEFAULTS.rag })
             onSwissRag(!swissRag)
           }}
         >
           <span>Swiss Rag</span>
-          <span className="fit-switch-state">{swissRag ? 'on' : 'off'}</span>
+          {/* Under Justify the rag is not merely unused, it is replaced — so the switch
+              reads off and stays off, instead of reporting a state with no output. */}
+          <span className="fit-switch-state">{rag ? 'on' : 'off'}</span>
         </button>
         {mode === 'justified' && (
           <button
@@ -114,22 +169,70 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag }:
         )}
       </div>
 
-      {/* Rows in the order the budget spends them. Rag width belongs to the rag alone, so
-          it slides in and out rather than appearing and vanishing. */}
-      <div className="fit-row-collapse" style={{ maxHeight: mode === 'flattersatz' ? 64 : 0 }}>
-        <AxisSlider label="rag width" value={v.ragWidth} min={0} max={220} step={1} suffix="px"
+      {/* THE RAG. Its measure band, and knobs that are its own — opening one closes the
+          gaps greedy breaking leaves, which is the rag, so they start off and stay off
+          until asked for. */}
+      <div className={`fit-row-collapse${rag ? ' fit-row-collapse--open' : ''}`}
+        style={{ maxHeight: rag ? (v.budgets ? 300 : 108) : 0 }}>
+        <AxisSlider label="rag width" value={v.ragWidth} min={0} max={220} suffix="px"
           onChange={n => set({ ragWidth: n as number })} />
+        <button className={`fit-sub${v.budgets ? ' active' : ''}`} aria-pressed={v.budgets}
+          onClick={() => set({ budgets: !v.budgets })}>
+          <span>spacing budgets</span>
+          <span className="fit-switch-state">{v.budgets ? 'on' : 'off'}</span>
+        </button>
+        {v.budgets && (
+          <>
+            {ragKnob('tracking', 'letter spacing')}
+            {ragKnob('wordSpacing', 'word spacing')}
+            {ragKnob('glyphScaling', widthAxis ? 'expansion' : 'glyph scaling')}
+          </>
+        )}
       </div>
-      <div className="fit-options" style={{ maxHeight: off ? 0 : 420, opacity: off ? 0 : 1 }}>
-        <AxisSlider label="letter spacing" value={v.tracking} min={90} max={110} step={0.1} suffix="%"
-          onChange={n => set({ tracking: +(n as number).toFixed(1) })} />
-        <AxisSlider label="word spacing" value={v.wordSpacing} min={80} max={133} step={1} suffix="%"
-          onChange={n => set({ wordSpacing: n as number })} />
-        <AxisSlider label="glyph scaling" value={v.glyphScaling} min={95} max={105} step={0.1} suffix="%"
-          onChange={n => set({ glyphScaling: +(n as number).toFixed(1) })} />
-        <AxisSlider label="indent" value={v.indent} min={0} max={120} step={1} suffix="px"
+
+      {/* JUSTIFICATION. The schema itself is buried: a proof wants a column that reads,
+          not a dialog, and these are the numbers you set once per typeface. */}
+      <div className={`fit-row-collapse${mode === 'justified' ? ' fit-row-collapse--open' : ''}`}
+        style={{ maxHeight: mode === 'justified' ? (hj ? 240 : 34) : 0 }}>
+        <button className={`fit-sub${hj ? ' active' : ''}`} aria-expanded={hj} onClick={() => setHj(!hj)}>
+          <span>justification</span>
+          <span className="fit-switch-state">{hj ? 'hide' : 'H&J'}</span>
+        </button>
+        {hj && (
+          <div className="fit-hj">
+            <div className="fit-hj-row fit-hj-head">
+              <span className="fit-hj-label" />
+              <div className="fit-hj-fields fit-hj-fields--head">
+                <span>min</span><span>desired</span><span>max</span>
+              </div>
+            </div>
+            <BandRow label="word spacing" offset={0} step={1} value={band(v.wordSpacing)}
+              onChange={b => set({ wordSpacing: b })} />
+            <BandRow label="letter spacing" offset={100} step={0.5} value={band(v.tracking)}
+              onChange={b => set({ tracking: b })} />
+            {/* Zapf expanded and condensed with drawn masters, never a distortion. When
+                the proofed font ships a width axis the fitter moves THAT, so the row is
+                expansion and says which axis it is spending. Without one it is scaleX,
+                and it is called what it is. */}
+            <BandRow label={widthAxis ? 'expansion' : 'glyph scaling'}
+              chip={widthAxis ? 'wdth' : undefined}
+              title={widthAxis
+                ? 'This font has a width axis: expansion moves wdth and re-measures, so the line is filled with type the designer drew.'
+                : 'No width axis in this font: expansion falls back to scaleX, which distorts. Leave at 100 to keep the proof honest.'}
+              offset={0} step={0.5} value={band(v.glyphScaling)}
+              onChange={b => set({ glyphScaling: b })} />
+          </div>
+        )}
+      </div>
+
+      {/* Indent is out of the rail. Justified never wanted it, and in rag mode it was one
+          more slider shoving the variable axes off the bottom — which is the whole reason
+          anyone opened the panel. The option still exists in the engine; nothing here
+          sets it. */}
+      {/* <div className="fit-options" style={{ maxHeight: off ? 0 : 64, opacity: off ? 0 : 1 }}>
+        <AxisSlider label="indent" value={v.indent} min={0} max={120} suffix="px"
           onChange={n => set({ indent: n as number })} />
-      </div>
+      </div> */}
     </>
   )
 }
@@ -161,7 +264,7 @@ export function FittedParagraph({ text, opts, indentPx = 0, fallback }: {
     ro.observe(el)
     return () => ro.disconnect()
   }, [text, indentPx, opts.mode, opts.center, opts.ragWidth, opts.wordSpacing,
-      opts.tracking, opts.glyphScaling, opts.hyphenate])
+      opts.tracking, opts.glyphScaling, opts.hyphenate, opts.budgets, opts.rag])
 
   return (
     <div ref={ref}>

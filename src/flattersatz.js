@@ -62,18 +62,35 @@
  * a static page needs; React consumers call layoutParagraph and render the lines.
  */
 
+/** A budget that permits nothing: desired, and no room either side. */
+export const INERT = { min: 100, desired: 100, max: 100 }
+
 export const MIN_MEASURE = 140      // a rag line never gets narrower than this
 export const DEFAULTS = {
   mode: 'off',                      // 'off' | 'justified' | 'flattersatz'
   ragWidth: 40,
-  // All three budgets start at 100 — no stretching at all. Justified still reaches its
-  // measure, because the uncapped residue is fenced to that mode; a rag simply stops
-  // short. Open a budget deliberately and it is spent in both. This is also why moving
-  // between Swiss Rag and Justify only adds or removes the rag width: nothing else
-  // about the setting changes underneath you.
-  wordSpacing: 100,                 // percent — <100 tightens, >100 opens, 100 off
-  tracking: 100,                    // percent — same
-  glyphScaling: 100,                // percent — <100 condenses, >100 stretches, 100 off
+  // Each budget is a BAND — { min, desired, max } in percent of natural. Desired is
+  // where the line starts before anything is spent; min and max are how far the fitter
+  // may go in each direction, INDEPENDENTLY. One number could only ever be a floor or a
+  // cap, never both, and had no desired at all. A plain number is still accepted and
+  // still means that old single knob, because ReCal passes numbers.
+  //
+  // The H&J a justified column arrives with. Note DESIRED word spacing below 100: the
+  // line starts tighter than natural and the fitter opens it, rather than starting at
+  // natural and only ever adding. Expansion is live here (98–102) — on a font with a
+  // wdth axis that is Zapf's expansion; on a font without one it is scaleX, which
+  // distorts, so that fallback is the thing to watch.
+  wordSpacing: { min: 75, desired: 85, max: 110 },
+  tracking: { min: 98, desired: 100, max: 104 },      // shown 0-centred: -2 / 0 / +4
+  glyphScaling: { min: 98, desired: 100, max: 102 },  // expansion — see expandValue
+  budgets: false,                   // rag only: a rag spends NOTHING unless asked. The
+                                    // band is the design; spending closes the gaps
+                                    // greedy leaves and the rag comes out flush.
+  // The rag's knobs are its OWN. They were the same three values as justification's,
+  // which meant opening a rag's word spacing quietly re-set every justified paragraph
+  // in the proof. Single centred knobs, because a rag is not aiming at anything: it
+  // stops short, and all these do is say how much it may close first.
+  rag: { tracking: 100, wordSpacing: 100, glyphScaling: 100 },
   center: false,                    // centred rag: split the shortfall onto both sides
   hyphenate: false,                 // justified only; points come from the browser
   composer: 'kp',                   // justified only: 'kp' or 'greedy'. Not a feature —
@@ -97,9 +114,8 @@ export const DEFAULTS = {
  */
 export const SWISS_PRESET = {
   ragWidth: 40,
-  tracking: 100,
-  wordSpacing: 100,
-  glyphScaling: 100,
+  budgets: false,
+  rag: { tracking: 100, wordSpacing: 100, glyphScaling: 100 },
 }
 
 /* ── Measurement ──────────────────────────────────────────────────────────────
@@ -130,9 +146,22 @@ function getProbe(reference) {
   return probe
 }
 
-/** Widths for one style, keyed by string. Cleared whenever the style key moves. */
+/** font-variation-settings is a whole declaration, not a set of properties: a value set
+ *  on the line REPLACES the block's axes rather than merging with them, so every string
+ *  we emit has to carry the block's own settings too. */
+function setAxis(fvs, tag, value) {
+  const decl = `"${tag}" ${Math.round(value * 100) / 100}`
+  if (!fvs || fvs === 'normal') return decl
+  const re = new RegExp(`["']${tag}["']\\s*-?[\\d.]+`)
+  return re.test(fvs) ? fvs.replace(re, decl) : `${fvs}, ${decl}`
+}
+
+/** Widths for one style, keyed by string. Cleared whenever the style key moves.
+ *  `measureAt` is the same probe with one axis moved — the only way to know what a
+ *  width axis actually does to a string, since axis widths are not linear. */
 function makeMeasurer(reference) {
   const el = getProbe(reference)
+  const baseFVS = getComputedStyle(reference).fontVariationSettings || ''
   const cache = new Map()
   const measure = s => {
     let w = cache.get(s)
@@ -143,90 +172,230 @@ function makeMeasurer(reference) {
     }
     return w
   }
-  return { measure, space: measure(' '), em: parseFloat(getComputedStyle(reference).fontSize) || 16 }
+  const measureAt = (value, s) => {
+    const key = `${value}|${s}`
+    let w = cache.get(key)
+    if (w === undefined) {
+      el.style.fontVariationSettings = setAxis(baseFVS, 'wdth', value)
+      el.textContent = s
+      w = el.getBoundingClientRect().width
+      el.style.fontVariationSettings = baseFVS
+      cache.set(key, w)
+    }
+    return w
+  }
+  return { measure, measureAt, fvsAt: v => setAxis(baseFVS, 'wdth', v),
+           space: measure(' '), em: parseFloat(getComputedStyle(reference).fontSize) || 16 }
+}
+
+/** The same measurer with the DESIRED spacing folded in. Same shape, so everything
+ *  downstream is unchanged; `base` is the natural one underneath. */
+function withDesired(m, B) {
+  const gap = (B.tracking.desired - 100) / 100 * m.em
+  if (!gap && B.wordSpacing.desired === 100) return m
+  return { ...m, base: m,
+    measure: s => m.measure(s) + Math.max(Array.from(s).length - 1, 0) * gap,
+    space: m.space * B.wordSpacing.desired / 100 + gap }
 }
 
 /* ── Fitting one line ─────────────────────────────────────────────────────── */
 
-const NONE = { wordSpacingPx: 0, trackingPx: 0, glyphScaling: 1 }
+/* ── Budgets as bands ─────────────────────────────────────────────────────────
+ * { min, desired, max }. A plain number is the old single knob: below 100 it was a
+ * condense floor, above it a stretch cap, and the other end was pinned — so that is
+ * exactly what a number still means here. Nothing that passes numbers changes.
+ */
+export function band(v) {
+  if (v == null) return INERT
+  if (typeof v === 'number') return { min: Math.min(100, v), desired: 100, max: Math.max(100, v) }
+  return { min: v.min ?? 100, desired: v.desired ?? 100, max: v.max ?? 100 }
+}
 
-/** One knob, two directions: below 100 is the condense floor, above it the stretch cap. */
-const floorOf = v => Math.min(100, v ?? 100)
-const capOf = v => Math.max(100, v ?? 100)
-function condenseFloor(limits) { return floorOf(limits.glyphScaling) }
-function stretchCap(limits) { return capOf(limits.glyphScaling) }
+/** A rag spends nothing unless asked: the band IS the design, and any spend closes the
+ *  gaps greedy leaves until the "rag" is flush to two measures. Justified always spends
+ *  — reaching the measure is what justified means. */
+export function budgetsOf(limits) {
+  if (limits.mode === 'flattersatz') {
+    if (!limits.budgets) return { wordSpacing: INERT, tracking: INERT, glyphScaling: INERT }
+    const r = limits.rag ?? {}
+    return { wordSpacing: band(r.wordSpacing), tracking: band(r.tracking),
+             glyphScaling: band(r.glyphScaling) }
+  }
+  return { wordSpacing: band(limits.wordSpacing), tracking: band(limits.tracking),
+           glyphScaling: band(limits.glyphScaling) }
+}
+
+function condenseFloor(limits) { return budgetsOf(limits).glyphScaling.min }
+function stretchCap(limits) { return budgetsOf(limits).glyphScaling.max }
 const countSpaces = t => (t.match(/[ \u00a0]/g) ?? []).length
 
+/* ── Expansion: Zapf's, not a scaleX ─────────────────────────────────────────
+ * The hz-program expanded and condensed glyphs using specially drawn masters, never a
+ * linear distortion — that is the whole point of it, and why the mechanism survived
+ * into pdfTeX as font EXPANSION rather than scaling. A variable font ships those
+ * masters. So: if the proofed font has a `wdth` axis, the fitter moves the axis and
+ * re-measures, and what fills the line is type the designer actually drew. A font
+ * without one falls back to scaleX, which distorts every stem it touches — which is
+ * why expansion is opt-in either way.
+ *
+ * Widths along an axis are not linear, so there is nothing to compute: bisect the
+ * setting and measure. CSS clamps a font-variation-settings value to the axis the font
+ * really has, so bisecting a deliberately wide range needs no fvar parsing and nothing
+ * plumbed in from the app — a font with no wdth axis simply never moves.
+ */
+const AXIS_LO = 1, AXIS_HI = 1000  // the font clamps these to its own wdth range
+const MAX_STEPS = 12               // percent of natural width, either direction
+
+/** Does this style have a live width axis? Measured once per measurer, then cached. */
+export function widthAxis(m) {
+  if (m._axis !== undefined) return m._axis
+  const S = 'nnoonnoo'
+  const w = m.measure(S)
+  m._axis = (Math.abs(m.measureAt(AXIS_HI, S) - w) > 0.5 ||
+             Math.abs(m.measureAt(AXIS_LO, S) - w) > 0.5) || false
+  return m._axis
+}
+
+/* Expansion is QUANTISED, in whole percent of natural width. pdfTeX quantises because
+ * every expansion level is a real font instance and there cannot be infinitely many; we
+ * get a second thing out of it — the axis value for "102%" is found once per style
+ * instead of once per line, and the percentages in the H&J panel mean what they say.
+ *
+ * The axis value for a percentage has to be BISECTED, not calculated: nothing says
+ * where the axis currently sits (a block need not set wdth at all), the units are the
+ * font's own, and width along an axis is not linear. Searching the raw range per line
+ * was the first attempt and it does not work — seven halvings of [1,1000] never come
+ * back down to the ~102 that a 2% budget actually needs, so every line was rejected. */
+function axisFor(m, pct) {
+  if (!m._axisAt) m._axisAt = new Map()
+  const hit = m._axisAt.get(pct)
+  if (hit !== undefined) return hit
+  const S = 'nnoonnoo'
+  const want = m.measure(S) * pct / 100
+  let lo = AXIS_LO, hi = AXIS_HI
+  for (let i = 0; i < 14; i++) {
+    const mid = (lo + hi) / 2
+    if (m.measureAt(mid, S) <= want) lo = mid; else hi = mid
+  }
+  m._axisAt.set(pct, lo)
+  return lo
+}
+
+/** The expanded (or condensed) line, measured — never estimated from the sample, so a
+ *  line can not overrun its measure because its letters happened to widen faster than
+ *  the sample's. Null when the axis has nothing useful to offer. */
+function expandValue(m, text, want, wider, steps) {
+  const natural = m.measure(text)
+  let best = null
+  for (let k = 1; k <= Math.min(steps, MAX_STEPS); k++) {
+    const value = axisFor(m, wider ? 100 + k : 100 - k)
+    const w = m.measureAt(value, text)
+    if (wider) {
+      if (w > want) break            // one step too far: keep the last that fitted
+      best = { value, width: w }
+    } else {
+      best = { value, width: w }
+      if (w <= want) break           // the least condensing that fits is the one to take
+    }
+  }
+  if (!best) return null
+  if (wider && best.width <= natural + 0.5) return null
+  if (!wider && best.width >= natural - 0.5) return null
+  return best
+}
+
 function fitLine(text, width, target, limits, m, isLast, flush) {
+  const B = budgetsOf(limits)
+  const nat = m.base ?? m          // px conversions are against NATURAL space and em
+  const axis = (B.glyphScaling.max > 100 || B.glyphScaling.min < 100) && widthAxis(nat)
+  // measureAt reports NATURAL widths; every other width here carries the desired shift.
+  const shift = m.measure(text) - nat.measure(text)
+  const px = (ws, tr, sc, wdth) => ({
+    wordSpacingPx: (ws / 100 - 1) * nat.space,
+    trackingPx: (tr / 100 - 1) * nat.em,
+    glyphScaling: sc / 100,
+    fvs: wdth ? m.fvsAt(wdth) : undefined,
+  })
+
   // ── Overset: the breaker took a word too many, on the promise of tightening ──
-  // Same three budgets, same order, their below-100 halves.
+  // Same three budgets, same order, their below-desired halves.
   if (width > target) {
     const nSpaces = countSpaces(text)
     const nGaps = Math.max(Array.from(text).length - 1, 0)
     let excess = width - target
-    let ws = 100, tr = 100, sc = 100
-    const wsRoom = nSpaces * (1 - floorOf(limits.wordSpacing) / 100) * m.space
+    let ws = B.wordSpacing.desired, tr = B.tracking.desired, sc = 100, wdth = null
+    const wsRoom = nSpaces * ((ws - B.wordSpacing.min) / 100) * nat.space
     if (excess > 0 && wsRoom > 0) {
       const spend = Math.min(excess, wsRoom)
-      ws = 100 - (100 - floorOf(limits.wordSpacing)) * (spend / wsRoom)
+      ws -= (ws - B.wordSpacing.min) * (spend / wsRoom)
       excess -= spend
     }
-    const trRoom = nGaps * (1 - floorOf(limits.tracking) / 100) * m.em
+    const trRoom = nGaps * ((tr - B.tracking.min) / 100) * nat.em
     if (excess > 0 && trRoom > 0) {
       const spend = Math.min(excess, trRoom)
-      tr = 100 - (100 - floorOf(limits.tracking)) * (spend / trRoom)
+      tr -= (tr - B.tracking.min) * (spend / trRoom)
       excess -= spend
     }
-    const floor = condenseFloor(limits) / 100
-    if (excess > 0 && floor < 1) sc = Math.max(floor, target / width) * 100
-    return {
-      wordSpacingPx: (ws / 100 - 1) * m.space,
-      trackingPx: (tr / 100 - 1) * m.em,
-      glyphScaling: sc / 100,
+    const floor = B.glyphScaling.min / 100
+    if (excess > 0 && floor < 1) {
+      // What is LEFT to close, not the whole measure: word spacing and tracking have
+      // already been spent, and aiming at the measure again overshot it — a line came
+      // out 253px wide in a 249px column, expanded past a deficit that was already gone.
+      const found = axis && expandValue(nat, text, Math.max(width - excess, width * floor) - shift, false,
+                                        Math.round(100 - B.glyphScaling.min))
+      if (found) wdth = found.value
+      else sc = Math.max(floor, target / width) * 100
     }
+    return px(ws, tr, sc, wdth)
   }
-  if (isLast || width >= target) return NONE
-  const spaces = (text.match(/[  ]/g) ?? []).length
+
+  if (isLast || width >= target) return px(B.wordSpacing.desired, B.tracking.desired, 100, null)
+  const spaces = countSpaces(text)
   const gaps = Math.max(Array.from(text).length - 1, 0)
 
   let deficit = target - width
-  let scaling = 100, tracking = 100, wordSpacing = 100
+  let scaling = 100, wdth = null
+  let tracking = B.tracking.desired, wordSpacing = B.wordSpacing.desired
 
-  // 1. tracking, capped
-  const trackCap = capOf(limits.tracking)
-  const trackRoom = gaps * (trackCap / 100 - 1) * m.em
+  // 1. tracking, to its max
+  const trackRoom = gaps * ((B.tracking.max - tracking) / 100) * nat.em
   if (deficit > 0 && trackRoom > 0) {
     const spend = Math.min(deficit, trackRoom)
-    tracking = 100 + (trackCap - 100) * (spend / trackRoom)
+    tracking += (B.tracking.max - tracking) * (spend / trackRoom)
     deficit -= spend
   }
-  // 2. word spacing, capped
-  const wordCap = capOf(limits.wordSpacing)
-  const wordRoom = spaces * (wordCap / 100 - 1) * m.space
+  // 2. word spacing, to its max
+  const wordRoom = spaces * ((B.wordSpacing.max - wordSpacing) / 100) * nat.space
   if (deficit > 0 && wordRoom > 0) {
     const spend = Math.min(deficit, wordRoom)
-    wordSpacing = 100 + (wordCap - 100) * (spend / wordRoom)
+    wordSpacing += (B.wordSpacing.max - wordSpacing) * (spend / wordRoom)
     deficit -= spend
   }
-  // 3. glyph scaling, capped — last resort, and 100 (off) unless asked for
-  const cap = stretchCap(limits)
+  // 3. expansion — last, and off unless asked for. The axis first, scaleX only if the
+  //    font has no axis to move.
+  const cap = B.glyphScaling.max
   if (deficit > 0 && cap > 100) {
-    const room = width * (cap / 100 - 1)
-    if (room > 0) {
-      const spend = Math.min(deficit, room)
-      scaling = 100 + (cap - 100) * (spend / room)
-      deficit -= spend
+    const ceiling = width * (cap / 100)
+    // Only the remaining deficit — see the note in the overset branch above.
+    const found = axis && expandValue(nat, text, Math.min(width + deficit, ceiling) - shift, true,
+                                      Math.round(cap - 100))
+    if (found) {
+      deficit -= (found.width + shift - width)
+      wdth = found.value
+    } else if (!axis) {
+      const room = width * (cap / 100 - 1)
+      if (room > 0) {
+        const spend = Math.min(deficit, room)
+        scaling = 100 + (cap - 100) * (spend / room)
+        deficit -= spend
+      }
     }
   }
   // 4. justified only: residue goes back to word spacing, uncapped. A rag stops short.
   if (flush && deficit > 0 && spaces > 0) {
-    wordSpacing += ((deficit / spaces) / (scaling / 100)) / m.space * 100
+    wordSpacing += ((deficit / spaces) / (scaling / 100)) / nat.space * 100
   }
-  return {
-    wordSpacingPx: (wordSpacing / 100 - 1) * m.space,
-    trackingPx: (tracking / 100 - 1) * m.em,
-    glyphScaling: scaling / 100,
-  }
+  return px(wordSpacing, tracking, scaling, wdth)
 }
 
 /** Even lines get the column; odd lines get the column less the rag. */
@@ -330,15 +499,19 @@ const LINE_PENALTY = 10
 const HYPHEN_PENALTY = 50   // TeX's default: a hyphen is allowed, never free
 const MAX_BADNESS = 10000    // TeX's ceiling: past this a line is not worth scoring
 const OVERFULL_PENALTY = 1e10 // worse than ANY legal line, better than no paragraph
+const STRETCH_PENALTY = 1e6   // per unit of stretch demanded PAST the budget — see below
 const INFEASIBLE = 1e9
 
 function kpBreak(items, target, m, limits) {
   const n = items.length
-  const stretch = Math.max(m.space * (capOf(limits.wordSpacing) / 100 - 1), m.space / 3)
-  // Shrink is exactly what the word-spacing control allows below 100 — the composer may
+  const W = budgetsOf(limits).wordSpacing
+  const nat = m.base ?? m
+  const stretch = Math.max(nat.space * ((W.max - W.desired) / 100), nat.space / 3)
+  // Shrink is exactly what the word-spacing band allows below desired — the composer may
   // only plan tightening the fitter can deliver. When it once assumed TeX's glue it
-  // produced a 758px line in a 756px measure.
-  const shrink = m.space * (1 - floorOf(limits.wordSpacing) / 100)
+  // produced a 758px line in a 756px measure. Stretch keeps TeX's floor because
+  // justified can always fall back on the uncapped residue; shrink has no such escape.
+  const shrink = nat.space * ((W.desired - W.min) / 100)
   const hyphenW = m.measure('-')
 
   // Natural width of items i..j-1, without the trailing space, plus the hyphen when the
@@ -388,7 +561,15 @@ function kpBreak(items, target, m, limits) {
         const slack = target - natural
         const give = slack >= 0 ? spaces * stretch : spaces * shrink
         if (give <= 0) {
-          demerits = slack === 0 ? 0 : (LINE_PENALTY + MAX_BADNESS) ** 2
+          // No spaces to give: a one-word line. This paid a FLAT capped fee, which the
+          // moment stretched lines started costing what they are worth became the next
+          // free lunch — the composer parked "Typography" alone on a 756px line rather
+          // than stretch anything. Price it by the hole it leaves, as if it had one
+          // space's worth of give, so it is ranked against stretched lines and not
+          // beneath them.
+          if (slack === 0) demerits = 0
+          else demerits = (LINE_PENALTY + MAX_BADNESS) ** 2 +
+            Math.min(OVERFULL_PENALTY * 0.9, (slack / stretch - 1) ** 2 * STRETCH_PENALTY)
         } else {
           const r = slack / give
           // Bounded, or the cube runs away: with a small stretch allowance a loose line
@@ -396,6 +577,14 @@ function kpBreak(items, target, m, limits) {
           // overfull lines and the paragraph came out in short, wrong pieces.
           const badness = Math.min(MAX_BADNESS, 100 * Math.abs(r) ** 3)
           demerits = (LINE_PENALTY + badness) ** 2
+          // Past the cap, badness SATURATES — and a saturated line is free to get worse,
+          // so the composer will sacrifice one line to buy perfect ones either side. That
+          // is how "Typography is the" ended up alone on a 756px line carrying 300px of
+          // word space: at r=100 it scored exactly what r=10 scores. Cost has to keep
+          // climbing past the cap or there is no reason to spread the slack. Held under
+          // OVERFULL_PENALTY so a loose line is still always cheaper than one that does
+          // not fit — the ordering that stopped the paragraph coming out in short pieces.
+          if (r > 1) demerits += Math.min(OVERFULL_PENALTY * 0.9, (r - 1) ** 2 * STRETCH_PENALTY)
           if (items[j - 1].hyphen) demerits += HYPHEN_PENALTY ** 2
         }
       }
@@ -456,7 +645,10 @@ export function layoutParagraph(text, reference, opts, indentPx = 0) {
   const columnWidth = reference.clientWidth
   if (!columnWidth) return null
 
-  const m = makeMeasurer(reference)
+  // Desired is a baseline, not a spend: it shifts every width the breaker sees, so the
+  // paragraph is composed as it will actually be set. The natural measurer stays
+  // reachable as `.base`, which is what px conversions and the axis work use.
+  const m = withDesired(makeMeasurer(reference), budgetsOf(opts))
   const words = text.split(/\s+/).filter(Boolean)
   if (!words.length) return null
 
@@ -520,6 +712,9 @@ export function lineStyle(l) {
     wordSpacing: l.wordSpacingPx ? `${l.wordSpacingPx}px` : undefined,
     letterSpacing: l.trackingPx ? `${l.trackingPx}px` : undefined,
     transform: l.glyphScaling === 1 ? undefined : `scaleX(${l.glyphScaling})`,
+    // The axis, when the font had one to move. Not additive with the block's own
+    // settings — fvs already carries them, which is why setAxis builds the whole string.
+    fontVariationSettings: l.fvs,
   }
 }
 
