@@ -104,7 +104,12 @@
    and compress. Words do not break, and nothing overlaps. */
 .fit-hj-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  /* The fields are a FIXED width in every row, so all nine boxes are the same size and
+     the three columns line up down the panel — including under the min/desired/max
+     header, which is the only thing that makes those words mean anything. The label
+     takes the remainder. Sizing it the other way round is what let the badge widen the
+     label and squeeze the values until they clipped to "99 10 10". */
+  grid-template-columns: minmax(0, 1fr) 8.4rem;
   align-items: center;
   gap: var(--spacing-02, 6px);
   margin-bottom: var(--spacing-02, 6px);
@@ -135,8 +140,10 @@
 .fit-hj-label {
   display: flex;
   align-items: center;
-  gap: var(--spacing-02, 6px);
+  gap: var(--spacing-01, 3px) var(--spacing-02, 6px);
+  flex-wrap: wrap;              /* only the badge may drop — the words are nowrap below */
   white-space: nowrap;          /* a two-word label is two words, not a headline break */
+  min-width: 0;
   color: var(--text-muted, #999);
   font-size: var(--type-ui-size, 0.75rem);
   letter-spacing: 0.04em;
@@ -193,13 +200,25 @@
   background: color-mix(in srgb, var(--accent, #7cc4ff) 18%, transparent);
   box-shadow: 0 0 8px color-mix(in srgb, var(--accent, #7cc4ff) 35%, transparent);
   color: var(--accent, #7cc4ff);
-  font-size: 0.9em;
+  /* 8px, deliberately below the type scale: the badge has to sit BESIDE its label on a
+     narrow rail, and at the system size it wrapped underneath — which is the crowding
+     that shortening "glyph scaling" to "glyph" was meant to fix. Sanctioned exception. */
+  font-size: 8px;
   font-style: normal;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
+/* Outlined, not a lifted gray. The fill version sat at --text-dim on a dark panel,
+   which is roughly 2.4:1 — below AA at any size, and this is 8px type. An outline lets
+   the label carry --text-muted instead, and the ring reads as a pill without needing a
+   fill to do it. It stays quieter than the glowing wdth badge because it does not glow,
+   not because it is hard to read. */
 .fit-chip--muted {
-  background: var(--bg-hover, rgba(255, 255, 255, .06));
+  background: none;
   box-shadow: none;
-  color: var(--text-dim, #555);
+  border: 1px solid color-mix(in srgb, var(--text-muted, #999) 55%, transparent);
+  /* Lifted off --text-muted rather than using it raw: that token resolves to #888 here,
+     which measured 4.38:1 against the panel — under AA, and this is 8px type. Mixed
+     toward --text it clears 4.5:1 while staying quieter than the glowing wdth badge. */
+  color: color-mix(in srgb, var(--text-muted, #999) 80%, var(--text, #fff));
 }
 .fit-chip-row { display: flex; justify-content: flex-end; margin-top: calc(-1 * var(--spacing-02, 6px)); }

@@ -134,14 +134,13 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, w
   const rag = mode === 'flattersatz'
   const [hj, setHj] = useState(false)
 
-  /* The expansion row states what it is DOING, and only once it does anything. At rest
-     — 100/100/100 — it is just a control and wears no badge. Opened, the badge names the
-     mechanism, because these two are not the same act: `wdth` moves masters the designer
-     drew, `scaleX` stretches what is there. Showing only the good one would make its
-     absence ambiguous, so both are labelled and only the honest one glows. */
-  const spending = (b: Band) => b.max > 100 || b.min < 100
-  const expansionChip = (b: Band) =>
-    !spending(b) ? undefined : widthAxis ? 'wdth' : 'scaleX'
+  /* The badge reports what the font AFFORDS, not what the row happens to be doing — so
+     it is there whether the band is spending or not. That is the more useful fact in a
+     proofer: `wdth` says this family has a width axis and expansion will interpolate
+     masters the designer drew; `x-scale` says it does not, and opening this row will
+     distort. Knowing that before you touch the numbers is the point. Only the honest one
+     glows. */
+  const expansionChip = () => (widthAxis ? 'wdth' : 'x-scale')
 
   const ragKnob = (k: 'tracking' | 'wordSpacing' | 'glyphScaling', label: string) => (
     <AxisSlider label={label} value={v.rag[k]} min={k === 'wordSpacing' ? 80 : 95}
@@ -200,14 +199,10 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, w
           <>
             {ragKnob('tracking', 'letter spacing')}
             {ragKnob('wordSpacing', 'word spacing')}
-            {ragKnob('glyphScaling', 'glyph scaling')}
-            {expansionChip(band(v.rag.glyphScaling)) && (
-              <div className="fit-chip-row">
-                <em className={`fit-chip${widthAxis ? '' : ' fit-chip--muted'}`}>
-                  {expansionChip(band(v.rag.glyphScaling))}
-                </em>
-              </div>
-            )}
+            {ragKnob('glyphScaling', 'flex')}
+            <div className="fit-chip-row">
+              <em className={`fit-chip${widthAxis ? '' : ' fit-chip--muted'}`}>{expansionChip()}</em>
+            </div>
           </>
         )}
       </div>
@@ -236,8 +231,12 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, w
                 obeys the same numbers whether the font has a width axis to move or has
                 to be stretched. Which of the two it used is in the tooltip, not in a
                 label that changes shape from font to font. */}
-            <BandRow label="glyph scaling"
-              chip={expansionChip(band(v.glyphScaling))}
+            {/* "flex", not "glyph scaling": when a width axis moves, nothing is being
+                SCALED — the font interpolates between masters the designer drew, and
+                only the fallback stretches. One word that is true of both, with the badge
+                beside it saying which. */}
+            <BandRow label="flex"
+              chip={expansionChip()}
               chipMuted={!widthAxis}
               title={widthAxis
                 ? 'This font has a width axis: expansion moves wdth and re-measures, so the line is filled with type the designer drew.'
