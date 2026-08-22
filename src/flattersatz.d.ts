@@ -34,10 +34,16 @@ export interface FitOptions {
   /** flattersatz only, and separate from the bands above on purpose: the rag's knobs
    *  must not re-set the justified paragraphs in the same proof. */
   rag: { tracking: number; wordSpacing: number; glyphScaling: number }
+  /** Which edge is flush — the only edge a hanging character can straighten. Left and
+   *  justified hang left, right hangs right, centred hangs nowhere. */
+  align: 'left' | 'center' | 'right' | 'justify'
   /** centred alignment splits a rag's shortfall onto both margins */
   center: boolean
   /** justified only; break points come from rules, not a dictionary */
   hyphenate: boolean
+  /** The widow killer: the space before a paragraph's final word stops being a legal
+   *  break, so the last word cannot stand alone on a line. Default true. */
+  keepLastWord: boolean
   /** protrusion: a hanging character hangs its own measured width. Default true. */
   hang: boolean
   /** How this app draws bold/italic/underline, so runs are measured in the face they
@@ -59,6 +65,10 @@ export interface FittedLine {
   glyphScaling: number
   /** The line's emphasis runs, in order. Concatenating their text gives `text`. */
   runs?: { type: string; text: string }[]
+  /** Right-aligned only: how far the trailing character hangs past the right margin.
+   *  Emitted as a negative margin-right, because a right-aligned line is positioned by
+   *  that edge and extra width alone would not move it. */
+  hangRightPx?: number
   /** Present only when expansion moved a real width axis: the block's own
    *  font-variation-settings with `wdth` replaced. */
   fvs?: string

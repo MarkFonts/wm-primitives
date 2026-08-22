@@ -104,6 +104,12 @@ export const DEFAULTS = {
   // in the proof. Single centred knobs, because a rag is not aiming at anything: it
   // stops short, and all these do is say how much it may close first.
   rag: { tracking: 100, wordSpacing: 100, glyphScaling: 100 },
+  // Which edge is FLUSH, which is the only edge a hanging character can straighten.
+  // Left and justified hang on the left; right hangs on the right; centred hangs
+  // nowhere, having no flush edge at all. Before this the engine was told only
+  // `center`, so right-aligned text hung its left edge — the ragged one, where the
+  // correction is invisible — and left its flush edge full of holes.
+  align: 'left',                    // 'left' | 'center' | 'right' | 'justify'
   center: false,                    // centred rag: split the shortfall onto both sides
   hyphenate: false,                 // justified only; points come from the browser
   // How a justified paragraph is composed. 'paragraph' scores every break in the whole
@@ -113,6 +119,14 @@ export const DEFAULTS = {
   // single-line by definition — stopping short IS the design — so this only ever
   // applies to justified.
   composer: 'paragraph',            // 'paragraph' | 'single-line'
+  // The widow killer. A paragraph must not end with its last word alone on a line, so
+  // the space before that word stops being a legal break. This is Mark's InDesign GREP —
+  //   (?<=\w)\s(?=\w+[[:punct:]]*+$)
+  // — as a property of the break instead of a search: the trailing punctuation the class
+  // was there to allow for is already part of the word here, and possessive matching has
+  // nothing to do since the engine asks "may I break?" rather than scanning. In JS the
+  // class itself would be [\p{P}\p{S}] with the u flag; POSIX classes do not exist here.
+  keepLastWord: true,
   hang: true,                       // protrusion — see PROTRUSION. Off is a worse proof,
                                     // but it has to be possible to see the difference.
   firstIndent: 0,
@@ -766,6 +780,10 @@ function buildItems(runs, m, opts) {
   // A break is only legal where a space or a hyphen follows; the fragments before a cut
   // already carry hyphen:true, so every item here is breakable except the very last.
   if (items.length) items[items.length - 1].brk = true
+  // …and the space before the FINAL word is not a break at all, so the last word cannot
+  // be left standing alone. Needs three items: with two, keeping them together is the
+  // whole paragraph and there is nothing to prevent.
+  if (opts.keepLastWord !== false && items.length > 2) items[items.length - 2].brk = false
   return items
 }
 
@@ -815,18 +833,27 @@ export function layoutParagraph(input, reference, opts, indentPx = 0) {
    * it hangs: shift left by what protrudes left, and let the measure run long by what
    * protrudes right. The INK then lands on the measure, which is the only edge anybody
    * sees. */
+  const centred = opts.center || opts.align === 'center'
+  const rightAligned = opts.align === 'right'
+
   const finish = (line, target, indent, isLast, flush) => {
     const p = protrude(line.runs, m, opts)
     // An indented line does NOT hang left. The indent is a deliberate offset and the
     // quote pulling back out of it reads as a broken indent rather than a straight
     // margin — the eye has a stepped edge to measure against, so there is no hole to
     // fix. Keyed on a real indent, not on the centred rag's offset, which is not one.
-    const left = line.indented || opts.center ? 0 : p.left
+    const left = line.indented || centred || rightAligned ? 0 : p.left
+    const right = centred ? 0 : p.right
+    // Right-aligned lines are positioned by their RIGHT edge, so the room granted above
+    // does not push the punctuation out — a negative margin does. Left and justified
+    // lines start at the left and simply run past the measure, needing no such help.
+    const hangRightPx = rightAligned ? right : 0
     return {
       text: line.text,
       runs: line.runs,
       indentPx: indent - left,
-      ...fitLine(line.text, line.width, target - 1 + left + p.right, opts, m, isLast, flush, line.runs),
+      hangRightPx,
+      ...fitLine(line.text, line.width, target - 1 + left + right, opts, m, isLast, flush, line.runs),
     }
   }
 
@@ -855,6 +882,15 @@ export function layoutParagraph(input, reference, opts, indentPx = 0) {
                  indentPx: indent + offsetFor(target) })
   }
 
+  let lastLegal = -1     // the most recent index we are allowed to break before
+  const widthOf = (from, to) => {
+    let w = 0
+    for (let k = from; k < to; k++) {
+      if (k > from && items[k - 1].space) w += m.space
+      w += items[k].w
+    }
+    return w
+  }
   for (let k = 0; k < items.length; k++) {
     const it = items[k]
     const gap = k > start && items[k - 1].space ? m.space : 0
@@ -862,13 +898,22 @@ export function layoutParagraph(input, reference, opts, indentPx = 0) {
     // A word that overruns by less than the condense allowance is TAKEN, and the line
     // squeezed to fit — cheaper than the hole its absence would leave.
     const squeezed = withWord * (condenseFloor(opts) / 100)
-    // items[k-1].brk is what keeps a run boundary INSIDE a word from becoming a break.
-    if (k > start && withWord > target && squeezed > target && items[k - 1].brk) {
-      push(start, k)
-      index += 1
-      indent = 0
-      target = targetFor(columnWidth, opts.ragWidth, index, mode)
-      start = k; lineWidth = it.w
+    if (k > start && items[k - 1].brk) lastLegal = k
+    if (k > start && withWord > target && squeezed > target) {
+      // Break where we are ALLOWED to, which is not always where we ran out of room: a
+      // run boundary inside a word is illegal, and so is the space the widow killer
+      // closed. Retreating to the last legal point is what turns "no break here" into a
+      // shorter previous line rather than a line that simply overruns.
+      const at = items[k - 1].brk ? k : lastLegal
+      if (at > start) {
+        push(start, at)
+        index += 1
+        indent = 0
+        target = targetFor(columnWidth, opts.ragWidth, index, mode)
+        start = at; lineWidth = widthOf(at, k + 1)
+      } else {
+        lineWidth = withWord      // nowhere legal to break; the line takes it
+      }
     } else {
       lineWidth = withWord
     }
@@ -885,6 +930,7 @@ export function lineStyle(l) {
     whiteSpace: 'pre',
     transformOrigin: 'left',
     marginLeft: l.indentPx ? `${l.indentPx}px` : undefined,
+    marginRight: l.hangRightPx ? `${-l.hangRightPx}px` : undefined,
     wordSpacing: l.wordSpacingPx ? `${l.wordSpacingPx}px` : undefined,
     letterSpacing: l.trackingPx ? `${l.trackingPx}px` : undefined,
     transform: l.glyphScaling === 1 ? undefined : `scaleX(${l.glyphScaling})`,

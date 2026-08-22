@@ -309,7 +309,7 @@ export function FittedParagraph({ text, opts, indentPx = 0, fallback, runStyle }
     return () => ro.disconnect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runs, runStyles, indentPx, opts.mode, opts.center, opts.ragWidth, opts.wordSpacing,
-      opts.tracking, opts.glyphScaling, opts.hyphenate, opts.budgets, opts.rag, opts.hang])
+      opts.tracking, opts.glyphScaling, opts.hyphenate, opts.budgets, opts.rag, opts.hang, opts.keepLastWord])
 
   /* Every style that changes GLYPH WIDTHS has to re-fit, and almost none of them change
    * the box: tracking, size, weight, a variable axis, a feature setting — the column
@@ -328,7 +328,12 @@ export function FittedParagraph({ text, opts, indentPx = 0, fallback, runStyle }
     const cs = getComputedStyle(el)
     const key = [cs.fontFamily, cs.fontSize, cs.fontWeight, cs.fontStyle, cs.fontStretch,
                  cs.fontVariationSettings, cs.fontFeatureSettings, cs.fontOpticalSizing,
-                 cs.letterSpacing, cs.wordSpacing, cs.textTransform, cs.fontKerning].join('|')
+                 cs.letterSpacing, cs.wordSpacing, cs.textTransform, cs.fontKerning,
+                 // text-align decides WHICH EDGE is flush, and therefore which edge can
+                 // hang. Going left to right changes neither the mode nor `center`, so
+                 // the dependencies above never fire and the lines keep hanging the edge
+                 // that is now ragged — the same trap tracking fell into.
+                 cs.textAlign].join('|')
     if (key === lastStyle.current) return
     lastStyle.current = key
     relayout()
