@@ -295,16 +295,44 @@ export function FittedParagraph({ text, opts, indentPx = 0, fallback, runStyle }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const runStyles = useMemo(() => computed, [runStylesKey])
 
+  const relayout = () => {
+    const el = ref.current
+    if (el) setLines(layoutParagraph(runs, el, { ...opts, runStyles }, indentPx))
+  }
+
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    const run = () => setLines(layoutParagraph(runs, el, { ...opts, runStyles }, indentPx))
-    run()
-    const ro = new ResizeObserver(run)
+    relayout()
+    const ro = new ResizeObserver(relayout)
     ro.observe(el)
     return () => ro.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runs, runStyles, indentPx, opts.mode, opts.center, opts.ragWidth, opts.wordSpacing,
       opts.tracking, opts.glyphScaling, opts.hyphenate, opts.budgets, opts.rag, opts.hang])
+
+  /* Every style that changes GLYPH WIDTHS has to re-fit, and almost none of them change
+   * the box: tracking, size, weight, a variable axis, a feature setting — the column
+   * stays exactly as wide as it was, so neither the options above nor the ResizeObserver
+   * notices. The breaks then stay as computed under the old style and the line runs past
+   * the measure: 0.3em of tracking put a 1223px line in a 756px column, with the line
+   * text identical to before, which is what proves it never recomposed.
+   *
+   * Reading the RESOLVED style is deliberate. Asking the app to declare what changed is
+   * how this bug happened in the first place — a list of dependencies that someone has
+   * to remember to add tracking to. The browser already knows. */
+  const lastStyle = useRef('')
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const cs = getComputedStyle(el)
+    const key = [cs.fontFamily, cs.fontSize, cs.fontWeight, cs.fontStyle, cs.fontStretch,
+                 cs.fontVariationSettings, cs.fontFeatureSettings, cs.fontOpticalSizing,
+                 cs.letterSpacing, cs.wordSpacing, cs.textTransform, cs.fontKerning].join('|')
+    if (key === lastStyle.current) return
+    lastStyle.current = key
+    relayout()
+  })
 
   return (
     <div ref={ref}>
