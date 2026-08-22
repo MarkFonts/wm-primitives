@@ -178,38 +178,75 @@ function setAxis(fvs, tag, value) {
 /** Widths for one style, keyed by string. Cleared whenever the style key moves.
  *  `measureAt` is the same probe with one axis moved — the only way to know what a
  *  width axis actually does to a string, since axis widths are not linear. */
+/* Widths are cached ACROSS layouts, keyed by every style that changes them except
+ * letter-spacing — because letter-spacing does not need a re-measure, it needs
+ * arithmetic. CSS adds it after every character, so w(ls) = w(0) + n·ls, exactly, with
+ * kerning intact. Measured to confirm it: a kerned string predicts to the thousandth of
+ * a pixel.
+ *
+ * With ONE exception, also measured: any non-zero letter-spacing makes the engine drop
+ * ligatures, so "office" is a different set of glyphs at 0 than at 0.01em — a fixed step
+ * of about 2.4px here, identical at +5px and -1.5px, which is the ligature against its
+ * separate letters and nothing to do with the amount. So each string is cached twice, in
+ * its ligated and un-ligated forms, and the right base is picked by whether tracking is
+ * zero. Dragging the tracking slider then re-breaks the paragraph without re-measuring a
+ * single word. */
+const WIDTHS = new Map()
+
+function styleBucket(cs) {
+  const key = [cs.fontFamily, cs.fontSize, cs.fontWeight, cs.fontStyle, cs.fontStretch,
+               cs.fontVariationSettings, cs.fontFeatureSettings, cs.fontOpticalSizing,
+               cs.wordSpacing, cs.textTransform, cs.fontKerning].join('|')
+  let bucket = WIDTHS.get(key)
+  if (!bucket) { bucket = new Map(); WIDTHS.set(key, bucket) }
+  // One paragraph's worth of strings per style is small; a proof that walks a whole novel
+  // at one size is not. Drop the bucket rather than grow without bound.
+  if (bucket.size > 20000) bucket.clear()
+  return bucket
+}
+
+/** The letter-spacing the probe is measured AT when tracking is on: any non-zero value
+ *  gives the same un-ligated glyphs, so one measurement serves every tracking. */
+const PROBE_LS = 1
+
 function makeMeasurer(reference, runStyles) {
   const el = getProbe(reference)
   const baseCss = el.style.cssText
-  const baseFVS = getComputedStyle(reference).fontVariationSettings || ''
-  const cache = new Map()
+  const refCs = getComputedStyle(reference)
+  const baseFVS = refCs.fontVariationSettings || ''
+  const ls = parseFloat(refCs.letterSpacing) || 0
+  const cache = styleBucket(refCs)
   // An italic run is a different face and therefore different widths: measuring it as
   // roman is wrong by exactly the amount that makes the line not fit. The app owns how
   // it draws emphasis, so it passes the styles in and the probe wears them.
   const measure = (s, type) => {
     const styled = type && type !== 'text' && runStyles && runStyles[type]
-    const key = styled ? type + '\u0000' + s : s
-    let w = cache.get(key)
-    if (w === undefined) {
+    // Two bases per string: ligated for tracking 0, un-ligated for everything else.
+    const key = (ls ? 'L' : '0') + '\u0000' + (styled ? type : '') + '\u0000' + s
+    let base = cache.get(key)
+    if (base === undefined) {
       if (styled) Object.assign(el.style, styled)
+      el.style.letterSpacing = ls ? `${PROBE_LS}px` : '0px'
       el.textContent = s
-      w = el.getBoundingClientRect().width
-      if (styled) el.style.cssText = baseCss
-      cache.set(key, w)
+      const raw = el.getBoundingClientRect().width
+      // Normalise the probe's own spacing back out, so the stored number is the width at
+      // zero tracking with the glyphs tracking actually produces.
+      base = ls ? raw - Array.from(s).length * PROBE_LS : raw
+      el.style.cssText = baseCss
+      cache.set(key, base)
     }
-    return w
+    return ls ? base + Array.from(s).length * ls : base
   }
   const measureAt = (value, s, type) => {
     const styled = type && type !== 'text' && runStyles && runStyles[type]
-    const key = `${value}|${type || ''}|${s}`
+    const key = `@${value}|${type || ''}|${s}`
     let w = cache.get(key)
     if (w === undefined) {
       if (styled) Object.assign(el.style, styled)
       el.style.fontVariationSettings = setAxis(baseFVS, 'wdth', value)
       el.textContent = s
       w = el.getBoundingClientRect().width
-      if (styled) el.style.cssText = baseCss
-      else el.style.fontVariationSettings = baseFVS
+      el.style.cssText = baseCss
       cache.set(key, w)
     }
     return w
