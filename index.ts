@@ -76,6 +76,10 @@ export { FittingControls, fittingMode, AlignmentButtons, ALIGNMENTS, FittedParag
 // build-specimens.mjs cuts at each FORM FEED, fetched only as far as the reader asks.
 export { SPECIMENS, specimenChunks, parseSpecimen, loadSpecimen,
          type SpecimenBlock } from './src/specimen'
-import './src/Specimen.css'
+// The tail control travels with the loader: both apps draw the same buttons because
+// they render the same component, not because two files agree today. Named for the
+// component and not "Specimen", which on a case-insensitive filesystem resolves to
+// specimen.ts — the loader — and fails at build with a confusing missing export.
+export { SpecimenNav } from './src/SpecimenNav'
 export type { FittingControlsProps, Alignment } from './src/Fitting'
 export type { FitMode, FitOptions, FittedLine } from './src/flattersatz'
