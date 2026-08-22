@@ -110,6 +110,7 @@ function BandRow({ label, chip, chipMuted, title, value, offset, step, onChange 
       onChange={e => onChange({ ...value, [k]: +e.target.value + offset })}
     />
   )
+
   return (
     <div className="fit-hj-row" title={title}>
       <span className="fit-hj-label">

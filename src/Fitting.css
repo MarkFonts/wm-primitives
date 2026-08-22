@@ -97,15 +97,16 @@
 
 /* The H&J schema: label, then minimum · desired · maximum. */
 .fit-hj { padding-bottom: var(--spacing-02, 6px); }
-/* Label ABOVE its fields, not beside them. Side by side needs a label column plus three
-   number fields and their steppers in a rail that is often under 200px, and it does not
-   fit: the labels ran under the boxes and read as "w s", "le s", "g s". Stacked, every
-   width works, the numbers get the whole rail, and the header still lines up because the
-   head row stacks the same way. It costs one line of height per budget. */
+/* The LABEL is sized first and the fields take what is left — not the other way round.
+   Pinning the fields to a fixed width left two-word labels fighting over ten pixels,
+   wrapping mid-phrase or disappearing under the boxes. `auto` gives the label exactly
+   the width of its words on one line; minmax(0,1fr) lets the field box absorb the rest
+   and compress. Words do not break, and nothing overlaps. */
 .fit-hj-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--spacing-01, 3px);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--spacing-02, 6px);
   margin-bottom: var(--spacing-02, 6px);
 }
 
@@ -130,14 +131,12 @@
   letter-spacing: 0.04em;
   text-align: center;
 }
-/* The head row carries no label of its own; stacked, that empty cell is a blank line. */
-.fit-hj-head > .fit-hj-label { display: none; }
+
 .fit-hj-label {
   display: flex;
   align-items: center;
-  gap: var(--spacing-01, 3px) var(--spacing-02, 6px);
-  flex-wrap: wrap;              /* the badge drops under the label rather than clipping */
-  min-width: 0;
+  gap: var(--spacing-02, 6px);
+  white-space: nowrap;          /* a two-word label is two words, not a headline break */
   color: var(--text-muted, #999);
   font-size: var(--type-ui-size, 0.75rem);
   letter-spacing: 0.04em;
@@ -169,7 +168,20 @@
    selector outranks a bare class — so the rail's fields kept their intrinsic width and
    the maximum column hung off the edge whatever the track said. One selector, specific
    enough to win, doing nothing but letting the field fit its column. */
-.fit-hj-row input.fit-num { width: 100%; min-width: 0; padding: 0; }
+/* font-proofer styles `input[type="number"]` app-wide — border, background, radius, a
+   fixed width — and an attribute selector outranks a bare class. Every one of those came
+   back on each field, which also flattened the box's corner: three child boxes painting
+   inside an overflow-clipped wrapper cut across its superellipse and left a plain radius.
+   The wrapper carries all the chrome; the fields carry none. */
+.fit-hj-row input.fit-num {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
 
 /* What the expansion row is spending, shown only while it spends anything. `wdth` glows:
    the font had an axis and the line is being filled with type the designer drew. `scaleX`
