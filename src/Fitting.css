@@ -4,19 +4,21 @@
 
 .fit-switches {
   display: flex;
+  flex-wrap: wrap;              /* Hyphenate drops below rather than clipping */
   border: 1px solid var(--border, var(--line, #2a2a2a));
   border-radius: 13px;              /* half the 26px height: a pill, not a rounded box */
   overflow: hidden;
   margin: var(--spacing-04, 12px) 0;
 }
 .fit-switch {
-  flex: 1;
+  flex: 1 1 7rem;               /* room for the longest label on one line */
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-02, 6px);
-  padding: 0 var(--spacing-04, 12px);   /* clears the cap rule at r=12 */
+  padding: 0 var(--spacing-02, 6px);    /* the rail is narrow; the pill's cap is not */
+  white-space: nowrap;
   background: none;
   border: none;
   color: var(--text-muted, #999);
@@ -95,13 +97,15 @@
 
 /* The H&J schema: label, then minimum · desired · maximum. */
 .fit-hj { padding-bottom: var(--spacing-02, 6px); }
+/* Label ABOVE its fields, not beside them. Side by side needs a label column plus three
+   number fields and their steppers in a rail that is often under 200px, and it does not
+   fit: the labels ran under the boxes and read as "w s", "le s", "g s". Stacked, every
+   width works, the numbers get the whole rail, and the header still lines up because the
+   head row stacks the same way. It costs one line of height per budget. */
 .fit-hj-row {
   display: grid;
-  /* minmax(0,…), not 1fr: a grid item's min-width is auto, so the label column grew to
-     fit "expansion" plus the wdth chip and pushed the maximum field off the rail. */
-  grid-template-columns: minmax(0, 1fr) 9.6rem;
-  align-items: center;
-  gap: var(--spacing-02, 6px);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-01, 3px);
   margin-bottom: var(--spacing-02, 6px);
 }
 
@@ -126,6 +130,8 @@
   letter-spacing: 0.04em;
   text-align: center;
 }
+/* The head row carries no label of its own; stacked, that empty cell is a blank line. */
+.fit-hj-head > .fit-hj-label { display: none; }
 .fit-hj-label {
   display: flex;
   align-items: center;
