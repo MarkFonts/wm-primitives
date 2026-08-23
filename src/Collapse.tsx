@@ -43,9 +43,18 @@ export function Collapse({ open, children, className = '', clipMargin = 12 }: Co
   // The height is only ever set from a measurement, and only while the box is animating
   // or shut. Mount is deliberately not animated: a panel that opens itself on first
   // paint reads as a glitch, not as a disclosure.
+  //
+  // `applied` is what the box was last ANIMATED to, and the guard below is not
+  // defensive tidiness: both apps mount under StrictMode, which runs this effect twice
+  // on mount with the same props. The second run took the closing path on a box that
+  // was already shut — pinning it to its content height for two frames — so every
+  // collapsed section flashed its contents open and slammed shut on every page load.
   const first = useRef(true)
+  const applied = useRef(open)
   useLayoutEffect(() => {
-    if (first.current) { first.current = false; return }
+    if (first.current) { first.current = false; applied.current = open; return }
+    if (applied.current === open) return
+    applied.current = open
     clearTimeout(settle.current)
     if (open) {
       setMaxHeight(measure())

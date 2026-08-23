@@ -494,10 +494,16 @@ function fitLine(text, width, target, limits, m, isLast, flush, runs) {
  * face at this size at this axis position and there is no table of units to go stale.
  *
  * Two rules, one per edge. Add a character to a class and it hangs.
+ *
+ * Parentheses are NOT in either class. A bracket is not a mark of punctuation the eye
+ * reads past — it is a stroke with real weight and a full body, so hanging one does not
+ * close a hole in the margin, it puts a stroke outside the measure and bends the edge
+ * the alignment exists to hold. Quotes, commas and hyphens are light enough that the
+ * margin reads straighter with them out; a bracket never is.
  */
 export const PROTRUSION = [
-  { edge: 'left',  match: /[“‘"'¿¡(\[]/u },
-  { edge: 'right', match: /[”’"',.;:!?)\]\-–—]/u },
+  { edge: 'left',  match: /[“‘"'¿¡]/u },
+  { edge: 'right', match: /[”’"',.;:!?\-–—]/u },
 ]
 
 /** How far this line's first and last characters may hang, in px. Measured, so it is

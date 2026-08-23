@@ -75,12 +75,27 @@ export function fittingMode(textAlign: string, swissRag: boolean): FitMode {
   return textAlign === 'justify' ? 'justified' : (swissRag ? 'flattersatz' : 'plain')
 }
 
+/* Two kinds of knob, and the props say which is which.
+ *
+ *   `value` / `onChange` are PER FONT: the H&J bands, the rag's width and its budgets.
+ *   How loose a justified line of this typeface may get does not change because the
+ *   line happens to be a heading — it is the number you set once per face.
+ *
+ *   `swissRag` and `hyphenate` are PER STYLE, which is why they are their own props and
+ *   not keys inside `value`. They are typographic decisions about one style: a heading
+ *   is ranged left and never hyphenated; body text may be justified and broken. The app
+ *   holds them wherever it holds the rest of that style, and hands one style's pair in.
+ *
+ * Alignment is per style too, and is the app's to place — see AlignmentButtons.
+ */
 export interface FittingControlsProps {
   value: Partial<FitOptions>
   onChange: (next: Partial<FitOptions>) => void
   mode: FitMode
   swissRag: boolean
   onSwissRag: (on: boolean) => void
+  hyphenate: boolean
+  onHyphenate: (on: boolean) => void
   /** The proofed font has a `wdth` axis, so expansion can be Zapf's rather than a
    *  scaleX. The app knows this from fvar; the engine also detects it by measuring. */
   widthAxis?: boolean
@@ -128,7 +143,7 @@ function BandRow({ label, chip, chipMuted, title, value, offset, step, onChange 
   )
 }
 
-export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, widthAxis = false }: FittingControlsProps) {
+export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, hyphenate, onHyphenate, widthAxis = false }: FittingControlsProps) {
   const v = { ...DEFAULTS, ...value }
   const set = (patch: Partial<FitOptions>) => onChange({ ...value, ...patch })
   // const off = mode === 'off'   // only the indent row read this — see below
@@ -174,12 +189,12 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, w
         </button>
         {mode === 'justified' && (
           <button
-            className={`fit-switch${v.hyphenate ? ' active' : ''}`}
-            aria-pressed={!!v.hyphenate}
-            onClick={() => set({ hyphenate: !v.hyphenate })}
+            className={`fit-switch${hyphenate ? ' active' : ''}`}
+            aria-pressed={hyphenate}
+            onClick={() => onHyphenate(!hyphenate)}
           >
             <span>Hyphenate</span>
-            <span className="fit-switch-state">{v.hyphenate ? 'on' : 'off'}</span>
+            <span className="fit-switch-state">{hyphenate ? 'on' : 'off'}</span>
           </button>
         )}
       </div>
