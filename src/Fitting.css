@@ -1,6 +1,12 @@
 /* Fitting.css — the line-fitting controls. Tokens only, so each app's theme dresses it.
    Metrics follow the house scale; the switch pair is a pill, which is why it presses
-   with a fill rather than the inset stroke (see the caveat in corners.css). */
+   with a fill rather than the inset stroke (see the caveat in corners.css).
+
+   NOTHING here tracks. The panel's labels used to carry 0.04em, which is not a value the
+   system has: role `ui` is tracked 0, and the only tracking token is --track-caps, for
+   capitals. It showed — "letter spacing" sat visibly open beside "Leading" one row below
+   it, which is an AxisSlider label and was never tracked. The 8px badge keeps its own
+   sanctioned exception, and that is the only one. */
 
 .fit-switches {
   display: flex;
@@ -24,7 +30,6 @@
   color: var(--text-muted, #999);
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
-  letter-spacing: 0.04em;
   cursor: pointer;
   transition: background .12s, color .12s;
 }
@@ -38,7 +43,7 @@
 .fit-switch:active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text, #fff); }
 .fit-switch.active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text, #fff); }
 .fit-switch:focus-visible { outline: 1px solid var(--text-muted, #999); outline-offset: -2px; }
-.fit-switch-state { color: var(--text-dim, #555); font-size: 0.9em; letter-spacing: 0.04em; }
+.fit-switch-state { color: var(--text-dim, #555); font-size: 0.9em; }
 
 /* The collapsing sections are <Collapse> now — see Collapse.tsx and collapse.css. The
    heights used to be four hand-tuned numbers in the component (108 / 300 / 34 / 240),
@@ -78,7 +83,6 @@
   color: var(--text-muted, #999);
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
-  letter-spacing: 0.04em;
   cursor: pointer;
   transition: color .12s;
 }
@@ -154,7 +158,6 @@
 .fit-hj-head {
   color: var(--text-dim, #555);
   font-size: var(--type-ui-size, 0.75rem);
-  letter-spacing: 0.04em;
   text-align: center;
 }
 
@@ -171,7 +174,6 @@
   min-width: 0;
   color: var(--text-muted, #999);
   font-size: var(--type-ui-size, 0.75rem);
-  letter-spacing: 0.04em;
 }
 .fit-num {
   width: 100%;
