@@ -94,11 +94,6 @@
   container-name: fit-hj;
   padding-bottom: var(--spacing-02, 6px);
 }
-/* The LABEL is sized first and the fields take what is left — not the other way round.
-   Pinning the fields to a fixed width left two-word labels fighting over ten pixels,
-   wrapping mid-phrase or disappearing under the boxes. `auto` gives the label exactly
-   the width of its words on one line; minmax(0,1fr) lets the field box absorb the rest
-   and compress. Words do not break, and nothing overlaps. */
 .fit-hj-row {
   display: grid;
   /* The fields are a FIXED width in every row, so all nine boxes are the same size and
@@ -112,18 +107,25 @@
   margin-bottom: var(--spacing-02, 6px);
 }
 
-/* BELOW 15rem the label goes ABOVE its box instead of beside it.
-   The number is derived, not picked: 8.4rem of fields + a 6px gap + the widest label
-   ("letter spacing", ~91px at 0.75rem with 0.04em of tracking) is a shade over 15rem,
-   so this is the width at which the beside-layout stops being honest. Under it the row
-   used to have no defined behaviour at all — the label is `nowrap`, so it simply ran
-   under the boxes, which is what a 260px rail (228px of content) has been doing.
+/* Three stages, in this order, and the row only gives up one thing at a time:
 
-   Stacking is the whole fix: the box goes full width and its three values stay
-   `repeat(3, 1fr)`, so they are a third of whatever is left over — including under the
-   min/desired/max header, which keeps meaning what it says. Nothing here is pinned to
-   a width the app has to know about. */
-@container fit-hj (max-width: 15rem) {
+     1. the label on ONE line beside its box          — the wide rail, unchanged
+     2. the label WRAPPED beside its box              — this is the 260px rail
+     3. the label ABOVE the box, box full width       — below 12rem
+
+   Stage 2 needs no query at all: the label may wrap now (see .fit-hj-label), so it takes
+   two lines exactly when one no longer fits and the box keeps its 8.4rem. That is the
+   layout font-proofer has always had — values right, labels left — and it is what the
+   rail should still show, rather than restacking a panel that has the room.
+
+   Stage 3 is the real minimum, and 12rem is derived rather than picked: below it even the
+   widest single WORD ("spacing", ~48px at 0.75rem) no longer fits beside 8.4rem of fields
+   and a 6px gap, so there is nothing left to give up. Stacked, the box takes the full
+   width and its three values stay `repeat(3, 1fr)` — a third of whatever is left over,
+   header included. The fields never shrink instead: three 5-character values ("102.5")
+   with native steppers is what 8.4rem measures, and taking width off them clips digits
+   rather than words. */
+@container fit-hj (max-width: 12rem) {
   .fit-hj-row {
     grid-template-columns: 1fr;
     align-items: start;
@@ -160,8 +162,12 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-01, 3px) var(--spacing-02, 6px);
-  flex-wrap: wrap;              /* only the badge may drop — the words are nowrap below */
-  white-space: nowrap;          /* a two-word label is two words, not a headline break */
+  flex-wrap: wrap;              /* the badge drops below the words rather than squeezing */
+  /* The words MAY wrap. They used to be `nowrap` — a two-word label being two words and
+     not a headline break — but a label that cannot wrap does not fit and does not stop
+     either: on the 260px rail it simply ran under the field box and read "wo", "lett",
+     "flex". Two lines is the graceful version of that, and it costs nothing now that the
+     section measures its own height. */
   min-width: 0;
   color: var(--text-muted, #999);
   font-size: var(--type-ui-size, 0.75rem);

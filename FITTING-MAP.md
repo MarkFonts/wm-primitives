@@ -47,15 +47,17 @@ component — 108 / 300 / 34 / 240 — so adding a row meant guessing a new one,
 guess was wrong the moment a label wrapped.
 
 Styles: `src/Fitting.css` — `.fit-switches` (5) the Swiss Rag / Hyphenate pill, `.fit-hj`
-(91) the query CONTAINER, `.fit-hj-row` (101) the H&J row layout and the `@container`
-block under it that stacks the label above its box below 15rem, `.fit-hj-fields` (140) the
+(91) the query CONTAINER, `.fit-hj-row` (97) the H&J row layout and the `@container`
+block under it — the label goes to two lines beside its box before it ever goes above it,
+and only below 12rem does the row stack — `.fit-hj-fields` (140) the
 shared field box, `.fit-num` (168) and its override at (200), `.fit-chip` (214) the badge.
 `src/collapse.css` is the disclosure box; `src/Specimen.css` has the read-more tail.
 
 **The panel's contract with the app is a WIDTH.** Give it one and allow it any height:
-the rows read the container and pick beside-or-above themselves, and the three values are
-always a third of whatever is left. A 260px rail (228px of content) stacks; a wider panel
-does not. Nothing about the layout is a prop, and nothing is a media query — the rail can
+the rows read the container and pick their own layout, giving up one thing at a time —
+one-line label, then a wrapped label, then the label above a full-width box. A 260px rail
+(227px of content) keeps its labels beside the values, which is what it has always done;
+only a genuinely narrow panel stacks. Nothing about the layout is a prop, and nothing is a media query — the rail can
 be dragged narrower and the rows follow.
 
 **Careful with `.fit-num`:** the host apps style `input[type="number"]` globally, and an
