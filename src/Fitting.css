@@ -40,20 +40,9 @@
 .fit-switch:focus-visible { outline: 1px solid var(--text-muted, #999); outline-offset: -2px; }
 .fit-switch-state { color: var(--text-dim, #555); font-size: 0.9em; letter-spacing: 0.04em; }
 
-/* Heights are driven inline by the component: the 0fr -> 1fr grid trick collapses in a
-   flex column that gives the box no definite height, and a class-based max-height lost
-   to something in font-proofer's cascade. Inline cannot lose. */
-.fit-options, .fit-row-collapse {
-  overflow: hidden;
-  transition: max-height var(--dur-med, .22s) cubic-bezier(.2, 0, 0, 1),
-              opacity var(--dur-fast, .12s) linear;
-}
-
-/* An OPEN section may let shadows bleed past its edge — the wdth chip's glow was being
-   cut square, and this box is its nearest clipping ancestor. Only when open: a collapsed
-   section given the same clip margin leaks 12px of its content, which put half a "rag
-   width" row on screen underneath the switches. */
-.fit-row-collapse--open { overflow: clip; overflow-clip-margin: 12px; }
+/* The collapsing sections are <Collapse> now — see Collapse.tsx and collapse.css. The
+   heights used to be four hand-tuned numbers in the component (108 / 300 / 34 / 240),
+   which the stacked H&J layout below would have made wrong on every narrow rail. */
 
 /* Alignment row. 28px, not 32: five buttons (a reset plus four alignments) have to fit
    the width three used to have. */
@@ -95,8 +84,16 @@
 }
 .fit-sub:hover, .fit-sub.active { color: var(--text, #fff); }
 
-/* The H&J schema: label, then minimum · desired · maximum. */
-.fit-hj { padding-bottom: var(--spacing-02, 6px); }
+/* The H&J schema: label, then minimum · desired · maximum.
+   This box is the QUERY CONTAINER for the rows inside it, which is the whole contract
+   with the host app: give the panel a width and allow it any height, and the rows pick
+   their own layout. No prop, no breakpoint the app has to know about, and it responds
+   to the rail being dragged narrow — which a media query cannot see. */
+.fit-hj {
+  container-type: inline-size;
+  container-name: fit-hj;
+  padding-bottom: var(--spacing-02, 6px);
+}
 /* The LABEL is sized first and the fields take what is left — not the other way round.
    Pinning the fields to a fixed width left two-word labels fighting over ten pixels,
    wrapping mid-phrase or disappearing under the boxes. `auto` gives the label exactly
@@ -113,6 +110,28 @@
   align-items: center;
   gap: var(--spacing-02, 6px);
   margin-bottom: var(--spacing-02, 6px);
+}
+
+/* BELOW 15rem the label goes ABOVE its box instead of beside it.
+   The number is derived, not picked: 8.4rem of fields + a 6px gap + the widest label
+   ("letter spacing", ~91px at 0.75rem with 0.04em of tracking) is a shade over 15rem,
+   so this is the width at which the beside-layout stops being honest. Under it the row
+   used to have no defined behaviour at all — the label is `nowrap`, so it simply ran
+   under the boxes, which is what a 260px rail (228px of content) has been doing.
+
+   Stacking is the whole fix: the box goes full width and its three values stay
+   `repeat(3, 1fr)`, so they are a third of whatever is left over — including under the
+   min/desired/max header, which keeps meaning what it says. Nothing here is pinned to
+   a width the app has to know about. */
+@container fit-hj (max-width: 15rem) {
+  .fit-hj-row {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: var(--spacing-01, 3px);
+  }
+  /* The header's label cell is empty; stacked, it would be an empty row plus a gap
+     between "min desired max" and the words they belong to. */
+  .fit-hj-head .fit-hj-label { display: none; }
 }
 
 /* Minimum · desired · maximum read as ONE box: same chrome as every other field in the

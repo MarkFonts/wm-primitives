@@ -41,9 +41,22 @@ Types are in `src/flattersatz.d.ts` — `FitOptions` is the readable summary of 
 | The wdth / x-scale badge | `expansionChip` (~143) |
 | The fitted renderer | `FittedParagraph()` (~271) |
 
-Styles: `src/Fitting.css` — `.fit-switches` (5) the Swiss Rag / Hyphenate pill, `.fit-hj-row`
-(105) the H&J row layout, `.fit-hj-fields` (123) the shared field box, `.fit-num` (151) and
-its override at (183), `.fit-chip` (197) the badge. `src/Specimen.css` has the read-more tail.
+The two collapsing sections are `<Collapse>` (`src/Collapse.tsx`), which measures its own
+content and drops its cap once open. Their heights used to be four numbers typed into the
+component — 108 / 300 / 34 / 240 — so adding a row meant guessing a new one, and every
+guess was wrong the moment a label wrapped.
+
+Styles: `src/Fitting.css` — `.fit-switches` (5) the Swiss Rag / Hyphenate pill, `.fit-hj`
+(91) the query CONTAINER, `.fit-hj-row` (101) the H&J row layout and the `@container`
+block under it that stacks the label above its box below 15rem, `.fit-hj-fields` (140) the
+shared field box, `.fit-num` (168) and its override at (200), `.fit-chip` (214) the badge.
+`src/collapse.css` is the disclosure box; `src/Specimen.css` has the read-more tail.
+
+**The panel's contract with the app is a WIDTH.** Give it one and allow it any height:
+the rows read the container and pick beside-or-above themselves, and the three values are
+always a third of whatever is left. A 260px rail (228px of content) stacks; a wider panel
+does not. Nothing about the layout is a prop, and nothing is a media query — the rail can
+be dragged narrower and the rows follow.
 
 **Careful with `.fit-num`:** the host apps style `input[type="number"]` globally, and an
 attribute selector outranks a bare class. Anything set on `.fit-num` alone may be silently

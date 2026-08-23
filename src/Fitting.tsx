@@ -11,6 +11,7 @@
  */
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { AxisSlider } from './AxisSlider'
+import { Collapse } from './Collapse'
 import { band, DEFAULTS, layoutParagraph, lineStyle, type Band, type FitMode, type FitOptions } from './flattersatz'
 import { splitInlineMarkup } from './inlineMarkup'
 import './Fitting.css'
@@ -186,8 +187,7 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, w
       {/* THE RAG. Its measure band, and knobs that are its own — opening one closes the
           gaps greedy breaking leaves, which is the rag, so they start off and stay off
           until asked for. */}
-      <div className={`fit-row-collapse${rag ? ' fit-row-collapse--open' : ''}`}
-        style={{ maxHeight: rag ? (v.budgets ? 300 : 108) : 0 }}>
+      <Collapse open={rag}>
         <AxisSlider label="rag width" value={v.ragWidth} min={0} max={220} suffix="px"
           onChange={n => set({ ragWidth: n as number })} />
         <button className={`fit-sub${v.budgets ? ' active' : ''}`} aria-pressed={v.budgets}
@@ -205,12 +205,11 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, w
             </div>
           </>
         )}
-      </div>
+      </Collapse>
 
       {/* JUSTIFICATION. The schema itself is buried: a proof wants a column that reads,
           not a dialog, and these are the numbers you set once per typeface. */}
-      <div className={`fit-row-collapse${mode === 'justified' ? ' fit-row-collapse--open' : ''}`}
-        style={{ maxHeight: mode === 'justified' ? (hj ? 240 : 34) : 0 }}>
+      <Collapse open={mode === 'justified'}>
         <button className={`fit-sub${hj ? ' active' : ''}`} aria-expanded={hj} onClick={() => setHj(!hj)}>
           <span>justification</span>
           <span className="fit-switch-state">{hj ? 'hide' : 'H&J'}</span>
@@ -245,7 +244,7 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, w
               onChange={b => set({ glyphScaling: b })} />
           </div>
         )}
-      </div>
+      </Collapse>
 
       {/* Indent is out of the rail. Justified never wanted it, and in rag mode it was one
           more slider shoving the variable axes off the bottom — which is the whole reason

@@ -67,6 +67,11 @@ export type { Role, Landing } from './src/type'
 export { layoutParagraph, lineStyle, applyTo as applyFlattersatz,
          DEFAULTS as FLATTERSATZ_DEFAULTS, SWISS_PRESET } from './src/flattersatz'
 
+// A disclosure box that measures its own content, so a section's height is never a
+// number anyone has to keep up to date. Used by the fitting panel's two sections.
+export { Collapse } from './src/Collapse'
+export type { CollapseProps } from './src/Collapse'
+
 // The line-fitting controls. The engine above is consumed directly by static pages; this
 // is the interface both paragraph views render — font-proofer in its sidebar, ReCal in
 // the floating Type panel. Alignment stays with the app; everything downstream travels.

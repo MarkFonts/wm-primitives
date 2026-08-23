@@ -1,0 +1,22 @@
+/* collapse.css — chrome for Collapse.tsx. The HEIGHT is inline, from the component:
+   a class-based max-height lost to font-proofer's cascade, and the 0fr -> 1fr grid
+   trick collapses in a flex column that gives the box no definite height. What is left
+   here is the clipping and the timing, neither of which any app contests. */
+
+.wm-collapse {
+  overflow: hidden;
+  transition: max-height var(--dur-med, .22s) cubic-bezier(.2, 0, 0, 1),
+              opacity var(--dur-fast, .12s) linear;
+}
+
+/* An open box may let a shadow past its edge — the wdth badge glows, and this is its
+   nearest clipping ancestor. `clip` rather than `hidden` because only clip takes a
+   margin; the margin itself is inline, so a caller can say how much bleed it needs.
+   Never on a closed box: the same margin leaks that many pixels of live content. */
+.wm-collapse--open { overflow: clip; }
+
+/* A settled open box has no cap at all (max-height: none), so nothing to animate — and
+   an ancestor that hides it while shut would otherwise animate it open on reveal. */
+@media (prefers-reduced-motion: reduce) {
+  .wm-collapse { transition: none; }
+}
