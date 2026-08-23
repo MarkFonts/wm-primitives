@@ -804,6 +804,140 @@ HERO_TMPL = """
 """
 HERO = HERO_TMPL.replace("__SIX__", SIX_CMDS)
 
+# -- The gloss ---------------------------------------------------------------------
+# THE LINKED BUILD ONLY. This is the one route that gets type above SDR white in a
+# browser: real DOM text with an HDR AVIF as its background and background-clip:text,
+# under dynamic-range-limit:no-limit. It needs the AVIF as a FILE beside the page, which
+# the single-file build (CSP, everything a data URI) cannot have -- and 132KB of AVIF is
+# 176KB of base64 on a page already near 4MB. So the poster glows on Pages and lands on
+# the P3 acid everywhere else, which is a fallback nobody has to maintain.
+#
+# What wears it, and what deliberately does not:
+#   the four headline lines  -- the whole point
+#   the bending bar          -- masked by its PATH only (see below)
+#   the eyebrow              -- no: it is 9px, and small type composites the headroom away
+#   the rules                -- no: sized off the header, a short rule caught one static
+#                               corner of the field and never moved with the rest
+#   the 6                    -- no: it carries mix-blend-mode:difference, where added
+#                               light inverts instead of adding
+#   the comb                 -- no: it already emits its own colour
+#
+# ONE field for the whole header. A percentage background-size resolves against each
+# element's OWN box, so every line scaled the map to itself and ran a private copy of it;
+# sizing in px off the header and offsetting each element by its own left/top edge
+# (--ox/--oy) makes one light source that travels ACROSS the words.
+GLOSS = "" if not LINKED else r"""
+<style id="gloss-css">
+.wm-head{ --gx:0px; --gy:0px; --gw:0px; --gh:0px; --gloss:url(field-247.avif); }
+/* The glyph is the mask, the field is the paint. The field never goes black (BASE is
+   0.30 of reference white), so replacing the ink cannot make a letter disappear. */
+.wm-head .wm-stack span{
+  background-color:var(--ink);                /* if the AVIF 404s, the caps stay ink */
+  background-image:var(--gloss);
+  background-size:var(--gw) var(--gh);
+  background-position:calc(var(--gx) - var(--ox,0px)) calc(var(--gy) - var(--oy,0px));
+  background-repeat:no-repeat;                /* the pan never leaves the field */
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+  dynamic-range-limit:no-limit;
+}
+/* The rule is furniture and keeps its ink -- but it lives INSIDE a span whose color is
+   now transparent, and it painted itself with currentColor. */
+.wm-head .wm-stack i{ background:var(--ink); }
+.wm-head .wm-bendsvg{ dynamic-range-limit:no-limit; }
+.wm-head .wm-bendsvg rect[data-gloss]{ pointer-events:none; }
+</style>
+<script id="gloss-js">
+(function(){
+  var head=document.querySelector('.wm-head'); if(!head) return;
+  var NS='http://www.w3.org/2000/svg';
+  /* The crop the tuner landed on: 23.5% x 9.3% of the map. */
+  var ZOOM_X=4.25, ZOOM_Y=10.75;
+
+  /* The bending bar wears it too, masked by the PATH alone -- not the comb's quads or
+     teeth, so nothing paints in the corner the comb already illuminates. No plus-lighter:
+     the bar's stroke is near-white ink and adding to it saturated to flat white, so the
+     gloss replaces the stroke inside the mask, the same way the headline wears the
+     field. The path is drawn by the hero script, so this waits for it. */
+  var bend=head.querySelector('.wm-bendsvg'), bpat=null, bspan=[0,0];
+  function wireBend(){
+    if(bpat || !bend) return;
+    var path=bend.querySelector('.wmb-path'); if(!path) return;
+    var vb=(bend.getAttribute('viewBox')||'').split(/[\s,]+/).map(Number);
+    if(vb.length!==4) return;
+    var X=vb[0],Y=vb[1],W=vb[2],H=vb[3];
+    path.id=path.id||'bend-gloss-src';
+    var defs=bend.querySelector('defs')||bend.insertBefore(document.createElementNS(NS,'defs'),bend.firstChild);
+
+    var mask=document.createElementNS(NS,'mask');
+    mask.id='bend-gloss-mask';
+    mask.setAttribute('maskUnits','userSpaceOnUse');
+    mask.setAttribute('x',X); mask.setAttribute('y',Y);
+    mask.setAttribute('width',W); mask.setAttribute('height',H);
+    var u=document.createElementNS(NS,'use');
+    u.setAttribute('href','#'+path.id);
+    u.style.stroke='#fff'; u.style.fill='none';
+    mask.appendChild(u); defs.appendChild(mask);
+
+    bpat=document.createElementNS(NS,'pattern');
+    bpat.id='bend-gloss-pat';
+    bpat.setAttribute('patternUnits','userSpaceOnUse');
+    bpat.setAttribute('x',X); bpat.setAttribute('y',Y);
+    bpat.setAttribute('width',W*ZOOM_X); bpat.setAttribute('height',H*ZOOM_Y);
+    var im=document.createElementNS(NS,'image');
+    im.setAttribute('href','field-247.avif');
+    im.setAttribute('width',W*ZOOM_X); im.setAttribute('height',H*ZOOM_Y);
+    im.setAttribute('preserveAspectRatio','none');
+    bpat.appendChild(im); defs.appendChild(bpat);
+    bspan=[W*(ZOOM_X-1), H*(ZOOM_Y-1)];
+
+    var rect=document.createElementNS(NS,'rect');
+    rect.setAttribute('x',X); rect.setAttribute('y',Y);
+    rect.setAttribute('width',W); rect.setAttribute('height',H);
+    rect.setAttribute('fill','url(#bend-gloss-pat)');
+    rect.setAttribute('mask','url(#bend-gloss-mask)');
+    rect.setAttribute('data-gloss','1');
+    bend.appendChild(rect);
+  }
+
+  /* The field's size is the HEADER's, in px, and every element is offset by its own
+     corner -- that is what makes it one light source instead of one per line. */
+  function place(){
+    var hb=head.getBoundingClientRect();
+    head.style.setProperty('--gw',(hb.width  * ZOOM_X)+'px');
+    head.style.setProperty('--gh',(hb.height * ZOOM_Y)+'px');
+    [].forEach.call(head.querySelectorAll('.wm-stack span'),function(el){
+      var r=el.getBoundingClientRect();
+      el.style.setProperty('--ox',(r.left-hb.left)+'px');
+      el.style.setProperty('--oy',(r.top -hb.top )+'px');
+    });
+  }
+
+  /* Panning a zoomed crop, not sliding a slab: the window is a fraction of the field, so
+     different structure comes through as it travels instead of arriving intact. */
+  function apply(u,v){
+    var hb=head.getBoundingClientRect();
+    head.style.setProperty('--gx',(-u*hb.width *(ZOOM_X-1))+'px');
+    head.style.setProperty('--gy',(-v*hb.height*(ZOOM_Y-1))+'px');
+    if(bpat){ bpat.setAttribute('x',(-u*bspan[0])+''); bpat.setAttribute('y',(-v*bspan[1])+''); }
+  }
+
+  function boot(){ wireBend(); place(); apply(cu,cv); }
+  var cu=0.5, cv=0.5, raf=null;
+  boot(); addEventListener('resize',boot);
+  /* the hero draws the bend after its own layout pass; catch it whenever it lands */
+  var tries=0, t=setInterval(function(){ wireBend(); if(bpat||++tries>40) clearInterval(t); },150);
+
+  head.addEventListener('mousemove',function(e){
+    var r=head.getBoundingClientRect();
+    cu=(e.clientX-r.left)/r.width; cv=(e.clientY-r.top)/r.height;
+    if(raf) return;
+    raf=requestAnimationFrame(function(){ raf=null; apply(cu,cv); });
+  });
+})();
+</script>
+"""
+
 # The colophon runs the shared primitive, src/letterbox.js -- the same engine
 # wordmark.nyc's hero and footer use. It is inlined here like every other script on the
 # page, and it stays ASCII so the single-file build cannot mojibake. It is an ES module,
@@ -922,7 +1056,7 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 {HERO}
 {SPY}</script>
 <script type="module">{LETTERBOX}
-{LB_BOOT}</script>{TAIL}
+{LB_BOOT}</script>{GLOSS}{TAIL}
 """
 
 bad = [(i, repr(c)) for i, c in enumerate(page) if ord(c) > 127]
