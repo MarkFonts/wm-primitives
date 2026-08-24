@@ -789,7 +789,23 @@ function buildItems(runs, m, opts) {
   // …and the space before the FINAL word is not a break at all, so the last word cannot
   // be left standing alone. Needs three items: with two, keeping them together is the
   // whole paragraph and there is nothing to prevent.
-  if (opts.keepLastWord !== false && items.length > 2) items[items.length - 2].brk = false
+  //
+  // Walk to the start of the last WORD rather than counting back two items. A hyphenated
+  // word is several items — its fragments carry hyphen:true — so `length - 2` lands
+  // INSIDE the final word whenever it happens to be splittable, forbidding a break in
+  // the middle of it while leaving the space in front of it legal. The widow killer then
+  // silently does nothing, and only for the words long enough to hyphenate: exactly the
+  // long compounds where a runt looks worst. Measured on German at a justified measure:
+  // 0 runts with hyphenation off, 11 with it on, same text and same flag.
+  if (opts.keepLastWord !== false && items.length > 2) {
+    let k = items.length - 1
+    while (k > 0 && items[k - 1].hyphen) k--   // k = first item of the last word
+    // The word may not be split either. Gluing it to the previous word is not enough on
+    // its own: break it at a hyphen and the tail is left standing alone instead, which
+    // is the same runt with a hyphen in front of it.
+    for (let i = k; i < items.length - 1; i++) items[i].brk = false
+    if (k > 0) items[k - 1].brk = false
+  }
   return items
 }
 
