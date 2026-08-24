@@ -2,10 +2,24 @@
    that the text continues, which is the whole affordance — a hard cut reads as the end
    of the specimen instead of the end of what has loaded. */
 .specimen-fade {
-  height: 7rem;
-  margin-top: -7rem;          /* sits over the last lines rather than after them */
+  height: var(--specimen-fade-height, 13rem);
+  margin-top: calc(var(--specimen-fade-height, 13rem) * -1);  /* sits over the last lines */
   pointer-events: none;       /* the text underneath stays clickable and editable */
-  background: linear-gradient(to bottom, transparent, var(--bg, #242424));
+  /* Eased, not a straight two-stop ramp. A linear interpolation in alpha does NOT read
+     as linear: perceived lightness moves fastest at the transparent end, so a plain
+     `transparent → --bg` puts a visible edge where the fade starts and then crawls. The
+     stops below approximate an ease-in curve (alpha ≈ t²), which is what makes a long
+     fade read as the ink thinning out rather than as a panel laid over the text.
+     Kept in --bg so it works on either theme without knowing which one is on. */
+  background: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0) 0%,
+    color-mix(in srgb, var(--bg, #242424) 8%, transparent) 25%,
+    color-mix(in srgb, var(--bg, #242424) 22%, transparent) 45%,
+    color-mix(in srgb, var(--bg, #242424) 45%, transparent) 65%,
+    color-mix(in srgb, var(--bg, #242424) 72%, transparent) 82%,
+    var(--bg, #242424) 100%
+  );
 }
 
 /* Read further, or leave. Right-aligned so the pair sits under the rag rather than
