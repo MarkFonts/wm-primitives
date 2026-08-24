@@ -1,0 +1,50 @@
+/* Ink fade — the tail of a reading proof falls away instead of stopping.
+ *
+ * GT Canon's web proofs do this: the specimen text is long enough that you read INTO
+ * it, and the bottom dissolves rather than ending on a hard last line. It is an honest
+ * device — it says "this continues" without a rule, a shadow, or a fake page edge — and
+ * it keeps the eye on the type rather than on where the box stops.
+ *
+ * A MASK, not an opacity or a colour ramp. Three reasons it has to be:
+ *   - opacity on the container fades the whole block evenly; the point is a gradient.
+ *   - a colour ramp toward the background has to KNOW the background, so it breaks the
+ *     moment the theme flips or the block sits on anything but flat --bg.
+ *   - a mask fades the ink to nothing over whatever is behind it, in either theme, with
+ *     no knowledge of the ground at all.
+ *
+ * Opt in per block with .ink-fade. Off by default: a fade over a SHORT column eats real
+ * lines, so this belongs on a long specimen and nowhere else.
+ */
+
+.ink-fade {
+  /* Both properties, and in this order: Safari and older WebKit still need the prefix,
+     and a bare `mask-image` there is simply ignored — the fade silently does nothing. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 var(--ink-fade-start, 55%),
+    transparent var(--ink-fade-end, 100%)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 var(--ink-fade-start, 55%),
+    transparent var(--ink-fade-end, 100%)
+  );
+}
+
+/* The fade is decoration. Someone who has asked for less motion has usually also asked
+   for fewer things that make text hard to read, and a dissolving paragraph is exactly
+   that — so hand back the full block rather than a prettier one. */
+@media (prefers-reduced-motion: reduce) {
+  .ink-fade {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* Editing beats decoration. A caret inside a faded tail is invisible and the text under
+   it unreadable, so any block that is focused or being edited shows its full ink. Both
+   apps put the caret in the proof itself, so without this the fade would fight typing. */
+.ink-fade:focus-within {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
