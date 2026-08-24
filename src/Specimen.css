@@ -5,6 +5,12 @@
   height: var(--specimen-fade-height, 13rem);
   margin-top: calc(var(--specimen-fade-height, 13rem) * -1);  /* sits over the last lines */
   pointer-events: none;       /* the text underneath stays clickable and editable */
+  /* Positioned, or it never shows. The paragraph blocks carry .edit-rail, which is
+     position:relative, and a positioned element paints above a static one whatever the
+     DOM order — so a static fade sits BEHIND the very text it is meant to cover. This
+     was the whole reason the fade looked absent in the proofers. */
+  position: relative;
+  z-index: 1;
   /* Eased, not a straight two-stop ramp. A linear interpolation in alpha does NOT read
      as linear: perceived lightness moves fastest at the transparent end, so a plain
      `transparent → --bg` puts a visible edge where the fade starts and then crawls. The
