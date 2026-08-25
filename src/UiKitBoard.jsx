@@ -11,7 +11,9 @@
 // .coss-b use --w-bold, so raising the default raises both. Italic text maps to the ital
 // axis on top of the current variation settings (--vs).
 import './UiKitBoard.css'
-import { useState, useEffect, useLayoutEffect, useRef, useCallback, Fragment } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, Fragment } from 'react'
+import { motion, useMotionValue, useMotionValueEvent } from 'motion/react'
+import { useDragScroll } from './useDragScroll'
 
 // ── Copy pools (rotated by pass index so panels vary as you scroll) ──────────────
 const at = (a, i) => a[((i % a.length) + a.length) % a.length]
@@ -149,9 +151,6 @@ const SLIDERS = [
 ]
 const PAGES = [[1, 8], [3, 12], [2, 5], [4, 20]]
 const TOGGLE_ACTIVE = [1, 0, 2, 1]
-
-// A spinning throbber (its own tiny particle) shown at the loading edge.
-function Spinner() { return <span className="ui-spinner" /> }
 
 // Skeleton placeholder sized to the tile's estimated body height (and full width) so the
 // card reserves ~the right box → minimal reflow/thrash when the real content resolves.
@@ -376,7 +375,7 @@ function SliderCtl({ label, fmt, init }) {
     <div className="ui-col">
       <div className="ui-between"><span style={{ fontSize: 13 }}>{label}</span><span className="ui-num coss-b" style={{ fontSize: 13 }}>{fmt(pct)}</span></div>
       <div ref={ref} className="ui-track ui-track--drag"
-        onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); set(e.clientX) }}
+        onPointerDown={e => { e.stopPropagation(); e.currentTarget.setPointerCapture(e.pointerId); set(e.clientX) }}
         onPointerMove={e => { if (e.buttons) set(e.clientX) }}>
         <span className="ui-track-fill" style={{ width: `${pct}%` }} />
         <span className="ui-thumb" style={{ left: `${pct}%` }} />
@@ -594,7 +593,8 @@ function makeParticles(v) {
 }
 
 const INIT_SIDE = 6   // columns each side of centre at start (→ ~12 columns)
-const MAX_SIDE = 16   // cap columns per side
+const OVERSCAN_PX = 600 // keep this much extra mounted past each visible edge
+const COL_W = 270, COL_WIDE_W = 420, COL_GAP = 16
 
 // Real measured tile heights (incl. header) — used to fill columns AND to size the loading
 // skeleton so the card reserves ~the right box (minimal reflow when content resolves).
@@ -607,7 +607,32 @@ const EST = {
   Stepper: 168, Rating: 168, 'Hover Card': 231, Login: 280, List: 390,
 }
 
-export default function UiKitBoard({ fontStyle, weight = 400, boldWeight = 700 }) {
+// Distinct permutation of catalog indices per column seed → no two columns share an order.
+// Module-level (not per-render) since colWidth/colX below need it too.
+function hash(i, seed) {
+  let x = ((i + 1) * 374761393 + (seed * 2 + 1) * 668265263) >>> 0
+  x = ((x ^ (x >>> 13)) * 1274126177) >>> 0
+  return x
+}
+
+// Column width is decided by INDEX ALONE, never by which tile lands there — that's what
+// keeps panning O(1) (see colX below). An occasional wide column then prefers a wide-flagged
+// tile (Table, List) so the extra width earns its keep; narrow columns skip those tiles
+// entirely, since they're sized to fill 420px, not 270px.
+const WIDE_PERIOD = 5
+const isWideCol = (c) => hash(c, 0) % WIDE_PERIOD === 0
+const colWidth = (c) => (isWideCol(c) ? COL_WIDE_W : COL_W)
+
+// Left edge of column c, in board-content pixels, with column 0 pinned at x=0. O(|range|)
+// is fine — the mounted range is a few dozen columns at most.
+function colX(c) {
+  let x = 0
+  if (c >= 0) { for (let i = 0; i < c; i++) x += colWidth(i) + COL_GAP }
+  else { for (let i = -1; i >= c; i--) x -= colWidth(i) + COL_GAP }
+  return x
+}
+
+export default function UiKitBoard({ fontStyle, weight = 400, boldWeight = 700, topInset = 0 }) {
   // Board style built from the incoming proof props: spread the font style object (fontFamily,
   // fontVariationSettings, fontFeatureSettings, fontStyle, fontOpticalSizing), then expose the
   // weight/variation CSS vars the ported coss.css relies on (--w-default, --w-bold, --vs).
@@ -618,18 +643,30 @@ export default function UiKitBoard({ fontStyle, weight = 400, boldWeight = 700 }
     '--vs': (fontStyle && fontStyle.fontVariationSettings) || 'normal',
   }
 
+  // topInset: how much of the board's top the consuming app's own chrome floats OVER
+  // (nav tabs, mode label — see ReCal's Shell.tsx / font-proofer's App.jsx). The STRIP
+  // itself always spans the full height it's given — this only sets where row 0 RESTS,
+  // so on load it clears whatever's overlaid on top, same as before there was an overlay.
+  // Panning down from rest slides later rows up underneath that chrome (see topFadeOpacity
+  // below); each app supplies its own value since the overlay heights differ per app.
+
   // ── 2D infinite board ───────────────────────────────────────────────────────────
   // Each column is an INDEPENDENT vertical strip that draws components from its OWN
-  // deterministic shuffle of the catalog (distinct order per column → no columns look alike)
-  // with its own copy seed, filled down to `targetH`. The board grows on THREE edges: more
-  // columns LEFT / RIGHT, and taller columns DOWN — so scrolling any way loads more.
+  // deterministic shuffle of the catalog (distinct order per column → no columns look alike),
+  // filled down to `targetH`. Panning is Seth Thompson's drag/wheel engine (useDragScroll,
+  // https://seththompson.com/articles/infinite-image-grids) driving plain motion values —
+  // there's no native scrollLeft/scrollTop, so nothing to fight with reflow-driven centring
+  // hacks. Columns mount/unmount on BOTH horizontal edges as you pan (real virtualization —
+  // panning far in one direction doesn't grow the DOM forever); rows only grow downward,
+  // same as an ordinary infinite-scroll feed, and both grow synchronously on the same tick
+  // the edge is crossed — no artificial loading delay, nothing to fetch.
   const [left, setLeft] = useState(INIT_SIDE)
   const [right, setRight] = useState(INIT_SIDE)
   const [rows, setRows] = useState(1)
-  const [loadingDir, setLoadingDir] = useState(null)
-  const busyRef = useRef(false)
   const stripRef = useRef(null)
-  const prevSW = useRef(0), pendingLeft = useRef(false), didCenter = useRef(false), ignoreScroll = useRef(false)
+  const baseX = useRef(0)
+  const panX = useMotionValue(0)
+  const panY = useMotionValue(0)
   const [vh, setVh] = useState(() => (typeof window !== 'undefined' ? window.innerHeight : 900))
   useEffect(() => {
     const on = () => setVh(window.innerHeight)
@@ -640,51 +677,91 @@ export default function UiKitBoard({ fontStyle, weight = 400, boldWeight = 700 }
   // (edge-checks aren't trivially satisfied on mount).
   const targetH = Math.round(vh * 2.2) * rows
 
-  const load = useCallback((dir) => {
-    if (busyRef.current) return
-    if (dir === 'l' && left >= MAX_SIDE) return
-    if (dir === 'r' && right >= MAX_SIDE) return
-    busyRef.current = true; setLoadingDir(dir)
-    if (dir === 'l') { const s = stripRef.current; prevSW.current = s ? s.scrollWidth : 0; pendingLeft.current = true }
-    window.setTimeout(() => {
-      if (dir === 'l') setLeft(n => Math.min(MAX_SIDE, n + 1))
-      else if (dir === 'r') setRight(n => Math.min(MAX_SIDE, n + 1))
-      else setRows(n => n + 1)
-      busyRef.current = false; setLoadingDir(null)
-    }, 620)
-  }, [left, right])
-
-  // Only ONE load per scroll event, and never from the programmatic centering/anchoring
-  // scrolls (ignoreScroll) or before the initial centre is set (didCenter).
-  const onScroll = useCallback(() => {
-    const s = stripRef.current
-    if (!s || !didCenter.current || ignoreScroll.current) return
-    if (s.scrollLeft < 300) load('l')
-    else if (s.scrollLeft > s.scrollWidth - s.clientWidth - 300) load('r')
-    else if (s.scrollTop > s.scrollHeight - s.clientHeight - 300) load('d')
-  }, [load])
-
-  // Left-grow shifts everything right — nudge scrollLeft by the added width so the view stays
-  // put. And centre horizontally once, on mount. Both are programmatic scrolls, so flag
-  // ignoreScroll briefly so they don't self-trigger a load.
+  // Centre the initial view once the strip has a measured width: column 0's left edge lands
+  // at mid-viewport, so the already-mounted negative AND positive columns are both reachable
+  // with a single drag, instead of starting flush against the left edge.
   useLayoutEffect(() => {
-    const s = stripRef.current; if (!s) return
-    const guard = () => { ignoreScroll.current = true; window.setTimeout(() => { ignoreScroll.current = false }, 150) }
-    if (pendingLeft.current) { guard(); s.scrollLeft += s.scrollWidth - prevSW.current; pendingLeft.current = false }
-    else if (!didCenter.current && s.scrollWidth > s.clientWidth) { guard(); s.scrollLeft = (s.scrollWidth - s.clientWidth) / 2; didCenter.current = true }
+    const s = stripRef.current
+    if (!s || baseX.current) return
+    baseX.current = s.clientWidth / 2
+    panX.set(baseX.current)
+  }, [])
+
+  // topInset arrives at 0 and is patched in asynchronously (the consuming app measures
+  // its own overlaid nav via ResizeObserver, after it's actually rendered) — panY only
+  // reads it inside the drag callback, so without this it would sit at the stale value
+  // until the next gesture. Keep tracking topInset until the user actually interacts;
+  // once they have, their own position takes over and this stops touching panY.
+  const hasPannedRef = useRef(false)
+  useEffect(() => {
+    if (!hasPannedRef.current) panY.set(topInset)
+  }, [topInset])
+
+  // Negated: useDragScroll's offset already flips drag/wheel direction once (see its
+  // emitOffset), and its OWN reference usage (virtual-grid.jsx) applies a second flip via
+  // `column - position` before turning a position into a CSS value. Since we skip that
+  // indirection and feed the transform directly, we need that second flip here instead —
+  // otherwise content drags backwards relative to the pointer.
+  // `bind` is drag-only now (see useDragScroll: wheel binds itself directly to `target`,
+  // drag stays on the synthetic events this spreads onto the strip below).
+  const bind = useDragScroll(
+    ({ offset }) => {
+      hasPannedRef.current = true
+      panX.set(baseX.current - offset[0])
+      // Clamped at topInset (row 0's rest position): nothing lives above row 0, so
+      // panning past that point would just reveal empty strip background.
+      panY.set(Math.min(topInset, topInset - offset[1]))
+    },
+    // `target` makes wheel attach a REAL DOM listener to the strip itself, instead of a
+    // synthetic React handler — required for eventOptions to have any effect. React
+    // hardcodes wheel/touch listeners as passive at its root regardless of what a synthetic
+    // onWheel prop does, so the wheel handler's preventDefault() (stop this from ALSO
+    // scrolling the page underneath) would silently no-op without this.
+    { target: stripRef, eventOptions: { passive: false } },
+  )
+
+
+  // Grow or shrink the mounted column range so it always covers the visible viewport plus
+  // OVERSCAN_PX of slack on each side. Calling setLeft/setRight with an unchanged value is a
+  // React no-op (Object.is bails the re-render), so this can run on every pan tick with no
+  // extra throttling — it only actually mounts/unmounts when an edge is really crossed.
+  useMotionValueEvent(panX, 'change', () => {
+    const s = stripRef.current
+    if (!s) return
+    const viewLeft = -panX.get()
+    const viewRight = viewLeft + s.clientWidth
+    setLeft((n) => {
+      if (colX(-n) > viewLeft - OVERSCAN_PX) return n + 1
+      if (n > INIT_SIDE && colX(-(n - 1)) < viewLeft - OVERSCAN_PX * 2) return n - 1
+      return n
+    })
+    setRight((n) => {
+      if (colX(n) < viewRight + OVERSCAN_PX) return n + 1
+      if (n > INIT_SIDE && colX(n - 1) > viewRight + OVERSCAN_PX * 2) return n - 1
+      return n
+    })
+  })
+  useMotionValueEvent(panY, 'change', () => {
+    const s = stripRef.current
+    if (!s) return
+    const viewBottom = -panY.get() + s.clientHeight
+    if (viewBottom > targetH - OVERSCAN_PX) setRows((n) => n + 1)
   })
 
-  // Distinct permutation of catalog indices per column seed → no two columns share an order.
-  const hash = (i, seed) => {
-    let x = ((i + 1) * 374761393 + (seed * 2 + 1) * 668265263) >>> 0
-    x = ((x ^ (x >>> 13)) * 1274126177) >>> 0
-    return x
-  }
+  // Wide columns are decided by index alone (isWideCol), never by content — a wide column
+  // then leads with a wide-flagged tile (Table, List) so the extra width earns its keep;
+  // narrow columns skip those tiles, since they're sized to fill 420px, not 270px.
   const column = (c) => {
+    const wide = isWideCol(c)
     const list = makeParticles(c)
     const order = list.map((_, i) => i).sort((a, b) => hash(a, c) - hash(b, c))
+    const [wideIdx, narrowIdx] = order.reduce(
+      (acc, oi) => { acc[list[oi].wide ? 0 : 1].push(oi); return acc },
+      [[], []],
+    )
+    const sequence = wide ? [...wideIdx, ...narrowIdx] : narrowIdx
     const out = []; let h = 0
-    for (const oi of order) {
+    for (const oi of sequence) {
       const p = list[oi]
       out.push({ ...p, key: `c${c}i${oi}` })
       h += (EST[p.name] ?? 180) + 16
@@ -692,26 +769,26 @@ export default function UiKitBoard({ fontStyle, weight = 400, boldWeight = 700 }
     }
     return out
   }
+  // Absolutely positioned at colX(c), NOT flex-flow order — flex would lay columns out in
+  // DOM order (the mounted range starts at -left), which doesn't match colX's coordinate
+  // frame (column 0 pinned at x=0, stable regardless of which range is currently mounted).
   const cols = []
-  for (let c = -left; c < right; c++) cols.push({ c, tiles: column(c) })
+  for (let c = -left; c < right; c++) cols.push({ c, x: colX(c), tiles: column(c) })
 
-  // Position the loading pill relative to the visible PREVIEW panel (the strip's box), not
-  // the window: left-load → preview left-centre, right → right-centre, down → bottom-centre.
-  const pillStyle = () => {
-    const s = stripRef.current
-    if (!s || !loadingDir) return undefined
-    const r = s.getBoundingClientRect()
-    const midY = r.top + r.height / 2
-    if (loadingDir === 'l') return { left: r.left + 20, top: midY, transform: 'translateY(-50%)' }
-    if (loadingDir === 'r') return { left: r.right - 20, top: midY, transform: 'translate(-100%, -50%)' }
-    return { left: r.left + r.width / 2, top: r.bottom - 54, transform: 'translate(-50%, -50%)' }
-  }
+  // The fade MUST end exactly at topInset (see UiKitBoard.css) — row 0 rests there, so a
+  // longer span would still be resolving over its own cards at rest, a visible "permafade"
+  // with no overlay above it to justify one. Gentle rather than a full fade-to-nothing:
+  // dips to ~55% opacity at the very top edge, never vanishing.
+  const topMask = topInset > 0
+    ? `linear-gradient(to bottom, rgba(0,0,0,.55), black ${topInset}px)`
+    : undefined
 
   return (
-    <div className="ukit-strip" ref={stripRef} onScroll={onScroll}>
-      <div className="coss-board" style={style}>
-        {cols.map(({ c, tiles }) => (
-          <div key={c} className={`coss-col${tiles.some(t => t.wide) ? ' coss-col--wide' : ''}`}>
+    <div className="ukit-strip" ref={stripRef} {...bind()}
+      style={topMask ? { maskImage: topMask, WebkitMaskImage: topMask } : undefined}>
+      <motion.div className="coss-board" style={{ ...style, x: panX, y: panY }}>
+        {cols.map(({ c, x, tiles }) => (
+          <div key={c} className="coss-col" style={{ left: x, width: colWidth(c) }}>
             {tiles.map(p => (
               <div key={p.key} className={`coss-card${p.pop ? ' coss-card--pop' : ''}`}>
                 <div className="coss-card-head">
@@ -723,8 +800,7 @@ export default function UiKitBoard({ fontStyle, weight = 400, boldWeight = 700 }
             ))}
           </div>
         ))}
-      </div>
-      {loadingDir && <div className="coss-loading" style={pillStyle()}><Spinner /> Loading…</div>}
+      </motion.div>
     </div>
   )
 }

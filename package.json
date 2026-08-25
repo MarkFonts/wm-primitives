@@ -10,7 +10,9 @@
   ],
   "peerDependencies": {
     "react": ">=18",
-    "react-dom": ">=18"
+    "react-dom": ">=18",
+    "motion": ">=12",
+    "@use-gesture/react": ">=10"
   },
   "license": "UNLICENSED",
   "private": false,

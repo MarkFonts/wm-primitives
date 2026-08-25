@@ -14,28 +14,37 @@
   --text-faint: var(--text-faint, var(--text-dim));
 }
 
-/* 2D board: the strip is the scroll viewport (both axes, full-bleed); the board packs
-   tiles top→bottom into tall columns that WRAP horizontally, so you pan right through the
-   catalog and down through each long column. */
+/* 2D board: the strip is the drag/wheel viewport (both axes, full-bleed, panned via
+   Seth Thompson's motion-value engine — not native scroll, see UiKitBoard.jsx); the board
+   packs tiles top→bottom into tall columns that WRAP horizontally, so you pan right through
+   the catalog and down through each long column. */
 .ukit-strip {
+  position: relative;
   height: 100%;
   margin: 0 -48px;
   padding: 4px 48px 24px;
-  overflow: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  /* The fade mask (real transparency, not a dark tint — a same-family tint barely
+     registers on this already-dark theme, and needs no re-tuning for font-proofer's
+     light mode either) is set as an inline style in UiKitBoard.jsx, sized to topInset —
+     it MUST end exactly there, not at some longer fixed span, or it bleeds into row 0's
+     own cards at rest (a real bug: a span longer than topInset means the ramp is still
+     resolving over content that isn't under any overlay yet). */
 }
+.ukit-strip:active { cursor: grabbing; }
+/* Columns are positioned by JS (style.left = colX(c), a coordinate stable across which
+   range is currently mounted) rather than flex-flow order, since the mounted range doesn't
+   start at column 0 — see UiKitBoard.jsx. */
 .coss-board {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 16px;
-  width: max-content;
+  position: relative;
   font-weight: var(--w-default, 400);
+  will-change: transform;
 }
-/* Each column is one masonry stack; its width is set by whether it holds a wide tile, so
+/* Each column is one masonry stack; width comes from JS (colWidth) via inline style, so
    every card in the column matches (cards fill 100% of the column). */
-.coss-col { display: flex; flex-direction: column; gap: 16px; width: 270px; }
-.coss-col--wide { width: 420px; }
+.coss-col { position: absolute; top: 0; display: flex; flex-direction: column; gap: 16px; }
 /* Strip scrollbar now comes from the shared house scrollbar (scrollbar.css, 6px) —
    including the corner fix (unstyled it defaults to white, a triangle in dark mode). */
 .coss-b { font-weight: var(--w-bold, 640); }
@@ -237,24 +246,6 @@
 .ui-fade-in { animation: coss-fade .35s ease; }
 @keyframes coss-fade { from { opacity: .25; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .ui-fade-in { animation: none; } }
-
-/* Spinner particle + the infinite-scroll throbber that sits under the board. */
-.ui-spinner {
-  width: 18px; height: 18px; border-radius: 50%; flex: 0 0 auto;
-  border: 2px solid var(--border); border-top-color: var(--text);
-  animation: coss-spin .7s linear infinite;
-}
-@keyframes coss-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .ui-spinner { animation-duration: 2s; } }
-/* Loading pill — FIXED to the viewport; its left/top are computed from the preview panel's
-   box (see pillStyle) so it centres on the PREVIEW, not the window. */
-.coss-loading {
-  position: fixed; z-index: 60; width: max-content;
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px 14px; border-radius: 999px;
-  background: var(--surface, #2e2e2e); border: 1px solid var(--border); box-shadow: 0 6px 20px rgba(0, 0, 0, .45);
-  color: var(--text-muted); font-size: var(--type-ui-size);
-}
 
 /* Group — controls visually attached into one unit (input + button). */
 .ui-group { display: flex; }
