@@ -15,13 +15,19 @@
    A host may still override them; what it may not do is spell a duration out in a rule.
    lint-tokens enforces that.
 
-   fast  a state change on one element: hover, press, focus, a colour
-   med   something resizing or revealing: a collapse, a panel
-   slow  something crossing the screen
-   hint  not motion at all -- how long a one-time hint stays before it fades */
+   fast    a state change on one element: hover, press, focus, a colour
+   med     something resizing or revealing: a collapse, a panel
+   layout  a LARGE surface moving: the sidebar, the tab riding its edge, the mobile
+           sheet. It is its own step because the alternative was those three landing on
+           `med` and collapsing 60-80ms faster than they were drawn to -- and because
+           two of them had independently picked ~300ms for exactly this job, which is
+           evidence rather than taste.
+   slow    something crossing the screen
+   hint    not motion at all -- how long a one-time hint stays before it fades */
 :root {
   --dur-fast: 140ms;
   --dur-med:  240ms;
+  --dur-layout: 300ms;
   --dur-slow: 400ms;
   --dur-hint: 3s;
 }

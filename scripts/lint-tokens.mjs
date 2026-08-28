@@ -104,7 +104,7 @@ for (const root of cfg.roots ?? ['src']) {
          `allow` without reading it. */
       for (const m of line.matchAll(/(?<![-\w])(transition)(?:-duration|-delay)?\s*:\s*([^;}]+)/g)) {
         for (const t of stripFallbacks(m[2]).matchAll(/(?<![\w.-])(\d*\.?\d+)(m?s)\b/g))
-          problems.push(`${at}  ${m[1]} time ${t[0]} is a literal  (use var(--dur-fast|--dur-med|--dur-slow, ...))`)
+          problems.push(`${at}  ${m[1]} time ${t[0]} is a literal  (use var(--dur-fast|--dur-med|--dur-layout|--dur-slow, ...))`)
       }
     })
   }
