@@ -97,8 +97,12 @@ for (const root of cfg.roots ?? ['src']) {
          else: the same primitive animated at two speeds depending on which app rendered
          it. Durations come from motion.css now, and a literal is how that happens again.
          Only transition/animation shorthands and their -duration/-delay longhands: a
-         keyframe percentage or a grid line is not a duration. */
-      for (const m of line.matchAll(/(?<![-\w])(transition|animation)(?:-duration|-delay)?\s*:\s*([^;}]+)/g)) {
+         TRANSITIONS ONLY. A transition is a state change -- hover, press, open -- and
+         that is what the scale governs. A keyframe animation's duration is choreography:
+         a loop's period, a bounce, a 2.1s wght-and-SHRP party. Linting those produced
+         nothing but a queue of exemptions, which is how a rule teaches people to write
+         `allow` without reading it. */
+      for (const m of line.matchAll(/(?<![-\w])(transition)(?:-duration|-delay)?\s*:\s*([^;}]+)/g)) {
         for (const t of stripFallbacks(m[2]).matchAll(/(?<![\w.-])(\d*\.?\d+)(m?s)\b/g))
           problems.push(`${at}  ${m[1]} time ${t[0]} is a literal  (use var(--dur-fast|--dur-med|--dur-slow, ...))`)
       }
