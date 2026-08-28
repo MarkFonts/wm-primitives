@@ -42,7 +42,7 @@
   font-family: var(--ui-font, inherit);
   font-size: var(--type-micro-size, 0.5625rem);
   line-height: var(--type-micro-lead, 1.2);
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   color: var(--muted, rgba(255, 255, 255, .42));
   background: none;
   border: none;
@@ -51,7 +51,7 @@
   padding: var(--nudge, 2px) var(--spacing-02, 6px);
   white-space: nowrap;
   cursor: pointer;
-  transition: background .15s, color .15s;
+  transition: background var(--dur-fast, .12s), color var(--dur-fast, .12s);
 }
 
 .ui-seg > button:hover:not(.active) { color: var(--ink, #fff); }

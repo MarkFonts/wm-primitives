@@ -22,7 +22,7 @@
   font-size: var(--type-micro-size);
   color: var(--text-muted);
   font-family: var(--ui-font, system-ui, sans-serif);
-  letter-spacing: 0.04em;
+  letter-spacing: 0;              /* the tag is lowercase: the caps token does not apply */
   flex-shrink: 0;
   font-feature-settings: "tnum";
 }
@@ -104,7 +104,7 @@
   pointer-events: none;
   z-index: 1000;
   white-space: nowrap;
-  animation: hint-fade 3s forwards;
+  animation: hint-fade var(--dur-hint, 3s) forwards;
 }
 @keyframes hint-fade { 0% { opacity: 1; } 60% { opacity: 1; } 100% { opacity: 0; } }
 

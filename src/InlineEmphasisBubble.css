@@ -13,7 +13,7 @@
   border: 1px solid var(--border, rgba(255, 255, 255, 0.14));
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  animation: emph-pop 0.12s ease;
+  animation: emph-pop var(--dur-fast, .12s) ease;
 }
 .inline-emph-menu--left { transform: translate(-100%, -100%); } /* flipped: tuck at the top-LEFT corner */
 @keyframes emph-pop { from { opacity: 0; } }

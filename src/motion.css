@@ -1,0 +1,22 @@
+/* motion.css -- the durations. Additive, like type.css: it defines tokens and styles no
+   element, so importing it cannot reach existing markup.
+
+   There were three "fast" values in use before this file existed -- .1s, .12s and .15s,
+   chosen a rule at a time -- and a --dur-fast that ONLY ReCal defined, at 140ms, while
+   every primitive fell back to .12s. The same component animated at two speeds depending
+   on which app rendered it, and nothing said which was right. These are the values the
+   primitives already fell back to, so this changes nothing except who decides.
+
+   A host may still override them; what it may not do is spell a duration out in a rule.
+   lint-tokens enforces that.
+
+   fast  a state change on one element: hover, press, focus, a colour
+   med   something resizing or revealing: a collapse, a panel
+   slow  something crossing the screen
+   hint  not motion at all -- how long a one-time hint stays before it fades */
+:root {
+  --dur-fast: .12s;
+  --dur-med:  .22s;
+  --dur-slow: .4s;
+  --dur-hint: 3s;
+}

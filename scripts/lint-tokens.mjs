@@ -53,6 +53,16 @@ for (const root of cfg.roots ?? ['src']) {
     lines.forEach((line, i) => {
       const at = `${rel}:${i + 1}`
 
+      /* One line may say why it is off the system, on itself or on the line above:
+             /* token-lint: allow -- 8px: the badge has to sit BESIDE its label *\/
+         A reason is required, because the point is to state the exception rather than to
+         silence it. File-level `exempt` stays for whole files that are somebody else's
+         gallery; a single sanctioned declaration should not have to exempt its file --
+         which is what kept this linter red, and a linter nobody can get to green is one
+         everybody learns to ignore. */
+      const allow = /token-lint:\s*allow\s*--\s*\S/
+      if (allow.test(line) || (i > 0 && allow.test(lines[i - 1]))) return
+
       /* gap is spacing on the same scale as padding, and sits inches away from it in the
          same rule -- checking one and not the other is how 10px gaps survived a padding
          audit. flex/grid gap only; the word also appears in shorthand grid properties,
@@ -69,6 +79,28 @@ for (const root of cfg.roots ?? ['src']) {
         const v = m[1].trim()
         if (!SIZE_OK.test(v))
           problems.push(`${at}  font-size ${v} is a literal, not a role`)
+      }
+
+      /* TRACKING. TYPOGRAPHY.md: "Tracking may only ever be positive, and only on
+         capitals. One token, --track-caps: .12em, and no other tracking value exists in
+         the system." It existed anyway -- 0.02, 0.04, 0.06, 0.08em, spread across three
+         repos, every one of them a lowercase UI label reading visibly open beside an
+         untracked one. The rule is the law with nothing added: the token, or nothing. */
+      for (const m of line.matchAll(/(?<![-\w])letter-spacing\s*:\s*([^;}]+)/g)) {
+        const v = m[1].trim()
+        if (!/^(?:var\(--track-caps\b|normal$|inherit$|initial$|unset$|0(?:px|em|rem)?$)/.test(v))
+          problems.push(`${at}  letter-spacing ${v} is not --track-caps  (capitals only, one value)`)
+      }
+
+      /* MOTION. Three near-identical "fast" values were in use -- .1s, .12s, .15s -- plus
+         a --dur-fast that only ReCal defined, at 140ms, against a .12s fallback everywhere
+         else: the same primitive animated at two speeds depending on which app rendered
+         it. Durations come from motion.css now, and a literal is how that happens again.
+         Only transition/animation shorthands and their -duration/-delay longhands: a
+         keyframe percentage or a grid line is not a duration. */
+      for (const m of line.matchAll(/(?<![-\w])(transition|animation)(?:-duration|-delay)?\s*:\s*([^;}]+)/g)) {
+        for (const t of stripFallbacks(m[2]).matchAll(/(?<![\w.-])(\d*\.?\d+)(m?s)\b/g))
+          problems.push(`${at}  ${m[1]} time ${t[0]} is a literal  (use var(--dur-fast|--dur-med|--dur-slow, ...))`)
       }
     })
   }

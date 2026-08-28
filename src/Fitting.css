@@ -31,7 +31,7 @@
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
   cursor: pointer;
-  transition: background .12s, color .12s;
+  transition: background var(--dur-fast, .12s), color var(--dur-fast, .12s);
 }
 .fit-switch + .fit-switch { border-left: 1px solid var(--border, var(--line, #2a2a2a)); }
 /* The FILL has to be shaped too: the container clips, but a filled child still paints a
@@ -62,7 +62,7 @@
   color: var(--text-dim, #555);
   border: 1px solid var(--border, var(--line, #2a2a2a));
   cursor: pointer;
-  transition: background .12s, color .12s, border-color .12s;
+  transition: background var(--dur-fast, .12s), color var(--dur-fast, .12s), border-color var(--dur-fast, .12s);
 }
 .fit-align-btn:hover { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text-muted, #999); }
 .fit-align-btn.active { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text, #fff); border-color: var(--text-muted, #999); }
@@ -84,7 +84,7 @@
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
   cursor: pointer;
-  transition: color .12s;
+  transition: color var(--dur-fast, .12s);
 }
 .fit-sub:hover, .fit-sub.active { color: var(--text, #fff); }
 
@@ -229,10 +229,11 @@
   color: var(--accent, #7cc4ff);
   /* 8px, deliberately below the type scale: the badge has to sit BESIDE its label on a
      narrow rail, and at the system size it wrapped underneath — which is the crowding
-     that shortening "glyph scaling" to "glyph" was meant to fix. Sanctioned exception. */
+     that shortening "glyph scaling" to "glyph" was meant to fix.
+     token-lint: allow -- 8px: a badge that has to sit beside its label on a 227px rail */
   font-size: 8px;
   font-style: normal;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
 }
 /* Outlined, not a lifted gray. The fill version sat at --text-dim on a dark panel,
    which is roughly 2.4:1 — below AA at any size, and this is 8px type. An outline lets

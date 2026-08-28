@@ -53,6 +53,12 @@ export type {
   LetterboxConfig, LetterboxHandle, LetterboxSpeckle, LetterboxLayers,
 } from './src/letterbox.js'
 
+// Motion tokens. Additive like type.css -- it defines --dur-* and styles no element.
+// Apps import it from their entry stylesheet, beside type.css. Before it existed the
+// system had three "fast" values and a --dur-fast only ReCal defined, at 140ms, against
+// a .12s fallback everywhere else: one component, two speeds, depending on the app.
+// (src/motion.css -- no JS to export.)
+
 // Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/
 // --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so
 // importing it cannot reach existing markup. Apps import the CSS from their entry

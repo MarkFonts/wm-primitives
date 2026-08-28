@@ -47,7 +47,7 @@
   border-radius: var(--radius, 6px);
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
-  letter-spacing: 0.08em;
+  letter-spacing: var(--track-caps);
   text-transform: uppercase;
   cursor: pointer;
 }
