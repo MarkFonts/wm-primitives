@@ -51,7 +51,7 @@
   padding: var(--nudge, 2px) var(--spacing-02, 6px);
   white-space: nowrap;
   cursor: pointer;
-  transition: background var(--dur-fast, .12s), color var(--dur-fast, .12s);
+  transition: background var(--dur-fast, 140ms), color var(--dur-fast, 140ms);
 }
 
 .ui-seg > button:hover:not(.active) { color: var(--ink, #fff); }

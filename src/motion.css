@@ -4,8 +4,13 @@
    There were three "fast" values in use before this file existed -- .1s, .12s and .15s,
    chosen a rule at a time -- and a --dur-fast that ONLY ReCal defined, at 140ms, while
    every primitive fell back to .12s. The same component animated at two speeds depending
-   on which app rendered it, and nothing said which was right. These are the values the
-   primitives already fell back to, so this changes nothing except who decides.
+   on which app rendered it, and nothing said which was right.
+
+   THE VALUES ARE ReCal's, not the fallbacks'. 140/240ms were written down in its spec
+   ("Motion, house spring, spec directive 4") and sat beside a --spring easing; .12s/.22s
+   were typed inline, one transition at a time, and then copied. Between a number somebody
+   specified and a number that accumulated, the specified one is the system. Everything
+   moves ~17% slower than the fallbacks did, which is one frame at 60Hz.
 
    A host may still override them; what it may not do is spell a duration out in a rule.
    lint-tokens enforces that.
@@ -15,8 +20,8 @@
    slow  something crossing the screen
    hint  not motion at all -- how long a one-time hint stays before it fades */
 :root {
-  --dur-fast: .12s;
-  --dur-med:  .22s;
-  --dur-slow: .4s;
+  --dur-fast: 140ms;
+  --dur-med:  240ms;
+  --dur-slow: 400ms;
   --dur-hint: 3s;
 }

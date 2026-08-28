@@ -31,7 +31,7 @@
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
   cursor: pointer;
-  transition: background var(--dur-fast, .12s), color var(--dur-fast, .12s);
+  transition: background var(--dur-fast, 140ms), color var(--dur-fast, 140ms);
 }
 .fit-switch + .fit-switch { border-left: 1px solid var(--border, var(--line, #2a2a2a)); }
 /* The FILL has to be shaped too: the container clips, but a filled child still paints a
@@ -62,7 +62,7 @@
   color: var(--text-dim, #555);
   border: 1px solid var(--border, var(--line, #2a2a2a));
   cursor: pointer;
-  transition: background var(--dur-fast, .12s), color var(--dur-fast, .12s), border-color var(--dur-fast, .12s);
+  transition: background var(--dur-fast, 140ms), color var(--dur-fast, 140ms), border-color var(--dur-fast, 140ms);
 }
 .fit-align-btn:hover { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text-muted, #999); }
 .fit-align-btn.active { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text, #fff); border-color: var(--text-muted, #999); }
@@ -84,7 +84,7 @@
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
   cursor: pointer;
-  transition: color var(--dur-fast, .12s);
+  transition: color var(--dur-fast, 140ms);
 }
 .fit-sub:hover, .fit-sub.active { color: var(--text, #fff); }
 

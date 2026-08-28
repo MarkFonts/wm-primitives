@@ -24,7 +24,7 @@
   border-radius: 2px;
   background: var(--edit-rail, rgba(255, 255, 255, 0.28));
   opacity: 0;
-  transition: opacity var(--dur-fast, .12s) ease, background var(--dur-fast, .12s) ease;
+  transition: opacity var(--dur-fast, 140ms) ease, background var(--dur-fast, 140ms) ease;
   pointer-events: none;
 }
 .edit-rail::before { left: -12px; }

@@ -5,8 +5,8 @@
 
 .wm-collapse {
   overflow: hidden;
-  transition: max-height var(--dur-med, .22s) cubic-bezier(.2, 0, 0, 1),
-              opacity var(--dur-fast, .12s) linear;
+  transition: max-height var(--dur-med, 240ms) cubic-bezier(.2, 0, 0, 1),
+              opacity var(--dur-fast, 140ms) linear;
 }
 
 /* An open box may let a shadow past its edge — the wdth badge glows, and this is its
