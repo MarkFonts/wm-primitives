@@ -92,5 +92,11 @@ export { SPECIMENS, specimenChunks, parseSpecimen, loadSpecimen,
 // component and not "Specimen", which on a case-insensitive filesystem resolves to
 // specimen.ts — the loader — and fails at build with a confusing missing export.
 export { SpecimenNav } from './src/SpecimenNav'
+// The four paragraph styles both paragraph views show, and the one-liner that turns a
+// style plus the font's H&J bands into fit options. The keys, labels, numbers and the
+// resolver only; each app keeps the font fields it draws with, and its own block CSS.
+export { PARA_STYLE_ORDER, PARA_STYLE_LABEL, PARA_STYLE_DEFAULTS, fitOptionsFor } from './src/paraStyles'
+export type { ParaStyleKey, ParaStyleBase } from './src/paraStyles'
+
 export type { FittingControlsProps, Alignment } from './src/Fitting'
 export type { FitMode, FitOptions, FittedLine } from './src/flattersatz'
