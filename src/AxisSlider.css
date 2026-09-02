@@ -50,9 +50,51 @@
   width: 66px;
   padding: var(--nudge, 2px) 0;
   font-feature-settings: "tnum";
-  color-scheme: inherit;   /* native steppers follow the app light/dark scheme */
+  color-scheme: inherit;
 }
 .slider-number:focus { outline: none; }
+
+/* ── the stepper ─────────────────────────────────────────────────────────────
+   Ours, because a text field has no native one — and because the native one could
+   never be styled the same way twice: font-proofer forced WebKit's visible with an
+   opacity hack that did nothing in Firefox, and ReCal left it hidden until hover, so
+   one primitive drew two different controls. This draws one.
+
+   Revealed on approach, not always on. A rail of eight dials with sixteen permanent
+   arrowheads is noise, and the field and the track are already two ways in before the
+   arrows are a third. */
+.slider-step {
+  display: inline-flex;
+  flex-direction: column;
+  margin-left: var(--nudge, 2px);
+  opacity: 0;
+  transition: opacity .12s;
+}
+.slider-row:hover .slider-step,
+.slider-row:focus-within .slider-step { opacity: 1; }
+
+.slider-step-btn {
+  font: inherit;
+  font-size: 6px;
+  line-height: 1;
+  padding: 0 var(--nudge, 2px);
+  border: 0;
+  background: none;
+  color: var(--text-muted, var(--text));
+  cursor: pointer;
+  /* the hit area is taller than the mark: two 5px arrowheads is not something to aim at */
+  min-height: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.slider-step-btn:hover { color: var(--text); }
+.slider-step-btn:focus-visible { outline: 1px solid var(--accent, currentColor); }
+
+@media (pointer: coarse) {
+  .slider-step { opacity: 1; }               /* nothing to hover with */
+  .slider-step-btn { min-height: 22px; min-width: 32px; font-size: 8px; }
+}
 .slider-number:disabled { cursor: default; }
 
 .slider-track-wrap { position: relative; }

@@ -1,8 +1,15 @@
-// AxisSlider — a numeric axis/value control. The value is an editable field:
-//   • normal axes → native <input type="number"> (up/down steppers, theme-aware
-//     via the app's color-scheme)
-//   • auto-capable axes (e.g. opsz) → a text field where you type a number OR press
-//     `a` for "auto" (with a one-time hint)
+// AxisSlider — a numeric axis/value control. The value is an editable TEXT field with a
+// stepper of our own, plus a range track below.
+//   • every axis → type=text, inputMode=decimal, so the readout can carry a real minus
+//     (U+2212). A number input cannot: the value would not parse, so it is stuck with a
+//     hyphen. The rest of the system already formats readouts with nbMinus; the field
+//     you can type in was the last place printing the wrong character.
+//   • auto-capable axes (e.g. opsz) additionally take `a` for "auto" (with a one-time
+//     hint). Nothing else distinguishes them now — one field, one code path.
+//   • the stepper is drawn here rather than the browser's: a text field has none, and
+//     the native one could not be styled the same way twice (font-proofer forced
+//     WebKit's visible, Firefox ignored that, ReCal left it hidden). Arrow keys, Shift
+//     for a coarse step, and press-and-hold repeat are all reimplemented.
 // …plus a range track below. Font-agnostic: the tag is just a label, nothing here
 // knows about any specific font. Extracted from font-proofer's SliderRow.
 //
@@ -17,8 +24,9 @@
 //   • marker  — a ◆ "baked default" indicator before the value
 //   • onRangePointerDown — hook on the range thumb (e.g. drag-to-flash a zone)
 //   • disabled — dim/lock the control (e.g. a frozen axis)
-import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
+import { nbMinus } from './format'
 import './AxisSlider.css'
 
 export interface AxisSliderProps {
@@ -91,9 +99,34 @@ export function AxisSlider({
     }
   }
 
-  const numberValue = allowAuto
-    ? (display != null ? String(display).replace('-', '−') : String(value))
-    : (value as number)
+  /* ONE field, and it is text. A number input cannot show U+2212 — the value would not
+     parse — so it is stuck with a hyphen, and a hyphen is not a minus. The readouts
+     elsewhere already use nbMinus for exactly this reason; the field you can type in was
+     the one place still printing the wrong character. Going to text costs the native
+     steppers, which are rebuilt below, and buys a real minus, `auto` on any dial, and
+     one control instead of two. */
+  /* Press-and-hold repeat. The native spinner did this; a button we draw does not, so it
+     is a delay then an interval, at roughly the rates a key repeat uses. */
+  const valueRef = useRef(value)
+  valueRef.current = value
+  const holdRef = useRef<{ t?: number; i?: number }>({})
+  const stopStep = () => {
+    clearTimeout(holdRef.current.t); clearInterval(holdRef.current.i)
+    holdRef.current = {}
+  }
+  const startStep = (dir: 1 | -1) => {
+    const bump = () => {
+      const base = typeof valueRef.current === 'number' ? valueRef.current : (autoValue ?? min)
+      onChange(Math.min(max, Math.max(min, base + dir * step)))
+    }
+    bump()
+    holdRef.current.t = window.setTimeout(() => {
+      holdRef.current.i = window.setInterval(bump, 60)
+    }, 400)
+  }
+  useEffect(() => stopStep, [])
+
+  const numberValue = nbMinus(display != null ? String(display) : String(value))
 
   return (
     <div ref={rowRef} className={`slider-row${disabled ? ' slider-row--off' : ''}${variant !== 'default' ? ` slider-row--${variant}` : ''}`}>
@@ -114,9 +147,15 @@ export function AxisSlider({
           <input
             ref={inputRef}
             className="slider-number"
-            type={allowAuto ? 'text' : 'number'}
-            inputMode={allowAuto ? 'numeric' : undefined}
-            step={allowAuto ? undefined : step}
+            type="text"
+            /* decimal, not numeric: numeric gives a keypad with no minus and no separator */
+            inputMode="decimal"
+            autoComplete="off"
+            spellCheck={false}
+            role="spinbutton"
+            aria-valuenow={typeof value === 'number' ? value : undefined}
+            aria-valuemin={min}
+            aria-valuemax={max}
             /* The bounds belong on the FIELD as well as the track. They were only ever on
                the range, so the two halves of one control disagreed: every dial accepted
                anything typed into it — ital (0-1) took 501, wght (400-700) took 1200 —
@@ -124,31 +163,54 @@ export function AxisSlider({
                the readout was free to lie about what you are looking at: a font clamps an
                out-of-range axis when it rasterises, and the proof showed 700 under a
                label reading 1200. */
-            min={allowAuto ? undefined : min}
-            max={allowAuto ? undefined : max}
             value={numberValue}
             disabled={disabled}
             onFocus={() => { handleFocus(); setNumFocused(true) }}
             onBlur={() => setNumFocused(false)}
-            onKeyDown={e => { if (allowAuto && e.key === 'a') { e.preventDefault(); onChange('auto') } }}
+            onKeyDown={e => {
+              if (allowAuto && e.key === 'a') { e.preventDefault(); onChange('auto'); return }
+              /* The arrow keys came free with type=number and have to be put back. Held,
+                 the OS repeats keydown by itself, so this reads the same as the native
+                 field did. Shift is the coarse step, as it is in every design tool. */
+              const dir = e.key === 'ArrowUp' ? 1 : e.key === 'ArrowDown' ? -1 : 0
+              if (!dir) return
+              e.preventDefault()
+              const base = typeof value === 'number' ? value : (autoValue ?? min)
+              onChange(Math.min(max, Math.max(min, base + dir * step * (e.shiftKey ? 10 : 1))))
+            }}
             onChange={e => {
               /* min/max on the element stops the STEPPERS going out of range, but a typed
                  value still arrives here unclamped — the attribute only marks the input
                  invalid, it does not refuse the keystroke. Clamp on the way through, and
                  drop NaN: mid-edit the field is legitimately "" or "-", and passing that
                  on sets the axis to NaN and blanks the proof. */
-              const clampNum = (n: number) => Math.min(max, Math.max(min, n))
-              if (!allowAuto) {
-                const n = parseFloat(e.target.value)
-                if (!Number.isNaN(n)) onChange(clampNum(n))
-                return
-              }
+              /* ONE parse for both paths. The field now RENDERS a real minus, so a real
+                 minus is what comes back when you edit it — and parseFloat("−0.08") is
+                 NaN. Undoing the display's own substitution used to be the auto path's
+                 business alone; it is every field's business now. */
               const raw = String(e.target.value).replace('−', '-').trim()
-              if (raw.toLowerCase() === 'auto') { onChange('auto'); return }
+              if (allowAuto && raw.toLowerCase() === 'auto') { onChange('auto'); return }
               const n = parseFloat(raw)
-              if (!Number.isNaN(n)) onChange(clampNum(n))
+              if (Number.isNaN(n)) return
+              onChange(Math.min(max, Math.max(min, n)))
             }}
           />
+          {!disabled && (
+            <span className="slider-step" aria-hidden="true">
+              {([1, -1] as const).map(dir => (
+                <button
+                  key={dir}
+                  type="button"
+                  tabIndex={-1}
+                  className="slider-step-btn"
+                  onPointerDown={e => { e.preventDefault(); startStep(dir) }}
+                  onPointerUp={stopStep}
+                  onPointerLeave={stopStep}
+                  onPointerCancel={stopStep}
+                >{dir > 0 ? '▲' : '▼'}</button>
+              ))}
+            </span>
+          )}
           {suffix && (
             <span className={`slider-suffix${numFocused ? ' slider-suffix--hidden' : ''}`} aria-hidden="true">{suffix}</span>
           )}
