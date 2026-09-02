@@ -48,6 +48,10 @@ export interface AxisSliderProps {
   lockedAbove?: number | null
   /** Enable the `a`-for-auto text field (e.g. opsz). */
   allowAuto?: boolean
+  /** Show a tappable `auto` chip beside the value. Defaults ON wherever allowAuto is set,
+   *  because the keystroke alone is unreachable on a phone — no mobile keypad this field
+   *  can raise has letters. Pass false to go back to the key only. */
+  autoButton?: boolean
   autoValue?: number
   /** Optional ◆ "baked default" marker before the value (suppressed for variant="diamond"). */
   marker?: boolean
@@ -69,7 +73,7 @@ export interface AxisSliderProps {
 
 export function AxisSlider({
   label, tag, value, min, max, step, onChange, display,
-  lockedAbove, allowAuto, autoValue, marker, onRangePointerDown, disabled,
+  lockedAbove, allowAuto, autoButton = true, autoValue, marker, onRangePointerDown, disabled,
   variant = 'default', reference, suffix, showRange,
 }: AxisSliderProps) {
   const [numFocused, setNumFocused] = useState(false)
@@ -195,6 +199,20 @@ export function AxisSlider({
               onChange(Math.min(max, Math.max(min, n)))
             }}
           />
+          {allowAuto && autoButton && !disabled && (
+            /* A keystroke cannot be the only way to reach a state. `a` for auto needs a
+               letter key, and every mobile keypad this field can raise — numeric or
+               decimal — has no letters on it, so on a phone the shortcut was unreachable
+               and the hint was telling you to press a key you do not have. The button is
+               the affordance; the key stays as the fast path. */
+            <button
+              type="button"
+              className={`slider-auto-btn${isAuto ? ' slider-auto-btn--on' : ''}`}
+              aria-pressed={isAuto}
+              title={isAuto ? 'auto — tap for a number' : 'follow the optical size automatically'}
+              onClick={() => onChange(isAuto ? (autoValue ?? min) : 'auto')}
+            >auto</button>
+          )}
           {!disabled && (
             <span className="slider-step" aria-hidden="true">
               {([1, -1] as const).map(dir => (
@@ -207,7 +225,13 @@ export function AxisSlider({
                   onPointerUp={stopStep}
                   onPointerLeave={stopStep}
                   onPointerCancel={stopStep}
-                >{dir > 0 ? '▲' : '▼'}</button>
+                >
+                  <svg viewBox="0 0 10 6" width="10" height="6" aria-hidden="true">
+                    <path d={dir > 0 ? 'M1 4.5 5 1.5 9 4.5' : 'M1 1.5 5 4.5 9 1.5'}
+                      fill="none" stroke="currentColor" strokeWidth="1.5"
+                      strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
               ))}
             </span>
           )}

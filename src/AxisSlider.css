@@ -54,6 +54,26 @@
 }
 .slider-number:focus { outline: none; }
 
+.slider-auto-btn {
+  font: inherit;
+  font-size: var(--type-micro-size, 0.5625rem);
+  letter-spacing: .06em;
+  text-transform: lowercase;
+  padding: 0 var(--spacing-02, 6px);
+  margin-left: var(--nudge, 2px);
+  min-height: 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  corner-shape: superellipse(var(--corner-k, 1.2));
+  background: none;
+  color: var(--text-muted, var(--text));
+  cursor: pointer;
+}
+.slider-auto-btn:hover { color: var(--text); }
+.slider-auto-btn--on { background: var(--text); color: var(--bg, var(--surface)); border-color: var(--text); }
+.slider-auto-btn:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 1px; }
+@media (pointer: coarse) { .slider-auto-btn { min-height: 32px; padding: 0 var(--spacing-03, 8px); } }
+
 /* ── the stepper ─────────────────────────────────────────────────────────────
    Ours, because a text field has no native one — and because the native one could
    never be styled the same way twice: font-proofer forced WebKit's visible with an
@@ -73,27 +93,53 @@
 .slider-row:hover .slider-step,
 .slider-row:focus-within .slider-step { opacity: 1; }
 
+/* SVG chevrons, not ▲▼. A glyph arrow is measured by whatever face is loaded — its
+   width, its baseline and its optical weight all move with the font — so the column it
+   sits in cannot be sized, and everything to its left gets padded to accommodate it.
+   A 10x6 path is exactly 10x6 in every face, which is what lets the field beside it be
+   as narrow as its digits. */
 .slider-step-btn {
-  font: inherit;
-  font-size: 6px;
-  line-height: 1;
-  padding: 0 var(--nudge, 2px);
+  padding: 0;
   border: 0;
   background: none;
   color: var(--text-muted, var(--text));
   cursor: pointer;
-  /* the hit area is taller than the mark: two 5px arrowheads is not something to aim at */
-  min-height: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* square, so the press state is a circle rather than an oval */
+  width: 16px;
+  height: 12px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  border-radius: 999px;
+  corner-shape: superellipse(var(--corner-k, 1.2));
 }
+.slider-step-btn svg { display: block; }
 .slider-step-btn:hover { color: var(--text); }
 .slider-step-btn:focus-visible { outline: 1px solid var(--accent, currentColor); }
 
+/* The press lands as a filled circle behind the chevron. A background on the button
+   itself would be a 16x12 pill; this is a true circle sized to the button's short side,
+   so it reads the same whatever the hit area grows to on touch. */
+.slider-step-btn::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: scale(.6);
+  transition: opacity .12s, transform .12s;
+  pointer-events: none;
+}
+.slider-step-btn:active::before { opacity: .16; transform: scale(1); }
+
 @media (pointer: coarse) {
   .slider-step { opacity: 1; }               /* nothing to hover with */
-  .slider-step-btn { min-height: 22px; min-width: 32px; font-size: 8px; }
+  .slider-step-btn { width: 32px; height: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slider-step-btn::before { transition: none; }
 }
 .slider-number:disabled { cursor: default; }
 
