@@ -117,16 +117,36 @@ export function AxisSlider({
             type={allowAuto ? 'text' : 'number'}
             inputMode={allowAuto ? 'numeric' : undefined}
             step={allowAuto ? undefined : step}
+            /* The bounds belong on the FIELD as well as the track. They were only ever on
+               the range, so the two halves of one control disagreed: every dial accepted
+               anything typed into it — ital (0-1) took 501, wght (400-700) took 1200 —
+               while the track pinned to its max. The field is what feeds the render, so
+               the readout was free to lie about what you are looking at: a font clamps an
+               out-of-range axis when it rasterises, and the proof showed 700 under a
+               label reading 1200. */
+            min={allowAuto ? undefined : min}
+            max={allowAuto ? undefined : max}
             value={numberValue}
             disabled={disabled}
             onFocus={() => { handleFocus(); setNumFocused(true) }}
             onBlur={() => setNumFocused(false)}
             onKeyDown={e => { if (allowAuto && e.key === 'a') { e.preventDefault(); onChange('auto') } }}
             onChange={e => {
-              if (!allowAuto) { onChange(parseFloat(e.target.value)); return }
+              /* min/max on the element stops the STEPPERS going out of range, but a typed
+                 value still arrives here unclamped — the attribute only marks the input
+                 invalid, it does not refuse the keystroke. Clamp on the way through, and
+                 drop NaN: mid-edit the field is legitimately "" or "-", and passing that
+                 on sets the axis to NaN and blanks the proof. */
+              const clampNum = (n: number) => Math.min(max, Math.max(min, n))
+              if (!allowAuto) {
+                const n = parseFloat(e.target.value)
+                if (!Number.isNaN(n)) onChange(clampNum(n))
+                return
+              }
               const raw = String(e.target.value).replace('−', '-').trim()
               if (raw.toLowerCase() === 'auto') { onChange('auto'); return }
-              onChange(parseFloat(raw))
+              const n = parseFloat(raw)
+              if (!Number.isNaN(n)) onChange(clampNum(n))
             }}
           />
           {suffix && (
