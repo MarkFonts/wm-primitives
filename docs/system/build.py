@@ -24,7 +24,7 @@ SECTIONS = [
     # inside 02. 03 is the control interface.
     ("corners",  "The corner law",    [SD/"corner-law.html", SD/"circles.html"],
                                        "superellipse(1.2), 2^k, and what opts out"),
-    ("controls", "Interface",         SD/"controls.html",     "one dial, six ways"),
+    ("controls", "Interface",         SD/"controls.html",     "one dial, five ways"),
     ("space",   "Space",         SD/"space.html",             "the pad scale, cap + alignment"),
     ("color",  "Color",        SD/"color-audit.html",      "every declaration, audited"),
     ("usage",   "Who uses what", SD/"color-usage.html",      "the usage map"),

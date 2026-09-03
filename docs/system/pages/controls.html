@@ -141,47 +141,45 @@
    one saying the same thing. Scoped, not global, for that reason.
    text-decoration rather than a border: it hugs the glyphs, so it moves with the value
    instead of underlining the whole fixed-width box including its empty space. */
-.v3 .f input, .v5 .f input, .v4 .pill input{
+.v2 .f input, .v4 .f input, .v3 .pill input{
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   transition: text-decoration-color .15s;
-}.v3 .f input:hover, .v5 .f input:hover, .v4 .pill input:hover,
-.v3 .f input:focus, .v5 .f input:focus, .v4 .pill input:focus{
+}.v2 .f input:hover, .v4 .f input:hover, .v3 .pill input:hover,
+.v2 .f input:focus, .v4 .f input:focus, .v3 .pill input:focus{
   text-decoration-color: currentColor;
 }/* the track */
 .trk{ -webkit-appearance: none; appearance: none; width: 100%; height: 2px;
   background: var(--line); border-radius: 2px; margin: 0; outline-offset: 4px; }.trk::-webkit-slider-thumb{ -webkit-appearance: none; appearance: none;
   width: 13px; height: 13px; border-radius: 50%; background: var(--ink); cursor: pointer; }.trk::-moz-range-thumb{ width: 13px; height: 13px; border: 0; border-radius: 50%;
   background: var(--ink); cursor: pointer; }.trk:focus-visible{ outline: 2px solid var(--accent); }/* vertical: writing-mode is the modern way and needs no wrapper or transform */
-&.vert .trk{ writing-mode: vertical-lr; direction: rtl; width: 2px; height: 11rem; }/* ── 01 · as shipped ──────────────────────────────────────── */
-.v1 .d-head{ display: flex; justify-content: space-between; align-items: baseline;
-  gap: .75rem; margin-bottom: .5rem; }.v1 .d-val{ display: inline-flex; align-items: center; gap: .375rem; }&.vert .v1 .d{ display: flex; flex-direction: column; align-items: center; gap: .5rem; }&.vert .v1 .d-head{ flex-direction: column; align-items: center; margin: 0; }/* ── 02 · one line ────────────────────────────────────────── */
-.v2 .d{ display: grid; grid-template-columns: 1fr auto; gap: .5rem .75rem;
+&.vert .trk{ writing-mode: vertical-lr; direction: rtl; width: 2px; height: 11rem; }/* ── 02 · one line ────────────────────────────────────────── */
+.v1 .d{ display: grid; grid-template-columns: 1fr auto; gap: .5rem .75rem;
   align-items: center; margin-bottom: 1.5rem; }/* same rhythm as 01 */
-.v2 .d-head{ display: flex; align-items: baseline; gap: 6px; min-width: 0; }.v2 .trk{ grid-column: 1 / -1; }.v2 .d-val{ display: inline-flex; align-items: center; gap: 4px; }&.vert .v2 .d{ grid-template-columns: none; justify-items: center; }/* ── 03 · the row IS the track (DialKit) ──────────────────── */
-.v3 .bar{
+.v1 .d-head{ display: flex; align-items: baseline; gap: 6px; min-width: 0; }.v1 .trk{ grid-column: 1 / -1; }.v1 .d-val{ display: inline-flex; align-items: center; gap: 4px; }&.vert .v1 .d{ grid-template-columns: none; justify-items: center; }/* ── 03 · the row IS the track (DialKit) ──────────────────── */
+.v2 .bar{
   position: relative; display: flex; align-items: center; justify-content: space-between;
   gap: 12px; height: 32px; padding: 0 12px; border-radius: 8px;
   corner-shape: superellipse(1.2);
   background: var(--sunk); overflow: hidden; cursor: ew-resize;
   touch-action: none; user-select: none;
-}.v3 .bar:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }.v3 .bar > i{ position: absolute; inset: 0 auto 0 0; background: var(--raised);
-  border-right: 1px solid var(--line); pointer-events: none; }.v3 .lab, .v3 .d-val{ position: relative; z-index: 1; }.v3 .f{ border: 0; background: none; }.v3 .f input{ width: 4.2rem; cursor: text; }.v3 .f .arrows{ display: none; }/* the bar is the coarse control; no arrows */
-&.vert .v3 .bar{
+}.v2 .bar:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }.v2 .bar > i{ position: absolute; inset: 0 auto 0 0; background: var(--raised);
+  border-right: 1px solid var(--line); pointer-events: none; }.v2 .lab, .v2 .d-val{ position: relative; z-index: 1; }.v2 .f{ border: 0; background: none; }.v2 .f input{ width: 4.2rem; cursor: text; }.v2 .f .arrows{ display: none; }/* the bar is the coarse control; no arrows */
+&.vert .v2 .bar{
   flex-direction: column; justify-content: space-between; align-items: center;
   height: 176px; width: 80px; padding: 8px 4px; cursor: ns-resize;
-}&.vert .v3 .bar > i{ inset: auto 0 0 0; width: 100%; height: 0;
+}&.vert .v2 .bar > i{ inset: auto 0 0 0; width: 100%; height: 0;
   border-right: 0; border-top: 1px solid var(--line); }/* The HEADER runs vertically, the VALUE stays upright — a rotated label costs nothing
    to read at a glance, a rotated number costs you the reading. It also solves the
    clipping: the label no longer has to fit a 5rem column. */
-&.vert .v3 .lab{ writing-mode: vertical-rl; text-orientation: mixed;
-  font-size: .8125rem; line-height: 1; }&.vert .v3 .d-tag{ margin: .4em 0 0; }&.vert .v3 .d-val{ display: flex; flex-direction: column; align-items: center; gap: 0; }&.vert .v3 .f input{ width: 100%; text-align: center; padding: 0; }/* ── 04 · the value rides in the handle (Font Gauntlet) ───── */
-.v4 .d{ display: flex; align-items: center; gap: .75rem; }.v4 .icon{ font-family: var(--serif); font-size: .9375rem; color: var(--muted);
-  width: 2.25rem; flex: none; letter-spacing: -.02em; }.v4 .rail{ position: relative; flex: 1; height: 34px; display: flex; align-items: center;
-  touch-action: none; }.v4 .rail > i{ position: absolute; left: 0; right: 0; top: 50%; height: 1px;
-  background: var(--line); transform: translateY(-50%); }.v4 .pill{
+&.vert .v2 .lab{ writing-mode: vertical-rl; text-orientation: mixed;
+  font-size: .8125rem; line-height: 1; }&.vert .v2 .d-tag{ margin: .4em 0 0; }&.vert .v2 .d-val{ display: flex; flex-direction: column; align-items: center; gap: 0; }&.vert .v2 .f input{ width: 100%; text-align: center; padding: 0; }/* ── 04 · the value rides in the handle (Font Gauntlet) ───── */
+.v3 .d{ display: flex; align-items: center; gap: .75rem; }.v3 .icon{ font-family: var(--serif); font-size: .9375rem; color: var(--muted);
+  width: 2.25rem; flex: none; letter-spacing: -.02em; }.v3 .rail{ position: relative; flex: 1; height: 34px; display: flex; align-items: center;
+  touch-action: none; }.v3 .rail > i{ position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+  background: var(--line); transform: translateY(-50%); }.v3 .pill{
   position: absolute; top: 50%; transform: translate(-50%, -50%);
   background: var(--accent); color: var(--on-accent); border-radius: 999px;
   corner-shape: superellipse(1.2);
@@ -197,14 +195,14 @@
    between the digits and the arrowheads: the value is centred in a 50px box, so "102.5"
    lands ~4px from them and reads as touching. Give the stepper its own air and let the
    number sit right, where a number belongs, instead of drifting toward the arrows. */
-.v4 .f{ border: 0; background: none; gap: 6px; }.v4 .pill input{ text-align: right; }/* No padding on the column. The flex gap already separates it from the number, and the
+.v3 .f{ border: 0; background: none; gap: 6px; }.v3 .pill input{ text-align: right; }/* No padding on the column. The flex gap already separates it from the number, and the
    padding pushed the BUTTONS right while the hairline stayed centred on the column box —
    so the line sat ~2px left of the chevrons it divides. The divider and the marks have to
    share one centre. */
 /* No padding on the field. The pill pads the outside and the flex gaps pad between the
    parts — a field that also pads itself doubles the outer edge and adds slack the eye
    reads as the number drifting: 39px of box for 30px of digits. */
-.v4 .pill input{
+.v3 .pill input{
   font-family: var(--dial); font-size: .875rem;
   /* explicit: a form control does not inherit this through the UA's font reset */
   font-variation-settings: 'opsz' 10;
@@ -222,38 +220,38 @@
    the same pixel; a pill is one object on its own rail with no column to hold, so the
    reservation is just dead space — 7.3px of a 12.7px glyph's slot, and the unit was
    costing a third of the resting lozenge. */
-.v4 .pill .d-unit{ color: var(--on-accent); opacity: .78; font-size: .6875rem;
+.v3 .pill .d-unit{ color: var(--on-accent); opacity: .78; font-size: .6875rem;
   min-width: 0; }/* Font Gauntlet has no steppers in the handle and it is right not to: the lozenge is
    positioned BY the value, so tapping an arrow moves the arrow out from under your
    finger. Off by default; "Arrows always" brings them back for comparison. */
-.v4 .pill .arrows{ display: none; }&.always-arrows .v4 .pill .arrows{ display: flex; opacity: 1; }/* No mirror. It was 55px of a 202px lozenge — a quarter of the width bought nothing but
+.v3 .pill .arrows{ display: none; }&.always-arrows .v3 .pill .arrows{ display: flex; opacity: 1; }/* No mirror. It was 55px of a 202px lozenge — a quarter of the width bought nothing but
    symmetry, and it never actually balanced, because the unit sits on the right too. A
    handle is centred on the rail by its own box; the number inside it does not have to be
    centred as well. */
-.v4 .pill .arrows::after{ background: color-mix(in srgb, var(--on-accent) 35%, transparent); }.v4 .pill .arrows button{ background: none; color: var(--on-accent); opacity: .7; }.v4 .pill .arrows button:hover{ background: color-mix(in srgb, var(--on-accent) 16%, transparent);
-  color: var(--on-accent); opacity: 1; }.v4 .f:focus-within{ border-color: transparent; }&.vert .v4 .d{ flex-direction: column; gap: .5rem; }/* flex:1 in a column made the rail as short as its content — it must be told a height.
+.v3 .pill .arrows::after{ background: color-mix(in srgb, var(--on-accent) 35%, transparent); }.v3 .pill .arrows button{ background: none; color: var(--on-accent); opacity: .7; }.v3 .pill .arrows button:hover{ background: color-mix(in srgb, var(--on-accent) 16%, transparent);
+  color: var(--on-accent); opacity: 1; }.v3 .f:focus-within{ border-color: transparent; }&.vert .v3 .d{ flex-direction: column; gap: .5rem; }/* flex:1 in a column made the rail as short as its content — it must be told a height.
    And the column has to be as wide as the PILL, not as the hairline: at 34px the pills
    hung 30px into their neighbours. The line stays centred inside the wider column. */
-&.vert .v4 .rail{ flex: none; width: 6rem; height: 11rem; }&.vert .v4 .rail > i{ left: 50%; width: 1px; }&.vert .v4 .icon{ width: auto; text-align: center; }&.vert .v4 .pill{ writing-mode: horizontal-tb; }/* the number never rotates */
-&.vert .v4 .rail > i{ left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto;
-  transform: translateX(-50%); }&.vert .v4 .pill{ left: 50%; cursor: ns-resize; }/* ── 05 · the toggle BECOMES the slider (MorphControl) ────── */
-.v5 .d-head{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }.v5 .d-val{ opacity: 0; transition: opacity .2s; }/* the number belongs to the slider */
-.v5.on .d-val{ opacity: 1; }.v5 .area{ position: relative; height: 34px; }/* The stops stop short of the area's right edge: that gutter is where the grip parks.
+&.vert .v3 .rail{ flex: none; width: 6rem; height: 11rem; }&.vert .v3 .rail > i{ left: 50%; width: 1px; }&.vert .v3 .icon{ width: auto; text-align: center; }&.vert .v3 .pill{ writing-mode: horizontal-tb; }/* the number never rotates */
+&.vert .v3 .rail > i{ left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto;
+  transform: translateX(-50%); }&.vert .v3 .pill{ left: 50%; cursor: ns-resize; }/* ── 05 · the toggle BECOMES the slider (MorphControl) ────── */
+.v4 .d-head{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }.v4 .d-val{ opacity: 0; transition: opacity .2s; }/* the number belongs to the slider */
+.v4.on .d-val{ opacity: 1; }.v4 .area{ position: relative; height: 34px; }/* The stops stop short of the area's right edge: that gutter is where the grip parks.
    The Framer original hangs the grip 12px past the toggle because its ROW is wider than
    the toggle — here the two are the same box, so "past the toggle" meant "outside the
    control". Reserving the space keeps the whole thing inside its own margin. */
-.v5 .stops{ position: absolute; inset: 0 var(--park, 34px) 0 0; display: flex; gap: 2px;
+.v4 .stops{ position: absolute; inset: 0 var(--park, 34px) 0 0; display: flex; gap: 2px;
   border: 1px solid var(--line); border-radius: 8px; corner-shape: superellipse(1.2);
   padding: 2px; background: var(--bg);
-  transition: opacity .22s; }.v5.on .stops{ opacity: 0; pointer-events: none; }.v5 .stops button{ font: inherit; font-size: .75rem; flex: 1; border: 0; background: none;
+  transition: opacity .22s; }.v4.on .stops{ opacity: 0; pointer-events: none; }.v4 .stops button{ font: inherit; font-size: .75rem; flex: 1; border: 0; background: none;
   color: var(--muted); border-radius: 6px; corner-shape: superellipse(1.2);
-  cursor: pointer; white-space: nowrap; }.v5 .stops button[aria-pressed="true"]{ background: var(--ink); color: var(--bg); }.v5 .stops button:focus-visible{ outline: 2px solid var(--accent); outline-offset: 1px; }/* the rail grows out of the right-hand edge, where the grip is parked */
-.v5 .rail{ position: absolute; top: 50%; left: 0; height: 2px; width: 0;
+  cursor: pointer; white-space: nowrap; }.v4 .stops button[aria-pressed="true"]{ background: var(--ink); color: var(--bg); }.v4 .stops button:focus-visible{ outline: 2px solid var(--accent); outline-offset: 1px; }/* the rail grows out of the right-hand edge, where the grip is parked */
+.v4 .rail{ position: absolute; top: 50%; left: 0; height: 2px; width: 0;
   background: var(--line); border-radius: 1px; opacity: 0;
   transform: translate(calc(100% + 12px), -50%);
-  transition: width .28s cubic-bezier(.2,.7,.3,1), opacity .2s, transform .28s cubic-bezier(.2,.7,.3,1); }.v5.on .rail{ width: calc(100% - var(--park, 34px)); opacity: 1; transform: translate(0, -50%); }/* ONE element. Parked it is a 6x16 grip; unlocked it is the 20x20 thumb. Same node —
+  transition: width .28s cubic-bezier(.2,.7,.3,1), opacity .2s, transform .28s cubic-bezier(.2,.7,.3,1); }.v4.on .rail{ width: calc(100% - var(--park, 34px)); opacity: 1; transform: translate(0, -50%); }/* ONE element. Parked it is a 6x16 grip; unlocked it is the 20x20 thumb. Same node —
    it travels onto the rail rather than a second control appearing under the first. */
-.v5 .knob{
+.v4 .knob{
   position: absolute; top: 50%; left: 0;
   width: 6px; height: 16px; border-radius: 3px; background: var(--muted);
   /* both offsets come from JS so the same node can park and travel on either axis */
@@ -262,47 +260,47 @@
   display: flex; align-items: center; justify-content: center;
   transition: width .28s cubic-bezier(.2,.7,.3,1), height .28s cubic-bezier(.2,.7,.3,1),
               border-radius .28s, background .28s, transform .28s cubic-bezier(.2,.7,.3,1);
-}.v5.on .knob{ width: 20px; height: 20px; border-radius: 10px; background: var(--ink); cursor: ew-resize; }.v5.dragging .knob, .v5.dragging .rail{ transition: none; }.v5 .knob:focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; }/* the two dashes that say "drag me", gone once it is a thumb */
-.v5 .knob::before, .v5 .knob::after{
+}.v4.on .knob{ width: 20px; height: 20px; border-radius: 10px; background: var(--ink); cursor: ew-resize; }.v4.dragging .knob, .v4.dragging .rail{ transition: none; }.v4 .knob:focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; }/* the two dashes that say "drag me", gone once it is a thumb */
+.v4 .knob::before, .v4 .knob::after{
   content: ''; position: absolute; top: 50%; width: 5px; height: 1.5px;
   background: var(--muted); border-radius: 1px; opacity: 1; transition: opacity .18s; }/* The horizontal ::after carried NO offset at all, so it drew on top of the grip
    while its twin stood off to the left -- the grip had one visible dash, on one
    side. The ticks stay perpendicular -- that is the original drawing -- but they
    close to 2px of the pill (5px dash at -7px) instead of 4px, which is the
    spacing the React component draws. */
-.v5 .knob::after carried no offset at all, so it sat ON the grip while its twin stood off
+.v4 .knob::after carried no offset at all, so it sat ON the grip while its twin stood off
    to the left -- the grip only ever had one visible dash, on one side. */
-.v5 .knob::before{ left: -7px; }.v5 .knob::after{ right: -7px; }.v5.on .knob::before, .v5.on .knob::after{ opacity: 0; }/* Same manners as the module reset in CustomTypeTester: invisible until it applies,
+.v4 .knob::before{ left: -7px; }.v4 .knob::after{ right: -7px; }.v4.on .knob::before, .v4.on .knob::after{ opacity: 0; }/* Same manners as the module reset in CustomTypeTester: invisible until it applies,
    half-strength when it does, full on hover, and it spins as it acts. */
 /* The reset lives in the gutter — the same slot the grip parks in. Parked, the grip is
    there and the reset is not; unlocked, the grip has travelled onto the rail and the
    reset takes the space it left. One slot, used in both states, and the control never
    grows a second row to hold a button that is only sometimes relevant. */
-.v5 .relock{ background: none; border: 0; font: inherit; cursor: pointer; padding: 0;
+.v4 .relock{ background: none; border: 0; font: inherit; cursor: pointer; padding: 0;
   position: absolute; right: 0; top: 50%; transform: translateY(-50%);
   width: var(--park, 34px); height: 26px; color: var(--ink-2);
   display: inline-flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; transition: opacity .2s, transform .5s; }.v5.on .relock{ opacity: .5; pointer-events: auto; }.v5.on .relock:hover{ opacity: 1; }.v5 .relock.spin{ transform: rotate(-360deg); }.v5 .relock:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }/* Turned vertical the area stops filling the row and becomes a 5.5rem column, so it
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .5s; }.v4.on .relock{ opacity: .5; pointer-events: auto; }.v4.on .relock:hover{ opacity: 1; }.v4 .relock.spin{ transform: rotate(-360deg); }.v4 .relock:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }/* Turned vertical the area stops filling the row and becomes a 5.5rem column, so it
    has to be centred explicitly -- it was sitting 58px left of its own label. */
-&.vert .v5 .area{ height: 11rem; width: 5.5rem; margin-inline: auto; }
+&.vert .v4 .area{ height: 11rem; width: 5.5rem; margin-inline: auto; }
 /* Turned vertical the head has a column to work with, not a row: name, then tag on
    its own line, then the readout. Side by side they were competing for 5.5rem. */
-&.vert .v5 .d-head{ flex-direction: column; align-items: center; gap: 2px; margin-bottom: var(--pad-2, 8px); }
-&.vert .v5 .d-lab{ display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; }
+&.vert .v4 .d-head{ flex-direction: column; align-items: center; gap: 2px; margin-bottom: var(--pad-2, 8px); }
+&.vert .v4 .d-lab{ display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; }
 /* GEOM carries a left margin from sitting AFTER the name on one line; on its own
    line that margin is 2px of off-centre. */
-&.vert .v5 .d-tag{ margin: 0; }
+&.vert .v4 .d-tag{ margin: 0; }
 /* All three lines on one axis, and the value's line is RESERVED: locked, v5 shows no
    number (the readout only exists once there is a continuous value), and a row that
    collapses when empty makes the whole head jump the moment you unlock it. The gap
    stays whether or not anything is in it -- same rule as the unit line above. */
-&.vert .v5 .d-val{
+&.vert .v4 .d-val{
   display: flex; justify-content: center; align-items: center;
   min-height: 1.4em; width: 100%;
-}&.vert .v5 .stops{ flex-direction: column; inset: 0 0 var(--park, 34px) 0; }&.vert .v5 .relock{ right: auto; bottom: 0; top: auto; left: 50%;
-  transform: translateX(-50%); width: 26px; height: var(--park, 34px); }&.vert .v5 .knob{ top: 0; left: 50%; width: 16px; height: 6px; border-radius: 3px;
-  transform: translate(calc(-50% + var(--x, 0px)), var(--y, 0px)); }&.vert .v5.on .knob{ width: 20px; height: 20px; border-radius: 10px; }&.vert .v5 .rail{ top: 0; left: 50%; width: 2px; height: 0;
-  transform: translate(-50%, calc(100% + 12px)); }&.vert .v5.on .rail{ height: calc(100% - var(--park, 34px)); width: 2px; transform: translate(-50%, 0); }&.vert .v5 .knob::before{ left: 50%; top: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }&.vert .v5 .knob::after{ left: 50%; right: auto; top: auto; bottom: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }/* ── touch ────────────────────────────────────────────────────
+}&.vert .v4 .stops{ flex-direction: column; inset: 0 0 var(--park, 34px) 0; }&.vert .v4 .relock{ right: auto; bottom: 0; top: auto; left: 50%;
+  transform: translateX(-50%); width: 26px; height: var(--park, 34px); }&.vert .v4 .knob{ top: 0; left: 50%; width: 16px; height: 6px; border-radius: 3px;
+  transform: translate(calc(-50% + var(--x, 0px)), var(--y, 0px)); }&.vert .v4.on .knob{ width: 20px; height: 20px; border-radius: 10px; }&.vert .v4 .rail{ top: 0; left: 50%; width: 2px; height: 0;
+  transform: translate(-50%, calc(100% + 12px)); }&.vert .v4.on .rail{ height: calc(100% - var(--park, 34px)); width: 2px; transform: translate(-50%, 0); }&.vert .v4 .knob::before{ left: 50%; top: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }&.vert .v4 .knob::after{ left: 50%; right: auto; top: auto; bottom: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }/* ── touch ────────────────────────────────────────────────────
    A 2px rail and a 10px arrowhead are mouse sizes. On a coarse pointer every target
    grows to 44px — Apple's HIG minimum — WITHOUT the visuals growing: the rail stays
    2px and the arrow stays small, but the thing your finger lands on is padded out
@@ -320,25 +318,25 @@
   &.touch .f .arrows button{ min-width: 0; width: 16px; height: 22px; }&.touch .f .arrows button::after{
     content: ''; position: absolute; inset: -5px -9px;   /* 34x32 to press, 16x22 to see */
   }&.touch .f .arrows button:first-child{ min-height: 22px; }&.touch .f .arrows button:last-child{ min-height: 22px; }/* the rail keeps its hairline look and gains a 44px band to hit */
-  &.touch .trk{ height: 44px; background: none; }&.touch .trk::-webkit-slider-runnable-track{ height: 2px; background: var(--line); border-radius: 2px; }&.touch .trk::-moz-range-track{ height: 2px; background: var(--line); border-radius: 2px; }&.touch .trk::-webkit-slider-thumb{ width: 24px; height: 24px; margin-top: -11px; }&.touch .trk::-moz-range-thumb{ width: 24px; height: 24px; }&.touch.vert .trk{ width: 44px; height: 11rem; }/* The bar has to grow with what is inside it. I raised .v3 .bar and .v4 .rail to 48px
-     and left .v5 .area at its mouse height of 34, so 44px buttons sat 13px outside their
+  &.touch .trk{ height: 44px; background: none; }&.touch .trk::-webkit-slider-runnable-track{ height: 2px; background: var(--line); border-radius: 2px; }&.touch .trk::-moz-range-track{ height: 2px; background: var(--line); border-radius: 2px; }&.touch .trk::-webkit-slider-thumb{ width: 24px; height: 24px; margin-top: -11px; }&.touch .trk::-moz-range-thumb{ width: 24px; height: 24px; }&.touch.vert .trk{ width: 44px; height: 11rem; }/* The bar has to grow with what is inside it. I raised .v2 .bar and .v3 .rail to 48px
+     and left .v4 .area at its mouse height of 34, so 44px buttons sat 13px outside their
      own container. A target and the thing that holds it are one measurement. */
-  &.touch:not(&.vert) .v5 .area{ height: 48px; }&.touch .v5 .stops button{ min-height: 44px; }/* 44px is the minimum TARGET, not the minimum gap between two of them. Once the field
+  &.touch:not(&.vert) .v4 .area{ height: 48px; }&.touch .v4 .stops button{ min-height: 44px; }/* 44px is the minimum TARGET, not the minimum gap between two of them. Once the field
      and the track are each 44px tall, their centres are already 44px+gap apart, so the
      spacing only has to stop a fingertip bridging the two edges — Material asks 8dp,
      and 16px is comfortable. A 44px GAP on top of 44px targets is a control built for
      no one: it was me over-correcting, not a guideline. */
-  &.touch .d{ margin-bottom: calc(var(--gap) * 2); }&.touch .v1 .d-head, &.touch .v2 .d-head{ margin-bottom: var(--gap); }&.touch .v2 .d{ row-gap: var(--gap); margin-bottom: calc(var(--gap) * 2); }&.touch .v4 .d{ gap: var(--gap); }&.touch .v3 .d{ margin-bottom: calc(var(--gap) * 2); }&.touch .v5 .area{ margin-top: var(--gap); }&.touch .v5 .grip{ width: 22px; height: 44px; }&.touch:not(&.vert) .v3 .bar{ height: 48px; }&.touch.vert .v3 .bar{ width: 5.5rem; }/* height stays 11rem, see the vert block */
-  &.touch .v3 .f input{ font-size: .9375rem; }&.touch:not(&.vert) .v4 .rail{ height: 48px; }/* The pill does NOT grow to 44px. The RAIL is the 48px target — it carries the drag —
+  &.touch .d{ margin-bottom: calc(var(--gap) * 2); }&.touch .v1 .d{ row-gap: var(--gap); margin-bottom: calc(var(--gap) * 2); }&.touch .v3 .d{ gap: var(--gap); }&.touch .v2 .d{ margin-bottom: calc(var(--gap) * 2); }&.touch .v4 .area{ margin-top: var(--gap); }&.touch .v4 .grip{ width: 22px; height: 44px; }&.touch:not(&.vert) .v2 .bar{ height: 48px; }&.touch.vert .v2 .bar{ width: 5.5rem; }/* height stays 11rem, see the vert block */
+  &.touch .v2 .f input{ font-size: .9375rem; }&.touch:not(&.vert) .v3 .rail{ height: 48px; }/* The pill does NOT grow to 44px. The RAIL is the 48px target — it carries the drag —
      so the handle only has to be seeable and grabbable inside it. Sized up it became
      129x57, taller than the band it rides on, which reads as a lozenge rather than a
      thumb. Same rule as the hairline: hit area and ink are different problems.
      16px text, though, because Safari zooms the page on focusing anything smaller. */
-  &.touch .v4 .pill{ padding: .25rem .5rem; box-shadow: 0 0 0 2px var(--panel); }/* No padding, even here. The generic touch rule pads .f inputs so a standalone field
+  &.touch .v3 .pill{ padding: .25rem .5rem; box-shadow: 0 0 0 2px var(--panel); }/* No padding, even here. The generic touch rule pads .f inputs so a standalone field
      is comfortable to tap; inside the pill the LOZENGE is that padding, and adding it
      again put 19px of dead space around a 30px number — which is what pushed the digits
      away from the chevrons. */
-  &.touch .v4 .pill input{ font-size: 16px; padding: 0; }/* The arrows were what made it 52px: a 44px stepper column inside the handle set the
+  &.touch .v3 .pill input{ font-size: 16px; padding: 0; }/* The arrows were what made it 52px: a 44px stepper column inside the handle set the
      handle's height. They also put a small tap target inside a draggable object, which
      is a hit-test fight nobody wins. On touch the pill is dragged and the number typed —
      the same reason variant 03 has none. */
@@ -348,7 +346,7 @@
      as well as its classes, so it was outranking &.always-arrows and the toggle did
      nothing here. Worse, the mirror spacer is NOT gated the same way, so the lozenge was
      being padded 55px for a stepper that had been hidden. */
-  &.touch:not(&.always-arrows) .v4 .pill .arrows{ display: none; }&.touch .toolbar button{ min-height: 44px; padding: .25rem 1rem; }
+  &.touch:not(&.always-arrows) .v3 .pill .arrows{ display: none; }&.touch .toolbar button{ min-height: 44px; padding: .25rem 1rem; }
 
 /* ── 06 · the triplet ──────────────────────────────────────────────────────────
    Three fields, one control. The lozenge is the object; the hairlines are the only
@@ -510,22 +508,10 @@
    So: no slot, and the unit goes UNDER the number the way "the row is the track"
    already does it, centred on the same axis. The number is then centred on the
    column whether or not anything follows it. */
-&.vert .d-unit { min-width: 0; text-align: center; }
-/* Two rows, and the second one exists whether or not a unit does. Dropping the
-   horizontal min-width slot fixed the sideways push but replaced it with a vertical
-   one: leading has no unit, so it had no unit LINE, so its track began 55px above
-   the other two inside the same box. The slot was never wrong -- it was reserving
-   on the wrong axis. Turned vertical it reserves a line. */
-&.vert .v1 .d-val, &.vert .v2 .d-val {
-  display: grid; grid-template-rows: auto 1.15em;
-  justify-items: center; align-items: start; gap: 0;
-}
-&.vert .v1 .f, &.vert .v2 .f { justify-self: center; }
-
-/* Two-word labels break into two lines rather than running the height of the
+&.vert .d-unit { min-width: 0; text-align: center; }/* Two-word labels break into two lines rather than running the height of the
    card. In vertical-rl the INLINE axis is vertical, so max-height is what a
    max-width would be lying down -- 6.5em is "letter spacing" over two lines. */
-&.vert .v3 .lab, &.vert .tri-lab {
+&.vert .v2 .lab, &.vert .tri-lab {
   /* 4em is derived, not picked: it is longer than the longest single WORD in play
      ("spacing" / "scaling", ~3.5em at 13px) and shorter than any two-word string,
      so "letter spacing" breaks after the first word while "measure" and "leading"
@@ -600,30 +586,32 @@
 
 /* ── the swap, stated once and at a specificity that cannot lose ──────────────
    The unit and the arrows share one slot, so one state drives both: the dial is
-   hovered or has focus inside it. Written here, last, because .v4's unit is pinned
-   by `.v4 .pill .d-unit {opacity:.78}` -- same specificity as a plain
+   hovered or has focus inside it. Written here, last, because .v3's unit is pinned
+   by `.v3 .pill .d-unit {opacity:.78}` -- same specificity as a plain
    `.d:focus-within .d-unit`, so the tie went to whichever came later, and the pill
    showed its unit underneath the arrows. */
 .d:hover .f .arrows, .d:focus-within .f .arrows { opacity: 1; }
 .d:hover .d-unit, .d:focus-within .d-unit,
-.v4 .pill:hover .d-unit, .v4 .pill:focus-within .d-unit,
-.v4 .d:hover .pill .d-unit, .v4 .d:focus-within .pill .d-unit { opacity: 0; }
+.v3 .pill:hover .d-unit, .v3 .pill:focus-within .d-unit,
+.v3 .d:hover .pill .d-unit, .v3 .d:focus-within .pill .d-unit { opacity: 0; }
 
 /* Persistent arrows are not a swap: both are permanent, both are measured. */
 &.always-arrows .d:hover .d-unit, &.always-arrows .d:focus-within .d-unit,
-&.always-arrows .v4 .d:hover .pill .d-unit, &.always-arrows .v4 .d:focus-within .pill .d-unit,
+&.always-arrows .v3 .d:hover .pill .d-unit, &.always-arrows .v3 .d:focus-within .pill .d-unit,
 &.touch .d:hover .d-unit, &.touch .d:focus-within .d-unit,
-&.touch .v4 .d:hover .pill .d-unit, &.touch .v4 .d:focus-within .pill .d-unit { opacity: .78; }
+&.touch .v3 .d:hover .pill .d-unit, &.touch .v3 .d:focus-within .pill .d-unit { opacity: .78; }
 &.always-arrows .d .f .arrows, &.touch .d .f .arrows { opacity: 1; }
 </style>
 
 <h1>Five ways to draw one dial</h1>
-<p class="lede">Each carries the same three controls &mdash; one with a unit, one with a tag, one
-with neither &mdash; so the labelling question stays visible while the shapes are compared. All
-five share one state. <b>01 is what AxisSlider ships</b>: a single <code>type=text</code> field,
-so the value can print a real minus where a number input is stuck with a hyphen; drawn chevrons
-rather than the browser's stepper; and a clamp on the field as well as the track. The other four
-are proposals. Nothing here changes value on scroll.</p>
+<p class="lede">The first four carry the same three controls &mdash; one with a unit, one with
+a tag, one with neither &mdash; so the labelling question stays visible while the shapes are
+compared, and they share one state. What every field here has in common is what
+<code>AxisSlider</code> ships: a single <code>type=text</code> field, so the value can print a
+real minus where a number input is stuck with a hyphen; drawn chevrons rather than the browser's
+stepper; and a clamp on the field as well as the track. <b>05 is the odd one</b> &mdash; three
+numbers of one parameter rather than one number of three. Nothing here changes value on
+scroll.</p>
 
 <div class="toolbar">
   <span>try</span>
@@ -759,27 +747,9 @@ const syncs = [];
 const get = d => state[d.key];
 const mk = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
 
-// ── 01 · as shipped ────────────────────────────────────────
-function v1(d) {
-  const root = mk('div', 'd');
-  const h = head(d);
-  const val = mk('span', 'd-val');
-  const set = v => { state[d.key] = v; sync(); };
-  const f = field(d, () => get(d), set);
-  val.appendChild(f);
-  const u = unitEl(d); if (u) val.appendChild(u);
-  h.appendChild(val);
-  const r = mk('input', 'trk');
-  r.type = 'range'; r.min = d.min; r.max = d.max; r.step = d.step;
-  r.setAttribute('aria-label', d.label);
-  r.addEventListener('input', () => set(parseFloat(r.value)));
-  root.append(h, r);
-  syncs.push(() => { r.value = get(d); f._sync(); });
-  return root;
-}
 
 // ── 02 · one line ──────────────────────────────────────────
-function v2(d) {
+function v1(d) {
   const root = mk('div', 'd');
   const h = mk('div', 'd-head');
   const l = mk('span', 'd-lab'); l.textContent = d.label;
@@ -848,7 +818,7 @@ function draggable(surface, d, get, set, opts = {}) {
 }
 
 // ── 03 · the row IS the track ──────────────────────────────
-function v3(d) {
+function v2(d) {
   const root = mk('div', 'd');
   const bar = mk('div', 'bar');
   const fill = mk('i');
@@ -878,7 +848,7 @@ function v3(d) {
 
 // ── 04 · the value rides in the handle ─────────────────────
 const ICONS = { measure: 'T↔', width: 'T⇔', leading: '↕T' };
-function v4(d) {
+function v3(d) {
   const root = mk('div', 'd');
   const icon = mk('span', 'icon');
   icon.textContent = ICONS[d.key] || d.label.slice(0, 2);
@@ -914,7 +884,7 @@ function v4(d) {
 // framer-motion. The point is that the grip and the thumb are ONE node: it is parked
 // past the right edge as a 6x16 handle, and on unlock it travels onto the rail and
 // becomes the 20x20 thumb. A second control appearing below would be a different idea.
-function v5() {
+function v4() {
   const d = STOPS;
   const root = mk('div', 'd');
   const h = mk('div', 'd-head');
@@ -1095,11 +1065,10 @@ function v6() {
 }
 
 const VARIANTS = [
-  { name: 'As shipped', note: '<b>Label, field, unit, track under.</b> What AxisSlider draws today, with our arrows instead of the platform’s. Two rows per dial — safe, and the most vertical space.', build: c => DIALS.forEach(d => c.appendChild(v1(d))) },
-  { name: 'One line', note: '<b>Everything on the label line.</b> Same anatomy, half the height — a rail of eight dials fits without scrolling. The value can crowd a long label at narrow widths.', build: c => DIALS.forEach(d => c.appendChild(v2(d))) },
-  { name: 'The row is the track', note: '<b>Label and number sit inside the bar; the fill is the value.</b> Press anywhere on the row and it jumps there, then follows. The number is still typeable — click it and the drag stands down. One object, one readout, and the widest hit area of the five.', build: c => DIALS.forEach(d => c.appendChild(v3(d))) },
-  { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label — which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => c.appendChild(v4(d))) },
-  { name: 'The toggle becomes the slider', note: '<b>One node, two states.</b> Ported from <code>MorphControl</code> in CustomTypeTester — the grip parked at the right edge IS the thumb: click it and it travels onto the rail and grows into it, while the stops fade out. It does not reveal a second control. The value only appears once there is a continuous number to show. <b>Added here:</b> a way back to the stops, which the original has no path to.', build: c => c.appendChild(v5()) },
+  { name: 'One line', note: '<b>Everything on the label line.</b> Same anatomy, half the height — a rail of eight dials fits without scrolling. The value can crowd a long label at narrow widths.', build: c => DIALS.forEach(d => c.appendChild(v1(d))) },
+  { name: 'The row is the track', note: '<b>Label and number sit inside the bar; the fill is the value.</b> Press anywhere on the row and it jumps there, then follows. The number is still typeable — click it and the drag stands down. One object, one readout, and the widest hit area of the five.', build: c => DIALS.forEach(d => c.appendChild(v2(d))) },
+  { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label — which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => c.appendChild(v3(d))) },
+  { name: 'The toggle becomes the slider', note: '<b>One node, two states.</b> Ported from <code>MorphControl</code> in CustomTypeTester — the grip parked at the right edge IS the thumb: click it and it travels onto the rail and grows into it, while the stops fade out. It does not reveal a second control. The value only appears once there is a continuous number to show. <b>Added here:</b> a way back to the stops, which the original has no path to.', build: c => c.appendChild(v4()) },
   { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired and max are one control, so they share a label and a lozenge and only hairlines divide them. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The shape the other five cannot make, because they each hold a single value.', build: c => c.appendChild(v6()) },
 ];
 

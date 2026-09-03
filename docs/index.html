@@ -2612,42 +2612,41 @@ html,body{margin:0;padding:0;background:var(--bg)}
   content: ''; position: absolute; width: 14px; height: 14px;
   border-radius: 50%; background: currentColor; opacity: 0;
   transition: opacity .1s; pointer-events: none;
-}#s-controls .f .arrows button:active::before{ opacity: .18; }#s-controls .f .arrows button:hover{ color: var(--ink); }#s-controls .f .arrows button:focus-visible{ outline: 1px solid var(--accent); outline-offset: -1px; }#s-controls .v3 .f input,#s-controls .v5 .f input,#s-controls .v4 .pill input{
+}#s-controls .f .arrows button:active::before{ opacity: .18; }#s-controls .f .arrows button:hover{ color: var(--ink); }#s-controls .f .arrows button:focus-visible{ outline: 1px solid var(--accent); outline-offset: -1px; }#s-controls .v2 .f input,#s-controls .v4 .f input,#s-controls .v3 .pill input{
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   transition: text-decoration-color .15s;
-}#s-controls .v3 .f input:hover,#s-controls .v5 .f input:hover,#s-controls .v4 .pill input:hover,#s-controls .v3 .f input:focus,#s-controls .v5 .f input:focus,#s-controls .v4 .pill input:focus{
+}#s-controls .v2 .f input:hover,#s-controls .v4 .f input:hover,#s-controls .v3 .pill input:hover,#s-controls .v2 .f input:focus,#s-controls .v4 .f input:focus,#s-controls .v3 .pill input:focus{
   text-decoration-color: currentColor;
 }#s-controls .trk{ -webkit-appearance: none; appearance: none; width: 100%; height: 2px;
   background: var(--line); border-radius: 2px; margin: 0; outline-offset: 4px; }#s-controls .trk::-webkit-slider-thumb{ -webkit-appearance: none; appearance: none;
   width: 13px; height: 13px; border-radius: 50%; background: var(--ink); cursor: pointer; }#s-controls .trk::-moz-range-thumb{ width: 13px; height: 13px; border: 0; border-radius: 50%;
-  background: var(--ink); cursor: pointer; }#s-controls .trk:focus-visible{ outline: 2px solid var(--accent); }#s-controls.vert .trk{ writing-mode: vertical-lr; direction: rtl; width: 2px; height: 11rem; }#s-controls .v1 .d-head{ display: flex; justify-content: space-between; align-items: baseline;
-  gap: .75rem; margin-bottom: .5rem; }#s-controls .v1 .d-val{ display: inline-flex; align-items: center; gap: .375rem; }#s-controls.vert .v1 .d{ display: flex; flex-direction: column; align-items: center; gap: .5rem; }#s-controls.vert .v1 .d-head{ flex-direction: column; align-items: center; margin: 0; }#s-controls .v2 .d{ display: grid; grid-template-columns: 1fr auto; gap: .5rem .75rem;
-  align-items: center; margin-bottom: 1.5rem; }#s-controls .v2 .d-head{ display: flex; align-items: baseline; gap: 6px; min-width: 0; }#s-controls .v2 .trk{ grid-column: 1 / -1; }#s-controls .v2 .d-val{ display: inline-flex; align-items: center; gap: 4px; }#s-controls.vert .v2 .d{ grid-template-columns: none; justify-items: center; }#s-controls .v3 .bar{
+  background: var(--ink); cursor: pointer; }#s-controls .trk:focus-visible{ outline: 2px solid var(--accent); }#s-controls.vert .trk{ writing-mode: vertical-lr; direction: rtl; width: 2px; height: 11rem; }#s-controls .v1 .d{ display: grid; grid-template-columns: 1fr auto; gap: .5rem .75rem;
+  align-items: center; margin-bottom: 1.5rem; }#s-controls .v1 .d-head{ display: flex; align-items: baseline; gap: 6px; min-width: 0; }#s-controls .v1 .trk{ grid-column: 1 / -1; }#s-controls .v1 .d-val{ display: inline-flex; align-items: center; gap: 4px; }#s-controls.vert .v1 .d{ grid-template-columns: none; justify-items: center; }#s-controls .v2 .bar{
   position: relative; display: flex; align-items: center; justify-content: space-between;
   gap: 12px; height: 32px; padding: 0 12px; border-radius: 8px;
   corner-shape: superellipse(1.2);
   background: var(--sunk); overflow: hidden; cursor: ew-resize;
   touch-action: none; user-select: none;
-}#s-controls .v3 .bar:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }#s-controls .v3 .bar > i{ position: absolute; inset: 0 auto 0 0; background: var(--raised);
-  border-right: 1px solid var(--line); pointer-events: none; }#s-controls .v3 .lab,#s-controls .v3 .d-val{ position: relative; z-index: 1; }#s-controls .v3 .f{ border: 0; background: none; }#s-controls .v3 .f input{ width: 4.2rem; cursor: text; }#s-controls .v3 .f .arrows{ display: none; }#s-controls.vert .v3 .bar{
+}#s-controls .v2 .bar:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }#s-controls .v2 .bar > i{ position: absolute; inset: 0 auto 0 0; background: var(--raised);
+  border-right: 1px solid var(--line); pointer-events: none; }#s-controls .v2 .lab,#s-controls .v2 .d-val{ position: relative; z-index: 1; }#s-controls .v2 .f{ border: 0; background: none; }#s-controls .v2 .f input{ width: 4.2rem; cursor: text; }#s-controls .v2 .f .arrows{ display: none; }#s-controls.vert .v2 .bar{
   flex-direction: column; justify-content: space-between; align-items: center;
   height: 176px; width: 80px; padding: 8px 4px; cursor: ns-resize;
-}#s-controls.vert .v3 .bar > i{ inset: auto 0 0 0; width: 100%; height: 0;
-  border-right: 0; border-top: 1px solid var(--line); }#s-controls.vert .v3 .lab{ writing-mode: vertical-rl; text-orientation: mixed;
-  font-size: .8125rem; line-height: 1; }#s-controls.vert .v3 .d-tag{ margin: .4em 0 0; }#s-controls.vert .v3 .d-val{ display: flex; flex-direction: column; align-items: center; gap: 0; }#s-controls.vert .v3 .f input{ width: 100%; text-align: center; padding: 0; }#s-controls .v4 .d{ display: flex; align-items: center; gap: .75rem; }#s-controls .v4 .icon{ font-family: var(--serif); font-size: .9375rem; color: var(--muted);
-  width: 2.25rem; flex: none; letter-spacing: -.02em; }#s-controls .v4 .rail{ position: relative; flex: 1; height: 34px; display: flex; align-items: center;
-  touch-action: none; }#s-controls .v4 .rail > i{ position: absolute; left: 0; right: 0; top: 50%; height: 1px;
-  background: var(--line); transform: translateY(-50%); }#s-controls .v4 .pill{
+}#s-controls.vert .v2 .bar > i{ inset: auto 0 0 0; width: 100%; height: 0;
+  border-right: 0; border-top: 1px solid var(--line); }#s-controls.vert .v2 .lab{ writing-mode: vertical-rl; text-orientation: mixed;
+  font-size: .8125rem; line-height: 1; }#s-controls.vert .v2 .d-tag{ margin: .4em 0 0; }#s-controls.vert .v2 .d-val{ display: flex; flex-direction: column; align-items: center; gap: 0; }#s-controls.vert .v2 .f input{ width: 100%; text-align: center; padding: 0; }#s-controls .v3 .d{ display: flex; align-items: center; gap: .75rem; }#s-controls .v3 .icon{ font-family: var(--serif); font-size: .9375rem; color: var(--muted);
+  width: 2.25rem; flex: none; letter-spacing: -.02em; }#s-controls .v3 .rail{ position: relative; flex: 1; height: 34px; display: flex; align-items: center;
+  touch-action: none; }#s-controls .v3 .rail > i{ position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+  background: var(--line); transform: translateY(-50%); }#s-controls .v3 .pill{
   position: absolute; top: 50%; transform: translate(-50%, -50%);
   background: var(--accent); color: var(--on-accent); border-radius: 999px;
   corner-shape: superellipse(1.2);
   
   padding: 4px 8px; display: inline-flex; align-items: center; gap: 6px;
   cursor: ew-resize; touch-action: none; box-shadow: 0 0 0 3px var(--panel);
-}#s-controls .v4 .f{ border: 0; background: none; gap: 6px; }#s-controls .v4 .pill input{ text-align: right; }#s-controls .v4 .pill input{
+}#s-controls .v3 .f{ border: 0; background: none; gap: 6px; }#s-controls .v3 .pill input{ text-align: right; }#s-controls .v3 .pill input{
   font-family: var(--dial); font-size: .875rem;
   
   font-variation-settings: 'opsz' 10;
@@ -2656,18 +2655,18 @@ html,body{margin:0;padding:0;background:var(--bg)}
   background: none; border: 0; color: var(--on-accent); padding: 0; outline: none;
   field-sizing: content; min-width: 2.25ch;
   text-align: center; cursor: text;
-}#s-controls .v4 .pill .d-unit{ color: var(--on-accent); opacity: .78; font-size: .6875rem;
-  min-width: 0; }#s-controls .v4 .pill .arrows{ display: none; }#s-controls.always-arrows .v4 .pill .arrows{ display: flex; opacity: 1; }#s-controls .v4 .pill .arrows::after{ background: color-mix(in srgb, var(--on-accent) 35%, transparent); }#s-controls .v4 .pill .arrows button{ background: none; color: var(--on-accent); opacity: .7; }#s-controls .v4 .pill .arrows button:hover{ background: color-mix(in srgb, var(--on-accent) 16%, transparent);
-  color: var(--on-accent); opacity: 1; }#s-controls .v4 .f:focus-within{ border-color: transparent; }#s-controls.vert .v4 .d{ flex-direction: column; gap: .5rem; }#s-controls.vert .v4 .rail{ flex: none; width: 6rem; height: 11rem; }#s-controls.vert .v4 .rail > i{ left: 50%; width: 1px; }#s-controls.vert .v4 .icon{ width: auto; text-align: center; }#s-controls.vert .v4 .pill{ writing-mode: horizontal-tb; }#s-controls.vert .v4 .rail > i{ left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto;
-  transform: translateX(-50%); }#s-controls.vert .v4 .pill{ left: 50%; cursor: ns-resize; }#s-controls .v5 .d-head{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }#s-controls .v5 .d-val{ opacity: 0; transition: opacity .2s; }#s-controls .v5.on .d-val{ opacity: 1; }#s-controls .v5 .area{ position: relative; height: 34px; }#s-controls .v5 .stops{ position: absolute; inset: 0 var(--park, 34px) 0 0; display: flex; gap: 2px;
+}#s-controls .v3 .pill .d-unit{ color: var(--on-accent); opacity: .78; font-size: .6875rem;
+  min-width: 0; }#s-controls .v3 .pill .arrows{ display: none; }#s-controls.always-arrows .v3 .pill .arrows{ display: flex; opacity: 1; }#s-controls .v3 .pill .arrows::after{ background: color-mix(in srgb, var(--on-accent) 35%, transparent); }#s-controls .v3 .pill .arrows button{ background: none; color: var(--on-accent); opacity: .7; }#s-controls .v3 .pill .arrows button:hover{ background: color-mix(in srgb, var(--on-accent) 16%, transparent);
+  color: var(--on-accent); opacity: 1; }#s-controls .v3 .f:focus-within{ border-color: transparent; }#s-controls.vert .v3 .d{ flex-direction: column; gap: .5rem; }#s-controls.vert .v3 .rail{ flex: none; width: 6rem; height: 11rem; }#s-controls.vert .v3 .rail > i{ left: 50%; width: 1px; }#s-controls.vert .v3 .icon{ width: auto; text-align: center; }#s-controls.vert .v3 .pill{ writing-mode: horizontal-tb; }#s-controls.vert .v3 .rail > i{ left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto;
+  transform: translateX(-50%); }#s-controls.vert .v3 .pill{ left: 50%; cursor: ns-resize; }#s-controls .v4 .d-head{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }#s-controls .v4 .d-val{ opacity: 0; transition: opacity .2s; }#s-controls .v4.on .d-val{ opacity: 1; }#s-controls .v4 .area{ position: relative; height: 34px; }#s-controls .v4 .stops{ position: absolute; inset: 0 var(--park, 34px) 0 0; display: flex; gap: 2px;
   border: 1px solid var(--line); border-radius: 8px; corner-shape: superellipse(1.2);
   padding: 2px; background: var(--bg);
-  transition: opacity .22s; }#s-controls .v5.on .stops{ opacity: 0; pointer-events: none; }#s-controls .v5 .stops button{ font: inherit; font-size: .75rem; flex: 1; border: 0; background: none;
+  transition: opacity .22s; }#s-controls .v4.on .stops{ opacity: 0; pointer-events: none; }#s-controls .v4 .stops button{ font: inherit; font-size: .75rem; flex: 1; border: 0; background: none;
   color: var(--muted); border-radius: 6px; corner-shape: superellipse(1.2);
-  cursor: pointer; white-space: nowrap; }#s-controls .v5 .stops button[aria-pressed="true"]{ background: var(--ink); color: var(--bg); }#s-controls .v5 .stops button:focus-visible{ outline: 2px solid var(--accent); outline-offset: 1px; }#s-controls .v5 .rail{ position: absolute; top: 50%; left: 0; height: 2px; width: 0;
+  cursor: pointer; white-space: nowrap; }#s-controls .v4 .stops button[aria-pressed="true"]{ background: var(--ink); color: var(--bg); }#s-controls .v4 .stops button:focus-visible{ outline: 2px solid var(--accent); outline-offset: 1px; }#s-controls .v4 .rail{ position: absolute; top: 50%; left: 0; height: 2px; width: 0;
   background: var(--line); border-radius: 1px; opacity: 0;
   transform: translate(calc(100% + 12px), -50%);
-  transition: width .28s cubic-bezier(.2,.7,.3,1), opacity .2s, transform .28s cubic-bezier(.2,.7,.3,1); }#s-controls .v5.on .rail{ width: calc(100% - var(--park, 34px)); opacity: 1; transform: translate(0, -50%); }#s-controls .v5 .knob{
+  transition: width .28s cubic-bezier(.2,.7,.3,1), opacity .2s, transform .28s cubic-bezier(.2,.7,.3,1); }#s-controls .v4.on .rail{ width: calc(100% - var(--park, 34px)); opacity: 1; transform: translate(0, -50%); }#s-controls .v4 .knob{
   position: absolute; top: 50%; left: 0;
   width: 6px; height: 16px; border-radius: 3px; background: var(--muted);
   
@@ -2676,23 +2675,23 @@ html,body{margin:0;padding:0;background:var(--bg)}
   display: flex; align-items: center; justify-content: center;
   transition: width .28s cubic-bezier(.2,.7,.3,1), height .28s cubic-bezier(.2,.7,.3,1),
               border-radius .28s, background .28s, transform .28s cubic-bezier(.2,.7,.3,1);
-}#s-controls .v5.on .knob{ width: 20px; height: 20px; border-radius: 10px; background: var(--ink); cursor: ew-resize; }#s-controls .v5.dragging .knob,#s-controls .v5.dragging .rail{ transition: none; }#s-controls .v5 .knob:focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; }#s-controls .v5 .knob::before,#s-controls .v5 .knob::after{
+}#s-controls .v4.on .knob{ width: 20px; height: 20px; border-radius: 10px; background: var(--ink); cursor: ew-resize; }#s-controls .v4.dragging .knob,#s-controls .v4.dragging .rail{ transition: none; }#s-controls .v4 .knob:focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; }#s-controls .v4 .knob::before,#s-controls .v4 .knob::after{
   content: ''; position: absolute; top: 50%; width: 5px; height: 1.5px;
-  background: var(--muted); border-radius: 1px; opacity: 1; transition: opacity .18s; }#s-controls .v5 .knob::after carried no offset at all,#s-controls so it sat ON the grip while its twin stood off
+  background: var(--muted); border-radius: 1px; opacity: 1; transition: opacity .18s; }#s-controls .v4 .knob::after carried no offset at all,#s-controls so it sat ON the grip while its twin stood off
    to the left -- the grip only ever had one visible dash,#s-controls on one side. */
-.v5 .knob::before{ left: -7px; }#s-controls .v5 .knob::after{ right: -7px; }#s-controls .v5.on .knob::before,#s-controls .v5.on .knob::after{ opacity: 0; }#s-controls .v5 .relock{ background: none; border: 0; font: inherit; cursor: pointer; padding: 0;
+.v4 .knob::before{ left: -7px; }#s-controls .v4 .knob::after{ right: -7px; }#s-controls .v4.on .knob::before,#s-controls .v4.on .knob::after{ opacity: 0; }#s-controls .v4 .relock{ background: none; border: 0; font: inherit; cursor: pointer; padding: 0;
   position: absolute; right: 0; top: 50%; transform: translateY(-50%);
   width: var(--park, 34px); height: 26px; color: var(--ink-2);
   display: inline-flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; transition: opacity .2s, transform .5s; }#s-controls .v5.on .relock{ opacity: .5; pointer-events: auto; }#s-controls .v5.on .relock:hover{ opacity: 1; }#s-controls .v5 .relock.spin{ transform: rotate(-360deg); }#s-controls .v5 .relock:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }#s-controls.vert .v5 .area{ height: 11rem; width: 5.5rem; margin-inline: auto; }#s-controls.vert .v5 .d-head{ flex-direction: column; align-items: center; gap: 2px; margin-bottom: var(--pad-2, 8px); }#s-controls.vert .v5 .d-lab{ display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; }#s-controls.vert .v5 .d-tag{ margin: 0; }#s-controls.vert .v5 .d-val{
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .5s; }#s-controls .v4.on .relock{ opacity: .5; pointer-events: auto; }#s-controls .v4.on .relock:hover{ opacity: 1; }#s-controls .v4 .relock.spin{ transform: rotate(-360deg); }#s-controls .v4 .relock:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }#s-controls.vert .v4 .area{ height: 11rem; width: 5.5rem; margin-inline: auto; }#s-controls.vert .v4 .d-head{ flex-direction: column; align-items: center; gap: 2px; margin-bottom: var(--pad-2, 8px); }#s-controls.vert .v4 .d-lab{ display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; }#s-controls.vert .v4 .d-tag{ margin: 0; }#s-controls.vert .v4 .d-val{
   display: flex; justify-content: center; align-items: center;
   min-height: 1.4em; width: 100%;
-}#s-controls.vert .v5 .stops{ flex-direction: column; inset: 0 0 var(--park, 34px) 0; }#s-controls.vert .v5 .relock{ right: auto; bottom: 0; top: auto; left: 50%;
-  transform: translateX(-50%); width: 26px; height: var(--park, 34px); }#s-controls.vert .v5 .knob{ top: 0; left: 50%; width: 16px; height: 6px; border-radius: 3px;
-  transform: translate(calc(-50% + var(--x, 0px)), var(--y, 0px)); }#s-controls.vert .v5.on .knob{ width: 20px; height: 20px; border-radius: 10px; }#s-controls.vert .v5 .rail{ top: 0; left: 50%; width: 2px; height: 0;
-  transform: translate(-50%, calc(100% + 12px)); }#s-controls.vert .v5.on .rail{ height: calc(100% - var(--park, 34px)); width: 2px; transform: translate(-50%, 0); }#s-controls.vert .v5 .knob::before{ left: 50%; top: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }#s-controls.vert .v5 .knob::after{ left: 50%; right: auto; top: auto; bottom: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }#s-controls.touch .f input{ padding: 8px; font-size: 1rem; }#s-controls.touch .f .arrows{ opacity: 1; }#s-controls.touch .f .arrows button{ min-width: 0; width: 16px; height: 22px; }#s-controls.touch .f .arrows button::after{
+}#s-controls.vert .v4 .stops{ flex-direction: column; inset: 0 0 var(--park, 34px) 0; }#s-controls.vert .v4 .relock{ right: auto; bottom: 0; top: auto; left: 50%;
+  transform: translateX(-50%); width: 26px; height: var(--park, 34px); }#s-controls.vert .v4 .knob{ top: 0; left: 50%; width: 16px; height: 6px; border-radius: 3px;
+  transform: translate(calc(-50% + var(--x, 0px)), var(--y, 0px)); }#s-controls.vert .v4.on .knob{ width: 20px; height: 20px; border-radius: 10px; }#s-controls.vert .v4 .rail{ top: 0; left: 50%; width: 2px; height: 0;
+  transform: translate(-50%, calc(100% + 12px)); }#s-controls.vert .v4.on .rail{ height: calc(100% - var(--park, 34px)); width: 2px; transform: translate(-50%, 0); }#s-controls.vert .v4 .knob::before{ left: 50%; top: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }#s-controls.vert .v4 .knob::after{ left: 50%; right: auto; top: auto; bottom: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }#s-controls.touch .f input{ padding: 8px; font-size: 1rem; }#s-controls.touch .f .arrows{ opacity: 1; }#s-controls.touch .f .arrows button{ min-width: 0; width: 16px; height: 22px; }#s-controls.touch .f .arrows button::after{
     content: ''; position: absolute; inset: -5px -9px;   
-  }#s-controls.touch .f .arrows button:first-child{ min-height: 22px; }#s-controls.touch .f .arrows button:last-child{ min-height: 22px; }#s-controls.touch .trk{ height: 44px; background: none; }#s-controls.touch .trk::-webkit-slider-runnable-track{ height: 2px; background: var(--line); border-radius: 2px; }#s-controls.touch .trk::-moz-range-track{ height: 2px; background: var(--line); border-radius: 2px; }#s-controls.touch .trk::-webkit-slider-thumb{ width: 24px; height: 24px; margin-top: -11px; }#s-controls.touch .trk::-moz-range-thumb{ width: 24px; height: 24px; }#s-controls.touch.vert .trk{ width: 44px; height: 11rem; }#s-controls.touch:not(&.vert) .v5 .area{ height: 48px; }#s-controls.touch .v5 .stops button{ min-height: 44px; }#s-controls.touch .d{ margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v1 .d-head,#s-controls.touch .v2 .d-head{ margin-bottom: var(--gap); }#s-controls.touch .v2 .d{ row-gap: var(--gap); margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v4 .d{ gap: var(--gap); }#s-controls.touch .v3 .d{ margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v5 .area{ margin-top: var(--gap); }#s-controls.touch .v5 .grip{ width: 22px; height: 44px; }#s-controls.touch:not(&.vert) .v3 .bar{ height: 48px; }#s-controls.touch.vert .v3 .bar{ width: 5.5rem; }#s-controls.touch .v3 .f input{ font-size: .9375rem; }#s-controls.touch:not(&.vert) .v4 .rail{ height: 48px; }#s-controls.touch .v4 .pill{ padding: .25rem .5rem; box-shadow: 0 0 0 2px var(--panel); }#s-controls.touch .v4 .pill input{ font-size: 16px; padding: 0; }#s-controls.touch:not(&.always-arrows) .v4 .pill .arrows{ display: none; }#s-controls.touch .toolbar button{ min-height: 44px; padding: .25rem 1rem; }#s-controls.tri,#s-controls .tri{ display: flex; flex-direction: column; gap: var(--pad-2, 8px); }#s-controls .tri-heads,#s-controls .tri-row{
+  }#s-controls.touch .f .arrows button:first-child{ min-height: 22px; }#s-controls.touch .f .arrows button:last-child{ min-height: 22px; }#s-controls.touch .trk{ height: 44px; background: none; }#s-controls.touch .trk::-webkit-slider-runnable-track{ height: 2px; background: var(--line); border-radius: 2px; }#s-controls.touch .trk::-moz-range-track{ height: 2px; background: var(--line); border-radius: 2px; }#s-controls.touch .trk::-webkit-slider-thumb{ width: 24px; height: 24px; margin-top: -11px; }#s-controls.touch .trk::-moz-range-thumb{ width: 24px; height: 24px; }#s-controls.touch.vert .trk{ width: 44px; height: 11rem; }#s-controls.touch:not(&.vert) .v4 .area{ height: 48px; }#s-controls.touch .v4 .stops button{ min-height: 44px; }#s-controls.touch .d{ margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v1 .d{ row-gap: var(--gap); margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v3 .d{ gap: var(--gap); }#s-controls.touch .v2 .d{ margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v4 .area{ margin-top: var(--gap); }#s-controls.touch .v4 .grip{ width: 22px; height: 44px; }#s-controls.touch:not(&.vert) .v2 .bar{ height: 48px; }#s-controls.touch.vert .v2 .bar{ width: 5.5rem; }#s-controls.touch .v2 .f input{ font-size: .9375rem; }#s-controls.touch:not(&.vert) .v3 .rail{ height: 48px; }#s-controls.touch .v3 .pill{ padding: .25rem .5rem; box-shadow: 0 0 0 2px var(--panel); }#s-controls.touch .v3 .pill input{ font-size: 16px; padding: 0; }#s-controls.touch:not(&.always-arrows) .v3 .pill .arrows{ display: none; }#s-controls.touch .toolbar button{ min-height: 44px; padding: .25rem 1rem; }#s-controls.tri,#s-controls .tri{ display: flex; flex-direction: column; gap: var(--pad-2, 8px); }#s-controls .tri-heads,#s-controls .tri-row{
   display: grid;
   grid-template-columns: minmax(0, 7.5em) repeat(3, minmax(0, 1fr));
   gap: var(--pad-2, 8px);
@@ -2745,10 +2744,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 }#s-controls.vert .tri-box .arrows button{ height: 10px; }#s-controls.vert .tri-box .f + .f{ border-left: 0; border-top: 1px solid var(--line); }#s-controls.vert .tri-box .f input{
   text-align: center; padding-left: 0; padding-right: 0;
   font-variant-numeric: tabular-nums;
-}#s-controls.vert .tri-box .arrows{ flex-direction: column; }#s-controls.vert .tri-h{ justify-self: start; align-self: center; grid-column: 4; }#s-controls.vert .tri-heads .tri-h:nth-child(1){ grid-column: 4; grid-row: 2; }#s-controls.vert .tri-heads .tri-h:nth-child(2){ grid-column: 4; grid-row: 3; }#s-controls.vert .tri-heads .tri-h:nth-child(3){ grid-column: 4; grid-row: 4; }#s-controls.vert .tri-row:nth-child(2) .tri-lab,#s-controls.vert .tri-row:nth-child(2) .tri-box{ grid-column: 1; }#s-controls.vert .tri-row:nth-child(3) .tri-lab,#s-controls.vert .tri-row:nth-child(3) .tri-box{ grid-column: 2; }#s-controls.vert .tri-row:nth-child(4) .tri-lab,#s-controls.vert .tri-row:nth-child(4) .tri-box{ grid-column: 3; }#s-controls.vert .d-unit{ min-width: 0; text-align: center; }#s-controls.vert .v1 .d-val,#s-controls.vert .v2 .d-val{
-  display: grid; grid-template-rows: auto 1.15em;
-  justify-items: center; align-items: start; gap: 0;
-}#s-controls.vert .v1 .f,#s-controls.vert .v2 .f{ justify-self: center; }#s-controls.vert .v3 .lab,#s-controls.vert .tri-lab{
+}#s-controls.vert .tri-box .arrows{ flex-direction: column; }#s-controls.vert .tri-h{ justify-self: start; align-self: center; grid-column: 4; }#s-controls.vert .tri-heads .tri-h:nth-child(1){ grid-column: 4; grid-row: 2; }#s-controls.vert .tri-heads .tri-h:nth-child(2){ grid-column: 4; grid-row: 3; }#s-controls.vert .tri-heads .tri-h:nth-child(3){ grid-column: 4; grid-row: 4; }#s-controls.vert .tri-row:nth-child(2) .tri-lab,#s-controls.vert .tri-row:nth-child(2) .tri-box{ grid-column: 1; }#s-controls.vert .tri-row:nth-child(3) .tri-lab,#s-controls.vert .tri-row:nth-child(3) .tri-box{ grid-column: 2; }#s-controls.vert .tri-row:nth-child(4) .tri-lab,#s-controls.vert .tri-row:nth-child(4) .tri-box{ grid-column: 3; }#s-controls.vert .d-unit{ min-width: 0; text-align: center; }#s-controls.vert .v2 .lab,#s-controls.vert .tri-lab{
   
   white-space: normal; max-height: 4em; text-align: center;
 }#s-controls.vert .tri-lab{ align-items: center; }#s-controls.vert .tri-u{
@@ -2765,7 +2761,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   padding-left: 2px; z-index: 1;
 }#s-controls .d-unit{ transition: opacity .12s; }#s-controls .d:hover .d-unit,#s-controls .d:focus-within .d-unit{ opacity: 0; }#s-controls.always-arrows .f .arrows,#s-controls.touch .f .arrows{
   position: static; padding-left: 0;
-}#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit{ opacity: 1; }#s-controls .tri-box .f .arrows{ position: static; padding-left: 0; }#s-controls .d:hover .f .arrows,#s-controls .d:focus-within .f .arrows{ opacity: 1; }#s-controls .d:hover .d-unit,#s-controls .d:focus-within .d-unit,#s-controls .v4 .pill:hover .d-unit,#s-controls .v4 .pill:focus-within .d-unit,#s-controls .v4 .d:hover .pill .d-unit,#s-controls .v4 .d:focus-within .pill .d-unit{ opacity: 0; }#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.always-arrows .v4 .d:hover .pill .d-unit,#s-controls.always-arrows .v4 .d:focus-within .pill .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit,#s-controls.touch .v4 .d:hover .pill .d-unit,#s-controls.touch .v4 .d:focus-within .pill .d-unit{ opacity: .78; }#s-controls.always-arrows .d .f .arrows,#s-controls.touch .d .f .arrows{ opacity: 1; }
+}#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit{ opacity: 1; }#s-controls .tri-box .f .arrows{ position: static; padding-left: 0; }#s-controls .d:hover .f .arrows,#s-controls .d:focus-within .f .arrows{ opacity: 1; }#s-controls .d:hover .d-unit,#s-controls .d:focus-within .d-unit,#s-controls .v3 .pill:hover .d-unit,#s-controls .v3 .pill:focus-within .d-unit,#s-controls .v3 .d:hover .pill .d-unit,#s-controls .v3 .d:focus-within .pill .d-unit{ opacity: 0; }#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.always-arrows .v3 .d:hover .pill .d-unit,#s-controls.always-arrows .v3 .d:focus-within .pill .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit,#s-controls.touch .v3 .d:hover .pill .d-unit,#s-controls.touch .v3 .d:focus-within .pill .d-unit{ opacity: .78; }#s-controls.always-arrows .d .f .arrows,#s-controls.touch .d .f .arrows{ opacity: 1; }
 
 /* ===== space ===== */
 #s-space *{box-sizing:border-box}#s-space{margin:0;background:#0f0f0f;color:#e8e8e8;font-family:"CalSansVF",system-ui,sans-serif;
@@ -4678,12 +4674,14 @@ of 168 corners, <b>87</b> take the law, 13 are circles carved out, and 32 sit in
 
 
 <h1>Five ways to draw one dial</h1>
-<p class="lede">Each carries the same three controls &mdash; one with a unit, one with a tag, one
-with neither &mdash; so the labelling question stays visible while the shapes are compared. All
-five share one state. <b>01 is what AxisSlider ships</b>: a single <code>type=text</code> field,
-so the value can print a real minus where a number input is stuck with a hyphen; drawn chevrons
-rather than the browser's stepper; and a clamp on the field as well as the track. The other four
-are proposals. Nothing here changes value on scroll.</p>
+<p class="lede">The first four carry the same three controls &mdash; one with a unit, one with
+a tag, one with neither &mdash; so the labelling question stays visible while the shapes are
+compared, and they share one state. What every field here has in common is what
+<code>AxisSlider</code> ships: a single <code>type=text</code> field, so the value can print a
+real minus where a number input is stuck with a hyphen; drawn chevrons rather than the browser's
+stepper; and a clamp on the field as well as the track. <b>05 is the odd one</b> &mdash; three
+numbers of one parameter rather than one number of three. Nothing here changes value on
+scroll.</p>
 
 <div class="toolbar">
   <span>try</span>
@@ -5881,27 +5879,9 @@ const syncs = [];
 const get = d => state[d.key];
 const mk = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
 
-// \u2500\u2500 01 \u00B7 as shipped \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-function v1(d) {
-  const root = mk('div', 'd');
-  const h = head(d);
-  const val = mk('span', 'd-val');
-  const set = v => { state[d.key] = v; sync(); };
-  const f = field(d, () => get(d), set);
-  val.appendChild(f);
-  const u = unitEl(d); if (u) val.appendChild(u);
-  h.appendChild(val);
-  const r = mk('input', 'trk');
-  r.type = 'range'; r.min = d.min; r.max = d.max; r.step = d.step;
-  r.setAttribute('aria-label', d.label);
-  r.addEventListener('input', () => set(parseFloat(r.value)));
-  root.append(h, r);
-  syncs.push(() => { r.value = get(d); f._sync(); });
-  return root;
-}
 
 // \u2500\u2500 02 \u00B7 one line \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-function v2(d) {
+function v1(d) {
   const root = mk('div', 'd');
   const h = mk('div', 'd-head');
   const l = mk('span', 'd-lab'); l.textContent = d.label;
@@ -5970,7 +5950,7 @@ function draggable(surface, d, get, set, opts = {}) {
 }
 
 // \u2500\u2500 03 \u00B7 the row IS the track \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-function v3(d) {
+function v2(d) {
   const root = mk('div', 'd');
   const bar = mk('div', 'bar');
   const fill = mk('i');
@@ -6000,7 +5980,7 @@ function v3(d) {
 
 // \u2500\u2500 04 \u00B7 the value rides in the handle \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 const ICONS = { measure: 'T\u2194', width: 'T\u21D4', leading: '\u2195T' };
-function v4(d) {
+function v3(d) {
   const root = mk('div', 'd');
   const icon = mk('span', 'icon');
   icon.textContent = ICONS[d.key] || d.label.slice(0, 2);
@@ -6036,7 +6016,7 @@ function v4(d) {
 // framer-motion. The point is that the grip and the thumb are ONE node: it is parked
 // past the right edge as a 6x16 handle, and on unlock it travels onto the rail and
 // becomes the 20x20 thumb. A second control appearing below would be a different idea.
-function v5() {
+function v4() {
   const d = STOPS;
   const root = mk('div', 'd');
   const h = mk('div', 'd-head');
@@ -6217,11 +6197,10 @@ function v6() {
 }
 
 const VARIANTS = [
-  { name: 'As shipped', note: '<b>Label, field, unit, track under.</b> What AxisSlider draws today, with our arrows instead of the platform\u2019s. Two rows per dial \u2014 safe, and the most vertical space.', build: c => DIALS.forEach(d => c.appendChild(v1(d))) },
-  { name: 'One line', note: '<b>Everything on the label line.</b> Same anatomy, half the height \u2014 a rail of eight dials fits without scrolling. The value can crowd a long label at narrow widths.', build: c => DIALS.forEach(d => c.appendChild(v2(d))) },
-  { name: 'The row is the track', note: '<b>Label and number sit inside the bar; the fill is the value.</b> Press anywhere on the row and it jumps there, then follows. The number is still typeable \u2014 click it and the drag stands down. One object, one readout, and the widest hit area of the five.', build: c => DIALS.forEach(d => c.appendChild(v3(d))) },
-  { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label \u2014 which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => c.appendChild(v4(d))) },
-  { name: 'The toggle becomes the slider', note: '<b>One node, two states.</b> Ported from <code>MorphControl</code> in CustomTypeTester \u2014 the grip parked at the right edge IS the thumb: click it and it travels onto the rail and grows into it, while the stops fade out. It does not reveal a second control. The value only appears once there is a continuous number to show. <b>Added here:</b> a way back to the stops, which the original has no path to.', build: c => c.appendChild(v5()) },
+  { name: 'One line', note: '<b>Everything on the label line.</b> Same anatomy, half the height \u2014 a rail of eight dials fits without scrolling. The value can crowd a long label at narrow widths.', build: c => DIALS.forEach(d => c.appendChild(v1(d))) },
+  { name: 'The row is the track', note: '<b>Label and number sit inside the bar; the fill is the value.</b> Press anywhere on the row and it jumps there, then follows. The number is still typeable \u2014 click it and the drag stands down. One object, one readout, and the widest hit area of the five.', build: c => DIALS.forEach(d => c.appendChild(v2(d))) },
+  { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label \u2014 which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => c.appendChild(v3(d))) },
+  { name: 'The toggle becomes the slider', note: '<b>One node, two states.</b> Ported from <code>MorphControl</code> in CustomTypeTester \u2014 the grip parked at the right edge IS the thumb: click it and it travels onto the rail and grows into it, while the stops fade out. It does not reveal a second control. The value only appears once there is a continuous number to show. <b>Added here:</b> a way back to the stops, which the original has no path to.', build: c => c.appendChild(v4()) },
   { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired and max are one control, so they share a label and a lozenge and only hairlines divide them. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The shape the other five cannot make, because they each hold a single value.', build: c => c.appendChild(v6()) },
 ];
 
