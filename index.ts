@@ -24,6 +24,12 @@ export { default as UiKitBoard } from './src/UiKitBoard'
 export { AxisSlider } from './src/AxisSlider'
 export type { AxisSliderProps } from './src/AxisSlider'
 
+// min / desired / max as ONE control. Extracted from ReCal's H&J rail, which had the
+// right layout on native number inputs -- platform steppers that cannot be themed and
+// a hyphen where a minus belongs.
+export { AxisTriplet } from './src/AxisTriplet'
+export type { AxisTripletProps, Band } from './src/AxisTriplet'
+
 // Glyph-set matching + cmap parsing (Glyphs scene). Each app composes its own
 // extra groups / alternates on top of the shared base groups.
 export { makeGlyphSets, parseCmapRanges, isSupported, enumerateCmap } from './src/glyphset'

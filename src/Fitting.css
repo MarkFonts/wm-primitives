@@ -93,131 +93,20 @@
    with the host app: give the panel a width and allow it any height, and the rows pick
    their own layout. No prop, no breakpoint the app has to know about, and it responds
    to the rail being dragged narrow — which a media query cannot see. */
+/* The H&J rows are the AxisTriplet primitive now, and it brings its own CSS. What
+   stood here -- .fit-hj-row, .fit-hj-fields, .fit-hj-label, .fit-num and their two
+   breakpoints -- described the same lozenge a second time, against native number
+   inputs. .fit-hj stays: it is the container the rows sit in, not one of them. */
 .fit-hj {
   container-type: inline-size;
   container-name: fit-hj;
   padding-bottom: var(--spacing-02, 6px);
-}
-.fit-hj-row {
-  display: grid;
-  /* The fields are a FIXED width in every row, so all nine boxes are the same size and
-     the three columns line up down the panel — including under the min/desired/max
-     header, which is the only thing that makes those words mean anything. The label
-     takes the remainder. Sizing it the other way round is what let the badge widen the
-     label and squeeze the values until they clipped to "99 10 10". */
-  grid-template-columns: minmax(0, 1fr) 8.4rem;
-  align-items: center;
-  gap: var(--spacing-02, 6px);
-  margin-bottom: var(--spacing-02, 6px);
-}
-
-/* Three stages, in this order, and the row only gives up one thing at a time:
-
-     1. the label on ONE line beside its box          — the wide rail, unchanged
-     2. the label WRAPPED beside its box              — this is the 260px rail
-     3. the label ABOVE the box, box full width       — below 12rem
-
-   Stage 2 needs no query at all: the label may wrap now (see .fit-hj-label), so it takes
-   two lines exactly when one no longer fits and the box keeps its 8.4rem. That is the
-   layout font-proofer has always had — values right, labels left — and it is what the
-   rail should still show, rather than restacking a panel that has the room.
-
-   Stage 3 is the real minimum, and 12rem is derived rather than picked: below it even the
-   widest single WORD ("spacing", ~48px at 0.75rem) no longer fits beside 8.4rem of fields
-   and a 6px gap, so there is nothing left to give up. Stacked, the box takes the full
-   width and its three values stay `repeat(3, 1fr)` — a third of whatever is left over,
-   header included. The fields never shrink instead: three 5-character values ("102.5")
-   with native steppers is what 8.4rem measures, and taking width off them clips digits
-   rather than words. */
-@container fit-hj (max-width: 12rem) {
-  .fit-hj-row {
-    grid-template-columns: 1fr;
-    align-items: start;
-    gap: var(--spacing-01, 3px);
-  }
-  /* The header's label cell is empty; stacked, it would be an empty row plus a gap
-     between "min desired max" and the words they belong to. */
-  .fit-hj-head .fit-hj-label { display: none; }
-}
-
-/* Minimum · desired · maximum read as ONE box: same chrome as every other field in the
-   rail, hairlines instead of gutters. They are still three real inputs — tab order,
-   focus and the native steppers are untouched; only the borders moved. One border and
-   one padding instead of three is also exactly the width that was missing when three
-   separate boxes would not fit beside the label. Scoped to this grid on purpose. */
-.fit-hj-fields {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  background: var(--bg-elevated, var(--surface-2, #1c1c1c));
-  border: 1px solid var(--border, var(--line, #2a2a2a));
-  border-radius: var(--radius, 6px);
-  overflow: hidden;
-}
-.fit-hj-fields--head { background: none; border-color: transparent; }
-.fit-hj-fields--head > span { text-align: center; }
-.fit-hj-head {
-  color: var(--text-dim, #555);
-  font-size: var(--type-ui-size, 0.75rem);
-  text-align: center;
-}
-
-.fit-hj-label {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-01, 3px) var(--spacing-02, 6px);
-  flex-wrap: wrap;              /* the badge drops below the words rather than squeezing */
-  /* The words MAY wrap. They used to be `nowrap` — a two-word label being two words and
-     not a headline break — but a label that cannot wrap does not fit and does not stop
-     either: on the 260px rail it simply ran under the field box and read "wo", "lett",
-     "flex". Two lines is the graceful version of that, and it costs nothing now that the
-     section measures its own height. */
-  min-width: 0;
-  color: var(--text-muted, #999);
-  font-size: var(--type-ui-size, 0.75rem);
-}
-.fit-num {
-  width: 100%;
-  /* A grid item's min-width is auto, and an input's min-content width is its default
-     `size` — about 64px. That beat the 2.4rem track and pushed the maximum column past
-     the rail no matter how narrow the column was made. */
-  min-width: 0;
-  height: 24px;
-  padding: 0;                              /* the stepper owns the right edge, and at
-                                              this width the digits need the rest of it:
-                                              "100" was touching the arrows */
-  background: none;                        /* .fit-hj-fields carries the chrome now */
-  border: none;
-  color: var(--text, #fff);
-  font: inherit;
-  font-size: var(--type-ui-size, 0.75rem);
-  text-align: center;
-}
-/* The hairline between two values, in place of a gutter. */
-.fit-num + .fit-num { border-left: 1px solid var(--border, var(--line, #2a2a2a)); }
-/* Focus has to stay legible without a border of its own: inset, so it reads inside the
-   shared box rather than drawing a fourth edge across the hairlines. */
-.fit-num:focus-visible { outline: 1px solid var(--text-muted, #999); outline-offset: -2px; }
-
-/* font-proofer styles `input[type="number"]` app-wide at a fixed 64px, and an attribute
-   selector outranks a bare class — so the rail's fields kept their intrinsic width and
-   the maximum column hung off the edge whatever the track said. One selector, specific
-   enough to win, doing nothing but letting the field fit its column. */
-/* font-proofer styles `input[type="number"]` app-wide — border, background, radius, a
-   fixed width — and an attribute selector outranks a bare class. Every one of those came
-   back on each field, which also flattened the box's corner: three child boxes painting
-   inside an overflow-clipped wrapper cut across its superellipse and left a plain radius.
-   The wrapper carries all the chrome; the fields carry none. */
-.fit-hj-row input.fit-num {
-  width: 100%;
-  min-width: 0;
-  padding: 0;
-  border: none;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-}
-
-/* What the expansion row is spending, shown only while it spends anything. `wdth` glows:
+}/* The three-stage narrowing that lived here went with the rows. It reasoned about
+   .fit-hj-label wrapping beside an 8.4rem box of NATIVE steppers -- "three 5-character
+   values with native steppers is what 8.4rem measures" -- and none of that is true of
+   the primitive, whose fields are text and whose chevrons are drawn. If the rail needs
+   to restack at narrow widths again, it belongs in AxisTriplet.css, once, rather than
+   here where only ReCal would get it. *//* What the expansion row is spending, shown only while it spends anything. `wdth` glows:
    the font had an axis and the line is being filled with type the designer drew. `scaleX`
    is muted: it works, it is seamless, and it is a distortion — the UI should not dress
    that up as the same thing. */

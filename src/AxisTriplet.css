@@ -1,0 +1,104 @@
+/* AxisTriplet — min · desired · max as ONE control.
+   The lozenge is the object. One border, one padding, and hairlines inside: three
+   bordered boxes on a row read as three controls, and the whole point is that these
+   are three numbers of one parameter. Every colour is a token, so the row themes with
+   whatever surface it lands on — ReCal's rail, font-proofer's sidebar, the docs page. */
+
+.triplet-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 15.5rem);
+  gap: var(--pad-3, 12px);
+  align-items: center;
+}
+.triplet-row--off { opacity: .45; pointer-events: none; }
+
+.triplet-label {
+  display: flex; align-items: baseline; gap: .1em;
+  min-width: 0; line-height: 1.25;
+  font-size: var(--type-ui-size, 12px);
+  color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
+  text-wrap: balance;
+}
+/* The unit is a property of the PARAMETER, so it is printed once, here, and in the
+   quiet ink — not inside each of the three fields, which would say they measure three
+   different things. */
+.triplet-unit {
+  margin-left: .45em; font-style: normal;
+  font-size: .85em; font-variant-numeric: tabular-nums;
+  color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
+}
+.triplet-chip {
+  margin-left: .5em; font-style: normal;
+  font-size: var(--type-micro-size, 9px);
+  letter-spacing: var(--track-caps, .08em); text-transform: uppercase;
+  padding: 1px 6px; border-radius: 999px;
+  border: 1px solid var(--border, #333);
+  color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
+}
+.triplet-chip--muted { opacity: .55; }
+
+.triplet-fields {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--border, #333);
+  border-radius: var(--radius, 8px);
+  background: var(--surface, #1a1a1a);
+  overflow: hidden;
+}
+/* The heads sit over the fields, never over the label, so they line up with the
+   numbers they name. No box of their own — they are a caption, not a row. */
+.triplet-fields--head {
+  border-color: transparent; background: none;
+  font-size: var(--type-micro-size, 10px); letter-spacing: var(--track-caps, .08em);
+  color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
+}
+.triplet-fields--head span { text-align: center; padding-bottom: 2px; }
+.triplet-row--head { align-items: end; }
+
+.triplet-f { position: relative; display: flex; align-items: center; min-width: 0; }
+.triplet-f + .triplet-f { border-left: 1px solid var(--border, #333); }
+
+.triplet-num {
+  width: 100%; min-width: 0;
+  /* content-sizing is wrong here: this is a COLUMN of rows, and a field that resizes
+     to its digits moves the hairline beside it, so the three columns stop lining up
+     down the panel. A lozenge on its own may hug; a matrix may not. */
+  background: none; border: 0; border-radius: 0;
+  padding: 6px 2px 6px 8px;
+  font: inherit; font-size: var(--type-ui-size, 12px);
+  font-variant-numeric: tabular-nums;
+  color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
+  text-align: right;
+}
+.triplet-num:focus { outline: none; }
+.triplet-f:focus-within { background: var(--surface-hi, #252525); }
+
+/* Drawn chevrons, not the platform stepper: type=text has none, and the native one
+   cannot be themed. A single hairline between them is the whole divider — two edges
+   of a button would draw an object that is not there. */
+.triplet-step {
+  display: flex; flex-direction: column; padding-right: 6px;
+  opacity: 0; transition: opacity var(--dur-fast, 140ms) ease;
+}
+.triplet-row:hover .triplet-step,
+.triplet-f:focus-within .triplet-step { opacity: 1; }
+.triplet-step-btn {
+  appearance: none; -webkit-appearance: none;
+  background: none; border: 0; padding: 0;
+  width: 16px; height: 11px;
+  display: grid; place-items: center;
+  color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
+  cursor: pointer;
+}
+.triplet-step-btn:first-child { align-items: end; }
+.triplet-step-btn + .triplet-step-btn { border-top: 1px solid var(--border, #333); }
+.triplet-step-btn:hover { color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1)); }
+.triplet-step-btn:active { background: rgba(var(--text-rgb, 232, 232, 232), .1); border-radius: 999px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .triplet-step { transition: none; }
+}
+/* A coarse pointer has no hover to reveal them, so they are always out. */
+@media (pointer: coarse) {
+  .triplet-step { opacity: 1; }
+  .triplet-step-btn { width: 20px; height: 15px; }
+}

@@ -11,6 +11,7 @@
  */
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { AxisSlider } from './AxisSlider'
+import { AxisTriplet } from './AxisTriplet'
 import { Collapse } from './Collapse'
 import { band, DEFAULTS, layoutParagraph, lineStyle, type Band, type FitMode, type FitOptions } from './flattersatz'
 import { splitInlineMarkup } from './inlineMarkup'
@@ -101,47 +102,11 @@ export interface FittingControlsProps {
   widthAxis?: boolean
 }
 
-/* One row of the H&J schema: minimum · desired · maximum. Three numbers because one
-   knob can only ever be a floor OR a cap, and never states what the line should aim for
-   in the first place. Letter spacing is stored 100-centred like the others and shown
-   0-centred, which is how type people read it. */
-function BandRow({ label, chip, chipMuted, title, value, offset, step, onChange }: {
-  label: string
-  chip?: string
-  chipMuted?: boolean
-  title?: string
-  value: Band
-  offset: number
-  step: number
-  onChange: (b: Band) => void
-}) {
-  const field = (k: keyof Band) => (
-    <input
-      key={k}
-      className="fit-num"
-      type="number"
-      step={step}
-      aria-label={`${label} ${k}`}
-      value={+(value[k] - offset).toFixed(2)}
-      onChange={e => onChange({ ...value, [k]: +e.target.value + offset })}
-    />
-  )
-
-  return (
-    <div className="fit-hj-row" title={title}>
-      <span className="fit-hj-label">
-        {label}
-        {chip && <em className={`fit-chip${chipMuted ? ' fit-chip--muted' : ''}`}>{chip}</em>}
-      </span>
-      {/* One box, three values. Three separate boxes could not fit the rail beside the
-          label, and the arrows were not the thing to give up — so the row keeps ONE
-          border and one padding, and the values are divided by hairlines inside it. */}
-      <div className="fit-hj-fields">
-        {(['min', 'desired', 'max'] as const).map(field)}
-      </div>
-    </div>
-  )
-}
+/* BandRow is gone: the row it drew is now the AxisTriplet primitive, so ReCal, the
+   proofer and the docs page all get the same control instead of three descriptions of
+   one. What it had here was native <input type="number"> — the platform stepper, which
+   cannot be themed and disappears under color-scheme, and a hyphen standing in for a
+   minus in the one row of this panel that goes negative. */
 
 export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, hyphenate, onHyphenate, widthAxis = false }: FittingControlsProps) {
   const v = { ...DEFAULTS, ...value }
@@ -231,16 +196,13 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, h
         </button>
         {hj && (
           <div className="fit-hj">
-            <div className="fit-hj-row fit-hj-head">
-              <span className="fit-hj-label" />
-              <div className="fit-hj-fields fit-hj-fields--head">
-                <span>min</span><span>desired</span><span>max</span>
-              </div>
-            </div>
-            <BandRow label="word spacing" offset={0} step={1} value={band(v.wordSpacing)}
-              onChange={b => set({ wordSpacing: b })} />
-            <BandRow label="letter spacing" offset={100} step={0.5} value={band(v.tracking)}
-              onChange={b => set({ tracking: b })} />
+            {/* the column heads come from the first row now -- the primitive draws them,
+                so they cannot drift out of line with the fields they name */}
+            <AxisTriplet label="word spacing" unit="%" showHeads offset={0} step={1} min={0} max={300}
+              value={band(v.wordSpacing)} onChange={b => set({ wordSpacing: b })} />
+            {/* stored 100-centred, read 0-centred: offset is a display transform, not a unit */}
+            <AxisTriplet label="letter spacing" unit="%" offset={100} step={0.5} min={-20} max={20}
+              value={band(v.tracking)} onChange={b => set({ tracking: b })} />
             {/* One name, whichever mechanism serves it: the row does the same job and
                 obeys the same numbers whether the font has a width axis to move or has
                 to be stretched. Which of the two it used is in the tooltip, not in a
@@ -249,7 +211,7 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, h
                 SCALED — the font interpolates between masters the designer drew, and
                 only the fallback stretches. One word that is true of both, with the badge
                 beside it saying which. */}
-            <BandRow label="flex"
+            <AxisTriplet label="flex" unit="%" min={90} max={110}
               chip={expansionChip()}
               chipMuted={!widthAxis}
               title={widthAxis
