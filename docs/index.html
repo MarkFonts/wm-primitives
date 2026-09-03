@@ -371,6 +371,14 @@ html,body{margin:0;padding:0;background:var(--bg)}
   .wm-lvl0::before,.wm-lvl0.on::before{display:none}
   :root{--rail-w:0px;--edge-l:20px;--edge-r:20px}
   .wm-head{padding:32px 0 0}
+  /* MOBILE ONLY, and that scoping is the point: every earlier attempt at this went
+     into the base rule, and a vw clamp applies at every width -- so tuning a phone
+     resized the desktop poster until four lines ran past 100svh and "surface." sat
+     below the fold.
+
+     Here the rail is already gone and the edges are 20px, so the headline IS the
+     poster: bigger, tighter, and run to the right edge rather than stopping short. */
+  .wm-stack{font-size:clamp(3.2rem,15.5vw,7rem);line-height:.96;margin-right:0}
   .wm-lb{margin-top:8vh}
 }
 /* below ~90px of statement the five labels start colliding (asc-cap is .18em);
