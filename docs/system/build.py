@@ -465,25 +465,40 @@ html,body{margin:0;padding:0;background:var(--bg)}
    GEOM 100, shown the way the editor shows them. Everything at FULL ink, outlines
    only. The nodes are live: hover gets the grab hand and the signal hue -- the
    node under your cursor is literally the thing under discussion. */
-.wm-six{position:absolute;top:50%;right:clamp(28px,3.2vw,64px);transform:translateY(-50%);z-index:2;
+/* Negative, so the glyph runs OFF the page. The crop is the point -- at a positive
+   inset it read as a picture that happened to be cut by the margin, which is a
+   different and worse thing than a letter too big for the sheet. */
+.wm-six{position:absolute;top:50%;right:-4vw;transform:translateY(-50%);z-index:2;
   height:108svh;width:auto;overflow:visible;pointer-events:none;user-select:none;
   mix-blend-mode:difference}
-/* difference lives on the dark ground only: on paper it would invert the whole
-   drawing into fog, so light keeps normal paint */
-@media (prefers-color-scheme:light){.wm-six{mix-blend-mode:normal}}
-:root[data-theme="light"] .wm-six{mix-blend-mode:normal}
+/* The knockout stays in both themes. difference is |backdrop - source|, so what has
+   to change on a light ground is not the BLEND but the PAINT: light ink on a light
+   page differences to fog, which is why this used to fall back to normal and the 6
+   went flat behind the words on a phone.
+
+   Painted in the page's own ground colour instead, difference inverts correctly --
+   |white - white| is black over the page, |black - white| is white over the type --
+   so the drawing reads as a negative of the sheet and still knocks out of the
+   headline. One token does it: --ink is redefined for the subtree, and every part of
+   the drawing already paints from --ink. */
+@media (prefers-color-scheme:light){.wm-six{mix-blend-mode:difference;--ink:var(--bg)}}
+:root[data-theme="light"] .wm-six{mix-blend-mode:difference;--ink:var(--bg)}
 :root[data-theme="dark"] .wm-six{mix-blend-mode:difference}
-.wm6-path{fill:none;stroke:var(--ink);stroke-width:1.5px;vector-effect:non-scaling-stroke}
-.wm6-h{stroke:var(--ink);stroke-width:1px;vector-effect:non-scaling-stroke}
-.wm6-on,.wm6-off{pointer-events:auto;cursor:grab;touch-action:none}
+/* Outline, stems and nodes drop to 30%: they are the CONSTRUCTION, and at full ink
+   they fight the headline for the same black. The combs keep their strength -- they
+   are the measurement, which is what the drawing is actually saying. */
+.wm6-path{fill:none;stroke:var(--ink);stroke-width:1.5px;vector-effect:non-scaling-stroke;opacity:.3}
+.wm6-h{stroke:var(--ink);stroke-width:1px;vector-effect:non-scaling-stroke;opacity:.3}
+.wm6-on,.wm6-off{pointer-events:auto;cursor:grab;touch-action:none;opacity:.3}
 .wm6-on{fill:var(--ink)}
 .wm6-off{fill:var(--bg);stroke:var(--ink);stroke-width:1.25px;vector-effect:non-scaling-stroke}
-.wm6-on:hover,.wm6-off:hover,.wm6-on.drag,.wm6-off.drag{fill:var(--signal);stroke:var(--signal)}
+/* a node under your hand is not construction any more */
+.wm6-on:hover,.wm6-off:hover,.wm6-on.drag,.wm6-off.drag{fill:var(--signal);stroke:var(--signal);opacity:1}
 .wm6-on.drag,.wm6-off.drag{cursor:grabbing}
 .wm-eyebrow{position:absolute;top:44px;right:0;z-index:2;writing-mode:vertical-rl;
   font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
   margin:0;font-variation-settings:"GEOM" 100}
-.wm-stack{position:relative;display:flex;flex-direction:column;
+.wm-stack{position:relative;z-index:4;display:flex;flex-direction:column;
   margin:clamp(16px,7vh,84px) 24px 0 0;font-size:clamp(2.4rem,8.6vw,10rem);line-height:1.07;
   font-weight:400;letter-spacing:.12em;text-transform:uppercase;
   font-variation-settings:"GEOM" 100}
@@ -505,7 +520,20 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-l3 i{margin-right:3em}
 .wm-bendsvg{position:absolute;right:0;top:calc(50% - .071em);width:3em;height:5.6em;
   overflow:visible;pointer-events:none;z-index:3}
-.wmb-path{fill:none;stroke:var(--ink);stroke-width:7.2}
+/* 8 is .wm6-chev's stroke-width. The bend runs INTO the chevron, so a 7.2 stroke
+   meeting an 8 one drew a join rather than an arrow. */
+/* ONE LINE, ONE WEIGHT. The rule runs into the bend and the bend runs into the
+   chevron, so the three are a single stroke and have to render at a single
+   thickness -- but they live in three coordinate systems and matching the NUMBERS
+   does not match the weight. Measured before this: rule 2.76px, bend 3.07px,
+   chevron 8.00px, because the bend's SVG is scaled 0.384 by its viewBox and the
+   chevron's is 1.0. Changing the bend 7.2 -> 8 moved it 2.76 -> 3.07 and looked
+   like nothing.
+
+   vector-effect:non-scaling-stroke takes the CTM out of it: 8 is 8 screen pixels in
+   every one of them, at any viewport, which is what "always match" has to mean when
+   the three drawings scale independently. --wm-stroke is the one number. */
+.wmb-path{fill:none;stroke:var(--ink);stroke-width:8}
 .wmb-tooth{stroke:var(--ink);stroke-width:1.2}
 .wmb-fill{fill:var(--signal);stroke:none}
 .wm6-fill{fill:var(--signal);stroke:none}
@@ -514,13 +542,19 @@ html,body{margin:0;padding:0;background:var(--bg)}
   text-transform:uppercase;color:var(--ink);font-variation-settings:"GEOM" 100;
   white-space:nowrap}
 .wm6-combg line{stroke:var(--ink);stroke-width:1px;vector-effect:non-scaling-stroke}
+/* NOT non-scaling-stroke. This SVG scales with 108svh, so pinning the chevron to 8
+   screen px made it THINNER than it had been -- the measurement that said its CTM
+   was 1.0 was one viewport, not a law. It stays in its own units. */
 .wm6-chev{fill:none;stroke:var(--ink);stroke-width:8;
   animation:wm6chev 2.6s ease-in-out infinite}
 @keyframes wm6chev{0%{transform:translateY(-26px);opacity:0}35%{opacity:1}
   100%{transform:translateY(30px);opacity:0}}
 @media (prefers-reduced-motion:reduce){.wm6-chev{animation:none}}
 /* the bottom of the poster is its credit line: dek, then the counts on a hairline */
-.wm-close{position:relative;z-index:1;margin-top:auto;padding-bottom:40px}
+/* Above the 6, not under it. The rules sat at 3 and the WORDS carried no z-index at
+   all, so the hairlines crossed the drawing while the letters were swallowed by it --
+   which is exactly how it reads on a phone. */
+.wm-close{position:relative;z-index:3;margin-top:auto;padding-bottom:40px}
 .wm-dek{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:52ch;margin:0 0 40px}
 .wm-dek b{color:var(--ink);font-weight:600}
 /* Counts, not a claim. The type section's strip is boxed and spends the accent hue
@@ -952,9 +986,18 @@ HERO_TMPL = """
     var l3=svg.closest('.wm-l3'); if(!l3) return;
     var st=l3.parentElement.getBoundingClientRect();
     var chevX=scr.x, extra=st.right-chevX-4;
+    /* l3 ONLY. Applying this to every ruled line was tried and clipped the headline:
+       `extra` is measured from the stack's right edge for the line that carries the
+       bend, and the other lines start at different indents, so the same margin
+       squeezed `laws.` and `surface.` until the words cut off. Lining four rules up on
+       the chevron needs a per-line measurement, not one number reused. */
     if(extra>0&&extra<st.width*.6) l3.style.marginRight=extra+'px';
     var fpx=parseFloat(getComputedStyle(l3).fontSize);
     var l3r=l3.getBoundingClientRect(), barY=l3r.top+l3r.height/2;
+    /* 40 stands. Shortening it to 26 did not close a gap -- it let dy grow past the
+       guard below, and the stroke ran down through the paragraph to the foot of the
+       page. Meeting the chevron is a real want, but it is a change to where the SVG
+       ends, not to this clearance. */
     var dy=scr.y-40-barY;
     if(dy>fpx*.9){svg.style.height=dy+'px';H=dy*100/fpx;
       svg.setAttribute('viewBox','0 0 300 '+Math.round(H));}}
@@ -1007,7 +1050,9 @@ HERO = HERO_TMPL.replace("__SIX__", SIX_CMDS)
 # (--ox/--oy) makes one light source that travels ACROSS the words.
 GLOSS = "" if not LINKED else r"""
 <style id="gloss-css">
-.wm-head{ --gx:0px; --gy:0px; --gw:0px; --gh:0px; --gloss:url(field-247.avif); }
+.wm-head{ --gx:0px; --gy:0px; --gw:0px; --gh:0px; --gloss:url(field-247.avif);
+  /* rule = bend = chevron, in screen pixels */
+  --wm-stroke:8px; }
 /* A phone gets the 1000-square bake: 61KB against 238KB, and the crop it takes is a
    fraction of a field it was never going to resolve at that width anyway. The saving
    that matters is not the download -- it is that every repaint resamples a smaller
@@ -1193,7 +1238,10 @@ GLOSS = "" if not LINKED else r"""
       raf=requestAnimationFrame(function(){ raf=null; apply(cu,cv); });
     });
   };
-  head.addEventListener('click', function(){
+  /* The WORDS, not the header. The header contains the 6, whose nodes you drag -- so
+     reaching in to move a point asked for the accelerometer. */
+  var tiltTarget = head.querySelector('.wm-stack') || head;
+  tiltTarget.addEventListener('click', function(){
     var D = window.DeviceOrientationEvent;
     if(!D) return;
     if(typeof D.requestPermission === 'function'){
