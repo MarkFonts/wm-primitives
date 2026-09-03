@@ -89,9 +89,29 @@
   margin-left: var(--nudge, 2px);
   opacity: 0;
   transition: opacity .12s;
+  /* HUNG, not reserved. A hidden stepper still owned its column, so every row paid
+     ~16px -- a quarter of the field -- for something most people never see appear.
+     Out of flow it costs nothing at rest, the field hugs its digits, and nothing
+     shifts when the arrows arrive because they were never in the layout.
+     They land where the suffix is, and the suffix yields as they come: one slot,
+     two occupants, never empty. On a coarse pointer they are permanent (below), and
+     a permanent thing IS part of the object, so there they go back in flow and are
+     measured with it. */
+  position: absolute;
+  left: 100%;
+  top: 0;
+  bottom: 0;
+  justify-content: center;
 }
+.slider-value { position: relative; }
 .slider-row:hover .slider-step,
 .slider-row:focus-within .slider-step { opacity: 1; }
+/* One trigger for both halves of the swap, and the same duration, or for 120ms there
+   are two things in one place. --hidden stays for the focus case the component sets
+   in JS; this adds the hover case it could not see. */
+.slider-row:hover .slider-suffix,
+.slider-row:focus-within .slider-suffix { opacity: 0; }
+.slider-suffix { transition: opacity var(--dur-fast, .12s); }
 
 /* SVG chevrons, not ▲▼. A glyph arrow is measured by whatever face is loaded — its
    width, its baseline and its optical weight all move with the font — so the column it
@@ -135,7 +155,11 @@
 .slider-step-btn:active::before { opacity: .16; transform: scale(1); }
 
 @media (pointer: coarse) {
-  .slider-step { opacity: 1; }               /* nothing to hover with */
+  /* Permanent here, so back into the layout and measured with the row -- and the
+     suffix stops yielding, because nothing is being anticipated. */
+  .slider-step { opacity: 1; position: static; }
+  .slider-row:hover .slider-suffix,
+  .slider-row:focus-within .slider-suffix { opacity: 1; }
   .slider-step-btn { width: 32px; height: 22px; }
 }
 @media (prefers-reduced-motion: reduce) {
