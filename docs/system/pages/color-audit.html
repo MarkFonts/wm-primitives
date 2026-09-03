@@ -18,17 +18,17 @@ warnings, and <code>--freeze-gold</code> <i class="sw" style="background:#d9a441
 <p class="note"><b>Only three of the four landings carry a hue.</b> UI is deliberately neutral —
 <code>#999</code> in ReCal, the plain ink in the map — because it is the default and a default should
 not announce itself.</p></section>
-<style>
-:root { --ink:#e9e6df; --ink2:rgba(233,230,223,.62); --ink3:rgba(233,230,223,.40);
-  --gnd:#121213; --card:#191919; --line:#2a2a2a; --acc:#eeff41; --acc:color(display-p3 0.9333 1 0.2549); }
-@media (prefers-color-scheme: light) { :root { --ink:#16161a; --ink2:rgba(22,22,26,.66); --ink3:rgba(22,22,26,.45);
-  --gnd:#fbfaf7; --card:#fff; --line:#e3e0d8; --acc:#5c6b00; --acc:color(display-p3 0.3608 0.4196 0); } }
-:root[data-theme=dark] { --ink:#e9e6df; --ink2:rgba(233,230,223,.62); --ink3:rgba(233,230,223,.40);
-  --gnd:#121213; --card:#191919; --line:#2a2a2a; --acc:#eeff41; --acc:color(display-p3 0.9333 1 0.2549); }
-:root[data-theme=light] { --ink:#16161a; --ink2:rgba(22,22,26,.66); --ink3:rgba(22,22,26,.45);
-  --gnd:#fbfaf7; --card:#fff; --line:#e3e0d8; --acc:#5c6b00; --acc:color(display-p3 0.3608 0.4196 0); }
-body { margin:0; background:var(--gnd); color:var(--ink); padding:40px 28px 90px;
-  font:15px/1.55 "Face","CalSansVF",ui-sans-serif,system-ui,sans-serif; }
+<style>:root{
+  /* aliases onto the page ramp. These were private near-copies -- --gnd #121213 against
+     --bg #0f0f0f, --card #191919 against --surface #1a1a1a, --ink #e9e6df against
+     #e8e8e8 -- so a theme change never reached them. They inherit now. */
+  --gnd:var(--bg); --card:var(--surface); --ink2:var(--ink-2); --ink3:var(--ink-3);
+  --acc:var(--signal);
+}
+@media (prefers-color-scheme: light) { :root {} }
+:root[data-theme=dark] {}
+:root[data-theme=light] {}
+body {}
 h1 { font-size:30px; margin:0 0 6px; letter-spacing:-.01em }
 .lede { color:var(--ink2); max-width:70ch; margin:0 0 22px }
 h2 { font-size:13px; text-transform:uppercase; letter-spacing:.11em; margin:44px 0 4px }

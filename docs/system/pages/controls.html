@@ -1,0 +1,883 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Five ways to draw one dial</title>
+<!-- Source for section 03. Written standalone: `body` is the section, `&` means the
+     section element itself, and the theme sits on :root, which is where the document
+     puts it. The faces are the ones the assembled page declares -- CalSansVF and
+     Newsreader -- NOT a name of this page's own, because the build strips @font-face
+     and a family nobody declared falls silently through to Plex. -->
+<style>
+:root{
+  --bg: #fcfcfa; --panel: #f2f2ee; --sunk: #e8e8e3; --raised: #fff;
+  --ink: #17181a; --ink-2: #4a4c50; --muted: #74767c;
+  --line: #dedcd6; --hair: #ebe9e3;
+  /* The house accent is not a hue. font-proofer and ReCal both set --accent to #111111
+     in light and #ffffff in dark — it is contrast, not colour. No orange, no acid. */
+  --accent: #111111; --accent-soft: #e8e8e6;
+  /* The minimum TARGET is 44px; the minimum SPACING between two of them is not. */
+  --finger: 44px;
+  --gap: 16px;
+  /* Ink FOR the accent, not a second accent. White clears 5.4:1 on the light-mode
+     #b4502a but only 2.6:1 on the dark-mode #e08050 — so the dark theme flips to dark
+     ink on the lighter orange (~7:1) instead of keeping white and failing. */
+  --on-accent: #fcfcfa;
+  --serif: "Newsreader", Georgia, serif;
+  /* Cal Sans is the face; Plex is only what shows if it fails to load. Newsreader keeps
+     the display line. The mistake worth not repeating is not WHICH font but the axis:
+     opsz was pinned to 10 on <body>, and Newsreader has its own opsz running 6-72, so a
+     40px headline was drawn at its 10pt optical size. opsz belongs on the size, not on
+     the page — small control text at 10, running text at its default 14, display left
+     alone. */
+  --sans: "CalSansVF", system-ui, sans-serif;
+  --dial: "CalSansVF", system-ui, sans-serif;
+  --mono: "CalSansVF", ui-monospace, monospace;
+}@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) {
+    --bg: #131416; --panel: #1b1c1f; --sunk: #232428; --raised: #26272b;
+    --ink: #f0efec; --ink-2: #c2c1bd; --muted: #8d8f95;
+    --line: #2e2f34; --hair: #232428;
+    --accent: #ffffff; --accent-soft: #26272b;
+    --on-accent: #131416;
+  }}:root[data-theme="dark"]{
+  --bg: #131416; --panel: #1b1c1f; --sunk: #232428; --raised: #26272b;
+  --ink: #f0efec; --ink-2: #c2c1bd; --muted: #8d8f95;
+  --line: #2e2f34; --hair: #232428;
+  --accent: #ffffff; --accent-soft: #26272b;
+  --on-accent: #131416;
+}:root{
+  background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-size: 16px; line-height: 1.6;
+  margin: 0; padding: 0 4vw 6rem;
+  -webkit-font-smoothing: antialiased;
+}/* ── the rule panel ───────────────────────────────────────── */
+.rules{ background: var(--panel); border: 1px solid var(--line); padding: 1.5rem 1.75rem;
+  margin: 2rem 0 3rem; }.rules h2{ font-family: var(--sans); font-size: .75rem; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted); margin: 0 0 1rem; }.rules table{ border-collapse: collapse; width: 100%; font-size: .875rem; }.rules td{ padding: .4rem .875rem .4rem 0; border-bottom: 1px solid var(--hair); vertical-align: top; }.rules tr:last-child td{ border-bottom: 0; }.rules td:first-child{ font-family: var(--mono); font-size: .8125rem; color: var(--accent);
+  white-space: nowrap; width: 6rem; }.rules td:last-child{ color: var(--ink-2); }/* ── toolbar ──────────────────────────────────────────────── */
+.toolbar{ display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+  margin: 0 0 2rem; padding: .75rem 0; border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; background: var(--bg); z-index: 10; }.toolbar span{ font-family: var(--mono); font-size: .625rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin-right: .25rem; }.toolbar button{ font: inherit; font-size: .8125rem; padding: .25rem .75rem;
+  background: var(--panel); color: var(--ink-2); border: 1px solid var(--line);
+  border-radius: 999px; corner-shape: superellipse(1.2); cursor: pointer; }.toolbar button[aria-pressed="true"]{ background: var(--ink); color: var(--bg); border-color: var(--ink); }.toolbar button:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }/* opsz 10 goes on the SMALL text — the controls and the micro-labels — because that is
+   the size the axis is drawn for. Running text keeps the default 14; Newsreader keeps its
+   own. Nothing is forced from <body> any more. */
+.rig, .toolbar button, .toolbar span, .eyebrow,
+.card-idx, .d-tag, .rules td:first-child, .spec-name{
+  font-variation-settings: 'opsz' 10;
+}/* ── variant cards ────────────────────────────────────────── */
+.grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  gap: 1px; background: var(--line); border: 1px solid var(--line); }.card{ background: var(--panel); padding: 1.5rem 1.5rem 1.75rem; display: flex; flex-direction: column; }.card-head{ display: flex; justify-content: space-between; align-items: baseline;
+  gap: 1rem; margin-bottom: 1.25rem; }.card-name{ font-family: var(--serif); font-size: 1.25rem; margin: 0; }.card-idx{ font-family: var(--mono); font-size: .625rem; letter-spacing: .14em; color: var(--accent); }.card-note{ font-size: .8125rem; line-height: 1.45; color: var(--muted); margin: 1.25rem 0 0; }.card-note b{ color: var(--ink-2); font-weight: 500; }.rig{ flex: 1; }&.vert .rig{ display: flex; gap: 1.25rem; align-items: flex-start; justify-content: safe center;
+  min-height: 15rem; padding-top: .5rem;
+  /* Three vertical columns can be wider than the card. Scroll the rig rather than let it
+     hang off the side — the page body must never scroll sideways for this. */
+  overflow-x: auto; overscroll-behavior-x: contain; }/* ── shared dial atoms ────────────────────────────────────── */
+.d{ margin-bottom: 1.5rem; }.d:last-child{ margin-bottom: 0; }&.vert .d{ margin-bottom: 0; }.d-lab{ font-size: .875rem; color: var(--ink-2); }.d-tag{ font-family: var(--mono); font-size: .6875rem; color: var(--muted); margin-left: .4em; }.d-unit{ font-size: .75rem; color: var(--muted);
+  /* a fixed slot, wide enough for the longest unit in play ("em") */
+  display: inline-block; min-width: 1.25rem; text-align: left; }&.no-tags .d-tag, &.no-units .d-unit{ display: none; }/* typeable field, custom arrows */
+.f{
+  display: inline-flex; align-items: stretch; gap: 0;
+  border: 1px solid var(--line); border-radius: 4px; background: var(--sunk);
+  overflow: hidden;
+}.f:focus-within{ border-color: var(--accent); }/* Cal Sans sets the numbers, not the mono: `tnum` so the digits still line up in a
+   column, `zero` so a slashed zero cannot be misread as an O. No `case` — in this font
+   it substitutes 28 glyphs and every one is a combining mark or periodcentered, so it
+   never touches the minus. U+2212 is already drawn on the figure axis anyway; that is
+   what separates it from the hyphen. */
+.f input{
+  font-family: var(--dial); font-size: .875rem;
+  /* explicit: a form control does not inherit this through the UA's font reset */
+  font-variation-settings: 'opsz' 10;
+  /* tabular-nums only. `slashed-zero` is off because in Cal Sans 2 (rev 2.0) the glyph
+     `zero` substitutes carries the PROPORTIONAL advance, not the tabular one — measured:
+     ten zeros 106.2422 against ten of any other digit 103.3672, while tnum alone has all
+     ten equal. So the two features together silently un-tabulate any value containing a
+     0, which is the one thing tnum is here to prevent. The slash is worth having and
+     should come back once the font's zero joins the tabular set. */
+  font-variant-numeric: tabular-nums;
+  background: none; border: 0; color: var(--ink); padding: 2px 6px;
+  /* field-sizing, not a measured width. This was a PreText-style probe setting
+     style.width in px, which is the wrong tool for a job the browser does: it needed the
+     font, the variant AND the axes copied onto the probe to be right, and when it missed
+     font-variation-settings it sized every box for opsz 14 while the page rendered at 10
+     — 52px of box for 30px of digits. min-width keeps a one-digit value from collapsing. */
+  field-sizing: content;
+  min-width: 2.25ch;
+  text-align: right; outline: none;
+}/* ONE hairline, and it sits BETWEEN the chevrons. The column used to carry a left border
+   as well, so the stepper read as two sides of a button that was never finished — and the
+   divider stretched with the hit area, 16px on a mouse and 44px on touch, so the same
+   control drew a different mark in each. The rule is a centred pseudo-element at a fixed
+   12px: the target grows for a finger, the ink does not. */
+.f .arrows{ display: flex; flex-direction: column; position: relative;
+  opacity: 0; transition: opacity .12s; }.f .arrows::after{
+  content: ''; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 7px; height: 1px; background: var(--line); pointer-events: none;   /* the chevron's own span */
+}.d:hover .f .arrows, .f:focus-within .arrows{ opacity: 1; }&.always-arrows .f .arrows{ opacity: 1; }/* Drawn chevrons, not ▲▼. A glyph arrow is measured by whatever face is loaded — width,
+   baseline and optical weight all move with it — so the column it sits in cannot be sized
+   and the field beside it gets padded for something that changes shape. A 10x6 path is
+   10x6 in every face. This is what the primitive ships. */
+.f .arrows button{
+  padding: 0; width: 16px; height: 12px; flex: none;
+  border: 0; background: none; color: var(--muted); cursor: pointer;
+  display: grid; place-items: center; position: relative;
+  border-radius: 999px; corner-shape: superellipse(1.2);
+}.f .arrows button svg{ display: block; }/* A small fixed circle behind the chevron — not a ripple that grows out of the press.
+   14px whatever the button is, so the mark stays the same size when the hit area goes to
+   44px on touch, and it sits on the chevron rather than filling the target. */
+.f .arrows button::before{
+  content: ''; position: absolute; width: 14px; height: 14px;
+  border-radius: 50%; background: currentColor; opacity: 0;
+  transition: opacity .1s; pointer-events: none;
+}.f .arrows button:active::before{ opacity: .18; }.f .arrows button:hover{ color: var(--ink); }.f .arrows button:focus-visible{ outline: 1px solid var(--accent); outline-offset: -1px; }/* An editable value that sits bare — inside a row or a toggle — has no box to say it is
+   editable, so it says so itself with an underline. Where the number already has a field
+   drawn around it (01, 02) the box IS the affordance and an underline would be a second
+   one saying the same thing. Scoped, not global, for that reason.
+   text-decoration rather than a border: it hugs the glyphs, so it moves with the value
+   instead of underlining the whole fixed-width box including its empty space. */
+.v3 .f input, .v5 .f input, .v4 .pill input{
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color .15s;
+}.v3 .f input:hover, .v5 .f input:hover, .v4 .pill input:hover,
+.v3 .f input:focus, .v5 .f input:focus, .v4 .pill input:focus{
+  text-decoration-color: currentColor;
+}/* the track */
+.trk{ -webkit-appearance: none; appearance: none; width: 100%; height: 2px;
+  background: var(--line); border-radius: 2px; margin: 0; outline-offset: 4px; }.trk::-webkit-slider-thumb{ -webkit-appearance: none; appearance: none;
+  width: 13px; height: 13px; border-radius: 50%; background: var(--ink); cursor: pointer; }.trk::-moz-range-thumb{ width: 13px; height: 13px; border: 0; border-radius: 50%;
+  background: var(--ink); cursor: pointer; }.trk:focus-visible{ outline: 2px solid var(--accent); }/* vertical: writing-mode is the modern way and needs no wrapper or transform */
+&.vert .trk{ writing-mode: vertical-lr; direction: rtl; width: 2px; height: 11rem; }/* ── 01 · as shipped ──────────────────────────────────────── */
+.v1 .d-head{ display: flex; justify-content: space-between; align-items: baseline;
+  gap: .75rem; margin-bottom: .5rem; }.v1 .d-val{ display: inline-flex; align-items: center; gap: .375rem; }&.vert .v1 .d{ display: flex; flex-direction: column; align-items: center; gap: .5rem; }&.vert .v1 .d-head{ flex-direction: column; align-items: center; margin: 0; }/* ── 02 · one line ────────────────────────────────────────── */
+.v2 .d{ display: grid; grid-template-columns: 1fr auto; gap: .5rem .75rem;
+  align-items: center; margin-bottom: 1.5rem; }/* same rhythm as 01 */
+.v2 .d-head{ display: flex; align-items: baseline; gap: 6px; min-width: 0; }.v2 .trk{ grid-column: 1 / -1; }.v2 .d-val{ display: inline-flex; align-items: center; gap: 4px; }&.vert .v2 .d{ grid-template-columns: none; justify-items: center; }/* ── 03 · the row IS the track (DialKit) ──────────────────── */
+.v3 .bar{
+  position: relative; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; height: 32px; padding: 0 12px; border-radius: 8px;
+  corner-shape: superellipse(1.2);
+  background: var(--sunk); overflow: hidden; cursor: ew-resize;
+  touch-action: none; user-select: none;
+}.v3 .bar:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }.v3 .bar > i{ position: absolute; inset: 0 auto 0 0; background: var(--raised);
+  border-right: 1px solid var(--line); pointer-events: none; }.v3 .lab, .v3 .d-val{ position: relative; z-index: 1; }.v3 .f{ border: 0; background: none; }.v3 .f input{ width: 4.2rem; cursor: text; }.v3 .f .arrows{ display: none; }/* the bar is the coarse control; no arrows */
+&.vert .v3 .bar{
+  flex-direction: column; justify-content: space-between; align-items: center;
+  height: 176px; width: 80px; padding: 8px 4px; cursor: ns-resize;
+}&.vert .v3 .bar > i{ inset: auto 0 0 0; width: 100%; height: 0;
+  border-right: 0; border-top: 1px solid var(--line); }/* The HEADER runs vertically, the VALUE stays upright — a rotated label costs nothing
+   to read at a glance, a rotated number costs you the reading. It also solves the
+   clipping: the label no longer has to fit a 5rem column. */
+&.vert .v3 .lab{ writing-mode: vertical-rl; text-orientation: mixed;
+  font-size: .8125rem; line-height: 1; }&.vert .v3 .d-tag{ margin: .4em 0 0; }&.vert .v3 .d-val{ display: flex; flex-direction: column; align-items: center; gap: 0; }&.vert .v3 .f input{ width: 100%; text-align: center; padding: 0; }/* ── 04 · the value rides in the handle (Font Gauntlet) ───── */
+.v4 .d{ display: flex; align-items: center; gap: .75rem; }.v4 .icon{ font-family: var(--serif); font-size: .9375rem; color: var(--muted);
+  width: 2.25rem; flex: none; letter-spacing: -.02em; }.v4 .rail{ position: relative; flex: 1; height: 34px; display: flex; align-items: center;
+  touch-action: none; }.v4 .rail > i{ position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+  background: var(--line); transform: translateY(-50%); }.v4 .pill{
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  background: var(--accent); color: var(--on-accent); border-radius: 999px;
+  corner-shape: superellipse(1.2);
+  /* .375rem between every part, matching the gap inside the field, so the stepper sits
+     the same distance from the number as from the unit. It was 6px one side, 2px the
+     other, which reads as the chevrons being shoved toward the unit. */
+  padding: 4px 8px; display: inline-flex; align-items: center; gap: 6px;
+  cursor: ew-resize; touch-action: none; box-shadow: 0 0 0 3px var(--panel);
+}/* The field carries its own border and fill for a bare panel. Inside a coloured handle
+   that reads as a second box around the number — the same mistake in both directions,
+   so both variants strip it. */
+/* Stripping the field's box (see the note above) also took away the only thing standing
+   between the digits and the arrowheads: the value is centred in a 50px box, so "102.5"
+   lands ~4px from them and reads as touching. Give the stepper its own air and let the
+   number sit right, where a number belongs, instead of drifting toward the arrows. */
+.v4 .f{ border: 0; background: none; gap: 6px; }.v4 .pill input{ text-align: right; }/* No padding on the column. The flex gap already separates it from the number, and the
+   padding pushed the BUTTONS right while the hairline stayed centred on the column box —
+   so the line sat ~2px left of the chevrons it divides. The divider and the marks have to
+   share one centre. */
+/* No padding on the field. The pill pads the outside and the flex gaps pad between the
+   parts — a field that also pads itself doubles the outer edge and adds slack the eye
+   reads as the number drifting: 39px of box for 30px of digits. */
+.v4 .pill input{
+  font-family: var(--dial); font-size: .875rem;
+  /* explicit: a form control does not inherit this through the UA's font reset */
+  font-variation-settings: 'opsz' 10;
+  /* tabular-nums only. `slashed-zero` is off because in Cal Sans 2 (rev 2.0) the glyph
+     `zero` substitutes carries the PROPORTIONAL advance, not the tabular one — measured:
+     ten zeros 106.2422 against ten of any other digit 103.3672, while tnum alone has all
+     ten equal. So the two features together silently un-tabulate any value containing a
+     0, which is the one thing tnum is here to prevent. The slash is worth having and
+     should come back once the font's zero joins the tabular set. */
+  font-variant-numeric: tabular-nums;
+  background: none; border: 0; color: var(--on-accent); padding: 0; outline: none;
+  field-sizing: content; min-width: 2.25ch;
+  text-align: center; cursor: text;
+}/* No reserved slot in here. The 1.25rem min-width exists so the ROWS' numbers end on
+   the same pixel; a pill is one object on its own rail with no column to hold, so the
+   reservation is just dead space — 7.3px of a 12.7px glyph's slot, and the unit was
+   costing a third of the resting lozenge. */
+.v4 .pill .d-unit{ color: var(--on-accent); opacity: .78; font-size: .6875rem;
+  min-width: 0; }/* Font Gauntlet has no steppers in the handle and it is right not to: the lozenge is
+   positioned BY the value, so tapping an arrow moves the arrow out from under your
+   finger. Off by default; "Arrows always" brings them back for comparison. */
+.v4 .pill .arrows{ display: none; }&.always-arrows .v4 .pill .arrows{ display: flex; opacity: 1; }/* No mirror. It was 55px of a 202px lozenge — a quarter of the width bought nothing but
+   symmetry, and it never actually balanced, because the unit sits on the right too. A
+   handle is centred on the rail by its own box; the number inside it does not have to be
+   centred as well. */
+.v4 .pill .arrows::after{ background: color-mix(in srgb, var(--on-accent) 35%, transparent); }.v4 .pill .arrows button{ background: none; color: var(--on-accent); opacity: .7; }.v4 .pill .arrows button:hover{ background: color-mix(in srgb, var(--on-accent) 16%, transparent);
+  color: var(--on-accent); opacity: 1; }.v4 .f:focus-within{ border-color: transparent; }&.vert .v4 .d{ flex-direction: column; gap: .5rem; }/* flex:1 in a column made the rail as short as its content — it must be told a height.
+   And the column has to be as wide as the PILL, not as the hairline: at 34px the pills
+   hung 30px into their neighbours. The line stays centred inside the wider column. */
+&.vert .v4 .rail{ flex: none; width: 6rem; height: 11rem; }&.vert .v4 .rail > i{ left: 50%; width: 1px; }&.vert .v4 .icon{ width: auto; text-align: center; }&.vert .v4 .pill{ writing-mode: horizontal-tb; }/* the number never rotates */
+&.vert .v4 .rail > i{ left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto;
+  transform: translateX(-50%); }&.vert .v4 .pill{ left: 50%; cursor: ns-resize; }/* ── 05 · the toggle BECOMES the slider (MorphControl) ────── */
+.v5 .d-head{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }.v5 .d-val{ opacity: 0; transition: opacity .2s; }/* the number belongs to the slider */
+.v5.on .d-val{ opacity: 1; }.v5 .area{ position: relative; height: 34px; }/* The stops stop short of the area's right edge: that gutter is where the grip parks.
+   The Framer original hangs the grip 12px past the toggle because its ROW is wider than
+   the toggle — here the two are the same box, so "past the toggle" meant "outside the
+   control". Reserving the space keeps the whole thing inside its own margin. */
+.v5 .stops{ position: absolute; inset: 0 var(--park, 34px) 0 0; display: flex; gap: 2px;
+  border: 1px solid var(--line); border-radius: 8px; corner-shape: superellipse(1.2);
+  padding: 2px; background: var(--bg);
+  transition: opacity .22s; }.v5.on .stops{ opacity: 0; pointer-events: none; }.v5 .stops button{ font: inherit; font-size: .75rem; flex: 1; border: 0; background: none;
+  color: var(--muted); border-radius: 6px; corner-shape: superellipse(1.2);
+  cursor: pointer; white-space: nowrap; }.v5 .stops button[aria-pressed="true"]{ background: var(--ink); color: var(--bg); }.v5 .stops button:focus-visible{ outline: 2px solid var(--accent); outline-offset: 1px; }/* the rail grows out of the right-hand edge, where the grip is parked */
+.v5 .rail{ position: absolute; top: 50%; left: 0; height: 2px; width: 0;
+  background: var(--line); border-radius: 1px; opacity: 0;
+  transform: translate(calc(100% + 12px), -50%);
+  transition: width .28s cubic-bezier(.2,.7,.3,1), opacity .2s, transform .28s cubic-bezier(.2,.7,.3,1); }.v5.on .rail{ width: calc(100% - var(--park, 34px)); opacity: 1; transform: translate(0, -50%); }/* ONE element. Parked it is a 6x16 grip; unlocked it is the 20x20 thumb. Same node —
+   it travels onto the rail rather than a second control appearing under the first. */
+.v5 .knob{
+  position: absolute; top: 50%; left: 0;
+  width: 6px; height: 16px; border-radius: 3px; background: var(--muted);
+  /* both offsets come from JS so the same node can park and travel on either axis */
+  transform: translate(var(--x, 0px), calc(-50% + var(--y, 0px)));
+  cursor: pointer; z-index: 2; touch-action: none;
+  display: flex; align-items: center; justify-content: center;
+  transition: width .28s cubic-bezier(.2,.7,.3,1), height .28s cubic-bezier(.2,.7,.3,1),
+              border-radius .28s, background .28s, transform .28s cubic-bezier(.2,.7,.3,1);
+}.v5.on .knob{ width: 20px; height: 20px; border-radius: 10px; background: var(--ink); cursor: ew-resize; }.v5.dragging .knob, .v5.dragging .rail{ transition: none; }.v5 .knob:focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; }/* the two dashes that say "drag me", gone once it is a thumb */
+.v5 .knob::before, .v5 .knob::after{
+  content: ''; position: absolute; top: 50%; width: 5px; height: 1.5px;
+  background: var(--muted); border-radius: 1px; opacity: 1; transition: opacity .18s; }.v5 .knob::before{ left: -9px; }.v5.on .knob::before, .v5.on .knob::after{ opacity: 0; }/* Same manners as the module reset in CustomTypeTester: invisible until it applies,
+   half-strength when it does, full on hover, and it spins as it acts. */
+/* The reset lives in the gutter — the same slot the grip parks in. Parked, the grip is
+   there and the reset is not; unlocked, the grip has travelled onto the rail and the
+   reset takes the space it left. One slot, used in both states, and the control never
+   grows a second row to hold a button that is only sometimes relevant. */
+.v5 .relock{ background: none; border: 0; font: inherit; cursor: pointer; padding: 0;
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  width: var(--park, 34px); height: 26px; color: var(--ink-2);
+  display: inline-flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .5s; }.v5.on .relock{ opacity: .5; pointer-events: auto; }.v5.on .relock:hover{ opacity: 1; }.v5 .relock.spin{ transform: rotate(-360deg); }.v5 .relock:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }&.vert .v5 .area{ height: 11rem; width: 5.5rem; }&.vert .v5 .stops{ flex-direction: column; inset: 0 0 var(--park, 34px) 0; }&.vert .v5 .relock{ right: auto; bottom: 0; top: auto; left: 50%;
+  transform: translateX(-50%); width: 26px; height: var(--park, 34px); }&.vert .v5 .knob{ top: 0; left: 50%; width: 16px; height: 6px; border-radius: 3px;
+  transform: translate(calc(-50% + var(--x, 0px)), var(--y, 0px)); }&.vert .v5.on .knob{ width: 20px; height: 20px; border-radius: 10px; }&.vert .v5 .rail{ top: 0; left: 50%; width: 2px; height: 0;
+  transform: translate(-50%, calc(100% + 12px)); }&.vert .v5.on .rail{ height: calc(100% - var(--park, 34px)); width: 2px; transform: translate(-50%, 0); }&.vert .v5 .knob::before{ left: 50%; top: -9px; width: 1.5px; height: 5px; transform: translateX(-50%); }&.vert .v5 .knob::after{ left: 50%; right: auto; top: auto; bottom: -9px; width: 1.5px; height: 5px; transform: translateX(-50%); }/* ── touch ────────────────────────────────────────────────────
+   A 2px rail and a 10px arrowhead are mouse sizes. On a coarse pointer every target
+   grows to 44px — Apple's HIG minimum — WITHOUT the visuals growing: the rail stays
+   2px and the arrow stays small, but the thing your finger lands on is padded out
+   around it. Hit area and ink are different problems. */
+/* Touch sizing. Scoped to a CLASS, not to `@media (pointer: coarse)`, for one
+   reason: a rule that only exists on a device cannot be reviewed on a desktop.
+   The JS below sets this class automatically on a real coarse pointer, and the
+   Touch button in the toolbar sets it by hand. */
+
+  &.touch .f input{ padding: 8px; font-size: 1rem; }&.touch .f .arrows{ opacity: 1; }/* no hover to reveal them on touch */
+  /* The button stays 16px WIDE and grows its hit area with an overlay instead. A 30px
+     min-width made the column 35px for a 10px chevron — 25px of dead space, which landed
+     as 21px between the number and the arrows against 16px on the other side. The target
+     has to grow for a finger; the column it sits in does not. */
+  &.touch .f .arrows button{ min-width: 0; width: 16px; height: 22px; }&.touch .f .arrows button::after{
+    content: ''; position: absolute; inset: -5px -9px;   /* 34x32 to press, 16x22 to see */
+  }&.touch .f .arrows button:first-child{ min-height: 22px; }&.touch .f .arrows button:last-child{ min-height: 22px; }/* the rail keeps its hairline look and gains a 44px band to hit */
+  &.touch .trk{ height: 44px; background: none; }&.touch .trk::-webkit-slider-runnable-track{ height: 2px; background: var(--line); border-radius: 2px; }&.touch .trk::-moz-range-track{ height: 2px; background: var(--line); border-radius: 2px; }&.touch .trk::-webkit-slider-thumb{ width: 24px; height: 24px; margin-top: -11px; }&.touch .trk::-moz-range-thumb{ width: 24px; height: 24px; }&.touch.vert .trk{ width: 44px; height: 11rem; }/* The bar has to grow with what is inside it. I raised .v3 .bar and .v4 .rail to 48px
+     and left .v5 .area at its mouse height of 34, so 44px buttons sat 13px outside their
+     own container. A target and the thing that holds it are one measurement. */
+  &.touch:not(&.vert) .v5 .area{ height: 48px; }&.touch .v5 .stops button{ min-height: 44px; }/* 44px is the minimum TARGET, not the minimum gap between two of them. Once the field
+     and the track are each 44px tall, their centres are already 44px+gap apart, so the
+     spacing only has to stop a fingertip bridging the two edges — Material asks 8dp,
+     and 16px is comfortable. A 44px GAP on top of 44px targets is a control built for
+     no one: it was me over-correcting, not a guideline. */
+  &.touch .d{ margin-bottom: calc(var(--gap) * 2); }&.touch .v1 .d-head, &.touch .v2 .d-head{ margin-bottom: var(--gap); }&.touch .v2 .d{ row-gap: var(--gap); margin-bottom: calc(var(--gap) * 2); }&.touch .v4 .d{ gap: var(--gap); }&.touch .v3 .d{ margin-bottom: calc(var(--gap) * 2); }&.touch .v5 .area{ margin-top: var(--gap); }&.touch .v5 .grip{ width: 22px; height: 44px; }&.touch:not(&.vert) .v3 .bar{ height: 48px; }&.touch.vert .v3 .bar{ width: 5.5rem; }/* height stays 11rem, see the vert block */
+  &.touch .v3 .f input{ font-size: .9375rem; }&.touch:not(&.vert) .v4 .rail{ height: 48px; }/* The pill does NOT grow to 44px. The RAIL is the 48px target — it carries the drag —
+     so the handle only has to be seeable and grabbable inside it. Sized up it became
+     129x57, taller than the band it rides on, which reads as a lozenge rather than a
+     thumb. Same rule as the hairline: hit area and ink are different problems.
+     16px text, though, because Safari zooms the page on focusing anything smaller. */
+  &.touch .v4 .pill{ padding: .25rem .5rem; box-shadow: 0 0 0 2px var(--panel); }/* No padding, even here. The generic touch rule pads .f inputs so a standalone field
+     is comfortable to tap; inside the pill the LOZENGE is that padding, and adding it
+     again put 19px of dead space around a 30px number — which is what pushed the digits
+     away from the chevrons. */
+  &.touch .v4 .pill input{ font-size: 16px; padding: 0; }/* The arrows were what made it 52px: a 44px stepper column inside the handle set the
+     handle's height. They also put a small tap target inside a draggable object, which
+     is a hit-test fight nobody wins. On touch the pill is dragged and the number typed —
+     the same reason variant 03 has none. */
+  /* :not(&.always-arrows) so the explicit toggle still wins. Hiding them on touch is the
+     default and the reasoning holds — the lozenge is positioned BY the value, so tapping
+     an arrow moves it out from under your finger — but this selector carries an element
+     as well as its classes, so it was outranking &.always-arrows and the toggle did
+     nothing here. Worse, the mirror spacer is NOT gated the same way, so the lozenge was
+     being padded 55px for a stepper that had been hidden. */
+  &.touch:not(&.always-arrows) .v4 .pill .arrows{ display: none; }&.touch .toolbar button{ min-height: 44px; padding: .25rem 1rem; }
+
+/* ── 06 · the triplet ──────────────────────────────────────────────────────────
+   Three fields, one control. The lozenge is the object; the hairlines are the only
+   thing between the fields, because a border on each would read as three separate
+   controls sharing a row. The column heads sit over the fields, not over the label,
+   so the grid is one track for the label and three equal ones for the numbers. */
+&.tri, .tri { display: flex; flex-direction: column; gap: var(--pad-2, 8px); }
+.tri-heads, .tri-row {
+  display: grid;
+  grid-template-columns: minmax(0, 7.5em) repeat(3, minmax(0, 1fr));
+  gap: var(--pad-2, 8px);
+  align-items: center;
+}
+.tri-heads { padding-bottom: 2px; }
+.tri-heads .tri-h {
+  grid-column: auto; text-align: center;
+  font-size: 11px; letter-spacing: .04em; color: var(--muted);
+}
+.tri-heads .tri-h:first-child { grid-column: 2; }
+.tri-lab { align-self: center; line-height: 1.25; text-wrap: balance; }
+.tri-box {
+  grid-column: 2 / -1;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--line); border-radius: var(--r-lozenge, 10px);
+  background: var(--sunk); overflow: hidden;
+}
+.tri-box .f { border-radius: 0; background: none; border: 0; }
+.tri-box .f + .f { border-left: 1px solid var(--line); }
+.tri-box .f input { text-align: right; }
+
+/* The unit rides with the label and takes the quiet ink, so it reads as a property
+   of the parameter rather than as a fourth value in the row. */
+.tri-u {
+  margin-left: .45em; color: var(--muted);
+  font-size: .85em; font-variant-numeric: tabular-nums;
+}
+</style>
+
+<h1>Five ways to draw one dial</h1>
+<p class="lede">Each carries the same three controls &mdash; one with a unit, one with a tag, one
+with neither &mdash; so the labelling question stays visible while the shapes are compared. All
+five share one state. <b>01 is what AxisSlider ships</b>: a single <code>type=text</code> field,
+so the value can print a real minus where a number input is stuck with a hyphen; drawn chevrons
+rather than the browser's stepper; and a clamp on the field as well as the track. The other four
+are proposals. Nothing here changes value on scroll.</p>
+
+<div class="toolbar">
+  <span>try</span>
+  <button id="t-vert" aria-pressed="false" type="button">Vertical</button>
+  <button id="t-tags" aria-pressed="true" type="button">Tags</button>
+  <button id="t-units" aria-pressed="true" type="button">Units</button>
+  <button id="t-touch" aria-pressed="false" type="button">Touch sizing</button>
+  <button id="t-arrows" aria-pressed="false" type="button">Arrows always</button>
+  <!-- No theme button here. The document owns the theme, and from the default
+       "auto" state this one's first click set data-theme="dark" on an already-dark
+       OS, which looks broken because nothing moves. -->
+</div>
+
+<div class="grid" id="t-grid"></div>
+<script>
+const $$ = s => document.querySelector(s);
+const $$$ = s => document.querySelectorAll(s);
+
+// Three dials, chosen to cover the labelling cases: unit only · tag + unit · neither.
+const DIALS = [
+  { key: 'measure', label: 'measure', tag: null,   unit: 'px', min: 120, max: 924, step: 1,    value: 620 },
+  { key: 'width',   label: 'width',   tag: 'wdth', unit: '%',  min: 75,  max: 125, step: 0.5,  value: 102.5 },
+  { key: 'leading', label: 'leading', tag: null,   unit: null, min: 0.6, max: 3,   step: 0.01, value: 1.6 },
+];
+
+const STOPS = { label: 'geometric form', tag: 'GEOM', unit: '%', min: 0, max: 100, step: 1, value: 25,
+                names: [['A11y', 0], ['UI', 25], ['Base', 60], ['Geo', 100]] };
+
+const state = Object.fromEntries(DIALS.map(d => [d.key, d.value]));
+const stopState = { value: STOPS.value, continuous: false };
+
+const clamp = (v, d) => Math.min(d.max, Math.max(d.min, v));
+const dec = d => (String(d.step).split('.')[1] || '').length;
+const fmt = (v, d) => v.toFixed(dec(d)).replace('-', '−');   // real minus, U+2212
+const parse = s => parseFloat(String(s).replace('−', '-').trim());
+const pct = (v, d) => ((v - d.min) / (d.max - d.min)) * 100;
+
+/* One typeable field for every variant. text + inputMode so a true minus is possible and
+   `auto` stays on the table; arrows are ours, and hold-to-repeat is a timer because a
+   button we draw does not get the browser's spinner repeat for free. */
+function field(d, get, set, opts = {}) {
+  // opts.fitContent — size to what is displayed right now rather than to the widest
+  // value in range. Right for a lozenge, which is an object that may change shape;
+  // wrong for a column of rows, where a moving edge would break the alignment.
+  const wrap = document.createElement('span');
+  wrap.className = 'f';
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.inputMode = 'decimal';
+  inp.setAttribute('aria-label', d.label);
+  inp.value = fmt(get(), d);
+  if (opts.big) inp.style.fontSize = '1.375rem';
+  inp.addEventListener('input', () => {
+    const n = parse(inp.value);
+    if (!Number.isNaN(n)) set(clamp(n, d));
+  });
+  inp.addEventListener('blur', () => { inp.value = fmt(get(), d); });
+  inp.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    const mult = e.shiftKey ? 10 : 1;
+    set(clamp(get() + (e.key === 'ArrowUp' ? d.step : -d.step) * mult, d));
+  });
+  wrap.appendChild(inp);
+
+  const arrows = document.createElement('span');
+  arrows.className = 'arrows';
+  for (const dir of [1, -1]) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    // 45 degrees: run 3.5, rise 3.5. The old path rose 3 over a run of 4 — 37 degrees,
+    // which reads as a flattened arrow rather than a chevron.
+    b.innerHTML = '<svg viewBox="0 0 10 7" width="10" height="7" aria-hidden="true">'
+      + '<path d="' + (dir > 0 ? 'M1.5 5 5 1.5 8.5 5' : 'M1.5 2 5 5.5 8.5 2') + '"'
+      + ' fill="none" stroke="currentColor" stroke-width="1.5"'
+      + ' stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    b.setAttribute('aria-label', (dir > 0 ? 'increase ' : 'decrease ') + d.label);
+    let timer, ramp;
+    const step = () => set(clamp(get() + dir * d.step, d));
+    const stop = () => { clearTimeout(timer); clearInterval(ramp); };
+    b.addEventListener('pointerdown', e => {
+      e.preventDefault(); step();
+      timer = setTimeout(() => { ramp = setInterval(step, 40); }, 400);   // OS-like delay, then repeat
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+    arrows.appendChild(b);
+  }
+  wrap.appendChild(arrows);
+  wrap._sync = () => {
+    if (document.activeElement !== inp) inp.value = fmt(get(), d);
+  };
+  return wrap;
+}
+
+function head(d, cls) {
+  const h = document.createElement('div');
+  h.className = 'd-head';
+  const l = document.createElement('span');
+  l.className = 'd-lab';
+  l.textContent = d.label;
+  if (d.tag) { const t = document.createElement('span'); t.className = 'd-tag'; t.textContent = d.tag; l.appendChild(t); }
+  h.appendChild(l);
+  return h;
+}
+
+/* The unit slot is ALWAYS rendered, empty when the value has no unit. Otherwise the
+   number's right edge moves with whatever follows it — `leading` sat 20px right of
+   `measure` because it has no unit, and `%` is narrower than `px`, so even two dials
+   that both have one did not agree. Reserving the space is the row-level version of
+   what tabular figures do inside the number: the column holds still. */
+function unitEl(d) {
+  const u = document.createElement('span');
+  u.className = 'd-unit';
+  u.textContent = d.unit || '';
+  if (!d.unit) u.setAttribute('aria-hidden', 'true');
+  return u;
+}
+
+const syncs = [];
+const get = d => state[d.key];
+const mk = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
+
+// ── 01 · as shipped ────────────────────────────────────────
+function v1(d) {
+  const root = mk('div', 'd');
+  const h = head(d);
+  const val = mk('span', 'd-val');
+  const set = v => { state[d.key] = v; sync(); };
+  const f = field(d, () => get(d), set);
+  val.appendChild(f);
+  const u = unitEl(d); if (u) val.appendChild(u);
+  h.appendChild(val);
+  const r = mk('input', 'trk');
+  r.type = 'range'; r.min = d.min; r.max = d.max; r.step = d.step;
+  r.setAttribute('aria-label', d.label);
+  r.addEventListener('input', () => set(parseFloat(r.value)));
+  root.append(h, r);
+  syncs.push(() => { r.value = get(d); f._sync(); });
+  return root;
+}
+
+// ── 02 · one line ──────────────────────────────────────────
+function v2(d) {
+  const root = mk('div', 'd');
+  const h = mk('div', 'd-head');
+  const l = mk('span', 'd-lab'); l.textContent = d.label;
+  if (d.tag) { const t = mk('span', 'd-tag'); t.textContent = d.tag; l.appendChild(t); }
+  h.appendChild(l);
+  const val = mk('span', 'd-val');
+  const set = v => { state[d.key] = v; sync(); };
+  const f = field(d, () => get(d), set);
+  val.appendChild(f);
+  const u = unitEl(d); if (u) val.appendChild(u);
+  const r = mk('input', 'trk');
+  r.type = 'range'; r.min = d.min; r.max = d.max; r.step = d.step;
+  r.setAttribute('aria-label', d.label);
+  r.addEventListener('input', () => set(parseFloat(r.value)));
+  root.append(h, val, r);
+  syncs.push(() => { r.value = get(d); f._sync(); });
+  return root;
+}
+
+// Shared dragging for the two "one object" variants: the whole surface is the track,
+// so a press anywhere sets the value from where you pressed and keeps following. Wheel
+// steps. The field inside opts out, or you could never put a caret in it.
+function draggable(surface, d, get, set, opts = {}) {
+  const vertical = () => document.body.classList.contains('vert');
+  const fromPoint = e => {
+    const r = surface.getBoundingClientRect();
+    const t = vertical()
+      ? 1 - (e.clientY - r.top) / r.height
+      : (e.clientX - r.left) / r.width;
+    return clamp(d.min + t * (d.max - d.min), d);
+  };
+  let dragging = false;
+  surface.addEventListener('pointerdown', e => {
+    // Anything interactive inside the surface owns its own press. Exempting only INPUT
+    // meant a chevron got BOTH handlers: the button stepped the value, and the rail
+    // snapped it to wherever the pointer happened to be — so an arrow behaved like a
+    // click on the track instead of an increment.
+    if (e.target.closest('input, button')) return;
+    dragging = true;
+    // Set the value FIRST. Capture can throw (a pointer that is already gone, some
+    // synthetic events), and if it does before the set, the press silently does nothing.
+    set(opts.absolute === false ? get() : fromPoint(e));
+    try { surface.setPointerCapture(e.pointerId); } catch {}
+    e.preventDefault();
+  });
+  surface.addEventListener('pointermove', e => { if (dragging) set(fromPoint(e)); });
+  ['pointerup', 'pointercancel'].forEach(ev =>
+    surface.addEventListener(ev, () => { dragging = false; }));
+  // No wheel handler. A control that changes value on scroll steals the page's scroll
+  // the moment the pointer crosses it, and you cannot scroll PAST a rail of them.
+  // Drag, type, or the arrow keys — all three are deliberate, which scrolling is not.
+  // keyboard: the surface is the control, so it must be reachable and operable
+  surface.tabIndex = 0;
+  surface.setAttribute('role', 'slider');
+  surface.setAttribute('aria-label', d.label);
+  surface.addEventListener('keydown', e => {
+    const k = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
+    if (k === undefined) {
+      if (e.key === 'Home') { e.preventDefault(); set(d.min); }
+      if (e.key === 'End') { e.preventDefault(); set(d.max); }
+      return;
+    }
+    e.preventDefault();
+    set(clamp(get() + k * d.step * (e.shiftKey ? 10 : 1), d));
+  });
+}
+
+// ── 03 · the row IS the track ──────────────────────────────
+function v3(d) {
+  const root = mk('div', 'd');
+  const bar = mk('div', 'bar');
+  const fill = mk('i');
+  const lab = mk('span', 'lab');
+  lab.className = 'lab d-lab';
+  lab.textContent = d.label;
+  if (d.tag) { const t = mk('span', 'd-tag'); t.textContent = d.tag; lab.appendChild(t); }
+  const set = v => { state[d.key] = v; sync(); };
+  const val = mk('span', 'd-val');
+  const f = field(d, () => get(d), set);
+  val.appendChild(f);
+  const u = unitEl(d); if (u) val.appendChild(u);
+  bar.append(fill, lab, val);
+  draggable(bar, d, () => get(d), set);
+  root.appendChild(bar);
+  syncs.push(() => {
+    f._sync();
+    const p = pct(get(d), d);
+    bar.setAttribute('aria-valuenow', String(get(d)));
+    bar.setAttribute('aria-valuemin', String(d.min));
+    bar.setAttribute('aria-valuemax', String(d.max));
+    if (document.body.classList.contains('vert')) { fill.style.height = p + '%'; fill.style.width = '100%'; }
+    else { fill.style.width = p + '%'; fill.style.height = '100%'; }
+  });
+  return root;
+}
+
+// ── 04 · the value rides in the handle ─────────────────────
+const ICONS = { measure: 'T↔', width: 'T⇔', leading: '↕T' };
+function v4(d) {
+  const root = mk('div', 'd');
+  const icon = mk('span', 'icon');
+  icon.textContent = ICONS[d.key] || d.label.slice(0, 2);
+  icon.title = d.label + (d.tag ? ' · ' + d.tag : '');
+  const rail = mk('div', 'rail');
+  const line = mk('i');
+  const pill = mk('span', 'pill');
+  const set = v => { state[d.key] = v; sync(); };
+  const f = field(d, () => get(d), set, { fitContent: true });
+  pill.appendChild(f);
+  // No reserved slot here. The rows keep one so their numbers line up in a column;
+  // the pills are separate objects on separate rails, so there is no column to hold
+  // and an empty slot is just a wider lozenge for nothing.
+  if (d.unit) { const u = unitEl(d); pill.appendChild(u); }
+  rail.append(line, pill);
+  draggable(rail, d, () => get(d), set);
+  root.append(icon, rail);
+  syncs.push(() => {
+    f._sync();
+    const p = pct(get(d), d);
+    rail.setAttribute('aria-valuenow', String(get(d)));
+    if (document.body.classList.contains('vert')) {
+      pill.style.top = (100 - p) + '%'; pill.style.left = '50%';
+    } else {
+      pill.style.left = p + '%'; pill.style.top = '50%';
+    }
+  });
+  return root;
+}
+
+// ── 05 · the toggle becomes the slider ─────────────────────
+// Ported from MorphControl in framercomponents/files/CustomTypeTester.tsx, without
+// framer-motion. The point is that the grip and the thumb are ONE node: it is parked
+// past the right edge as a 6x16 handle, and on unlock it travels onto the rail and
+// becomes the 20x20 thumb. A second control appearing below would be a different idea.
+function v5() {
+  const d = STOPS;
+  const root = mk('div', 'd');
+  const h = mk('div', 'd-head');
+  const l = mk('span', 'd-lab'); l.textContent = d.label;
+  const t = mk('span', 'd-tag'); t.textContent = d.tag; l.appendChild(t);
+  h.appendChild(l);
+  const set = v => { stopState.value = v; sync(); };
+  const val = mk('span', 'd-val');
+  const f = field(d, () => stopState.value, set);
+  val.appendChild(f);
+  const u = unitEl(d); if (u) val.appendChild(u);
+  h.appendChild(val);
+
+  const area = mk('div', 'area');
+  const stops = mk('div', 'stops');
+  const btns = d.names.map(([name, v]) => {
+    const b = mk('button'); b.type = 'button'; b.textContent = name;
+    b.addEventListener('click', () => set(v));
+    stops.appendChild(b);
+    return [b, v];
+  });
+  const rail = mk('div', 'rail');
+  const knob = mk('div', 'knob');
+  knob.tabIndex = 0;
+  knob.setAttribute('role', 'slider');
+  knob.setAttribute('aria-label', d.label);
+  area.append(stops, rail, knob);
+
+  const relock = mk('button', 'relock');
+  relock.type = 'button';
+  relock.title = 'back to named stops';
+  relock.setAttribute('aria-label', 'back to named stops');
+  relock.innerHTML = '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">'
+    + '<path d="M13 8a5 5 0 1 1-1.6-3.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'
+    + '<path d="M13 2v3.2h-3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  relock.addEventListener('click', () => {
+    // Snap to the nearest named stop on the way back. Locking without snapping would
+    // leave the segmented control showing a value none of its buttons match, so nothing
+    // would read as selected — the control would look broken rather than closed.
+    const nearest = d.names.reduce((best, [, v]) =>
+      Math.abs(v - stopState.value) < Math.abs(best - stopState.value) ? v : best, d.names[0][1]);
+    stopState.value = nearest;
+    stopState.continuous = false;
+    relock.classList.add('spin');
+    setTimeout(() => relock.classList.remove('spin'), 520);
+    sync();
+  });
+
+  const KNOB = 20;
+
+  // click the parked grip to unlock — the same gesture as the Framer original
+  knob.addEventListener('click', () => { if (!stopState.continuous) { stopState.continuous = true; sync(); } });
+
+  let dragging = false;
+  knob.addEventListener('pointerdown', e => {
+    if (!stopState.continuous) return;             // locked: the click handler unlocks
+    dragging = true;
+    root.closest('.rig').classList.add('dragging');
+    try { knob.setPointerCapture(e.pointerId); } catch {}
+    e.preventDefault();
+  });
+  knob.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const r = area.getBoundingClientRect();
+    const PARK = 34;
+    const pctv = document.body.classList.contains('vert')
+      ? 1 - (e.clientY - r.top - KNOB / 2) / Math.max(1, r.height - PARK - KNOB)
+      : (e.clientX - r.left - KNOB / 2) / Math.max(1, r.width - PARK - KNOB);
+    set(clamp(d.min + pctv * (d.max - d.min), d));
+  });
+  ['pointerup', 'pointercancel'].forEach(ev => knob.addEventListener(ev, () => {
+    dragging = false;
+    root.closest('.rig')?.classList.remove('dragging');
+  }));
+  knob.addEventListener('keydown', e => {
+    if (!stopState.continuous) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); stopState.continuous = true; sync(); }
+      return;
+    }
+    const k = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
+    if (k === undefined) return;
+    e.preventDefault();
+    set(clamp(stopState.value + k * d.step * (e.shiftKey ? 10 : 1), d));
+  });
+
+  area.appendChild(relock);          // the gutter is inside the area, so the button is too
+  root.append(h, area);
+  // The parked position is derived from the area's WIDTH, and the first sync runs before
+  // layout has given it one — so it computed 0 - 20 and parked the grip off the left edge.
+  // Re-sync whenever the box actually resolves or changes.
+  new ResizeObserver(() => sync()).observe(area);
+  syncs.push(() => {
+    f._sync();
+    const on = stopState.continuous;
+    const rig = root.closest('.rig');
+    if (rig) rig.classList.toggle('on', on);
+    // The knob travels along whichever axis the rail runs on. Setting only --x left it
+    // sliding sideways off a vertical rail — the CSS had both offsets, the sync had one.
+    const vertical = document.body.classList.contains('vert');
+    // The rail now stops short of the gutter, so the thumb's travel has to as well —
+    // otherwise it would slide out over the reset button at the top of the range.
+    const PARK = 34;
+    const span = (vertical ? area.clientHeight : area.clientWidth) - PARK - KNOB;
+    const along = on ? (pct(stopState.value, d) / 100) * Math.max(1, span) : null;
+    // Parked, the grip sits INSIDE the gutter — 20px in from the far edge, which leaves
+    // its outer dash (9px) clear of the boundary instead of poking through it.
+    const PARK_INSET = 20;
+    if (vertical) {
+      knob.style.setProperty('--x', '0px');
+      knob.style.setProperty('--y', on ? (span - along) + 'px' : (area.clientHeight - PARK_INSET) + 'px');
+    } else {
+      knob.style.setProperty('--y', '0px');
+      knob.style.setProperty('--x', on ? along + 'px' : (area.clientWidth - PARK_INSET) + 'px');
+    }
+    knob.setAttribute('aria-valuenow', String(stopState.value));
+    knob.setAttribute('aria-valuetext', on ? String(stopState.value) + '%'
+      : (d.names.find(([, v]) => v === stopState.value) || ['custom'])[0]);
+    btns.forEach(([b, v]) => b.setAttribute('aria-pressed', String(v === stopState.value)));
+  });
+  return root;
+}
+
+// ── 06 · the triplet ───────────────────────────────────────
+// ReCal's justification rail: a parameter is not one number, it is a RANGE the
+// typesetter may move inside — min, desired, max. Three fields, one object, one
+// label. Two things fall out of that and neither is decoration:
+//   • the three are ordered, so editing one has to push the others rather than
+//     let you type min 90 under a max of 80. The clamp is the control's job.
+//   • they share a label and a row, so they share a lozenge; the hairlines are
+//     the only separation, because three boxes side by side read as three
+//     controls rather than one range.
+const TRIPLETS = [
+  { key: 'word',   label: 'word spacing',  unit: '%',  min: 0,   max: 300, step: 1, lo: 75, mid: 85,  hi: 110 },
+  // Flattersatz stores tracking as a percent (98/100/104) and SHOWS it 0-centred,
+  // so -2 here is 98% of natural. The unit is still %; the zero is the only thing
+  // that moved. All three parameters are percentages -- none is in font units.
+  { key: 'letter', label: 'letter spacing',unit: '%',  min: -20, max: 20,  step: 1, lo: -2, mid: 0,   hi: 4   },
+  { key: 'glyph',  label: 'glyph scaling', unit: '%',  min: 90,  max: 110, step: 1, lo: 100,mid: 100, hi: 100 },
+];
+const tri = Object.fromEntries(TRIPLETS.map(t => [t.key, { lo: t.lo, mid: t.mid, hi: t.hi }]));
+
+function v6() {
+  const root = mk('div', 'd tri');
+  const heads = mk('div', 'tri-heads');
+  for (const h of ['min', 'desired', 'max']) {
+    const e = mk('span', 'tri-h'); e.textContent = h; heads.appendChild(e);
+  }
+  root.appendChild(heads);
+  for (const t of TRIPLETS) {
+    const row = mk('div', 'tri-row');
+    const lab = mk('span', 'd-lab tri-lab'); lab.textContent = t.label;
+    // The unit belongs to the PARAMETER, not to each of its three numbers — printing
+    // it three times says the fields are three controls. It sits with the label,
+    // in its own colour, so the row reads "word spacing, in percent: 75 85 110".
+    const u = mk('span', 'tri-u'); u.textContent = t.unit; lab.appendChild(u);
+    const box = mk('span', 'tri-box');
+    const SLOTS = ['lo', 'mid', 'hi'];
+    const made = [];
+    for (const slot of SLOTS) {
+      // min <= desired <= max is the invariant. Moving one carries the others with
+      // it instead of refusing the edit — a control that rejects what you typed and
+      // says nothing is worse than one that shows you where the value landed.
+      const set = v => {
+        const s = tri[t.key]; s[slot] = v;
+        if (slot === 'lo')  { s.mid = Math.max(s.mid, v); s.hi = Math.max(s.hi, s.mid); }
+        if (slot === 'mid') { s.lo = Math.min(s.lo, v);   s.hi = Math.max(s.hi, v); }
+        if (slot === 'hi')  { s.mid = Math.min(s.mid, v); s.lo = Math.min(s.lo, s.mid); }
+        sync();
+      };
+      const f = field(t, () => tri[t.key][slot], set, { fitContent: true });
+      made.push(f); box.appendChild(f);
+    }
+    syncs.push(() => made.forEach(f => f._sync()));
+    row.append(lab, box);
+    root.appendChild(row);
+  }
+  return root;
+}
+
+const VARIANTS = [
+  { name: 'As shipped', note: '<b>Label, field, unit, track under.</b> What AxisSlider draws today, with our arrows instead of the platform’s. Two rows per dial — safe, and the most vertical space.', build: c => DIALS.forEach(d => c.appendChild(v1(d))) },
+  { name: 'One line', note: '<b>Everything on the label line.</b> Same anatomy, half the height — a rail of eight dials fits without scrolling. The value can crowd a long label at narrow widths.', build: c => DIALS.forEach(d => c.appendChild(v2(d))) },
+  { name: 'The row is the track', note: '<b>Label and number sit inside the bar; the fill is the value.</b> Press anywhere on the row and it jumps there, then follows. The number is still typeable — click it and the drag stands down. One object, one readout, and the widest hit area of the five.', build: c => DIALS.forEach(d => c.appendChild(v3(d))) },
+  { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label — which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => c.appendChild(v4(d))) },
+  { name: 'The toggle becomes the slider', note: '<b>One node, two states.</b> Ported from <code>MorphControl</code> in CustomTypeTester — the grip parked at the right edge IS the thumb: click it and it travels onto the rail and grows into it, while the stops fade out. It does not reveal a second control. The value only appears once there is a continuous number to show. <b>Added here:</b> a way back to the stops, which the original has no path to.', build: c => c.appendChild(v5()) },
+  { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired and max are one control, so they share a label and a lozenge and only hairlines divide them. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The shape the other five cannot make, because they each hold a single value.', build: c => c.appendChild(v6()) },
+];
+
+const grid = document.getElementById('t-grid');
+VARIANTS.forEach((v, i) => {
+  const card = mk('div', 'card');
+  const ch = mk('div', 'card-head');
+  const n = mk('h2', 'card-name'); n.textContent = v.name;
+  const ix = mk('span', 'card-idx'); ix.textContent = String(i + 1).padStart(2, '0');
+  ch.append(n, ix);
+  const rig = mk('div', 'rig v' + (i + 1));
+  v.build(rig);
+  const note = mk('p', 'card-note'); note.innerHTML = v.note;
+  card.append(ch, rig, note);
+  grid.appendChild(card);
+});
+
+function sync() { syncs.forEach(fn => fn()); }
+sync();
+
+
+// ── toolbar ────────────────────────────────────────────────
+const toggle = (id, cls, on) => {
+  const b = document.getElementById(id);
+  b.setAttribute('aria-pressed', String(on));
+  document.body.classList.toggle(cls, on);
+  b.addEventListener('click', () => {
+    const next = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', String(next));
+    document.body.classList.toggle(cls, next);
+    sync();
+  });
+};
+// a real coarse pointer turns it on by itself; the button is for reviewing it on a mouse
+toggle('t-touch', 'touch', matchMedia('(pointer: coarse)').matches);
+toggle('t-vert', 'vert', false);
+toggle('t-arrows', 'always-arrows', false);
+// these two read inverted: pressed means "showing"
+(() => {
+  for (const [id, cls] of [['t-tags', 'no-tags'], ['t-units', 'no-units']]) {
+    const b = document.getElementById(id);
+    b.addEventListener('click', () => {
+      const showing = b.getAttribute('aria-pressed') === 'true';
+      b.setAttribute('aria-pressed', String(!showing));
+      document.body.classList.toggle(cls, showing);
+      sync();
+    });
+  }
+})();
+
+
+</script>

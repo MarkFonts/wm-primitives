@@ -20,8 +20,11 @@ DOCS = HERE.parent
 # variable face, so it could not have shared this page's font anyway.)
 SECTIONS = [
     ("type",    "Type",          SD/"type-tokens.built.html", "7 roles, 3 inks, 6 signals"),
-    ("corners", "The corner law",SD/"corner-law.html",        "superellipse(1.2), and 2^k"),
-    ("circles", "Circles",       SD/"circles.html",           "what opts out, and why"),
+    # Circles is the corner law's exclusion list, not a law of its own: it rides
+    # inside 02. 03 is the control interface.
+    ("corners",  "The corner law",    [SD/"corner-law.html", SD/"circles.html"],
+                                       "superellipse(1.2), 2^k, and what opts out"),
+    ("controls", "Control interface", SD/"controls.html",     "one dial, five ways"),
     ("space",   "Space",         SD/"space.html",             "the pad scale, cap + alignment"),
     ("color",  "Color",        SD/"color-audit.html",      "every declaration, audited"),
     ("usage",   "Who uses what", SD/"color-usage.html",      "the usage map"),
@@ -56,6 +59,13 @@ def scope_selector(sel, root):
     sel = sel.strip()
     if not sel:
         return sel
+    # `&` is the scope itself. The controls page carries its state on the section
+    # element (.vert, .touch), and every other form here produces a DESCENDANT --
+    # `#s-controls .vert`, or `body.vert #s-controls` -- neither of which is
+    # `#s-controls.vert`. Without this the state toggles compile to selectors that
+    # match nothing, which is how a section can look right and do nothing.
+    if sel.startswith("&"):
+        return root + sel[1:]
     m = ROOTISH.match(sel)
     if m:
         name, qual, rest = m.group(1), m.group(2), m.group(3).strip()
@@ -84,6 +94,14 @@ def scope_css(css, root, depth=0):
 
 # ---------------------------------------------------------------- per section
 def build_section(sid, label, path, kicker):
+    """`path` may be a list. Extra sources fold into the SAME section under a wrapper
+    class -- corner-law and circles share fourteen class names (.bar, .grid, .tag,
+    .zone-chip ...), so merging them at one scope would let the host page's rules
+    reach into the guest's markup."""
+    if isinstance(path, (list, tuple)):
+        extras = list(path[1:]); path = path[0]
+    else:
+        extras = []
     raw = path.read_text(errors="replace")
     raw = re.sub(r'@font-face\s*\{.*?\}', '', raw, flags=re.S)
     title = (re.search(r'<title>(.*?)</title>', raw, re.S) or [None, label])[1]
@@ -112,6 +130,22 @@ def build_section(sid, label, path, kicker):
 
     root = f"#s-{sid}"
     css = scope_css(css, root)
+
+    for n, ex in enumerate(extras, 1):
+        ex_raw = re.sub(r'@font-face\s*\{.*?\}', '', ex.read_text(errors="replace"), flags=re.S)
+        ex_css = "\n".join(re.findall(r'<style[^>]*>(.*?)</style>', ex_raw, re.S))
+        ex_css = re.sub(r'/\*.*?\*/', '', ex_css, flags=re.S)
+        ex_css = ex_css.replace('<![CDATA[', '').replace(']]>', '')
+        ex_js  = "\n".join(re.findall(r'<script[^>]*>(.*?)</script>', ex_raw, re.S))
+        ex_html = re.sub(r'<style[^>]*>.*?</style>', '', ex_raw, flags=re.S)
+        ex_html = re.sub(r'<script[^>]*>.*?</script>', '', ex_html, flags=re.S)
+        ex_html = re.sub(r'<title>.*?</title>', '', ex_html, flags=re.S)
+        ex_html = re.sub(r'<!doctype[^>]*>', '', ex_html, flags=re.I)
+        ex_html = re.sub(r'</?(html|head|body)[^>]*>', '', ex_html, flags=re.I)
+        part = f"part-{n}"
+        css += scope_css(ex_css, f"{root} .{part}")
+        html += f'<div class="{part}">{ex_html}</div>'
+        js  += "\n" + ex_js
 
 
     # ids are document-global: prefix them, and every reference to them.
@@ -149,6 +183,10 @@ def build_section(sid, label, path, kicker):
     if js.strip():
         js = js.replace("document.querySelectorAll", "ROOT.querySelectorAll")
         js = js.replace("document.querySelector", "ROOT.querySelector")
+        # a standalone page toggles state on <body>; inside the document that is the
+        # section, and it has to agree with the `&.vert` selectors above.
+        js = js.replace("document.body.classList", "ROOT.classList")
+        js = js.replace("document.body.dataset", "ROOT.dataset")
         js = f"(function(){{var ROOT=document.getElementById('s-{sid}');if(!ROOT)return;\n{js}\n}})();"
 
     # The artifact wrapper supplies the <head>, and it carries no <meta charset>, so a
@@ -168,6 +206,87 @@ def build_section(sid, label, path, kicker):
                 css=css, html=html, js=js, chapters=chapters)
 
 
+GEOM_TOKENS = """<style>
+:root{
+  /* the GEOM chart's palette. The axis hues are the DISPLAY-P3 colour in OKLCH, so a
+     wide-gamut screen gets the chroma each was picked at and sRGB gamut-maps back.
+     They hold across both themes; only the twelve neutrals move. */
+  --g-a11y:#ff6b35; --g-a11y:oklch(71.85% 0.2279 37.82);
+  --g-base:#00a0ff; --g-base:oklch(68.25% 0.2027 239.51);
+  --g-geo:#00c700; --g-geo:oklch(70.40% 0.3056 145.66);
+  --g-bg:#f8f8f8; --g-bg:oklch(97.91% 0 0);
+  --g-fg:#242424; --g-fg:oklch(26.03% 0 0);
+  --g-fg2:#454545; --g-fg2:oklch(39.04% 0 0);
+  --g-dim:#a1a1a1; --g-dim:oklch(70.90% 0 0);
+  --g-rule:#e0e0e0; --g-rule:oklch(90.67% 0 0);
+  --g-grid:#dcdcdc; --g-grid:oklch(89.45% 0 0);
+  --g-tick:#d4d4d4; --g-tick:oklch(86.99% 0 0);
+  --g-vgrid:#e8e8e8; --g-vgrid:oklch(93.10% 0 0);
+  --g-hatch:#a1a1a1; --g-hatch:oklch(70.90% 0 0);
+  --g-surface:#ffffff; --g-surface:oklch(100.00% 0 0);
+  --g-onfg:#ffffff; --g-onfg:oklch(100.00% 0 0);
+  --g-ui:#242424; --g-ui:oklch(26.03% 0 0);
+  /* A wash is a MIX toward the ground -- the ground moves with the theme, so the wash
+     has to know it. An ink level is alpha ON the colour. Neither is an opacity
+     attribute: those composite against whatever is behind and keep the value out of
+     the palette. 113 of them come off the chart on the way through the build. */
+  --g-a11y-wash:color-mix(in oklab,var(--g-a11y),var(--g-bg) 93%);
+  --g-base-wash:color-mix(in oklab,var(--g-base),var(--g-bg) 93%);
+  --g-geo-wash: color-mix(in oklab,var(--g-geo), var(--g-bg) 93%);
+  --g-ui-wash:  color-mix(in oklab,var(--g-ui),  var(--g-bg) 93%);
+  --g-fg-wash:  color-mix(in oklab,var(--g-fg),  var(--g-bg) 93%);
+  --g-a11y-45:oklch(from var(--g-a11y) l c h/.45); --g-a11y-85:oklch(from var(--g-a11y) l c h/.85);
+  --g-base-45:oklch(from var(--g-base) l c h/.45); --g-base-85:oklch(from var(--g-base) l c h/.85);
+  --g-geo-45: oklch(from var(--g-geo)  l c h/.45); --g-geo-85: oklch(from var(--g-geo)  l c h/.85);
+  --g-ui-45:  oklch(from var(--g-ui)   l c h/.45); --g-ui-85:  oklch(from var(--g-ui)   l c h/.85);
+  --g-grid-30:oklch(from var(--g-grid) l c h/.30);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --g-bg:#151515; --g-bg:oklch(19.57% 0 0);
+  --g-fg:#e6edf3; --g-fg:oklch(94.25% 0.0111 243.66);
+  --g-fg2:#b8c0c8; --g-fg2:oklch(80.40% 0.0144 248.01);
+  --g-dim:#6e7681; --g-dim:oklch(56.29% 0.0196 256.33);
+  --g-rule:#2c3138; --g-rule:oklch(31.12% 0.0144 256.78);
+  --g-grid:#262b31; --g-grid:oklch(28.66% 0.0131 253.03);
+  --g-tick:#30363d; --g-tick:oklch(33.00% 0.0149 252.31);
+  --g-vgrid:#22272d; --g-vgrid:oklch(27.03% 0.0133 253.05);
+  --g-hatch:#7d8590; --g-hatch:oklch(61.37% 0.0191 256.32);
+  --g-surface:#0d1117; --g-surface:oklch(17.63% 0.0140 258.36);
+  --g-onfg:#151515; --g-onfg:oklch(19.57% 0 0);
+  --g-ui:#e6edf3; --g-ui:oklch(94.25% 0.0111 243.66);
+}}
+:root[data-theme="dark"]{
+  --g-bg:#151515; --g-bg:oklch(19.57% 0 0);
+  --g-fg:#e6edf3; --g-fg:oklch(94.25% 0.0111 243.66);
+  --g-fg2:#b8c0c8; --g-fg2:oklch(80.40% 0.0144 248.01);
+  --g-dim:#6e7681; --g-dim:oklch(56.29% 0.0196 256.33);
+  --g-rule:#2c3138; --g-rule:oklch(31.12% 0.0144 256.78);
+  --g-grid:#262b31; --g-grid:oklch(28.66% 0.0131 253.03);
+  --g-tick:#30363d; --g-tick:oklch(33.00% 0.0149 252.31);
+  --g-vgrid:#22272d; --g-vgrid:oklch(27.03% 0.0133 253.05);
+  --g-hatch:#7d8590; --g-hatch:oklch(61.37% 0.0191 256.32);
+  --g-surface:#0d1117; --g-surface:oklch(17.63% 0.0140 258.36);
+  --g-onfg:#151515; --g-onfg:oklch(19.57% 0 0);
+  --g-ui:#e6edf3; --g-ui:oklch(94.25% 0.0111 243.66);
+}
+:root[data-theme="light"]{
+  --g-bg:#f8f8f8; --g-bg:oklch(97.91% 0 0);
+  --g-fg:#242424; --g-fg:oklch(26.03% 0 0);
+  --g-fg2:#454545; --g-fg2:oklch(39.04% 0 0);
+  --g-dim:#a1a1a1; --g-dim:oklch(70.90% 0 0);
+  --g-rule:#e0e0e0; --g-rule:oklch(90.67% 0 0);
+  --g-grid:#dcdcdc; --g-grid:oklch(89.45% 0 0);
+  --g-tick:#d4d4d4; --g-tick:oklch(86.99% 0 0);
+  --g-vgrid:#e8e8e8; --g-vgrid:oklch(93.10% 0 0);
+  --g-hatch:#a1a1a1; --g-hatch:oklch(70.90% 0 0);
+  --g-surface:#ffffff; --g-surface:oklch(100.00% 0 0);
+  --g-onfg:#ffffff; --g-onfg:oklch(100.00% 0 0);
+  --g-ui:#242424; --g-ui:oklch(26.03% 0 0);
+}
+.mono{font-family:"PaperMono",ui-monospace,SFMono-Regular,Menlo,monospace}
+</style>
+"""
+
 def build_type_page():
     """type-tokens.html is a template: __FACE__/__SPEC__ are font URLs and __GEOMSVG__ is
     the GEOM axis map. Fonts are referenced, not embedded -- the assembler strips every
@@ -176,9 +295,30 @@ def build_type_page():
     svg = (SD/"geom-themed.svg").read_text()
     svg = svg[svg.index("<svg"):]
     svg = re.sub(r"@font-face\s*\{.*?\}", "", svg, flags=re.S)
+    svg = svg.replace("font-family:'CalSansVF', sans-serif;", 'font-family:"Face", sans-serif;')
     svg = svg.replace("font-family: 'CalSansVF', sans-serif;", 'font-family: "Face", sans-serif;')
-    svg = svg.replace('viewBox="0 0 1920 1080" width="1920" height="1080"',
-                      'viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet"')
+    # The svgshow build is 1920x1650 and carries its own light-only token block under
+    # names that collide with :root -- --bg, --fg, --surface. Strip it, rename to --g-*,
+    # and emit BOTH themes from GEOM_TOKENS instead of shipping a second file.
+    svg = svg.replace('viewBox="0 0 1920 1650" width="1920" height="1650"',
+                      'viewBox="0 0 1920 1650" preserveAspectRatio="xMidYMid meet"')
+    svg = re.sub(r'<style>svg\{.*?\}</style>\s*', '', svg, flags=re.S)
+    for t in ("bg","fg2","fg","dim","rule","grid","tick","vgrid","hatch","surface",
+              "onfg","a11y","ui","base","geo"):
+        svg = svg.replace(f"var(--{t})", f"var(--g-{t})")
+    svg = svg.replace('id="card"','id="geom-card"').replace('url(#card)','url(#geom-card)')
+    svg = svg.replace('id="hatch"','id="geom-hatch"').replace('url(#hatch)','url(#geom-hatch)')
+    for t in ("a11y","base","geo","ui","fg"):
+        svg = re.sub(r'(fill|stroke)="var\(--g-%s\)"([^/>]*?)\s*opacity="0\.07"'%t,
+                     r'\1="var(--g-%s-wash)"\2'%t, svg)
+    for t in ("a11y","base","geo","ui"):
+        for a in ("45","85"):
+            svg = re.sub(r'(fill|stroke)="var\(--g-%s\)"([^/>]*?)\s*opacity="0\.%s"'%(t,a),
+                         r'\1="var(--g-%s-%s)"\2'%(t,a), svg)
+    svg = re.sub(r'(fill|stroke)="var\(--g-grid\)"([^/>]*?)\s*opacity="0\.3"',
+                 r'\1="var(--g-grid-30)"\2', svg)
+    svg = re.sub(r'\s*opacity="1\.0"', '', svg)
+    svg = GEOM_TOKENS + svg
     out = (tpl.replace("__FACE__", "../fonts/CalSansVF.ttf")
               .replace("__SPEC__", "../fonts/CalSansSpecimen.ttf")
               .replace("__GEOMSVG__", svg))
@@ -234,6 +374,7 @@ if LINKED:
 @font-face{font-family:"Face";src:url(fonts/CalSansVF.ttf) format("truetype");font-display:swap}
 @font-face{font-family:"CalSansVF";src:url(fonts/CalSansVF.ttf) format("truetype");font-display:swap}
 @font-face{font-family:"Specimen";src:url(fonts/CalSansSpecimen.ttf) format("truetype");font-display:swap}
+@font-face{font-family:"PaperMono";src:url(fonts/PaperMono.woff2) format("woff2");font-display:swap}
 """
 else:
     FACE, SPEC = face("CalSansVF.ttf"), face("CalSansSpecimen.ttf")
@@ -244,10 +385,30 @@ else:
 """
 
 SHELL = """
+/* ── THE COLOUR SYSTEM ─────────────────────────────────────────────────────────
+   Four hues and one lightness ramp. A theme is not a second palette: it is where
+   each role sits on that ramp, plus how hard the three inks press. Seven numbers,
+   and everything else is derived with oklch(from ...) or color-mix().
+
+   Each token is written twice, sRGB then OKLCH, so an engine without oklch() stops
+   at the first line. Where a colour is an axis hue the OKLCH value is the DISPLAY-P3
+   one -- a wide-gamut screen gets the chroma it was picked at, sRGB gamut-maps back.
+
+   The --a11y/--ui/--base/--geo quartet that used to sit here was referenced nowhere
+   and is gone; the axis hues that ARE used are the chart's --g-* set. */
 :root{
-  --ink:#e8e8e8; --ink-2:rgba(232,232,232,.62); --ink-3:rgba(232,232,232,.38);
-  --bg:#0f0f0f; --surface:#1a1a1a; --surface-hi:#252525; --line:rgba(232,232,232,.14);
-  --a11y:#c97050; --ui:#999; --base:#4a7fd4; --geo:#4aad5c; --signal:#eeff41; --signal:color(display-p3 0.9333 1 0.2549);
+  --hue-a11y:37.82; --hue-base:239.51; --hue-geo:145.66; --hue-signal:115.72;
+  --l-ground:16.84%; --l-surface:21.78%; --l-surface-hi:26.45%; --l-ink:93.10%;
+  --a-2:.62; --a-3:.38; --a-line:.14; --l-warn:74%;
+  --signal:#eeff41; --signal:oklch(95.19% .2302 var(--hue-signal));
+  /* the roles. These lines never change between themes -- only the numbers above do. */
+  --bg:#0f0f0f;         --bg:oklch(var(--l-ground) 0 0);
+  --surface:#1a1a1a;    --surface:oklch(var(--l-surface) 0 0);
+  --surface-hi:#252525; --surface-hi:oklch(var(--l-surface-hi) 0 0);
+  --ink:#e8e8e8;        --ink:oklch(var(--l-ink) 0 0);
+  --ink-2:rgba(232,232,232,.62); --ink-2:oklch(from var(--ink) l c h / var(--a-2));
+  --ink-3:rgba(232,232,232,.38); --ink-3:oklch(from var(--ink) l c h / var(--a-3));
+  --line:rgba(232,232,232,.14);  --line:oklch(from var(--ink) l c h / var(--a-line));
   --ui-font:"Face","CalSansVF",system-ui,sans-serif;
   /* the column's own geometry. The colophon breaks OUT of it by exactly these, so
      they are tokens rather than three copies of 202 -- the alignment rule applies to
@@ -261,16 +422,24 @@ SHELL = """
   --lb-bleed:520px;
 }
 @media (prefers-color-scheme: light){
-  :root{--ink:#161616;--ink-2:rgba(22,22,22,.66);--ink-3:rgba(22,22,22,.42);
-    --bg:#f4f4f2;--surface:#fff;--surface-hi:#ebebe8;--line:rgba(22,22,22,.16);
-    --a11y:#a85136;--ui:#6b6b6b;--base:#2f5fae;--geo:#2f8a44;--signal:#5c6b00; --signal:color(display-p3 0.3608 0.4196 0)}
+  :root:not([data-theme="dark"]){
+  --l-ground:96.66%; --l-surface:100%; --l-surface-hi:93.92%; --l-ink:20.02%;
+    --a-2:.66; --a-3:.42; --a-line:.16; --l-warn:57%; --l-warn:57%;
+    /* the light signal is a different COLOUR, not a step: olive, 4.5 degrees off */
+    --signal:#5c6b00; --signal:oklch(49.43% .1370 120.20);
+  }
 }
-:root[data-theme="dark"]{--ink:#e8e8e8;--ink-2:rgba(232,232,232,.62);--ink-3:rgba(232,232,232,.38);
-  --bg:#0f0f0f;--surface:#1a1a1a;--surface-hi:#252525;--line:rgba(232,232,232,.14);
-  --a11y:#c97050;--ui:#999;--base:#4a7fd4;--geo:#4aad5c;--signal:#eeff41; --signal:color(display-p3 0.9333 1 0.2549)}
-:root[data-theme="light"]{--ink:#161616;--ink-2:rgba(22,22,22,.66);--ink-3:rgba(22,22,22,.42);
-  --bg:#f4f4f2;--surface:#fff;--surface-hi:#ebebe8;--line:rgba(22,22,22,.16);
-  --a11y:#a85136;--ui:#6b6b6b;--base:#2f5fae;--geo:#2f8a44;--signal:#5c6b00; --signal:color(display-p3 0.3608 0.4196 0)}
+:root[data-theme="dark"]{
+  --l-ground:16.84%; --l-surface:21.78%; --l-surface-hi:26.45%; --l-ink:93.10%;
+  --a-2:.62; --a-3:.38; --a-line:.14; --l-warn:74%;
+  --signal:#eeff41; --signal:oklch(95.19% .2302 var(--hue-signal));
+}
+:root[data-theme="light"]{
+  --l-ground:96.66%; --l-surface:100%; --l-surface-hi:93.92%; --l-ink:20.02%;
+  --a-2:.66; --a-3:.42; --a-line:.16; --l-warn:57%;
+  /* the light signal is a different COLOUR, not a step: olive, 4.5 degrees off */
+  --signal:#5c6b00; --signal:oklch(49.43% .1370 120.20);
+}
 
 /* The linked build ships bare — no artifact wrapper, no reset — so the UA's 8px body
    margin shows the page-default white as a hairline gutter around .wm. Own the root. */

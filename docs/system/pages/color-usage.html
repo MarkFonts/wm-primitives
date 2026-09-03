@@ -856,12 +856,19 @@ the ones a value-to-token sweep would silently merge.</p>
 <span class="meta">font-proofer · themes: base
  · <em>no token</em></span></summary>
 <table><tr><td class="r">painted as text</td><td class="p"><code>color</code></td><td class="s">.coss-no-more</td><td class="t">base</td><td class="l">font-proofer/App.css</td></tr></table></details>
-<style>
-:root{--ink:#e9e6df;--ink2:rgba(233,230,223,.62);--ink3:rgba(233,230,223,.40);--gnd:#121213;--card:#191919;--line:#2a2a2a;--acc:#eeff41; --acc:color(display-p3 0.9333 1 0.2549);--warn:#ff8557}
-@media(prefers-color-scheme:light){:root{--ink:#16161a;--ink2:rgba(22,22,26,.66);--ink3:rgba(22,22,26,.45);--gnd:#fbfaf7;--card:#fff;--line:#e3e0d8;--acc:#5c6b00; --acc:color(display-p3 0.3608 0.4196 0);--warn:#c05320}}
-:root[data-theme=dark]{--ink:#e9e6df;--ink2:rgba(233,230,223,.62);--ink3:rgba(233,230,223,.40);--gnd:#121213;--card:#191919;--line:#2a2a2a;--acc:#eeff41; --acc:color(display-p3 0.9333 1 0.2549);--warn:#ff8557}
-:root[data-theme=light]{--ink:#16161a;--ink2:rgba(22,22,26,.66);--ink3:rgba(22,22,26,.45);--gnd:#fbfaf7;--card:#fff;--line:#e3e0d8;--acc:#5c6b00; --acc:color(display-p3 0.3608 0.4196 0);--warn:#c05320}
-body{margin:0;background:var(--gnd);color:var(--ink);padding:40px 26px 90px;font:15px/1.55 "Face","CalSansVF",ui-sans-serif,system-ui,sans-serif}
+<style>:root{
+  /* aliases onto the page ramp. These were private near-copies -- --gnd #121213 against
+     --bg #0f0f0f, --card #191919 against --surface #1a1a1a, --ink #e9e6df against
+     #e8e8e8 -- so a theme change never reached them. They inherit now. */
+  --gnd:var(--bg); --card:var(--surface); --ink2:var(--ink-2); --ink3:var(--ink-3);
+  --acc:var(--signal);
+  /* warn is A11y orange: one hue, one lightness number per theme */
+  --warn:#ff8557; --warn:oklch(var(--l-warn) .165 var(--hue-a11y));
+}
+@media(prefers-color-scheme:light){:root{}}
+:root[data-theme=dark]{}
+:root[data-theme=light]{}
+body{}
 h1{font-size:29px;margin:0 0 6px;letter-spacing:-.01em}
 .lede{color:var(--ink2);max-width:76ch;margin:0 0 26px}
 details{background:var(--card);border:1px solid var(--line);border-radius:9px;margin-bottom:7px;overflow:hidden}

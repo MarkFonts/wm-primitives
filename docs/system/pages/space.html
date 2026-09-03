@@ -746,29 +746,38 @@ input[type="range"]::-moz-range-thumb {
      measured against it, so it wants maximum contrast and no tint at all. It is the only
      place in the app darker than --bg. Do not fold it into --bg or into a surface step
      during any collapse — a #0f0f0f stage puts a grey cast behind the specimen. */
-  --stage-deep: #000;
-  --bg:        #0f0f0f;
+
+  /* ── the instrument palette, derived ──────────────────────────────────────
+     DARK BY DECISION, not oversight: ReCal has no light theme and is not getting one,
+     so this does not follow the page. Every colour is written twice, sRGB then OKLCH,
+     and the greys read as steps on one ramp instead of ten unrelated values. The chips
+     are their zone LIFTED -- raising lightness while holding chroma is the one move
+     only relative colour makes; mixing toward white desaturates. ReCal's zone hues are
+     NOT the axis hues (base sits at H 259, the axis at 239.5): left as measured,
+     because snapping them would change ReCal. */
+  --stage-deep: #000; --stage-deep: oklch(0.00% 0 0);
+  --bg: #0f0f0f; --bg: oklch(16.84% 0 0);
   /* Three steps, house-wide (wm-primitives#3). The old four had --surface-1 at #111 —
      two values above --bg — which is why GlyphPicker's cells were invisible here while
      they read fine in font-proofer off a hardcoded fallback. #111 is gone; what used it
      now sits on --surface. --stage-deep is NOT part of this scale, see above. */
-  --surface:    #1a1a1a;   /* raised: panels, cards, cells, inputs */
-  --surface-hi: #252525;   /* hover / active / selected */
+  --surface: #1a1a1a; --surface: oklch(21.78% 0 0);   /* raised: panels, cards, cells, inputs */
+  --surface-hi: #252525; --surface-hi: oklch(26.45% 0 0);   /* hover / active / selected */
 
   /* ── Text (existing scale) ── */
-  --text:       #e8e8e8;
-  --text-muted: #999;
-  --text-dim:   #666;
-  --text-faint: #444;
+  --text: #e8e8e8; --text: oklch(93.10% 0 0);
+  --text-muted: #999; --text-muted: oklch(68.30% 0 0);
+  --text-dim: #666; --text-dim: oklch(51.03% 0 0);
+  --text-faint: #444; --text-faint: oklch(38.67% 0 0);
   /* --text as "R, G, B" for the ink levels in type.css. COMMA-separated on purpose:
      ink is written rgba(var(--text-rgb), a), and the rgb(... / a) slash form needs
      space-separated channels, so mixing them drops the color silently. */
   --text-rgb: 232, 232, 232;
 
   /* ── Lines ── */
-  --border:        #333;
-  --border-subtle: #222;
-  --edit-rail:     rgba(255, 255, 255, 0.28);  /* "you can type here" left rail */
+  --border: #333; --border: oklch(32.11% 0 0);
+  --border-subtle: #222; --border-subtle: oklch(25.20% 0 0);
+  --edit-rail:     rgba(255, 255, 255, 0.28); --edit-rail: oklch(from var(--text) l c h / .28);  /* "you can type here" left rail */
   --scrollbar-thumb:       var(--surface-hi);   /* house 6px scrollbar (wm-primitives) */
   --scrollbar-thumb-hover: var(--text-dim);
   /* GlyphPicker chrome pin: the UI font is CalSansVF itself, so picker chrome text
@@ -779,43 +788,43 @@ input[type="range"]::-moz-range-thumb {
   /* ── Accent & origin markers ──
      ◆ baked-default marker takes the site accent; ● preview marker a neutral —
      two different visual species (control-mapping §5, spec directive 3). */
-  --accent:         #e8e8e8;        /* primary action + ◆ */
+  --accent:         #e8e8e8; --accent: var(--text);        /* primary action + ◆ */
   --marker-default: var(--accent);  /* ◆ YOUR default */
-  --marker-preview: #999;           /* ● PREVIEWING */
-  --state-stock:    #c97050;        /* STOCK narrator only (= the A11Y zone hue) */
+  --marker-preview: #999; --marker-preview: var(--text-muted);           /* ● PREVIEWING */
+  --state-stock: #c97050; --state-stock: oklch(63.86% 0.1216 40.30);        /* STOCK narrator only (= the A11Y zone hue) */
 
   /* ── Freezer (ssXX/cvXX manual override) ──
      Gold marks a glyph pinned off the GEOM continuum by a frozen feature — a
      deliberately separate hue from the four GEOM zones (user directive: "color …
      distinguishing ss-frozen from GEOM-driven"). The only warm accent besides the
      A11Y terracotta, kept muted so it reads as "held" rather than an alert. */
-  --freeze-gold:     #d9a441;
+  --freeze-gold: #d9a441; --freeze-gold: oklch(75.07% 0.1295 79.85);
 
   /* Status triad — ok / warn / err. Previously three raw literals repeated across
      coss.css and UiKitBoard.css with no token anywhere, which is why the terracotta
      family survived here after it was dropped elsewhere. Named now so the palette is
      a three-line change rather than a grep. */
-  --ok:   #46c07a;
-  --warn: #e0a23a;
-  --err:  #e0603a;
-  --freeze-gold-dim: rgba(217, 164, 65, .16);
+  --ok: #46c07a; --ok: oklch(72.21% 0.1493 154.59);
+  --warn: #e0a23a; --warn: oklch(75.39% 0.1369 76.32);
+  --err: #e0603a; --err: oklch(64.40% 0.1688 37.06);
+  --freeze-gold-dim: rgba(217, 164, 65, .16); --freeze-gold-dim: oklch(from var(--freeze-gold) l c h / .16);
 
   /* ── Zones (reuse existing exactly) ── */
   /* The zones as they render in the Type Matrix and the glyph strips: muted, because there
      they are a wash behind dense content and a background classification, not a control. */
-  --zone-a11y:       #c97050;
-  --zone-ui:         #999;   /* neutral: UI is the default, it should not announce itself */
-  --zone-ui-on-grid: #fff;   /* UI renders white inside the zone grid */
-  --zone-base:       #4a7fd4;
-  --zone-geo:        #4aad5c;
+  --zone-a11y: #c97050; --zone-a11y: oklch(63.86% 0.1216 40.30);
+  --zone-ui:         #999; --zone-ui: var(--text-muted);   /* neutral: UI is the default, it should not announce itself */
+  --zone-ui-on-grid: #fff; --zone-ui-on-grid: oklch(100.00% 0 0);   /* UI renders white inside the zone grid */
+  --zone-base: #4a7fd4; --zone-base: oklch(60.08% 0.1419 259.44);
+  --zone-geo: #4aad5c; --zone-geo: oklch(66.90% 0.1495 147.36);
 
   /* The same four as CHIPS. A chip is a control you press, so it gets the hue at full
      strength — same hue angles, more chroma and lightness. UI takes the on-grid white,
      since a chip group always has something selected and grey there reads as disabled. */
-  --zone-a11y-chip:  #e08a63;
+  --zone-a11y-chip:  #e08a63; --zone-a11y-chip: oklch(from var(--zone-a11y) calc(l + .076) c h);
   --zone-ui-chip:    var(--zone-ui-on-grid);
-  --zone-base-chip:  #6f9ee8;
-  --zone-geo-chip:   #5fc678;
+  --zone-base-chip:  #6f9ee8; --zone-base-chip: oklch(from var(--zone-base) calc(l + .096) c h);
+  --zone-geo-chip:   #5fc678; --zone-geo-chip: oklch(from var(--zone-geo) calc(l + .081) c h);
 
   /* ── Motion (house spring, spec directive 4) ── */
   --spring:   cubic-bezier(.34, 1.45, .64, 1);
