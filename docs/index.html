@@ -2577,7 +2577,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   border-radius: 999px; corner-shape: superellipse(1.2); cursor: pointer; }#s-controls .toolbar button[aria-pressed="true"]{ background: var(--ink); color: var(--bg); border-color: var(--ink); }#s-controls .toolbar button:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }#s-controls .rig,#s-controls .toolbar button,#s-controls .toolbar span,#s-controls .eyebrow,#s-controls .card-idx,#s-controls .d-tag,#s-controls .rules td:first-child,#s-controls .spec-name{
   font-variation-settings: 'opsz' 10;
 }#s-controls .grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
-  gap: 1px; background: var(--line); border: 1px solid var(--line); }#s-controls .card{ background: var(--panel); padding: 1.5rem 1.5rem 1.75rem; display: flex; flex-direction: column; }#s-controls .card-head{ display: flex; justify-content: space-between; align-items: baseline;
+  gap: 1px; background: var(--line); border: 1px solid var(--line); }#s-controls .card{ min-width: 0; background: var(--panel); padding: 1.5rem 1.5rem 1.75rem; display: flex; flex-direction: column; }#s-controls .card-head{ display: flex; justify-content: space-between; align-items: baseline;
   gap: 1rem; margin-bottom: 1.25rem; }#s-controls .card-name{ font-family: var(--serif); font-size: 1.25rem; margin: 0; }#s-controls .card-idx{ font-family: var(--mono); font-size: .625rem; letter-spacing: .14em; color: var(--accent); }#s-controls .card-note{ font-size: .8125rem; line-height: 1.45; color: var(--muted); margin: 1.25rem 0 0; }#s-controls .card-note b{ color: var(--ink-2); font-weight: 500; }#s-controls .rig{ flex: 1; }#s-controls.vert .rig{ display: flex; gap: 1.25rem; align-items: flex-start; justify-content: safe center;
   min-height: 15rem; padding-top: .5rem;
   
@@ -2678,14 +2678,19 @@ html,body{margin:0;padding:0;background:var(--bg)}
               border-radius .28s, background .28s, transform .28s cubic-bezier(.2,.7,.3,1);
 }#s-controls .v5.on .knob{ width: 20px; height: 20px; border-radius: 10px; background: var(--ink); cursor: ew-resize; }#s-controls .v5.dragging .knob,#s-controls .v5.dragging .rail{ transition: none; }#s-controls .v5 .knob:focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; }#s-controls .v5 .knob::before,#s-controls .v5 .knob::after{
   content: ''; position: absolute; top: 50%; width: 5px; height: 1.5px;
-  background: var(--muted); border-radius: 1px; opacity: 1; transition: opacity .18s; }#s-controls .v5 .knob::before{ left: -9px; }#s-controls .v5.on .knob::before,#s-controls .v5.on .knob::after{ opacity: 0; }#s-controls .v5 .relock{ background: none; border: 0; font: inherit; cursor: pointer; padding: 0;
+  background: var(--muted); border-radius: 1px; opacity: 1; transition: opacity .18s; }#s-controls .v5 .knob::after carried no offset at all,#s-controls so it sat ON the grip while its twin stood off
+   to the left -- the grip only ever had one visible dash,#s-controls on one side. */
+.v5 .knob::before{ left: -7px; }#s-controls .v5 .knob::after{ right: -7px; }#s-controls .v5.on .knob::before,#s-controls .v5.on .knob::after{ opacity: 0; }#s-controls .v5 .relock{ background: none; border: 0; font: inherit; cursor: pointer; padding: 0;
   position: absolute; right: 0; top: 50%; transform: translateY(-50%);
   width: var(--park, 34px); height: 26px; color: var(--ink-2);
   display: inline-flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; transition: opacity .2s, transform .5s; }#s-controls .v5.on .relock{ opacity: .5; pointer-events: auto; }#s-controls .v5.on .relock:hover{ opacity: 1; }#s-controls .v5 .relock.spin{ transform: rotate(-360deg); }#s-controls .v5 .relock:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }#s-controls.vert .v5 .area{ height: 11rem; width: 5.5rem; }#s-controls.vert .v5 .stops{ flex-direction: column; inset: 0 0 var(--park, 34px) 0; }#s-controls.vert .v5 .relock{ right: auto; bottom: 0; top: auto; left: 50%;
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .5s; }#s-controls .v5.on .relock{ opacity: .5; pointer-events: auto; }#s-controls .v5.on .relock:hover{ opacity: 1; }#s-controls .v5 .relock.spin{ transform: rotate(-360deg); }#s-controls .v5 .relock:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }#s-controls.vert .v5 .area{ height: 11rem; width: 5.5rem; margin-inline: auto; }#s-controls.vert .v5 .d-head{ flex-direction: column; align-items: center; gap: 2px; margin-bottom: var(--pad-2, 8px); }#s-controls.vert .v5 .d-lab{ display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; }#s-controls.vert .v5 .d-tag{ margin: 0; }#s-controls.vert .v5 .d-val{
+  display: flex; justify-content: center; align-items: center;
+  min-height: 1.4em; width: 100%;
+}#s-controls.vert .v5 .stops{ flex-direction: column; inset: 0 0 var(--park, 34px) 0; }#s-controls.vert .v5 .relock{ right: auto; bottom: 0; top: auto; left: 50%;
   transform: translateX(-50%); width: 26px; height: var(--park, 34px); }#s-controls.vert .v5 .knob{ top: 0; left: 50%; width: 16px; height: 6px; border-radius: 3px;
   transform: translate(calc(-50% + var(--x, 0px)), var(--y, 0px)); }#s-controls.vert .v5.on .knob{ width: 20px; height: 20px; border-radius: 10px; }#s-controls.vert .v5 .rail{ top: 0; left: 50%; width: 2px; height: 0;
-  transform: translate(-50%, calc(100% + 12px)); }#s-controls.vert .v5.on .rail{ height: calc(100% - var(--park, 34px)); width: 2px; transform: translate(-50%, 0); }#s-controls.vert .v5 .knob::before{ left: 50%; top: -9px; width: 1.5px; height: 5px; transform: translateX(-50%); }#s-controls.vert .v5 .knob::after{ left: 50%; right: auto; top: auto; bottom: -9px; width: 1.5px; height: 5px; transform: translateX(-50%); }#s-controls.touch .f input{ padding: 8px; font-size: 1rem; }#s-controls.touch .f .arrows{ opacity: 1; }#s-controls.touch .f .arrows button{ min-width: 0; width: 16px; height: 22px; }#s-controls.touch .f .arrows button::after{
+  transform: translate(-50%, calc(100% + 12px)); }#s-controls.vert .v5.on .rail{ height: calc(100% - var(--park, 34px)); width: 2px; transform: translate(-50%, 0); }#s-controls.vert .v5 .knob::before{ left: 50%; top: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }#s-controls.vert .v5 .knob::after{ left: 50%; right: auto; top: auto; bottom: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }#s-controls.touch .f input{ padding: 8px; font-size: 1rem; }#s-controls.touch .f .arrows{ opacity: 1; }#s-controls.touch .f .arrows button{ min-width: 0; width: 16px; height: 22px; }#s-controls.touch .f .arrows button::after{
     content: ''; position: absolute; inset: -5px -9px;   
   }#s-controls.touch .f .arrows button:first-child{ min-height: 22px; }#s-controls.touch .f .arrows button:last-child{ min-height: 22px; }#s-controls.touch .trk{ height: 44px; background: none; }#s-controls.touch .trk::-webkit-slider-runnable-track{ height: 2px; background: var(--line); border-radius: 2px; }#s-controls.touch .trk::-moz-range-track{ height: 2px; background: var(--line); border-radius: 2px; }#s-controls.touch .trk::-webkit-slider-thumb{ width: 24px; height: 24px; margin-top: -11px; }#s-controls.touch .trk::-moz-range-thumb{ width: 24px; height: 24px; }#s-controls.touch.vert .trk{ width: 44px; height: 11rem; }#s-controls.touch:not(&.vert) .v5 .area{ height: 48px; }#s-controls.touch .v5 .stops button{ min-height: 44px; }#s-controls.touch .d{ margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v1 .d-head,#s-controls.touch .v2 .d-head{ margin-bottom: var(--gap); }#s-controls.touch .v2 .d{ row-gap: var(--gap); margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v4 .d{ gap: var(--gap); }#s-controls.touch .v3 .d{ margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v5 .area{ margin-top: var(--gap); }#s-controls.touch .v5 .grip{ width: 22px; height: 44px; }#s-controls.touch:not(&.vert) .v3 .bar{ height: 48px; }#s-controls.touch.vert .v3 .bar{ width: 5.5rem; }#s-controls.touch .v3 .f input{ font-size: .9375rem; }#s-controls.touch:not(&.vert) .v4 .rail{ height: 48px; }#s-controls.touch .v4 .pill{ padding: .25rem .5rem; box-shadow: 0 0 0 2px var(--panel); }#s-controls.touch .v4 .pill input{ font-size: 16px; padding: 0; }#s-controls.touch:not(&.always-arrows) .v4 .pill .arrows{ display: none; }#s-controls.touch .toolbar button{ min-height: 44px; padding: .25rem 1rem; }#s-controls.tri,#s-controls .tri{ display: flex; flex-direction: column; gap: var(--pad-2, 8px); }#s-controls .tri-heads,#s-controls .tri-row{
   display: grid;
@@ -2700,10 +2705,67 @@ html,body{margin:0;padding:0;background:var(--bg)}
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
   border: 1px solid var(--line); border-radius: var(--r-lozenge, 10px);
   background: var(--sunk); overflow: hidden;
-}#s-controls .tri-box .f{ border-radius: 0; background: none; border: 0; }#s-controls .tri-box .f + .f{ border-left: 1px solid var(--line); }#s-controls .tri-box .f input{ text-align: right; }#s-controls .tri-u{
-  margin-left: .45em; color: var(--muted);
-  font-size: .85em; font-variant-numeric: tabular-nums;
-}
+}#s-controls .tri-box .f{
+  border-radius: 0; background: none; border: 0;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; gap: 0; padding-right: var(--pad-2, 8px);
+}#s-controls .tri-box .f + .f{ border-left: 1px solid var(--line); }#s-controls .tri-box .f input{
+  text-align: right; width: 100%; min-width: 0;
+  
+  box-sizing: border-box;
+  field-sizing: fixed;
+  padding-right: var(--pad-2, 8px);
+}#s-controls .tri-box .arrows{ opacity: 1; }#s-controls .tri-box .arrows button{ height: 11px; width: 14px; }#s-controls .tri-lab{ display: flex; align-items: baseline; gap: var(--pad-2, 8px); }#s-controls .tri-u{
+  
+  margin-left: auto; color: var(--muted);
+  font-size: 12px; font-variant-numeric: tabular-nums;
+}#s-controls.vert .tri{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 5.25rem)) auto;
+  
+  grid-template-rows: minmax(5.6em, auto) repeat(3, minmax(0, auto));
+  gap: var(--pad-2, 8px);
+  align-items: stretch;
+  justify-content: start;
+}#s-controls.vert .tri-row,#s-controls.vert .tri-heads{ display: contents; }#s-controls.vert .tri-lab{
+  
+  grid-row: 1; font-size: 13px;
+  writing-mode: vertical-rl;
+  justify-self: center; align-self: start;
+  flex-direction: row; align-items: baseline;
+  gap: var(--pad-1, 6px); text-align: start;
+}#s-controls.vert .tri-u{ margin-left: 0; }#s-controls.vert .tri-box{
+  grid-row: 2 / span 3;
+  grid-template-columns: none;
+  grid-template-rows: subgrid;
+}#s-controls.vert .tri-box .f{
+  grid-template-columns: none; grid-template-rows: auto auto;
+  justify-items: center; align-content: center;
+  padding: var(--pad-1, 6px) 0;
+}#s-controls.vert .tri-box .arrows button{ height: 10px; }#s-controls.vert .tri-box .f + .f{ border-left: 0; border-top: 1px solid var(--line); }#s-controls.vert .tri-box .f input{
+  text-align: center; padding-left: 0; padding-right: 0;
+  font-variant-numeric: tabular-nums;
+}#s-controls.vert .tri-box .arrows{ flex-direction: column; }#s-controls.vert .tri-h{ justify-self: start; align-self: center; grid-column: 4; }#s-controls.vert .tri-heads .tri-h:nth-child(1){ grid-column: 4; grid-row: 2; }#s-controls.vert .tri-heads .tri-h:nth-child(2){ grid-column: 4; grid-row: 3; }#s-controls.vert .tri-heads .tri-h:nth-child(3){ grid-column: 4; grid-row: 4; }#s-controls.vert .tri-row:nth-child(2) .tri-lab,#s-controls.vert .tri-row:nth-child(2) .tri-box{ grid-column: 1; }#s-controls.vert .tri-row:nth-child(3) .tri-lab,#s-controls.vert .tri-row:nth-child(3) .tri-box{ grid-column: 2; }#s-controls.vert .tri-row:nth-child(4) .tri-lab,#s-controls.vert .tri-row:nth-child(4) .tri-box{ grid-column: 3; }#s-controls.vert .d-unit{ min-width: 0; text-align: center; }#s-controls.vert .v1 .d-val,#s-controls.vert .v2 .d-val{
+  display: grid; grid-template-rows: auto 1.15em;
+  justify-items: center; align-items: start; gap: 0;
+}#s-controls.vert .v1 .f,#s-controls.vert .v2 .f{ justify-self: center; }#s-controls.vert .v3 .lab,#s-controls.vert .tri-lab{
+  
+  white-space: normal; max-height: 4em; text-align: center;
+}#s-controls.vert .tri-lab{ align-items: center; }#s-controls.vert .tri-u{
+  
+  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  writing-mode: horizontal-tb; text-orientation: mixed;
+  margin: 0; text-align: center; line-height: 1;
+}#s-controls.vert .tri-lab{
+  position: relative;
+  
+  max-height: 5.5em; padding-bottom: 1.5em;
+}#s-controls .f{ position: relative; overflow: visible; }#s-controls .f .arrows{
+  position: absolute; left: 100%; top: 0; bottom: 0;
+  padding-left: 2px; z-index: 1;
+}#s-controls .d-unit{ transition: opacity .12s; }#s-controls .d:hover .d-unit,#s-controls .d:focus-within .d-unit{ opacity: 0; }#s-controls.always-arrows .f .arrows,#s-controls.touch .f .arrows{
+  position: static; padding-left: 0;
+}#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit{ opacity: 1; }#s-controls .tri-box .f .arrows{ position: static; padding-left: 0; }#s-controls .d:hover .f .arrows,#s-controls .d:focus-within .f .arrows{ opacity: 1; }#s-controls .d:hover .d-unit,#s-controls .d:focus-within .d-unit,#s-controls .v4 .pill:hover .d-unit,#s-controls .v4 .pill:focus-within .d-unit,#s-controls .v4 .d:hover .pill .d-unit,#s-controls .v4 .d:focus-within .pill .d-unit{ opacity: 0; }#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.always-arrows .v4 .d:hover .pill .d-unit,#s-controls.always-arrows .v4 .d:focus-within .pill .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit,#s-controls.touch .v4 .d:hover .pill .d-unit,#s-controls.touch .v4 .d:focus-within .pill .d-unit{ opacity: .78; }#s-controls.always-arrows .d .f .arrows,#s-controls.touch .d .f .arrows{ opacity: 1; }
 
 /* ===== space ===== */
 #s-space *{box-sizing:border-box}#s-space{margin:0;background:#0f0f0f;color:#e8e8e8;font-family:"CalSansVF",system-ui,sans-serif;
@@ -3767,7 +3829,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 </style>
 <div class="wm">
   <div class="wm-doc">
-  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1">The 5 pills</a><a class="wm-lvl1" href="#corners-c2">The radius ladder</a><a class="wm-lvl1" href="#corners-c3">Asymmetric corners</a><a class="wm-lvl1" href="#corners-c4">The 13 circles</a><a class="wm-lvl1" href="#corners-c5">The 5 pills</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u>03</u>Control interface</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1">The steps</a><a class="wm-lvl1" href="#space-c2">The cap rule</a><a class="wm-lvl1" href="#space-c3">Use a step</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1">The vocabulary</a><a class="wm-lvl1" href="#color-c2">Literal colors outside App.css</a><a class="wm-lvl1" href="#color-c3">Fallbacks inside var()</a><a class="wm-lvl1" href="#color-c4">App.css (frozen)</a><a class="wm-lvl1" href="#color-c5">The GEOM zones</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div>
+  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1">The 5 pills</a><a class="wm-lvl1" href="#corners-c2">The radius ladder</a><a class="wm-lvl1" href="#corners-c3">Asymmetric corners</a><a class="wm-lvl1" href="#corners-c4">The 13 circles</a><a class="wm-lvl1" href="#corners-c5">The 5 pills</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u>03</u>Interface</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1">The steps</a><a class="wm-lvl1" href="#space-c2">The cap rule</a><a class="wm-lvl1" href="#space-c3">Use a step</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1">The vocabulary</a><a class="wm-lvl1" href="#color-c2">Literal colors outside App.css</a><a class="wm-lvl1" href="#color-c3">Fallbacks inside var()</a><a class="wm-lvl1" href="#color-c4">App.css (frozen)</a><a class="wm-lvl1" href="#color-c5">The GEOM zones</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div>
     <span class="wm-rail-foot">wm&#8209;primitives</span></div></nav></div>
   <div class="wm-main">
   <header class="wm-head">
@@ -4604,7 +4666,7 @@ of 168 corners, <b>87</b> take the law, 13 are circles carved out, and 32 sit in
 </div></div>
 </section>
 <section class="wm-sec">
-  <div class="wm-sec-head"><div class="wm-n">03 &middot; Control interface</div></div>
+  <div class="wm-sec-head"><div class="wm-n">03 &middot; Interface</div></div>
   <div class="wm-body" id="s-controls">
 <meta charset="utf-8">
 
@@ -5745,7 +5807,9 @@ function field(d, get, set, opts = {}) {
     if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
     e.preventDefault();
     const mult = e.shiftKey ? 10 : 1;
+    wrap._echo = true;
     set(clamp(get() + (e.key === 'ArrowUp' ? d.step : -d.step) * mult, d));
+    wrap._echo = false;
   });
   wrap.appendChild(inp);
 
@@ -5762,7 +5826,11 @@ function field(d, get, set, opts = {}) {
       + ' stroke-linecap="round" stroke-linejoin="round"/></svg>';
     b.setAttribute('aria-label', (dir > 0 ? 'increase ' : 'decrease ') + d.label);
     let timer, ramp;
-    const step = () => set(clamp(get() + dir * d.step, d));
+    const step = () => {
+      wrap._echo = true;                      // the chevrons focus nothing, but the
+      set(clamp(get() + dir * d.step, d));    // field may already have focus
+      wrap._echo = false;
+    };
     const stop = () => { clearTimeout(timer); clearInterval(ramp); };
     b.addEventListener('pointerdown', e => {
       e.preventDefault(); step();
@@ -5772,9 +5840,16 @@ function field(d, get, set, opts = {}) {
     arrows.appendChild(b);
   }
   wrap.appendChild(arrows);
+  // A sync must not clobber what you are TYPING -- hence the focus guard -- but an
+  // arrow key or a chevron is a value change, not typing, and the guard swallowed it:
+  // the state moved, the track slid, and the focused field alone sat still until blur
+  // wrote it. `echo` is that one exception, used by every path that sets the value
+  // without the keyboard putting characters in the field.
+  const echo = () => { inp.value = fmt(get(), d); };
   wrap._sync = () => {
-    if (document.activeElement !== inp) inp.value = fmt(get(), d);
+    if (document.activeElement !== inp || wrap._echo) echo();
   };
+  wrap._echo = false;
   return wrap;
 }
 

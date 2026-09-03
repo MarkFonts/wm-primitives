@@ -67,7 +67,11 @@
   font-variation-settings: 'opsz' 10;
 }/* ── variant cards ────────────────────────────────────────── */
 .grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
-  gap: 1px; background: var(--line); border: 1px solid var(--line); }.card{ background: var(--panel); padding: 1.5rem 1.5rem 1.75rem; display: flex; flex-direction: column; }.card-head{ display: flex; justify-content: space-between; align-items: baseline;
+  gap: 1px; background: var(--line); border: 1px solid var(--line); }/* min-width:0 or a 1fr track cannot shrink below its content: a field sized to its
+   digits raises the card's min-content width the moment a value reaches three
+   figures, auto-fit re-solves every track, and the headline in EVERY card slides.
+   The value should move the field, not the page. */
+.card{ min-width: 0; background: var(--panel); padding: 1.5rem 1.5rem 1.75rem; display: flex; flex-direction: column; }.card-head{ display: flex; justify-content: space-between; align-items: baseline;
   gap: 1rem; margin-bottom: 1.25rem; }.card-name{ font-family: var(--serif); font-size: 1.25rem; margin: 0; }.card-idx{ font-family: var(--mono); font-size: .625rem; letter-spacing: .14em; color: var(--accent); }.card-note{ font-size: .8125rem; line-height: 1.45; color: var(--muted); margin: 1.25rem 0 0; }.card-note b{ color: var(--ink-2); font-weight: 500; }.rig{ flex: 1; }&.vert .rig{ display: flex; gap: 1.25rem; align-items: flex-start; justify-content: safe center;
   min-height: 15rem; padding-top: .5rem;
   /* Three vertical columns can be wider than the card. Scroll the rig rather than let it
@@ -261,7 +265,14 @@
 }.v5.on .knob{ width: 20px; height: 20px; border-radius: 10px; background: var(--ink); cursor: ew-resize; }.v5.dragging .knob, .v5.dragging .rail{ transition: none; }.v5 .knob:focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; }/* the two dashes that say "drag me", gone once it is a thumb */
 .v5 .knob::before, .v5 .knob::after{
   content: ''; position: absolute; top: 50%; width: 5px; height: 1.5px;
-  background: var(--muted); border-radius: 1px; opacity: 1; transition: opacity .18s; }.v5 .knob::before{ left: -9px; }.v5.on .knob::before, .v5.on .knob::after{ opacity: 0; }/* Same manners as the module reset in CustomTypeTester: invisible until it applies,
+  background: var(--muted); border-radius: 1px; opacity: 1; transition: opacity .18s; }/* The horizontal ::after carried NO offset at all, so it drew on top of the grip
+   while its twin stood off to the left -- the grip had one visible dash, on one
+   side. The ticks stay perpendicular -- that is the original drawing -- but they
+   close to 2px of the pill (5px dash at -7px) instead of 4px, which is the
+   spacing the React component draws. */
+.v5 .knob::after carried no offset at all, so it sat ON the grip while its twin stood off
+   to the left -- the grip only ever had one visible dash, on one side. */
+.v5 .knob::before{ left: -7px; }.v5 .knob::after{ right: -7px; }.v5.on .knob::before, .v5.on .knob::after{ opacity: 0; }/* Same manners as the module reset in CustomTypeTester: invisible until it applies,
    half-strength when it does, full on hover, and it spins as it acts. */
 /* The reset lives in the gutter — the same slot the grip parks in. Parked, the grip is
    there and the reset is not; unlocked, the grip has travelled onto the rail and the
@@ -271,10 +282,27 @@
   position: absolute; right: 0; top: 50%; transform: translateY(-50%);
   width: var(--park, 34px); height: 26px; color: var(--ink-2);
   display: inline-flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; transition: opacity .2s, transform .5s; }.v5.on .relock{ opacity: .5; pointer-events: auto; }.v5.on .relock:hover{ opacity: 1; }.v5 .relock.spin{ transform: rotate(-360deg); }.v5 .relock:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }&.vert .v5 .area{ height: 11rem; width: 5.5rem; }&.vert .v5 .stops{ flex-direction: column; inset: 0 0 var(--park, 34px) 0; }&.vert .v5 .relock{ right: auto; bottom: 0; top: auto; left: 50%;
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .5s; }.v5.on .relock{ opacity: .5; pointer-events: auto; }.v5.on .relock:hover{ opacity: 1; }.v5 .relock.spin{ transform: rotate(-360deg); }.v5 .relock:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }/* Turned vertical the area stops filling the row and becomes a 5.5rem column, so it
+   has to be centred explicitly -- it was sitting 58px left of its own label. */
+&.vert .v5 .area{ height: 11rem; width: 5.5rem; margin-inline: auto; }
+/* Turned vertical the head has a column to work with, not a row: name, then tag on
+   its own line, then the readout. Side by side they were competing for 5.5rem. */
+&.vert .v5 .d-head{ flex-direction: column; align-items: center; gap: 2px; margin-bottom: var(--pad-2, 8px); }
+&.vert .v5 .d-lab{ display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; }
+/* GEOM carries a left margin from sitting AFTER the name on one line; on its own
+   line that margin is 2px of off-centre. */
+&.vert .v5 .d-tag{ margin: 0; }
+/* All three lines on one axis, and the value's line is RESERVED: locked, v5 shows no
+   number (the readout only exists once there is a continuous value), and a row that
+   collapses when empty makes the whole head jump the moment you unlock it. The gap
+   stays whether or not anything is in it -- same rule as the unit line above. */
+&.vert .v5 .d-val{
+  display: flex; justify-content: center; align-items: center;
+  min-height: 1.4em; width: 100%;
+}&.vert .v5 .stops{ flex-direction: column; inset: 0 0 var(--park, 34px) 0; }&.vert .v5 .relock{ right: auto; bottom: 0; top: auto; left: 50%;
   transform: translateX(-50%); width: 26px; height: var(--park, 34px); }&.vert .v5 .knob{ top: 0; left: 50%; width: 16px; height: 6px; border-radius: 3px;
   transform: translate(calc(-50% + var(--x, 0px)), var(--y, 0px)); }&.vert .v5.on .knob{ width: 20px; height: 20px; border-radius: 10px; }&.vert .v5 .rail{ top: 0; left: 50%; width: 2px; height: 0;
-  transform: translate(-50%, calc(100% + 12px)); }&.vert .v5.on .rail{ height: calc(100% - var(--park, 34px)); width: 2px; transform: translate(-50%, 0); }&.vert .v5 .knob::before{ left: 50%; top: -9px; width: 1.5px; height: 5px; transform: translateX(-50%); }&.vert .v5 .knob::after{ left: 50%; right: auto; top: auto; bottom: -9px; width: 1.5px; height: 5px; transform: translateX(-50%); }/* ── touch ────────────────────────────────────────────────────
+  transform: translate(-50%, calc(100% + 12px)); }&.vert .v5.on .rail{ height: calc(100% - var(--park, 34px)); width: 2px; transform: translate(-50%, 0); }&.vert .v5 .knob::before{ left: 50%; top: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }&.vert .v5 .knob::after{ left: 50%; right: auto; top: auto; bottom: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }/* ── touch ────────────────────────────────────────────────────
    A 2px rail and a 10px arrowhead are mouse sizes. On a coarse pointer every target
    grows to 44px — Apple's HIG minimum — WITHOUT the visuals growing: the rail stays
    2px and the arrow stays small, but the thing your finger lands on is padded out
@@ -347,16 +375,246 @@
   border: 1px solid var(--line); border-radius: var(--r-lozenge, 10px);
   background: var(--sunk); overflow: hidden;
 }
-.tri-box .f { border-radius: 0; background: none; border: 0; }
+/* Inside the lozenge each cell is a two-track grid, not an inline-flex that hugs its
+   content: with hugging, the chevrons sat wherever the digits ended, so 75 / 85 / 110
+   put three arrow stacks at three different x positions and the eye read a ragged
+   right edge. One flexible track for the number, one fixed track for the arrows, and
+   the stacks line up down the row and down the column. */
+.tri-box .f {
+  border-radius: 0; background: none; border: 0;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; gap: 0; padding-right: var(--pad-2, 8px);
+}
 .tri-box .f + .f { border-left: 1px solid var(--line); }
-.tri-box .f input { text-align: right; }
+/* The number ends where the arrows begin, with one gap, always the same gap. */
+.tri-box .f input {
+  text-align: right; width: 100%; min-width: 0;
+  /* Both of these, or the number sits UNDER the chevrons: the field is content-box by
+     default, so a 46px track plus 6px of padding rendered 60px and overflowed 14px
+     into the arrows column. `auto` is not a field-sizing keyword either -- it is
+     fixed | content -- so the bench's `content` kept hugging underneath. */
+  box-sizing: border-box;
+  field-sizing: fixed;
+  padding-right: var(--pad-2, 8px);
+}
+/* Always out inside the triplet: three fields that reveal arrows on hover would flash
+   two thirds of the row on every pass across it. */
+.tri-box .arrows { opacity: 1; }
+/* Tighter than the standalone lozenge: the pair is 22px tall against a 16px cap, so
+   the two chevrons read as one object with a rule through it rather than as two
+   buttons that happen to be stacked. */
+.tri-box .arrows button { height: 11px; width: 14px; }
 
 /* The unit rides with the label and takes the quiet ink, so it reads as a property
    of the parameter rather than as a fourth value in the row. */
+/* The unit is tabbed to the right edge of the LABEL column, not left ragged after the
+   word, so the three of them stack into a line that runs down beside the lozenge. */
+.tri-lab { display: flex; align-items: baseline; gap: var(--pad-2, 8px); }
 .tri-u {
-  margin-left: .45em; color: var(--muted);
-  font-size: .85em; font-variant-numeric: tabular-nums;
+  /* 12px flat, not .85em: relative sizing made it 11.9 against a 14px label here and
+     would have made it 11.05 against the 13px vertical one, so the unit changed size
+     with its neighbour while every other unit on the page stayed at 12. */
+  margin-left: auto; color: var(--muted);
+  font-size: 12px; font-variant-numeric: tabular-nums;
 }
+
+/* ── 06 vertical ───────────────────────────────────────────────────────────────
+   Transposed, not restacked: each PARAMETER becomes a column and min/desired/max
+   become its rows, so the thing that stays put is the parameter and the thing you
+   scan is the range. The row labels move to the right of the lozenge, where they
+   caption the three cells instead of heading three columns.
+
+   .tri-row and .tri-heads go display:contents so the labels, the lozenges and the
+   captions all become items of ONE grid — otherwise each row is its own formatting
+   context and the caption beside the third cell has nothing to align to. The lozenge
+   then takes grid-template-rows: subgrid so its three cells sit on the parent's rows
+   and the captions line up with them exactly, at any cell height. */
+&.vert .tri {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 5.25rem)) auto;
+  /* row 1 holds a 4em turned label PLUS the upright unit parked under it */
+  grid-template-rows: minmax(5.6em, auto) repeat(3, minmax(0, auto));
+  gap: var(--pad-2, 8px);
+  align-items: stretch;
+  justify-content: start;
+}
+&.vert .tri-row, &.vert .tri-heads { display: contents; }
+
+/* the label turns with the column and reads bottom-up, which keeps the unit under
+   the word rather than beside it */
+/* Reads top-to-bottom, which is what "the track" already does with its own vertical
+   label -- plain vertical-rl. The rotate(180deg) I had on here turned it bottom-up,
+   so the one vertical label on the page ran the opposite way to the other five. */
+&.vert .tri-lab {
+  /* 13px, which is what "the row is the track" sets on its own turned label. Two
+     vertical labels on one page at two sizes is a difference that means nothing. */
+  grid-row: 1; font-size: 13px;
+  writing-mode: vertical-rl;
+  justify-self: center; align-self: start;
+  flex-direction: row; align-items: baseline;
+  gap: var(--pad-1, 6px); text-align: start;
+}
+/* margin-left:auto is right in a row and wrong once the label turns: along the block
+   axis it pushed the unit to the far end of the column and left it floating in the
+   middle of nothing. The unit follows the word, the way px follows measure. */
+&.vert .tri-u { margin-left: 0; }
+
+&.vert .tri-box {
+  grid-row: 2 / span 3;
+  grid-template-columns: none;
+  grid-template-rows: subgrid;
+}
+&.vert .tri-box .f {
+  grid-template-columns: none; grid-template-rows: auto auto;
+  justify-items: center; align-content: center;
+  padding: var(--pad-1, 6px) 0;
+}
+/* The number is the thing being read; the chevrons sit under it at their hairline
+   size rather than claiming a second full row. */
+&.vert .tri-box .arrows button { height: 10px; }
+&.vert .tri-box .f + .f { border-left: 0; border-top: 1px solid var(--line); }
+/* Centred, on the same axis as the chevrons under it. Turned vertical there is no
+   column of figures to hold -- each parameter is its own stack and nothing is being
+   read across them -- so aligning the ones place buys nothing and costs the centring:
+   right-aligned, the number hugged one wall while its chevrons stayed in the middle. */
+&.vert .tri-box .f input {
+  text-align: center; padding-left: 0; padding-right: 0;
+  font-variant-numeric: tabular-nums;
+}
+&.vert .tri-box .arrows { flex-direction: column; }
+
+/* min / desired / max become captions beside the cells they name */
+&.vert .tri-h { justify-self: start; align-self: center; grid-column: 4; }
+/* The column has to be repeated at this specificity: the horizontal head rule is
+   `.tri-heads .tri-h:first-child { grid-column: 2 }` (1,3,0), which outranks the
+   `&.vert .tri-h` above (1,2,0) and was parking "min" in the second parameter's
+   column while its two siblings sat correctly beside the lozenge. */
+&.vert .tri-heads .tri-h:nth-child(1) { grid-column: 4; grid-row: 2; }
+&.vert .tri-heads .tri-h:nth-child(2) { grid-column: 4; grid-row: 3; }
+&.vert .tri-heads .tri-h:nth-child(3) { grid-column: 4; grid-row: 4; }
+
+/* one column per parameter, in the order they are declared */
+&.vert .tri-row:nth-child(2) .tri-lab, &.vert .tri-row:nth-child(2) .tri-box { grid-column: 1; }
+&.vert .tri-row:nth-child(3) .tri-lab, &.vert .tri-row:nth-child(3) .tri-box { grid-column: 2; }
+&.vert .tri-row:nth-child(4) .tri-lab, &.vert .tri-row:nth-child(4) .tri-box { grid-column: 3; }
+
+/* ── vertical: centring, and the unit slot that fought it ─────────────────────
+   .d-unit reserves min-width:1.25rem so a COLUMN of horizontal rows keeps its
+   figures on one axis -- "620 px" and "1.60" line up because the unitless one
+   still pays for the slot. Turned vertical, each dial is its own column and
+   nothing aligns across them, so the slot stops buying anything and only pushes
+   the number off centre. Worse, it pushes by a different amount depending on
+   whether the dial HAS a unit, so leading sat at one offset and measure at
+   another inside otherwise identical boxes.
+
+   So: no slot, and the unit goes UNDER the number the way "the row is the track"
+   already does it, centred on the same axis. The number is then centred on the
+   column whether or not anything follows it. */
+&.vert .d-unit { min-width: 0; text-align: center; }
+/* Two rows, and the second one exists whether or not a unit does. Dropping the
+   horizontal min-width slot fixed the sideways push but replaced it with a vertical
+   one: leading has no unit, so it had no unit LINE, so its track began 55px above
+   the other two inside the same box. The slot was never wrong -- it was reserving
+   on the wrong axis. Turned vertical it reserves a line. */
+&.vert .v1 .d-val, &.vert .v2 .d-val {
+  display: grid; grid-template-rows: auto 1.15em;
+  justify-items: center; align-items: start; gap: 0;
+}
+&.vert .v1 .f, &.vert .v2 .f { justify-self: center; }
+
+/* Two-word labels break into two lines rather than running the height of the
+   card. In vertical-rl the INLINE axis is vertical, so max-height is what a
+   max-width would be lying down -- 6.5em is "letter spacing" over two lines. */
+&.vert .v3 .lab, &.vert .tri-lab {
+  /* 4em is derived, not picked: it is longer than the longest single WORD in play
+     ("spacing" / "scaling", ~3.5em at 13px) and shorter than any two-word string,
+     so "letter spacing" breaks after the first word while "measure" and "leading"
+     stay on one line. 6.5em cleared every string and wrapped nothing. */
+  white-space: normal; max-height: 4em; text-align: center;
+}
+/* the unit rides under the label's last line, on the label's own axis */
+&.vert .tri-lab { align-items: center; }
+/* The label turns; the unit does not. Inside a vertical-rl box the % was being
+   rotated with the words and reading as a diagonal mark under the label. It is a
+   symbol, not text that runs -- upright and centred on the column. */
+&.vert .tri-u {
+  /* Out of the label's flow entirely. The label is capped at 4em -- that cap is what
+     makes a two-word name break onto two lines -- and the unit was sitting AFTER the
+     text inside that cap, so it spilled past the box and the lozenge drew over it.
+     Parked at the bottom of the label's own cell instead, centred on the column, with
+     the row given the height to hold both. */
+  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  writing-mode: horizontal-tb; text-orientation: mixed;
+  margin: 0; text-align: center; line-height: 1;
+}
+&.vert .tri-lab {
+  position: relative;
+  /* The label box was exactly as tall as its two turned lines, so "bottom: 0" on the
+     unit landed at the end of the last line rather than below the block -- the %
+     read as part of the word. Padding opens a strip under the text for it to sit in,
+     and max-height grows by the same amount so the CONTENT box stays 4em and the
+     two-word wrap is unchanged. */
+  max-height: 5.5em; padding-bottom: 1.5em;
+}
+
+/* ── arrows: hung when transient, built in when persistent ────────────────────
+   The reserved slot exists for one reason -- nothing may shift when the arrows
+   arrive -- and that constraint only binds while they are hidden. Measured before
+   this: 28% of the field in 01 and 02, 31% in 05, empty unless you happen to hover.
+
+   So the two modes get two layouts, deliberately:
+
+   ROLLOVER  the arrows hang. Out of flow at the field's right edge, so the lozenge
+             hugs its digits at rest and nothing moves when they appear -- they were
+             never in the layout. They land in the unit's slot and the unit fades as
+             they arrive: one slot, two occupants, never empty. A dial with no unit
+             (leading) is the one case with a real gap, and it is ~16px on one dial.
+
+   PERSISTENT  the arrows are part of the object, so they are measured as part of it:
+             back in flow, inline, and the unit keeps its own slot. Nothing is being
+             anticipated here because nothing is hidden. */
+.f { position: relative; overflow: visible; }
+.f .arrows {
+  position: absolute; left: 100%; top: 0; bottom: 0;
+  padding-left: 2px; z-index: 1;
+}
+/* One trigger for both halves of the swap. The arrows reveal on `.d:hover` -- the
+   whole dial -- while the unit was hiding on `.d-val:hover`, just the value, so
+   hovering the dial anywhere else showed the arrows with the unit still under them.
+   They occupy the same slot, so they have to be driven by the same state and the
+   same duration, or for 120ms there are two things in one place. */
+.d-unit { transition: opacity .12s; }
+.d:hover .d-unit, .d:focus-within .d-unit { opacity: 0; }
+
+/* persistent: back into the layout, and the unit stops yielding */
+&.always-arrows .f .arrows, &.touch .f .arrows {
+  position: static; padding-left: 0;
+}
+&.always-arrows .d:hover .d-unit, &.always-arrows .d:focus-within .d-unit,
+&.touch .d:hover .d-unit, &.touch .d:focus-within .d-unit { opacity: 1; }
+
+/* the triplet's arrows are persistent by design -- a matrix that flashed two thirds
+   of itself on every pass across the row would be unreadable -- so it takes the
+   built-in layout in both modes and never hangs. */
+.tri-box .f .arrows { position: static; padding-left: 0; }
+
+/* ── the swap, stated once and at a specificity that cannot lose ──────────────
+   The unit and the arrows share one slot, so one state drives both: the dial is
+   hovered or has focus inside it. Written here, last, because .v4's unit is pinned
+   by `.v4 .pill .d-unit {opacity:.78}` -- same specificity as a plain
+   `.d:focus-within .d-unit`, so the tie went to whichever came later, and the pill
+   showed its unit underneath the arrows. */
+.d:hover .f .arrows, .d:focus-within .f .arrows { opacity: 1; }
+.d:hover .d-unit, .d:focus-within .d-unit,
+.v4 .pill:hover .d-unit, .v4 .pill:focus-within .d-unit,
+.v4 .d:hover .pill .d-unit, .v4 .d:focus-within .pill .d-unit { opacity: 0; }
+
+/* Persistent arrows are not a swap: both are permanent, both are measured. */
+&.always-arrows .d:hover .d-unit, &.always-arrows .d:focus-within .d-unit,
+&.always-arrows .v4 .d:hover .pill .d-unit, &.always-arrows .v4 .d:focus-within .pill .d-unit,
+&.touch .d:hover .d-unit, &.touch .d:focus-within .d-unit,
+&.touch .v4 .d:hover .pill .d-unit, &.touch .v4 .d:focus-within .pill .d-unit { opacity: .78; }
+&.always-arrows .d .f .arrows, &.touch .d .f .arrows { opacity: 1; }
 </style>
 
 <h1>Five ways to draw one dial</h1>
@@ -427,7 +685,9 @@ function field(d, get, set, opts = {}) {
     if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
     e.preventDefault();
     const mult = e.shiftKey ? 10 : 1;
+    wrap._echo = true;
     set(clamp(get() + (e.key === 'ArrowUp' ? d.step : -d.step) * mult, d));
+    wrap._echo = false;
   });
   wrap.appendChild(inp);
 
@@ -444,7 +704,11 @@ function field(d, get, set, opts = {}) {
       + ' stroke-linecap="round" stroke-linejoin="round"/></svg>';
     b.setAttribute('aria-label', (dir > 0 ? 'increase ' : 'decrease ') + d.label);
     let timer, ramp;
-    const step = () => set(clamp(get() + dir * d.step, d));
+    const step = () => {
+      wrap._echo = true;                      // the chevrons focus nothing, but the
+      set(clamp(get() + dir * d.step, d));    // field may already have focus
+      wrap._echo = false;
+    };
     const stop = () => { clearTimeout(timer); clearInterval(ramp); };
     b.addEventListener('pointerdown', e => {
       e.preventDefault(); step();
@@ -454,9 +718,16 @@ function field(d, get, set, opts = {}) {
     arrows.appendChild(b);
   }
   wrap.appendChild(arrows);
+  // A sync must not clobber what you are TYPING -- hence the focus guard -- but an
+  // arrow key or a chevron is a value change, not typing, and the guard swallowed it:
+  // the state moved, the track slid, and the focused field alone sat still until blur
+  // wrote it. `echo` is that one exception, used by every path that sets the value
+  // without the keyboard putting characters in the field.
+  const echo = () => { inp.value = fmt(get(), d); };
   wrap._sync = () => {
-    if (document.activeElement !== inp) inp.value = fmt(get(), d);
+    if (document.activeElement !== inp || wrap._echo) echo();
   };
+  wrap._echo = false;
   return wrap;
 }
 
