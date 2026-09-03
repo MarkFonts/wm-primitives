@@ -608,6 +608,12 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-rail-foot{position:absolute;left:40px;bottom:0;font-size:9px;letter-spacing:.14em;
   text-transform:uppercase;color:var(--ink-3)}
 
+/* content-visibility:auto was tried here and reverted. It implies contain: layout
+   style paint, so every section became a containment boundary -- the bend lost the
+   frame it is positioned against and landed in the wrong place, and paragraphs sat
+   over the illustrations as skipped sections resolved at their placeholder height
+   rather than their real one. The page IS ~59,000px and does want this, but it wants
+   it on a wrapper that nothing is positioned against, not on the sections themselves. */
 .wm-sec{padding:0}
 .wm-sec-head{padding:64px 0 16px;border-top:1px solid var(--line);margin-top:56px}
 .wm-sec:first-of-type .wm-sec-head{border-top:none;margin-top:8px}
@@ -687,8 +693,12 @@ html,body{margin:0;padding:0;background:var(--bg)}
   /* the rail is a top bar here, and a bar that stops at the end of the sections would
      stop being a bar -- display:contents takes the wrapper back out of the layout */
   .wm-railcol{display:contents}
+  /* No backdrop-filter. A sticky blur re-filters everything behind it on EVERY scroll
+     frame, and behind this one is a 59,000px document -- the most expensive thing on
+     the page, buying a frosting nobody asked for. An opaque ground is what the blur
+     was faking anyway. */
   .wm-rail{position:sticky;top:0;height:auto;width:auto;
-    background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);
+    background:var(--bg);
     border-bottom:1px solid var(--line)}
   .wm-axis{display:flex;gap:0;padding:0 20px;max-height:none;overflow-x:auto;overflow-y:hidden}
   .wm-axis::before,.wm-axis::after,.wm-rail-foot{display:none}
@@ -998,6 +1008,12 @@ HERO = HERO_TMPL.replace("__SIX__", SIX_CMDS)
 GLOSS = "" if not LINKED else r"""
 <style id="gloss-css">
 .wm-head{ --gx:0px; --gy:0px; --gw:0px; --gh:0px; --gloss:url(field-247.avif); }
+/* A phone gets the 1000-square bake: 61KB against 238KB, and the crop it takes is a
+   fraction of a field it was never going to resolve at that width anyway. The saving
+   that matters is not the download -- it is that every repaint resamples a smaller
+   texture, and on a phone the gloss is driven by SCROLL, so that repaint happens on
+   the one interaction the whole page depends on being smooth. */
+@media (max-width: 700px){ .wm-head{ --gloss:url(field-247-sm.avif); } }
 /* The glyph is the mask, the field is the paint. The field never goes black (BASE is
    0.30 of reference white), so replacing the ink cannot make a letter disappear. */
 .wm-head .wm-stack span{
@@ -1025,6 +1041,12 @@ GLOSS = "" if not LINKED else r"""
   background-repeat:no-repeat;
   dynamic-range-limit:no-limit;
 }
+/* background-position is not compositable: moving it repaints, and each repaint
+   resamples a 12-megapixel field through background-clip:text. The repaint is
+   unavoidable without changing the technique -- but it can have its own layer, so it
+   does not invalidate its neighbours. NOT contain:paint: the bend overflows these
+   boxes on purpose and containment clipped it. */
+.wm-head .wm-stack span, .wm-head .wm-stack i{ will-change:background-position; }
 .wm-head .wm-bendsvg{ dynamic-range-limit:no-limit; }
 .wm-head .wm-bendsvg rect[data-gloss]{ pointer-events:none; }
 </style>

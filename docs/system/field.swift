@@ -2,6 +2,11 @@
 //
 //   swift docs/system/field.swift && mv field-247.avif docs/
 //
+// Two bakes ship: field-247.avif at 2400 square, and field-247-sm.avif at 1000 for
+// screens under 700px. Same constants, W/H is the only difference. The small one is
+// 61KB against 238KB, and on a phone the field is panned by SCROLL -- so the texture
+// being resampled every repaint is on the critical path of the page's main gesture.
+//
 // Rebuild only to change the look. The AVIF is committed, so a normal build.py run does
 // not need Swift, and CI never sees this file.
 //
