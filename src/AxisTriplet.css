@@ -13,7 +13,9 @@
 .triplet-row--off { opacity: .45; pointer-events: none; }
 
 .triplet-label {
-  display: flex; align-items: baseline; gap: .1em;
+  /* the unit is tabbed to the right edge of this column (margin-left:auto below), so
+     a stack of rows shows one line of units rather than a ragged one per label */
+  display: flex; align-items: baseline; gap: var(--pad-2, 8px);
   min-width: 0; line-height: 1.25;
   font-size: var(--type-ui-size, 12px);
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
@@ -23,7 +25,7 @@
    quiet ink — not inside each of the three fields, which would say they measure three
    different things. */
 .triplet-unit {
-  margin-left: .45em; font-style: normal;
+  margin-left: auto; font-style: normal;
   font-size: .85em; font-variant-numeric: tabular-nums;
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
 }
@@ -54,11 +56,19 @@
 .triplet-fields--head span { text-align: center; padding-bottom: 2px; }
 .triplet-row--head { align-items: end; }
 
-.triplet-f { position: relative; display: flex; align-items: center; min-width: 0; }
+/* Two tracks, not a hugging flex: with hugging the chevrons sit wherever the digits
+   end, so 75 / 85 / 110 puts three arrow stacks at three x positions and the right
+   edge reads ragged. One flexible track for the number, one fixed for the arrows. */
+.triplet-f {
+  position: relative; min-width: 0;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+}
 .triplet-f + .triplet-f { border-left: 1px solid var(--border, #333); }
 
 .triplet-num {
   width: 100%; min-width: 0;
+  /* border-box, or the padding pushes the field out under the chevrons. */
+  box-sizing: border-box; field-sizing: fixed;
   /* content-sizing is wrong here: this is a COLUMN of rows, and a field that resizes
      to its digits moves the hairline beside it, so the three columns stop lining up
      down the panel. A lozenge on its own may hug; a matrix may not. */

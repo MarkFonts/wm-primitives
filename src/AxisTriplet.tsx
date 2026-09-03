@@ -91,7 +91,7 @@ export function AxisTriplet({
     hold.current = {}
   }
   const startHold = (k: Key, dir: 1 | -1) => {
-    const bump = () => commit(k, +(shown(k) + dir * step).toFixed(2))
+    const bump = () => { setDraft(null); commit(k, +(shown(k) + dir * step).toFixed(2)) }
     bump()
     hold.current.t = window.setTimeout(() => {
       hold.current.i = window.setInterval(bump, 60)
@@ -132,6 +132,12 @@ export function AxisTriplet({
                   const dir = e.key === 'ArrowUp' ? 1 : e.key === 'ArrowDown' ? -1 : 0
                   if (!dir) return
                   e.preventDefault()
+                  /* Same rule as the draft itself: the draft exists so a re-render
+                     cannot clobber what you are TYPING. An arrow key is a value
+                     change, not typing, so it drops the draft -- otherwise the store
+                     moves, the track moves, and the field alone shows the stale text
+                     you last typed until it loses focus. */
+                  setDraft(null)
                   commit(k, +(shown(k) + dir * step * (e.shiftKey ? 10 : 1)).toFixed(2))
                 }}
                 onChange={e => {
