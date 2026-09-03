@@ -7190,6 +7190,57 @@ if (lb) {
     if(raf) return;
     raf=requestAnimationFrame(function(){ raf=null; apply(cu,cv); });
   });
+
+  /* ── no pointer: the page itself moves the light ────────────────────────────
+     A phone has no mousemove, so the field sat at its default forever -- the one
+     input everybody already makes is the scroll. The header is at the top of the
+     document, so scroll progress maps onto the field's vertical travel with nothing
+     to explain: the light comes down the words as you come down the page. Gated on a
+     coarse pointer so it cannot fight the mouse on a desktop that also has touch. */
+  /* No load-time device gate. `matchMedia('(pointer: coarse)')` at script-eval time is
+     a snapshot of something that changes -- a mouse gets plugged in, emulation turns
+     on, a laptop has both -- and when the snapshot was wrong the scroll listener was
+     never attached at all and the field sat at its initial 0.5 forever.
+
+     Nor is there a latch. A `pointerUsed` flag set by the first mousemove looked
+     tidy and was worse: one synthetic mousemove -- and something dispatches one on
+     load -- disabled scroll for the rest of the session. Both inputs simply write,
+     and the one that moved most recently is the one you see. You are not scrolling
+     and moving the mouse in the same instant. */
+  var onScroll=function(){
+    var max=Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    cv = Math.min(1, Math.max(0, scrollY/max));
+    if(raf) return;
+    raf=requestAnimationFrame(function(){ raf=null; apply(cu,cv); });
+  };
+  addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* Tilt is opt-in and has to be: iOS sends no orientation events at all until
+     requestPermission() resolves, and that call is only honoured inside a real user
+     gesture. So the headline is the switch -- tap the words you want lit. Android
+     needs no prompt, so there the same tap just starts listening. Once tilt drives,
+     scroll stands down. */
+  var tilting=false;
+  var startTilt=function(){
+    if(tilting) return; tilting=true;
+    removeEventListener('scroll', onScroll);
+    addEventListener('deviceorientation', function(e){
+      if(e.gamma==null) return;
+      cu = Math.min(1, Math.max(0, (e.gamma + 45) / 90));   /* -45..45 across */
+      cv = Math.min(1, Math.max(0, (e.beta  - 15) / 60));   /*  15..75 tipped */
+      if(raf) return;
+      raf=requestAnimationFrame(function(){ raf=null; apply(cu,cv); });
+    });
+  };
+  head.addEventListener('click', function(){
+    var D = window.DeviceOrientationEvent;
+    if(!D) return;
+    if(typeof D.requestPermission === 'function'){
+      D.requestPermission().then(function(r){ if(r === 'granted') startTilt(); })
+                           .catch(function(){});   /* declined: scroll keeps it */
+    } else { startTilt(); }
+  });
 })();
 </script>
 
