@@ -20,8 +20,11 @@ DOCS = HERE.parent
 # variable face, so it could not have shared this page's font anyway.)
 SECTIONS = [
     ("type",    "Type",          SD/"type-tokens.built.html", "7 roles, 3 inks, 6 signals"),
-    ("corners", "The corner law",SD/"corner-law.html",        "superellipse(1.2), and 2^k"),
-    ("circles", "Circles",       SD/"circles.html",           "what opts out, and why"),
+    # Circles is not a law of its own -- it is the corner law's exclusion list, so it
+    # rides inside 02 rather than taking a number. 03 is the control interface.
+    ("corners",  "The corner law",     [SD/"corner-law.html", SD/"circles.html"],
+                                        "superellipse(1.2), 2^k, and what opts out"),
+    ("controls", "Control interface",  SD/"controls.html",    "one dial, five ways"),
     ("space",   "Space",         SD/"space.html",             "the pad scale, cap + alignment"),
     ("color",  "Color",        SD/"color-audit.html",      "every declaration, audited"),
     ("usage",   "Who uses what", SD/"color-usage.html",      "the usage map"),
@@ -84,6 +87,16 @@ def scope_css(css, root, depth=0):
 
 # ---------------------------------------------------------------- per section
 def build_section(sid, label, path, kicker):
+    """`path` may be a list. Extra sources are folded into the SAME section under a
+    wrapper class, which is how Circles now lives inside The corner law: the two pages
+    share 14 class names (.bar, .grid, .tag, .zone-chip ...), so concatenating them at
+    one scope would have let corner-law's rules reach into circles' markup. Scoping the
+    extra page to `#s-<sid> .part-<n>` keeps each page's CSS inside its own subtree and
+    costs one class of specificity, which only ever beats the host page's own rules."""
+    if isinstance(path, (list, tuple)):
+        extras = list(path[1:]); path = path[0]
+    else:
+        extras = []
     raw = path.read_text(errors="replace")
     raw = re.sub(r'@font-face\s*\{.*?\}', '', raw, flags=re.S)
     title = (re.search(r'<title>(.*?)</title>', raw, re.S) or [None, label])[1]
@@ -112,6 +125,22 @@ def build_section(sid, label, path, kicker):
 
     root = f"#s-{sid}"
     css = scope_css(css, root)
+
+    for n, ex in enumerate(extras, 1):
+        ex_raw = re.sub(r'@font-face\s*\{.*?\}', '', ex.read_text(errors="replace"), flags=re.S)
+        ex_css = "\n".join(re.findall(r'<style[^>]*>(.*?)</style>', ex_raw, re.S))
+        ex_css = re.sub(r'/\*.*?\*/', '', ex_css, flags=re.S)
+        ex_css = ex_css.replace('<![CDATA[', '').replace(']]>', '')
+        ex_js  = "\n".join(re.findall(r'<script[^>]*>(.*?)</script>', ex_raw, re.S))
+        ex_html = re.sub(r'<style[^>]*>.*?</style>', '', ex_raw, flags=re.S)
+        ex_html = re.sub(r'<script[^>]*>.*?</script>', '', ex_html, flags=re.S)
+        ex_html = re.sub(r'<title>.*?</title>', '', ex_html, flags=re.S)
+        ex_html = re.sub(r'<!doctype[^>]*>', '', ex_html, flags=re.I)
+        ex_html = re.sub(r'</?(html|head|body)[^>]*>', '', ex_html, flags=re.I)
+        part = f"part-{n}"
+        css += scope_css(ex_css, f"{root} .{part}")
+        html += f'<div class="{part}">{ex_html}</div>'
+        js  += "\n" + ex_js
 
 
     # ids are document-global: prefix them, and every reference to them.
@@ -168,6 +197,86 @@ def build_section(sid, label, path, kicker):
                 css=css, html=html, js=js, chapters=chapters)
 
 
+GEOM_TOKENS = """<style>
+:root{
+  /* the GEOM chart's palette. The axis hues are the DISPLAY-P3 colour in OKLCH --
+     a wide-gamut screen gets the chroma each was picked at, sRGB gamut-maps back.
+     They hold across both themes; only the twelve neutrals below move. */
+  --g-a11y:#ff6b35; --g-a11y:oklch(71.85% 0.2279 37.82);
+  --g-base:#00a0ff; --g-base:oklch(68.25% 0.2027 239.51);
+  --g-geo:#00c700; --g-geo:oklch(70.40% 0.3056 145.66);
+  --g-bg:#f8f8f8; --g-bg:oklch(97.91% 0 0);
+  --g-fg:#242424; --g-fg:oklch(26.03% 0 0);
+  --g-fg2:#454545; --g-fg2:oklch(39.04% 0 0);
+  --g-dim:#a1a1a1; --g-dim:oklch(70.90% 0 0);
+  --g-rule:#e0e0e0; --g-rule:oklch(90.67% 0 0);
+  --g-grid:#dcdcdc; --g-grid:oklch(89.45% 0 0);
+  --g-tick:#d4d4d4; --g-tick:oklch(86.99% 0 0);
+  --g-vgrid:#e8e8e8; --g-vgrid:oklch(93.10% 0 0);
+  --g-hatch:#a1a1a1; --g-hatch:oklch(70.90% 0 0);
+  --g-surface:#ffffff; --g-surface:oklch(100.00% 0 0);
+  --g-onfg:#ffffff; --g-onfg:oklch(100.00% 0 0);
+  --g-ui:#242424; --g-ui:oklch(26.03% 0 0);
+  /* Washes MIX toward the ground, so they follow the theme; ink levels are alpha ON
+     the colour. Both used to be opacity="" attributes on 113 elements, which
+     composite against whatever is behind and keep the value out of the palette. */
+  --g-a11y-wash:color-mix(in oklab,var(--g-a11y),var(--g-bg) 93%);
+  --g-base-wash:color-mix(in oklab,var(--g-base),var(--g-bg) 93%);
+  --g-geo-wash: color-mix(in oklab,var(--g-geo), var(--g-bg) 93%);
+  --g-ui-wash:  color-mix(in oklab,var(--g-ui),  var(--g-bg) 93%);
+  --g-fg-wash:  color-mix(in oklab,var(--g-fg),  var(--g-bg) 93%);
+  --g-a11y-45:oklch(from var(--g-a11y) l c h/.45); --g-a11y-85:oklch(from var(--g-a11y) l c h/.85);
+  --g-base-45:oklch(from var(--g-base) l c h/.45); --g-base-85:oklch(from var(--g-base) l c h/.85);
+  --g-geo-45: oklch(from var(--g-geo)  l c h/.45); --g-geo-85: oklch(from var(--g-geo)  l c h/.85);
+  --g-ui-45:  oklch(from var(--g-ui)   l c h/.45); --g-ui-85:  oklch(from var(--g-ui)   l c h/.85);
+  --g-grid-30:oklch(from var(--g-grid) l c h/.30);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --g-bg:#151515; --g-bg:oklch(19.57% 0 0);
+  --g-fg:#e6edf3; --g-fg:oklch(94.25% 0.0111 243.66);
+  --g-fg2:#b8c0c8; --g-fg2:oklch(80.40% 0.0144 248.01);
+  --g-dim:#6e7681; --g-dim:oklch(56.29% 0.0196 256.33);
+  --g-rule:#2c3138; --g-rule:oklch(31.12% 0.0144 256.78);
+  --g-grid:#262b31; --g-grid:oklch(28.66% 0.0131 253.03);
+  --g-tick:#30363d; --g-tick:oklch(33.00% 0.0149 252.31);
+  --g-vgrid:#22272d; --g-vgrid:oklch(27.03% 0.0133 253.05);
+  --g-hatch:#7d8590; --g-hatch:oklch(61.37% 0.0191 256.32);
+  --g-surface:#0d1117; --g-surface:oklch(17.63% 0.0140 258.36);
+  --g-onfg:#151515; --g-onfg:oklch(19.57% 0 0);
+  --g-ui:#e6edf3; --g-ui:oklch(94.25% 0.0111 243.66);
+}}
+:root[data-theme="dark"]{
+  --g-bg:#151515; --g-bg:oklch(19.57% 0 0);
+  --g-fg:#e6edf3; --g-fg:oklch(94.25% 0.0111 243.66);
+  --g-fg2:#b8c0c8; --g-fg2:oklch(80.40% 0.0144 248.01);
+  --g-dim:#6e7681; --g-dim:oklch(56.29% 0.0196 256.33);
+  --g-rule:#2c3138; --g-rule:oklch(31.12% 0.0144 256.78);
+  --g-grid:#262b31; --g-grid:oklch(28.66% 0.0131 253.03);
+  --g-tick:#30363d; --g-tick:oklch(33.00% 0.0149 252.31);
+  --g-vgrid:#22272d; --g-vgrid:oklch(27.03% 0.0133 253.05);
+  --g-hatch:#7d8590; --g-hatch:oklch(61.37% 0.0191 256.32);
+  --g-surface:#0d1117; --g-surface:oklch(17.63% 0.0140 258.36);
+  --g-onfg:#151515; --g-onfg:oklch(19.57% 0 0);
+  --g-ui:#e6edf3; --g-ui:oklch(94.25% 0.0111 243.66);
+}
+:root[data-theme="light"]{
+  --g-bg:#f8f8f8; --g-bg:oklch(97.91% 0 0);
+  --g-fg:#242424; --g-fg:oklch(26.03% 0 0);
+  --g-fg2:#454545; --g-fg2:oklch(39.04% 0 0);
+  --g-dim:#a1a1a1; --g-dim:oklch(70.90% 0 0);
+  --g-rule:#e0e0e0; --g-rule:oklch(90.67% 0 0);
+  --g-grid:#dcdcdc; --g-grid:oklch(89.45% 0 0);
+  --g-tick:#d4d4d4; --g-tick:oklch(86.99% 0 0);
+  --g-vgrid:#e8e8e8; --g-vgrid:oklch(93.10% 0 0);
+  --g-hatch:#a1a1a1; --g-hatch:oklch(70.90% 0 0);
+  --g-surface:#ffffff; --g-surface:oklch(100.00% 0 0);
+  --g-onfg:#ffffff; --g-onfg:oklch(100.00% 0 0);
+  --g-ui:#242424; --g-ui:oklch(26.03% 0 0);
+}
+.mono{font-family:"PaperMono",ui-monospace,SFMono-Regular,Menlo,monospace}
+</style>
+"""
+
 def build_type_page():
     """type-tokens.html is a template: __FACE__/__SPEC__ are font URLs and __GEOMSVG__ is
     the GEOM axis map. Fonts are referenced, not embedded -- the assembler strips every
@@ -176,9 +285,32 @@ def build_type_page():
     svg = (SD/"geom-themed.svg").read_text()
     svg = svg[svg.index("<svg"):]
     svg = re.sub(r"@font-face\s*\{.*?\}", "", svg, flags=re.S)
+    svg = svg.replace("font-family:'CalSansVF', sans-serif;", 'font-family:"Face", sans-serif;')
     svg = svg.replace("font-family: 'CalSansVF', sans-serif;", 'font-family: "Face", sans-serif;')
+    # the svgshow build is 1920x1650 and carries its own light/dark token block. The
+    # tokens have to become the page's --g-* set or they collide with :root's --bg/--fg,
+    # and the dark half has to arrive as a media query rather than a second file.
+    svg = svg.replace('viewBox="0 0 1920 1650" width="1920" height="1650"',
+                      'viewBox="0 0 1920 1650" preserveAspectRatio="xMidYMid meet"')
     svg = svg.replace('viewBox="0 0 1920 1080" width="1920" height="1080"',
                       'viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet"')
+    svg = re.sub(r'<style>svg\{.*?\}</style>\s*', '', svg, flags=re.S)
+    for t in ("bg","fg","fg2","dim","rule","grid","tick","vgrid","hatch","surface",
+              "onfg","a11y","ui","base","geo"):
+        svg = svg.replace(f"var(--{t})", f"var(--g-{t})")
+    svg = svg.replace('id="card"','id="geom-card"').replace('url(#card)','url(#geom-card)')
+    svg = svg.replace('id="hatch"','id="geom-hatch"').replace('url(#hatch)','url(#geom-hatch)')
+    for t in ("a11y","base","geo","ui","fg"):
+        svg = re.sub(r'(fill|stroke)="var\(--g-%s\)"([^/>]*?)\s*opacity="0\.07"'%t,
+                     r'\1="var(--g-%s-wash)"\2'%t, svg)
+    for t in ("a11y","base","geo","ui"):
+        for a in ("45","85"):
+            svg = re.sub(r'(fill|stroke)="var\(--g-%s\)"([^/>]*?)\s*opacity="0\.%s"'%(t,a),
+                         r'\1="var(--g-%s-%s)"\2'%(t,a), svg)
+    svg = re.sub(r'(fill|stroke)="var\(--g-grid\)"([^/>]*?)\s*opacity="0\.3"',
+                 r'\1="var(--g-grid-30)"\2', svg)
+    svg = re.sub(r'\s*opacity="1\.0"', '', svg)     # a no-op on 30 elements
+    svg = GEOM_TOKENS + svg
     out = (tpl.replace("__FACE__", "../fonts/CalSansVF.ttf")
               .replace("__SPEC__", "../fonts/CalSansSpecimen.ttf")
               .replace("__GEOMSVG__", svg))
@@ -234,6 +366,7 @@ if LINKED:
 @font-face{font-family:"Face";src:url(fonts/CalSansVF.ttf) format("truetype");font-display:swap}
 @font-face{font-family:"CalSansVF";src:url(fonts/CalSansVF.ttf) format("truetype");font-display:swap}
 @font-face{font-family:"Specimen";src:url(fonts/CalSansSpecimen.ttf) format("truetype");font-display:swap}
+@font-face{font-family:"PaperMono";src:url(fonts/PaperMono.woff2) format("woff2");font-display:swap}
 """
 else:
     FACE, SPEC = face("CalSansVF.ttf"), face("CalSansSpecimen.ttf")
