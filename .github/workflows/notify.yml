@@ -1,5 +1,6 @@
-# On any source change, tell the consuming apps (font-proofer, ReCal) to rebuild +
-# redeploy, so a primitive tweak reaches wordmark without manually bumping each app.
+# On any source change, tell the consuming apps -- font-proofer, ReCal, wordmarktools --
+# to rebuild + redeploy, so a primitive tweak reaches wordmark without manually bumping
+# each app.
 # No-ops until the WORDMARK_DEPLOY_TOKEN4 secret is added (a PAT that can dispatch to the apps).
 name: Notify consumers
 on:
@@ -14,7 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        repo: [font-proofer, ReCal]
+        # wordmarktools, not opsz-proofer: the tool is a directory inside that repo, and
+        # a dispatch addresses a repo. Its deploy-opsz-proofer.yml already listens for
+        # primitive-updated and has been waiting on this line.
+        repo: [font-proofer, ReCal, wordmarktools]
     steps:
       - name: Trigger ${{ matrix.repo }} deploy
         env:
