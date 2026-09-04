@@ -41,13 +41,41 @@ const walk = dir => readdirSync(dir).flatMap(name => {
 const stripFallbacks = s => s.replace(/var\([^()]*(?:\([^()]*\)[^()]*)*\)/g, '')
 const problems = []
 
+/* REFERENCES. Every check above reads a declaration and judges its value; none of them
+   follows a var() back to where it is defined, so a token that no longer exists reads
+   exactly like one that does. That is not hypothetical -- when --pad-N became
+   --spacing-0N, files kept saying var(--pad-4), rendered with zero padding, and this
+   linter said clean. Of the rules here it is the only one that catches a RENAME, which
+   is most of what happens to this system.
+   Gathered from every file including the exempt ones: `exempt` is about literals in
+   somebody else's gallery, and a rename breaks a gallery the same as anything else. */
+const declared = new Set()
+const used = new Map()   // --name -> [{ at, fallback }]
+/* Comments name tokens in prose all over this package -- editRail.css explains
+   --edit-rail-target in its header -- so they are cut before either scan, or the
+   documentation of a token counts as a use of it. Newlines survive, to keep line
+   numbers honest. */
+const decomment = t => t.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' '))
+
 for (const root of cfg.roots ?? ['src']) {
   const abs = join(ROOT, root)
   if (!existsSync(abs)) continue
   for (const file of walk(abs)) {
     const rel = relative(ROOT, file)
-    if (EXEMPT.some(e => rel === e || rel.startsWith(e + sep))) continue
     const text = readFileSync(file, 'utf8')
+
+    decomment(text).split('\n').forEach((line, i) => {
+      /* A declaration is `--x:`; a read is `var(--x` -- and `var(--x, 8px)` carries a
+         comma, which is the whole difference between a miss that degrades and a miss
+         that paints black text on a black ground. */
+      for (const m of line.matchAll(/(--[\w-]+)\s*:/g)) declared.add(m[1])
+      for (const m of line.matchAll(/var\(\s*(--[\w-]+)\s*(,?)/g)) {
+        if (!used.has(m[1])) used.set(m[1], [])
+        used.get(m[1]).push({ at: `${rel}:${i + 1}`, fallback: m[2] === ',' })
+      }
+    })
+
+    if (EXEMPT.some(e => rel === e || rel.startsWith(e + sep))) continue
     const lines = text.split('\n')
 
     lines.forEach((line, i) => {
@@ -145,11 +173,38 @@ if (cfg.typeParity) {
   }
 }
 
+/* A token read here is legitimate in exactly three ways: this package declares it, the
+   consuming app declares it (hostTokens -- the contract, written down so a consumer can
+   be checked against it instead of guessed at), or our own JS sets it on an element
+   (runtimeTokens). Anything else is a name that has drifted. */
+const HOST = new Set(cfg.hostTokens ?? [])
+const RUNTIME = new Set(cfg.runtimeTokens ?? [])
+const contracted = new Set([...HOST, ...RUNTIME])
+let bare = 0
+for (const [name, sites] of used) {
+  if (declared.has(name)) continue
+  if (contracted.has(name)) { bare += sites.filter(s => !s.fallback).length; continue }
+  const where = sites.slice(0, 3).map(s => s.at).join(', ')
+  problems.push(`${sites[0].at}  var(${name}) is declared nowhere  (${sites.length} use${sites.length > 1 ? 's' : ''}: ${where})`)
+}
+
+/* Notes, not failures. A bare host token is a real risk -- an undefined custom property
+   is invalid at computed-value time, so a consumer that misses --text inherits a colour
+   rather than falling back to one -- but there are too many to fail on today, and a
+   linter nobody can get to green is one everybody learns to ignore. The number is
+   printed so it can be worked down and then promoted. */
+const notes = []
+if (bare) notes.push(`${bare} host-token read${bare > 1 ? 's' : ''} with no fallback (README: var(--surface-2, var(--bg-elevated)))`)
+const stale = [...contracted].filter(t => !used.has(t))
+if (stale.length) notes.push(`contract lists ${stale.length} token${stale.length > 1 ? 's' : ''} nothing reads: ${stale.join(' ')}`)
+
 if (problems.length) {
   console.error(`\nlint-tokens: ${problems.length} problem${problems.length > 1 ? 's' : ''}\n`)
   for (const p of problems) console.error('  ' + p)
+  for (const n of notes) console.error(`  note -- ${n}`)
   console.error('\nUse a step (4 6 8 12 16 24 32 48 64) or a --type-* role.')
   console.error('If a value genuinely belongs off the system, add its file to .tokenlint.json exempt and say why.\n')
   process.exit(1)
 }
+for (const n of notes) console.log(`lint-tokens: note -- ${n}`)
 console.log('lint-tokens: clean')

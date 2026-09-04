@@ -5,5 +5,22 @@
   "exempt": [
     "src/UiKitBoard.css"
   ],
-  "typeParity": "src"
+  "typeParity": "src",
+
+  "_hostTokens": "The contract. Every token here is the CONSUMING app's to define -- font-proofer and ReCal both do, which is why bare reads work today. Written down so a new consumer can be checked against a list instead of discovering the set by rendering black on black. Adding a name here is a promise that every consumer defines it.",
+  "hostTokens": [
+    "--accent", "--bg", "--bg-elevated", "--bg-hover", "--border", "--border-subtle",
+    "--edit-rail", "--edit-rail-target", "--err", "--gp-ui-font", "--gp-ui-fvs",
+    "--ink", "--line", "--marker-default", "--muted", "--ok",
+    "--radius", "--radius-sm", "--scrollbar-thumb", "--scrollbar-thumb-hover",
+    "--specimen-fade-height", "--surface", "--surface-2", "--surface-hi",
+    "--text", "--text-dim", "--text-muted", "--track-empty",
+    "--ui-font", "--ui-fvs", "--vm-lh", "--vs", "--w-bold", "--w-default", "--warn"
+  ],
+
+  "_runtimeTokens": "Set by this package's own JS onto its own elements, so they are never in a stylesheet. Not a contract with anybody -- a rename here is ours to make on both sides at once.",
+  "runtimeTokens": [
+    "--gp-asc", "--gp-desc", "--gp-ffs", "--gp-font", "--gp-fvs", "--gp-opsz",
+    "--locked-pct"
+  ]
 }
