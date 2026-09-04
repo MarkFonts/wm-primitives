@@ -10,6 +10,10 @@ on:
       - 'src/**'
       - 'index.ts'
       - 'fonts/**'      # the canonical Cal Sans lives here; a rebuild must follow it
+  # Re-tell the consumers without inventing a commit. Needed the day a token changes
+  # or a consumer is added: the only other way to prove a dispatch lands was to push
+  # something to src/ and watch, which is a fake commit in the history forever.
+  workflow_dispatch:
 jobs:
   dispatch:
     runs-on: ubuntu-latest
