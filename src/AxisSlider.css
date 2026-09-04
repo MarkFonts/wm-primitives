@@ -57,7 +57,7 @@
 .slider-auto-btn {
   font: inherit;
   font-size: var(--type-micro-size, 0.5625rem);
-  letter-spacing: .06em;
+  letter-spacing: 0;              /* lowercase, like the tag above: no caps token */
   text-transform: lowercase;
   padding: 0 var(--spacing-02, 6px);
   margin-left: var(--nudge, 2px);
@@ -88,7 +88,7 @@
   flex-direction: column;
   margin-left: var(--nudge, 2px);
   opacity: 0;
-  transition: opacity .12s;
+  transition: opacity var(--dur-fast, .12s);
   /* HUNG, not reserved. A hidden stepper still owned its column, so every row paid
      ~16px -- a quarter of the field -- for something most people never see appear.
      Out of flow it costs nothing at rest, the field hugs its digits, and nothing
@@ -149,7 +149,7 @@
   background: currentColor;
   opacity: 0;
   transform: scale(.6);
-  transition: opacity .12s, transform .12s;
+  transition: opacity var(--dur-fast, .12s), transform var(--dur-fast, .12s);
   pointer-events: none;
 }
 .slider-step-btn:active::before { opacity: .16; transform: scale(1); }
