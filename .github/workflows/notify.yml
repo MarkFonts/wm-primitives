@@ -14,6 +14,11 @@ jobs:
   dispatch:
     runs-on: ubuntu-latest
     strategy:
+      # One consumer's failure must not cancel the others. The default fail-fast
+      # cancelled font-proofer and ReCal the first time the wordmarktools leg 404'd,
+      # so adding a consumer stopped the two that already worked from being told
+      # anything -- the opposite of what this workflow is for.
+      fail-fast: false
       matrix:
         # wordmarktools, not opsz-proofer: the tool is a directory inside that repo, and
         # a dispatch addresses a repo. Its deploy-opsz-proofer.yml already listens for
