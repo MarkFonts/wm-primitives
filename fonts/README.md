@@ -1,8 +1,23 @@
 # Fonts
 
-`CalSansVF.ttf` — Cal Sans 2.000 (a0e1b9d), the full face: `opsz, GEOM, wght, YTAS,
-SHRP, ital`, 1545 glyphs, 15 FeatureVariations. Built in `calbuild`, kept here so the
-repos that already track `shared/` get it from one place instead of their own copies.
+Cal Sans 2.000 (a0e1b9d), built in `calbuild`, kept here so the repos that already
+track `shared/` get it from one place instead of their own copies. Every house face an
+app renders from lives here -- a consumer holding its own copy is the bug, because the
+copy is what stops the app noticing this file went stale.
+
+| file | | |
+|---|---|---|
+| `CalSansVF.ttf` / `.woff2` | full face, six axes | 1545 glyphs, 15 FV |
+| `CalSansFlexVF.ttf` / `.woff2` | Flex | 1545 glyphs, 15 FV |
+| `CalSans-Bold.woff2` | static instance | 1545 glyphs, 0 FV |
+
+`CalSans-Bold.woff2` reads 0 FeatureVariations and that is correct: it is a static, so
+the axes are baked and there is nothing left to condition on. Only the variable faces
+are worth running the check below against.
+
+Worth resolving: this file has long said Flex carries a smaller glyph set, but the
+2.000 build has the same 1545 glyphs as the full face and is larger on disk
+(1.31MB against 992KB). One of the two is out of date -- the sentence or the build.
 
 ## These are different families, not different versions
 
