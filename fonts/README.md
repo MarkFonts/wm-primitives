@@ -15,16 +15,18 @@ copy is what stops the app noticing this file went stale.
 the axes are baked and there is nothing left to condition on. Only the variable faces
 are worth running the check below against.
 
-Worth resolving: this file has long said Flex carries a smaller glyph set, but the
-2.000 build has the same 1545 glyphs as the full face and is larger on disk
-(1.31MB against 992KB). One of the two is out of date -- the sentence or the build.
 
 ## These are different families, not different versions
 
 Don't flatten them into each other:
 
 - **Cal Sans** — six axes, 15 FeatureVariations. This file.
-- **Cal Sans Flex** — same six axes, same 15 FeatureVariations, smaller glyph set.
+- **Cal Sans Flex** — the **avar2** build, not a reduced anything. Same 1545 glyphs and
+  same 15 FeatureVariations as the full face; what differs is `avar` v2 carrying a
+  `VarIdxMap` (the full face has plain v1), and `YTAS` hidden, cross-mapped off `opsz`.
+  Built by `calbuild/scripts/lib/build_flex.py`. It is LARGER than the full face --
+  1.31MB against 992KB -- because shifting the defaults expands `gvar` by ~292KB and
+  `HVAR` by ~16KB. Bigger is expected here and is not a sign of a bad build.
 - **Cal Sans UI** — `wght, GEOM` only, 9 FeatureVariations. A deliberately reduced face
   for interface work and for Framer, which handles a face carrying 20 stylistic sets and
   42 character variants badly.
