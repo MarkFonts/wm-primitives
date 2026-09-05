@@ -7,7 +7,13 @@
  * cleanup into a rule that enforces itself.
  *
  * Config: .tokenlint.json at the repo root.
- *   { "roots": ["src"], "exempt": ["src/App.css"], "typeParity": "shared/src" }
+ *   { "roots": ["src"], "exempt": ["src/App.css"], "typeParity": "shared/src",
+ *     "tokenSources": ["shared/src"], "hostTokens": ["--text"], "runtimeTokens": [] }
+ *
+ * roots        linted for literals AND scanned for token declarations/references
+ * tokenSources scanned for declarations only -- where the primitives declare theirs
+ * hostTokens   the consuming app declares these; reading one bare is legal
+ * runtimeTokens this repo's own JS sets these on its own elements
  *
  * exempt is deliberate, not a backlog. Anything listed there should be explainable in one
  * sentence -- a frozen file, or a gallery of somebody else's components.
@@ -56,6 +62,18 @@ const used = new Map()   // --name -> [{ at, fallback }]
    documentation of a token counts as a use of it. Newlines survive, to keep line
    numbers honest. */
 const decomment = t => t.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' '))
+
+/* Declarations only, no literal rules: an app's CSS reads --spacing-04 and --type-ui-size
+   from the primitives it builds against, and those are declared in shared/src, outside
+   its own roots. Without this the reference check calls 23 perfectly good tokens
+   undefined the moment an app upgrades -- which is exactly what it did. */
+for (const dir of cfg.tokenSources ?? []) {
+  const abs = join(ROOT, dir.split('/').join(sep))
+  if (!existsSync(abs)) continue
+  for (const file of walk(abs))
+    for (const m of decomment(readFileSync(file, 'utf8')).matchAll(/(--[\w-]+)\s*:/g))
+      declared.add(m[1])
+}
 
 for (const root of cfg.roots ?? ['src']) {
   const abs = join(ROOT, root)
@@ -177,11 +195,17 @@ if (cfg.typeParity) {
    consuming app declares it (hostTokens -- the contract, written down so a consumer can
    be checked against it instead of guessed at), or our own JS sets it on an element
    (runtimeTokens). Anything else is a name that has drifted. */
+/* OPT-IN, and that is not timidity. This file is consumed by three other repos that run
+   it against their own CSS with their own config, and a shared rule that cannot be
+   satisfied until that config is updated turns every consumer red on upgrade -- it broke
+   font-proofer's and ReCal's deploys the day it landed. A repo asks for the check by
+   describing where its tokens come from; until then the other rules run as before. */
+const wantsRefs = !!(cfg.hostTokens || cfg.runtimeTokens || cfg.tokenSources)
 const HOST = new Set(cfg.hostTokens ?? [])
 const RUNTIME = new Set(cfg.runtimeTokens ?? [])
 const contracted = new Set([...HOST, ...RUNTIME])
 let bare = 0
-for (const [name, sites] of used) {
+for (const [name, sites] of wantsRefs ? used : []) {
   if (declared.has(name)) continue
   if (contracted.has(name)) { bare += sites.filter(s => !s.fallback).length; continue }
   const where = sites.slice(0, 3).map(s => s.at).join(', ')
@@ -194,6 +218,7 @@ for (const [name, sites] of used) {
    linter nobody can get to green is one everybody learns to ignore. The number is
    printed so it can be worked down and then promoted. */
 const notes = []
+if (!wantsRefs) notes.push('reference check off -- add tokenSources/hostTokens to .tokenlint.json to enable it')
 if (bare) notes.push(`${bare} host-token read${bare > 1 ? 's' : ''} with no fallback (README: var(--surface-2, var(--bg-elevated)))`)
 const stale = [...contracted].filter(t => !used.has(t))
 if (stale.length) notes.push(`contract lists ${stale.length} token${stale.length > 1 ? 's' : ''} nothing reads: ${stale.join(' ')}`)
