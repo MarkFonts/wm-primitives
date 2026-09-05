@@ -1,6 +1,6 @@
 # Fonts
 
-`CalSansVF.ttf` — Cal Sans 1.999 (fcf0594), the full face: `opsz, GEOM, wght, YTAS,
+`CalSansVF.ttf` — Cal Sans 2.000 (a0e1b9d), the full face: `opsz, GEOM, wght, YTAS,
 SHRP, ital`, 1545 glyphs, 15 FeatureVariations. Built in `calbuild`, kept here so the
 repos that already track `shared/` get it from one place instead of their own copies.
 
