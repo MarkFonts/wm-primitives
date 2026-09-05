@@ -72,7 +72,7 @@ export interface AxisSliderProps {
 }
 
 export function AxisSlider({
-  label, tag, value, min, max, step, onChange, display,
+  label, tag, value, min, max, step = 1, onChange, display,
   lockedAbove, allowAuto, autoButton = true, autoValue, marker, onRangePointerDown, disabled,
   variant = 'default', reference, suffix, showRange,
 }: AxisSliderProps) {
