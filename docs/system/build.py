@@ -92,6 +92,16 @@ def scope_css(css, root, depth=0):
             parts.append(f"{sels}{{{body}}}")
     return "".join(parts)
 
+# Which primitives each section demonstrates. Their CSS is read from src/ at build time,
+# so the published page and the shipped component cannot disagree -- the page was 73%
+# hand-written copies of these rules, and every one was a place to drift.
+PRIMITIVE_CSS = {
+    # type.css FIRST: the controls read --type-ui-size / --type-micro-size and their
+    # fallbacks are the page's inherited size, so without it every label renders at body
+    # size and the rows grow to match -- which looks like touch sizing and is not.
+    "controls": ("type.css", "AxisSlider.css", "AxisTriplet.css"),
+}
+
 # ---------------------------------------------------------------- per section
 def build_section(sid, label, path, kicker):
     """`path` may be a list. Extra sources fold into the SAME section under a wrapper
@@ -104,9 +114,18 @@ def build_section(sid, label, path, kicker):
         extras = []
     raw = path.read_text(errors="replace")
     raw = re.sub(r'@font-face\s*\{.*?\}', '', raw, flags=re.S)
+    # A page may link the primitives' own stylesheets so it renders standalone. Those are
+    # inlined below from src/ instead, so the link would be a second copy and a 404 in the
+    # assembled page, where ../../src/ is outside docs/.
+    raw = re.sub(r'<link[^>]+href="\.\./\.\./src/[^"]+"[^>]*>', '', raw)
     title = (re.search(r'<title>(.*?)</title>', raw, re.S) or [None, label])[1]
 
     css = "\n".join(re.findall(r'<style[^>]*>(.*?)</style>', raw, re.S))
+    # The primitives a page DEMONSTRATES bring their own CSS, read from src/ so the page
+    # cannot drift from what ships. The section styles the page; it does not style a
+    # control. scope_css recurses into @layer, so wm.controls survives being scoped here.
+    css = "".join((HERE.parent.parent / "src" / f).read_text()
+                  for f in PRIMITIVE_CSS.get(sid, ())) + css
     # Strip CSS comments BEFORE scoping. split_rules() treats everything up to '{' as the
     # selector, so a comment sitting above a rule became part of its prelude -- and then
     # ':root' no longer compared equal to ':root', fell through to the descendant branch,

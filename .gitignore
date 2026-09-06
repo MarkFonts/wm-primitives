@@ -4,3 +4,8 @@ node_modules
 
 # Scratch reference material (sketches, screenshots, borrowed jsx) -- read here, never built from.
 reference/
+
+# Local only: lets the docs pages load the primitives' own CSS when opened directly
+# (../../src/… from docs/system/pages/). build.py strips those links from the published
+# page, which inlines the same files from src/ instead.
+docs/src

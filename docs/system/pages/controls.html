@@ -8,6 +8,12 @@
      from docs/fonts/, and build.py strips @font-face but not <link>, so this reaches the
      assembled page too. A failed request leaves the ligature TEXT ("fit_width") behind,
      which is why .v3 .material-symbols-outlined clips its overflow. -->
+<!-- The primitives' own stylesheets, for standalone viewing. build.py strips these and
+     inlines the same files from src/ (PRIMITIVE_CSS), so the published page and the
+     shipped component cannot disagree. -->
+<link rel="stylesheet" href="../../src/type.css">
+<link rel="stylesheet" href="../../src/AxisSlider.css">
+<link rel="stylesheet" href="../../src/AxisTriplet.css">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=fit_width,line_weight,format_line_spacing,mystery" />
 <!-- Source for section 03. Written standalone: `body` is the section, `&` means the
@@ -87,19 +93,35 @@
    figures, auto-fit re-solves every track, and the headline in EVERY card slides.
    The value should move the field, not the page. */
 .card{ min-width: 0; background: var(--panel); padding: 1.5rem 1.5rem 1.75rem; display: flex; flex-direction: column; }.card-head{ display: flex; justify-content: space-between; align-items: baseline;
-  gap: 1rem; margin-bottom: 1.25rem; }.card-name{ font-family: var(--serif); font-size: 1.25rem; margin: 0; }.card-idx{ font-family: var(--mono); font-size: .625rem; letter-spacing: .14em; color: var(--accent); }.card-note{ font-size: .8125rem; line-height: 1.45; color: var(--muted); margin: 1.25rem 0 0; }.card-note b{ color: var(--ink-2); font-weight: 500; }.rig{ flex: 1; }&.vert .rig{ display: flex; gap: 1.25rem; align-items: flex-start; justify-content: safe center;
+  gap: 1rem; margin-bottom: 1.25rem; }.card-name{ font-family: var(--serif); font-size: 1.25rem; margin: 0; }.card-idx{ font-family: var(--mono); font-size: .625rem; letter-spacing: .14em; color: var(--accent); }.card-note{ font-size: .8125rem; line-height: 1.45; color: var(--muted); margin: 1.25rem 0 0; }.card-note b{ color: var(--ink-2); font-weight: 500; }.rig{ flex: 1; }
+/* The RAIL's two jobs, which the component cannot do for itself (DIAL.md §5):
+   - give the rows a width to fill, or each sizes to its own content and the values stop
+     sharing a right edge (R1)
+   - set --axis-label-w wide enough for the widest row, or the row carrying `auto`
+     overflows the label column and drags its tag out of line (R2). 150px clears
+     "optical size" plus the AUTO control in this card; 105px, the primitive's default,
+     does not. Arrived at by measuring, not chosen. */
+.v1, .v2{ display: flex; flex-direction: column; gap: 14px; }
+.v1 .slider-row, .v2 .slider-row{ width: 100%; }&.vert .rig{ display: flex; gap: 1.25rem; align-items: flex-start; justify-content: safe center;
   min-height: 15rem; padding-top: .5rem;
   /* Three vertical columns can be wider than the card. Scroll the rig rather than let it
      hang off the side — the page body must never scroll sideways for this. */
   overflow-x: auto; overscroll-behavior-x: contain; }/* ── shared dial atoms ────────────────────────────────────── */
 .d{ margin-bottom: 1.5rem; }.d:last-child{ margin-bottom: 0; }&.vert .d{ margin-bottom: 0; }.d-lab{ font-size: .875rem; color: var(--ink-2); }.d-tag{ font-family: var(--mono); font-size: .6875rem; color: var(--muted); margin-left: .4em; }.d-unit{ font-size: .75rem; color: var(--muted);
   /* a fixed slot, wide enough for the longest unit in play ("em") */
-  display: inline-block; min-width: 1.25rem; text-align: left; }&.no-tags .d-tag, &.no-units .d-unit{ display: none; }/* typeable field, custom arrows */
+  display: inline-block; min-width: 1.25rem; text-align: left; }&.no-tags .d-tag, &.no-units .d-unit{ display: none; }/* typeable field, custom arrows.
+   ONE treatment, shared by 01, 02 and the triplet, and the same one AxisSlider ships: an
+   underline instead of a box. A border is drawn on the padding box -- full field width,
+   below the descender -- while an underline is drawn on the TEXT, exactly as wide as the
+   value and offset from the baseline. It also means focus needs to know nothing about box
+   padding or radius: it lives on the text.
+   The arrows and the unit HANG in one reserved slot at the right (see .d-val below), so
+   the field is as narrow as its digits and nothing shifts when the arrows arrive. */
 .f{
-  display: inline-flex; align-items: stretch; gap: 0;
-  border: 1px solid var(--line); border-radius: 4px; background: var(--sunk);
-  overflow: hidden;
-}.f:focus-within{ border-color: var(--accent); }/* Cal Sans sets the numbers, not the mono: `tnum` so the digits still line up in a
+  display: inline-flex; align-items: baseline; gap: 0;
+  border: 0; border-radius: 0; background: none;
+  position: relative;
+}/* Cal Sans sets the numbers, not the mono: `tnum` so the digits still line up in a
    column, `zero` so a slashed zero cannot be misread as an O. No `case` — in this font
    it substitutes 28 glyphs and every one is a combining mark or periodcentered, so it
    never touches the minus. U+2212 is already drawn on the figure axis anyway; that is
@@ -130,11 +152,11 @@
    control drew a different mark in each. The rule is a centred pseudo-element at a fixed
    12px: the target grows for a finger, the ink does not. */
 .f .arrows{ display: flex; flex-direction: column; position: relative;
-  opacity: 0; transition: opacity .12s; }.f .arrows::after{
-  content: ''; position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 7px; height: 1px; background: var(--line); pointer-events: none;   /* the chevron's own span */
-}.d:hover .f .arrows, .f:focus-within .arrows{ opacity: 1; }&.always-arrows .f .arrows{ opacity: 1; }/* Drawn chevrons, not ▲▼. A glyph arrow is measured by whatever face is loaded — width,
+  opacity: 0; transition: opacity .12s; }/* The 7px rule that used to sit between the two chevrons is gone. It was drawn to give
+   the pair a middle, and in the triplet -- three fields in a row, each with its own -- it
+   read as a stray dash beside every number instead. Two chevrons with a gap already have
+   a middle. */
+.d:hover .f .arrows, .f:focus-within .arrows{ opacity: 1; }&.always-arrows .f .arrows{ opacity: 1; }/* Drawn chevrons, not ▲▼. A glyph arrow is measured by whatever face is loaded — width,
    baseline and optical weight all move with it — so the column it sits in cannot be sized
    and the field beside it gets padded for something that changes shape. A 10x6 path is
    10x6 in every face. This is what the primitive ships. */
@@ -216,7 +238,7 @@
    column and drags its tag 19px right of the others, which is the exact ragged edge this
    mechanism exists to prevent. The rail is the only thing that can know this, because it
    is the only thing that can see all its rows. */
-.v1, .v2{ --axis-label-w: 126px; }
+.v1, .v2{ --axis-label-w: 150px; }   /* clears "optical size" + the AUTO control */
 .v1 .d-lab, .v2 .lab{ display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; }
 .v1 .d-namecol, .v2 .d-namecol{
   min-width: var(--axis-label-w, 105px);
@@ -1330,9 +1352,90 @@ function v6() {
   return root;
 }
 
+/* ── the real component's markup ─────────────────────────────────────────────
+   01 and 02 are AxisSlider, so they are built from AxisSlider's OWN class names and
+   styled by AxisSlider's OWN stylesheet, which build.py inlines from src/ (see
+   PRIMITIVE_CSS there). This page used to hand-write both the markup and the CSS: 165 of
+   its 225 selectors were rules for dials, every one a copy that could drift from what
+   ships -- and did, all evening.
+
+   What is left for the page to style is the page: cards, the grid, the toolbar, prose.
+   The rule is that simple. The page may style the page; it may not style a dial.
+
+   The behaviour is still the page's own -- this is static HTML and cannot mount React --
+   so a real change to the component has to be checked here. But it can no longer LOOK
+   different, which is the failure that kept happening. */
+function axisSlider(d, opts = {}) {
+  const track = opts.variant === 'track';
+  const row = mk('div', 'slider-row' + (track ? ' slider-row--track' : ''));
+  const label = mk('div', 'slider-label');
+  const left = mk('span', 'slider-label-left');
+  const text = mk('span', 'slider-label-text' + (d.tag ? ' slider-label-text--tagged' : ''));
+  const name = mk('span', 'slider-label-name'); name.textContent = d.label;
+  text.appendChild(name);
+
+  if (d.auto) {
+    const b = mk('button', 'slider-auto'); b.type = 'button';
+    const dot = mk('span', 'slider-auto-dot'); dot.setAttribute('aria-hidden', 'true');
+    const word = mk('span', 'slider-auto-word'); word.textContent = 'auto';
+    b.append(dot, word);
+    b.addEventListener('click', () => {
+      state[d.key] = state[d.key] === 'auto' ? d.autoValue : 'auto'; sync();
+    });
+    syncs.push(() => {
+      const on = state[d.key] === 'auto';
+      b.classList.toggle('slider-auto--on', on);
+      b.setAttribute('aria-pressed', String(on));
+      dot.textContent = on ? '●' : '○';
+    });
+    text.appendChild(b);
+  }
+  left.appendChild(text);
+  if (d.tag) { const t = mk('span', 'slider-tag'); t.textContent = d.tag; left.appendChild(t); }
+
+  const value = mk('span', 'slider-value');
+  const field = mk('input', 'slider-number');
+  field.type = 'text'; field.inputMode = 'decimal'; field.setAttribute('aria-label', d.label);
+  field.addEventListener('change', () => {
+    const v = parse(field.value);
+    if (!Number.isNaN(v)) { state[d.key] = clamp(v, d); sync(); }
+  });
+  value.appendChild(field);
+
+  const step = mk('span', 'slider-step'); step.setAttribute('aria-hidden', 'true');
+  [1, -1].forEach(dir => {
+    const b = mk('button', 'slider-step-btn'); b.type = 'button'; b.tabIndex = -1;
+    b.innerHTML = '<svg viewBox="0 0 10 6" width="10" height="6" aria-hidden="true"><path d="'
+      + (dir > 0 ? 'M1 4.5 5 1.5 9 4.5' : 'M1 1.5 5 4.5 9 1.5')
+      + '" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    b.addEventListener('click', () => {
+      state[d.key] = clamp(num(get(d), d) + dir * d.step, d); sync();
+    });
+    step.appendChild(b);
+  });
+  value.appendChild(step);
+  if (d.unit) { const u = mk('span', 'slider-suffix'); u.textContent = d.unit; value.appendChild(u); }
+
+  label.append(left, value);
+  const wrap = mk('div', 'slider-track-wrap');
+  const rng = mk('input'); rng.type = 'range'; rng.min = d.min; rng.max = d.max; rng.step = d.step;
+  rng.setAttribute('aria-label', d.label);
+  rng.addEventListener('input', () => { state[d.key] = parseFloat(rng.value); sync(); });
+  wrap.appendChild(rng);
+  row.append(label, wrap);
+
+  syncs.push(() => {
+    const v = get(d);
+    rng.value = num(v, d);
+    if (document.activeElement !== field) field.value = fmt(v, d);
+    row.style.setProperty('--pct', pct(v, d) + '%');
+  });
+  return row;
+}
+
 const VARIANTS = [
-  { name: 'One line', note: '<b>Everything on the label line.</b> Same anatomy, half the height — a rail of eight dials fits without scrolling. The value can crowd a long label at narrow widths.', build: c => DIALS.forEach(d => c.appendChild(v1(d))) },
-  { name: 'The row is the track', note: '<b>Label and number sit inside the bar; the fill is the value.</b> Press anywhere on the row and it jumps there, then follows. The number is still typeable — click it and the drag stands down. One object, one readout, and the widest hit area of the five.', build: c => DIALS.forEach(d => c.appendChild(v2(d))) },
+  { name: 'One line', note: '<b>Everything on the label line.</b> Same anatomy, half the height — a rail of eight dials fits without scrolling. The value can crowd a long label at narrow widths.', build: c => DIALS.forEach(d => c.appendChild(axisSlider(d))) },
+  { name: 'The row is the track', note: '<b>Label and number sit inside the bar; the fill is the value.</b> Press anywhere on the row and it jumps there, then follows. The number is still typeable — click it and the drag stands down. One object, one readout, and the widest hit area of the five.', build: c => DIALS.forEach(d => c.appendChild(axisSlider(d, { variant: 'track' }))) },
   { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label — which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => c.appendChild(v3(d))) },
   { name: 'The toggle becomes the slider', note: '<b>One node, two states.</b> Ported from <code>MorphControl</code> in CustomTypeTester — the grip parked at the right edge IS the thumb: click it and it travels onto the rail and grows into it, while the stops fade out. It does not reveal a second control. The value only appears once there is a continuous number to show. <b>Added here:</b> a way back to the stops, which the original has no path to.', build: c => c.appendChild(v4()) },
   { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired and max are one control, so they share a label and a lozenge and only hairlines divide them. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The shape the other five cannot make, because they each hold a single value.', build: c => c.appendChild(v6()) },
