@@ -114,9 +114,49 @@ function parseRGB(str, fallback) {
      through. Carried back as 0-255 so everything downstream keeps one number space. */
   var fn = str.match(/^color\(\s*([\w-]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)/i);
   if (fn) return [+fn[2] * 255, +fn[3] * 255, +fn[4] * 255];
+  /* Anything else -- oklch(), oklab(), lch(), color-mix(), a named colour -- goes
+     through the engine instead of a regex. The docs ramp writes every role as
+     oklch(93.1% 0 0), and the number sweep below read that as rgb(93, 0, 0): the
+     wordmark painted dark red and the speckle green, because L, C and H were taken
+     for R, G and B. Letting a 1x1 canvas resolve it is also future-proof -- the next
+     colour syntax needs no branch here. */
+  if (str && str.charAt(0) !== '#' && /[a-z]/i.test(str)) {
+    var sniffed = viaCanvas(str);
+    if (sniffed) return sniffed;
+  }
   var m = str.match(/(\d+(?:\.\d+)?)/g);
   if (m && m.length >= 3) return [+m[0], +m[1], +m[2]];
   return fallback;
+}
+
+/* Paint one pixel and read it back. Returns null if the engine rejects the syntax --
+   fillStyle keeps its previous value on an invalid assignment, which is exactly how we
+   tell "unsupported" from "black". */
+var _probe = null;
+function viaCanvas(str) {
+  try {
+    if (!_probe) {
+      var el = document.createElement('canvas');
+      el.width = el.height = 1;
+      _probe = el.getContext('2d', { willReadFrequently: true });
+      if (!_probe) return null;
+    }
+    _probe.fillStyle = '#000';
+    _probe.fillStyle = str;
+    if (_probe.fillStyle === '#000') {
+      /* Either the syntax was rejected, or the colour really is black. Re-ask against
+         a different sentinel to tell them apart. */
+      _probe.fillStyle = '#fff';
+      _probe.fillStyle = str;
+      if (_probe.fillStyle === '#ffffff') return null;
+    }
+    _probe.clearRect(0, 0, 1, 1);
+    _probe.fillRect(0, 0, 1, 1);
+    var d = _probe.getImageData(0, 0, 1, 1).data;
+    return [d[0], d[1], d[2]];
+  } catch (e) {
+    return null;
+  }
 }
 
 /* A colour is either the name of a custom property -- read live, so the theme toggle
