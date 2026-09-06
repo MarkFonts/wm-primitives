@@ -1,12 +1,27 @@
 <!doctype html>
 <meta charset="utf-8">
 <title>Five ways to draw one dial</title>
+<!-- 03's icons. One request for all four rather than four for one icon each; the axis
+     ranges are the family's own (opsz 20..48, wght 100..700, FILL 0..1, GRAD -50..200)
+     and .v3 .icon sets where on them these sit.
+     NOTE: the only EXTERNAL dependency on this page. Everything else is inlined or served
+     from docs/fonts/, and build.py strips @font-face but not <link>, so this reaches the
+     assembled page too. A failed request leaves the ligature TEXT ("fit_width") behind,
+     which is why .v3 .material-symbols-outlined clips its overflow. -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=fit_width,line_weight,format_line_spacing,mystery" />
 <!-- Source for section 03. Written standalone: `body` is the section, `&` means the
      section element itself, and the theme sits on :root, which is where the document
      puts it. The faces are the ones the assembled page declares -- CalSansVF and
      Newsreader -- NOT a name of this page's own, because the build strips @font-face
      and a family nobody declared falls silently through to Plex. -->
 <style>
+/* Standalone only. build.py STRIPS every @font-face and declares the faces once for the
+   whole document, so this never reaches the assembled page -- it is here so that opening
+   this file directly renders in Cal Sans instead of falling through to system-ui.
+   Alignment is the subject of this page; judging it in the wrong face judges the wrong
+   metrics. */
+@font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype"); font-display:swap; }
 :root{
   --bg: #fcfcfa; --panel: #f2f2ee; --sunk: #e8e8e3; --raised: #fff;
   --ink: #17181a; --ink-2: #4a4c50; --muted: #74767c;
@@ -164,9 +179,15 @@
   gap: 12px; height: 32px; padding: 0 12px; border-radius: 8px;
   corner-shape: superellipse(1.2);
   background: var(--sunk); overflow: hidden; cursor: ew-resize;
-  touch-action: none; user-select: none;
+  touch-action: pan-y; user-select: none;
 }.v2 .bar:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }.v2 .bar > i{ position: absolute; inset: 0 auto 0 0; background: var(--raised);
   border-right: 1px solid var(--line); pointer-events: none; }.v2 .lab, .v2 .d-val{ position: relative; z-index: 1; }.v2 .f{ border: 0; background: none; }.v2 .f input{ width: 4.2rem; cursor: text; }.v2 .f .arrows{ display: none; }/* the bar is the coarse control; no arrows */
+/* These controls drag along ONE axis, so they only need to claim that axis. `none`
+   claimed both, and the page stopped scrolling whenever the pointer happened to rest over
+   a dial -- which, on a page that is mostly dials, meant it stopped scrolling. pan-y lets
+   the page keep the vertical gesture while the control keeps the horizontal one; in
+   vertical mode the two swap. */
+&.vert .v2 .bar, &.vert .v3 .rail, &.vert .v3 .pill, &.vert .v4 .knob{ touch-action: pan-x; }
 &.vert .v2 .bar{
   flex-direction: column; justify-content: space-between; align-items: center;
   height: 176px; width: 80px; padding: 8px 4px; cursor: ns-resize;
@@ -175,10 +196,148 @@
    to read at a glance, a rotated number costs you the reading. It also solves the
    clipping: the label no longer has to fit a 5rem column. */
 &.vert .v2 .lab{ writing-mode: vertical-rl; text-orientation: mixed;
-  font-size: .8125rem; line-height: 1; }&.vert .v2 .d-tag{ margin: .4em 0 0; }&.vert .v2 .d-val{ display: flex; flex-direction: column; align-items: center; gap: 0; }&.vert .v2 .f input{ width: 100%; text-align: center; padding: 0; }/* ── 04 · the value rides in the handle (Font Gauntlet) ───── */
+  font-size: .8125rem; line-height: 1; }&.vert .v2 .d-tag{ margin: .4em 0 0; }&.vert .v2 .d-val{ display: flex; flex-direction: column; align-items: center; gap: 0; }&.vert .v2 .f input{ width: 100%; text-align: center; padding: 0; }/* ── the shipped tag column (AxisSlider) ───────────────────
+   One column width for the rail, so every tag lands on the same x. A rail whose
+   abbreviations do not line up looks broken even when each row is fine on its own, and a
+   component cannot measure its siblings -- so the width is a property the RAIL sets once
+   and every row moves together, pill or no pill.
+
+   The name is never clipped to hold the column: min-width is a floor, not a fixed width,
+   and a row that needs more takes it. In font-proofer the sidebar sets 125px, which is a
+   ceiling rather than a preference -- 227px of row, minus the widest tag and the value
+   field, leaves exactly that. Here the card is narrower, so the page sets its own.
+
+   The auto control lives INSIDE the column with the name, not next to the tag: it belongs
+   to the axis rather than to its abbreviation, and hanging it off the tag pushed that
+   row's tag out of line with the rest. */
+/* The rail's own width. 105px is the primitive's default -- the widest bare name in the
+   house rails plus air -- but this rail has a row carrying the auto control, and
+   "optical size" plus ● AUTO measures 124px. At the default that row alone overflows the
+   column and drags its tag 19px right of the others, which is the exact ragged edge this
+   mechanism exists to prevent. The rail is the only thing that can know this, because it
+   is the only thing that can see all its rows. */
+.v1, .v2{ --axis-label-w: 126px; }
+.v1 .d-lab, .v2 .lab{ display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; }
+.v1 .d-namecol, .v2 .d-namecol{
+  min-width: var(--axis-label-w, 105px);
+  flex: 0 0 auto;
+  display: inline-flex; align-items: baseline; gap: 4px;
+}
+.d-labname{ white-space: nowrap; }
+
+/* ── the `auto` control, shared ────────────────────────────
+   A dot for the state, a word for the name. No ring: see the note on autoPill().
+   The dot is a TRUE circle on a square box, so it is one of the shapes corners.css
+   exempts from the superellipse -- a squircle at 6px reads as a rounded square. */
+.d-auto{
+  /* 10.5px, not a rem step. The word is caps beside an 11px lowercase tag, and caps
+     read larger at equal size -- at 11px AUTO outweighs the axis name it belongs to.
+     Half a pixel is the whole correction, and half a pixel has no honest rem spelling. */
+  font: inherit; font-size: 10.5px; line-height: 1;
+  margin-left: .5em; padding: 2px 0;
+  border: 0; background: none;
+  color: var(--muted); cursor: pointer;
+  display: inline-flex; align-items: baseline; gap: .28em;
+  vertical-align: baseline;
+}
+.d-auto:hover{ color: var(--ink-2); }
+.d-auto.on{ color: #00a01e; }
+/* The mark is TYPE, not a drawn shape: ○ and ● as Cal Sans draws them, so it carries the
+   face's own weight and colour rather than a border-radius approximation.
+
+   0.7em raised 1px, and the 1px is arithmetic rather than taste. AUTO at 10.5px has a cap
+   height of 7.56px, so its optical centre is 3.78px above the baseline; the glyph's ink
+   runs -14..748 units, which at 0.7em (7.35px) centres 2.70px up -- 1.08px low. A 1px
+   rise lands it 0.08px off the cap centre. 0.7em is also the size whose correction is
+   nearest a whole pixel: 0.5em would need 1.85px, 0.8em 0.70px. */
+.d-auto-dot{ font-size: .7em; position: relative; top: -1px; }
+/* No tracking, deliberately, and against the house rule that capitals are letterspaced
+   and nothing else may be. Four caps at 10.5px with .12em on them read as a word set
+   apart; this is a two-part mark -- dot plus word -- and the tracking pulled it open
+   until the dot stopped belonging to it. */
+.d-auto-word{ text-transform: uppercase; letter-spacing: normal; }
+/* NOT hidden with the tags. `auto` is a state you can be in, not an abbreviation for the
+   axis -- turning off tags asks to see the rail without `opsz` and `wdth`, not without a
+   control. It was tied to them only because the pill used to sit beside the tag, and the
+   coupling outlived the layout that suggested it. */
+&.touch .d-auto{ padding: 6px 0; }
+
+/* 03's id column: icon, then the name it never had. */
+/* Wide enough for the longest NAME, since the name is what the reader needs and the tag
+   is the optional half. 2.25rem fitted only an abbreviation, which is how the tag ended
+   up standing in for the name. */
+/* Centred, so the four things in this stack read as ONE object rather than four items
+   that happen to share a left edge. Left-aligned they were a ragged block whose only
+   straight edge was the one nearest the rail; centred, the icon sits over its own name
+   and the column has an axis of its own.
+   text-align matters as well as align-items: the flex property centres each LINE box in
+   the column, and text-align centres the text inside a line that wraps. */
+.v3 .idcol{ width: 5.5rem; flex: none; display: flex; flex-direction: column;
+  align-items: center; text-align: center; gap: 1px; }
+/* Italic, so the tag is a different KIND of thing from the name stacked above it rather
+   than a smaller copy of it. Cal Sans reaches italic through the real `ital` axis, never
+   a synthesised slant -- font-synthesis: none makes the difference visible if the axis is
+   ever missing, instead of the browser faking it.
+
+   margin-left: 0 undoes .d-tag's .4em. That margin is the GAP between a name and the tag
+   beside it, which is right everywhere the two sit on one line -- stacked, it is just an
+   indent, and it read as the column being carelessly aligned.
+
+   The centred period is set as content on ::before so it belongs to the tag: it hides
+   with the tag under the Tags toggle, and it cannot be selected or copied along with the
+   text. periodcentered is drawn around the middle of the em rather than on the baseline,
+   which is why it needs no vertical nudge here. */
+.v3 .idtag{
+  line-height: 1;
+  margin-left: 0;
+  font-variation-settings: 'ital' 1;
+  font-synthesis: none;
+}
+.v3 .idtag::before{
+  content: '\00B7';
+  font-variation-settings: 'ital' 0;   /* the mark is not italic; only the letters are */
+  /* Space on the RIGHT only. The period is the first thing on this line, so a left
+     margin would push the whole tag in from the column edge -- which is the indent that
+     was there before and looked careless. The glyph's own side bearings give it a little
+     air on the left; .5em gives it more than that on the right, which reads as spaced
+     without breaking the flush edge the icon, name and AUTO all share.
+     If you want it optically centred in a gutter instead, that is a different layout:
+     the tag line gets its own indent and every row keeps it. */
+  /* Symmetric now that the column is centred: the earlier right-only gap existed to keep
+     a flush LEFT edge, and there is no flush left edge to protect any more. */
+  margin-right: .35em;
+  margin-left: .1em;
+  color: var(--muted);
+}
+.v3 .idcol .icon{ width: auto; }
+/* The icon face. font-variation-settings is how this family is configured: FILL 0 keeps
+   the outlined cut, and opsz 20 is the small-size DRAWING -- the point of the family is
+   that it is not the 48px icon scaled down. Overflow is clipped so a failed request shows
+   nothing rather than the ligature's own name spelled out. */
+.v3 .icon.material-symbols-outlined{
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal; font-style: normal;
+  font-size: 20px; line-height: 1;
+  letter-spacing: normal; text-transform: none; white-space: nowrap;
+  direction: ltr; font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+  /* inline-block, or max-width/overflow do nothing and a failed request spells out
+     "format_line_spacing" across the row. .v3 .icon sets the serif stack at equal
+     specificity and sits LATER in this file, so this selector carries .icon too. */
+  display: inline-block; max-width: 20px; overflow: hidden;
+  color: var(--muted);
+}
+.v3 .idname{ font-size: .625rem; color: var(--muted); line-height: 1; }
+/* The spec is one size in all three variants -- 03 was pulling it down to the caption's
+   .625rem, which also broke the 1px rise, since that correction is computed for 10.5px.
+   AUTO untracked is ~27px, and the column is 36px, so it fits without the override. */
+.v3 .idcol .d-auto{ margin-left: 0; margin-top: 2px; }
+
+/* ── 04 · the value rides in the handle (Font Gauntlet) ───── */
 .v3 .d{ display: flex; align-items: center; gap: .75rem; }.v3 .icon{ font-family: var(--serif); font-size: .9375rem; color: var(--muted);
   width: 2.25rem; flex: none; letter-spacing: -.02em; }.v3 .rail{ position: relative; flex: 1; height: 34px; display: flex; align-items: center;
-  touch-action: none; }.v3 .rail > i{ position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+  touch-action: pan-y; }.v3 .rail > i{ position: absolute; left: 0; right: 0; top: 50%; height: 1px;
   background: var(--line); transform: translateY(-50%); }.v3 .pill{
   position: absolute; top: 50%; transform: translate(-50%, -50%);
   background: var(--accent); color: var(--on-accent); border-radius: 999px;
@@ -187,7 +346,7 @@
      the same distance from the number as from the unit. It was 6px one side, 2px the
      other, which reads as the chevrons being shoved toward the unit. */
   padding: 4px 8px; display: inline-flex; align-items: center; gap: 6px;
-  cursor: ew-resize; touch-action: none; box-shadow: 0 0 0 3px var(--panel);
+  cursor: ew-resize; touch-action: pan-y; box-shadow: 0 0 0 3px var(--panel);
 }/* The field carries its own border and fill for a bare panel. Inside a coloured handle
    that reads as a second box around the number — the same mistake in both directions,
    so both variants strip it. */
@@ -256,7 +415,7 @@
   width: 6px; height: 16px; border-radius: 3px; background: var(--muted);
   /* both offsets come from JS so the same node can park and travel on either axis */
   transform: translate(var(--x, 0px), calc(-50% + var(--y, 0px)));
-  cursor: pointer; z-index: 2; touch-action: none;
+  cursor: pointer; z-index: 2; touch-action: pan-y;
   display: flex; align-items: center; justify-content: center;
   transition: width .28s cubic-bezier(.2,.7,.3,1), height .28s cubic-bezier(.2,.7,.3,1),
               border-radius .28s, background .28s, transform .28s cubic-bezier(.2,.7,.3,1);
@@ -268,8 +427,6 @@
    side. The ticks stay perpendicular -- that is the original drawing -- but they
    close to 2px of the pill (5px dash at -7px) instead of 4px, which is the
    spacing the React component draws. */
-.v4 .knob::after carried no offset at all, so it sat ON the grip while its twin stood off
-   to the left -- the grip only ever had one visible dash, on one side. */
 .v4 .knob::before{ left: -7px; }.v4 .knob::after{ right: -7px; }.v4.on .knob::before, .v4.on .knob::after{ opacity: 0; }/* Same manners as the module reset in CustomTypeTester: invisible until it applies,
    half-strength when it does, full on hover, and it spins as it acts. */
 /* The reset lives in the gutter — the same slot the grip parks in. Parked, the grip is
@@ -635,6 +792,10 @@ const DIALS = [
   { key: 'measure', label: 'measure', tag: null,   unit: 'px', min: 120, max: 924, step: 1,    value: 620 },
   { key: 'width',   label: 'width',   tag: 'wdth', unit: '%',  min: 75,  max: 125, step: 0.5,  value: 102.5 },
   { key: 'leading', label: 'leading', tag: null,   unit: null, min: 0.6, max: 3,   step: 0.01, value: 1.6 },
+  /* The awkward one, and the reason it is here: a tag AND a second state. Every variant
+     has to find somewhere to put `auto` without disturbing the row it already draws. */
+  { key: 'opsz',    label: 'optical size', tag: 'opsz', unit: null, min: 8, max: 45, step: 1,
+    value: 'auto', auto: true, autoValue: 14 },
 ];
 
 const STOPS = { label: 'geometric form', tag: 'GEOM', unit: '%', min: 0, max: 100, step: 1, value: 25,
@@ -643,11 +804,15 @@ const STOPS = { label: 'geometric form', tag: 'GEOM', unit: '%', min: 0, max: 10
 const state = Object.fromEntries(DIALS.map(d => [d.key, d.value]));
 const stopState = { value: STOPS.value, continuous: false };
 
+// `auto` is a state, not a number: the axis still HAS a value while it is on -- the one
+// the browser derives -- so everything that has to draw a position uses num() and only
+// the readout says the word.
+const num = (v, d) => (v === 'auto' ? d.autoValue : v);
 const clamp = (v, d) => Math.min(d.max, Math.max(d.min, v));
 const dec = d => (String(d.step).split('.')[1] || '').length;
-const fmt = (v, d) => v.toFixed(dec(d)).replace('-', '−');   // real minus, U+2212
+const fmt = (v, d) => (v === 'auto' ? 'auto' : v.toFixed(dec(d)).replace('-', '−'));   // real minus, U+2212
 const parse = s => parseFloat(String(s).replace('−', '-').trim());
-const pct = (v, d) => ((v - d.min) / (d.max - d.min)) * 100;
+const pct = (v, d) => ((num(v, d) - d.min) / (d.max - d.min)) * 100;
 
 /* One typeable field for every variant. text + inputMode so a true minus is possible and
    `auto` stays on the table; arrows are ours, and hold-to-repeat is a timer because a
@@ -743,6 +908,48 @@ function unitEl(d) {
   return u;
 }
 
+/* One `auto` control, shared by every variant. A dot and a word, and nothing else.
+
+   It was an outlined pill. A ring has to be balanced against the word inside it, and at
+   the sizes this thing lives at there is no setting that works: at 11px the pill is wide
+   enough to shove the value field into the tag, and every step down crowds the ring onto
+   the letters until it stops reading as a control at all. Below ~9px it is also too small
+   to touch. The ring was the part causing all of that, so the ring is gone.
+
+   What is left says the same two things with less: the dot carries the STATE (hollow off,
+   filled on) and the word carries the NAME. No box means no box to balance, no baseline
+   trick to keep it on the line, and the whole dot-plus-word is the hit target rather than
+   the inside of a pill.
+
+   Caps, because this is the type system's label role -- and caps are the one thing that
+   takes --track-caps. Lowercase `auto` beside a lowercase tag read as a second tag. */
+function autoPill(d) {
+  const b = mk('button', 'd-auto');
+  b.type = 'button';
+  const dot = mk('span', 'd-auto-dot');
+  dot.setAttribute('aria-hidden', 'true');
+  dot.textContent = '\u25CB';               // ○ circle — filled to ● by the sync below
+  const word = mk('span', 'd-auto-word');
+  word.textContent = 'auto';
+  b.append(dot, word);
+  b.title = 'follow the optical size automatically';
+  b.addEventListener('click', () => {
+    state[d.key] = state[d.key] === 'auto' ? d.autoValue : 'auto';
+    sync();
+  });
+  syncs.push(() => {
+    const on = state[d.key] === 'auto';
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', String(on));
+    // ● uni25CF / ○ circle. NOT • bullet and ◦ openbullet, which are the marks this
+    // wants to be: they are drawn at 18% of the em against these two at 76%, and
+    // openbullet's counter is 90 units -- 0.89px at this size, under one device pixel,
+    // so it fills in and the two states render as the same solid dot.
+    dot.textContent = on ? '\u25CF' : '\u25CB';
+  });
+  return b;
+}
+
 const syncs = [];
 const get = d => state[d.key];
 const mk = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
@@ -752,7 +959,15 @@ const mk = (tag, cls) => { const e = document.createElement(tag); if (cls) e.cla
 function v1(d) {
   const root = mk('div', 'd');
   const h = mk('div', 'd-head');
-  const l = mk('span', 'd-lab'); l.textContent = d.label;
+  /* AxisSlider's own anatomy, reproduced: the NAME and the auto control share one
+     fixed-width column, and the tag is a sibling AFTER it -- never inside it. That is
+     what makes every tag in the rail land on the same x. */
+  const l = mk('span', 'd-lab');
+  const col = mk('span', 'd-namecol');
+  const nm = mk('span', 'd-labname'); nm.textContent = d.label;
+  col.appendChild(nm);
+  if (d.auto) col.appendChild(autoPill(d));
+  l.appendChild(col);
   if (d.tag) { const t = mk('span', 'd-tag'); t.textContent = d.tag; l.appendChild(t); }
   h.appendChild(l);
   const val = mk('span', 'd-val');
@@ -765,7 +980,7 @@ function v1(d) {
   r.setAttribute('aria-label', d.label);
   r.addEventListener('input', () => set(parseFloat(r.value)));
   root.append(h, val, r);
-  syncs.push(() => { r.value = get(d); f._sync(); });
+  syncs.push(() => { r.value = num(get(d), d); f._sync(); });
   return root;
 }
 
@@ -796,8 +1011,26 @@ function draggable(surface, d, get, set, opts = {}) {
     e.preventDefault();
   });
   surface.addEventListener('pointermove', e => { if (dragging) set(fromPoint(e)); });
+  /* End the drag from THREE places, because the surface only hears two of them.
+     setPointerCapture routes the pointer to this element, but if the release happens
+     where the element never learns of it -- the cursor leaves the window, the tab loses
+     the pointer, a synthetic press with no matching lift -- then `dragging` stays true
+     and the capture is never given back. Every later click and scroll on the PAGE is
+     then delivered to a control nobody is touching, and the document goes dead. That is
+     recoverable only by reloading, which is a bad way to find out.
+     So: release the capture explicitly rather than trusting the implicit release, and
+     listen on window as well so a release anywhere ends it. */
+  const endDrag = e => {
+    dragging = false;
+    if (e && e.pointerId != null) {
+      try { if (surface.hasPointerCapture(e.pointerId)) surface.releasePointerCapture(e.pointerId); } catch {}
+    }
+  };
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev =>
+    surface.addEventListener(ev, endDrag));
   ['pointerup', 'pointercancel'].forEach(ev =>
-    surface.addEventListener(ev, () => { dragging = false; }));
+    window.addEventListener(ev, endDrag));
+  window.addEventListener('blur', () => { dragging = false; });
   // No wheel handler. A control that changes value on scroll steals the page's scroll
   // the moment the pointer crosses it, and you cannot scroll PAST a rail of them.
   // Drag, type, or the arrow keys — all three are deliberate, which scrolling is not.
@@ -824,7 +1057,11 @@ function v2(d) {
   const fill = mk('i');
   const lab = mk('span', 'lab');
   lab.className = 'lab d-lab';
-  lab.textContent = d.label;
+  const col2 = mk('span', 'd-namecol');
+  const nm2 = mk('span', 'd-labname'); nm2.textContent = d.label;
+  col2.appendChild(nm2);
+  if (d.auto) col2.appendChild(autoPill(d));
+  lab.appendChild(col2);
   if (d.tag) { const t = mk('span', 'd-tag'); t.textContent = d.tag; lab.appendChild(t); }
   const set = v => { state[d.key] = v; sync(); };
   const val = mk('span', 'd-val');
@@ -837,7 +1074,7 @@ function v2(d) {
   syncs.push(() => {
     f._sync();
     const p = pct(get(d), d);
-    bar.setAttribute('aria-valuenow', String(get(d)));
+    bar.setAttribute('aria-valuenow', String(num(get(d), d)));
     bar.setAttribute('aria-valuemin', String(d.min));
     bar.setAttribute('aria-valuemax', String(d.max));
     if (document.body.classList.contains('vert')) { fill.style.height = p + '%'; fill.style.width = '100%'; }
@@ -847,12 +1084,31 @@ function v2(d) {
 }
 
 // ── 04 · the value rides in the handle ─────────────────────
-const ICONS = { measure: 'T↔', width: 'T⇔', leading: '↕T' };
+// Material Symbols ligature names. These were typographic stand-ins built from a T and an
+// arrow, which read as a rebus rather than an icon. There is no letter fallback any more:
+// a dial without an entry here gets an empty box, which is a visible gap someone will fix,
+// rather than two letters of its own label pretending to be a symbol.
+const ICONS = { measure: 'fit_width', width: 'line_weight',
+                leading: 'format_line_spacing', opsz: 'mystery' };
 function v3(d) {
   const root = mk('div', 'd');
-  const icon = mk('span', 'icon');
-  icon.textContent = ICONS[d.key] || d.label.slice(0, 2);
+  // The icon alone was the whole label, and a hover title is not a label -- on touch
+  // there is no hover, and even on a pointer the name is invisible until you go looking
+  // for it. The icon keeps the column; a micro caption under it names the dial, and
+  // prefers the TAG where there is one, since `opsz` is the thing you would search for.
+  const idcol = mk('span', 'idcol');
+  const icon = mk('span', 'icon material-symbols-outlined');
+  icon.textContent = ICONS[d.key];
   icon.title = d.label + (d.tag ? ' · ' + d.tag : '');
+  // Name AND tag, not one or the other. Putting the tag in the caption slot meant a
+  // tagged dial lost its human name entirely -- 03 showed `wdth` and `opsz` and never
+  // `width` or `optical size` -- and it meant those tags were not .d-tag, so the Tags
+  // toggle had nothing to hide here while it emptied the other variants.
+  const name = mk('span', 'idname');
+  name.textContent = d.label;
+  idcol.append(icon, name);
+  if (d.tag) { const t = mk('span', 'idtag d-tag'); t.textContent = d.tag; idcol.appendChild(t); }
+  if (d.auto) idcol.appendChild(autoPill(d));
   const rail = mk('div', 'rail');
   const line = mk('i');
   const pill = mk('span', 'pill');
@@ -865,11 +1121,11 @@ function v3(d) {
   if (d.unit) { const u = unitEl(d); pill.appendChild(u); }
   rail.append(line, pill);
   draggable(rail, d, () => get(d), set);
-  root.append(icon, rail);
+  root.append(idcol, rail);
   syncs.push(() => {
     f._sync();
     const p = pct(get(d), d);
-    rail.setAttribute('aria-valuenow', String(get(d)));
+    rail.setAttribute('aria-valuenow', String(num(get(d), d)));
     if (document.body.classList.contains('vert')) {
       pill.style.top = (100 - p) + '%'; pill.style.left = '50%';
     } else {
@@ -955,9 +1211,19 @@ function v4() {
       : (e.clientX - r.left - KNOB / 2) / Math.max(1, r.width - PARK - KNOB);
     set(clamp(d.min + pctv * (d.max - d.min), d));
   });
-  ['pointerup', 'pointercancel'].forEach(ev => knob.addEventListener(ev, () => {
+  const endKnob = e => {
     dragging = false;
+    if (e && e.pointerId != null) {
+      try { if (knob.hasPointerCapture(e.pointerId)) knob.releasePointerCapture(e.pointerId); } catch {}
+    }
     root.closest('.rig')?.classList.remove('dragging');
+  };
+  // Same three places as draggable() -- see the note there for why the surface alone
+  // is not enough.
+  ['pointerup', 'pointercancel'].forEach(ev => window.addEventListener(ev, endKnob));
+  window.addEventListener('blur', () => endKnob());
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => knob.addEventListener(ev, e => {
+    endKnob(e);
   }));
   knob.addEventListener('keydown', e => {
     if (!stopState.continuous) {
@@ -1091,14 +1357,26 @@ sync();
 
 
 // ── toolbar ────────────────────────────────────────────────
+/* The flag has to land on TWO elements, and until now it landed on the wrong one.
+   The CSS writes these rules as `&.no-tags .d-tag`, and `&` is this page's own scope:
+   the build compiles it to `#s-controls.no-tags`, and standalone it resolves against the
+   root. Either way it is not <body>, which is where the class was being put -- so every
+   button in this toolbar was inert in both contexts. The JS side does read it off body
+   (draggable() asks body for `vert`), so both have to carry it. */
+const scopeEl = document.getElementById('s-controls') || document.documentElement;
+const setFlag = (cls, on) => {
+  document.body.classList.toggle(cls, on);
+  scopeEl.classList.toggle(cls, on);
+};
+
 const toggle = (id, cls, on) => {
   const b = document.getElementById(id);
   b.setAttribute('aria-pressed', String(on));
-  document.body.classList.toggle(cls, on);
+  setFlag(cls, on);
   b.addEventListener('click', () => {
     const next = b.getAttribute('aria-pressed') !== 'true';
     b.setAttribute('aria-pressed', String(next));
-    document.body.classList.toggle(cls, next);
+    setFlag(cls, next);
     sync();
   });
 };
@@ -1113,7 +1391,7 @@ toggle('t-arrows', 'always-arrows', false);
     b.addEventListener('click', () => {
       const showing = b.getAttribute('aria-pressed') === 'true';
       b.setAttribute('aria-pressed', String(!showing));
-      document.body.classList.toggle(cls, showing);
+      setFlag(cls, showing);
       sync();
     });
   }
