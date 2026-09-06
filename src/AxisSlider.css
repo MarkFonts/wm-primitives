@@ -435,23 +435,18 @@
   .slider-row--track .slider-number,
   .slider-row--track .slider-step,
   .slider-row--track .slider-auto { pointer-events: auto; }
-  /* The focus ring belongs to the BAR, which is what the eye reads as the control -- but the
-     focusable element is the transparent range input on top of it. `+ *` was nonsense (the
-     input has no next sibling); :has() puts the ring where it belongs. The input's own
-     outline stays suppressed so the two do not double up.
-     Falls back to ringing the input, which occupies the same box, wherever :has() is not
-     available -- so this degrades to the same picture rather than to nothing. */
+  /* The focus ring belongs to the BAR, and the input IS the bar: it is stretched over it
+     at inset 0, so ringing the input rings exactly the shape the eye reads as the control.
+
+     This was `:has(input:focus-visible)` on the row, styling .slider-label. It never
+     fired -- measured: with the range focused and document.activeElement equal to it,
+     `row:focus-within` matches and `row:has(input:focus)` does not. Whatever the cause,
+     a rule that cannot match is worse than a simpler one that can, and this needs no
+     :has() support to work. */
   .slider-row--track .slider-track-wrap input[type="range"]:focus-visible {
     outline: 2px solid var(--accent, currentColor);
     outline-offset: 2px;
     border-radius: var(--radius, 6px);
-  }
-  .slider-row--track:has(input[type="range"]:focus-visible) .slider-label {
-    outline: 2px solid var(--accent, currentColor);
-    outline-offset: 2px;
-  }
-  .slider-row--track:has(input[type="range"]:focus-visible) .slider-track-wrap input[type="range"] {
-    outline: none;
   }
 
   /* The selection highlight is the browser's, not ours -- it arrives in the OS accent,
@@ -491,40 +486,31 @@
     min-width: 2ch;
     max-width: 14ch;   /* "620 · 64n" is the longest value in either app */
   }
-  /* No arrows here, and so no slot to reserve for them. The bar IS the coarse control --
-     press anywhere and it jumps, then follows -- which is the study's own argument for
-     dropping them, and the field is still typeable for a precise value.
-     Reserving 16px for arrows that are invisible at rest put a permanent gap between the
-     number and the bar's edge: 16px of empty slot on top of the bar's own 12px padding,
-     which read as the value being pushed off its right edge. The unit sits in normal flow
-     directly after the number, and the only right margin is the bar's padding. */
-  .slider-row--track .slider-step { display: none; }
-  .slider-row--track .slider-suffix { position: static; margin-left: .25em; }
+  /* ONE SLOT ON EVERY ROW, and it IS the bar's right padding rather than something extra
+     inside it.
 
-  /* The field loses its box. In the default variant the host paints a rounded field so the
-     number reads as editable; inside a bar that is a box within a box, and the bar is
-     already the object. What marks it editable here is an underline under the digits --
-     the study's treatment, and enough, because the caret and the arrows arrive on focus.
+     Conditional was worse, and the numbers said so: reserving only where a unit exists
+     pushed that row's value 16px left of the rest, so the values stopped forming a column.
+     A rail of dials is read down the right edge -- that column is the reason the value is
+     right-aligned in the first place -- and no per-row saving is worth breaking it.
 
-     These override the HOST's .slider-number (0,1,0) by being one class more specific, so
-     font-proofer and ReCal need no change of their own to opt in. */
-  /* text-decoration, not border-bottom. A border is drawn on the input's PADDING BOX, so it
-     runs the full width of the field and sits below the descender -- wider than the number
-     and further from it than it looks in a mockup. An underline is drawn on the TEXT: it is
-     exactly as wide as the digits, and text-underline-offset places it against the baseline
-     rather than against the box. */
-  .slider-row--track .slider-number {
-    background: none;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 0;
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 2px;
-    text-decoration-color: currentColor;
+     So the slot is uniform, and it is not additional space: the bar gives up its right
+     padding to it, so the total is 16px on the right against 12px of padding on the left,
+     not 28px. The unit sits in it at rest; the arrows take it on hover. On a row with no
+     unit it holds the arrows alone and is otherwise the right margin -- which is what the
+     row needed anyway.
+
+     Step buttons are 12px here so a pair fits the slot with air, rather than filling it. */
+  .slider-row--track .slider-label { padding-right: 0; }
+  .slider-row--track .slider-value { padding-right: var(--spacing-05, 16px); }
+  .slider-row--track .slider-suffix,
+  .slider-row--track .slider-step {
+    position: absolute;
+    right: 0; left: auto; top: 50%; bottom: auto;
+    transform: translateY(-50%);
   }
-  .slider-row--track .slider-number:focus { text-decoration-color: var(--accent, currentColor); }
+  .slider-row--track .slider-step-btn { width: 12px; }
+
   .slider-row--track .slider-suffix { color: var(--text-muted); }
 
   /* ── what the swap left behind ───────────────────────────────────────────────
