@@ -1,3 +1,6 @@
 node_modules
 .DS_Store
 *.log
+
+# Scratch reference material (sketches, screenshots, borrowed jsx) -- read here, never built from.
+reference/
