@@ -2,8 +2,10 @@
 //
 // A single knob can only ever be a floor OR a cap, and neither says what the line
 // should AIM for. Justification needs all three, so the three are one control: they
-// share a label, a unit and a lozenge, and only hairlines divide them. Three bordered
-// boxes side by side would read as three controls that happen to sit on a row.
+// share a label and a unit, and the rule under each number is the field. Three bordered
+// boxes side by side would read as three controls that happen to sit on a row -- but so
+// did one box with hairlines through it, which is what this drew first. What separates
+// the three now is the gap the chevrons live in, and nothing else.
 //
 // Two things follow from "one control", and neither is decoration:
 //
@@ -116,7 +118,8 @@ export function AxisTriplet({
           {unit && <i className="triplet-unit">{unit}</i>}
           {chip && <em className={`triplet-chip${chipMuted ? ' triplet-chip--muted' : ''}`}>{chip}</em>}
         </span>
-        {/* One box, three values: one border, one padding, hairlines inside. */}
+        {/* No box. Each value is its own underlined field, and the gutter between them
+            is where that field's chevrons sit -- space no number was using. */}
         <div className="triplet-fields">
           {KEYS.map(k => (
             <span className="triplet-f" key={k}>

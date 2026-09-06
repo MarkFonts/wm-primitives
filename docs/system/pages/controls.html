@@ -555,154 +555,6 @@
      being padded 55px for a stepper that had been hidden. */
   &.touch:not(&.always-arrows) .v3 .pill .arrows{ display: none; }&.touch .toolbar button{ min-height: 44px; padding: .25rem 1rem; }
 
-/* ── 06 · the triplet ──────────────────────────────────────────────────────────
-   Three fields, one control. The lozenge is the object; the hairlines are the only
-   thing between the fields, because a border on each would read as three separate
-   controls sharing a row. The column heads sit over the fields, not over the label,
-   so the grid is one track for the label and three equal ones for the numbers. */
-&.tri, .tri { display: flex; flex-direction: column; gap: var(--pad-2, 8px); }
-.tri-heads, .tri-row {
-  display: grid;
-  grid-template-columns: minmax(0, 7.5em) repeat(3, minmax(0, 1fr));
-  gap: var(--pad-2, 8px);
-  align-items: center;
-}
-.tri-heads { padding-bottom: 2px; }
-.tri-heads .tri-h {
-  grid-column: auto; text-align: center;
-  font-size: 11px; letter-spacing: .04em; color: var(--muted);
-}
-.tri-heads .tri-h:first-child { grid-column: 2; }
-.tri-lab { align-self: center; line-height: 1.25; text-wrap: balance; }
-.tri-box {
-  grid-column: 2 / -1;
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-  border: 1px solid var(--line); border-radius: var(--r-lozenge, 10px);
-  background: var(--sunk); overflow: hidden;
-}
-/* Inside the lozenge each cell is a two-track grid, not an inline-flex that hugs its
-   content: with hugging, the chevrons sat wherever the digits ended, so 75 / 85 / 110
-   put three arrow stacks at three different x positions and the eye read a ragged
-   right edge. One flexible track for the number, one fixed track for the arrows, and
-   the stacks line up down the row and down the column. */
-.tri-box .f {
-  border-radius: 0; background: none; border: 0;
-  display: grid; grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center; gap: 0; padding-right: var(--pad-2, 8px);
-}
-.tri-box .f + .f { border-left: 1px solid var(--line); }
-/* The number ends where the arrows begin, with one gap, always the same gap. */
-.tri-box .f input {
-  text-align: right; width: 100%; min-width: 0;
-  /* Both of these, or the number sits UNDER the chevrons: the field is content-box by
-     default, so a 46px track plus 6px of padding rendered 60px and overflowed 14px
-     into the arrows column. `auto` is not a field-sizing keyword either -- it is
-     fixed | content -- so the bench's `content` kept hugging underneath. */
-  box-sizing: border-box;
-  field-sizing: fixed;
-  padding-right: var(--pad-2, 8px);
-}
-/* Always out inside the triplet: three fields that reveal arrows on hover would flash
-   two thirds of the row on every pass across it. */
-.tri-box .arrows { opacity: 1; }
-/* Tighter than the standalone lozenge: the pair is 22px tall against a 16px cap, so
-   the two chevrons read as one object with a rule through it rather than as two
-   buttons that happen to be stacked. */
-.tri-box .arrows button { height: 11px; width: 14px; }
-
-/* The unit rides with the label and takes the quiet ink, so it reads as a property
-   of the parameter rather than as a fourth value in the row. */
-/* The unit is tabbed to the right edge of the LABEL column, not left ragged after the
-   word, so the three of them stack into a line that runs down beside the lozenge. */
-.tri-lab { display: flex; align-items: baseline; gap: var(--pad-2, 8px); }
-.tri-u {
-  /* 12px flat, not .85em: relative sizing made it 11.9 against a 14px label here and
-     would have made it 11.05 against the 13px vertical one, so the unit changed size
-     with its neighbour while every other unit on the page stayed at 12. */
-  margin-left: auto; color: var(--muted);
-  font-size: 12px; font-variant-numeric: tabular-nums;
-}
-
-/* ── 06 vertical ───────────────────────────────────────────────────────────────
-   Transposed, not restacked: each PARAMETER becomes a column and min/desired/max
-   become its rows, so the thing that stays put is the parameter and the thing you
-   scan is the range. The row labels move to the right of the lozenge, where they
-   caption the three cells instead of heading three columns.
-
-   .tri-row and .tri-heads go display:contents so the labels, the lozenges and the
-   captions all become items of ONE grid — otherwise each row is its own formatting
-   context and the caption beside the third cell has nothing to align to. The lozenge
-   then takes grid-template-rows: subgrid so its three cells sit on the parent's rows
-   and the captions line up with them exactly, at any cell height. */
-&.vert .tri {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 5.25rem)) auto;
-  /* row 1 holds a 4em turned label PLUS the upright unit parked under it */
-  grid-template-rows: minmax(5.6em, auto) repeat(3, minmax(0, auto));
-  gap: var(--pad-2, 8px);
-  align-items: stretch;
-  justify-content: start;
-}
-&.vert .tri-row, &.vert .tri-heads { display: contents; }
-
-/* the label turns with the column and reads bottom-up, which keeps the unit under
-   the word rather than beside it */
-/* Reads top-to-bottom, which is what "the track" already does with its own vertical
-   label -- plain vertical-rl. The rotate(180deg) I had on here turned it bottom-up,
-   so the one vertical label on the page ran the opposite way to the other five. */
-&.vert .tri-lab {
-  /* 13px, which is what "the row is the track" sets on its own turned label. Two
-     vertical labels on one page at two sizes is a difference that means nothing. */
-  grid-row: 1; font-size: 13px;
-  writing-mode: vertical-rl;
-  justify-self: center; align-self: start;
-  flex-direction: row; align-items: baseline;
-  gap: var(--pad-1, 6px); text-align: start;
-}
-/* margin-left:auto is right in a row and wrong once the label turns: along the block
-   axis it pushed the unit to the far end of the column and left it floating in the
-   middle of nothing. The unit follows the word, the way px follows measure. */
-&.vert .tri-u { margin-left: 0; }
-
-&.vert .tri-box {
-  grid-row: 2 / span 3;
-  grid-template-columns: none;
-  grid-template-rows: subgrid;
-}
-&.vert .tri-box .f {
-  grid-template-columns: none; grid-template-rows: auto auto;
-  justify-items: center; align-content: center;
-  padding: var(--pad-1, 6px) 0;
-}
-/* The number is the thing being read; the chevrons sit under it at their hairline
-   size rather than claiming a second full row. */
-&.vert .tri-box .arrows button { height: 10px; }
-&.vert .tri-box .f + .f { border-left: 0; border-top: 1px solid var(--line); }
-/* Centred, on the same axis as the chevrons under it. Turned vertical there is no
-   column of figures to hold -- each parameter is its own stack and nothing is being
-   read across them -- so aligning the ones place buys nothing and costs the centring:
-   right-aligned, the number hugged one wall while its chevrons stayed in the middle. */
-&.vert .tri-box .f input {
-  text-align: center; padding-left: 0; padding-right: 0;
-  font-variant-numeric: tabular-nums;
-}
-&.vert .tri-box .arrows { flex-direction: column; }
-
-/* min / desired / max become captions beside the cells they name */
-&.vert .tri-h { justify-self: start; align-self: center; grid-column: 4; }
-/* The column has to be repeated at this specificity: the horizontal head rule is
-   `.tri-heads .tri-h:first-child { grid-column: 2 }` (1,3,0), which outranks the
-   `&.vert .tri-h` above (1,2,0) and was parking "min" in the second parameter's
-   column while its two siblings sat correctly beside the lozenge. */
-&.vert .tri-heads .tri-h:nth-child(1) { grid-column: 4; grid-row: 2; }
-&.vert .tri-heads .tri-h:nth-child(2) { grid-column: 4; grid-row: 3; }
-&.vert .tri-heads .tri-h:nth-child(3) { grid-column: 4; grid-row: 4; }
-
-/* one column per parameter, in the order they are declared */
-&.vert .tri-row:nth-child(2) .tri-lab, &.vert .tri-row:nth-child(2) .tri-box { grid-column: 1; }
-&.vert .tri-row:nth-child(3) .tri-lab, &.vert .tri-row:nth-child(3) .tri-box { grid-column: 2; }
-&.vert .tri-row:nth-child(4) .tri-lab, &.vert .tri-row:nth-child(4) .tri-box { grid-column: 3; }
-
 /* ── vertical: centring, and the unit slot that fought it ─────────────────────
    .d-unit reserves min-width:1.25rem so a COLUMN of horizontal rows keeps its
    figures on one axis -- "620 px" and "1.60" line up because the unitless one
@@ -718,36 +570,12 @@
 &.vert .d-unit { min-width: 0; text-align: center; }/* Two-word labels break into two lines rather than running the height of the
    card. In vertical-rl the INLINE axis is vertical, so max-height is what a
    max-width would be lying down -- 6.5em is "letter spacing" over two lines. */
-&.vert .v2 .lab, &.vert .tri-lab {
+&.vert .v2 .lab {
   /* 4em is derived, not picked: it is longer than the longest single WORD in play
      ("spacing" / "scaling", ~3.5em at 13px) and shorter than any two-word string,
      so "letter spacing" breaks after the first word while "measure" and "leading"
      stay on one line. 6.5em cleared every string and wrapped nothing. */
   white-space: normal; max-height: 4em; text-align: center;
-}
-/* the unit rides under the label's last line, on the label's own axis */
-&.vert .tri-lab { align-items: center; }
-/* The label turns; the unit does not. Inside a vertical-rl box the % was being
-   rotated with the words and reading as a diagonal mark under the label. It is a
-   symbol, not text that runs -- upright and centred on the column. */
-&.vert .tri-u {
-  /* Out of the label's flow entirely. The label is capped at 4em -- that cap is what
-     makes a two-word name break onto two lines -- and the unit was sitting AFTER the
-     text inside that cap, so it spilled past the box and the lozenge drew over it.
-     Parked at the bottom of the label's own cell instead, centred on the column, with
-     the row given the height to hold both. */
-  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
-  writing-mode: horizontal-tb; text-orientation: mixed;
-  margin: 0; text-align: center; line-height: 1;
-}
-&.vert .tri-lab {
-  position: relative;
-  /* The label box was exactly as tall as its two turned lines, so "bottom: 0" on the
-     unit landed at the end of the last line rather than below the block -- the %
-     read as part of the word. Padding opens a strip under the text for it to sit in,
-     and max-height grows by the same amount so the CONTENT box stays 4em and the
-     two-word wrap is unchanged. */
-  max-height: 5.5em; padding-bottom: 1.5em;
 }
 
 /* ── arrows: hung when transient, built in when persistent ────────────────────
@@ -786,10 +614,6 @@
 &.always-arrows .d:hover .d-unit, &.always-arrows .d:focus-within .d-unit,
 &.touch .d:hover .d-unit, &.touch .d:focus-within .d-unit { opacity: 1; }
 
-/* the triplet's arrows are persistent by design -- a matrix that flashed two thirds
-   of itself on every pass across the row would be unreadable -- so it takes the
-   built-in layout in both modes and never hangs. */
-.tri-box .f .arrows { position: static; padding-left: 0; }
 
 /* ── the swap, stated once and at a specificity that cannot lose ──────────────
    The unit and the arrows share one slot, so one state drives both: the dial is
@@ -1323,61 +1147,154 @@ function v4() {
   return root;
 }
 
-// ── 06 · the triplet ───────────────────────────────────────
+// ── 05 · the triplet ───────────────────────────────────────
 // ReCal's justification rail: a parameter is not one number, it is a RANGE the
 // typesetter may move inside — min, desired, max. Three fields, one object, one
 // label. Two things fall out of that and neither is decoration:
-//   • the three are ordered, so editing one has to push the others rather than
-//     let you type min 90 under a max of 80. The clamp is the control's job.
-//   • they share a label and a row, so they share a lozenge; the hairlines are
-//     the only separation, because three boxes side by side read as three
-//     controls rather than one range.
+//   • the three are ordered, so editing one has to CARRY the others rather than
+//     let you type min 90 under a max of 80. Refusing the edit silently is the
+//     worst version of this control — you cannot tell whether it heard you.
+//   • the unit belongs to the parameter, so it is printed once beside the label.
+//     In all three fields it would say they measure three different things.
+//
+// The four rows are the prop surface, not four copies: heads on the first only,
+// `offset` on the second, a chip on the third, and the fourth disabled with a
+// muted chip. Everything a host can ask this component for is on screen.
 const TRIPLETS = [
-  { key: 'word',   label: 'word spacing',  unit: '%',  min: 0,   max: 300, step: 1, lo: 75, mid: 85,  hi: 110 },
-  // Flattersatz stores tracking as a percent (98/100/104) and SHOWS it 0-centred,
-  // so -2 here is 98% of natural. The unit is still %; the zero is the only thing
-  // that moved. All three parameters are percentages -- none is in font units.
-  { key: 'letter', label: 'letter spacing',unit: '%',  min: -20, max: 20,  step: 1, lo: -2, mid: 0,   hi: 4   },
-  { key: 'glyph',  label: 'glyph scaling', unit: '%',  min: 90,  max: 110, step: 1, lo: 100,mid: 100, hi: 100 },
+  { key: 'word',   label: 'word space',   unit: '%', min: 0,   max: 300, step: 1,
+    lo: 75, mid: 85, hi: 110, heads: true },
+  // Flattersatz stores tracking as a percent (98/100/104) and type people read it
+  // 0-centred (−2/0/+4), so `offset` subtracts 100 for display and adds it back on
+  // edit. A display transform, not a second unit — all of these are percentages.
+  { key: 'letter', label: 'letter space', unit: '%', min: -20, max: 20, step: 1,
+    lo: 98, mid: 100, hi: 104, offset: 100 },
+  { key: 'flex',   label: 'flex',         unit: '%', min: 90,  max: 110, step: 1,
+    lo: 100, mid: 100, hi: 100, chip: 'x-scale' },
+  // Disabled, because the mechanism behind it is off: the chip goes muted, the
+  // steppers are not rendered at all, and the row drops to .45 rather than being
+  // removed — the parameter still exists, it just has nothing to do right now.
+  { key: 'glyph',  label: 'glyph scale',  unit: '%', min: 90,  max: 110, step: 1,
+    lo: 100, mid: 100, hi: 100, chip: 'wdth', chipMuted: true, disabled: true },
 ];
 const tri = Object.fromEntries(TRIPLETS.map(t => [t.key, { lo: t.lo, mid: t.mid, hi: t.hi }]));
 
-function v6() {
-  const root = mk('div', 'd tri');
-  const heads = mk('div', 'tri-heads');
-  for (const h of ['min', 'desired', 'max']) {
-    const e = mk('span', 'tri-h'); e.textContent = h; heads.appendChild(e);
+/* AxisTriplet, on the same terms as 01 and 02: the component's own class names, styled
+   by the component's own stylesheet. What the page drew here before was a DIFFERENT
+   control wearing the same name — a bordered lozenge with hairlines between the three
+   fields, plus a vertical transposition — and it kept that shape long after the
+   primitive stopped having it, because the page owned its own copy of the CSS. The page
+   may style the page. It may not style a control. */
+function axisTriplet(t) {
+  const frag = document.createDocumentFragment();
+  const st = tri[t.key];
+  const shown = slot => +(st[slot] - (t.offset || 0)).toFixed(2);
+
+  if (t.heads) {
+    const h = mk('div', 'triplet-row triplet-row--head');
+    h.setAttribute('aria-hidden', 'true');
+    h.appendChild(mk('span', 'triplet-label'));
+    const hf = mk('div', 'triplet-fields triplet-fields--head');
+    // `des`, not `desired`: three narrow columns, and it is the only head long enough
+    // to crowd its neighbours. min / des / max still reads.
+    for (const s of ['min', 'des', 'max']) { const e = mk('span'); e.textContent = s; hf.appendChild(e); }
+    h.appendChild(hf);
+    frag.appendChild(h);
   }
-  root.appendChild(heads);
-  for (const t of TRIPLETS) {
-    const row = mk('div', 'tri-row');
-    const lab = mk('span', 'd-lab tri-lab'); lab.textContent = t.label;
-    // The unit belongs to the PARAMETER, not to each of its three numbers — printing
-    // it three times says the fields are three controls. It sits with the label,
-    // in its own colour, so the row reads "word spacing, in percent: 75 85 110".
-    const u = mk('span', 'tri-u'); u.textContent = t.unit; lab.appendChild(u);
-    const box = mk('span', 'tri-box');
-    const SLOTS = ['lo', 'mid', 'hi'];
-    const made = [];
-    for (const slot of SLOTS) {
-      // min <= desired <= max is the invariant. Moving one carries the others with
-      // it instead of refusing the edit — a control that rejects what you typed and
-      // says nothing is worse than one that shows you where the value landed.
-      const set = v => {
-        const s = tri[t.key]; s[slot] = v;
-        if (slot === 'lo')  { s.mid = Math.max(s.mid, v); s.hi = Math.max(s.hi, s.mid); }
-        if (slot === 'mid') { s.lo = Math.min(s.lo, v);   s.hi = Math.max(s.hi, v); }
-        if (slot === 'hi')  { s.mid = Math.min(s.mid, v); s.lo = Math.min(s.lo, s.mid); }
-        sync();
-      };
-      const f = field(t, () => tri[t.key][slot], set, { fitContent: true });
-      made.push(f); box.appendChild(f);
+
+  const row = mk('div', 'triplet-row' + (t.disabled ? ' triplet-row--off' : ''));
+  const lab = mk('span', 'triplet-label');
+  lab.textContent = t.label;
+  if (t.unit) { const u = mk('i', 'triplet-unit'); u.textContent = t.unit; lab.appendChild(u); }
+  // The chip hangs out of flow at top:100%, so it runs under the unit on its own line
+  // and costs the label column nothing.
+  if (t.chip) {
+    const c = mk('em', 'triplet-chip' + (t.chipMuted ? ' triplet-chip--muted' : ''));
+    c.textContent = t.chip;
+    lab.appendChild(c);
+  }
+
+  const fields = mk('div', 'triplet-fields');
+  for (const slot of ['lo', 'mid', 'hi']) {
+    const f = mk('span', 'triplet-f');
+    const inp = mk('input', 'triplet-num');
+    inp.type = 'text'; inp.inputMode = 'decimal';
+    inp.disabled = !!t.disabled;
+    inp.setAttribute('aria-label', t.label + ' ' + ({ lo: 'min', mid: 'desired', hi: 'max' })[slot]);
+
+    // min <= desired <= max is CARRIED, not refused. Which neighbours move depends on
+    // which edge you grabbed: a min pushes desired up and desired pushes max; a max
+    // pulls them down the same way.
+    const set = display => {
+      const n = Math.min(t.max, Math.max(t.min, display)) + (t.offset || 0);
+      st[slot] = n;
+      if (slot === 'lo')  { st.mid = Math.max(st.mid, n); st.hi = Math.max(st.hi, st.mid); }
+      if (slot === 'mid') { st.lo = Math.min(st.lo, n);   st.hi = Math.max(st.hi, n); }
+      if (slot === 'hi')  { st.mid = Math.min(st.mid, n); st.lo = Math.min(st.lo, st.mid); }
+      sync();
+    };
+    const text = () => String(shown(slot)).replace('-', '−');   // real minus, U+2212
+    inp.value = text();
+
+    // A sync must not clobber what you are TYPING, but an arrow key or a chevron is a
+    // value change rather than typing, and the focus guard alone swallowed those: the
+    // state moved and the focused field sat still until blur. `echo` is that exception.
+    let echo = false;
+    const bump = (dir, mult) => {
+      echo = true;
+      set(+(shown(slot) + dir * t.step * mult).toFixed(2));
+      echo = false;
+    };
+    inp.addEventListener('input', () => {
+      // "", "−" and "." are on the way to a number, not numbers. Committing them would
+      // clamp the field out from under the caret.
+      const raw = String(inp.value).replace('−', '-').trim();
+      if (raw === '' || raw === '-' || raw === '.' || raw === '-.') return;
+      const n = parseFloat(raw);
+      if (!Number.isNaN(n)) set(n);
+    });
+    inp.addEventListener('blur', () => { inp.value = text(); });
+    inp.addEventListener('keydown', e => {
+      const dir = e.key === 'ArrowUp' ? 1 : e.key === 'ArrowDown' ? -1 : 0;
+      if (!dir) return;
+      e.preventDefault();
+      bump(dir, e.shiftKey ? 10 : 1);      // Shift for ×10, as everywhere else
+    });
+    f.appendChild(inp);
+
+    if (!t.disabled) {
+      const step = mk('span', 'triplet-step');
+      step.setAttribute('aria-hidden', 'true');
+      for (const dir of [1, -1]) {
+        const b = mk('button', 'triplet-step-btn');
+        b.type = 'button'; b.tabIndex = -1;
+        // A NARROWER CHEVRON, redrawn rather than scaled down: scaling shrinks the
+        // stroke with the shape, so a squeezed chevron reads lighter than every other
+        // line in the panel. 7 wide against the standalone dial's 10, same 1.5 stroke.
+        b.innerHTML = '<svg viewBox="0 0 7 6" width="7" height="6" aria-hidden="true"><path d="'
+          + (dir > 0 ? 'M1 4.5 3.5 1.75 6 4.5' : 'M1 1.75 3.5 4.5 6 1.75')
+          + '" fill="none" stroke="currentColor" stroke-width="1.5"'
+          + ' stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        // A drawn button gets no native repeat, so press-and-hold is a timer: one step,
+        // 400ms for the intent, then 60ms repeats.
+        let timer, ramp;
+        const stop = () => { clearTimeout(timer); clearInterval(ramp); };
+        b.addEventListener('pointerdown', e => {
+          e.preventDefault(); bump(dir, 1);
+          timer = setTimeout(() => { ramp = setInterval(() => bump(dir, 1), 60); }, 400);
+        });
+        ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+        step.appendChild(b);
+      }
+      f.appendChild(step);
     }
-    syncs.push(() => made.forEach(f => f._sync()));
-    row.append(lab, box);
-    root.appendChild(row);
+
+    syncs.push(() => { if (document.activeElement !== inp || echo) inp.value = text(); });
+    fields.appendChild(f);
   }
-  return root;
+
+  row.append(lab, fields);
+  frag.appendChild(row);
+  return frag;
 }
 
 /* ── the real component's markup ─────────────────────────────────────────────
@@ -1466,7 +1383,7 @@ const VARIANTS = [
   { name: 'The row is the track', note: '<b>Label and number sit inside the bar; the fill is the value.</b> Press anywhere on the row and it jumps there, then follows. The number is still typeable — click it and the drag stands down. One object, one readout, and the widest hit area of the five.', build: c => DIALS.forEach(d => c.appendChild(axisSlider(d, { variant: 'track' }))) },
   { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label — which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => c.appendChild(v3(d))) },
   { name: 'The toggle becomes the slider', note: '<b>One node, two states.</b> Ported from <code>MorphControl</code> in CustomTypeTester — the grip parked at the right edge IS the thumb: click it and it travels onto the rail and grows into it, while the stops fade out. It does not reveal a second control. The value only appears once there is a continuous number to show. <b>Added here:</b> a way back to the stops, which the original has no path to.', build: c => c.appendChild(v4()) },
-  { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired and max are one control, so they share a label and a lozenge and only hairlines divide them. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The shape the other five cannot make, because they each hold a single value.', build: c => c.appendChild(v6()) },
+  { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired and max are one control, so they share a label and a unit \u2014 printed once, beside the name, because three copies of it would say the fields measure three different things. There is no box: the rule under each number IS the field, the same one 01 and 02 draw. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The four rows are the prop surface: heads on the first, a 100-centred store shown 0-centred on the second, a chip on the third, and the fourth disabled. The shape the other five cannot make, because they each hold a single value.', build: c => TRIPLETS.forEach(t => c.appendChild(axisTriplet(t))) },
 ];
 
 const grid = document.getElementById('t-grid');

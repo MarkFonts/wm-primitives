@@ -1,8 +1,12 @@
 /* AxisTriplet — min · desired · max as ONE control.
-   The lozenge is the object. One border, one padding, and hairlines inside: three
-   bordered boxes on a row read as three controls, and the whole point is that these
-   are three numbers of one parameter. Every colour is a token, so the row themes with
-   whatever surface it lands on — ReCal's rail, font-proofer's sidebar, the docs page. */
+   Three bordered boxes on a row read as three controls, and the whole point is that
+   these are three numbers of one parameter. The first answer to that was a lozenge:
+   one border, one padding, hairlines inside. It is gone. What holds the three together
+   now is the shared label and the shared unit; what separates them is the gutter the
+   chevrons live in. The rule under each number IS the field, the same one AxisSlider
+   draws, so a value here and a value there are the same object.
+   Every colour is a token, so the row themes with whatever surface it lands on —
+   ReCal's rail, font-proofer's sidebar, the docs page. */
 
 .triplet-row {
   display: grid;
