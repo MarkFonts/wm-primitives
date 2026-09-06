@@ -9,11 +9,20 @@ copy is what stops the app noticing this file went stale.
 |---|---|---|
 | `CalSansVF.ttf` / `.woff2` | full face, six axes | 1545 glyphs, 15 FV |
 | `CalSansFlexVF.ttf` / `.woff2` | Flex | 1545 glyphs, 15 FV |
-| `CalSans-Bold.woff2` | static instance | 1545 glyphs, 0 FV |
+| `CalSans-Bold.woff2` | **the 2021 Cal Sans, v1.000** | 613 glyphs, 0 FV |
 
-`CalSans-Bold.woff2` reads 0 FeatureVariations and that is correct: it is a static, so
-the axes are baked and there is nothing left to condition on. Only the variable faces
-are worth running the check below against.
+`CalSans-Bold.woff2` is the odd one out and is **not** published by `calbuild --bump`.
+It is the original 2021 drawing, kept for font-proofer's before/after page, not a house
+face -- so unlike everything else here it must NOT track the current build.
+
+The trap: calbuild can produce a file with exactly this name (a v2 static at GEOM 50 /
+opsz 45, 1545 glyphs). It is a different typeface that happens to share a filename.
+Publishing it would leave the comparison page showing v2 against v2 and quietly destroy
+the only copy of the old drawing. `bump_primitives.DO_NOT_PUBLISH` refuses to, and
+raises if anyone puts it back in the publish list.
+
+It reads 0 FeatureVariations because it is a static -- correct, and true of any static.
+Only the variable faces are worth running the check below against.
 
 
 ## These are different families, not different versions
