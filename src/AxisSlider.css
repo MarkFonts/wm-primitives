@@ -9,6 +9,10 @@
 .slider-label { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .slider-label-left {
   display: flex; align-items: baseline; gap: var(--spacing-01, 4px);
+  /* Takes the row's leftover rather than collapsing to its own content. On flex:0 1 auto
+     it sized to content, which starved the label of its 105px column and let the tag
+     land wherever the label happened to end -- a ragged tag edge down the rail. */
+  flex: 1 1 auto;
   min-width: 0; overflow: visible; padding-bottom: var(--nudge, 2px);
 }
 .slider-label-text {
@@ -17,7 +21,32 @@
   font-family: var(--ui-font, system-ui, sans-serif);
   white-space: nowrap; overflow: visible; text-overflow: clip;
 }
-.slider-label-text--tagged { flex: 0 0 105px; }
+/* The name is never clipped. It shared a fixed column with the auto pill, and the pill
+   pushed "Optical Size" into "Optical Si..." -- trading a whole word for five pixels of
+   alignment, which is the wrong way round. A truncated name is a worse defect than a
+   tag that sits five pixels right of its neighbours. */
+.slider-label-name { white-space: nowrap; }
+/* One column, so the tags line up down the rail -- but shrinkable, and the NAME is what
+   gives way, never the tag. At font-proofer's sidebar width the row has 227px: a RIGID
+   105px plus the tag plus the value group wants 240, and with nothing allowed to yield
+   the tag spilled 13px past its own container. The value field, which the host paints
+   with a background, then covered the last letter: "opsz" read as "ops". Ellipsis rather
+   than clip, because the tag already names the axis -- the long name is the half that
+   can afford to lose a character. */
+.slider-label-text--tagged {
+  /* ONE column width for the whole rail, so every tag lands on the same x -- a rail
+     whose abbreviations do not line up looks broken even when each row is fine on its
+     own. A component cannot measure its siblings, so the width is a property the rail
+     sets once: raise --axis-label-w wherever a row carries the auto pill (or a long
+     name), and every row moves together. The 105px default is the widest bare name in
+     the house rails ("Ascender Height", 96px) plus air.
+     Never clip to hold the column -- see .slider-label-name. */
+  min-width: var(--axis-label-w, 105px);
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--spacing-01, 4px);
+}
 .slider-tag {
   font-size: var(--type-micro-size);
   color: var(--text-muted);
@@ -54,25 +83,54 @@
 }
 .slider-number:focus { outline: none; }
 
-.slider-auto-btn {
+/* auto: an outlined pill beside the NAME, inside the label column -- so the tag next to
+   it starts at the same x on every row. Hanging it off the tag instead pushed that row's
+   abbreviation out of line with the rest of the rail; the control belongs to the axis,
+   not to its shorthand. "Optical Size" is 66px in a 105px column, so the pill rides in
+   the slack and costs the row nothing.
+
+   Outline, not a fill. The first version was a solid pill, and a filled shape with a
+   word in it and no icon reads as a badge REPORTING state rather than something you can
+   press -- which is why the feature stayed secret long enough to need this comment. An
+   outline that lights up is a control: the ring says pressable, the colour says on.
+
+   Both halves fade together when off -- ring and word on the same grey -- so the whole
+   chip recedes as one object instead of leaving a grey box around dim text. */
+.slider-auto {
   font: inherit;
   font-size: var(--type-micro-size, 0.5625rem);
-  letter-spacing: 0;              /* lowercase, like the tag above: no caps token */
+  letter-spacing: 0;              /* lowercase, like the tag: no caps token */
   text-transform: lowercase;
   padding: 0 var(--spacing-02, 6px);
-  margin-left: var(--nudge, 2px);
-  min-height: 16px;
-  border: 1px solid var(--border);
+  min-height: 15px;
+  border: 1px solid currentColor;
   border-radius: 999px;
+  /* G2: k is the superellipse exponent 2^k, and at 1.2 a pill keeps its round cap while
+     curvature eases to zero before the straight edge. Declared here rather than left to
+     the universal rule in corners.css, which a consumer may not load. */
   corner-shape: superellipse(var(--corner-k, 1.2));
   background: none;
-  color: var(--text-muted, var(--text));
+  color: var(--text-dim, var(--text-muted));
   cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--dur-fast, .12s) ease;
 }
-.slider-auto-btn:hover { color: var(--text); }
-.slider-auto-btn--on { background: var(--text); color: var(--bg, var(--surface)); border-color: var(--text); }
-.slider-auto-btn:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 1px; }
-@media (pointer: coarse) { .slider-auto-btn { min-height: 32px; padding: 0 var(--spacing-03, 8px); } }
+/* The rollover is the whole point: nothing else on the row answers the pointer, so this
+   is what says the word is a control before you click it. */
+.slider-auto:hover { color: var(--text-muted, var(--text)); }
+.slider-auto--on {
+  /* House green. --ok is the app's to define; the fallback is the docs palette's geo
+     hue, which was picked in OKLCH and holds its chroma across both themes. Ring and
+     word share it through currentColor, so they can never drift apart. */
+  color: var(--ok, #00c700);
+}
+.slider-auto--on:hover { color: var(--ok, #00c700); opacity: .78; }
+/* Press with colour, never an inset shadow: on a pill the shadow follows border-radius
+   but not corner-shape, so it paints a rounded rectangle inside the squircle while the
+   tap is held (corners.css says the same). */
+.slider-auto:active { opacity: .6; }
+.slider-auto:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+@media (pointer: coarse) { .slider-auto { min-height: 26px; padding: 0 var(--spacing-03, 8px); } }
 
 /* ── the stepper ─────────────────────────────────────────────────────────────
    Ours, because a text field has no native one — and because the native one could

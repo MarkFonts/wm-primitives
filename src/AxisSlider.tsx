@@ -48,9 +48,10 @@ export interface AxisSliderProps {
   lockedAbove?: number | null
   /** Enable the `a`-for-auto text field (e.g. opsz). */
   allowAuto?: boolean
-  /** Show a tappable `auto` chip beside the value. Defaults ON wherever allowAuto is set,
-   *  because the keystroke alone is unreachable on a phone — no mobile keypad this field
-   *  can raise has letters. Pass false to go back to the key only. */
+  /** Show the named `auto` checkbox beside the tag. Defaults ON wherever allowAuto is
+   *  set: the keystroke alone is unreachable on a phone (no keypad this field can raise
+   *  has letters) and, on any device, undiscoverable — nothing on screen said the state
+   *  existed. Pass false for the key only. */
   autoButton?: boolean
   autoValue?: number
   /** Optional ◆ "baked default" marker before the value (suppressed for variant="diamond"). */
@@ -142,7 +143,27 @@ export function AxisSlider({
       )}
       <div className="slider-label">
         <span className="slider-label-left">
-          <span className={`slider-label-text${tag ? ' slider-label-text--tagged' : ''}`}>{label}</span>
+          <span className={`slider-label-text${tag ? ' slider-label-text--tagged' : ''}`}>
+            <span className="slider-label-name">{label}</span>
+            {allowAuto && autoButton && !disabled && (
+            /* Beside the label, not in the value group. A keystroke cannot be the only
+               way to reach a state — `a` needs a letter key, and no keypad this field
+               raises has one, so on a phone the shortcut was unreachable and the hint
+               named a key you do not have. It was a pill in the value group first, which
+               read as a badge rather than a control, said "auto" a second time next to a
+               field already showing it, and cost 34px in a 227px row — enough to shove
+               the field over the tag. This is the shape ReCal arrived at independently
+               (.opsz-auto): the state is named on screen instead of being secret. The key
+               stays as the fast path, and typing the word still works. */
+            <button
+              type="button"
+              className={`slider-auto${isAuto ? ' slider-auto--on' : ''}`}
+              aria-pressed={isAuto}
+              title={isAuto ? 'auto — tap for a number' : 'follow the optical size automatically'}
+              onClick={() => onChange(isAuto ? (autoValue ?? min) : 'auto')}
+            >auto</button>
+            )}
+          </span>
           {tag && <span className="slider-tag">{tag}</span>}
           {showRange && <span className="slider-range">{min}–{max}</span>}
         </span>
@@ -199,20 +220,6 @@ export function AxisSlider({
               onChange(Math.min(max, Math.max(min, n)))
             }}
           />
-          {allowAuto && autoButton && !disabled && (
-            /* A keystroke cannot be the only way to reach a state. `a` for auto needs a
-               letter key, and every mobile keypad this field can raise — numeric or
-               decimal — has no letters on it, so on a phone the shortcut was unreachable
-               and the hint was telling you to press a key you do not have. The button is
-               the affordance; the key stays as the fast path. */
-            <button
-              type="button"
-              className={`slider-auto-btn${isAuto ? ' slider-auto-btn--on' : ''}`}
-              aria-pressed={isAuto}
-              title={isAuto ? 'auto — tap for a number' : 'follow the optical size automatically'}
-              onClick={() => onChange(isAuto ? (autoValue ?? min) : 'auto')}
-            >auto</button>
-          )}
           {!disabled && (
             <span className="slider-step" aria-hidden="true">
               {([1, -1] as const).map(dir => (
