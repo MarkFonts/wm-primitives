@@ -6,17 +6,37 @@
 
 .triplet-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 15.5rem);
-  gap: var(--spacing-04, 12px);
-  align-items: center;
+  /* 4rem floor: minmax(0, ...) let this column shrink to NOTHING, and at ReCal's 152px
+     panel it did -- so "word spacing" had no column to wrap inside and printed across the
+     numbers. With a floor it wraps to two lines, which is what you want at the narrowest
+     width. */
+  grid-template-columns: minmax(3.5rem, 1fr) minmax(0, 13rem);
+  /* The label column is already a floor with slack in it, so a 12px gap on top read as a
+     gutter nobody asked for. 6px: enough to part the two, not enough to look like a
+     column of its own. */
+  gap: var(--spacing-02, 6px);
+  /* BASELINE, not centre. Centring balanced the label BLOCK against the fields, so a row
+     whose label carries a chip underneath (flex · X-SCALE) pushed "flex" and its % above
+     the numbers they belong to. On a shared baseline the label's first line, the unit and
+     the values all sit on one line, whatever hangs below. */
+  align-items: baseline;
 }
 .triplet-row--off { opacity: .45; pointer-events: none; }
+/* Rows were touching -- measured 0px between them -- while a wrapped label's two lines
+   sat at 1.25. That is backwards: the lines of one label belong together and two
+   parameters do not. Tighter within, looser between. */
+.triplet-row + .triplet-row { margin-top: var(--spacing-03, 8px); }
 
 .triplet-label {
   /* the unit is tabbed to the right edge of this column (margin-left:auto below), so
      a stack of rows shows one line of units rather than a ragged one per label */
-  display: flex; align-items: baseline; gap: var(--spacing-03, 8px);
-  min-width: 0; line-height: 1.25;
+  /* A grid, not a wrapping flex. With flex-wrap the unit went wherever the label's last
+     line ended, so a stack of rows showed the % at three different x. Here row 1 is
+     [label | unit] and the chip spans row 2, so every unit lands on the same right edge
+     however many lines the label takes. */
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline; gap: 0 var(--spacing-02, 6px);
+  min-width: 0; line-height: 1.1;
   font-size: var(--type-ui-size, 12px);
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
   text-wrap: balance;
@@ -25,26 +45,48 @@
    quiet ink — not inside each of the three fields, which would say they measure three
    different things. */
 .triplet-unit {
-  margin-left: auto; font-style: normal;
+  /* Row 1, on the shared baseline with the label's first line and the values. */
+  font-style: normal;
   font-size: .85em; font-variant-numeric: tabular-nums;
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
 }
+/* Its own line under the label: the chip qualifies the PARAMETER, and sharing a line with
+   the unit made it read as a second unit. */
+/* ZERO CHIP. No ring, no fill, no padding -- the same treatment as AxisSlider's `auto`,
+   which stopped being a pill for the same reason: a ring has to be balanced against the
+   word inside it, and at micro size there is no setting that works. A dot carries the
+   mark and the caps carry the name.
+   Caps stay (it is the type system's label role, and caps are the one thing that takes
+   --track-caps). The dot is ● at 0.7em raised 1px, exactly as on `auto` -- ○/● are drawn
+   at 76% of the em where • is 18%, which at this size is under a device pixel. */
 .triplet-chip {
-  margin-left: .5em; font-style: normal;
-  font-size: var(--type-micro-size, 9px);
+  grid-column: 1 / -1; justify-self: start;
+  display: inline-flex; align-items: baseline; gap: .28em;
+  margin: 2px 0 0; padding: 0; border: 0; border-radius: 0;
+  font-style: normal; white-space: nowrap;
+  /* Smaller than micro: it is the quietest thing in the row -- a qualifier on the
+     parameter, under a label that is already secondary to the numbers. */
+  font-size: calc(var(--type-micro-size, 9px) * .85);
   letter-spacing: var(--track-caps, .08em); text-transform: uppercase;
-  padding: 1px 6px; border-radius: 999px;
-  border: 1px solid var(--border);
-  color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
+  color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
+}
+.triplet-chip::before {
+  content: '\25CF';
+  font-size: .7em; position: relative; top: -1px;
+  letter-spacing: normal;
 }
 .triplet-chip--muted { opacity: .55; }
 
+/* A gutter between the fields, because the chevrons have to live somewhere. Overlaid at
+   right: 0 they printed ON the digits; here they sit in the gap between one field and the
+   next, which is space no number was using. */
 .triplet-fields {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-  border: 1px solid var(--border);
-  border-radius: var(--radius, 8px);
-  background: var(--surface);
-  overflow: hidden;
+  column-gap: 9px;
+  /* No box: the rule under each number IS the field, same as .slider-number. The three
+     fields used to sit in one bordered, filled lozenge with hairlines between them --
+     a container drawn around numbers that are already a row. */
+  overflow: visible;
 }
 /* The heads sit over the fields, never over the label, so they line up with the
    numbers they name. No box of their own — they are a caption, not a row. */
@@ -53,17 +95,24 @@
   font-size: var(--type-micro-size, 10px); letter-spacing: var(--track-caps, .08em);
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
 }
-.triplet-fields--head span { text-align: center; padding-bottom: 2px; }
+/* Right-aligned, because the numbers are. Centred heads sat over the middle of a column
+   whose values hang on its right edge, so `des` and `85` were never on the same axis --
+   a head names the column it can be read straight down from. */
+.triplet-fields--head span { text-align: right; padding-bottom: 2px; }
 .triplet-row--head { align-items: end; }
 
 /* Two tracks, not a hugging flex: with hugging the chevrons sit wherever the digits
    end, so 75 / 85 / 110 puts three arrow stacks at three x positions and the right
    edge reads ragged. One flexible track for the number, one fixed for the arrows. */
+/* The stepper overlays instead of owning a track. It was `auto` in this grid, so every
+   field reserved ~22px for chevrons that are invisible at rest -- three fields, 66px, for
+   one stepper that can only ever show on the field you are pointing at. The stepper stays;
+   what goes is reserving room for three of them. */
 .triplet-f {
   position: relative; min-width: 0;
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+  display: block;
 }
-.triplet-f + .triplet-f { border-left: 1px solid var(--border); }
+/* The hairline divided three things inside a container, and there is no container now. */
 
 .triplet-num {
   width: 100%; min-width: 0;
@@ -73,20 +122,38 @@
      to its digits moves the hairline beside it, so the three columns stop lining up
      down the panel. A lozenge on its own may hug; a matrix may not. */
   background: none; border: 0; border-radius: 0;
-  padding: 6px 2px 6px 8px;
+  /* No permanent clearance for the chevrons. At ReCal's 152px the whole fields track is
+     86px -- 28px a field -- and "110" is 21px of digits, so 14px of clearance was the
+     difference between fitting and clipping. The chevrons overlay the digits on the one
+     field you are pointing at, which is the only field that can show them. */
+  /* No horizontal padding. The field is 22px at ReCal's 178px panel and "110" is 21px of
+     digits, so 2px a side was the difference between fitting and clipping. The gutter
+     beside it already separates one number from the next; the field does not need its own
+     margin as well. */
+  padding: 6px 0;
   font: inherit; font-size: var(--type-ui-size, 12px);
   font-variant-numeric: tabular-nums;
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
   text-align: right;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  text-decoration-color: var(--text-muted, currentColor);
 }
+/* Active colours the number AND its rule, on focus-within so stepping counts too. */
 .triplet-num:focus { outline: none; }
-.triplet-f:focus-within { background: var(--surface-hi); }
+.triplet-f:focus-within .triplet-num {
+  color: var(--accent, currentColor);
+  text-decoration-color: var(--accent, currentColor);
+  text-decoration-thickness: 2px;
+}
 
 /* Drawn chevrons, not the platform stepper: type=text has none, and the native one
    cannot be themed. A single hairline between them is the whole divider — two edges
    of a button would draw an object that is not there. */
 .triplet-step {
-  display: flex; flex-direction: column; padding-right: 6px;
+  position: absolute; right: -9px; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column;
   opacity: 0; transition: opacity var(--dur-fast, 140ms) ease;
 }
 .triplet-row:hover .triplet-step,
@@ -94,7 +161,10 @@
 .triplet-step-btn {
   appearance: none; -webkit-appearance: none;
   background: none; border: 0; padding: 0;
-  width: 16px; height: 11px;
+  /* 9px, sized to the redrawn 7-wide chevron plus a pixel either side. The path was
+     narrowed to 7 and this stayed at 16, so the box never shrank and the stepper still
+     straddled the digits -- redrawing the glyph only helps if the button follows it. */
+  width: 9px; height: 11px;
   display: grid; place-items: center;
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
   cursor: pointer;

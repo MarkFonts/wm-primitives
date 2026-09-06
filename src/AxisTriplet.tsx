@@ -104,7 +104,9 @@ export function AxisTriplet({
         <div className="triplet-row triplet-row--head" aria-hidden="true">
           <span className="triplet-label" />
           <div className="triplet-fields triplet-fields--head">
-            <span>min</span><span>desired</span><span>max</span>
+            {/* `des`, not `desired`: it is the middle of three narrow columns and the only head
+                long enough to crowd its neighbours. min / des / max still reads. */}
+            <span>min</span><span>des</span><span>max</span>
           </div>
         </div>
       )}
@@ -166,8 +168,12 @@ export function AxisTriplet({
                       onPointerLeave={stopHold}
                       onPointerCancel={stopHold}
                     >
-                      <svg viewBox="0 0 10 6" width="10" height="6" aria-hidden="true">
-                        <path d={dir > 0 ? 'M1 4.5 5 1.5 9 4.5' : 'M1 1.5 5 4.5 9 1.5'}
+                      {/* A NARROWER CHEVRON, not the 10-wide one scaled down. Scaling
+                          shrinks the stroke with the shape, so a squeezed chevron reads
+                          lighter than every other line in the panel; redrawing keeps the
+                          1.5 stroke and just brings the arms in. 7 wide against 10. */}
+                      <svg viewBox="0 0 7 6" width="7" height="6" aria-hidden="true">
+                        <path d={dir > 0 ? 'M1 4.5 3.5 1.75 6 4.5' : 'M1 1.75 3.5 4.5 6 1.75'}
                           fill="none" stroke="currentColor" strokeWidth="1.5"
                           strokeLinecap="round" strokeLinejoin="round" />
                       </svg>

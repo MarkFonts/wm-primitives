@@ -8,37 +8,43 @@
    it, which is an AxisSlider label and was never tracked. The 8px badge keeps its own
    sanctioned exception, and that is the only one. */
 
+/* These sit in the same rail as the dials, so they are drawn as dials are: one bar per
+   switch, at the dial's height and radius, label left and state right. They were a single
+   outlined PILL holding both switches with a hairline between them -- a different object
+   in a column of bars, which is why the rail read as two unrelated kinds of control.
+
+   Not a pill any more. A pill's radius is half its height, which says "chip"; the bars
+   around it use --radius, which says "row". Matching that is the whole change. */
 .fit-switches {
   display: flex;
   flex-wrap: wrap;              /* Hyphenate drops below rather than clipping */
-  border: 1px solid var(--border);
-  border-radius: 13px;              /* half the 26px height: a pill, not a rounded box */
-  overflow: hidden;
+  gap: var(--spacing-02, 6px);
   margin: var(--spacing-04, 12px) 0;
 }
 .fit-switch {
   flex: 1 1 7rem;               /* room for the longest label on one line */
-  height: 24px;
+  height: 32px;                 /* the dial bar's height, so a rail of both is one rhythm */
+  border-radius: var(--radius, 6px);
+  corner-shape: superellipse(var(--corner-k, 1.2));
+  background: var(--surface);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-02, 6px);
-  padding: 0 var(--spacing-02, 6px);    /* the rail is narrow; the pill's cap is not */
+  padding: 0 var(--spacing-04, 12px);   /* the dial bar's padding */
   white-space: nowrap;
-  background: none;
-  border: none;
   color: var(--text-muted);
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
   cursor: pointer;
   transition: background var(--dur-fast, 140ms), color var(--dur-fast, 140ms);
 }
-.fit-switch + .fit-switch { border-left: 1px solid var(--border); }
+/* The hairline divided two halves of one pill. They are separate bars now, and the gap
+   between them is the divider. */
 /* The FILL has to be shaped too: the container clips, but a filled child still paints a
    rectangle into the cap, so the active half showed square corners inside a round end. */
-.fit-switch:first-child { border-radius: 12px 0 0 12px; }
-.fit-switch:last-child { border-radius: 0 12px 12px 0; }
-.fit-switch:only-child { border-radius: 12px; }
+
 .fit-switch:hover:not(.active) { background: var(--bg-hover, rgba(255, 255, 255, .06)); }
 .fit-switch:active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text); }
 .fit-switch.active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text); }
