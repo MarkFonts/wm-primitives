@@ -1,0 +1,122 @@
+/* ── color: the ramp, as package defaults ─────────────────────────────────────
+ *
+ * Additive, like type.css and motion.css: it declares tokens and styles no element,
+ * so importing it cannot reach existing markup. Apps import it from their entry
+ * stylesheet and override whatever they want.
+ *
+ * A theme is not a second palette. It is where each role sits on ONE lightness ramp,
+ * plus how hard the three inks press -- seven numbers. The role lines below are written
+ * once and never change between themes; only the numbers above them move.
+ *
+ * WHY THIS FILE EXISTS
+ * Before it, the package answered "what if the host never defined this token?" two
+ * contradictory ways: 119 reads carried a hardcoded dark literal (var(--surface, #2e2e2e)),
+ * and 150 carried nothing at all. The first gives a light-mode app dark-on-light. The
+ * second is worse -- an undefined custom property is invalid at computed-value time, so
+ * var(--text) does not fall back, it INHERITS, and the text quietly takes the colour of
+ * whatever it sits in. Neither raises anything. With a real default under them, both stop
+ * being bugs without editing 269 call sites.
+ *
+ * These are DEFAULTS, not the contract. --bg/--text/etc. are still the app's to define;
+ * this only decides what happens when it hasn't yet.
+ *
+ * @layer, deliberately: an unlayered rule beats any layered one regardless of order, so
+ * an app's plain :root always wins without caring whether its stylesheet is imported
+ * before or after this file. Same specificity in two files is otherwise decided by load
+ * order, which nobody remembers and a bundler is free to change.
+ *
+ * EVERY TOKEN IS WRITTEN TWICE, sRGB then OKLCH. An engine without oklch() drops the
+ * second declaration at parse time and keeps the first. The hex is not decoration: it is
+ * the same colour, computed from the same L (16.84% -> #0f0f0f, 93.10% -> #e8e8e8), and
+ * each theme carries its own pair. Declaring only the OKLCH half per theme is how the
+ * docs page ended up rendering light mode dark on a legacy engine.
+ *
+ * IF YOU READ THESE FROM JS, resolve them with the engine, not a regex. getComputedStyle
+ * returns the winning declaration -- today that is `oklch(93.1% 0 0)`, not a hex. A number
+ * sweep reads L, C, H as R, G, B and paints 93.1% grey as rgb(93, 0, 0); that is exactly
+ * how the colophon wordmark turned dark red. src/letterbox.js resolves colour through a
+ * 1x1 canvas for this reason.
+ *
+ * SCOPE: the seven tokens below are the ones the package reads unguarded -- --text (51
+ * reads), --border (39), --text-muted (32), --text-dim (15), --bg (9), --surface (3),
+ * --surface-hi (1). Still undefaulted, and still the app's job: --accent, --err, --ok,
+ * --warn, --muted, --line, --bg-elevated, --bg-hover, --border-subtle, --surface-2,
+ * --marker-default, --track-empty, --scrollbar-thumb*, --edit-rail*. --line and --border
+ * are two names for one thing and should collapse into one.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+@layer wm.color {
+  :root {
+    /* ---- the seven numbers. Dark. ---- */
+    --l-ground: 16.84%;  --l-surface: 21.78%;  --l-surface-hi: 26.45%;  --l-ink: 93.10%;
+    --a-2: .62;  --a-3: .38;  --a-line: .14;
+
+    /* ---- the roles. These lines are identical in every theme. ---- */
+    --bg:         #0f0f0f;  --bg:         oklch(var(--l-ground) 0 0);
+    --surface:    #1a1a1a;  --surface:    oklch(var(--l-surface) 0 0);
+    --surface-hi: #252525;  --surface-hi: oklch(var(--l-surface-hi) 0 0);
+    --text:       #e8e8e8;  --text:       oklch(var(--l-ink) 0 0);
+
+    /* Ink pressure, not separate greys: muted and dim are --text held back, so they
+       track it through a retheme instead of drifting off it. --a-2 / --a-3 are the same
+       numbers as type.css's --ink-quiet / --ink-faint on purpose -- one system, two
+       spellings, and they must not disagree. */
+    --text-muted: rgba(232, 232, 232, .62);  --text-muted: oklch(from var(--text) l c h / var(--a-2));
+    --text-dim:   rgba(232, 232, 232, .38);  --text-dim:   oklch(from var(--text) l c h / var(--a-3));
+    --border:     rgba(232, 232, 232, .14);  --border:     oklch(from var(--text) l c h / var(--a-line));
+  }
+
+  /* Light. Seven numbers and seven hexes -- the hex half moves too, or a legacy engine
+     gets the dark palette on a light ground. */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --l-ground: 96.66%;  --l-surface: 100%;  --l-surface-hi: 93.92%;  --l-ink: 20.02%;
+      --a-2: .66;  --a-3: .42;  --a-line: .16;
+      --bg: #f4f4f4;  --surface: #ffffff;  --surface-hi: #ebebeb;  --text: #161616;
+      --text-muted: rgba(22, 22, 22, .66);
+      --text-dim:   rgba(22, 22, 22, .42);
+      --border:     rgba(22, 22, 22, .16);
+      --bg:         oklch(var(--l-ground) 0 0);
+      --surface:    oklch(var(--l-surface) 0 0);
+      --surface-hi: oklch(var(--l-surface-hi) 0 0);
+      --text:       oklch(var(--l-ink) 0 0);
+      --text-muted: oklch(from var(--text) l c h / var(--a-2));
+      --text-dim:   oklch(from var(--text) l c h / var(--a-3));
+      --border:     oklch(from var(--text) l c h / var(--a-line));
+    }
+  }
+
+  /* An explicit choice beats the OS preference in both directions, so each theme is
+     spelled out rather than one of them relying on the media query not matching. */
+  :root[data-theme="dark"] {
+    --l-ground: 16.84%;  --l-surface: 21.78%;  --l-surface-hi: 26.45%;  --l-ink: 93.10%;
+    --a-2: .62;  --a-3: .38;  --a-line: .14;
+    --bg: #0f0f0f;  --surface: #1a1a1a;  --surface-hi: #252525;  --text: #e8e8e8;
+    --text-muted: rgba(232, 232, 232, .62);
+    --text-dim:   rgba(232, 232, 232, .38);
+    --border:     rgba(232, 232, 232, .14);
+    --bg:         oklch(var(--l-ground) 0 0);
+    --surface:    oklch(var(--l-surface) 0 0);
+    --surface-hi: oklch(var(--l-surface-hi) 0 0);
+    --text:       oklch(var(--l-ink) 0 0);
+    --text-muted: oklch(from var(--text) l c h / var(--a-2));
+    --text-dim:   oklch(from var(--text) l c h / var(--a-3));
+    --border:     oklch(from var(--text) l c h / var(--a-line));
+  }
+
+  :root[data-theme="light"] {
+    --l-ground: 96.66%;  --l-surface: 100%;  --l-surface-hi: 93.92%;  --l-ink: 20.02%;
+    --a-2: .66;  --a-3: .42;  --a-line: .16;
+    --bg: #f4f4f4;  --surface: #ffffff;  --surface-hi: #ebebeb;  --text: #161616;
+    --text-muted: rgba(22, 22, 22, .66);
+    --text-dim:   rgba(22, 22, 22, .42);
+    --border:     rgba(22, 22, 22, .16);
+    --bg:         oklch(var(--l-ground) 0 0);
+    --surface:    oklch(var(--l-surface) 0 0);
+    --surface-hi: oklch(var(--l-surface-hi) 0 0);
+    --text:       oklch(var(--l-ink) 0 0);
+    --text-muted: oklch(from var(--text) l c h / var(--a-2));
+    --text-dim:   oklch(from var(--text) l c h / var(--a-3));
+    --border:     oklch(from var(--text) l c h / var(--a-line));
+  }
+}

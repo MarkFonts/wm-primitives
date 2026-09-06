@@ -65,6 +65,15 @@ export type {
 // a .12s fallback everywhere else: one component, two speeds, depending on the app.
 // (src/motion.css -- no JS to export.)
 
+// Colour tokens. color.css is additive like type.css and motion.css -- it declares the
+// ramp (--bg/--surface/--surface-hi/--text/--text-muted/--text-dim/--border) and styles
+// no element. A theme is seven numbers, not a second palette. It sits in @layer wm.color
+// so an app's unlayered :root always wins no matter the import order. These are DEFAULTS
+// under the host contract, not a replacement for it: before them, 150 var() reads in this
+// package resolved to nothing and INHERITED a colour rather than falling back to one.
+// (src/color.css -- no JS to export. Read them from JS via the engine, never a regex:
+// they compute to oklch(), and a number sweep paints 93.1% grey as rgb(93, 0, 0).)
+
 // Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/
 // --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so
 // importing it cannot reach existing markup. Apps import the CSS from their entry
