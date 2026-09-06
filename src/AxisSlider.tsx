@@ -179,7 +179,15 @@ export function AxisSlider({
               aria-pressed={isAuto}
               title={isAuto ? 'auto — tap for a number' : 'follow the optical size automatically'}
               onClick={() => onChange(isAuto ? (autoValue ?? min) : 'auto')}
-            >auto</button>
+            >
+              {/* ● on, ○ off — Cal Sans' own circle/uni25CF, NOT • bullet and ◦ openbullet.
+                  Those are the marks this wants, and they cannot be used: they are drawn at
+                  18% of the em against these at 76%, and openbullet's counter is 90 units --
+                  0.89px at this size, under one device pixel -- so it fills in and both
+                  states render as the same solid dot. Measured, not guessed. */}
+              <span className="slider-auto-dot" aria-hidden="true">{isAuto ? '\u25CF' : '\u25CB'}</span>
+              <span className="slider-auto-word">auto</span>
+            </button>
             )}
           </span>
           {tag && <span className="slider-tag">{tag}</span>}

@@ -161,41 +161,58 @@
 
      Both halves fade together when off -- ring and word on the same grey -- so the whole
      chip recedes as one object instead of leaving a grey box around dim text. */
+  /* auto: a dot and a word. It was an outlined pill, and a ring has to be balanced
+     against the word inside it -- at 11px the pill was wide enough to shove the value
+     field into the tag, and every step down crowded the ring onto the letters until it
+     stopped reading as a control and was too small to touch. The ring caused all of it.
+
+     What is left says the same two things with less: the dot carries the STATE, the word
+     carries the NAME, and the whole thing is the hit target. Colour carries it too, but
+     never alone -- the mark changes shape as well, so the state survives a greyscale
+     screenshot and a colourblind reader.
+
+     Sizes are from the study in docs/system/pages/controls.html: word 10.5px because caps
+     read larger than lowercase at equal size and 11px let AUTO outweigh the 11px lowercase
+     tag it belongs to; dot 0.7em raised 1px, which is arithmetic -- AUTO's cap centre is
+     3.78px above the baseline, the glyph centres 2.70px up, and 0.7em is the size whose
+     correction lands nearest a whole pixel. Tracking off, deliberately against the house
+     caps rule, because .12em pulled the two-part mark apart. */
   .slider-auto {
     font: inherit;
-    font-size: var(--type-micro-size, 0.5625rem);
-    letter-spacing: 0;              /* lowercase, like the tag: no caps token */
-    text-transform: lowercase;
-    padding: 0 var(--spacing-02, 6px);
-    min-height: 15px;
-    border: 1px solid currentColor;
-    border-radius: 999px;
-    /* G2: k is the superellipse exponent 2^k, and at 1.2 a pill keeps its round cap while
-       curvature eases to zero before the straight edge. Declared here rather than left to
-       the universal rule in corners.css, which a consumer may not load. */
-    corner-shape: superellipse(var(--corner-k, 1.2));
+    /* token-lint: allow -- 10.5px: caps read larger than lowercase at equal size, so AUTO
+       at the 11px tag size outweighs the tag it belongs to. Half a pixel is the whole
+       correction and has no honest rem or role spelling. */
+    font-size: 10.5px;
+    line-height: 1;
+    letter-spacing: 0;
+    margin-left: var(--spacing-02, 6px);
+    padding: 2px 0;
+    border: 0;
     background: none;
-    color: var(--text-dim);
+    color: var(--text-dim, var(--text-muted));
     cursor: pointer;
+    display: inline-flex;
+    align-items: baseline;
+    gap: .28em;
+    vertical-align: baseline;
     flex-shrink: 0;
     transition: color var(--dur-fast, .12s) ease;
   }
-  /* The rollover is the whole point: nothing else on the row answers the pointer, so this
-     is what says the word is a control before you click it. */
-  .slider-auto:hover { color: var(--text-muted); }
-  .slider-auto--on {
-    /* House green. --ok is the app's to define; the fallback is the docs palette's geo
-       hue, which was picked in OKLCH and holds its chroma across both themes. Ring and
-       word share it through currentColor, so they can never drift apart. */
-    color: var(--ok, #00c700);
-  }
-  .slider-auto--on:hover { color: var(--ok, #00c700); opacity: .78; }
-  /* Press with colour, never an inset shadow: on a pill the shadow follows border-radius
-     but not corner-shape, so it paints a rounded rectangle inside the squircle while the
-     tap is held (corners.css says the same). */
-  .slider-auto:active { opacity: .6; }
+  .slider-auto:hover { color: var(--text-muted, var(--text)); }
+  /* ONE declaration with the fallback inside the var(), not two declarations.
+     The sRGB-then-OKLCH pattern in color.css works because an unsupported SYNTAX is
+     dropped at parse time, leaving the earlier declaration standing. A var() is not that:
+     `var(--ok)` parses fine and fails at COMPUTED-VALUE time, and a property that is
+     invalid at computed-value time does not fall back to the previous declaration -- it
+     INHERITS. Written as two declarations, the second one won the cascade and then
+     poisoned it, and the green became whatever grey the label happened to be.
+     That is the same trap color.css is written to document. The fallback belongs inside
+     the var(), where it covers the undefined case without ever being a declaration. */
+  .slider-auto--on { color: var(--ok, #00a01e); }
   .slider-auto:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
-  @media (pointer: coarse) { .slider-auto { min-height: 26px; padding: 0 var(--spacing-03, 8px); } }
+  .slider-auto-dot { font-size: .7em; position: relative; top: -1px; }
+  .slider-auto-word { text-transform: uppercase; letter-spacing: normal; }
+  @media (pointer: coarse) { .slider-auto { padding: 6px 0; } }
 
   /* ── the stepper ─────────────────────────────────────────────────────────────
      Ours, because a text field has no native one — and because the native one could
@@ -474,13 +491,15 @@
     min-width: 2ch;
     max-width: 14ch;   /* "620 · 64n" is the longest value in either app */
   }
-  .slider-row--track .slider-value { padding-right: var(--spacing-05, 16px); }
-  .slider-row--track .slider-suffix,
-  .slider-row--track .slider-step {
-    position: absolute;
-    right: 0; left: auto; top: 50%; bottom: auto;
-    transform: translateY(-50%);
-  }
+  /* No arrows here, and so no slot to reserve for them. The bar IS the coarse control --
+     press anywhere and it jumps, then follows -- which is the study's own argument for
+     dropping them, and the field is still typeable for a precise value.
+     Reserving 16px for arrows that are invisible at rest put a permanent gap between the
+     number and the bar's edge: 16px of empty slot on top of the bar's own 12px padding,
+     which read as the value being pushed off its right edge. The unit sits in normal flow
+     directly after the number, and the only right margin is the bar's padding. */
+  .slider-row--track .slider-step { display: none; }
+  .slider-row--track .slider-suffix { position: static; margin-left: .25em; }
 
   /* The field loses its box. In the default variant the host paints a rounded field so the
      number reads as editable; inside a bar that is a box within a box, and the bar is
