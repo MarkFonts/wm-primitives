@@ -50,6 +50,34 @@
      the page — small control text at 10, running text at its default 14, display left
      alone. */
   --sans: "CalSansVF", system-ui, sans-serif;
+
+  /* ── the host contract ──────────────────────────────────────────────────────
+     This page is now a HOST: it renders the real AxisSlider, so it owes the same tokens
+     font-proofer and ReCal owe (.tokenlint.json hostTokens). It was not paying them, and
+     the failure was silent in the worst way -- an undefined custom property makes the
+     whole declaration invalid at computed-value time, so the track's gradient and the
+     thumb's fill simply did not paint. The slider looked absent rather than broken.
+
+     Mapping, not redefining: the page keeps its own vocabulary (--ink, --line, --sunk)
+     and hands the primitive the names it asks for. */
+  --text:        var(--ink);
+  --text-muted:  var(--muted);
+  --text-dim:    var(--muted);
+  --border:      var(--line);
+  --border-subtle: var(--hair);
+  --surface:     var(--panel);
+  --surface-hi:  var(--raised);
+  --surface-2:   var(--sunk);
+  --bg-elevated: var(--raised);
+  --bg-hover:    var(--sunk);
+  --track-empty: var(--sunk);
+  --marker-default: var(--accent);
+  --radius:      4px;
+  --radius-sm:   3px;
+  --ui-font:     var(--sans);
+  --ok:          #00a01e;
+  --warn:        #b45309;
+  --err:         #b42318;
   --dial: "CalSansVF", system-ui, sans-serif;
   --mono: "CalSansVF", ui-monospace, monospace;
 }@media (prefers-color-scheme: dark){

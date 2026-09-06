@@ -179,10 +179,10 @@
      caps rule, because .12em pulled the two-part mark apart. */
   .slider-auto {
     font: inherit;
-    /* token-lint: allow -- 10.5px: caps read larger than lowercase at equal size, so AUTO
-       at the 11px tag size outweighs the tag it belongs to. Half a pixel is the whole
-       correction and has no honest rem or role spelling. */
-    font-size: 10.5px;
+    /* Caps read larger than lowercase at equal size, so AUTO at the 11px tag size
+       outweighs the tag it belongs to. Half a pixel is the whole correction, and half a
+       pixel has no honest rem or role spelling. */
+    font-size: 10.5px;   /* token-lint: allow -- deliberate, see above */
     line-height: 1;
     letter-spacing: 0;
     margin-left: var(--spacing-02, 6px);
@@ -237,13 +237,32 @@
        two occupants, never empty. On a coarse pointer they are permanent (below), and
        a permanent thing IS part of the object, so there they go back in flow and are
        measured with it. */
+    /* In the slot, not hung past the field. Hanging cost nothing at rest but left the
+       unit in flow, so a row with `px` pushed its number left of a row without one and
+       the values stopped sharing a right edge -- R1 in DIAL.md, and the whole reason a
+       value is right-aligned. */
     position: absolute;
-    left: 100%;
-    top: 0;
-    bottom: 0;
     justify-content: center;
   }
-  .slider-value { position: relative; }
+  /* THE SLOT, on every row. Wide enough for the WIDEST unit plus one word space --
+     measured in Cal Sans at the label size: `em` 18.36px, `px` 14.21, `%` 9.41, a space
+     2.52. 1.75x the label size clears the widest and leaves a space outside it.
+     Multiplied against --type-ui-size, NOT written as `em`: em resolves against this
+     element's own font-size, which is the page's inherited 16px rather than the 12px the
+     label is set at -- that made the slot 28px instead of 21px, a third too wide.
+     One slot, two occupants: the unit sits in it at rest, the stepper takes it on hover,
+     and the field never moves because the slot was always there. */
+  .slider-value { position: relative; padding-right: calc(1.75 * var(--type-ui-size, 0.75rem)); }
+  /* Inset by one word space, so the space sits OUTSIDE the unit -- between it and the
+     row's right edge -- rather than collapsing to the left of it. A space is 2.52px at
+     the 12px label size, hence .21 of it. */
+  .slider-suffix,
+  .slider-step {
+    position: absolute;
+    right: calc(0.21 * var(--type-ui-size, 0.75rem));
+    top: 50%;
+    transform: translateY(-50%);
+  }
   .slider-row:hover .slider-step,
   .slider-row:focus-within .slider-step { opacity: 1; }
   /* One trigger for both halves of the swap, and the same duration, or for 120ms there
@@ -501,14 +520,9 @@
      row needed anyway.
 
      Step buttons are 12px here so a pair fits the slot with air, rather than filling it. */
+  /* The bar gives up its right padding to the slot, so the total is the slot alone
+     rather than the slot plus 12px. The slot itself is the base's now. */
   .slider-row--track .slider-label { padding-right: 0; }
-  .slider-row--track .slider-value { padding-right: var(--spacing-05, 16px); }
-  .slider-row--track .slider-suffix,
-  .slider-row--track .slider-step {
-    position: absolute;
-    right: 0; left: auto; top: 50%; bottom: auto;
-    transform: translateY(-50%);
-  }
   .slider-row--track .slider-step-btn { width: 12px; }
 
   .slider-row--track .slider-suffix { color: var(--text-muted); }
