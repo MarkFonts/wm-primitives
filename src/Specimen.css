@@ -20,11 +20,11 @@
   background: linear-gradient(
     to bottom,
     rgb(0 0 0 / 0) 0%,
-    color-mix(in srgb, var(--bg, #242424) 8%, transparent) 25%,
-    color-mix(in srgb, var(--bg, #242424) 22%, transparent) 45%,
-    color-mix(in srgb, var(--bg, #242424) 45%, transparent) 65%,
-    color-mix(in srgb, var(--bg, #242424) 72%, transparent) 82%,
-    var(--bg, #242424) 100%
+    color-mix(in srgb, var(--bg) 8%, transparent) 25%,
+    color-mix(in srgb, var(--bg) 22%, transparent) 45%,
+    color-mix(in srgb, var(--bg) 45%, transparent) 65%,
+    color-mix(in srgb, var(--bg) 72%, transparent) 82%,
+    var(--bg) 100%
   );
 }
 
@@ -41,8 +41,8 @@
 .specimen-more {
   display: block;
   padding: var(--spacing-02, 6px) var(--spacing-04, 12px);
-  background: var(--text, #fff);
-  color: var(--bg, #242424);
+  background: var(--text);
+  color: var(--bg);
   border: none;
   border-radius: var(--radius, 6px);
   font: inherit;
@@ -52,13 +52,13 @@
   cursor: pointer;
 }
 .specimen-more:hover { opacity: 0.85; }
-.specimen-more:focus-visible { outline: 1px solid var(--text-muted, #999); outline-offset: 2px; }
+.specimen-more:focus-visible { outline: 1px solid var(--text-muted); outline-offset: 2px; }
 .specimen-more[disabled] { opacity: 0.5; cursor: default; }
 
 /* Leaving is the quieter of the two: outlined, not filled. */
 .specimen-next {
   background: none;
-  color: var(--text-muted, #999);
-  border: 1px solid var(--border, var(--line, #2a2a2a));
+  color: var(--text-muted);
+  border: 1px solid var(--border);
 }
-.specimen-next:hover { color: var(--text, #fff); opacity: 1; }
+.specimen-next:hover { color: var(--text); opacity: 1; }

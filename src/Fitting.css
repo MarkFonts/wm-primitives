@@ -11,7 +11,7 @@
 .fit-switches {
   display: flex;
   flex-wrap: wrap;              /* Hyphenate drops below rather than clipping */
-  border: 1px solid var(--border, var(--line, #2a2a2a));
+  border: 1px solid var(--border);
   border-radius: 13px;              /* half the 26px height: a pill, not a rounded box */
   overflow: hidden;
   margin: var(--spacing-04, 12px) 0;
@@ -27,23 +27,23 @@
   white-space: nowrap;
   background: none;
   border: none;
-  color: var(--text-muted, #999);
+  color: var(--text-muted);
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
   cursor: pointer;
   transition: background var(--dur-fast, 140ms), color var(--dur-fast, 140ms);
 }
-.fit-switch + .fit-switch { border-left: 1px solid var(--border, var(--line, #2a2a2a)); }
+.fit-switch + .fit-switch { border-left: 1px solid var(--border); }
 /* The FILL has to be shaped too: the container clips, but a filled child still paints a
    rectangle into the cap, so the active half showed square corners inside a round end. */
 .fit-switch:first-child { border-radius: 12px 0 0 12px; }
 .fit-switch:last-child { border-radius: 0 12px 12px 0; }
 .fit-switch:only-child { border-radius: 12px; }
 .fit-switch:hover:not(.active) { background: var(--bg-hover, rgba(255, 255, 255, .06)); }
-.fit-switch:active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text, #fff); }
-.fit-switch.active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text, #fff); }
-.fit-switch:focus-visible { outline: 1px solid var(--text-muted, #999); outline-offset: -2px; }
-.fit-switch-state { color: var(--text-dim, #555); font-size: 0.9em; }
+.fit-switch:active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text); }
+.fit-switch.active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text); }
+.fit-switch:focus-visible { outline: 1px solid var(--text-muted); outline-offset: -2px; }
+.fit-switch-state { color: var(--text-dim); font-size: 0.9em; }
 
 /* The collapsing sections are <Collapse> now — see Collapse.tsx and collapse.css. The
    heights used to be four hand-tuned numbers in the component (108 / 300 / 34 / 240),
@@ -59,13 +59,13 @@
   height: 28px;
   border-radius: var(--radius, 6px);
   background: var(--bg-elevated, var(--surface-2, #1c1c1c));
-  color: var(--text-dim, #555);
-  border: 1px solid var(--border, var(--line, #2a2a2a));
+  color: var(--text-dim);
+  border: 1px solid var(--border);
   cursor: pointer;
   transition: background var(--dur-fast, 140ms), color var(--dur-fast, 140ms), border-color var(--dur-fast, 140ms);
 }
-.fit-align-btn:hover { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text-muted, #999); }
-.fit-align-btn.active { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text, #fff); border-color: var(--text-muted, #999); }
+.fit-align-btn:hover { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text-muted); }
+.fit-align-btn.active { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text); border-color: var(--text-muted); }
 
 /* A sub-switch inside a collapsed section: the rag's budgets, and the H&J disclosure.
    Lower contrast than .fit-switch because it sits under one, not beside it. */
@@ -79,14 +79,14 @@
   margin: var(--spacing-02, 6px) 0;
   background: none;
   border: none;
-  border-top: 1px solid var(--border, var(--line, #2a2a2a));
-  color: var(--text-muted, #999);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
   cursor: pointer;
   transition: color var(--dur-fast, 140ms);
 }
-.fit-sub:hover, .fit-sub.active { color: var(--text, #fff); }
+.fit-sub:hover, .fit-sub.active { color: var(--text); }
 
 /* The H&J schema: label, then minimum · desired · maximum.
    This box is the QUERY CONTAINER for the rows inside it, which is the whole contract
@@ -132,10 +132,10 @@
 .fit-chip--muted {
   background: none;
   box-shadow: none;
-  border: 1px solid color-mix(in srgb, var(--text-muted, #999) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 55%, transparent);
   /* Lifted off --text-muted rather than using it raw: that token resolves to #888 here,
      which measured 4.38:1 against the panel — under AA, and this is 8px type. Mixed
      toward --text it clears 4.5:1 while staying quieter than the glowing wdth badge. */
-  color: color-mix(in srgb, var(--text-muted, #999) 80%, var(--text, #fff));
+  color: color-mix(in srgb, var(--text-muted) 80%, var(--text));
 }
 .fit-chip-row { display: flex; justify-content: flex-end; margin-top: calc(-1 * var(--spacing-02, 6px)); }

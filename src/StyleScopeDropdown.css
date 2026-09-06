@@ -82,7 +82,7 @@
   padding: var(--nudge, 2px) var(--spacing-02, 6px);
   border-radius: 999px; /* pill chips */
   border: 1px solid var(--border);
-  color: var(--text-dim, var(--text-muted));
+  color: var(--text-dim);
 }
 /* the markup chip (# / ## / ### / —) reads as syntax, so mono if available */
 .ssd-chip--markup { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }

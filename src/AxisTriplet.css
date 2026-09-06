@@ -34,16 +34,16 @@
   font-size: var(--type-micro-size, 9px);
   letter-spacing: var(--track-caps, .08em); text-transform: uppercase;
   padding: 1px 6px; border-radius: 999px;
-  border: 1px solid var(--border, #333);
+  border: 1px solid var(--border);
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
 }
 .triplet-chip--muted { opacity: .55; }
 
 .triplet-fields {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-  border: 1px solid var(--border, #333);
+  border: 1px solid var(--border);
   border-radius: var(--radius, 8px);
-  background: var(--surface, #1a1a1a);
+  background: var(--surface);
   overflow: hidden;
 }
 /* The heads sit over the fields, never over the label, so they line up with the
@@ -63,7 +63,7 @@
   position: relative; min-width: 0;
   display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
 }
-.triplet-f + .triplet-f { border-left: 1px solid var(--border, #333); }
+.triplet-f + .triplet-f { border-left: 1px solid var(--border); }
 
 .triplet-num {
   width: 100%; min-width: 0;
@@ -80,7 +80,7 @@
   text-align: right;
 }
 .triplet-num:focus { outline: none; }
-.triplet-f:focus-within { background: var(--surface-hi, #252525); }
+.triplet-f:focus-within { background: var(--surface-hi); }
 
 /* Drawn chevrons, not the platform stepper: type=text has none, and the native one
    cannot be themed. A single hairline between them is the whole divider — two edges
@@ -100,7 +100,7 @@
   cursor: pointer;
 }
 .triplet-step-btn:first-child { align-items: end; }
-.triplet-step-btn + .triplet-step-btn { border-top: 1px solid var(--border, #333); }
+.triplet-step-btn + .triplet-step-btn { border-top: 1px solid var(--border); }
 .triplet-step-btn:hover { color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1)); }
 .triplet-step-btn:active { background: rgba(var(--text-rgb, 232, 232, 232), .1); border-radius: 999px; }
 

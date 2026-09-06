@@ -110,14 +110,14 @@
      the universal rule in corners.css, which a consumer may not load. */
   corner-shape: superellipse(var(--corner-k, 1.2));
   background: none;
-  color: var(--text-dim, var(--text-muted));
+  color: var(--text-dim);
   cursor: pointer;
   flex-shrink: 0;
   transition: color var(--dur-fast, .12s) ease;
 }
 /* The rollover is the whole point: nothing else on the row answers the pointer, so this
    is what says the word is a control before you click it. */
-.slider-auto:hover { color: var(--text-muted, var(--text)); }
+.slider-auto:hover { color: var(--text-muted); }
 .slider-auto--on {
   /* House green. --ok is the app's to define; the fallback is the docs palette's geo
      hue, which was picked in OKLCH and holds its chroma across both themes. Ring and
@@ -180,7 +180,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--text-muted, var(--text));
+  color: var(--text-muted);
   cursor: pointer;
   /* square, so the press state is a circle rather than an oval */
   width: 16px;
@@ -237,8 +237,8 @@
     to right,
     var(--border) 0%,
     var(--border) var(--locked-pct, 100%),
-    var(--track-empty, var(--surface-hi, #2b2b2b)) var(--locked-pct, 100%),
-    var(--track-empty, var(--surface-hi, #2b2b2b)) 100%
+    var(--track-empty, var(--surface-hi)) var(--locked-pct, 100%),
+    var(--track-empty, var(--surface-hi)) 100%
   );
   border-radius: 1px;
 }
@@ -253,8 +253,8 @@
     to right,
     var(--border) 0%,
     var(--border) var(--locked-pct, 100%),
-    var(--track-empty, var(--surface-hi, #2b2b2b)) var(--locked-pct, 100%),
-    var(--track-empty, var(--surface-hi, #2b2b2b)) 100%
+    var(--track-empty, var(--surface-hi)) var(--locked-pct, 100%),
+    var(--track-empty, var(--surface-hi)) 100%
   );
   border-radius: 1px;
 }
@@ -267,7 +267,7 @@
   position: fixed;
   font-size: var(--type-ui-size);
   color: var(--text);
-  background: var(--bg-elevated, var(--surface, #2e2e2e));
+  background: var(--bg-elevated, var(--surface));
   border: 1px solid var(--border);
   border-radius: var(--radius, 6px);
   padding: var(--spacing-01, 4px) var(--spacing-03, 8px);
@@ -284,14 +284,14 @@
   width: 12px; height: 12px; border-radius: 2px;
   background: var(--marker-default, var(--accent, var(--text)));
   transform: rotate(45deg);
-  box-shadow: 0 0 0 1px var(--bg, #0f0f0f);
+  box-shadow: 0 0 0 1px var(--bg);
   margin-top: -5px;
 }
 .slider-row--diamond input[type="range"]::-moz-range-thumb {
   width: 12px; height: 12px; border-radius: 2px;
   background: var(--marker-default, var(--accent, var(--text)));
   transform: rotate(45deg);
-  box-shadow: 0 0 0 1px var(--bg, #0f0f0f);
+  box-shadow: 0 0 0 1px var(--bg);
 }
 
 /* Burned stock reference — a faint ghost dot at the shipped value, behind the thumb. */

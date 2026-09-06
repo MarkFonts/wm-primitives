@@ -21,7 +21,6 @@
     "--gp-ui-font",
     "--gp-ui-fvs",
     "--ink",
-    "--line",
     "--marker-default",
     "--muted",
     "--ok",

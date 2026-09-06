@@ -40,9 +40,12 @@
  * SCOPE: the seven tokens below are the ones the package reads unguarded -- --text (51
  * reads), --border (39), --text-muted (32), --text-dim (15), --bg (9), --surface (3),
  * --surface-hi (1). Still undefaulted, and still the app's job: --accent, --err, --ok,
- * --warn, --muted, --line, --bg-elevated, --bg-hover, --border-subtle, --surface-2,
- * --marker-default, --track-empty, --scrollbar-thumb*, --edit-rail*. --line and --border
- * are two names for one thing and should collapse into one.
+ * --warn, --muted, --bg-elevated, --bg-hover, --border-subtle, --surface-2,
+ * --marker-default, --track-empty, --scrollbar-thumb*, --edit-rail*.
+ *
+ * --line is gone from the contract. It only ever appeared as --border's fallback
+ * (var(--border, var(--line, #2a2a2a))), and no consumer has ever defined it, so the
+ * chain was two names for one thing with the second unreachable.
  * ─────────────────────────────────────────────────────────────────────────── */
 
 @layer wm.color {

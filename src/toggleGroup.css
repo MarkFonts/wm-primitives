@@ -32,7 +32,7 @@
   display: inline-flex;
   gap: var(--hair, 1px);
   padding: var(--nudge, 2px);
-  background: var(--bg, #242424);
+  background: var(--bg);
   border: 1px solid var(--muted, rgba(255, 255, 255, .42));
   border-radius: 999px;
   corner-shape: superellipse(var(--corner-k, 1.2));
@@ -61,5 +61,5 @@
 
 .ui-seg > button.active {
   background: var(--ink, #fff);
-  color: var(--bg, #242424);
+  color: var(--bg);
 }

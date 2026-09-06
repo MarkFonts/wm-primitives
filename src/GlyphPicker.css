@@ -7,7 +7,7 @@
   display: flex;
   gap: var(--spacing-06, 24px);
   min-height: 0;
-  color: var(--text, #eee);
+  color: var(--text);
 }
 /* The specimen font applies ONLY to glyph-bearing elements; picker chrome keeps the
    host's UI font. Hosts whose UI font is itself variable pin its instance via
@@ -94,10 +94,10 @@
 .gp-rule {
   position: absolute;
   height: 0;
-  border-top: 1px solid var(--border, #333);
+  border-top: 1px solid var(--border);
   pointer-events: none;
 }
-.gp-rule--base { border-top-color: var(--text-dim, #666); }
+.gp-rule--base { border-top-color: var(--text-dim); }
 /* labels are their own layer: right edge magnets to the rule overhang, y comes from
    placeLabels (coincident rules split above/below the shared line). */
 .gp-rule-label {
@@ -106,7 +106,7 @@
   font-size: var(--type-micro-size);
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
-  color: var(--text-dim, #666);
+  color: var(--text-dim);
   white-space: nowrap;
   pointer-events: none;
 }
@@ -130,10 +130,10 @@
   font: inherit;
   background: none;
   border: none;
-  color: var(--text-muted, #999);
+  color: var(--text-muted);
   cursor: pointer;
 }
-.gp-copy:hover { color: var(--text, #eee); }
+.gp-copy:hover { color: var(--text); }
 .gp-code {
   font-size: var(--type-ui-size);
   letter-spacing: 0;             /* a U+ readout is a code, not a caps run */
@@ -143,13 +143,13 @@
   padding: var(--spacing-03, 8px) var(--spacing-04, 12px);
   font: inherit;
   font-size: var(--type-ui-size);
-  color: var(--text, #eee);
-  background: var(--surface, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--border, #333);
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius, 8px);
   outline: none;
 }
-.gp-search:focus { border-color: var(--text-dim, #777); }
+.gp-search:focus { border-color: var(--text-dim); }
 
 /* ── Grid: groups of equal-sized cells ── */
 .gp-groups {
@@ -162,7 +162,7 @@
   font-size: var(--type-micro-size);
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
-  color: var(--text-dim, #666);
+  color: var(--text-dim);
   margin-bottom: 10px;
 }
 .gp-grid {
@@ -180,8 +180,8 @@
   font: inherit;
   font-size: var(--type-title-size, 1.625rem);
   line-height: 1;
-  color: var(--text, #eee);
-  background: var(--surface, rgba(255, 255, 255, 0.05));
+  color: var(--text);
+  background: var(--surface);
   border: none;
   border-radius: var(--radius, 8px);
   cursor: pointer;
@@ -198,11 +198,11 @@
    themes: light fill / dark glyph on a dark page, dark fill / light glyph on a light one. */
 .gp-cell:hover {
   background: var(--accent, #e8e8e8);
-  color: var(--bg, #0f0f0f);
+  color: var(--bg);
 }
 .gp-cell--active {
   box-shadow: inset 0 0 0 1.5px var(--accent, #e8e8e8);
-  background: var(--surface-hi, rgba(255, 255, 255, 0.08));
+  background: var(--surface-hi);
 }
 
 /* names mode: the square glyph area keeps its feel; a caption hangs beneath */
@@ -220,20 +220,20 @@
   font-variation-settings: normal;
   font-optical-sizing: auto;
   line-height: 1.2;
-  color: var(--text-dim, #666);
+  color: var(--text-dim);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.gp-cell--active .gp-cell-name { color: var(--text-muted, #999); }
+.gp-cell--active .gp-cell-name { color: var(--text-muted); }
 
 /* full name line under the U+ readout in the console */
 .gp-name {
   font-size: var(--type-ui-size);
   line-height: 1.4;
   text-align: center;
-  color: var(--text-muted, #999);
+  color: var(--text-muted);
 }
 /* Unsupported glyphs recede by ink, not by a fixed grey. The old #444 fallback was
    dark-first: on font-proofer's light theme it sits a hair off the #111 body text, so
