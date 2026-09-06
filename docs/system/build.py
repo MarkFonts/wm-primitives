@@ -1359,11 +1359,6 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
   </header>
   {''.join(body_parts)}
   </div>
-  <footer class="wm-foot">
-    Built from the working pages, not screenshots &mdash; every demo here is live CSS, so the
-    corners really are superellipses and the padding really is the token. Corner shapes need
-    Chrome 148+; Safari falls back to plain radii, which is the intended degradation.
-  </footer>
   </div>
   <div class="wm-lb"><canvas id="lb-footer" aria-label="WORDMARK"></canvas></div>
 </div>
