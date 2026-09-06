@@ -61,10 +61,16 @@ export interface AxisSliderProps {
   /** Dim/disable the control (e.g. a frozen axis). */
   disabled?: boolean
   /** Thumb style: 'default' round thumb · 'diamond' rotate-45 marker-default thumb (Type-Matrix
-   *  style, for default-editing rails) · 'skeletal' thin/minimal (preview/demo). */
+   *  style, for default-editing rails) · 'skeletal' thin/minimal (preview/demo)
    *  · 'track' the row IS the track: label and value sit inside a bar whose fill is the
    *    value, and a press anywhere on it jumps there and follows. */
   variant?: 'default' | 'diamond' | 'skeletal' | 'track'
+  /** How the value field is dressed. 'underline' (default) is the house treatment: a rule
+   *  under the digits, as wide as the value, with focus carried by the underline and the
+   *  number colouring together -- no box means nothing has to know about box padding or
+   *  radius to show a state. 'box' is font-proofer's original field, kept because a dial
+   *  value in a box is a legitimate choice and not a legacy. */
+  field?: 'underline' | 'box'
   /** Stock/original value → a faint "burned" reference marker on the track (see how far you moved). */
   reference?: number
   /** Static unit label shown just after the editable field (e.g. "px", "%", "em"). Never inside it. */
@@ -77,7 +83,7 @@ export interface AxisSliderProps {
 export function AxisSlider({
   label, tag, value, min, max, step = 1, onChange, display,
   lockedAbove, allowAuto, autoButton = true, autoValue, marker, onRangePointerDown, disabled,
-  variant = 'default', reference, suffix, showRange,
+  variant = 'default', field = 'underline', reference, suffix, showRange,
 }: AxisSliderProps) {
   const [numFocused, setNumFocused] = useState(false)
 
@@ -144,7 +150,7 @@ export function AxisSlider({
   return (
     <div
       ref={rowRef}
-      className={`slider-row${disabled ? ' slider-row--off' : ''}${variant !== 'default' ? ` slider-row--${variant}` : ''}`}
+      className={`slider-row${disabled ? ' slider-row--off' : ''}${variant !== 'default' ? ` slider-row--${variant}` : ''}${field === 'box' ? ' slider-row--boxed' : ''}`}
       style={{ '--pct': `${valuePct}%` } as CSSProperties}
     >
       {hintPos && createPortal(
