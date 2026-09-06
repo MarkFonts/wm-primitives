@@ -15,17 +15,25 @@
      gutter nobody asked for. 6px: enough to part the two, not enough to look like a
      column of its own. */
   gap: var(--spacing-02, 6px);
-  /* BASELINE, not centre. Centring balanced the label BLOCK against the fields, so a row
-     whose label carries a chip underneath (flex · X-SCALE) pushed "flex" and its % above
-     the numbers they belong to. On a shared baseline the label's first line, the unit and
-     the values all sit on one line, whatever hangs below. */
-  align-items: baseline;
+  /* CENTRE, now that the chip is out of the flow. A two-line label centred against a
+     one-line value straddles it -- half a line up from where a shared baseline puts it --
+     which is what lets the rows sit closer without the second line crowding the row below.
+     Baseline was the right answer only while the chip inflated the label block: it pushed
+     `flex` and its % above the numbers, and centring the whole block including the chip
+     was worse. Fixing the chip fixes the alignment. */
+  align-items: center;
 }
 .triplet-row--off { opacity: .45; pointer-events: none; }
 /* Rows were touching -- measured 0px between them -- while a wrapped label's two lines
    sat at 1.25. That is backwards: the lines of one label belong together and two
    parameters do not. Tighter within, looser between. */
-.triplet-row + .triplet-row { margin-top: var(--spacing-03, 8px); }
+/* A row whose label carries a chip needs room for it underneath, since the chip no longer
+   takes any of its own. */
+.triplet-row + .triplet-row { margin-top: 10px; }
+/* A chip row needs a little under it -- the chip hangs out of flow at top:100% and would
+   otherwise sit in the next row's gap. 2px on top of the 10px is enough for a mark that
+   is .85 of micro type; a full step read as a blank line between every parameter. */
+.triplet-row:has(.triplet-chip) { margin-bottom: 2px; }
 
 .triplet-label {
   /* the unit is tabbed to the right edge of this column (margin-left:auto below), so
@@ -34,8 +42,9 @@
      line ended, so a stack of rows showed the % at three different x. Here row 1 is
      [label | unit] and the chip spans row 2, so every unit lands on the same right edge
      however many lines the label takes. */
-  display: grid; grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline; gap: 0 var(--spacing-02, 6px);
+  position: relative;   /* the chip hangs off this */
+  display: grid; grid-template-columns: minmax(0, 1fr);
+  align-items: baseline; gap: 0;
   min-width: 0; line-height: 1.1;
   font-size: var(--type-ui-size, 12px);
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
@@ -45,7 +54,13 @@
    quiet ink — not inside each of the three fields, which would say they measure three
    different things. */
 .triplet-unit {
-  /* Row 1, on the shared baseline with the label's first line and the values. */
+  /* Its own slot, out of the label's flow: pinned to the right edge of the label column
+     and centred on the row, so it sits on the VALUES' line rather than on one of the
+     label's. In flow it either shared the label's last line -- moving with the wrap, so
+     three rows put the % at three different heights -- or took a row of its own beneath
+     the label, which read as a caption on the label instead of a unit on the numbers. */
+  position: absolute; right: -2px; top: 50%; transform: translateY(-50%);
+  padding-left: 2px;   /* air on the label side, 2px closer to the fields it belongs to */
   font-style: normal;
   font-size: .85em; font-variant-numeric: tabular-nums;
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
@@ -60,13 +75,16 @@
    --track-caps). The dot is ● at 0.7em raised 1px, exactly as on `auto` -- ○/● are drawn
    at 76% of the em where • is 18%, which at this size is under a device pixel. */
 .triplet-chip {
-  grid-column: 1 / -1; justify-self: start;
+  /* Out of flow, so it cannot make the label taller than its own lines. In flow it added
+     a row to the label grid, and everything that aligns against the label then aligned
+     against a block that is partly a footnote. */
+  position: absolute; top: 100%; left: 0;
   display: inline-flex; align-items: baseline; gap: .28em;
-  margin: 2px 0 0; padding: 0; border: 0; border-radius: 0;
+  margin: 1px 0 0; padding: 0; border: 0; border-radius: 0;
   font-style: normal; white-space: nowrap;
   /* Smaller than micro: it is the quietest thing in the row -- a qualifier on the
      parameter, under a label that is already secondary to the numbers. */
-  font-size: calc(var(--type-micro-size, 9px) * .85);
+  font-size: calc(var(--type-micro-size, 9px) * .85);   /* token-lint: allow -- below micro on purpose, see above */
   letter-spacing: var(--track-caps, .08em); text-transform: uppercase;
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
 }
@@ -82,7 +100,7 @@
    next, which is space no number was using. */
 .triplet-fields {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: 9px;
+  column-gap: 9px;   /* token-lint: allow -- the chevron gutter: 9px is the stepper's width */
   /* No box: the rule under each number IS the field, same as .slider-number. The three
      fields used to sit in one bordered, filled lozenge with hairlines between them --
      a container drawn around numbers that are already a row. */
