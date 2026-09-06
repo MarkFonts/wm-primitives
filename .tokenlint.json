@@ -52,6 +52,7 @@
     "--gp-font",
     "--gp-fvs",
     "--gp-opsz",
-    "--locked-pct"
+    "--locked-pct",
+    "--pct"
   ]
 }

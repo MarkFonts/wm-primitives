@@ -62,7 +62,9 @@ export interface AxisSliderProps {
   disabled?: boolean
   /** Thumb style: 'default' round thumb · 'diamond' rotate-45 marker-default thumb (Type-Matrix
    *  style, for default-editing rails) · 'skeletal' thin/minimal (preview/demo). */
-  variant?: 'default' | 'diamond' | 'skeletal'
+   *  · 'track' the row IS the track: label and value sit inside a bar whose fill is the
+   *    value, and a press anywhere on it jumps there and follows. */
+  variant?: 'default' | 'diamond' | 'skeletal' | 'track'
   /** Stock/original value → a faint "burned" reference marker on the track (see how far you moved). */
   reference?: number
   /** Static unit label shown just after the editable field (e.g. "px", "%", "em"). Never inside it. */
@@ -133,8 +135,18 @@ export function AxisSlider({
 
   const numberValue = nbMinus(display != null ? String(display) : String(value))
 
+  // How far along the track the value sits, as a percentage. Only variant="track" paints
+  // with it -- the bar's fill is a gradient stop, not an element -- but it costs one
+  // custom property on every row rather than a second code path for one variant.
+  const shownValue = isAuto ? (autoValue ?? (min + max) / 2) : (value as number)
+  const valuePct = Math.max(0, Math.min(100, ((shownValue - min) / (max - min)) * 100))
+
   return (
-    <div ref={rowRef} className={`slider-row${disabled ? ' slider-row--off' : ''}${variant !== 'default' ? ` slider-row--${variant}` : ''}`}>
+    <div
+      ref={rowRef}
+      className={`slider-row${disabled ? ' slider-row--off' : ''}${variant !== 'default' ? ` slider-row--${variant}` : ''}`}
+      style={{ '--pct': `${valuePct}%` } as CSSProperties}
+    >
       {hintPos && createPortal(
         <div className="slider-auto-hint" style={{ top: hintPos.top, left: hintPos.left }}>
           hint: type &quot;a&quot; for auto

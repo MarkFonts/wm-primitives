@@ -313,3 +313,48 @@
   font-feature-settings: "tnum"; margin-left: -3px; pointer-events: none;
 }
 .slider-suffix--hidden { visibility: hidden; }
+
+/* ── variant="track": the row IS the track ───────────────────────────────────
+   The bar carries the label, the tag and the value, and its fill IS the value. Ported
+   from the "row is the track" study in the docs page, which is where the five ways of
+   drawing a dial are compared side by side.
+
+   Built from the SAME DOM as every other variant rather than a second render path: the
+   native range input is stretched over the bar at zero opacity, so press-anywhere-to-jump,
+   drag, and the full keyboard contract (arrows, Home/End, page keys) are the platform's
+   and not ours to reimplement or to get subtly wrong. The label layer sits above it and
+   is pointer-transparent, except the number, which has to stay clickable to type into.
+
+   The fill is a gradient stop at --pct, not an element -- one paint, nothing to keep in
+   sync, and it cannot drift from the thumb because there is no thumb. */
+.slider-row--track { position: relative; gap: 0; }
+
+.slider-row--track .slider-track-wrap { position: absolute; inset: 0; margin: 0; }
+.slider-row--track .slider-track-wrap input[type="range"] {
+  width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize;
+  /* Claim the horizontal gesture only. `none` would take the page's vertical scroll with
+     it wherever the pointer crossed a rail, which is most of a rail. */
+  touch-action: pan-y;
+}
+.slider-row--track .slider-track-wrap input[type="range"]:disabled { cursor: default; }
+
+.slider-row--track .slider-label {
+  position: relative; z-index: 1;
+  pointer-events: none;                     /* the bar underneath owns the press */
+  min-height: 32px; padding: 0 var(--spacing-04, 12px);
+  border-radius: var(--radius, 6px);
+  corner-shape: superellipse(var(--corner-k, 1.2));
+  background:
+    linear-gradient(to right, var(--surface-hi) 0 var(--pct, 0%), transparent var(--pct, 0%) 100%),
+    var(--surface);
+  border: 1px solid var(--border);
+}
+/* The number stays typeable: click it and the drag stands down. */
+.slider-row--track .slider-number,
+.slider-row--track .slider-step,
+.slider-row--track .slider-auto { pointer-events: auto; }
+.slider-row--track .slider-track-wrap input[type="range"]:focus-visible + * ,
+.slider-row--track .slider-track-wrap input[type="range"]:focus-visible {
+  outline: 2px solid var(--accent, currentColor); outline-offset: 2px;
+}
+@media (pointer: coarse) { .slider-row--track .slider-label { min-height: 44px; } }
