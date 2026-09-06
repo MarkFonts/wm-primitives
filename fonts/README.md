@@ -61,4 +61,13 @@ fv = getattr(f["GSUB"].table, "FeatureVariations", None)
 print(len(fv.FeatureVariationRecord) if fv else 0)   # Cal Sans / Flex: 15, UI: 9
 ```
 
-To update: rebuild in `calbuild`, copy here, push, bump the submodule pointers.
+## Updating
+
+`python -m scripts --bump` in calbuild, after a build. It copies the house faces here,
+commits and pushes, which fires `notify.yml` and redeploys the consumers. It refuses if
+FeatureVariations did not survive the build, or if this checkout is dirty or off main.
+`CalSans-Bold.woff2` is excluded, per above.
+
+`--varonly` stops before the statics, so it warns that any static it would publish is
+from an earlier run. Don't hand-copy: the point of the flag is that the version is
+guaranteed by git rather than asserted by whoever remembered to drag the file across.
