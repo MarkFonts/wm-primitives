@@ -198,10 +198,13 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, h
           <div className="fit-hj">
             {/* the column heads come from the first row now -- the primitive draws them,
                 so they cannot drift out of line with the fields they name */}
-            <AxisTriplet label="word spacing" unit="%" showHeads offset={0} step={1} min={0} max={300}
+            {/* "space", not "spacing": at the rail's real width the longer word wraps to a
+                second line, and two lines of label against one line of value is what
+                forces the rows apart. The shorter name reads the same and fits. */}
+            <AxisTriplet label="word space" unit="%" showHeads offset={0} step={1} min={0} max={300}
               value={band(v.wordSpacing)} onChange={b => set({ wordSpacing: b })} />
             {/* stored 100-centred, read 0-centred: offset is a display transform, not a unit */}
-            <AxisTriplet label="letter spacing" unit="%" offset={100} step={0.5} min={-20} max={20}
+            <AxisTriplet label="letter space" unit="%" offset={100} step={0.5} min={-20} max={20}
               value={band(v.tracking)} onChange={b => set({ tracking: b })} />
             {/* One name, whichever mechanism serves it: the row does the same job and
                 obeys the same numbers whether the font has a width axis to move or has

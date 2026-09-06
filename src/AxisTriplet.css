@@ -10,7 +10,7 @@
      panel it did -- so "word spacing" had no column to wrap inside and printed across the
      numbers. With a floor it wraps to two lines, which is what you want at the narrowest
      width. */
-  grid-template-columns: minmax(3.5rem, 1fr) minmax(0, 13rem);
+  grid-template-columns: minmax(3rem, 1fr) minmax(0, 13rem);
   /* The label column is already a floor with slack in it, so a 12px gap on top read as a
      gutter nobody asked for. 6px: enough to part the two, not enough to look like a
      column of its own. */
