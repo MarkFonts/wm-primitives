@@ -1,0 +1,85 @@
+name: rebuild docs for a font bump
+
+# `calbuild --bump` pushes new house faces into fonts/ and stops there. docs/fonts/ is a
+# build-time copy of those faces (docs/system/build.py), and docs/index.html embeds glyph
+# data read out of them -- neither updates itself, which is how the system page came to
+# serve 1.999 for 27 days while fonts/ beside it held 2.000. See issue #6.
+#
+# So the bump gets its other half here: rebuild the page against the faces that just
+# landed, and commit it. lint.yml's `faces` job deliberately does NOT watch fonts/ --
+# if it did, every bump would go red for the minute before this workflow fixed it, which
+# is a failure notification for something that has not failed. It watches docs/fonts/
+# and every PR instead, so a hand-edited copy is still caught; this is what handles the
+# one path that is expected and automatic.
+on:
+  push:
+    branches: [main]
+    paths: ['fonts/**']
+  workflow_dispatch:
+
+# A second bump landing mid-rebuild would race this one to the same generated files.
+# Queue; never cancel, or the queue-jumper's build is the one that gets committed.
+concurrency:
+  group: docs-rebuild
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # fontTools only. qu2cu ships inside it now, so the hero's `6` outline needs
+      # nothing extra.
+      - run: pip install fonttools
+
+      - name: Rebuild and commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Generated output does not merge. If another push wins the race, throw this
+          # build away, take theirs, and build again on top -- never rebase a 790KB
+          # single-line HTML file into a conflict nobody can resolve.
+          for attempt in 1 2 3 4 5; do
+            python3 docs/system/build.py --linked
+            git add docs
+            if git diff --staged --quiet; then
+              echo "docs already match the published fonts -- nothing to commit"
+              exit 0
+            fi
+            git commit \
+              -m "docs: rebuild against the fonts just published" \
+              -m "Automatic half of a calbuild --bump: docs/fonts/ is a copy of fonts/ and docs/index.html embeds glyph data read from it, so a bump that stopped at fonts/ left the system page on the previous face. See #6."
+            if git push origin HEAD:main; then
+              echo "pushed"
+              exit 0
+            fi
+            echo "push rejected (attempt $attempt) -- resetting onto origin/main and rebuilding"
+            git fetch origin main
+            git reset --hard origin/main
+            sleep $((RANDOM % 5 + 3))
+          done
+          echo "::error::could not push a docs rebuild after 5 attempts"
+          exit 1
+
+      # The point of the whole workflow, asserted rather than assumed. Same comparison
+      # lint.yml's `faces` job makes; here it is the proof the rebuild actually took.
+      - name: docs/fonts must now match the published fonts
+        run: |
+          fail=0
+          for name in CalSansVF.ttf; do
+            a=$(sha256sum "fonts/$name"      | cut -d' ' -f1)
+            b=$(sha256sum "docs/fonts/$name" | cut -d' ' -f1)
+            if [ "$a" = "$b" ]; then
+              echo "ok    $name  ${a:0:12}"
+            else
+              echo "::error::rebuild ran but docs/fonts/$name is still ${b:0:12} against fonts/$name ${a:0:12}"
+              fail=1
+            fi
+          done
+          exit $fail

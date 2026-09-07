@@ -8,8 +8,12 @@ on:
       - 'src/**'
       - 'scripts/lint-tokens.mjs'
       - '.tokenlint.json'
-      # The faces job below watches both halves of the copy.
-      - 'fonts/**'
+      # The faces job watches docs/fonts/, NOT fonts/. A `calbuild --bump` writes
+      # fonts/ and stops; docs-fonts.yml rebuilds the copy a minute later. Watching
+      # fonts/ here would fail the bump commit in that gap -- a failure notification
+      # for something that has not failed, and is about to be handled. What is left
+      # for this job is the case nothing automates: a docs/fonts/ copy edited by hand,
+      # and every PR (the pull_request trigger carries no paths filter).
       - 'docs/fonts/**'
   pull_request:
   workflow_dispatch:
