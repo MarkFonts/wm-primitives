@@ -326,10 +326,23 @@
   }
   .slider-number:disabled { cursor: default; }
 
+  /* THE TARGET IS THE ROW'S HEIGHT, and it has to be, because it cannot overlap.
+     The range input is the pointer target -- press-anywhere-on-the-track is the whole
+     reason the native control is here -- and the visible track is only 2px of it.
+     Two wrong ways to buy the rest of that height back, both tried:
+       • ReCal set `height: 1px` in host CSS. That does not compact the row, it DELETES
+         the target: a 1px-tall box to press.
+       • Taking the input out of flow and centring it over a short wrap. The row gets
+         short and the target stays 24px -- but the target then overhangs the rows above
+         and below and swallows THEIR clicks, so a dense rail stops responding entirely.
+     So the target stays in flow and the row pays for it. --dial-track-h is how a dense
+     rail asks for less, and 14px is the floor: below the thumb there is nothing left to
+     hit. Compactness is bought from the number, not from the hit area. */
   .slider-track-wrap { position: relative; }
   .slider-track-wrap input[type="range"] {
     -webkit-appearance: none; appearance: none;
-    width: 100%; height: 24px;
+    width: 100%;
+    height: max(14px, var(--dial-track-h, 24px));
     background: transparent; cursor: pointer; margin: 0; display: block;
   }
   .slider-track-wrap input[type="range"]::-webkit-slider-runnable-track {
@@ -343,10 +356,18 @@
     );
     border-radius: 1px;
   }
+  /* THE THUMB CENTRES ITSELF ON THE TRACK, whatever size it is. -webkit- puts the thumb's
+     top at the track's top, so centring is a margin -- and that margin is arithmetic on
+     the thumb's own height, not a number. It was -6px, correct for exactly 14px and wrong
+     for anything else: ReCal's play rail resizes the thumb to 9px and its scene bar to
+     12px, both by overriding this pseudo-element and neither restating the margin, so
+     both sat high of their rails (2.5px and 1px). Size it through --dial-thumb instead
+     and the arithmetic follows. */
   .slider-track-wrap input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 14px; height: 14px; border-radius: 50%;
-    background: var(--text); margin-top: -6px; cursor: pointer;
+    width: var(--dial-thumb, 14px); height: var(--dial-thumb, 14px); border-radius: 50%;
+    background: var(--text); cursor: pointer;
+    margin-top: calc((2px - var(--dial-thumb, 14px)) / 2);
   }
   .slider-track-wrap input[type="range"]::-moz-range-track {
     height: 2px;
@@ -359,8 +380,9 @@
     );
     border-radius: 1px;
   }
+  /* Firefox centres the thumb on the track for us -- no margin, and none wanted. */
   .slider-track-wrap input[type="range"]::-moz-range-thumb {
-    width: 14px; height: 14px; border-radius: 50%;
+    width: var(--dial-thumb, 14px); height: var(--dial-thumb, 14px); border-radius: 50%;
     background: var(--text); border: none; cursor: pointer;
   }
 

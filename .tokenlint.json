@@ -15,6 +15,8 @@
     "--bg-hover",
     "--border",
     "--border-subtle",
+    "--dial-thumb",
+    "--dial-track-h",
     "--edit-rail",
     "--edit-rail-target",
     "--err",
