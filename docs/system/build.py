@@ -14,6 +14,45 @@ import pathlib, re, sys
 HERE = pathlib.Path(__file__).resolve().parent
 SD   = HERE / "pages"
 DOCS = HERE.parent
+PKG  = DOCS.parent          # the repo root, where fonts/ is
+
+
+# ---------------------------------------------------------------- the house faces
+# docs/fonts/ used to hold its own committed copy of Cal Sans, one directory from the
+# fonts/ that `calbuild --bump` publishes into. Nothing kept the two in step, so the page
+# that DOCUMENTS the house faces was serving 1.999 while fonts/ beside it held 2.000 --
+# 27 days, and no way to notice, because a stale font renders perfectly.
+#
+# So the published face is copied here at build time instead. fonts/ is the source; this
+# is a derivative of it, regenerated on every build, and it can no longer drift because
+# nothing writes it by hand. See MarkFonts/wm-primitives#6.
+#
+# It stays TRACKED, unlike most build output: GitHub Pages serves the committed docs/
+# directory, and the linked build points @font-face at fonts/CalSansVF.ttf relative to
+# it. Ignoring the copy would publish a page with no font. Same deal as docs/index.html
+# -- generated, and committed because that is what gets served.
+#
+# Only the faces `--bump` publishes are synced. CalSansSpecimen.ttf and PaperMono.woff2
+# are the page's own, tracked here, and are not house faces -- copying fonts/ wholesale
+# would be wrong in both directions.
+SYNCED_FACES = ["CalSansVF.ttf"]
+
+def sync_faces():
+    import shutil
+    (DOCS/"fonts").mkdir(parents=True, exist_ok=True)
+    for name in SYNCED_FACES:
+        src = PKG/"fonts"/name
+        if not src.exists():
+            raise SystemExit(f"build: {src} is missing -- docs/fonts/ is built from fonts/, "
+                             f"which is what `calbuild --bump` publishes into.")
+        dst = DOCS/"fonts"/name
+        if dst.exists() and dst.read_bytes() == src.read_bytes():
+            print(f"  face {name}: already current")
+            continue
+        shutil.copy2(src, dst)
+        print(f"  face {name}: copied from fonts/")
+
+sync_faces()
 
 # The Optical Size Proof is deliberately NOT here: it is a font-proofing instrument, not
 # a page about the design system. (It also embeds CalSansUI.ttf rather than the full

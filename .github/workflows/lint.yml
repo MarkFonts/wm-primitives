@@ -4,7 +4,13 @@ name: lint-tokens
 # was cleaned up by hand once; without this the next literal goes in unnoticed.
 on:
   push:
-    paths: ['src/**', 'scripts/lint-tokens.mjs', '.tokenlint.json']
+    paths:
+      - 'src/**'
+      - 'scripts/lint-tokens.mjs'
+      - '.tokenlint.json'
+      # The faces job below watches both halves of the copy.
+      - 'fonts/**'
+      - 'docs/fonts/**'
   pull_request:
   workflow_dispatch:
 
@@ -17,3 +23,31 @@ jobs:
         with:
           node-version: 20
       - run: node scripts/lint-tokens.mjs
+
+  # docs/fonts/ is a build-time copy of the faces `calbuild --bump` publishes into
+  # fonts/, and docs/system/build.py makes the copy. But nothing runs build.py in CI, so
+  # a bump lands in fonts/ and the docs page keeps serving the old face until somebody
+  # happens to rebuild. That is exactly how it went 27 days stale (issue #6) -- the copy
+  # alone shortens that window, it does not close it.
+  #
+  # This closes it: a bump that does not carry a rebuilt docs/ fails here, loudly, on the
+  # commit that caused it, instead of being discovered by measuring a live page.
+  faces:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: docs/fonts must match the published fonts
+        run: |
+          fail=0
+          # Keep in step with SYNCED_FACES in docs/system/build.py.
+          for name in CalSansVF.ttf; do
+            a=$(sha256sum "fonts/$name"      | cut -d' ' -f1)
+            b=$(sha256sum "docs/fonts/$name" | cut -d' ' -f1)
+            if [ "$a" = "$b" ]; then
+              echo "ok    $name  ${a:0:12}"
+            else
+              echo "::error file=docs/fonts/$name::docs/fonts/$name is ${b:0:12}, fonts/$name is ${a:0:12} -- run 'python3 docs/system/build.py --linked' and commit docs/"
+              fail=1
+            fi
+          done
+          exit $fail
