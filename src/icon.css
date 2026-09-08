@@ -42,6 +42,24 @@
  * @layer wm.icon so an app's plain rule always wins. See DIAL.md §6.
  * ─────────────────────────────────────────────────────────────────────────── */
 
+/* SELF-HOSTED, and outside the layer because @font-face is not a style rule and cascade
+   layers do not apply to it.
+   The package ships the font in fonts/ beside Cal Sans, so a consumer gets the marks by
+   importing this file and nothing else -- no <link> to remember, which is exactly the
+   thing that would have made ReCal render `format_align_left` as words. It also removes
+   the subsetting trap: a subset list that drifts from the code prints the missing
+   ligature as its own name, in plain text, in production. 3.9MB is the price of not
+   having that failure mode, and it is one file, cached, on a type tool.
+   The path is relative to THIS stylesheet, so it resolves the same whether the file is
+   read from src/ in the package or from shared/src/ in a consumer. */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;   /* block, not swap: a fallback would print the ligature NAME */
+  src: url('../fonts/MaterialSymbolsOutlined.woff2') format('woff2');
+}
+
 @layer wm.icon {
   .wm-icon {
     /* The literal ligature name is the content, so it must not wrap, hyphenate, or get

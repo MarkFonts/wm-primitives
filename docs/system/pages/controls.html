@@ -15,7 +15,14 @@
 <link rel="stylesheet" href="../../src/AxisSlider.css">
 <link rel="stylesheet" href="../../src/AxisTriplet.css">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=fit_width,line_weight,format_line_spacing,mystery" />
+<!-- The Material Symbols link that used to be here was SUBSETTED to four icon_names --
+     fit_width, line_weight, format_line_spacing, mystery -- for card 04. It declared the
+     same font-family as the package's own self-hosted face, so two faces loaded under one
+     name and the four-icon subset won: every other ligature on this page printed as its
+     own name, in words. That is the exact failure a drifting icon_names list produces, and
+     it was already live here.
+     The font comes from icon.css now, which build.py inlines and whose @font-face points
+     at the woff2 synced into docs/fonts/. One face, every mark. -->
 <!-- Source for section 03. Written standalone: `body` is the section, `&` means the
      section element itself, and the theme sits on :root, which is where the document
      puts it. The faces are the ones the assembled page declares -- CalSansVF and
@@ -632,6 +639,44 @@
 &.touch .d:hover .d-unit, &.touch .d:focus-within .d-unit,
 &.touch .v3 .d:hover .pill .d-unit, &.touch .v3 .d:focus-within .pill .d-unit { opacity: .78; }
 &.always-arrows .d .f .arrows, &.touch .d .f .arrows { opacity: 1; }
+
+/* ── the marks grid ────────────────────────────────────────────────────────────
+   Page furniture only. Everything INSIDE a cell is the primitive's own -- .wm-icon and
+   .wm-chevron come from icon.css and chevron.css, which build.py inlines, so this grid
+   cannot show a mark that differs from what ships. */
+.marks-h { margin: var(--pad-8, 48px) 0 var(--pad-2, 8px); }
+.marks-h3 { margin: var(--pad-7, 32px) 0 var(--pad-2, 8px); }
+.marks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: var(--pad-4, 16px);
+  margin-top: var(--pad-4, 16px);
+}
+.mark {
+  margin: 0;
+  display: flex; flex-direction: column; align-items: center; gap: var(--pad-2, 8px);
+  padding: var(--pad-5, 20px) var(--pad-3, 12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  background: var(--surface);
+  text-align: center;
+}
+/* The mark sits on its own line at full ink -- this is a specimen, not a control, so the
+   quiet resting ink the apps use would be showing the wrong thing. */
+.mark .wm-icon, .mark .wm-chevron { color: var(--text); }
+/* A chevron is 6-7px tall. On its own in a cell that reads as a speck, so the cell gives
+   it room without scaling it: the whole point is the size it really is. */
+.marks--chev .mark svg { margin: var(--pad-4, 16px) 0; overflow: visible; }
+.mark-name {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: var(--type-micro-size, 10px);
+  color: var(--text-muted);
+  word-break: break-all;
+}
+.mark-use {
+  font-size: var(--type-micro-size, 10px);
+  color: var(--text-dim);
+}
 </style>
 
 <h1>Five ways to draw one dial</h1>
@@ -657,6 +702,24 @@ scroll.</p>
 </div>
 
 <div class="grid" id="t-grid"></div>
+
+<h2 class="marks-h">The marks</h2>
+<p class="lede">Two families, and the split is not taste. <b>Material Symbols</b> for anything
+that is a <i>symbol</i>: it is a variable font, so a mark answers the pointer by pressing
+harder rather than by swapping drawings, and it themes on <code>GRAD</code> without moving
+its own metrics. <b>The house chevron</b> for every chevron, because Material&rsquo;s
+<code>opsz</code> axis bottoms out at 20 and a dial&rsquo;s stepper is six pixels tall &mdash;
+a glyph drawn for 20px used at 6 is the 20px drawing scaled down, stroke and all. A stroked
+path has no floor.</p>
+
+<div class="marks" id="m-icons"></div>
+
+<h3 class="marks-h3">Chevrons</h3>
+<p class="lede">One drawing, one angle (34.6&deg;), three sizes. The stroke is derived from the
+width rather than fixed &mdash; optical sizing by another name: at one absolute stroke a small
+chevron carries more ink per unit of mark and reads heavier.</p>
+<div class="marks marks--chev" id="m-chevrons"></div>
+
 <script>
 const $$ = s => document.querySelector(s);
 const $$$ = s => document.querySelectorAll(s);
@@ -1445,5 +1508,71 @@ toggle('t-arrows', 'always-arrows', false);
   }
 })();
 
+
+/* ── the marks grid ────────────────────────────────────────
+   Rendered from the same component contract the apps use -- .wm-icon carries the axes
+   and the ink, so this page cannot show a mark the package does not ship. */
+const MDS = [
+  ['format_align_left','align left'], ['format_align_center','align center'],
+  ['format_align_right','align right'], ['format_align_justify','justify'],
+  ['format_h1','heading 1'], ['format_h2','heading 2'], ['format_h3','heading 3'],
+  ['format_paragraph','paragraph'], ['format_bold','bold'], ['format_italic','italic'],
+  ['settings_backup_restore','reset'], ['discover_tune','settings flyout'],
+  ['forms_add_on','multi-select'], ['content_copy','copy'], ['check','copied'],
+  ['calendar_month','cal.com'], ['insert_text','big word'], ['text_fields','type scale'],
+  ['grid_view','glyphs'], ['brightness_auto','theme auto'], ['light_mode','theme light'],
+  ['dark_mode','theme dark'], ['keyboard_arrow_up','stepper up'], ['keyboard_arrow_down','stepper down'],
+];
+(() => {
+  const host = document.getElementById('m-icons');
+  for (const [name, use] of MDS) {
+    const cell = mk('figure', 'mark');
+    const m = mk('span', 'wm-icon material-symbols-outlined');
+    m.textContent = name; m.setAttribute('translate', 'no');
+    m.style.fontSize = '24px';
+    m.style.setProperty('--icon-opsz', '24');
+    const n = mk('figcaption', 'mark-name'); n.textContent = name;
+    const u = mk('span', 'mark-use'); u.textContent = use;
+    cell.append(m, n, u); host.appendChild(cell);
+  }
+})();
+
+/* The three chevrons that actually ship, at the sizes they ship at. Named by size rather
+   than by where they are used, because the same mark serves several places. */
+const CHEVS = [
+  ['chevron_S', 7,  6, 'AxisTriplet stepper'],
+  ['chevron_M', 10, 6, 'AxisSlider stepper'],
+  ['chevron_L', 12, 7, 'select, sidebar, style menu'],
+];
+const SLOPE = 0.69;
+const r2 = n => Math.round(n * 100) / 100;
+function chevPath(dir, w, h, inset = 1) {
+  const x0 = inset, x1 = w / 2, x2 = w - inset;
+  const rise = (x1 - x0) * SLOPE, m = h / 2, a = m - rise / 2, b = m + rise / 2;
+  return dir > 0 ? `M${x0} ${r2(b)} ${x1} ${r2(a)} ${x2} ${r2(b)}`
+                 : `M${x0} ${r2(a)} ${x1} ${r2(b)} ${x2} ${r2(a)}`;
+}
+const strokeFor = w => Math.round(1.15 * Math.sqrt(w / 10) * 100) / 100;
+(() => {
+  const host = document.getElementById('m-chevrons');
+  for (const [name, w, h, use] of CHEVS) {
+    const cell = mk('figure', 'mark');
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.setAttribute('width', String(w)); svg.setAttribute('height', String(h));
+    svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'miter');
+    svg.setAttribute('stroke-miterlimit', '4');
+    svg.style.strokeWidth = strokeFor(w) + 'px';
+    svg.classList.add('wm-chevron');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', chevPath(-1, w, h));
+    svg.appendChild(path);
+    const n = mk('figcaption', 'mark-name'); n.textContent = name;
+    const u = mk('span', 'mark-use'); u.textContent = `${w}\u00d7${h}px \u00b7 stroke ${strokeFor(w)} \u00b7 ${use}`;
+    cell.append(svg, n, u); host.appendChild(cell);
+  }
+})();
 
 </script>
