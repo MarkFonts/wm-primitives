@@ -13,9 +13,14 @@
     top: 0;
     display: flex;
     flex-direction: column;
-    /* No gap: the marks are one object, a stack, and a gap makes four of them. Their own
-       padding (.wm-icon-btn) already parts them by 12px of target. */
+    /* No gap: the marks are one object, a stack, and a gap makes four of them. It is also
+       what keeps the column of targets CONTINUOUS -- any gap here is a strip of dead
+       pixels between two buttons, and dragging down the rail flickers the cursor between
+       pointer and arrow as you cross each one. */
     gap: 0;
+    /* Belt and braces on the same point: the rail itself is pointer, so even the padding
+       between a button's edge and the next never reverts. */
+    cursor: pointer;
     /* Out of the text's way entirely -- the rail must not narrow the measure, because the
        measure is the thing being proofed. Sitting outside the column is why it can be
        absolute rather than a flex sibling. */
@@ -32,9 +37,20 @@
      A floor, not zero, so the rail is discoverable rather than hidden -- at 0 you cannot
      find what you do not know is there, and the margin is a large place to wave at. The
      floor is a hint; the fade is the reward for going near.
-     No transition: --prox is already updated every frame, and a 140ms ease on top of a
-     per-frame value lags the cursor by exactly that much. */
+     No transition: --prox is already updated every frame, and an eased transition on top
+     of a per-frame value lags the cursor by exactly its own duration. */
+  /* Bigger targets than a toolbar's. These sit in open margin with nothing to collide
+     with, they are aimed at from a distance rather than pressed in a row, and they are
+     faint by design -- so the thing you are aiming at is smaller than usual and deserves
+     more room around it, not less. 10px against .wm-icon-btn's 6px: a 40px square per
+     mark, and the four make one unbroken column.
+     Full width of the rail as well, so the whole stack is live rather than four islands
+     with the rail's own padding between them. */
   .block-style-rail .wm-icon-btn {
+    /* Through the knob: a plain `padding` here is in wm.controls and loses to icon.css's
+       wm.icon, later layer beating it whatever the specificity. */
+    --icon-btn-pad: var(--spacing-04, 12px);
+    width: 100%;
     --prox: 0;
     --rail-prox-floor: .14;
     opacity: calc(var(--rail-prox-floor) + (1 - var(--rail-prox-floor)) * var(--prox));

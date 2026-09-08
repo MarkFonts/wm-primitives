@@ -207,7 +207,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-02, 6px);
+    /* A knob, not a fixed value, because this file lives in @layer wm.icon -- which is
+       declared AFTER wm.controls, so a control's stylesheet cannot override it however
+       specific it gets: a later layer wins outright. A host or another primitive that
+       needs a bigger target sets --icon-btn-pad rather than fighting the cascade and
+       silently losing, which is exactly what BlockStyleRail did first. */
+    padding: var(--icon-btn-pad, var(--spacing-02, 6px));
     margin: 0;
     background: none;
     border: 0;
