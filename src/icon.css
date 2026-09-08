@@ -104,6 +104,12 @@
      An `off` mark does not react -- nothing to react to. */
   .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),
   .wm-icon-btn:focus-visible .wm-icon:not(.wm-icon--off),
+  /* Buttons that predate .wm-icon-btn and own their own target. Named rather than
+     matched on `button:hover .wm-icon`, which would also fire for a button that merely
+     contains a mark somewhere -- a toolbar, a row -- and light up a mark the pointer is
+     nowhere near. */
+  .fit-align-btn:hover .wm-icon:not(.wm-icon--off),
+  .fit-align-btn:focus-visible .wm-icon:not(.wm-icon--off),
   .wm-icon:not(.wm-icon--off):hover {
     --icon-wght: 500;
     color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
