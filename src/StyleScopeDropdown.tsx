@@ -151,7 +151,9 @@ export default function StyleScopeDropdown({
     <div ref={wrapRef} className={`ssd${className ? ' ' + className : ''}`}>
       <button type="button" className="ssd-btn" onClick={() => setOpen(o => !o)}>
         <span className="ssd-btn-label">{buttonLabel}</span>
-        <span className="ssd-caret" aria-hidden="true">▾</span>
+        {/* Was `▾`, U+25BE -- a filled triangle from whatever UI font happened to be
+            resolved, which is a fourth chevron treatment in a system that has one. */}
+        <Icon name="keyboard_arrow_down" size={20} className="ssd-caret" />
       </button>
       {open && <StyleScopeList rows={rows} mode={mode} onSelect={onSelect} onPicked={() => setOpen(false)} />}
     </div>

@@ -27,6 +27,8 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { nbMinus } from './format'
+import { CHEVRON, chevronPath } from './chevronGeometry'
+import './chevron.css'
 import './AxisSlider.css'
 
 export interface AxisSliderProps {
@@ -260,9 +262,8 @@ export function AxisSlider({
                   onPointerCancel={stopStep}
                 >
                   <svg viewBox="0 0 10 6" width="10" height="6" aria-hidden="true">
-                    <path d={dir > 0 ? 'M1 4.5 5 1.5 9 4.5' : 'M1 1.5 5 4.5 9 1.5'}
-                      fill="none" stroke="currentColor" strokeWidth="1.5"
-                      strokeLinecap="round" strokeLinejoin="round" />
+                    <path d={chevronPath(dir, 10, 6)}
+                      fill="none" stroke="currentColor"                       strokeLinecap={CHEVRON.cap} strokeLinejoin={CHEVRON.join} strokeMiterlimit={CHEVRON.miterLimit} />
                   </svg>
                 </button>
               ))}

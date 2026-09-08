@@ -138,7 +138,10 @@ PRIMITIVE_CSS = {
     # type.css FIRST: the controls read --type-ui-size / --type-micro-size and their
     # fallbacks are the page's inherited size, so without it every label renders at body
     # size and the rows grow to match -- which looks like touch sizing and is not.
-    "controls": ("type.css", "AxisSlider.css", "AxisTriplet.css"),
+    # chevron.css carries the stepper stroke and its rollover; without it the docs page
+    # draws chevrons at the browser's default stroke-width of 1, thinner than anything
+    # that ships, since the weight left the SVG attribute so it could answer :hover.
+    "controls": ("type.css", "chevron.css", "AxisSlider.css", "AxisTriplet.css"),
 }
 
 # ---------------------------------------------------------------- per section

@@ -28,6 +28,8 @@
 // which cannot survive type=text and does not theme.
 import { useRef, useState } from 'react'
 import { nbMinus } from './format'
+import { CHEVRON, chevronPath } from './chevronGeometry'
+import './chevron.css'
 import './AxisTriplet.css'
 
 /** The three numbers, in the store's own units (before `offset` is applied). */
@@ -176,9 +178,8 @@ export function AxisTriplet({
                           lighter than every other line in the panel; redrawing keeps the
                           1.5 stroke and just brings the arms in. 7 wide against 10. */}
                       <svg viewBox="0 0 7 6" width="7" height="6" aria-hidden="true">
-                        <path d={dir > 0 ? 'M1 4.5 3.5 1.75 6 4.5' : 'M1 1.75 3.5 4.5 6 1.75'}
-                          fill="none" stroke="currentColor" strokeWidth="1.5"
-                          strokeLinecap="round" strokeLinejoin="round" />
+                        <path d={chevronPath(dir, 7, 6)}
+                          fill="none" stroke="currentColor"                           strokeLinecap={CHEVRON.cap} strokeLinejoin={CHEVRON.join} strokeMiterlimit={CHEVRON.miterLimit} />
                       </svg>
                     </button>
                   ))}

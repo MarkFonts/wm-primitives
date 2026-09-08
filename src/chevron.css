@@ -1,0 +1,56 @@
+/* ── the house chevron, as CSS ────────────────────────────────────────────────
+ *
+ * Companion to chevron.ts, which holds the drawing. This holds the WEIGHT, and it is
+ * here rather than on the <path> because a stroke that has to change on hover cannot be
+ * an SVG attribute -- attributes take no var() and no :hover.
+ *
+ * WHY IT CHANGES AT ALL. Every Material mark in this system answers the pointer by
+ * pressing harder: GRAD 50 -> 100, which thickens the stroke without moving the glyph.
+ * A stepper chevron sitting beside those marks and holding still reads as disabled, or
+ * as not part of the same set. The chevrons that are ALWAYS on screen -- the triplet's,
+ * and any dial with arrows pinned -- are the ones where it shows, because a chevron that
+ * only appears on hover is already saying something by appearing.
+ *
+ * 1.15 -> 1.35 keeps the same proportion the rest weight was measured at (see
+ * chevron.ts: Material's own chevron is an effective 1.02px at wght 300 / opsz 20, and
+ * 1.15 matches it). The +17% on hover is matched by eye against GRAD 50 -> 100 and is not
+ * derivable -- GRAD's effect on stroke is a function of the font's interpolation, not a
+ * percentage computable from the axis value.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+@layer wm.controls {
+  .wm-chevron,
+  .slider-step-btn svg,
+  .triplet-step-btn svg {
+    stroke-width: var(--chevron-stroke, 1.15);
+    /* Same duration as a mark's, so a row carrying both moves as one thing. */
+    transition: stroke-width var(--icon-dur, 90ms) ease;
+  }
+
+  /* The whole ROW, not just the button: you are pointing at a control, and its arrows are
+     part of it. Scoping to the button alone means the chevron thickens only once the
+     pointer is on a 9px target, which is after you have already arrived. */
+  /* A MULTIPLIER, not a replacement value: --chevron-stroke is now derived per mark from
+     its width, so a fixed hover number would flatten every size back to one weight -- the
+     thing the derivation just fixed. +17%, matched by eye against a Material mark's
+     GRAD 50 -> 100. */
+  .slider-row:hover .slider-step-btn svg,
+  .slider-row:focus-within .slider-step-btn svg,
+  .triplet-f:hover .triplet-step-btn svg,
+  .triplet-f:focus-within .triplet-step-btn svg,
+  .triplet-row:hover .triplet-step-btn svg,
+  .instance-select-wrap:hover .wm-chevron,
+  button:hover > .wm-chevron {
+    stroke-width: calc(var(--chevron-stroke, 1.15) * 1.17);
+  }
+
+  /* Left and right are the up/down drawing turned, so there is one path and one angle
+     rather than four. A chevron has no top or bottom to lose by rotating. */
+  .wm-chevron.chev-left  { transform: rotate(90deg); }
+  .wm-chevron.chev-right { transform: rotate(-90deg); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slider-step-btn svg,
+    .triplet-step-btn svg { transition: none; }
+  }
+}

@@ -22,7 +22,11 @@
 }
 .ssd-btn:hover { border-color: var(--text-muted); }
 .ssd-btn-label { margin-right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ssd-caret { color: var(--text-muted); font-size: var(--type-ui-size); flex: 0 0 auto; }
+/* The caret is an Icon now, so it carries its own ink and size from icon.css; all that is
+   left here is that it must not stretch. font-size is deliberately NOT set: Icon takes a
+   `size` prop, which drives opsz as well, and a font-size here would move the glyph
+   without moving its optical correction. */
+.ssd-caret { flex: 0 0 auto; }
 
 /* popover list */
 .ssd-list {
