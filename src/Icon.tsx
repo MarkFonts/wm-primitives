@@ -20,6 +20,7 @@
 // radius around it. The hit target, where one is needed, comes from padding on whatever
 // wraps it -- see icon.css. A 28px bordered square around a 14px mark was the old answer
 // and it made a rail of five read as five buttons rather than one row of marks.
+import type { CSSProperties } from 'react'
 import './icon.css'
 
 export interface IconProps {
@@ -38,6 +39,10 @@ export interface IconProps {
    *  case the mark is decorative and is hidden. */
   label?: string
   className?: string
+  /** Escape hatch for per-instance custom properties -- `--icon-dur` for a confirm that
+   *  needs to be slower than a hover. Merged UNDER the computed axis values, so it can
+   *  add but never silently break opsz/FILL. */
+  style?: CSSProperties
 }
 
 /* opsz is 20..48 in the shipped file. A mark set at 12px still renders -- it is just
@@ -47,12 +52,13 @@ export interface IconProps {
 const OPSZ_MIN = 20
 const OPSZ_MAX = 48
 
-export function Icon({ name, state = 'rest', size = 20, filled, label, className }: IconProps) {
+export function Icon({ name, state = 'rest', size = 20, filled, label, className, style }: IconProps) {
   const opsz = Math.min(OPSZ_MAX, Math.max(OPSZ_MIN, size))
   return (
     <span
       className={`wm-icon material-symbols-outlined wm-icon--${state}${className ? ' ' + className : ''}`}
       style={{
+        ...style,
         fontSize: `${size}px`,
         // Only the axes that vary per instance. wght and GRAD are stated in CSS so a
         // :hover rule can move them -- an inline style would win over the hover and the

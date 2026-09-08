@@ -276,3 +276,38 @@ the answer, and subsetting does not flatten the axes: all four survive at full r
 
 Which means the list has to track the code, or an icon added in a component renders as
 its own name in production. That is a build step, not a discipline.
+
+
+### Named but not implemented
+
+Verified present in the font, wired to nothing yet. Recorded here so the eventual subset
+list and the eventual call sites come from one place rather than from memory.
+
+| mark | for |
+|---|---|
+| `format_bold` | inline emphasis — `InlineEmphasisBubble` currently spells it in text |
+| `format_italic` | the same bubble's other half |
+| `format_h1` … `format_h6` | heading level, six marks. The obvious home is ReCal's Type Matrix and font-proofer's Type Scale, both of which name their steps in words today |
+| `brightness_auto` · `light_mode` · `dark_mode` | the three-way colour-scheme switch, which spells `Auto / Light / Dark` in words today |
+
+`format_h1` through `h6` are the interesting ones: a heading level is a number, and six
+marks that each contain their own numeral are the rare case where an icon carries more
+than a word would at the same size.
+
+### Settled
+
+- **B wins.** One weight for the whole set (`wght 300`) with `GRAD` carrying emphasis.
+  It thickens the stroke without touching the advance or the outline, so a row of marks
+  cannot shift as one lights up, and the set stays one family whose pressure changes.
+- **The GRAD ladder climbs in both grounds and hover never reaches active:**
+  dark `50 → 100 → 150`, light `100 → 150 → 200`. Hover sat at 200 first — GRAD's
+  ceiling, and the value `active` uses — so on light a hovered mark was as heavy as the
+  chosen one, and hovering an unchosen mark made it look chosen.
+- **Ink is the other half, and it is three distinct rungs:** `--ink-faint` at rest,
+  `--ink-quiet` on hover, `--ink-full` when active. Hover and active shared full ink at
+  first, so arriving at active changed only the weight.
+- **90ms for the pointer, 260ms for a confirm.** At 140 the mark lagged the row it sits
+  in. A rollover should feel like the pointer; the copy confirm is the one place that IS
+  an animation, and it fills the mark before swapping to `check` so the swap does not
+  read as a flash back to the old SVG.
+- **`reset_settings` → `settings_backup_restore`.**

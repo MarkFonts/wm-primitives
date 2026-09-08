@@ -8,14 +8,18 @@
 // italic-face rendering) so the labels preview the actual font being edited.
 import { useState, useEffect, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
+import { Icon } from './Icon'
 import './InlineEmphasisBubble.css'
 
 export interface InlineEmphasisBubbleProps {
   /** CSS selector for editable elements that should trigger the bubble. */
   selector: string
-  /** Style for the "italic" label — the app's resolved real italic (ital axis / italic face). */
+  /** Style for the "italic" label — the app's resolved real italic (ital axis / italic face).
+   *  UNUSED while the bubble draws marks instead of words; kept because the commented-out
+   *  word version below still wants it and callers still pass it. Removing it would be a
+   *  breaking change to un-break later. */
   italicLabelStyle?: CSSProperties
-  /** Style for the "bold" label — the app's resolved real bold. */
+  /** Style for the "bold" label — the app's resolved real bold. See above: unused for now. */
   boldLabelStyle?: CSSProperties
   /** Markup markers wrapped around the selection. Defaults to the * / ** convention. */
   markers?: { italic: string; bold: string }
@@ -63,6 +67,14 @@ export function InlineEmphasisBubble({
       className={`inline-emph-menu${menu.flip ? ' inline-emph-menu--left' : ''}`}
       style={{ top: menu.top, left: menu.left }}
     >
+      {/* THE WORDS, KEPT. This bubble said "italic" and "bold" set in the app's own
+          resolved italic and bold -- so the label was a specimen of the thing it applied,
+          which is a genuinely good idea in a type tool and the reason italicLabelStyle /
+          boldLabelStyle exist. It is commented out rather than deleted because the
+          argument for it has not gone away: a mark cannot show you the face.
+          What it could not do is be small. Two words are as wide as the selection they
+          hover over, and at that width the bubble covers the text you are looking at --
+          which is the one thing a floating menu must not do.
       <button
         className="inline-emph-btn"
         title={`Wrap selection in ${markers.italic}italic${markers.italic}`}
@@ -76,6 +88,23 @@ export function InlineEmphasisBubble({
         onMouseDown={e => { e.preventDefault(); apply(markers.bold) }}
       >
         <strong style={boldLabelStyle}>bold</strong>
+      </button>
+      */}
+      <button
+        className="inline-emph-btn wm-icon-btn"
+        title={`Wrap selection in ${markers.italic}italic${markers.italic}`}
+        aria-label="Italic"
+        onMouseDown={e => { e.preventDefault(); apply(markers.italic) }}
+      >
+        <Icon name="format_italic" size={18} />
+      </button>
+      <button
+        className="inline-emph-btn wm-icon-btn"
+        title={`Wrap selection in ${markers.bold}bold${markers.bold}`}
+        aria-label="Bold"
+        onMouseDown={e => { e.preventDefault(); apply(markers.bold) }}
+      >
+        <Icon name="format_bold" size={18} />
       </button>
     </div>,
     document.body,

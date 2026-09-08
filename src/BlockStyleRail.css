@@ -1,0 +1,98 @@
+/* ── block style rail ─────────────────────────────────────────────────────────
+ *
+ * Four marks stacked in the margin of the block being edited. Companion to
+ * BlockStyleRail.tsx, which explains why it is quiet.
+ *
+ * The rail is absolutely positioned against the BLOCK, so the block's wrapper needs
+ * `position: relative` — that is the host's one obligation, and .para-block sets it.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+@layer wm.controls {
+  .block-style-rail {
+    position: absolute;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    /* No gap: the marks are one object, a stack, and a gap makes four of them. It is also
+       what keeps the column of targets CONTINUOUS -- any gap here is a strip of dead
+       pixels between two buttons, and dragging down the rail flickers the cursor between
+       pointer and arrow as you cross each one. */
+    gap: 0;
+    /* Belt and braces on the same point: the rail itself is pointer, so even the padding
+       between a button's edge and the next never reverts. */
+    cursor: pointer;
+    /* Out of the text's way entirely -- the rail must not narrow the measure, because the
+       measure is the thing being proofed. Sitting outside the column is why it can be
+       absolute rather than a flex sibling. */
+    z-index: 2;
+  }
+  /* Well clear of the measure. At 6px the rail crowded the text's left edge and read as
+     part of the column; the margin is where it belongs, so it sits in the margin. */
+  .block-style-rail--left  { right: 100%; padding-right: var(--spacing-06, 24px); }
+  .block-style-rail--right { left: 100%;  padding-left:  var(--spacing-06, 24px); }
+
+  /* PROXIMITY. Each mark carries a --prox of 0..1, written per frame by the component
+     from its own distance to the cursor, so the four fade independently and the nearest
+     is brightest: a field around the pointer rather than a panel that switches on.
+     A floor, not zero, so the rail is discoverable rather than hidden -- at 0 you cannot
+     find what you do not know is there, and the margin is a large place to wave at. The
+     floor is a hint; the fade is the reward for going near.
+     No transition: --prox is already updated every frame, and an eased transition on top
+     of a per-frame value lags the cursor by exactly its own duration. */
+  /* Bigger targets than a toolbar's. These sit in open margin with nothing to collide
+     with, they are aimed at from a distance rather than pressed in a row, and they are
+     faint by design -- so the thing you are aiming at is smaller than usual and deserves
+     more room around it, not less. 10px against .wm-icon-btn's 6px: a 40px square per
+     mark, and the four make one unbroken column.
+     Full width of the rail as well, so the whole stack is live rather than four islands
+     with the rail's own padding between them. */
+  .block-style-rail .wm-icon-btn {
+    /* Through the knob: a plain `padding` here is in wm.controls and loses to icon.css's
+       wm.icon, later layer beating it whatever the specificity. */
+    --icon-btn-pad: var(--spacing-04, 12px);
+    width: 100%;
+    --prox: 0;
+    --rail-prox-floor: .14;
+    opacity: calc(var(--rail-prox-floor) + (1 - var(--rail-prox-floor)) * var(--prox));
+    will-change: opacity;
+  }
+  /* Reaching for one settles it: a mark that keeps breathing under the pointer is a mark
+     you are chasing. */
+  .block-style-rail .wm-icon-btn:hover,
+  .block-style-rail .wm-icon-btn:focus-visible { opacity: 1; }
+
+  /* No pointer to be near, or someone who has asked for less: show them outright. A fade
+     keyed to a cursor that does not exist leaves the rail permanently invisible. */
+  @media (pointer: coarse) {
+    .block-style-rail .wm-icon-btn { --rail-prox-floor: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .block-style-rail .wm-icon-btn { --rail-prox-floor: 1; }
+  }
+
+  /* An `off` mark ignores the pointer by design in icon.css -- "off" means the control
+     cannot act. Here `off` means only "quiet", so the hover rung is given back: these
+     ARE pressable, they are just the faintest thing on screen until you reach for them.
+     The middle rung, not full: full ink belongs to the level the block already is. */
+  .block-style-rail .wm-icon-btn:hover .wm-icon,
+  .block-style-rail .wm-icon-btn:focus-visible .wm-icon {
+    --icon-grad: 100;
+    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .block-style-rail .wm-icon-btn:hover .wm-icon,
+    :root:not([data-theme="dark"]) .block-style-rail .wm-icon-btn:focus-visible .wm-icon { --icon-grad: 150; }
+  }
+  :root[data-theme="light"] .block-style-rail .wm-icon-btn:hover .wm-icon,
+  :root[data-theme="light"] .block-style-rail .wm-icon-btn:focus-visible .wm-icon { --icon-grad: 150; }
+
+  /* Narrow: there is no margin to put a rail in. Lay it across the top of the block
+     instead, still quiet, still out of the text. */
+  @container (max-width: 34rem) {
+    .block-style-rail {
+      position: static;
+      flex-direction: row;
+      padding: 0 0 var(--spacing-01, 4px);
+    }
+  }
+}

@@ -57,21 +57,30 @@
 
 /* Alignment row. 28px, not 32: five buttons (a reset plus four alignments) have to fit
    the width three used to have. */
+/* NO BOX. This was a 28px bordered square with its own fill, one per alignment, so a row
+   of four marks read as four buttons -- and the state lived in the box (border-color,
+   background) while the mark underneath barely moved. Now the mark IS the state: Icon
+   carries ink and weight together, so `active` is bolder as well as brighter and the row
+   reads as one set of four marks rather than four chrome rectangles.
+   All that is left here is the target. It draws nothing. */
 .fit-align-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: var(--radius, 6px);
-  background: var(--bg-elevated, var(--surface-2, #1c1c1c));
-  color: var(--text-dim);
-  border: 1px solid var(--border);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
   cursor: pointer;
-  transition: background var(--dur-fast, 140ms), color var(--dur-fast, 140ms), border-color var(--dur-fast, 140ms);
 }
-.fit-align-btn:hover { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text-muted); }
-.fit-align-btn.active { background: var(--bg-hover, rgba(255,255,255,.06)); color: var(--text); border-color: var(--text-muted); }
+.fit-align-btn:focus { outline: none; }
+/* The ring goes on the button, not the glyph: an outline on an inline mark traces the
+   ink and reads as a mistake. */
+.fit-align-btn:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+@media (pointer: coarse) { .fit-align-btn { width: 44px; height: 44px; } }
 
 /* A sub-switch inside a collapsed section: the rag's budgets, and the H&J disclosure.
    Lower contrast than .fit-switch because it sits under one, not beside it. */

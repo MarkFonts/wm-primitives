@@ -9,6 +9,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <title>wm-primitives &mdash; the system</title>
 <style>
+@font-face{font-family:"Material Symbols Outlined";src:url(fonts/MaterialSymbolsOutlined.woff2) format("woff2");font-weight:100 700;font-style:normal;font-display:block}
 @font-face{font-family:"Face";src:url(fonts/CalSansVF.ttf) format("truetype");font-display:swap}
 @font-face{font-family:"CalSansVF";src:url(fonts/CalSansVF.ttf) format("truetype");font-display:swap}
 @font-face{font-family:"Specimen";src:url(fonts/CalSansSpecimen.ttf) format("truetype");font-display:swap}
@@ -2616,6 +2617,94 @@ html,body{margin:0;padding:0;background:var(--bg)}
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: .28em;
+}@layer wm.controls{#s-controls .wm-chevron,#s-controls .slider-step-btn svg,#s-controls .triplet-step-btn svg{
+    stroke-width: var(--chevron-stroke, 1.15);
+    
+    transition: stroke-width var(--icon-dur, 90ms) ease;
+  }#s-controls .slider-row:hover .slider-step-btn svg,#s-controls .slider-row:focus-within .slider-step-btn svg,#s-controls .triplet-f:hover .triplet-step-btn svg,#s-controls .triplet-f:focus-within .triplet-step-btn svg,#s-controls .triplet-row:hover .triplet-step-btn svg,#s-controls .instance-select-wrap:hover .wm-chevron,#s-controls button:hover > .wm-chevron{
+    stroke-width: calc(var(--chevron-stroke, 1.15) * 1.17);
+  }#s-controls .wm-chevron.chev-left{ transform: rotate(90deg); }#s-controls .wm-chevron.chev-right{ transform: rotate(-90deg); }@media (prefers-reduced-motion: reduce){#s-controls .slider-step-btn svg,#s-controls .triplet-step-btn svg{ transition: none; }
+  }
+}@layer wm.icon{#s-controls .wm-icon{
+    
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    
+    vertical-align: middle;
+    user-select: none;
+
+    
+    background: none;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+
+    --icon-opsz: 20;
+    --icon-fill: 0;
+    
+    --icon-wght: 300;
+    
+    --icon-grad: 50;
+
+    font-variation-settings:
+      'FILL' var(--icon-fill),
+      'wght' var(--icon-wght),
+      'GRAD' var(--icon-grad),
+      'opsz' var(--icon-opsz);
+
+    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
+    
+    
+    --icon-dur: 90ms;   
+    transition:
+      font-variation-settings var(--icon-dur) ease,
+      color var(--icon-dur) ease;
+  }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .wm-icon{ --icon-grad: 100; }:root:not([data-theme="dark"]) #s-controls .wm-icon--off{ --icon-grad: 100; }:root:not([data-theme="dark"]) #s-controls .wm-icon--active,:root:not([data-theme="dark"]) #s-controls .active > .wm-icon,:root:not([data-theme="dark"]) #s-controls .active > * > .wm-icon{ --icon-grad: 200; }
+  }:root[data-theme="light"] #s-controls .wm-icon{ --icon-grad: 100; }:root[data-theme="light"] #s-controls .wm-icon--off{ --icon-grad: 100; }:root[data-theme="light"] #s-controls .wm-icon--active,:root[data-theme="light"] #s-controls .active > .wm-icon,:root[data-theme="light"] #s-controls .active > * > .wm-icon{ --icon-grad: 200; }:root[data-theme="dark"] #s-controls .wm-icon{ --icon-grad: 50; }:root[data-theme="dark"] #s-controls .wm-icon--off{ --icon-grad: 50; }:root[data-theme="dark"] #s-controls .wm-icon--active,:root[data-theme="dark"] #s-controls .active > .wm-icon,:root[data-theme="dark"] #s-controls .active > * > .wm-icon{ --icon-grad: 150; }#s-controls .wm-icon--off{
+    --icon-wght: 300;
+    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
+  }#s-controls .wm-icon--active,#s-controls .active > .wm-icon,#s-controls .active > * > .wm-icon{
+    --icon-grad: 150;
+    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
+  }#s-controls .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),#s-controls .wm-icon-btn:focus-visible .wm-icon:not(.wm-icon--off),#s-controls .fit-align-btn:hover .wm-icon:not(.wm-icon--off),#s-controls .fit-align-btn:focus-visible .wm-icon:not(.wm-icon--off),#s-controls .align-btn:hover .wm-icon:not(.wm-icon--off),#s-controls .align-btn:focus-visible .wm-icon:not(.wm-icon--off),#s-controls .mobile-tab:hover .wm-icon:not(.wm-icon--off),#s-controls .mode-btn:hover .wm-icon:not(.wm-icon--off),#s-controls .wm-icon:not(.wm-icon--off):hover{
+    
+    --icon-grad: 100;
+    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
+  }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),:root:not([data-theme="dark"]) #s-controls .fit-align-btn:hover .wm-icon:not(.wm-icon--off),:root:not([data-theme="dark"]) #s-controls .align-btn:hover .wm-icon:not(.wm-icon--off),:root:not([data-theme="dark"]) #s-controls .mobile-tab:hover .wm-icon:not(.wm-icon--off),:root:not([data-theme="dark"]) #s-controls .mode-btn:hover .wm-icon:not(.wm-icon--off),:root:not([data-theme="dark"]) #s-controls .wm-icon:not(.wm-icon--off):hover{ --icon-grad: 150; }
+  }:root[data-theme="light"] #s-controls .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="light"] #s-controls .fit-align-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="light"] #s-controls .align-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="light"] #s-controls .mobile-tab:hover .wm-icon:not(.wm-icon--off),:root[data-theme="light"] #s-controls .mode-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="light"] #s-controls .wm-icon:not(.wm-icon--off):hover{ --icon-grad: 150; }:root[data-theme="dark"] #s-controls .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="dark"] #s-controls .fit-align-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="dark"] #s-controls .align-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="dark"] #s-controls .mobile-tab:hover .wm-icon:not(.wm-icon--off),:root[data-theme="dark"] #s-controls .mode-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="dark"] #s-controls .wm-icon:not(.wm-icon--off):hover{ --icon-grad: 100; }#s-controls .wm-icon-btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    padding: var(--icon-btn-pad, var(--spacing-02, 6px));
+    margin: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }#s-controls .wm-icon-btn:focus{ outline: none; }#s-controls .wm-icon-btn:focus-visible{
+    outline: 2px solid var(--accent, currentColor);
+    outline-offset: 2px;
+  }@media (pointer: coarse){#s-controls .wm-icon-btn{ min-width: 44px; min-height: 44px; }
+  }@media (prefers-reduced-motion: reduce){#s-controls .wm-icon{ transition: none; }
+  }
 }@layer wm.controls{#s-controls .slider-row{ display: flex; flex-direction: column; gap: 3px; }#s-controls .slider-row--off{ opacity: 0.4; }#s-controls .slider-label{ display: flex; align-items: center; justify-content: space-between; gap: 6px; }#s-controls .slider-label-left{
     display: flex; align-items: baseline; gap: var(--spacing-01, 4px);
     
@@ -2741,7 +2830,8 @@ html,body{margin:0;padding:0;background:var(--bg)}
   }@media (prefers-reduced-motion: reduce){#s-controls .slider-step-btn::before{ transition: none; }
   }#s-controls .slider-number:disabled{ cursor: default; }#s-controls .slider-track-wrap{ position: relative; }#s-controls .slider-track-wrap input[type="range"]{
     -webkit-appearance: none; appearance: none;
-    width: 100%; height: 24px;
+    width: 100%;
+    height: max(14px, var(--dial-track-h, 24px));
     background: transparent; cursor: pointer; margin: 0; display: block;
   }#s-controls .slider-track-wrap input[type="range"]::-webkit-slider-runnable-track{
     height: 2px;
@@ -2755,8 +2845,9 @@ html,body{margin:0;padding:0;background:var(--bg)}
     border-radius: 1px;
   }#s-controls .slider-track-wrap input[type="range"]::-webkit-slider-thumb{
     -webkit-appearance: none;
-    width: 14px; height: 14px; border-radius: 50%;
-    background: var(--text); margin-top: -6px; cursor: pointer;
+    width: var(--dial-thumb, 14px); height: var(--dial-thumb, 14px); border-radius: 50%;
+    background: var(--text); cursor: pointer;
+    margin-top: calc((2px - var(--dial-thumb, 14px)) / 2);
   }#s-controls .slider-track-wrap input[type="range"]::-moz-range-track{
     height: 2px;
     background: linear-gradient(
@@ -2768,7 +2859,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     );
     border-radius: 1px;
   }#s-controls .slider-track-wrap input[type="range"]::-moz-range-thumb{
-    width: 14px; height: 14px; border-radius: 50%;
+    width: var(--dial-thumb, 14px); height: var(--dial-thumb, 14px); border-radius: 50%;
     background: var(--text); border: none; cursor: pointer;
   }#s-controls .slider-auto-hint{
     position: fixed;
@@ -3141,7 +3232,28 @@ html,body{margin:0;padding:0;background:var(--bg)}
   padding-left: 2px; z-index: 1;
 }#s-controls .d-unit{ transition: opacity .12s; }#s-controls .d:hover .d-unit,#s-controls .d:focus-within .d-unit{ opacity: 0; }#s-controls.always-arrows .f .arrows,#s-controls.touch .f .arrows{
   position: static; padding-left: 0;
-}#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit{ opacity: 1; }#s-controls .d:hover .f .arrows,#s-controls .d:focus-within .f .arrows{ opacity: 1; }#s-controls .d:hover .d-unit,#s-controls .d:focus-within .d-unit,#s-controls .v3 .pill:hover .d-unit,#s-controls .v3 .pill:focus-within .d-unit,#s-controls .v3 .d:hover .pill .d-unit,#s-controls .v3 .d:focus-within .pill .d-unit{ opacity: 0; }#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.always-arrows .v3 .d:hover .pill .d-unit,#s-controls.always-arrows .v3 .d:focus-within .pill .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit,#s-controls.touch .v3 .d:hover .pill .d-unit,#s-controls.touch .v3 .d:focus-within .pill .d-unit{ opacity: .78; }#s-controls.always-arrows .d .f .arrows,#s-controls.touch .d .f .arrows{ opacity: 1; }
+}#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit{ opacity: 1; }#s-controls .d:hover .f .arrows,#s-controls .d:focus-within .f .arrows{ opacity: 1; }#s-controls .d:hover .d-unit,#s-controls .d:focus-within .d-unit,#s-controls .v3 .pill:hover .d-unit,#s-controls .v3 .pill:focus-within .d-unit,#s-controls .v3 .d:hover .pill .d-unit,#s-controls .v3 .d:focus-within .pill .d-unit{ opacity: 0; }#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.always-arrows .v3 .d:hover .pill .d-unit,#s-controls.always-arrows .v3 .d:focus-within .pill .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit,#s-controls.touch .v3 .d:hover .pill .d-unit,#s-controls.touch .v3 .d:focus-within .pill .d-unit{ opacity: .78; }#s-controls.always-arrows .d .f .arrows,#s-controls.touch .d .f .arrows{ opacity: 1; }#s-controls .marks-h{ margin: var(--pad-8, 48px) 0 var(--pad-2, 8px); }#s-controls .marks-h3{ margin: var(--pad-7, 32px) 0 var(--pad-2, 8px); }#s-controls .marks{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: var(--pad-4, 16px);
+  margin-top: var(--pad-4, 16px);
+}#s-controls .mark{
+  margin: 0;
+  display: flex; flex-direction: column; align-items: center; gap: var(--pad-2, 8px);
+  padding: var(--pad-5, 20px) var(--pad-3, 12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  background: var(--surface);
+  text-align: center;
+}#s-controls .mark .wm-icon,#s-controls .mark .wm-chevron{ color: var(--text); }#s-controls .marks--chev .mark svg{ margin: var(--pad-4, 16px) 0; overflow: visible; }#s-controls .mark-name{
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: var(--type-micro-size, 10px);
+  color: var(--text-muted);
+  word-break: break-all;
+}#s-controls .mark-use{
+  font-size: var(--type-micro-size, 10px);
+  color: var(--text-dim);
+}
 
 /* ===== space ===== */
 #s-space *{box-sizing:border-box}#s-space{margin:0;background:#0f0f0f;color:#e8e8e8;font-family:"CalSansVF",system-ui,sans-serif;
@@ -4205,7 +4317,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 </style>
 <div class="wm">
   <div class="wm-doc">
-  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1">The 5 pills</a><a class="wm-lvl1" href="#corners-c2">The radius ladder</a><a class="wm-lvl1" href="#corners-c3">Asymmetric corners</a><a class="wm-lvl1" href="#corners-c4">The 13 circles</a><a class="wm-lvl1" href="#corners-c5">The 5 pills</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u>03</u>Interface</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1">The steps</a><a class="wm-lvl1" href="#space-c2">The cap rule</a><a class="wm-lvl1" href="#space-c3">Use a step</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1">The vocabulary</a><a class="wm-lvl1" href="#color-c2">Literal colors outside App.css</a><a class="wm-lvl1" href="#color-c3">Fallbacks inside var()</a><a class="wm-lvl1" href="#color-c4">App.css (frozen)</a><a class="wm-lvl1" href="#color-c5">The GEOM zones</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div>
+  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1">The 5 pills</a><a class="wm-lvl1" href="#corners-c2">The radius ladder</a><a class="wm-lvl1" href="#corners-c3">Asymmetric corners</a><a class="wm-lvl1" href="#corners-c4">The 13 circles</a><a class="wm-lvl1" href="#corners-c5">The 5 pills</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u>03</u>Interface</a><a class="wm-lvl1" href="#controls-c1">The marks</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1">The steps</a><a class="wm-lvl1" href="#space-c2">The cap rule</a><a class="wm-lvl1" href="#space-c3">Use a step</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1">The vocabulary</a><a class="wm-lvl1" href="#color-c2">Literal colors outside App.css</a><a class="wm-lvl1" href="#color-c3">Fallbacks inside var()</a><a class="wm-lvl1" href="#color-c4">App.css (frozen)</a><a class="wm-lvl1" href="#color-c5">The GEOM zones</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div>
     <span class="wm-rail-foot">wm&#8209;primitives</span></div></nav></div>
   <div class="wm-main">
   <header class="wm-head">
@@ -5060,7 +5172,14 @@ of 168 corners, <b>87</b> take the law, 13 are circles carved out, and 32 sit in
 
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=fit_width,line_weight,format_line_spacing,mystery" />
+<!-- The Material Symbols link that used to be here was SUBSETTED to four icon_names --
+     fit_width, line_weight, format_line_spacing, mystery -- for card 04. It declared the
+     same font-family as the package's own self-hosted face, so two faces loaded under one
+     name and the four-icon subset won: every other ligature on this page printed as its
+     own name, in words. That is the exact failure a drifting icon_names list produces, and
+     it was already live here.
+     The font comes from icon.css now, which build.py inlines and whose @font-face points
+     at the woff2 synced into docs/fonts/. One face, every mark. -->
 <!-- Source for section 03. Written standalone: `body` is the section, `&` means the
      section element itself, and the theme sits on :root, which is where the document
      puts it. The faces are the ones the assembled page declares -- CalSansVF and
@@ -5091,6 +5210,23 @@ scroll.</p>
 </div>
 
 <div class="grid" id="controls-t-grid"></div>
+
+<h2 id="controls-c1" class="marks-h">The marks</h2>
+<p class="lede">Two families, and the split is not taste. <b>Material Symbols</b> for anything
+that is a <i>symbol</i>: it is a variable font, so a mark answers the pointer by pressing
+harder rather than by swapping drawings, and it themes on <code>GRAD</code> without moving
+its own metrics. <b>The house chevron</b> for every chevron, because Material&rsquo;s
+<code>opsz</code> axis bottoms out at 20 and a dial&rsquo;s stepper is six pixels tall &mdash;
+a glyph drawn for 20px used at 6 is the 20px drawing scaled down, stroke and all. A stroked
+path has no floor.</p>
+
+<div class="marks" id="controls-m-icons"></div>
+
+<h3 class="marks-h3">Chevrons</h3>
+<p class="lede">One drawing, one angle (34.6&deg;), three sizes. The stroke is derived from the
+width rather than fixed &mdash; optical sizing by another name: at one absolute stroke a small
+chevron carries more ink per unit of mark and reads heavier.</p>
+<div class="marks marks--chev" id="controls-m-chevrons"></div>
 
 </div>
 </section>
@@ -6936,6 +7072,72 @@ toggle('controls-t-arrows', 'always-arrows', false);
   }
 })();
 
+
+/* \u2500\u2500 the marks grid \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Rendered from the same component contract the apps use -- .wm-icon carries the axes
+   and the ink, so this page cannot show a mark the package does not ship. */
+const MDS = [
+  ['format_align_left','align left'], ['format_align_center','align center'],
+  ['format_align_right','align right'], ['format_align_justify','justify'],
+  ['format_h1','heading 1'], ['format_h2','heading 2'], ['format_h3','heading 3'],
+  ['format_paragraph','paragraph'], ['format_bold','bold'], ['format_italic','italic'],
+  ['settings_backup_restore','reset'], ['discover_tune','settings flyout'],
+  ['forms_add_on','multi-select'], ['content_copy','copy'], ['check','copied'],
+  ['calendar_month','cal.com'], ['insert_text','big word'], ['text_fields','type scale'],
+  ['grid_view','glyphs'], ['brightness_auto','theme auto'], ['light_mode','theme light'],
+  ['dark_mode','theme dark'], ['keyboard_arrow_up','stepper up'], ['keyboard_arrow_down','stepper down'],
+];
+(() => {
+  const host = document.getElementById('controls-m-icons');
+  for (const [name, use] of MDS) {
+    const cell = mk('figure', 'mark');
+    const m = mk('span', 'wm-icon material-symbols-outlined');
+    m.textContent = name; m.setAttribute('translate', 'no');
+    m.style.fontSize = '24px';
+    m.style.setProperty('--icon-opsz', '24');
+    const n = mk('figcaption', 'mark-name'); n.textContent = name;
+    const u = mk('span', 'mark-use'); u.textContent = use;
+    cell.append(m, n, u); host.appendChild(cell);
+  }
+})();
+
+/* The three chevrons that actually ship, at the sizes they ship at. Named by size rather
+   than by where they are used, because the same mark serves several places. */
+const CHEVS = [
+  ['chevron_S', 7,  6, 'AxisTriplet stepper'],
+  ['chevron_M', 10, 6, 'AxisSlider stepper'],
+  ['chevron_L', 12, 7, 'select, sidebar, style menu'],
+];
+const SLOPE = 0.69;
+const r2 = n => Math.round(n * 100) / 100;
+function chevPath(dir, w, h, inset = 1) {
+  const x0 = inset, x1 = w / 2, x2 = w - inset;
+  const rise = (x1 - x0) * SLOPE, m = h / 2, a = m - rise / 2, b = m + rise / 2;
+  return dir > 0 ? `M${x0} ${r2(b)} ${x1} ${r2(a)} ${x2} ${r2(b)}`
+                 : `M${x0} ${r2(a)} ${x1} ${r2(b)} ${x2} ${r2(a)}`;
+}
+const strokeFor = w => Math.round(1.15 * Math.sqrt(w / 10) * 100) / 100;
+(() => {
+  const host = document.getElementById('controls-m-chevrons');
+  for (const [name, w, h, use] of CHEVS) {
+    const cell = mk('figure', 'mark');
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.setAttribute('width', String(w)); svg.setAttribute('height', String(h));
+    svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'miter');
+    svg.setAttribute('stroke-miterlimit', '4');
+    svg.style.strokeWidth = strokeFor(w) + 'px';
+    svg.classList.add('wm-chevron');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', chevPath(-1, w, h));
+    svg.appendChild(path);
+    const n = mk('figcaption', 'mark-name'); n.textContent = name;
+    const u = mk('span', 'mark-use'); u.textContent = `${w}\u00d7${h}px \u00b7 stroke ${strokeFor(w)} \u00b7 ${use}`;
+    cell.append(svg, n, u); host.appendChild(cell);
+  }
+})();
 
 
 })();

@@ -15,31 +15,24 @@ import { AxisTriplet } from './AxisTriplet'
 import { Collapse } from './Collapse'
 import { band, DEFAULTS, layoutParagraph, lineStyle, type Band, type FitMode, type FitOptions } from './flattersatz'
 import { splitInlineMarkup } from './inlineMarkup'
+import { Icon } from './Icon'
 import './Fitting.css'
 
 export type { FitMode, FitOptions }
 
 
-/* One family: four rows apiece, two bar lengths only (10 and 6), so the row reads as a
-   set rather than four drawings. Justify gets three flush lines and a short last one —
-   justification never forces the final line, and four full bars would promise setting
-   nobody does. */
-const BARS: Record<string, [number, number, number, number]> = {
-  left: [10, 6, 10, 6], center: [10, 6, 10, 6], right: [10, 6, 10, 6], justify: [10, 10, 10, 6],
-}
-const ROWS = [1.6, 5.0, 8.4, 11.8]
+/* The four alignments come from Material Symbols now, not from four hand-drawn SVGs.
+   What was here was a good drawing -- one family, two bar lengths, and justify given
+   three flush lines and a short last one, because justification never forces the final
+   line. The font draws the same idea, and draws it on axes: the mark gets heavier under
+   the pointer and lighter when the control cannot act, which a <path> cannot do.
 
-function AlignIcon({ kind }: { kind: string }) {
-  const widths = BARS[kind]
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      {ROWS.map((y, i) => {
-        const w = widths[i]
-        const x = kind === 'right' ? 12 - w : kind === 'center' ? 2 + (10 - w) / 2 : 2
-        return <rect key={y} x={x} y={y} width={w} height="1.2" rx="0.6" fill="currentColor" />
-      })}
-    </svg>
-  )
+   These are the only four in the system that were already the primitive's rather than an
+   app's copy -- font-proofer kept its own AlignLeft/Center/Right/JustifyIcon and rendered
+   them zero times -- so converting here converts everything that ships. */
+const ALIGN_ICON: Record<string, string> = {
+  left: 'format_align_left', center: 'format_align_center',
+  right: 'format_align_right', justify: 'format_align_justify',
 }
 
 export const ALIGNMENTS = ['left', 'center', 'right', 'justify'] as const
@@ -60,7 +53,9 @@ export function AlignmentButtons({ value, onChange, className = '' }: {
           aria-pressed={value === a}
           onClick={() => onChange(a)}
         >
-          <AlignIcon kind={a} />
+          {/* `active` carries both the ink and the weight, so the chosen alignment is
+              bolder as well as brighter -- readable without colour. */}
+          <Icon name={ALIGN_ICON[a]} state={value === a ? 'active' : 'rest'} size={20} />
         </button>
       ))}
     </>

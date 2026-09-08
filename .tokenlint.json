@@ -48,6 +48,7 @@
   ],
   "_runtimeTokens": "Set by this package's own JS onto its own elements, so they are never in a stylesheet. Not a contract with anybody -- a rename here is ours to make on both sides at once.",
   "runtimeTokens": [
+    "--chevron-stroke",
     "--gp-asc",
     "--gp-desc",
     "--gp-ffs",

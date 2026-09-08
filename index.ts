@@ -33,8 +33,16 @@ export type { AxisTripletProps, Band } from './src/AxisTriplet'
 // Icon — a Material Symbols mark on the same axes as the type beside it. The HOST loads
 // the font (see Icon.tsx for the link tag and its four axes); this exports the component
 // and the ink/weight contract only.
+export { Chevron } from './src/Chevron'
+export type { ChevronProps } from './src/Chevron'
+
 export { Icon } from './src/Icon'
 export type { IconProps } from './src/Icon'
+
+// BlockStyleRail — h1/h2/h3/¶ stacked in the margin of the block being edited, at the
+// bottom of the ink ladder until you reach for them.
+export { BlockStyleRail } from './src/BlockStyleRail'
+export type { BlockStyleRailProps } from './src/BlockStyleRail'
 
 // Glyph-set matching + cmap parsing (Glyphs scene). Each app composes its own
 // extra groups / alternates on top of the shared base groups.

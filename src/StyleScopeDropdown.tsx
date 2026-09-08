@@ -23,6 +23,7 @@
 // colors flow in unchanged. Destined to move into the shared `wm-primitives` submodule.
 // ─────────────────────────────────────────────────────────────────────────────
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type MouseEvent as ReactMouseEvent } from 'react'
+import { Icon } from './Icon'
 import './StyleScopeDropdown.css'
 
 export type ScopeChipKind = 'size' | 'axis' | 'tracking' | 'markup' | 'local'
@@ -40,6 +41,11 @@ export interface ScopeRow {
   weight?: number
   /** when set, the label renders in the proofed font (font-proofer); omit for the UI face */
   labelStyle?: CSSProperties
+  /** Material Symbols name for the mark that NAMES the row -- format_h1, format_paragraph.
+   *  It exists so the label can stop being the name: with a mark carrying "which level",
+   *  the label is free to be a specimen word set at the style's real size, which is the
+   *  thing you are actually choosing between. */
+  icon?: string
   chips?: ScopeChip[]
   selected?: boolean
 }
@@ -92,6 +98,12 @@ export function StyleScopeList({ rows, mode = 'single', onSelect, onPicked, inli
           {mode === 'multi' && (
             <span className="ssd-check" aria-hidden="true">{r.selected ? '●' : '○'}</span>
           )}
+          {r.icon && (
+            /* The mark takes the row's selected state, like every other icon in the
+               system -- the row's own `.on` class does not reach it, because the label
+               beside it is set in the PROOFED font and must not inherit UI ink. */
+            <Icon name={r.icon} size={20} state={r.selected ? 'active' : 'rest'} className="ssd-icon" />
+          )}
           <span className="ssd-name" style={{ ...(r.labelStyle || null), fontWeight: r.weight }}>
             {r.label}
           </span>
@@ -139,7 +151,9 @@ export default function StyleScopeDropdown({
     <div ref={wrapRef} className={`ssd${className ? ' ' + className : ''}`}>
       <button type="button" className="ssd-btn" onClick={() => setOpen(o => !o)}>
         <span className="ssd-btn-label">{buttonLabel}</span>
-        <span className="ssd-caret" aria-hidden="true">▾</span>
+        {/* Was `▾`, U+25BE -- a filled triangle from whatever UI font happened to be
+            resolved, which is a fourth chevron treatment in a system that has one. */}
+        <Icon name="keyboard_arrow_down" size={20} className="ssd-caret" />
       </button>
       {open && <StyleScopeList rows={rows} mode={mode} onSelect={onSelect} onPicked={() => setOpen(false)} />}
     </div>

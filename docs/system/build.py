@@ -35,7 +35,7 @@ PKG  = DOCS.parent          # the repo root, where fonts/ is
 # Only the faces `--bump` publishes are synced. CalSansSpecimen.ttf and PaperMono.woff2
 # are the page's own, tracked here, and are not house faces -- copying fonts/ wholesale
 # would be wrong in both directions.
-SYNCED_FACES = ["CalSansVF.ttf"]
+SYNCED_FACES = ["CalSansVF.ttf", "MaterialSymbolsOutlined.woff2"]
 
 def sync_faces():
     import shutil
@@ -138,7 +138,10 @@ PRIMITIVE_CSS = {
     # type.css FIRST: the controls read --type-ui-size / --type-micro-size and their
     # fallbacks are the page's inherited size, so without it every label renders at body
     # size and the rows grow to match -- which looks like touch sizing and is not.
-    "controls": ("type.css", "AxisSlider.css", "AxisTriplet.css"),
+    # chevron.css carries the stepper stroke and its rollover; without it the docs page
+    # draws chevrons at the browser's default stroke-width of 1, thinner than anything
+    # that ships, since the weight left the SVG attribute so it could answer :hover.
+    "controls": ("type.css", "chevron.css", "icon.css", "AxisSlider.css", "AxisTriplet.css"),
 }
 
 # ---------------------------------------------------------------- per section
@@ -165,6 +168,13 @@ def build_section(sid, label, path, kicker):
     # control. scope_css recurses into @layer, so wm.controls survives being scoped here.
     css = "".join((HERE.parent.parent / "src" / f).read_text()
                   for f in PRIMITIVE_CSS.get(sid, ())) + css
+    # NOTE: this rewrite is belt-and-braces only. Every @font-face is stripped a few lines
+    # down -- the whole point of this build is that the faces are declared ONCE at the top
+    # rather than per page -- so icon.css's own Material Symbols face never survives the
+    # inline. It is re-declared in the FONTS block instead, pointing at the copy
+    # SYNCED_FACES puts in docs/fonts/. If that pairing is broken, every mark on the page
+    # renders as its own name in words, which is the visible symptom to look for.
+    css = css.replace("url('../fonts/", "url('fonts/").replace('url("../fonts/', 'url("fonts/')
     # Strip CSS comments BEFORE scoping. split_rules() treats everything up to '{' as the
     # selector, so a comment sitting above a rule became part of its prelude -- and then
     # ':root' no longer compared equal to ':root', fell through to the descendant branch,
@@ -429,6 +439,7 @@ LINKED = "--linked" in sys.argv
 
 if LINKED:
     FONTS = """
+@font-face{font-family:"Material Symbols Outlined";src:url(fonts/MaterialSymbolsOutlined.woff2) format("woff2");font-weight:100 700;font-style:normal;font-display:block}
 @font-face{font-family:"Face";src:url(fonts/CalSansVF.ttf) format("truetype");font-display:swap}
 @font-face{font-family:"CalSansVF";src:url(fonts/CalSansVF.ttf) format("truetype");font-display:swap}
 @font-face{font-family:"Specimen";src:url(fonts/CalSansSpecimen.ttf) format("truetype");font-display:swap}
@@ -1382,7 +1393,11 @@ HEAD = ("" if not LINKED else
   '<meta property="og:image:width" content="2400"><meta property="og:image:height" content="1260">\n'
   '<meta property="og:type" content="website">\n'
   '<meta property="og:url" content="https://markfonts.github.io/wm-primitives/">\n'
-  '<meta name="twitter:card" content="summary_large_image">\n')
+  '<meta name="twitter:card" content="summary_large_image">\n'
+  # No Material Symbols <link>: icon.css carries its own @font-face and build.py syncs the
+  # woff2 into docs/fonts/, so the page serves the same file the package ships rather than
+  # a CDN's, and cannot drift from it.
+  )
 TAIL = ("" if not LINKED else "\n</body></html>")
 
 page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
