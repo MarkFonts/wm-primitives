@@ -220,3 +220,59 @@ Dark mode `<span class="material-symbols-outlined">dark_mode</span>`
 | 3 | align center | `<span class="material-symbols-outlined">format_align_center</span>` |
 | 4 | align right | `<span class="material-symbols-outlined">format_align_right</span>` |
 | 5 | align justify | `<span class="material-symbols-outlined">format_align_justify</span>` |
+
+---
+
+## The migration target, verified against the binary
+
+Every name below was resolved out of the actual subsetted woff2 — GSUB walked, each
+ligature sequence spelled back through the cmap. Not read off a website.
+
+| bespoke icon | renders | → Material Symbols |
+|---|---|---|
+| `CalIcon` | 6× | `calendar_month` |
+| `SlidersIcon` | 4× | `discover_tune` |
+| `BigIcon` | 2× | `insert_text` |
+| `ParaIcon` | 2× | `format_paragraph` |
+| `GlyphIcon` | 2× | `grid_view` |
+| `ScaleIcon` | 2× | `text_fields` |
+| `MultiSelectIcon` | 2× | `forms_add_on` |
+| `ResetIcon` | 2× | `reset_settings` |
+| `ChevronLeftIcon` | 1× | `arrow_back_ios_new` |
+| `ChevronRightIcon` | 1× | `arrow_forward_ios` |
+| `ChevronDownIcon` | 1× | `keyboard_arrow_down` |
+| `ChevronUpIcon` | 1× | `keyboard_arrow_up` |
+| `AlignLeft/Center/Right/JustifyIcon` | **0×** | — **delete.** The live ones are `AlignIcon` in wm-primitives' `Fitting.tsx`, which takes `format_align_left/center/right/justify` |
+| ReCal `SeamChevron()` | **0×** | — **delete.** The capital `V` took the job |
+
+Plus, with no bespoke predecessor: `light_mode`, `dark_mode`, `fit_width`, `format_size`,
+`format_letter_spacing`, `format_line_spacing`, `mystery`, `mobile_layout`.
+
+### What the font actually ships
+
+| | |
+|---|---|
+| `FILL` | 0 .. 1, default 0 |
+| `GRAD` | −50 .. 200, default 0 |
+| `opsz` | **20 .. 48**, default 24 |
+| `wght` | 100 .. 700, default 400 |
+
+**`opsz` bottoms out at 20.** A mark set at 14px gets the 20px drawing — the closest the
+font has. `Icon.tsx` clamps rather than passing 14 through, because
+`font-variation-settings` on an out-of-range value is not an error, it is silently
+ignored, and you would never learn the axis had stopped working.
+
+### `icon_names` is required, and it is a trap either way
+
+| URL | payload | glyphs |
+|---|---|---|
+| `icon_names=refresh` (as first drafted) | 2 KB | 8 — **one icon** |
+| no `icon_names` | **3.97 MB** | 6,607 |
+| `icon_names=` our 24 | **22 KB** | 60 |
+
+Shipped with `icon_names=refresh`, every other ligature renders as **literal text** —
+`format_align_left` in words, on screen. Dropping the parameter costs 4 MB. The list is
+the answer, and subsetting does not flatten the axes: all four survive at full range.
+
+Which means the list has to track the code, or an icon added in a component renders as
+its own name in production. That is a build step, not a discipline.
