@@ -5,27 +5,6 @@ of these are there, and which ones are actually the primitive?"
 
 Two censuses: [the sliders](#the-sliders), then [the icons and chevrons](#the-icons-and-chevrons).
 
-
-flyout `<span class="material-symbols-outlined">discover_tune</span>`
-Light mode `<span class="material-symbols-outlined">light_mode</span>`
-Dark mode `<span class="material-symbols-outlined">dark_mode</span>`
-
-| # | preview tab | MDS icon |
-|---|-------------|----------|
-| 1 | Big Word | `<span class="material-symbols-outlined">insert_text</span>` |
-<!--| 1 | Big Word | `<span class="material-symbols-outlined">zoom_in</span>` |-->
-| 2 | UI | `<span class="material-symbols-outlined">mobile_layout</span>` |
-| 3 | Type Scale | `<span class="material-symbols-outlined">text_fields</span>` |
-| 4 | Glyphs | `<span class="material-symbols-outlined">grid_view</span>` |
-
-| # | typography function | MDS icon |
-|---|-------------|----------|
-| 1 | reset | `<span class="material-symbols-outlined">reset_settings</span>` |
-| 2 | align left | `<span class="material-symbols-outlined">format_align_left</span>` |
-| 3 | align center | `<span class="material-symbols-outlined">format_align_center</span>` |
-| 4 | align right | `<span class="material-symbols-outlined">format_align_right</span>` |
-| 5 | align justify | `<span class="material-symbols-outlined">format_align_justify</span>` |
-
 Counted 2026-09-07 across wm-primitives, font-proofer, ReCal, opsz-proofer and kernpare.
 **59 sliders. 49 are the primitive; 10 are not.**
 
@@ -100,21 +79,7 @@ none of the behaviour — no `auto`, no typed minus, no drawn steppers.
 **kernpare** has none. Its 194 `type="range"` matches are all inside `shared/` — the
 primitives' own stylesheet, not its own controls.
 
-**MDS additions**
-```
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=refresh" />
-<style>
-```
-```
-.material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24
-}
-</style>
-```
+
 
 ---
 
@@ -202,3 +167,45 @@ left behind when the `V` took over. Deletable.
 **Three icon vocabularies coexist**: hand-inlined Lucide (font-proofer, 34), a bespoke
 14×14 set (font-proofer, 10), and Material Symbols as a webfont (docs only, 4). Nothing
 shared, and the docs page is the only consumer paying for a font to get icons.
+
+
+
+**MDS additions**
+```
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=refresh" />
+<style>
+```
+```
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}
+</style>
+```
+
+##chevrons
+`<span class="material-symbols-outlined">arrow_back_ios_new</span>`
+`<span class="material-symbols-outlined">arrow_forward_ios</span>`
+
+flyout `<span class="material-symbols-outlined">discover_tune</span>`
+Light mode `<span class="material-symbols-outlined">light_mode</span>`
+Dark mode `<span class="material-symbols-outlined">dark_mode</span>`
+
+| # | preview tab | MDS icon |
+|---|-------------|----------|
+| 1 | Big Word | `<span class="material-symbols-outlined">insert_text</span>` |
+<!--| 1 | Big Word | `<span class="material-symbols-outlined">zoom_in</span>` |-->
+| 2 | UI | `<span class="material-symbols-outlined">mobile_layout</span>` |
+| 3 | Type Scale | `<span class="material-symbols-outlined">text_fields</span>` |
+| 4 | Glyphs | `<span class="material-symbols-outlined">grid_view</span>` |
+
+| # | typography function | MDS icon |
+|---|-------------|----------|
+| 1 | reset | `<span class="material-symbols-outlined">reset_settings</span>` |
+| 2 | align left | `<span class="material-symbols-outlined">format_align_left</span>` |
+| 3 | align center | `<span class="material-symbols-outlined">format_align_center</span>` |
+| 4 | align right | `<span class="material-symbols-outlined">format_align_right</span>` |
+| 5 | align justify | `<span class="material-symbols-outlined">format_align_justify</span>` |
