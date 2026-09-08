@@ -315,8 +315,31 @@
 
   @media (pointer: coarse) {
     /* Permanent here, so back into the layout and measured with the row -- and the
-       suffix stops yielding, because nothing is being anticipated. */
-    .slider-step { opacity: 1; position: static; }
+       suffix stops yielding, because nothing is being anticipated.
+
+       transform: none IS THE POINT, and its absence was a real bug on phones. These two
+       share the absolute rule above, which carries `translateY(-50%)` to centre them in
+       their slot. Setting only `position: static` left the transform behind, so an
+       in-flow stepper -- 44px, two 22px targets stacked -- was still pulled up 22px: it
+       began 21px ABOVE a 46px row, overhung the rows either side, and, being painted on
+       top, swallowed the touches meant for the track. The control could not be dragged
+       on a phone at all, and the value and unit were shoved out of line by the same
+       overflow. A position change without the matching transform reset is the trap.
+
+       The suffix comes in flow with it. Left absolute against a slot that now has a real
+       occupant, it centred itself on a 44px box while the number sat at the top -- which
+       is how `620` and `px` came to be on two different lines. */
+    .slider-step { opacity: 1; position: static; transform: none; }
+    .slider-suffix { position: static; transform: none; }
+    /* The reserved slot is not reserved any more -- the stepper is IN it -- so the
+       padding that held it open is now just a gap at the right edge. */
+    .slider-value { padding-right: 0; align-items: center; }
+    /* DOM order is number, stepper, unit -- right while they share one slot and only one
+       of them is ever visible. In flow they are all three on screen at once, and that
+       order reads "620 ^v px": the unit is separated from its number by the control.
+       `order` puts it back without touching the markup, which the swap still depends on. */
+    .slider-suffix { order: 1; }
+    .slider-step { order: 2; }
     .slider-row:hover .slider-suffix,
     .slider-row:focus-within .slider-suffix { opacity: 1; }
     .slider-step-btn { width: 32px; height: 22px; }
