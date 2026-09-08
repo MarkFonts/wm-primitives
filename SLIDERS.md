@@ -1,7 +1,9 @@
-# Every slider, and what draws it
+# Every slider, icon and chevron, and what draws it
 
 A census, not a spec — the spec is [DIAL.md](DIAL.md). This is the answer to "how many
 of these are there, and which ones are actually the primitive?"
+
+Two censuses: [the sliders](#the-sliders), then [the icons and chevrons](#the-icons-and-chevrons).
 
 
 flyout `<span class="material-symbols-outlined">discover_tune</span>`
@@ -142,3 +144,61 @@ preview bar uses raw tags on purpose — but not four ways' worth.
 **`flex` is three different controls.** The Swiss Rag knob (3), the triplet row (8, 16,
 49) and the docs card's fourth row, which calls the same idea **glyph scale** and tags it
 `wdth` instead of `x-scale`. The page and the shipping rail disagree about its name.
+
+
+---
+
+## The icons and chevrons
+
+Same question, same answer shape. **31 marks. 8 are drawn by the primitive; the rest are
+the apps' own**, and three of them are the same idea drawn three ways.
+
+| # | mark | repo | where |  | how it is made | primitive? |
+|---|---|---|---|---|---|---|
+| 1 | stepper chevron ⌃⌄ | wm-primitives | `AxisSlider` value field | | inline SVG, `viewBox 0 0 10 6`, stroke 1.5 | ✅ |
+| 2 | stepper chevron ⌃⌄ | wm-primitives | `AxisTriplet` fields | | inline SVG, `viewBox 0 0 7 6`, stroke 1.5 — **redrawn narrower, not scaled**: scaling shrinks the stroke with the shape | ✅ |
+| 3 | `auto` state dot ● / ○ | wm-primitives | `AxisSlider` label, `allowAuto` | | Cal Sans `uni25CF` / `circle` at 0.7em, raised 1px — **not** `•` / `◦`, drawn at 18% of the em against these at 76% | ✅ |
+| 4 | chip dot ● | wm-primitives | `AxisTriplet` chip | | CSS `content: '\25CF'` at 0.7em, raised 1px | ✅ |
+| 5 | ◆ baked-default marker | wm-primitives | `AxisSlider` value, `marker` | | text glyph, suppressed in `variant="diamond"` | ✅ |
+| 6 | ◆ diamond thumb | wm-primitives | `AxisSlider` `variant="diamond"` | | CSS rotate-45 square on the range thumb | ✅ |
+| 7 | align bars | wm-primitives | `Fitting` — left/center/right/justify | | `AlignIcon`, SVG 14×14, four `<rect>` rows at computed x | ✅ |
+| 8 | copy → check | wm-primitives | `GlyphPicker` copy button | | SVG 16×16, two paths, 2s revert | ✅ |
+| 9 | **capital `V`** | ReCal | rail seams — TYPE MATRIX, FREEZER | | **a literal Cal Sans `V` at `SHRP 100`**, `margin: 0 2em`, no transform — a transform would drop the shared clip fill and the V vanishes, so it stays inline and rides the holographic gradient | ❌ |
+| 10 | seam chevron | ReCal | — | | `SeamChevron()`, SVG 22×10 — **declared and never rendered.** Dead: the `V` above took the job | ❌ |
+| 11 | ↺ reset | ReCal | Reset buttons | | `ResetIcon()`, SVG 16×16, two paths — **defined twice**, `Shell.tsx:43` and `App.tsx:30`, byte-identical | ❌ |
+| 12 | ✓ freeze check | ReCal | `Freezer` | | inline SVG 12×12, one path, stroke 1.8 | ❌ |
+| 13 | vertical-metrics diagram | ReCal | `VMetricsView` | | SVG with a computed `viewBox` — a drawing, not an icon | ❌ |
+| 14–47 | 34 × 24×24 | font-proofer | throughout | | `LucideIcon` wrapper — Lucide-style stroke icons, inlined by hand | ❌ |
+| 48–57 | 10 × 14×14 | font-proofer | toolbars | | named set: `AlignLeft/Center/Right/Justify`, `ChevronLeft/Right`, `Glyph`, `MultiSelect`, `Para`, `Scale` | ❌ |
+| 58–60 | 3 × 16×16 | font-proofer | incl. `calcom-font` | | inline SVG | ❌ |
+| 61 | `fit_width` | wm-primitives docs | controls card 04 | | Material Symbols Outlined ligature | ❌ |
+| 62 | `line_weight` | wm-primitives docs | controls card 04 | | Material Symbols Outlined ligature | ❌ |
+| 63 | `format_line_spacing` | wm-primitives docs | controls card 04 | | Material Symbols Outlined ligature | ❌ |
+| 64 | `mystery` | wm-primitives docs | controls card 04 — `opsz` | | Material Symbols Outlined ligature. Named `mystery` because no symbol means optical size | ❌ |
+
+opsz-proofer draws **no** icons or chevrons at all — its hand-emitted `.slider-row` markup
+has no stepper, which is the behaviour it silently gave up by copying the class names
+instead of the component.
+
+### What the icon census says
+
+**The same chevron is drawn four ways.** The primitive draws it twice on purpose —
+10×6 for the dial, 7×6 redrawn for the triplet's narrower gutter, and the redraw is
+correct, because scaling would have thinned the stroke. But font-proofer also ships
+`ChevronLeft/Right` at 14×14, and ReCal draws its seam chevron as **a capital V set in
+Cal Sans**. Four chevrons, three unrelated constructions.
+
+**ReCal's `V` is the interesting one and should probably stay.** It is not laziness: the
+seam label rides a holographic gradient with a shared clip fill, and an SVG cannot be
+inside that fill — the comment in `holo.css` says so and says why a transform kills it.
+A letterform as an icon is the right answer *here*, in a type tool, and it is the only
+mark in the census that a font could draw better than a drawing.
+
+**`SeamChevron()` is dead** — an SVG chevron defined in `Shell.tsx` and never rendered,
+left behind when the `V` took over. Deletable.
+
+**`ResetIcon()` is defined twice in ReCal**, identically, in `Shell.tsx` and `App.tsx`.
+
+**Three icon vocabularies coexist**: hand-inlined Lucide (font-proofer, 34), a bespoke
+14×14 set (font-proofer, 10), and Material Symbols as a webfont (docs only, 4). Nothing
+shared, and the docs page is the only consumer paying for a font to get icons.
