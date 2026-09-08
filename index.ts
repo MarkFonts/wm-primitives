@@ -33,6 +33,9 @@ export type { AxisTripletProps, Band } from './src/AxisTriplet'
 // Icon — a Material Symbols mark on the same axes as the type beside it. The HOST loads
 // the font (see Icon.tsx for the link tag and its four axes); this exports the component
 // and the ink/weight contract only.
+export { Chevron } from './src/Chevron'
+export type { ChevronProps } from './src/Chevron'
+
 export { Icon } from './src/Icon'
 export type { IconProps } from './src/Icon'
 

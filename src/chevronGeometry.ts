@@ -45,15 +45,14 @@ export const CHEVRON = {
      1.02px; a 1.5 lineWidth came out at 1.34, i.e. 31% heavier, which is exactly the
      mismatch you see when the two sit in one panel. 1.15 lands on Material's weight. */
   stroke: 1.15,
-  /* Round CAPS, mitred CORNER. The two are different decisions and were conflated once
-     already: `butt` cuts each cap perpendicular to its own arm, so the ends come out as
-     ragged diagonals rather than square -- a filled glyph cuts them on the horizontal,
-     which a stroke cannot be told to do -- and that is why the ends stay round. The
-     APEX is another matter: a round join blunts the point into a small arc, and at a
-     1.15 stroke that arc is most of the corner. Mitred, the chevron has a point.
-     The first attempt at this failed because it changed both at once, at a 1.5 stroke
-     and with the two steppers still at different angles, so a spiky apex arrived on top
-     of an already-mismatched mark. */
+  /* Round caps, mitred corner -- and flat caps were tried in between, so here is why it
+     is back. `butt` cuts each cap perpendicular to its own ARM, so on a 34.6-degree
+     chevron the ends come out cut at 34.6 degrees rather than vertically: a filled
+     Material glyph cuts them on the horizontal, which a stroked path cannot be told to
+     do. What you get is a slight bevel at each tip, not the clean square end that made
+     flat look right on paper.
+     The corner is a separate decision and stays mitred: a round join blunts the apex into
+     an arc that, at a 1.15 stroke on a 10px mark, is most of the corner. */
   cap: 'round' as const,
   join: 'miter' as const,
   /** A mitre on a 34.6-degree apex extends ~1.6x the stroke; 4 clears it without letting
