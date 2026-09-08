@@ -14,6 +14,7 @@ import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, useCallbac
 import type { CSSProperties } from 'react'
 import { isSupported, type CmapRanges } from './glyphset'
 import { loadNamePages, algorithmicName } from './glyphNames'
+import { Icon } from './Icon'
 import './GlyphPicker.css'
 
 /** One cell. `ffs` is a raw font-feature-settings fragment for this cell (e.g.
@@ -155,17 +156,40 @@ const Cell = memo(function Cell({ cell, active, state, name, onPick }: {
 })
 
 // Copy affordance (from the house CopyButton): copy icon → checkmark, 2s revert.
+//
+// TWO STEPS, NOT ONE. Swapping content_copy straight to check changes the glyph in a
+// single frame and animates only the fill behind it, which at 140ms does not read as a
+// transition at all -- it reads as a flash, and the thing it looks like it flashed to is
+// the icon you just replaced. So the mark FILLS first, still as content_copy and slowly
+// enough to see, and only then becomes check. The confirmation is the filling; the check
+// is where it lands.
+//
+// Both marks come from one font at one weight, which is the other half of why this works:
+// two inlined SVGs from two sources could not be relied on to agree about stroke or
+// optical centre, and any disagreement between them shows up exactly at the swap.
 function CopyIcon({ ok }: { ok: boolean }) {
+  const [filled, setFilled] = useState(false)
+  useEffect(() => {
+    if (!ok) { setFilled(false); return }
+    /* Fill immediately, hold the copy mark for the length of that fill, then swap. The
+       timeout matches FILL_MS below rather than guessing: if the two disagree the glyph
+       changes mid-fill, which is the flicker this exists to remove. */
+    setFilled(true)
+    const t = window.setTimeout(() => setFilled(false), FILL_MS)
+    return () => window.clearTimeout(t)
+  }, [ok])
+  const showCheck = ok && !filled
   return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
-      {ok ? (
-        <path fill="currentColor" d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" />
-      ) : (
-        <path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d="M2.75.5A1.75 1.75 0 0 0 1 2.25v7.5c0 .966.784 1.75 1.75 1.75H4.5V10H2.75a.25.25 0 0 1-.25-.25v-7.5A.25.25 0 0 1 2.75 2h5.5a.25.25 0 0 1 .25.25V3H10v-.75A1.75 1.75 0 0 0 8.25.5zm5 4A1.75 1.75 0 0 0 6 6.25v7.5c0 .966.784 1.75 1.75 1.75h5.5A1.75 1.75 0 0 0 15 13.75v-7.5a1.75 1.75 0 0 0-1.75-1.75zM7.5 6.25A.25.25 0 0 1 7.75 6h5.5a.25.25 0 0 1 .25.25v7.5a.25.25 0 0 1-.25.25h-5.5a.25.25 0 0 1-.25-.25z" />
-      )}
-    </svg>
+    <Icon
+      name={showCheck ? 'check' : 'content_copy'}
+      size={20}
+      filled={ok}
+      state={ok ? 'active' : 'rest'}
+      style={{ ['--icon-dur' as string]: `${FILL_MS}ms` }}
+    />
   )
 }
+const FILL_MS = 260
 
 // Label placement: each label magnets to its rule; colliding labels share the
 // displacement symmetrically — so coincident rules (asc == cap) split around the

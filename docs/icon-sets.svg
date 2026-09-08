@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 622 426" width="622" height="426" font-family="Newsreader, Georgia, serif">
+<style>
+  .bg { fill: #0f0f0f; }
+  .h { fill: #e8e8e8; font-size: 15px; font-weight: 600; }
+  .s { fill: rgba(232,232,232,.45); font-size: 10.5px; font-family: ui-monospace, Menlo, monospace; }
+  .n { fill: rgba(232,232,232,.5); font-size: 8px; text-anchor: middle;
+        font-family: ui-monospace, Menlo, monospace; }
+  .cell { fill: #1a1a1a; stroke: rgba(232,232,232,.10); }
+  .ico { color: #e8e8e8; overflow: visible; }
+</style>
+<rect class="bg" x="0" y="0" width="622" height="426"/>
+<text class="h" x="28" y="46">Lucide — inlined by hand</text>
+<text class="s" x="28" y="62">9 icons · viewBox 0 0 24 24 · stroke, no fill · font-proofer&#x27;s cal.com nav</text>
+<g transform="translate(28,86)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><line x1="11" y1="12" x2="13" y2="12"/></svg>
+<text class="n" x="27.0" y="66">Event Types</text></g>
+<g transform="translate(92,86)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+<text class="n" x="27.0" y="66">Bookings</text></g>
+<g transform="translate(156,86)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M12 2a10 10 0 0 1 7.38 16.75"/><path d="M12 6v6l4 2"/><path d="M2.5 8.875a10 10 0 0 0-.5 3"/><path d="M2.83 16a10 10 0 0 0 2.43 3.4"/><path d="M4.636 5.235a10 10 0 0 1 .891-.857"/><path d="M8.644 21.42a10 10 0 0 0 7.631-.38"/></svg>
+<text class="n" x="27.0" y="66">Availability</text></g>
+<g transform="translate(220,86)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M16 2v2"/><path d="M17.915 22a6 6 0 0 0-12 0"/><path d="M8 2v2"/><circle cx="12" cy="12" r="4"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>
+<text class="n" x="27.0" y="66">Members</text></g>
+<g transform="translate(284,86)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+<text class="n" x="27.0" y="66">Teams</text></g>
+<g transform="translate(348,86)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+<text class="n" x="27.0" y="66">Apps</text></g>
+<g transform="translate(412,86)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+<text class="n" x="27.0" y="66">Routing</text></g>
+<g transform="translate(476,86)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></svg>
+<text class="n" x="27.0" y="66">Workflows</text></g>
+<g transform="translate(540,86)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
+<text class="n" x="27.0" y="66">Insights</text></g><text class="h" x="28" y="202">The bespoke set</text>
+<text class="s" x="28" y="218">14 icons · mixed viewBoxes 12–20 · font-proofer&#x27;s own toolbar marks</text>
+<g transform="translate(28,242)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect width="20" height="20" rx="3" ry="3" fill="currentColor" fillOpacity="0.15"/>
+      <path fill="currentColor" d="M5.155 12.422c-.43-.25-.769-.587-1.016-1.012-.247-.425-.371-.893-.371-1.402 0-.515.12-.987.36-1.417.24-.43.574-.77 1.001-1.02.427-.25.914-.375 1.459-.375.405 0 .777.071 1.117.214.34.143.635.358.885.648l-.772.735c-.17-.18-.35-.314-.54-.401-.19-.087-.42-.131-.69-.131-.345 0-.646.076-.904.229-.257.153-.456.361-.596.626-.14.265-.21.562-.21.892 0 .33.07.625.21.885.14.26.341.465.604.615.262.15.568.225.918.225.235 0 .456-.042.664-.128.207-.085.383-.21.529-.375l.795.698c-.22.265-.498.476-.832.633-.335.157-.728.236-1.177.236-.525 0-1.002-.125-1.432-.375ZM9.835 12.516c-.3-.193-.534-.449-.701-.769-.168-.32-.251-.665-.251-1.035 0-.37.084-.715.251-1.035.167-.32.401-.576.701-.769.3-.193.64-.289 1.02-.289.285 0 .542.064.772.191.23.128.383.3.458.514h.052v-.6h1.027v3.974h-1.027v-.585h-.052c-.075.205-.228.371-.458.499-.23.127-.487.191-.772.191-.38 0-.72-.096-1.02-.288Zm1.743-.833c.162-.097.29-.231.382-.401.092-.17.139-.36.139-.57 0-.215-.047-.407-.139-.577-.092-.17-.22-.304-.382-.401-.163-.097-.346-.146-.551-.146-.31 0-.568.106-.772.319-.205.213-.307.478-.307.799 0 .21.046.401.139.574.092.172.221.307.386.405.165.097.35.146.555.146.205 0 .389-.049.551-.146ZM15.391 12.7h-1.057v-.877l.007-4.53h1.058l-.008 5.406Z"/></svg>
+<text class="n" x="27.0" y="66">Cal</text></g>
+<g transform="translate(92,242)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="1" y="2" width="12" height="1.5" rx="0.75" fill="currentColor"/>
+      <rect x="1" y="5.5" width="12" height="1.5" rx="0.75" fill="currentColor"/>
+      <rect x="1" y="9" width="8" height="1.5" rx="0.75" fill="currentColor"/></svg>
+<text class="n" x="27.0" y="66">Para</text></g>
+<g transform="translate(156,242)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+      <rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+      <rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+      <rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+<text class="n" x="27.0" y="66">Glyph</text></g>
+<g transform="translate(220,242)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="1" y="1.5" width="12" height="3" rx="0.75" fill="currentColor"/>
+      <rect x="1" y="6.5" width="12" height="2" rx="0.75" fill="currentColor"/>
+      <rect x="1" y="10.5" width="12" height="1.25" rx="0.625" fill="currentColor"/></svg>
+<text class="n" x="27.0" y="66">Scale</text></g>
+<g transform="translate(284,242)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><line x1="1" y1="3" x2="11" y2="3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <circle cx="4" cy="3" r="1.5" fill="currentColor"/>
+      <line x1="1" y1="9" x2="11" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <circle cx="8" cy="9" r="1.5" fill="currentColor"/></svg>
+<text class="n" x="27.0" y="66">Sliders</text></g>
+<g transform="translate(348,242)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2" y="1.6" width="10" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="2" y="5.0" width="6" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="2" y="8.4" width="10" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="2" y="11.8" width="6" height="1.2" rx="0.6" fill="currentColor"/></svg>
+<text class="n" x="27.0" y="66">AlignLeft</text></g>
+<g transform="translate(412,242)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2.0" y="1.6" width="10" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="4.0" y="5.0" width="6" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="2.0" y="8.4" width="10" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="4.0" y="11.8" width="6" height="1.2" rx="0.6" fill="currentColor"/></svg>
+<text class="n" x="27.0" y="66">AlignCenter</text></g>
+<g transform="translate(476,242)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2" y="1.6" width="10" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="6" y="5.0" width="6" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="2" y="8.4" width="10" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="6" y="11.8" width="6" height="1.2" rx="0.6" fill="currentColor"/></svg>
+<text class="n" x="27.0" y="66">AlignRight</text></g>
+<g transform="translate(540,242)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2" y="1.6" width="10" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="2" y="5.0" width="10" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="2" y="8.4" width="10" height="1.2" rx="0.6" fill="currentColor"/>
+      <rect x="2" y="11.8" width="6" height="1.2" rx="0.6" fill="currentColor"/></svg>
+<text class="n" x="27.0" y="66">AlignJustify</text></g>
+<g transform="translate(28,324)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><polyline points="9,2 4,7 9,12" /></svg>
+<text class="n" x="27.0" y="66">ChevronLeft</text></g>
+<g transform="translate(92,324)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><polyline points="5,2 10,7 5,12" /></svg>
+<text class="n" x="27.0" y="66">ChevronRight</text></g>
+<g transform="translate(156,324)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><polyline points="3,6 8,11 13,6" /></svg>
+<text class="n" x="27.0" y="66">ChevronDown</text></g>
+<g transform="translate(220,324)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><polyline points="3,10 8,5 13,10" /></svg>
+<text class="n" x="27.0" y="66">ChevronUp</text></g>
+<g transform="translate(284,324)">
+<rect class="cell" x="0" y="0" width="54" height="54" rx="8"/>
+<svg x="14.0" y="14.0" width="26" height="26" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="3" cy="4" r="1.5" />
+      <line x1="6.5" y1="4" x2="12" y2="4" />
+      <circle cx="3" cy="10" r="1.5" />
+      <line x1="6.5" y1="10" x2="12" y2="10" /></svg>
+<text class="n" x="27.0" y="66">MultiSelect</text></g>
+</svg>

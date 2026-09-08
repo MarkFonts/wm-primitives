@@ -9,10 +9,23 @@
  * ink: hover is not a colour change with a shape underneath it, it is the mark pressing
  * harder. That is the whole reason to leave SVG behind, so it is stated here first.
  *
- *   off     ink-faint  wght 300   the control cannot act -- a frozen axis, a disabled row
- *   rest    ink-quiet  wght 400   present, not chosen
- *   hover   ink-full   wght 500   under the pointer. Ink and weight move together.
+ *   off     ink-faint  wght 200   the control cannot act -- a frozen axis, a disabled row
+ *   rest    ink-faint  wght 200   present, not chosen
+ *   hover   ink-quiet  wght 400   under the pointer
  *   active  ink-full   wght 600   chosen. FILL 1 if the mark has a filled form.
+ *
+ * THREE INKS, THREE STATES, and no two of them share one. Hover and active were both
+ * ink-full first, so the colour said nothing -- the mark reached its final ink merely by
+ * being pointed at, and arriving at `active` changed only the weight. A weight step is
+ * not enough on its own to carry "this is the one that is on": the ladder has to climb
+ * faint -> quiet -> full so that hover is visibly a WAY to active rather than the same
+ * thing as it.
+ *
+ * 200 -> 400 rather than 400 -> 500: at 20px a 100-unit step is not visible, and the
+ * point of putting emphasis on an axis is that you can SEE the mark press. Doubling the
+ * weight is legible without the mark changing size, which is the thing a swap of two
+ * drawings could never do. It also leaves the resting rail quieter than the type it
+ * labels, which is where a row of marks belongs.
  *
  * GRAD, NOT wght, CARRIES THE THEME. On a dark ground a stroke of the same weight reads
  * heavier -- it blooms. GRAD exists for exactly this and moves the stroke without moving
@@ -64,10 +77,13 @@
 
     --icon-opsz: 20;
     --icon-fill: 0;
-    --icon-wght: 400;
-    /* Dark is the default ground here, so the default GRAD is the dark correction.
-       0 would be right for light. */
-    --icon-grad: -25;
+    /* ONE WEIGHT FOR THE WHOLE SET. Emphasis rides GRAD instead, which thickens the
+       stroke without touching the advance or the outline -- so a row of marks cannot
+       shift by a fraction as one of them lights up, and the marks stay one family whose
+       pressure changes rather than four weights of the same drawing. */
+    --icon-wght: 300;
+    /* Dark ground, at rest. Light starts higher: the same stroke reads lighter there. */
+    --icon-grad: 50;
 
     font-variation-settings:
       'FILL' var(--icon-fill),
@@ -75,25 +91,65 @@
       'GRAD' var(--icon-grad),
       'opsz' var(--icon-opsz);
 
-    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
+    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
+    /* --icon-dur, not --dur-fast directly: a hover wants to be instant, but a CONFIRM
+       wants to be seen. At 140ms the copy button's fill read as a flicker -- indeed it
+       read as the old SVG flashing -- so the affordance that says "it worked" needs to
+       be slower than the one that says "you are pointing at this". The caller turns it
+       up; nothing else changes. */
+    /* 90ms, not --dur-fast's 140: at 140 the mark visibly lagged the row it sits in,
+       arriving after the thing it labels had already moved. A rollover should feel like
+       the pointer, not like an animation about the pointer. The copy confirm turns this
+       up to 260 because that one IS the animation. */
+    --icon-dur: 90ms;   /* token-lint: allow -- deliberately shorter than --dur-fast */
     transition:
-      font-variation-settings var(--dur-fast, 140ms) ease,
-      color var(--dur-fast, 140ms) ease;
+      font-variation-settings var(--icon-dur) ease,
+      color var(--icon-dur) ease;
   }
 
-  /* Light ground: the stroke no longer blooms, so the correction comes off. */
+  /* Light ground: every rung one step up, because the same stroke reads lighter on light.
+     rest 100 · hover 150 · active 200. Dark: 50 · 100 · 150. Both climb; neither lets
+     hover reach the value active uses. 200 is GRAD's ceiling, so `active` on light is at
+     the top and there is deliberately nothing above it. */
   @media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) .wm-icon { --icon-grad: 0; }
+    :root:not([data-theme="dark"]) .wm-icon { --icon-grad: 100; }
+    :root:not([data-theme="dark"]) .wm-icon--off { --icon-grad: 100; }
+    :root:not([data-theme="dark"]) .wm-icon--active,
+    :root:not([data-theme="dark"]) .active > .wm-icon,
+    :root:not([data-theme="dark"]) .active > * > .wm-icon { --icon-grad: 200; }
   }
-  :root[data-theme="light"] .wm-icon { --icon-grad: 0; }
-  :root[data-theme="dark"]  .wm-icon { --icon-grad: -25; }
+  :root[data-theme="light"] .wm-icon { --icon-grad: 100; }
+  :root[data-theme="light"] .wm-icon--off { --icon-grad: 100; }
+  :root[data-theme="light"] .wm-icon--active,
+  :root[data-theme="light"] .active > .wm-icon,
+  :root[data-theme="light"] .active > * > .wm-icon { --icon-grad: 200; }
+  :root[data-theme="dark"] .wm-icon { --icon-grad: 50; }
+  :root[data-theme="dark"] .wm-icon--off { --icon-grad: 50; }
+  /* Stated for dark as well as light, and this is why: `:root[data-theme="dark"] .wm-icon`
+     scores (0,2,1) while `.active > .wm-icon` scores (0,2,0), so the theme's REST value
+     beat active outright and the chosen mark never lit. The light block had these rules
+     already; dark did not, which is exactly the sort of asymmetry that renders correctly
+     in the theme you happen to be testing. */
+  :root[data-theme="dark"] .wm-icon--active,
+  :root[data-theme="dark"] .active > .wm-icon,
+  :root[data-theme="dark"] .active > * > .wm-icon { --icon-grad: 150; }
 
   .wm-icon--off {
     --icon-wght: 300;
     color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
   }
-  .wm-icon--active {
-    --icon-wght: 600;
+  /* ACTIVE COMES FROM THE BUTTON TOO, not only from the prop.
+     Icon takes state="active", and Fitting's alignments pass it -- but every other
+     control in these apps already says "chosen" by putting .active on the BUTTON, and
+     was doing so long before there was an Icon. Reading only the prop meant an active
+     mode row and a resting one drew the same mark: the row lit up, the mark did not, so
+     the emphasis vanished at exactly the moment it was supposed to arrive.
+     Matching the host's own class here rather than editing seventeen call sites, and
+     because the button is the thing that actually knows. */
+  .wm-icon--active,
+  .active > .wm-icon,
+  .active > * > .wm-icon {
+    --icon-grad: 150;
     color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
   }
 
@@ -110,10 +166,40 @@
      nowhere near. */
   .fit-align-btn:hover .wm-icon:not(.wm-icon--off),
   .fit-align-btn:focus-visible .wm-icon:not(.wm-icon--off),
+  .align-btn:hover .wm-icon:not(.wm-icon--off),
+  .align-btn:focus-visible .wm-icon:not(.wm-icon--off),
+  .mobile-tab:hover .wm-icon:not(.wm-icon--off),
+  .mode-btn:hover .wm-icon:not(.wm-icon--off),
   .wm-icon:not(.wm-icon--off):hover {
-    --icon-wght: 500;
-    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
+    /* THE MIDDLE RUNG. Hover was at 200 -- the top of GRAD's range and the same value
+       `active` uses -- so in light mode a hovered mark was as heavy as the chosen one,
+       and hovering an unchosen mark made it look chosen. Hover has to sit BETWEEN rest
+       and active or it is not a way to active, it is a claim to be it. */
+    --icon-grad: 100;
+    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
   }
+  /* The same middle rung on light, where every value sits one step higher. Without this
+     a light hover used the dark number and came out lighter than rest. */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),
+    :root:not([data-theme="dark"]) .fit-align-btn:hover .wm-icon:not(.wm-icon--off),
+    :root:not([data-theme="dark"]) .align-btn:hover .wm-icon:not(.wm-icon--off),
+    :root:not([data-theme="dark"]) .mobile-tab:hover .wm-icon:not(.wm-icon--off),
+    :root:not([data-theme="dark"]) .mode-btn:hover .wm-icon:not(.wm-icon--off),
+    :root:not([data-theme="dark"]) .wm-icon:not(.wm-icon--off):hover { --icon-grad: 150; }
+  }
+  :root[data-theme="light"] .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),
+  :root[data-theme="light"] .fit-align-btn:hover .wm-icon:not(.wm-icon--off),
+  :root[data-theme="light"] .align-btn:hover .wm-icon:not(.wm-icon--off),
+  :root[data-theme="light"] .mobile-tab:hover .wm-icon:not(.wm-icon--off),
+  :root[data-theme="light"] .mode-btn:hover .wm-icon:not(.wm-icon--off),
+  :root[data-theme="light"] .wm-icon:not(.wm-icon--off):hover { --icon-grad: 150; }
+  :root[data-theme="dark"] .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),
+  :root[data-theme="dark"] .fit-align-btn:hover .wm-icon:not(.wm-icon--off),
+  :root[data-theme="dark"] .align-btn:hover .wm-icon:not(.wm-icon--off),
+  :root[data-theme="dark"] .mobile-tab:hover .wm-icon:not(.wm-icon--off),
+  :root[data-theme="dark"] .mode-btn:hover .wm-icon:not(.wm-icon--off),
+  :root[data-theme="dark"] .wm-icon:not(.wm-icon--off):hover { --icon-grad: 100; }
 
   /* THE BUTTON THAT DRAWS NOTHING. All target, no face: the padding is the hit area, and
      44px is the touch floor rather than a look. Everything visible is the mark. */
@@ -142,6 +228,7 @@
   @media (pointer: coarse) {
     .wm-icon-btn { min-width: 44px; min-height: 44px; }
   }
+
 
   @media (prefers-reduced-motion: reduce) {
     .wm-icon { transition: none; }
