@@ -187,6 +187,7 @@
   .align-btn:hover .wm-icon:not(.wm-icon--off),
   .align-btn:focus-visible .wm-icon:not(.wm-icon--off),
   .mobile-tab:hover .wm-icon:not(.wm-icon--off),
+  .mobile-sub-btn:hover .wm-icon:not(.wm-icon--off),
   .mode-btn:hover .wm-icon:not(.wm-icon--off),
   .wm-icon:not(.wm-icon--off):hover {
     /* THE MIDDLE RUNG. Hover was at 200 -- the top of GRAD's range and the same value
