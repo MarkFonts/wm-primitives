@@ -115,8 +115,8 @@ preview bar uses raw tags on purpose — but not four ways' worth.
 
 ## The icons and chevrons
 
-Same question, same answer shape. **31 marks. 8 are drawn by the primitive; the rest are
-the apps' own**, and three of them are the same idea drawn three ways.
+Same question, same answer shape. **22 marks in scope. 8 are drawn by the primitive; the rest are the apps' own.**
+The 9 Lucide icons are cal.com's brand furniture and are commented out below, and three of them are the same idea drawn three ways.
 
 | # | mark | repo | where |  | how it is made | primitive? |
 |---|---|---|---|---|---|---|
@@ -133,7 +133,10 @@ the apps' own**, and three of them are the same idea drawn three ways.
 | 11 | ↺ reset | ReCal | Reset buttons | | `ResetIcon()`, SVG 16×16, two paths — **defined twice**, `Shell.tsx:43` and `App.tsx:30`, byte-identical | ❌ |
 | 12 | ✓ freeze check | ReCal | `Freezer` | | inline SVG 12×12, one path, stroke 1.8 | ❌ |
 | 13 | vertical-metrics diagram | ReCal | `VMetricsView` | | SVG with a computed `viewBox` — a drawing, not an icon | ❌ |
-| 14–47 | 34 × 24×24 | font-proofer | throughout | | `LucideIcon` wrapper — Lucide-style stroke icons, inlined by hand | ❌ |
+<!-- OUT OF SCOPE for the Material Symbols migration — cal.com's own brand furniture,
+     not our control vocabulary. Left as they are.
+| 14–22 | 9 × 24×24 | font-proofer | cal.com nav preview | | `LucideIcon` wrapper — Event Types, Bookings, Availability, Members, Teams, Apps, Routing, Workflows, Insights | ❌ |
+-->
 | 48–57 | 10 × 14×14 | font-proofer | toolbars | | named set: `AlignLeft/Center/Right/Justify`, `ChevronLeft/Right`, `Glyph`, `MultiSelect`, `Para`, `Scale` | ❌ |
 | 58–60 | 3 × 16×16 | font-proofer | incl. `calcom-font` | | inline SVG | ❌ |
 | 61 | `fit_width` | wm-primitives docs | controls card 04 | | Material Symbols Outlined ligature | ❌ |
@@ -164,9 +167,17 @@ left behind when the `V` took over. Deletable.
 
 **`ResetIcon()` is defined twice in ReCal**, identically, in `Shell.tsx` and `App.tsx`.
 
-**Three icon vocabularies coexist**: hand-inlined Lucide (font-proofer, 34), a bespoke
-14×14 set (font-proofer, 10), and Material Symbols as a webfont (docs only, 4). Nothing
-shared, and the docs page is the only consumer paying for a font to get icons.
+**Three icon vocabularies coexist**: hand-inlined Lucide (font-proofer, 9 — cal.com's
+nav, out of scope), a bespoke set of 16 (font-proofer, viewBoxes 12–20, not all 14×14 as
+first counted), and Material Symbols as a webfont (docs only, 4). Nothing shared.
+
+**Counted by RENDERS rather than definitions, two more are dead.** font-proofer's
+`AlignLeftIcon` / `AlignCenterIcon` / `AlignRightIcon` / `AlignJustifyIcon` are rendered
+**0×**: the alignment buttons you see are drawn by `AlignIcon` in wm-primitives'
+`Fitting.tsx`, so the primitive already owns them and these four are duplicates to
+delete, not convert. And `ChevronUpIcon` is rendered exactly **1×** — so the up chevron
+needs `keyboard_arrow_up`, not a rotated `arrow_forward_ios`. Worth avoiding: rotating a
+glyph puts its opsz correction on the wrong axis.
 
 
 

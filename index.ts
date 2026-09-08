@@ -30,6 +30,12 @@ export type { AxisSliderProps } from './src/AxisSlider'
 export { AxisTriplet } from './src/AxisTriplet'
 export type { AxisTripletProps, Band } from './src/AxisTriplet'
 
+// Icon — a Material Symbols mark on the same axes as the type beside it. The HOST loads
+// the font (see Icon.tsx for the link tag and its four axes); this exports the component
+// and the ink/weight contract only.
+export { Icon } from './src/Icon'
+export type { IconProps } from './src/Icon'
+
 // Glyph-set matching + cmap parsing (Glyphs scene). Each app composes its own
 // extra groups / alternates on top of the shared base groups.
 export { makeGlyphSets, parseCmapRanges, isSupported, enumerateCmap } from './src/glyphset'
