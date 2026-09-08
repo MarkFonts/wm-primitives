@@ -17,15 +17,20 @@
 }
 .inline-emph-menu--left { transform: translate(-100%, -100%); } /* flipped: tuck at the top-LEFT corner */
 @keyframes emph-pop { from { opacity: 0; } }
+/* Marks, not words: the type properties below are dead while the buttons hold an Icon,
+   and are kept for the commented-out word version in the .tsx. */
 .inline-emph-btn {
   background: none;
   border: 0;
-  border-radius: 5px;
-  padding: var(--hair, 1px) var(--spacing-02, 6px);
+  border-radius: 0;
+  padding: var(--spacing-02, 6px);
   color: var(--text);
   font-family: var(--ui-font, system-ui, sans-serif);
   font-size: var(--type-micro-size);
   cursor: pointer;
   white-space: nowrap;
 }
-.inline-emph-btn:hover { background: var(--surface-hi); }
+/* No hover FILL. Every other icon in the system says "you are pointing at this" by
+   pressing harder -- ink and GRAD, from icon.css -- and a background behind two marks in
+   a bubble that is itself a floating panel is a box inside a box. The mark reacts; the
+   button does not. */
