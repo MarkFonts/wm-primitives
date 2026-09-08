@@ -23,7 +23,11 @@
   background: none;
   border: 0;
   border-radius: 0;
-  padding: var(--spacing-02, 6px);
+  /* Tight. This bubble floats over the text you are reading, so every pixel of padding is
+     a pixel of the sentence you cannot see -- and unlike a toolbar it has no neighbours to
+     be parted from. 2px against the 6px .wm-icon-btn uses elsewhere: the marks nearly
+     touch, which is right for two halves of one choice. */
+  padding: 2px;   /* token-lint: allow -- below --spacing-01 on purpose, see above */
   color: var(--text);
   font-family: var(--ui-font, system-ui, sans-serif);
   font-size: var(--type-micro-size);

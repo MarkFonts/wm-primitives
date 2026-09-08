@@ -36,6 +36,11 @@ export type { AxisTripletProps, Band } from './src/AxisTriplet'
 export { Icon } from './src/Icon'
 export type { IconProps } from './src/Icon'
 
+// BlockStyleRail — h1/h2/h3/¶ stacked in the margin of the block being edited, at the
+// bottom of the ink ladder until you reach for them.
+export { BlockStyleRail } from './src/BlockStyleRail'
+export type { BlockStyleRailProps } from './src/BlockStyleRail'
+
 // Glyph-set matching + cmap parsing (Glyphs scene). Each app composes its own
 // extra groups / alternates on top of the shared base groups.
 export { makeGlyphSets, parseCmapRanges, isSupported, enumerateCmap } from './src/glyphset'

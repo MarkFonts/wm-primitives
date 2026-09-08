@@ -96,7 +96,7 @@ export function InlineEmphasisBubble({
         aria-label="Italic"
         onMouseDown={e => { e.preventDefault(); apply(markers.italic) }}
       >
-        <Icon name="format_italic" size={20} />
+        <Icon name="format_italic" size={18} />
       </button>
       <button
         className="inline-emph-btn wm-icon-btn"
@@ -104,7 +104,7 @@ export function InlineEmphasisBubble({
         aria-label="Bold"
         onMouseDown={e => { e.preventDefault(); apply(markers.bold) }}
       >
-        <Icon name="format_bold" size={20} />
+        <Icon name="format_bold" size={18} />
       </button>
     </div>,
     document.body,
