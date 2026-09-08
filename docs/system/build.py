@@ -572,10 +572,16 @@ html,body{margin:0;padding:0;background:var(--bg)}
   font-weight:400;letter-spacing:.12em;text-transform:uppercase;
   font-variation-settings:"GEOM" 100}
 .wm-stack span{display:flex;align-items:center;gap:.38em}
+/* ONE STROKE, THREE DRAWINGS. The rule, the bend and the chevron are a single line
+   that happens to be drawn by an element and two SVGs, so they must render at one
+   thickness -- and matching the NUMBERS does not do it, because each has its own CTM.
+   Declared here rather than in the gloss block so the stack can actually read it; it
+   was set on .wm-head and used by nothing. */
+:root{ --wm-stroke:8px; }
 /* the rule-fill runs each open line out to the shared right rail; its weight sits
    near the caps' stroke and its seat at the optical mid of a 720 cap */
-.wm-stack i{flex:1 1 0;height:.072em;background:currentColor;
-  transform:translateY(-.035em);position:relative;z-index:3}
+.wm-stack i{flex:1 1 0;height:var(--wm-stroke,8px);background:currentColor;
+  transform:translateY(calc(var(--wm-stroke,8px) / -2));position:relative;z-index:3}
 /* the rules and the bend ride ABOVE the blend layer: a hairline crossing a rule
    inverted it into a visible chop, and a rule is furniture, not type */
 .wm-l2{margin-left:11vw}
@@ -602,7 +608,8 @@ html,body{margin:0;padding:0;background:var(--bg)}
    vector-effect:non-scaling-stroke takes the CTM out of it: 8 is 8 screen pixels in
    every one of them, at any viewport, which is what "always match" has to mean when
    the three drawings scale independently. --wm-stroke is the one number. */
-.wmb-path{fill:none;stroke:var(--ink);stroke-width:8}
+.wmb-path{fill:none;stroke:var(--ink);stroke-width:var(--wm-stroke,8px);
+  vector-effect:non-scaling-stroke}
 .wmb-tooth{stroke:var(--ink);stroke-width:1.2}
 .wmb-fill{fill:var(--signal);stroke:none}
 .wm6-fill{fill:var(--signal);stroke:none}
@@ -611,10 +618,16 @@ html,body{margin:0;padding:0;background:var(--bg)}
   text-transform:uppercase;color:var(--ink);font-variation-settings:"GEOM" 100;
   white-space:nowrap}
 .wm6-combg line{stroke:var(--ink);stroke-width:1px;vector-effect:non-scaling-stroke}
-/* NOT non-scaling-stroke. This SVG scales with 108svh, so pinning the chevron to 8
-   screen px made it THINNER than it had been -- the measurement that said its CTM
-   was 1.0 was one viewport, not a law. It stays in its own units. */
-.wm6-chev{fill:none;stroke:var(--ink);stroke-width:8;
+/* non-scaling-stroke after all, and the note it replaces was half right. It said
+   pinning the chevron to 8 screen px made it THINNER than it had been -- true, and an
+   argument about this drawing alone rather than about the three that have to agree.
+   Measured on the built page: rule 7.92px, bend 8.78, chevron 7.13, because each lives
+   in its own CTM (1.0, 1.098, 0.891). The bar stepped +0.86 into the bend and -1.65 into
+   the chevron, and that break is visible at any size because it is a scale difference,
+   not rounding. Thinner-but-equal is the whole point of one stroke crossing three
+   coordinate systems. */
+.wm6-chev{fill:none;stroke:var(--ink);stroke-width:var(--wm-stroke,8px);
+  vector-effect:non-scaling-stroke;
   animation:wm6chev 2.6s ease-in-out infinite}
 @keyframes wm6chev{0%{transform:translateY(-26px);opacity:0}35%{opacity:1}
   100%{transform:translateY(30px);opacity:0}}
@@ -1119,9 +1132,7 @@ HERO = HERO_TMPL.replace("__SIX__", SIX_CMDS)
 # (--ox/--oy) makes one light source that travels ACROSS the words.
 GLOSS = "" if not LINKED else r"""
 <style id="gloss-css">
-.wm-head{ --gx:0px; --gy:0px; --gw:0px; --gh:0px; --gloss:url(field-247.avif);
-  /* rule = bend = chevron, in screen pixels */
-  --wm-stroke:8px; }
+.wm-head{ --gx:0px; --gy:0px; --gw:0px; --gh:0px; --gloss:url(field-247.avif); }
 /* A phone gets the 1000-square bake: 61KB against 238KB, and the crop it takes is a
    fraction of a field it was never going to resolve at that width anyway. The saving
    that matters is not the download -- it is that every repaint resamples a smaller
