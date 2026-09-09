@@ -302,16 +302,20 @@
   .slider-step-btn::before {
     content: '';
     position: absolute;
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background: currentColor;
+    inset: 0;
+    background-image: url('data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAE1pUHJhdmlmbWlhZm1pZjEAAAFebWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAAOcGl0bQAAAAAAAQAAADhpaW5mAAAAAAACAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAFWluZmUCAAABAAIAAEV4aWYAAAAAGmlyZWYAAAAAAAAADmNkc2MAAgABAAEAAACBaXBycAAAAGBpcGNvAAAAE2NvbHJuY2x4AAkAEAABgAAAAAxjbGxpA+gAQAAAABRpc3BlAAAAAAAAAGQAAABkAAAACWlyb3QAAAAAEHBpeGkAAAAAAwoKCgAAAAxhdjFDgQBMAAAAABlpcG1hAAAAAAAAAAEAAQaBAgMFhoQAAAAsaWxvYwAAAABEAAACAAEAAAABAAAB0AAAADcAAgAAAAEAAAGOAAAAQgAAAAFtZGF0AAAAAAAAAIkAAAAGRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAZKADAAQAAAABAAAAZAAAAAASAAoNAAAAAzY8Z//ChIgAwjIkEAGEgAYYYYi0VMregO56Wg+x6xnwsfoJWaYWX85G+ibLVJ6A');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    dynamic-range-limit: no-limit;
+    mask-repeat: no-repeat; mask-position: center; mask-size: 10px 6px;
+    -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; -webkit-mask-size: 10px 6px;
     opacity: 0;
-    transform: scale(.6);
-    transition: opacity var(--dur-fast, .12s), transform var(--dur-fast, .12s);
+    transition: opacity calc(var(--dur-fast, .12s) * 2) ease-out;
     pointer-events: none;
   }
-  .slider-step-btn:active::before { opacity: .16; transform: scale(1); }
+  .slider-step-btn:first-child::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 4.38 5 1.62 9 4.38' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 4.38 5 1.62 9 4.38' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }
+  .slider-step-btn + .slider-step-btn::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1.62 5 4.38 9 1.62' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1.62 5 4.38 9 1.62' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }
+  .slider-step-btn:active::before { opacity: 1; transition: none; }
 
   @media (pointer: coarse) {
     /* Permanent here, so back into the layout and measured with the row -- and the
