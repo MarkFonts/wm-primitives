@@ -60,6 +60,15 @@
   src: url('../fonts/MaterialSymbolsOutlined.woff2') format('woff2');
 }
 
+/* --icon-hdr has to be REGISTERED or it cannot be transitioned: an unregistered custom
+   property is a token stream, and a token stream has no interpolation. That registration
+   is the whole reason the boost can be a slope rather than a switch. */
+@property --icon-hdr {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
 @layer wm.icon {
   .wm-icon {
     /* The literal ligature name is the content, so it must not wrap, hyphenate, or get
@@ -122,25 +131,27 @@
     --icon-dur: 90ms;   /* token-lint: allow -- deliberately shorter than --dur-fast */
     transition:
       font-variation-settings var(--icon-dur) ease,
-      color var(--icon-dur) ease;
+      color var(--icon-dur) ease,
+      --icon-hdr var(--icon-dur) ease;
   }
 
   /* Light ground: every rung one step up, because the same stroke reads lighter on light.
-     rest 100 · hover 150 · active 200. Dark: 50 · 100 · 150. Both climb; neither lets
-     hover reach the value active uses. 200 is GRAD's ceiling, so `active` on light is at
-     the top and there is deliberately nothing above it. */
+     rest 100 - hover 150 - active 100. Dark: 50 - 100 - 75. Hover is the top of the
+     stroke ladder in both; active comes back DOWN by 50 because its HDR paint carries the
+     emphasis instead. Same shape, different absolute numbers -- which is why active is
+     restated per theme rather than inherited. */
   @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) .wm-icon { --icon-grad: 100; }
     :root:not([data-theme="dark"]) .wm-icon--off { --icon-grad: 100; }
     :root:not([data-theme="dark"]) .wm-icon--active,
     :root:not([data-theme="dark"]) .active > .wm-icon,
-    :root:not([data-theme="dark"]) .active > * > .wm-icon { --icon-grad: 200; }
+    :root:not([data-theme="dark"]) .active > * > .wm-icon { --icon-grad: 100; }
   }
   :root[data-theme="light"] .wm-icon { --icon-grad: 100; }
   :root[data-theme="light"] .wm-icon--off { --icon-grad: 100; }
   :root[data-theme="light"] .wm-icon--active,
   :root[data-theme="light"] .active > .wm-icon,
-  :root[data-theme="light"] .active > * > .wm-icon { --icon-grad: 200; }
+  :root[data-theme="light"] .active > * > .wm-icon { --icon-grad: 100; }
   :root[data-theme="dark"] .wm-icon { --icon-grad: 50; }
   :root[data-theme="dark"] .wm-icon--off { --icon-grad: 50; }
   /* Stated for dark as well as light, and this is why: `:root[data-theme="dark"] .wm-icon`
@@ -148,9 +159,16 @@
      beat active outright and the chosen mark never lit. The light block had these rules
      already; dark did not, which is exactly the sort of asymmetry that renders correctly
      in the theme you happen to be testing. */
+  /* 75, matching the base active rule: the HDR paint carries the emphasis, so the stroke
+     comes back DOWN from the rollover rather than up -- one rung, not off the end. Stated
+     per theme for the same
+     specificity reason as the rest -- `:root[data-theme] .wm-icon` is (0,2,1) and beats
+     `.active > .wm-icon` at (0,2,0), so a theme's value silently wins unless active is
+     restated inside it. That is exactly how this rule ended up overriding the 50 it was
+     supposed to agree with. */
   :root[data-theme="dark"] .wm-icon--active,
   :root[data-theme="dark"] .active > .wm-icon,
-  :root[data-theme="dark"] .active > * > .wm-icon { --icon-grad: 150; }
+  :root[data-theme="dark"] .active > * > .wm-icon { --icon-grad: 75; }
 
   .wm-icon--off {
     --icon-wght: 300;
@@ -164,32 +182,128 @@
      the emphasis vanished at exactly the moment it was supposed to arrive.
      Matching the host's own class here rather than editing seventeen call sites, and
      because the button is the thing that actually knows. */
+  /* ACTIVE IS THE ONLY STATE THAT LEAVES SDR. The ladder spends its ink and its GRAD
+     getting here -- faint to quiet to full, 50 to 100 to 150 -- and then has nowhere left
+     to go on a screen that can go further. So the chosen mark is painted with a flat PQ
+     white rather than with ink: the same technique the poster uses on its headline, and
+     literally the same light -- this swatch is one pixel of field-247, its brightest,
+     which works out at 1216 nits through the PQ EOTF. dynamic-range-limit:no-limit is
+     what allows past SDR white.
+
+     NOT PQ 1.0, deliberately. That is 10,000 nits, which no display resolves, so the
+     system tone-maps it -- and clipping is where a bright white turns chalky and shifts
+     hue. Sampling the field's own peak also means an active mark glows at exactly the
+     wordmark's white rather than outshining the logotype from 20px.
+
+     TWO LAYERS, so the boost is a SLOPE. The bottom is the HDR white; the top is the
+     ordinary ink at alpha (1 - --icon-hdr). At 0 the ink is opaque and the mark looks
+     exactly as it did, which is why the handover is invisible; as --icon-hdr climbs the
+     ink thins and the HDR comes through. background-image and background-clip cannot be
+     interpolated, so nothing about the paint animates -- only that one number, registered
+     above so that it can.
+
+     On an SDR display the bottom layer is just white and the mark reads as full ink,
+     which is where the ladder ended anyway. Nothing is lost by not having the screen. */
   .wm-icon--active,
   .active > .wm-icon,
   .active > * > .wm-icon {
-    --icon-grad: 150;
-    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
+    /* GRAD comes DOWN from the rollover, by 50. Everywhere else on this ladder emphasis is
+       stroke weight, because that is all an SDR mark has; once the mark is painted above
+       SDR white the luminance does that work, and a heavier stroke on top is two emphases
+       stacked -- a blob at 20px.
+       The step down is RELATIVE and each theme states its own END value: dark 75, light
+       100 -- a rung BELOW that theme's hover, not a plunge. Earlier ends of -50 and then
+       -25 were read off the axis rather than off the ladder: the shipped fvar runs GRAD
+       -50..200, so -50 is the floor with nothing under it, and the mark went visibly thin
+       the moment the pointer left. 75 sits 25 under dark's hover and still reads chosen.
+       Worth knowing when tuning it: active is heavier than its GRAD implies because of the
+       PAINT PATH, not the axis. `color: transparent` + `background-clip: text` makes
+       Chrome rasterise the glyph as a MASK rather than as smoothed coloured text, and a
+       mask is full grayscale coverage -- more actual pixels, not bloom.
+       -webkit-font-smoothing: antialiased is set on both and does not reach it. */
+    --icon-grad: 75;
+    --icon-hdr: 1;
+    color: transparent;
+    background-image:
+      linear-gradient(
+        rgba(var(--text-rgb, 232, 232, 232), calc(1 - var(--icon-hdr))),
+        rgba(var(--text-rgb, 232, 232, 232), calc(1 - var(--icon-hdr)))),
+      url('data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAE1pUHJhdmlmbWlhZm1pZjEAAAFebWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAAOcGl0bQAAAAAAAQAAADhpaW5mAAAAAAACAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAFWluZmUCAAABAAIAAEV4aWYAAAAAGmlyZWYAAAAAAAAADmNkc2MAAgABAAEAAACBaXBycAAAAGBpcGNvAAAAE2NvbHJuY2x4AAkAEAABgAAAAAxjbGxpA+gAQAAAABRpc3BlAAAAAAAAAGQAAABkAAAACWlyb3QAAAAAEHBpeGkAAAAAAwoKCgAAAAxhdjFDgQBMAAAAABlpcG1hAAAAAAAAAAEAAQaBAgMFhoQAAAAsaWxvYwAAAABEAAACAAEAAAABAAAB0AAAADcAAgAAAAEAAAGOAAAAQgAAAAFtZGF0AAAAAAAAAIkAAAAGRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAZKADAAQAAAABAAAAZAAAAAASAAoNAAAAAzY8Z//ChIgAwjIkEAGEgAYYYYi0VMregO56Wg+x6xnwsfoJWaYWX85G+ibLVJ6A');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    dynamic-range-limit: no-limit;
   }
 
-  /* Hover is the pointer's, so it is scoped to the button that owns the pointer rather
+  /* LIGHT GROUND TAKES NO HDR, and this is physics rather than taste. The boost exists
+     only for pixels brighter than SDR white; a mark on a light ground has to go DARKER to
+     read as chosen, and there is no such thing as darker-than-black to boost into. Left
+     ungated, the swatch painted the chosen mark WHITE on a light page -- the faintest
+     thing in the row rather than the fullest, which is the exact inverse of what active
+     means. Everything is unwound explicitly: background-clip back to border-box so the
+     glyph is smoothed coloured text again and not a mask, and --icon-hdr to 0 so anything
+     else keyed to it stands down.
+     Stated twice for the same reason the GRAD blocks are -- the media query cannot cover a
+     user who has chosen light against an OS set to dark. */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .wm-icon--active,
+    :root:not([data-theme="dark"]) .active > .wm-icon,
+    :root:not([data-theme="dark"]) .active > * > .wm-icon {
+      --icon-hdr: 0;
+      color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
+      background-image: none;
+      -webkit-background-clip: border-box;
+      background-clip: border-box;
+      dynamic-range-limit: standard;
+    }
+  }
+  :root[data-theme="light"] .wm-icon--active,
+  :root[data-theme="light"] .active > .wm-icon,
+  :root[data-theme="light"] .active > * > .wm-icon {
+    --icon-hdr: 0;
+    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
+    background-image: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    dynamic-range-limit: standard;
+  }
+
+  /* ACTIVE DOES NOT TAKE HOVER. Every selector below excludes it, on the mark and on the
+     button carrying the host's own .active. Without that, pointing at the chosen item
+     dropped it from full ink to QUIET and pushed GRAD back up -- an active control getting
+     dimmer and heavier under the pointer, which is the opposite of what hover means. It
+     also fought the HDR paint, since the veil is keyed to the active state and the ink
+     under it had just changed.
+
+     Hover is the pointer's, so it is scoped to the button that owns the pointer rather
      than to the mark: hovering a 20px glyph is a smaller and less forgiving target than
      hovering the control it stands for, and the two should not disagree about state.
      :focus-visible gets the same treatment so the keyboard sees what the mouse sees.
-     An `off` mark does not react -- nothing to react to. */
-  .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),
-  .wm-icon-btn:focus-visible .wm-icon:not(.wm-icon--off),
+     An `off` mark does not react -- nothing to react to.
+
+     The bare `.wm-icon:hover` at the end of the list needs :not(:where(.active) *) as
+     well, and that omission is what put SDR white back over the HDR mask. Active arrives
+     two ways -- the `--active` MODIFIER, and a host ancestor carrying `.active` with a
+     plain mark inside it (the sidebar's .mode-btn does exactly this). Excluding only the
+     modifier leaves the second kind unguarded, so pointing straight at the glyph repainted
+     it at ink-quiet. background-clip: text only reveals the image where the text is
+     TRANSPARENT, so any colour at all covers the swatch and the HDR vanishes under the
+     pointer -- not dimmed, replaced. */
+  .wm-icon-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  .wm-icon-btn:not(.active):focus-visible .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
   /* Buttons that predate .wm-icon-btn and own their own target. Named rather than
      matched on `button:hover .wm-icon`, which would also fire for a button that merely
      contains a mark somewhere -- a toolbar, a row -- and light up a mark the pointer is
      nowhere near. */
-  .fit-align-btn:hover .wm-icon:not(.wm-icon--off),
-  .fit-align-btn:focus-visible .wm-icon:not(.wm-icon--off),
-  .align-btn:hover .wm-icon:not(.wm-icon--off),
-  .align-btn:focus-visible .wm-icon:not(.wm-icon--off),
-  .mobile-tab:hover .wm-icon:not(.wm-icon--off),
-  .mobile-sub-btn:hover .wm-icon:not(.wm-icon--off),
-  .mode-btn:hover .wm-icon:not(.wm-icon--off),
-  .wm-icon:not(.wm-icon--off):hover {
+  .fit-align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  .fit-align-btn:not(.active):focus-visible .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  .align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  .align-btn:not(.active):focus-visible .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  .mobile-tab:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  .mobile-sub-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  .mode-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  .wm-icon:not(.wm-icon--off):not(.wm-icon--active):not(:where(.active) *):hover {
     /* THE MIDDLE RUNG. Hover was at 200 -- the top of GRAD's range and the same value
        `active` uses -- so in light mode a hovered mark was as heavy as the chosen one,
        and hovering an unchosen mark made it look chosen. Hover has to sit BETWEEN rest
@@ -200,25 +314,25 @@
   /* The same middle rung on light, where every value sits one step higher. Without this
      a light hover used the dark number and came out lighter than rest. */
   @media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),
-    :root:not([data-theme="dark"]) .fit-align-btn:hover .wm-icon:not(.wm-icon--off),
-    :root:not([data-theme="dark"]) .align-btn:hover .wm-icon:not(.wm-icon--off),
-    :root:not([data-theme="dark"]) .mobile-tab:hover .wm-icon:not(.wm-icon--off),
-    :root:not([data-theme="dark"]) .mode-btn:hover .wm-icon:not(.wm-icon--off),
-    :root:not([data-theme="dark"]) .wm-icon:not(.wm-icon--off):hover { --icon-grad: 150; }
+    :root:not([data-theme="dark"]) .wm-icon-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+    :root:not([data-theme="dark"]) .fit-align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+    :root:not([data-theme="dark"]) .align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+    :root:not([data-theme="dark"]) .mobile-tab:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+    :root:not([data-theme="dark"]) .mode-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+    :root:not([data-theme="dark"]) .wm-icon:not(.wm-icon--off):not(.wm-icon--active):not(:where(.active) *):hover { --icon-grad: 150; }
   }
-  :root[data-theme="light"] .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),
-  :root[data-theme="light"] .fit-align-btn:hover .wm-icon:not(.wm-icon--off),
-  :root[data-theme="light"] .align-btn:hover .wm-icon:not(.wm-icon--off),
-  :root[data-theme="light"] .mobile-tab:hover .wm-icon:not(.wm-icon--off),
-  :root[data-theme="light"] .mode-btn:hover .wm-icon:not(.wm-icon--off),
-  :root[data-theme="light"] .wm-icon:not(.wm-icon--off):hover { --icon-grad: 150; }
-  :root[data-theme="dark"] .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),
-  :root[data-theme="dark"] .fit-align-btn:hover .wm-icon:not(.wm-icon--off),
-  :root[data-theme="dark"] .align-btn:hover .wm-icon:not(.wm-icon--off),
-  :root[data-theme="dark"] .mobile-tab:hover .wm-icon:not(.wm-icon--off),
-  :root[data-theme="dark"] .mode-btn:hover .wm-icon:not(.wm-icon--off),
-  :root[data-theme="dark"] .wm-icon:not(.wm-icon--off):hover { --icon-grad: 100; }
+  :root[data-theme="light"] .wm-icon-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  :root[data-theme="light"] .fit-align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  :root[data-theme="light"] .align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  :root[data-theme="light"] .mobile-tab:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  :root[data-theme="light"] .mode-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  :root[data-theme="light"] .wm-icon:not(.wm-icon--off):not(.wm-icon--active):not(:where(.active) *):hover { --icon-grad: 150; }
+  :root[data-theme="dark"] .wm-icon-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  :root[data-theme="dark"] .fit-align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  :root[data-theme="dark"] .align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  :root[data-theme="dark"] .mobile-tab:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  :root[data-theme="dark"] .mode-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),
+  :root[data-theme="dark"] .wm-icon:not(.wm-icon--off):not(.wm-icon--active):not(:where(.active) *):hover { --icon-grad: 100; }
 
   /* THE BUTTON THAT DRAWS NOTHING. All target, no face: the padding is the hit area, and
      44px is the touch floor rather than a look. Everything visible is the mark. */
