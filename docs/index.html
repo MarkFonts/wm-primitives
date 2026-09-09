@@ -169,8 +169,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
    vector-effect:non-scaling-stroke takes the CTM out of it: 8 is 8 screen pixels in
    every one of them, at any viewport, which is what "always match" has to mean when
    the three drawings scale independently. --wm-stroke is the one number. */
-.wmb-path{fill:none;stroke:var(--ink);stroke-width:var(--wm-stroke,8px);
-  vector-effect:non-scaling-stroke}
+.wmb-path{fill:none;stroke:var(--ink);stroke-width:var(--wm-stroke-u,8)}
 .wmb-tooth{stroke:var(--ink);stroke-width:1.2}
 .wmb-fill{fill:var(--signal);stroke:none}
 .wm6-fill{fill:var(--signal);stroke:none}
@@ -187,8 +186,13 @@ html,body{margin:0;padding:0;background:var(--bg)}
    the chevron, and that break is visible at any size because it is a scale difference,
    not rounding. Thinner-but-equal is the whole point of one stroke crossing three
    coordinate systems. */
-.wm6-chev{fill:none;stroke:var(--ink);stroke-width:var(--wm-stroke,8px);
-  vector-effect:non-scaling-stroke;
+/* NOT non-scaling-stroke, and that was the join bug. non-scaling-stroke is DEFINED to
+   ignore the CTM, so these strokes held 8px while .wm-stack i -- a CSS box in CSS px --
+   grew with page zoom. At 100% the two agreed and the seam looked clean; at any other
+   zoom the bar ran into a curve 1.75x thinner than itself. --wm-stroke-u is the same
+   weight expressed in each svg's USER UNITS, measured per layout from the bar itself
+   (see the gloss script), so the three scale together at every zoom. */
+.wm6-chev{fill:none;stroke:var(--ink);stroke-width:var(--wm-stroke-u,8);
   animation:wm6chev 2.6s ease-in-out infinite}
 @keyframes wm6chev{0%{transform:translateY(-26px);opacity:0}35%{opacity:1}
   100%{transform:translateY(30px);opacity:0}}
@@ -2638,6 +2642,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
     stroke-width: calc(var(--chevron-stroke, 1.15) * 1.17);
   }#s-controls .wm-chevron.chev-left{ transform: rotate(90deg); }#s-controls .wm-chevron.chev-right{ transform: rotate(-90deg); }@media (prefers-reduced-motion: reduce){#s-controls .slider-step-btn svg,#s-controls .triplet-step-btn svg{ transition: none; }
   }
+}@property --icon-hdr{
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
 }@layer wm.icon{#s-controls .wm-icon{
     
     font-family: 'Material Symbols Outlined';
@@ -2686,20 +2694,48 @@ html,body{margin:0;padding:0;background:var(--bg)}
     --icon-dur: 90ms;   
     transition:
       font-variation-settings var(--icon-dur) ease,
-      color var(--icon-dur) ease;
-  }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .wm-icon{ --icon-grad: 100; }:root:not([data-theme="dark"]) #s-controls .wm-icon--off{ --icon-grad: 100; }:root:not([data-theme="dark"]) #s-controls .wm-icon--active,:root:not([data-theme="dark"]) #s-controls .active > .wm-icon,:root:not([data-theme="dark"]) #s-controls .active > * > .wm-icon{ --icon-grad: 200; }
-  }:root[data-theme="light"] #s-controls .wm-icon{ --icon-grad: 100; }:root[data-theme="light"] #s-controls .wm-icon--off{ --icon-grad: 100; }:root[data-theme="light"] #s-controls .wm-icon--active,:root[data-theme="light"] #s-controls .active > .wm-icon,:root[data-theme="light"] #s-controls .active > * > .wm-icon{ --icon-grad: 200; }:root[data-theme="dark"] #s-controls .wm-icon{ --icon-grad: 50; }:root[data-theme="dark"] #s-controls .wm-icon--off{ --icon-grad: 50; }:root[data-theme="dark"] #s-controls .wm-icon--active,:root[data-theme="dark"] #s-controls .active > .wm-icon,:root[data-theme="dark"] #s-controls .active > * > .wm-icon{ --icon-grad: 150; }#s-controls .wm-icon--off{
+      color var(--icon-dur) ease,
+      --icon-hdr var(--icon-dur) ease;
+  }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .wm-icon{ --icon-grad: 100; }:root:not([data-theme="dark"]) #s-controls .wm-icon--off{ --icon-grad: 100; }:root:not([data-theme="dark"]) #s-controls .wm-icon--active,:root:not([data-theme="dark"]) #s-controls .active > .wm-icon,:root:not([data-theme="dark"]) #s-controls .active > * > .wm-icon{ --icon-grad: 100; }
+  }:root[data-theme="light"] #s-controls .wm-icon{ --icon-grad: 100; }:root[data-theme="light"] #s-controls .wm-icon--off{ --icon-grad: 100; }:root[data-theme="light"] #s-controls .wm-icon--active,:root[data-theme="light"] #s-controls .active > .wm-icon,:root[data-theme="light"] #s-controls .active > * > .wm-icon{ --icon-grad: 100; }:root[data-theme="dark"] #s-controls .wm-icon{ --icon-grad: 50; }:root[data-theme="dark"] #s-controls .wm-icon--off{ --icon-grad: 50; }:root[data-theme="dark"] #s-controls .wm-icon--active,:root[data-theme="dark"] #s-controls .active > .wm-icon,:root[data-theme="dark"] #s-controls .active > * > .wm-icon{ --icon-grad: 75; }#s-controls .wm-icon--off{
     --icon-wght: 300;
     color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
   }#s-controls .wm-icon--active,#s-controls .active > .wm-icon,#s-controls .active > * > .wm-icon{
-    --icon-grad: 150;
+    
+    --icon-grad: 75;
+    --icon-hdr: 1;
+    color: transparent;
+    background-image:
+      linear-gradient(
+        rgba(var(--text-rgb, 232, 232, 232), calc(1 - var(--icon-hdr))),
+        rgba(var(--text-rgb, 232, 232, 232), calc(1 - var(--icon-hdr)))),
+      url('data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAE1pUHJhdmlmbWlhZm1pZjEAAAFebWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAAOcGl0bQAAAAAAAQAAADhpaW5mAAAAAAACAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAFWluZmUCAAABAAIAAEV4aWYAAAAAGmlyZWYAAAAAAAAADmNkc2MAAgABAAEAAACBaXBycAAAAGBpcGNvAAAAE2NvbHJuY2x4AAkAEAABgAAAAAxjbGxpA+gAQAAAABRpc3BlAAAAAAAAAGQAAABkAAAACWlyb3QAAAAAEHBpeGkAAAAAAwoKCgAAAAxhdjFDgQBMAAAAABlpcG1hAAAAAAAAAAEAAQaBAgMFhoQAAAAsaWxvYwAAAABEAAACAAEAAAABAAAB0AAAADcAAgAAAAEAAAGOAAAAQgAAAAFtZGF0AAAAAAAAAIkAAAAGRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAZKADAAQAAAABAAAAZAAAAAASAAoNAAAAAzY8Z//ChIgAwjIkEAGEgAYYYYi0VMregO56Wg+x6xnwsfoJWaYWX85G+ibLVJ6A');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    dynamic-range-limit: no-limit;
+  }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .wm-icon--active,:root:not([data-theme="dark"]) #s-controls .active > .wm-icon,:root:not([data-theme="dark"]) #s-controls .active > * > .wm-icon{
+      --icon-hdr: 0;
+      color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
+      background-image: none;
+      -webkit-background-clip: border-box;
+      background-clip: border-box;
+      dynamic-range-limit: standard;
+    }
+  }:root[data-theme="light"] #s-controls .wm-icon--active,:root[data-theme="light"] #s-controls .active > .wm-icon,:root[data-theme="light"] #s-controls .active > * > .wm-icon{
+    --icon-hdr: 0;
     color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
-  }#s-controls .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),#s-controls .wm-icon-btn:focus-visible .wm-icon:not(.wm-icon--off),#s-controls .fit-align-btn:hover .wm-icon:not(.wm-icon--off),#s-controls .fit-align-btn:focus-visible .wm-icon:not(.wm-icon--off),#s-controls .align-btn:hover .wm-icon:not(.wm-icon--off),#s-controls .align-btn:focus-visible .wm-icon:not(.wm-icon--off),#s-controls .mobile-tab:hover .wm-icon:not(.wm-icon--off),#s-controls .mobile-sub-btn:hover .wm-icon:not(.wm-icon--off),#s-controls .mode-btn:hover .wm-icon:not(.wm-icon--off),#s-controls .wm-icon:not(.wm-icon--off):hover{
+    background-image: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    dynamic-range-limit: standard;
+  }#s-controls .wm-icon-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),#s-controls .wm-icon-btn:not(.active):focus-visible .wm-icon:not(.wm-icon--off):not(.wm-icon--active),#s-controls .fit-align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),#s-controls .fit-align-btn:not(.active):focus-visible .wm-icon:not(.wm-icon--off):not(.wm-icon--active),#s-controls .align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),#s-controls .align-btn:not(.active):focus-visible .wm-icon:not(.wm-icon--off):not(.wm-icon--active),#s-controls .mobile-tab:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),#s-controls .mobile-sub-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),#s-controls .mode-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),#s-controls .wm-icon:not(.wm-icon--off):not(.wm-icon--active):not(:where(.active) *):hover{
     
     --icon-grad: 100;
     color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
-  }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),:root:not([data-theme="dark"]) #s-controls .fit-align-btn:hover .wm-icon:not(.wm-icon--off),:root:not([data-theme="dark"]) #s-controls .align-btn:hover .wm-icon:not(.wm-icon--off),:root:not([data-theme="dark"]) #s-controls .mobile-tab:hover .wm-icon:not(.wm-icon--off),:root:not([data-theme="dark"]) #s-controls .mode-btn:hover .wm-icon:not(.wm-icon--off),:root:not([data-theme="dark"]) #s-controls .wm-icon:not(.wm-icon--off):hover{ --icon-grad: 150; }
-  }:root[data-theme="light"] #s-controls .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="light"] #s-controls .fit-align-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="light"] #s-controls .align-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="light"] #s-controls .mobile-tab:hover .wm-icon:not(.wm-icon--off),:root[data-theme="light"] #s-controls .mode-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="light"] #s-controls .wm-icon:not(.wm-icon--off):hover{ --icon-grad: 150; }:root[data-theme="dark"] #s-controls .wm-icon-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="dark"] #s-controls .fit-align-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="dark"] #s-controls .align-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="dark"] #s-controls .mobile-tab:hover .wm-icon:not(.wm-icon--off),:root[data-theme="dark"] #s-controls .mode-btn:hover .wm-icon:not(.wm-icon--off),:root[data-theme="dark"] #s-controls .wm-icon:not(.wm-icon--off):hover{ --icon-grad: 100; }#s-controls .wm-icon-btn{
+  }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .wm-icon-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root:not([data-theme="dark"]) #s-controls .fit-align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root:not([data-theme="dark"]) #s-controls .align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root:not([data-theme="dark"]) #s-controls .mobile-tab:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root:not([data-theme="dark"]) #s-controls .mode-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root:not([data-theme="dark"]) #s-controls .wm-icon:not(.wm-icon--off):not(.wm-icon--active):not(:where(.active) *):hover{ --icon-grad: 150; }
+  }:root[data-theme="light"] #s-controls .wm-icon-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root[data-theme="light"] #s-controls .fit-align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root[data-theme="light"] #s-controls .align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root[data-theme="light"] #s-controls .mobile-tab:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root[data-theme="light"] #s-controls .mode-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root[data-theme="light"] #s-controls .wm-icon:not(.wm-icon--off):not(.wm-icon--active):not(:where(.active) *):hover{ --icon-grad: 150; }:root[data-theme="dark"] #s-controls .wm-icon-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root[data-theme="dark"] #s-controls .fit-align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root[data-theme="dark"] #s-controls .align-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root[data-theme="dark"] #s-controls .mobile-tab:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root[data-theme="dark"] #s-controls .mode-btn:not(.active):hover .wm-icon:not(.wm-icon--off):not(.wm-icon--active),:root[data-theme="dark"] #s-controls .wm-icon:not(.wm-icon--off):not(.wm-icon--active):not(:where(.active) *):hover{ --icon-grad: 100; }#s-controls .wm-icon-btn{
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2831,15 +2867,17 @@ html,body{margin:0;padding:0;background:var(--bg)}
   }#s-controls .slider-step-btn svg{ display: block; }#s-controls .slider-step-btn:hover{ color: var(--text); }#s-controls .slider-step-btn:focus-visible{ outline: 1px solid var(--accent, currentColor); }#s-controls .slider-step-btn::before{
     content: '';
     position: absolute;
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background: currentColor;
+    inset: 0;
+    background-image: url('data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAE1pUHJhdmlmbWlhZm1pZjEAAAFebWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAAOcGl0bQAAAAAAAQAAADhpaW5mAAAAAAACAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAFWluZmUCAAABAAIAAEV4aWYAAAAAGmlyZWYAAAAAAAAADmNkc2MAAgABAAEAAACBaXBycAAAAGBpcGNvAAAAE2NvbHJuY2x4AAkAEAABgAAAAAxjbGxpA+gAQAAAABRpc3BlAAAAAAAAAGQAAABkAAAACWlyb3QAAAAAEHBpeGkAAAAAAwoKCgAAAAxhdjFDgQBMAAAAABlpcG1hAAAAAAAAAAEAAQaBAgMFhoQAAAAsaWxvYwAAAABEAAACAAEAAAABAAAB0AAAADcAAgAAAAEAAAGOAAAAQgAAAAFtZGF0AAAAAAAAAIkAAAAGRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAZKADAAQAAAABAAAAZAAAAAASAAoNAAAAAzY8Z//ChIgAwjIkEAGEgAYYYYi0VMregO56Wg+x6xnwsfoJWaYWX85G+ibLVJ6A');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    dynamic-range-limit: no-limit;
+    mask-repeat: no-repeat; mask-position: center; mask-size: 10px 6px;
+    -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; -webkit-mask-size: 10px 6px;
     opacity: 0;
-    transform: scale(.6);
-    transition: opacity var(--dur-fast, .12s), transform var(--dur-fast, .12s);
+    transition: opacity calc(var(--dur-fast, .12s) * 2) ease-out;
     pointer-events: none;
-  }#s-controls .slider-step-btn:active::before{ opacity: .16; transform: scale(1); }@media (pointer: coarse){#s-controls .slider-step{ opacity: 1; position: static; transform: none; }#s-controls .slider-suffix{ position: static; transform: none; }#s-controls .slider-value{ padding-right: 0; align-items: center; }#s-controls .slider-suffix{ order: 1; }#s-controls .slider-step{ order: 2; }#s-controls .slider-row:hover .slider-suffix,#s-controls .slider-row:focus-within .slider-suffix{ opacity: 1; }#s-controls .slider-step-btn{ width: 32px; height: 22px; }
+  }#s-controls .slider-step-btn:first-child::before{ mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 4.38 5 1.62 9 4.38' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 4.38 5 1.62 9 4.38' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }#s-controls .slider-step-btn + .slider-step-btn::before{ mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1.62 5 4.38 9 1.62' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1.62 5 4.38 9 1.62' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }#s-controls .slider-step-btn:active::before{ opacity: 1; transition: none; }@media (pointer: coarse){#s-controls .slider-step{ opacity: 1; position: static; transform: none; }#s-controls .slider-suffix{ position: static; transform: none; }#s-controls .slider-value{ padding-right: 0; align-items: center; }#s-controls .slider-suffix{ order: 1; }#s-controls .slider-step{ order: 2; }#s-controls .slider-row:hover .slider-suffix,#s-controls .slider-row:focus-within .slider-suffix{ opacity: 1; }#s-controls .slider-step-btn{ width: 32px; height: 22px; }
   }@media (prefers-reduced-motion: reduce){#s-controls .slider-step-btn::before{ transition: none; }
   }#s-controls .slider-number:disabled{ cursor: default; }#s-controls .slider-track-wrap{ position: relative; }#s-controls .slider-track-wrap input[type="range"]{
     -webkit-appearance: none; appearance: none;
@@ -3026,7 +3064,16 @@ html,body{margin:0;padding:0;background:var(--bg)}
   display: grid; place-items: center;
   color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-faint, .38));
   cursor: pointer;
-}#s-controls .triplet-step-btn:first-child{ align-items: end; }#s-controls .triplet-step-btn + .triplet-step-btn{ border-top: 1px solid var(--border); }#s-controls .triplet-step-btn:hover{ color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1)); }#s-controls .triplet-step-btn:active{ background: rgba(var(--text-rgb, 232, 232, 232), .1); border-radius: 999px; }@media (prefers-reduced-motion: reduce){#s-controls .triplet-step{ transition: none; }
+}#s-controls .triplet-step-btn:first-child{ align-items: end; }#s-controls .triplet-step-btn:hover{ color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1)); }#s-controls .triplet-step-btn{ position: relative; }#s-controls .triplet-step-btn::after{
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image: url('data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAE1pUHJhdmlmbWlhZm1pZjEAAAFebWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAAOcGl0bQAAAAAAAQAAADhpaW5mAAAAAAACAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAFWluZmUCAAABAAIAAEV4aWYAAAAAGmlyZWYAAAAAAAAADmNkc2MAAgABAAEAAACBaXBycAAAAGBpcGNvAAAAE2NvbHJuY2x4AAkAEAABgAAAAAxjbGxpA+gAQAAAABRpc3BlAAAAAAAAAGQAAABkAAAACWlyb3QAAAAAEHBpeGkAAAAAAwoKCgAAAAxhdjFDgQBMAAAAABlpcG1hAAAAAAAAAAEAAQaBAgMFhoQAAAAsaWxvYwAAAABEAAACAAEAAAABAAAB0AAAADcAAgAAAAEAAAGOAAAAQgAAAAFtZGF0AAAAAAAAAIkAAAAGRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAZKADAAQAAAABAAAAZAAAAAASAAoNAAAAAzY8Z//ChIgAwjIkEAGEgAYYYYi0VMregO56Wg+x6xnwsfoJWaYWX85G+ibLVJ6A');
+  background-size: 100% 100%; background-repeat: no-repeat;
+  dynamic-range-limit: no-limit;
+  mask-repeat: no-repeat; mask-position: center; mask-size: 7px 6px;
+  -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; -webkit-mask-size: 7px 6px;
+  opacity: 0;
+  transition: opacity calc(var(--dur-fast, .12s) * 2) ease-out;
+}#s-controls .triplet-step-btn:first-child::after{ mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 3.86 3.5 2.14 6 3.86' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 3.86 3.5 2.14 6 3.86' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }#s-controls .triplet-step-btn + .triplet-step-btn::after{ mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 2.14 3.5 3.86 6 2.14' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 2.14 3.5 3.86 6 2.14' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }#s-controls .triplet-step-btn:active::after{ opacity: 1; transition: none; }@media (prefers-reduced-motion: reduce){#s-controls .triplet-step-btn::after{ transition: none; } }@media (prefers-reduced-motion: reduce){#s-controls .triplet-step{ transition: none; }
 }@media (pointer: coarse){#s-controls .triplet-step{ opacity: 1; }#s-controls .triplet-step-btn{ width: 20px; height: 15px; }
 }#s-controls{
   --bg: #fcfcfa; --panel: #f2f2ee; --sunk: #e8e8e3; --raised: #fff;
@@ -8063,7 +8110,8 @@ if (lb) {
      the bar's stroke is near-white ink and adding to it saturated to flat white, so the
      gloss replaces the stroke inside the mask, the same way the headline wears the
      field. The path is drawn by the hero script, so this waits for it. */
-  var bend=head.querySelector('.wm-bendsvg'), bpat=null, bspan=[0,0];
+  var bend=head.querySelector('.wm-bendsvg'), bpat=null, bimg=null, buse=null;
+  var bscale=1, boff=[0,0];
   function wireBend(){
     if(bpat || !bend) return;
     var path=bend.querySelector('.wmb-path'); if(!path) return;
@@ -8081,19 +8129,25 @@ if (lb) {
     var u=document.createElementNS(NS,'use');
     u.setAttribute('href','#'+path.id);
     u.style.stroke='#fff'; u.style.fill='none';
+    /* THE MASK IS THE STROKE, so it has to be the same stroke. A <use> does not inherit
+       the CSS that styles its referent -- .wmb-path gets stroke-width from --wm-stroke,
+       the <use> got nothing and fell back to SVG's default of 1. The gloss was therefore
+       a 1px ribbon down the middle of an 8px flat-ink stroke, which is what made the bar
+       look like it stepped into the curve: the bar was fully glossed and the curve was
+       ink with a hairline in it. Copied from the path's own computed style rather than
+       restated, so --wm-stroke stays the one number and cap/join/miter cannot drift. */
+    buse=u; syncMaskStroke(path);
     mask.appendChild(u); defs.appendChild(mask);
 
     bpat=document.createElementNS(NS,'pattern');
     bpat.id='bend-gloss-pat';
     bpat.setAttribute('patternUnits','userSpaceOnUse');
-    bpat.setAttribute('x',X); bpat.setAttribute('y',Y);
-    bpat.setAttribute('width',W*ZOOM_X); bpat.setAttribute('height',H*ZOOM_Y);
     var im=document.createElementNS(NS,'image');
     im.setAttribute('href','field-247.avif');
-    im.setAttribute('width',W*ZOOM_X); im.setAttribute('height',H*ZOOM_Y);
     im.setAttribute('preserveAspectRatio','none');
-    bpat.appendChild(im); defs.appendChild(bpat);
-    bspan=[W*(ZOOM_X-1), H*(ZOOM_Y-1)];
+    bimg=im; bpat.appendChild(im); defs.appendChild(bpat);
+    /* No size here on purpose -- see placeBend. Sizing the pattern off the SVG's own
+       viewBox is what put the bend on a different map from the bar. */
 
     var rect=document.createElementNS(NS,'rect');
     rect.setAttribute('x',X); rect.setAttribute('y',Y);
@@ -8102,6 +8156,45 @@ if (lb) {
     rect.setAttribute('mask','url(#bend-gloss-mask)');
     rect.setAttribute('data-gloss','1');
     bend.appendChild(rect);
+  }
+
+  /* Keep the mask's ribbon identical to the drawn stroke. Re-run on layout, because
+     --wm-stroke is read through CSS and a resize can change what it resolves to. */
+  function syncMaskStroke(path){
+    if(!buse) return;
+    var pcs=getComputedStyle(path);
+    buse.style.strokeWidth   = pcs.strokeWidth;
+    buse.style.vectorEffect  = pcs.vectorEffect;
+    buse.style.strokeLinecap = pcs.strokeLinecap;
+    buse.style.strokeLinejoin= pcs.strokeLinejoin;
+    buse.style.strokeMiterlimit = pcs.strokeMiterlimit;
+  }
+
+  /* ONE FIELD, TWO COORDINATE SYSTEMS. The bar wears the field as a CSS background
+     measured in HEADER pixels; the bend wears it as an SVG pattern measured in the
+     bend's own USER UNITS. Those are not the same unit, and sizing the pattern off the
+     viewBox (300 x ZOOM) rather than off the header meant the bend sampled the map about
+     3x zoomed against the bar -- so even with the mask fixed, the gloss LEVEL jumped at
+     the seam. Convert instead: px / scale, where scale is how many px one user unit is
+     currently worth, and offset by where the svg sits inside the header. */
+  function placeBend(hb){
+    if(!bpat || !bend.getScreenCTM) return;
+    /* getScreenCTM, not boundingRect/viewBox. That quotient is only the true scale when
+       the box and the viewBox share an aspect ratio -- preserveAspectRatio's default is
+       xMidYMid MEET, which fits the smaller axis and CENTRES the remainder, so the
+       estimate was both slightly small and slightly offset. It left the bend sampling the
+       field 0.18% narrow and 4px across from where the words sample it: aligned enough to
+       look fixed, not aligned enough to BE fixed. The CTM is the mapping itself. */
+    var m=bend.getScreenCTM(); if(!m) return;
+    var sc=Math.hypot(m.a,m.b); if(!sc) return;
+    bscale = sc;
+    /* m.e/m.f are user (0,0) in client coords -- same frame as hb, and taken in the same
+       instant, so storing it relative to the header makes it scroll-invariant. */
+    boff   = [ (m.e-hb.left)/sc, (m.f-hb.top)/sc ];
+    var w = hb.width  * ZOOM_X / bscale, h = hb.height * ZOOM_Y / bscale;
+    bpat.setAttribute('width', w);  bpat.setAttribute('height', h);
+    bimg.setAttribute('width', w);  bimg.setAttribute('height', h);
+    var path=bend.querySelector('.wmb-path'); if(path) syncMaskStroke(path);
   }
 
   /* The field's size is the HEADER's, in px, and every element is offset by its own
@@ -8118,6 +8211,26 @@ if (lb) {
       el.style.setProperty('--ox',(r.left-hb.left)+'px');
       el.style.setProperty('--oy',(r.top -hb.top )+'px');
     });
+    placeBend(hb);
+    strokeUnits();
+  }
+
+  /* ONE STROKE, THREE COORDINATE SYSTEMS. The rule is a CSS box measured in CSS px; the
+     bend and the 6's chevron are SVG strokes measured in their own user units, and the
+     two svgs do not even share a scale. Rather than restate 8 in three places and hope,
+     each svg is told what 8 CSS px is worth in ITS units: the bar's rendered height
+     divided by that svg's screen CTM scale. Both terms carry page zoom, so the quotient
+     does not -- which is the whole point, since zoom is what exposed the old bug. */
+  function strokeUnits(){
+    var bar=head.querySelector('.wm-stack i'); if(!bar) return;
+    var px=bar.getBoundingClientRect().height; if(!px) return;
+    [bend, document.querySelector('.wm-six')].forEach(function(svg){
+      if(!svg || !svg.getScreenCTM) return;
+      var m=svg.getScreenCTM(); if(!m) return;
+      var sc=Math.hypot(m.a,m.b); if(!sc) return;
+      svg.style.setProperty('--wm-stroke-u', (px/sc)+'');
+    });
+    var path=bend&&bend.querySelector('.wmb-path'); if(path) syncMaskStroke(path);
   }
 
   /* Panning a zoomed crop, not sliding a slab: the window is a fraction of the field, so
@@ -8130,14 +8243,20 @@ if (lb) {
        rather than a light you are dragging across the words. */
     head.style.setProperty('--gx',((u-1)*hb.width *(ZOOM_X-1))+'px');
     head.style.setProperty('--gy',((v-1)*hb.height*(ZOOM_Y-1))+'px');
-    if(bpat){ bpat.setAttribute('x',((u-1)*bspan[0])+''); bpat.setAttribute('y',((v-1)*bspan[1])+''); }
+    /* Same origin as the bar's: the field's top-left in HEADER px is (gx, gy), so in the
+       bend's user units it is gx/scale minus wherever the svg starts inside the header. */
+    if(bpat){
+      var gx=(u-1)*hb.width *(ZOOM_X-1), gy=(v-1)*hb.height*(ZOOM_Y-1);
+      bpat.setAttribute('x',(gx/bscale - boff[0])+'');
+      bpat.setAttribute('y',(gy/bscale - boff[1])+'');
+    }
   }
 
   function boot(){ wireBend(); place(); apply(cu,cv); }
   var cu=0.5, cv=0.5, raf=null;
   boot(); addEventListener('resize',boot);
   /* the hero draws the bend after its own layout pass; catch it whenever it lands */
-  var tries=0, t=setInterval(function(){ wireBend(); if(bpat||++tries>40) clearInterval(t); },150);
+  var tries=0, t=setInterval(function(){ wireBend(); if(bpat){ place(); apply(cu,cv); } if(bpat||++tries>40) clearInterval(t); },150);
 
   /* The WINDOW, not the header. Bound to the header, the light froze the moment the
      pointer crossed into the rail or the right margin -- which is most of the page,

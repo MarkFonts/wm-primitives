@@ -36,6 +36,8 @@ PKG  = DOCS.parent          # the repo root, where fonts/ is
 # are the page's own, tracked here, and are not house faces -- copying fonts/ wholesale
 # would be wrong in both directions.
 SYNCED_FACES = ["CalSansVF.ttf", "MaterialSymbolsOutlined.woff2"]
+# Not a face: the flat PQ swatch icon.css paints an active mark with. Synced for the same
+# reason -- an inlined rule's url() resolves against the HTML, not against src/.
 
 def sync_faces():
     import shutil
@@ -175,6 +177,7 @@ def build_section(sid, label, path, kicker):
     # SYNCED_FACES puts in docs/fonts/. If that pairing is broken, every mark on the page
     # renders as its own name in words, which is the visible symptom to look for.
     css = css.replace("url('../fonts/", "url('fonts/").replace('url("../fonts/', 'url("fonts/')
+    css = css.replace("url('../assets/", "url('assets/").replace('url("../assets/', 'url("assets/')
     # Strip CSS comments BEFORE scoping. split_rules() treats everything up to '{' as the
     # selector, so a comment sitting above a rule became part of its prelude -- and then
     # ':root' no longer compared equal to ':root', fell through to the descendant branch,
@@ -608,8 +611,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
    vector-effect:non-scaling-stroke takes the CTM out of it: 8 is 8 screen pixels in
    every one of them, at any viewport, which is what "always match" has to mean when
    the three drawings scale independently. --wm-stroke is the one number. */
-.wmb-path{fill:none;stroke:var(--ink);stroke-width:var(--wm-stroke,8px);
-  vector-effect:non-scaling-stroke}
+.wmb-path{fill:none;stroke:var(--ink);stroke-width:var(--wm-stroke-u,8)}
 .wmb-tooth{stroke:var(--ink);stroke-width:1.2}
 .wmb-fill{fill:var(--signal);stroke:none}
 .wm6-fill{fill:var(--signal);stroke:none}
@@ -626,8 +628,13 @@ html,body{margin:0;padding:0;background:var(--bg)}
    the chevron, and that break is visible at any size because it is a scale difference,
    not rounding. Thinner-but-equal is the whole point of one stroke crossing three
    coordinate systems. */
-.wm6-chev{fill:none;stroke:var(--ink);stroke-width:var(--wm-stroke,8px);
-  vector-effect:non-scaling-stroke;
+/* NOT non-scaling-stroke, and that was the join bug. non-scaling-stroke is DEFINED to
+   ignore the CTM, so these strokes held 8px while .wm-stack i -- a CSS box in CSS px --
+   grew with page zoom. At 100% the two agreed and the seam looked clean; at any other
+   zoom the bar ran into a curve 1.75x thinner than itself. --wm-stroke-u is the same
+   weight expressed in each svg's USER UNITS, measured per layout from the bar itself
+   (see the gloss script), so the three scale together at every zoom. */
+.wm6-chev{fill:none;stroke:var(--ink);stroke-width:var(--wm-stroke-u,8);
   animation:wm6chev 2.6s ease-in-out infinite}
 @keyframes wm6chev{0%{transform:translateY(-26px);opacity:0}35%{opacity:1}
   100%{transform:translateY(30px);opacity:0}}
@@ -1187,7 +1194,8 @@ GLOSS = "" if not LINKED else r"""
      the bar's stroke is near-white ink and adding to it saturated to flat white, so the
      gloss replaces the stroke inside the mask, the same way the headline wears the
      field. The path is drawn by the hero script, so this waits for it. */
-  var bend=head.querySelector('.wm-bendsvg'), bpat=null, bspan=[0,0];
+  var bend=head.querySelector('.wm-bendsvg'), bpat=null, bimg=null, buse=null;
+  var bscale=1, boff=[0,0];
   function wireBend(){
     if(bpat || !bend) return;
     var path=bend.querySelector('.wmb-path'); if(!path) return;
@@ -1205,19 +1213,25 @@ GLOSS = "" if not LINKED else r"""
     var u=document.createElementNS(NS,'use');
     u.setAttribute('href','#'+path.id);
     u.style.stroke='#fff'; u.style.fill='none';
+    /* THE MASK IS THE STROKE, so it has to be the same stroke. A <use> does not inherit
+       the CSS that styles its referent -- .wmb-path gets stroke-width from --wm-stroke,
+       the <use> got nothing and fell back to SVG's default of 1. The gloss was therefore
+       a 1px ribbon down the middle of an 8px flat-ink stroke, which is what made the bar
+       look like it stepped into the curve: the bar was fully glossed and the curve was
+       ink with a hairline in it. Copied from the path's own computed style rather than
+       restated, so --wm-stroke stays the one number and cap/join/miter cannot drift. */
+    buse=u; syncMaskStroke(path);
     mask.appendChild(u); defs.appendChild(mask);
 
     bpat=document.createElementNS(NS,'pattern');
     bpat.id='bend-gloss-pat';
     bpat.setAttribute('patternUnits','userSpaceOnUse');
-    bpat.setAttribute('x',X); bpat.setAttribute('y',Y);
-    bpat.setAttribute('width',W*ZOOM_X); bpat.setAttribute('height',H*ZOOM_Y);
     var im=document.createElementNS(NS,'image');
     im.setAttribute('href','field-247.avif');
-    im.setAttribute('width',W*ZOOM_X); im.setAttribute('height',H*ZOOM_Y);
     im.setAttribute('preserveAspectRatio','none');
-    bpat.appendChild(im); defs.appendChild(bpat);
-    bspan=[W*(ZOOM_X-1), H*(ZOOM_Y-1)];
+    bimg=im; bpat.appendChild(im); defs.appendChild(bpat);
+    /* No size here on purpose -- see placeBend. Sizing the pattern off the SVG's own
+       viewBox is what put the bend on a different map from the bar. */
 
     var rect=document.createElementNS(NS,'rect');
     rect.setAttribute('x',X); rect.setAttribute('y',Y);
@@ -1226,6 +1240,45 @@ GLOSS = "" if not LINKED else r"""
     rect.setAttribute('mask','url(#bend-gloss-mask)');
     rect.setAttribute('data-gloss','1');
     bend.appendChild(rect);
+  }
+
+  /* Keep the mask's ribbon identical to the drawn stroke. Re-run on layout, because
+     --wm-stroke is read through CSS and a resize can change what it resolves to. */
+  function syncMaskStroke(path){
+    if(!buse) return;
+    var pcs=getComputedStyle(path);
+    buse.style.strokeWidth   = pcs.strokeWidth;
+    buse.style.vectorEffect  = pcs.vectorEffect;
+    buse.style.strokeLinecap = pcs.strokeLinecap;
+    buse.style.strokeLinejoin= pcs.strokeLinejoin;
+    buse.style.strokeMiterlimit = pcs.strokeMiterlimit;
+  }
+
+  /* ONE FIELD, TWO COORDINATE SYSTEMS. The bar wears the field as a CSS background
+     measured in HEADER pixels; the bend wears it as an SVG pattern measured in the
+     bend's own USER UNITS. Those are not the same unit, and sizing the pattern off the
+     viewBox (300 x ZOOM) rather than off the header meant the bend sampled the map about
+     3x zoomed against the bar -- so even with the mask fixed, the gloss LEVEL jumped at
+     the seam. Convert instead: px / scale, where scale is how many px one user unit is
+     currently worth, and offset by where the svg sits inside the header. */
+  function placeBend(hb){
+    if(!bpat || !bend.getScreenCTM) return;
+    /* getScreenCTM, not boundingRect/viewBox. That quotient is only the true scale when
+       the box and the viewBox share an aspect ratio -- preserveAspectRatio's default is
+       xMidYMid MEET, which fits the smaller axis and CENTRES the remainder, so the
+       estimate was both slightly small and slightly offset. It left the bend sampling the
+       field 0.18% narrow and 4px across from where the words sample it: aligned enough to
+       look fixed, not aligned enough to BE fixed. The CTM is the mapping itself. */
+    var m=bend.getScreenCTM(); if(!m) return;
+    var sc=Math.hypot(m.a,m.b); if(!sc) return;
+    bscale = sc;
+    /* m.e/m.f are user (0,0) in client coords -- same frame as hb, and taken in the same
+       instant, so storing it relative to the header makes it scroll-invariant. */
+    boff   = [ (m.e-hb.left)/sc, (m.f-hb.top)/sc ];
+    var w = hb.width  * ZOOM_X / bscale, h = hb.height * ZOOM_Y / bscale;
+    bpat.setAttribute('width', w);  bpat.setAttribute('height', h);
+    bimg.setAttribute('width', w);  bimg.setAttribute('height', h);
+    var path=bend.querySelector('.wmb-path'); if(path) syncMaskStroke(path);
   }
 
   /* The field's size is the HEADER's, in px, and every element is offset by its own
@@ -1242,6 +1295,26 @@ GLOSS = "" if not LINKED else r"""
       el.style.setProperty('--ox',(r.left-hb.left)+'px');
       el.style.setProperty('--oy',(r.top -hb.top )+'px');
     });
+    placeBend(hb);
+    strokeUnits();
+  }
+
+  /* ONE STROKE, THREE COORDINATE SYSTEMS. The rule is a CSS box measured in CSS px; the
+     bend and the 6's chevron are SVG strokes measured in their own user units, and the
+     two svgs do not even share a scale. Rather than restate 8 in three places and hope,
+     each svg is told what 8 CSS px is worth in ITS units: the bar's rendered height
+     divided by that svg's screen CTM scale. Both terms carry page zoom, so the quotient
+     does not -- which is the whole point, since zoom is what exposed the old bug. */
+  function strokeUnits(){
+    var bar=head.querySelector('.wm-stack i'); if(!bar) return;
+    var px=bar.getBoundingClientRect().height; if(!px) return;
+    [bend, document.querySelector('.wm-six')].forEach(function(svg){
+      if(!svg || !svg.getScreenCTM) return;
+      var m=svg.getScreenCTM(); if(!m) return;
+      var sc=Math.hypot(m.a,m.b); if(!sc) return;
+      svg.style.setProperty('--wm-stroke-u', (px/sc)+'');
+    });
+    var path=bend&&bend.querySelector('.wmb-path'); if(path) syncMaskStroke(path);
   }
 
   /* Panning a zoomed crop, not sliding a slab: the window is a fraction of the field, so
@@ -1254,14 +1327,20 @@ GLOSS = "" if not LINKED else r"""
        rather than a light you are dragging across the words. */
     head.style.setProperty('--gx',((u-1)*hb.width *(ZOOM_X-1))+'px');
     head.style.setProperty('--gy',((v-1)*hb.height*(ZOOM_Y-1))+'px');
-    if(bpat){ bpat.setAttribute('x',((u-1)*bspan[0])+''); bpat.setAttribute('y',((v-1)*bspan[1])+''); }
+    /* Same origin as the bar's: the field's top-left in HEADER px is (gx, gy), so in the
+       bend's user units it is gx/scale minus wherever the svg starts inside the header. */
+    if(bpat){
+      var gx=(u-1)*hb.width *(ZOOM_X-1), gy=(v-1)*hb.height*(ZOOM_Y-1);
+      bpat.setAttribute('x',(gx/bscale - boff[0])+'');
+      bpat.setAttribute('y',(gy/bscale - boff[1])+'');
+    }
   }
 
   function boot(){ wireBend(); place(); apply(cu,cv); }
   var cu=0.5, cv=0.5, raf=null;
   boot(); addEventListener('resize',boot);
   /* the hero draws the bend after its own layout pass; catch it whenever it lands */
-  var tries=0, t=setInterval(function(){ wireBend(); if(bpat||++tries>40) clearInterval(t); },150);
+  var tries=0, t=setInterval(function(){ wireBend(); if(bpat){ place(); apply(cu,cv); } if(bpat||++tries>40) clearInterval(t); },150);
 
   /* The WINDOW, not the header. Bound to the header, the light froze the moment the
      pointer crossed into the rail or the right margin -- which is most of the page,
