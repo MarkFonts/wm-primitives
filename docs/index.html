@@ -2981,7 +2981,20 @@ html,body{margin:0;padding:0;background:var(--bg)}
     pointer-events: none;
   }#s-controls .slider-row--track .slider-ref{
     z-index: 2;
-    top: 0; bottom: 0; height: auto;
+    top: auto; bottom: 0;
+    width: 0; height: 0;
+    
+    margin-left: -5px;
+    border-radius: 0;
+    
+    transform: none;
+    background: none;
+    
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid rgba(var(--text-rgb, 232, 232, 232), .55);
+    border-top: 0;
+    opacity: 1;
   }#s-controls .slider-row--track .slider-label{ cursor: ew-resize; }#s-controls .slider-row--track.slider-row--off .slider-label{ cursor: default; }
 }#s-controls .triplet-row{
   display: grid;
