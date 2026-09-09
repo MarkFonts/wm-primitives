@@ -337,7 +337,10 @@
     .slider-suffix { position: static; transform: none; }
     /* The reserved slot is not reserved any more -- the stepper is IN it -- so the
        padding that held it open is now just a gap at the right edge. */
-    .slider-value { padding-right: 0; align-items: center; }
+    /* Not flush to the edge. Zeroing this was right for the hung stepper -- the slot it
+       held open no longer existed -- but with the arrows now IN flow it put them hard
+       against the row's edge, which on a track-variant row is also the edge of the bar. */
+    .slider-value { padding-right: var(--spacing-02, 8px); align-items: center; }
     /* DOM order is number, stepper, unit -- right while they share one slot and only one
        of them is ever visible. In flow they are all three on screen at once, and that
        order reads "620 ^v px": the unit is separated from its number by the control.
@@ -346,7 +349,15 @@
     .slider-step { order: 2; }
     .slider-row:hover .slider-suffix,
     .slider-row:focus-within .slider-suffix { opacity: 1; }
-    .slider-step-btn { width: 32px; height: 22px; }
+    /* BIG TARGETS, MARKS CLOSE TOGETHER -- and those pull in opposite directions, so the
+       box grows and the mark moves to the box's inner edge rather than its centre. Two
+       centred marks in 22px boxes sit ~22px apart, which on a 46px row reads as two
+       unrelated arrows at opposite ends of the value; pushing each to the edge it points
+       away from closes that to a pair while the 46x40 of touchable area stays. Same
+       arrangement the triplet's stepper uses. */
+    .slider-step-btn { width: 40px; height: 23px; }
+    .slider-step-btn:first-child { align-items: end; padding-bottom: 1px; }
+    .slider-step-btn + .slider-step-btn { align-items: start; padding-top: 1px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .slider-step-btn::before { transition: none; }
@@ -482,9 +493,19 @@
   .slider-row--track .slider-track-wrap { position: absolute; inset: 0; margin: 0; }
   .slider-row--track .slider-track-wrap input[type="range"] {
     width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize;
-    /* Claim the horizontal gesture only. `none` would take the page's vertical scroll with
-       it wherever the pointer crossed a rail, which is most of a rail. */
+    /* Claim the horizontal gesture only. `none` here would take the page's vertical scroll
+       with it wherever the pointer crossed a rail, which is most of a rail. */
     touch-action: pan-y;
+    /* EXCEPT ON TOUCH, where pan-y is why the rails could not be dragged at all. It is the
+       correct value in principle -- the browser keeps vertical panning, the element gets
+       everything else -- but it leaves the gesture AMBIGUOUS until the direction resolves,
+       and this element is a 46px-tall full-width bar inside a sheet whose whole job is to
+       scroll vertically. A drag that starts even slightly off-horizontal is claimed by the
+       scroller and the slider never sees it, so on a phone the control reads as dead.
+       `none` gives the row's own 46px to the slider and costs a scroll that can be started
+       from anywhere else in the sheet -- the far better trade of the two, and the one the
+       original note ruled out without testing it. */
+    @media (pointer: coarse) { touch-action: none; }
   }
   .slider-row--track .slider-track-wrap input[type="range"]:disabled { cursor: default; }
 
@@ -573,6 +594,15 @@
      rather than the slot plus 12px. The slot itself is the base's now. */
   .slider-row--track .slider-label { padding-right: 0; }
   .slider-row--track .slider-step-btn { width: 12px; }
+  /* ON TOUCH THE PAIR IS A TARGET, NOT AN ORNAMENT. 12px is a fine-pointer width, chosen
+     so a pair fits the slot with air; a finger needs the slot. Restated here because
+     `.slider-row--track .slider-step-btn` out-specifies the coarse block above -- which is
+     why widening it there did nothing, and why these arrows stayed 12px wide and hard
+     against the bar's edge on a phone. */
+  @media (pointer: coarse) {
+    .slider-row--track .slider-step-btn { width: 40px; }
+    .slider-row--track .slider-value { padding-right: var(--spacing-02, 8px); }
+  }
 
   .slider-row--track .slider-suffix { color: var(--text-muted); }
 

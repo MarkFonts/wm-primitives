@@ -141,7 +141,19 @@ export function AxisSlider({
   }
   useEffect(() => stopStep, [])
 
-  const numberValue = nbMinus(display != null ? String(display) : String(value))
+  /* WHAT THE FIELD SHOWS WHILE YOU TYPE IN IT. A controlled input clamped on every
+     keystroke cannot be retyped: clearing it parsed as NaN, the handler returned without
+     propagating, and React rendered the old value straight back -- so the field could
+     never be emptied. Worse, selecting 88 on a min-8 dial and typing "2" committed 8
+     immediately, then "4" made 84. The small number you were reaching for was
+     unreachable, which is how a headline bottomed out at 88.
+     So the field keeps its own draft while focused and the clamp moves to blur. Nothing
+     out of range ever reaches onChange -- an in-range draft still propagates on every
+     keystroke, so live preview is unchanged -- but the INTERMEDIATE states of typing
+     (empty, "-", "2" on the way to "24") are now allowed to exist. */
+  const [draft, setDraft] = useState<string | null>(null)
+  const committed = nbMinus(display != null ? String(display) : String(value))
+  const numberValue = draft ?? committed
 
   // How far along the track the value sits, as a percentage. Only variant="track" paints
   // with it -- the bar's fill is a gradient stop, not an element -- but it costs one
@@ -219,9 +231,26 @@ export function AxisSlider({
             value={numberValue}
             disabled={disabled}
             onFocus={() => { handleFocus(); setNumFocused(true) }}
-            onBlur={() => setNumFocused(false)}
+            onBlur={() => {
+              setNumFocused(false)
+              /* Commit on the way out. An empty or unparseable draft is not an edit --
+                 it is an abandoned one -- so the field falls back to the live value
+                 rather than to min. */
+              if (draft != null) {
+                const raw = draft.replace('\u2212', '-').trim()
+                const n = parseFloat(raw)
+                if (!Number.isNaN(n)) onChange(Math.min(max, Math.max(min, n)))
+                setDraft(null)
+              }
+            }}
             onKeyDown={e => {
               if (allowAuto && e.key === 'a') { e.preventDefault(); onChange('auto'); return }
+              /* Enter commits the draft without waiting for a blur -- on a phone that is
+                 the "done" key, and there may be nowhere obvious to tap next. Escape
+                 abandons it and puts the live value back. */
+              if (e.key === 'Enter') { e.currentTarget.blur(); return }
+              if (e.key === 'Escape') { setDraft(null); e.currentTarget.blur(); return }
+              if (draft != null) setDraft(null)
               /* The arrow keys came free with type=number and have to be put back. Held,
                  the OS repeats keydown by itself, so this reads the same as the native
                  field did. Shift is the coarse step, as it is in every design tool. */
@@ -241,11 +270,16 @@ export function AxisSlider({
                  minus is what comes back when you edit it — and parseFloat("−0.08") is
                  NaN. Undoing the display's own substitution used to be the auto path's
                  business alone; it is every field's business now. */
-              const raw = String(e.target.value).replace('−', '-').trim()
-              if (allowAuto && raw.toLowerCase() === 'auto') { onChange('auto'); return }
+              const shown = String(e.target.value)
+              const raw = shown.replace('−', '-').trim()
+              if (allowAuto && raw.toLowerCase() === 'auto') { setDraft(null); onChange('auto'); return }
+              setDraft(shown)
               const n = parseFloat(raw)
               if (Number.isNaN(n)) return
-              onChange(Math.min(max, Math.max(min, n)))
+              /* In range: propagate, so the proof follows the digits as before. Out of
+                 range: hold it in the draft and let blur clamp it -- committing min on
+                 the first digit of a longer number is exactly what made this unusable. */
+              if (n >= min && n <= max) onChange(n)
             }}
           />
           {!disabled && (
