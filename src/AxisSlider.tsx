@@ -155,6 +155,50 @@ export function AxisSlider({
   const committed = nbMinus(display != null ? String(display) : String(value))
   const numberValue = draft ?? committed
 
+  /* TOUCH DRAG, DRIVEN HERE RATHER THAN LEFT TO THE INPUT. The CSS gives the row to this
+     control on a coarse pointer, so once a finger is down the whole gesture is ours -- and
+     this makes the drag definite rather than hoping a native range answers touch the way it
+     answers a mouse, which is exactly what was in doubt when the rails read as dead.
+     Mouse is untouched: the native input already handles it, and capturing there would add
+     a second code path for a case that works. */
+  const dragRef = useRef<{ x: number; y: number; id: number; live: boolean } | null>(null)
+
+  const valueAt = (clientX: number, el: HTMLElement) => {
+    const r = el.getBoundingClientRect()
+    if (!r.width) return null
+    const t = Math.min(1, Math.max(0, (clientX - r.left) / r.width))
+    const raw = min + t * (max - min)
+    const snapped = step > 0 ? Math.round(raw / step) * step : raw
+    /* toFixed then + to shed float dust: 0.1 steps otherwise land on 1.7000000000000002,
+       which the number field then prints in full. */
+    return Math.min(max, Math.max(min, +snapped.toFixed(6)))
+  }
+
+  const onTouchDown = (e: ReactPointerEvent<HTMLInputElement>) => {
+    if (disabled || e.pointerType === 'mouse') return
+    dragRef.current = { x: e.clientX, y: e.clientY, id: e.pointerId, live: false }
+  }
+  const onTouchMove = (e: ReactPointerEvent<HTMLInputElement>) => {
+    const d = dragRef.current
+    if (!d || e.pointerId !== d.id) return
+    if (!d.live) {
+      /* 3px of slop so a tap that wobbles is still a tap, not a drag that nudges the value
+         a step before you have let go. Direction is NOT judged: the row is the slider's, so
+         a finger that moves at all is driving it. */
+      if (Math.abs(e.clientX - d.x) < 3 && Math.abs(e.clientY - d.y) < 3) return
+      d.live = true
+      try { e.currentTarget.setPointerCapture(d.id) } catch { /* capture is best-effort */ }
+    }
+    const v = valueAt(e.clientX, e.currentTarget)
+    if (v != null && v !== value) onChange(v)
+    e.preventDefault()
+  }
+  const onTouchUp = (e: ReactPointerEvent<HTMLInputElement>) => {
+    const d = dragRef.current
+    if (d?.live) { try { e.currentTarget.releasePointerCapture(d.id) } catch { /* already gone */ } }
+    dragRef.current = null
+  }
+
   // How far along the track the value sits, as a percentage. Only variant="track" paints
   // with it -- the bar's fill is a gradient stop, not an element -- but it costs one
   // custom property on every row rather than a second code path for one variant.
@@ -312,7 +356,11 @@ export function AxisSlider({
         className="slider-track-wrap"
         style={lockedPct != null ? ({ '--locked-pct': `${lockedPct}%` } as CSSProperties) : undefined}
       >
-        {refPct != null && <span className="slider-ref" style={{ left: `${refPct}%` }} aria-hidden="true" />}
+        {/* clamp(), not a bare percent: at stock = axis floor the mark sat at left:0 with a
+            negative margin and hung off the bar's rounded corner, where any shape reads as
+            damage rather than as a marker. Half its own width of inset at each end keeps
+            it ON the bar without moving it anywhere it can be misread. */}
+        {refPct != null && <span className="slider-ref" style={{ left: `clamp(5px, ${refPct}%, calc(100% - 5px))` }} aria-hidden="true" />}
         <input
           type="range"
           min={min}
@@ -320,7 +368,11 @@ export function AxisSlider({
           step={step}
           value={isAuto ? Math.min(max, Math.max(min, autoValue ?? (min + max) / 2)) : (value as number)}
           disabled={disabled}
-          onPointerDown={onRangePointerDown}
+          onPointerDown={e => { onTouchDown(e); onRangePointerDown?.(e) }}
+          onPointerMove={onTouchMove}
+          onPointerUp={onTouchUp}
+          onPointerCancel={onTouchUp}
+          onLostPointerCapture={onTouchUp}
           onChange={e => onChange(parseFloat(e.target.value))}
         />
       </div>
