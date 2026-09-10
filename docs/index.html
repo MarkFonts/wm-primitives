@@ -8217,6 +8217,13 @@ if (lb) {
      corner -- that is what makes it one light source instead of one per line. */
   function place(){
     var hb=head.getBoundingClientRect();
+    /* NOTHING IS MEASURABLE YET -- bail rather than write zeros. Called too early (fonts
+       still loading, or a Pages cold load where layout settles later than it does locally)
+       the header measures 0 wide, and every value derived from it is 0 too. That shipped:
+       the bend's gloss pattern went out at width="0", so the curve had a gloss exactly
+       zero pixels across and rendered flat while the bar beside it was lit. Writing
+       nothing leaves the last good values in place and lets a later call do the work. */
+    if (!hb.width || !hb.height) return;
     head.style.setProperty('--gw',(hb.width  * ZOOM_X)+'px');
     head.style.setProperty('--gh',(hb.height * ZOOM_Y)+'px');
     /* the rule is in this list too: it is 940px wide against a 1050px header, so it
@@ -8269,6 +8276,11 @@ if (lb) {
   }
 
   function boot(){ wireBend(); place(); apply(cu,cv); }
+  /* And keep watching. A single boot + resize listener is not enough on a cold load: the
+     header can gain its size after both have fired -- a webfont swapping in is enough --
+     and there is no event for "the thing you measured is finally real". */
+  if (window.ResizeObserver) new ResizeObserver(function(){ place(); apply(cu,cv); }).observe(head);
+  document.fonts && document.fonts.ready.then(function(){ place(); apply(cu,cv); });
   var cu=0.5, cv=0.5, raf=null;
   boot(); addEventListener('resize',boot);
   /* the hero draws the bend after its own layout pass; catch it whenever it lands */
