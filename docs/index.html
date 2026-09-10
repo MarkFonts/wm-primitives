@@ -8159,7 +8159,15 @@ if (lb) {
     bpat.id='bend-gloss-pat';
     bpat.setAttribute('patternUnits','userSpaceOnUse');
     var im=document.createElementNS(NS,'image');
-    im.setAttribute('href','field-247.avif');
+    /* THE SAME FILE THE BAR IS USING, read from --gloss rather than hardcoded. The CSS
+       swaps in field-247-sm.avif under 700px -- a smaller texture, because on a phone the
+       gloss is driven by SCROLL and every repaint resamples it. The pattern did not know
+       that and always asked for the full-size one, so on a narrow viewport the bend was
+       sampling a different image from the bar beside it. Same field, different file: they
+       cannot be guaranteed to agree, and nothing about the failure announces itself. */
+    var gl=getComputedStyle(head).getPropertyValue('--gloss');
+    var mu=/url\(\s*['"]?([^'")]+)/.exec(gl);
+    im.setAttribute('href', mu ? mu[1] : 'field-247.avif');
     im.setAttribute('preserveAspectRatio','none');
     bimg=im; bpat.appendChild(im); defs.appendChild(bpat);
     /* No size here on purpose -- see placeBend. Sizing the pattern off the SVG's own
