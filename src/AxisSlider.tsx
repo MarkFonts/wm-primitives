@@ -175,12 +175,73 @@ export function AxisSlider({
      you were pointing at is still where you left it. */
   const [engaged, setEngaged] = useState(false)
   const engageTimer = useRef<number | null>(null)
+  /* Two calls, because a single one was wrong: the bar shrank back mid-gesture while the
+     finger was still on it. engage() holds it open with NO timer -- a touch that is still
+     happening cannot time out -- and release() starts the three seconds once the finger
+     lifts. */
+  /* SCRUBBING, ANNOUNCED GLOBALLY. A host wants to know the difference between a value
+     arriving continuously under a finger and one committed in a single step: the first
+     wants no animation at all -- every intermediate frame is a full re-raster and the eye
+     never asked for them -- while the second reads better eased.
+     A data attribute on the root rather than a prop, because every consumer would
+     otherwise have to thread the same flag down through every slider it renders, and the
+     fact is global anyway: either the user is dragging a control or they are not. Hosts
+     style off `:root[data-scrubbing]`; ignoring it costs nothing. */
+  const setScrub = (on: boolean) => {
+    const root = document.documentElement
+    if (on) root.dataset.scrubbing = ''
+    else delete root.dataset.scrubbing
+  }
+  useEffect(() => () => setScrub(false), [])
+
   const engage = () => {
     setEngaged(true)
+    if (engageTimer.current) { clearTimeout(engageTimer.current); engageTimer.current = null }
+  }
+  const release = () => {
     if (engageTimer.current) clearTimeout(engageTimer.current)
     engageTimer.current = window.setTimeout(() => setEngaged(false), 3000)
   }
   useEffect(() => () => { if (engageTimer.current) clearTimeout(engageTimer.current) }, [])
+
+  /* ONE UPDATE PER FRAME WHILE SCRUBBING. pointermove fires up to ~120Hz, and each event
+     was calling onChange straight through: a setState, a full re-render, and a re-raster
+     of whatever the host is showing. On a phone rendering a 400px variable word that is
+     far more work than there are frames to do it in, so the updates queue and the type
+     only catches up once the finger stops -- which reads as easing, but is a backlog.
+     Coalescing to rAF means the host sees at most one value per frame, and always the
+     LATEST: intermediate positions the eye never saw are dropped rather than rendered
+     late. Discrete changes -- typing, arrow keys, a stepper tap, the wheel -- still go
+     straight through, because one of those is one render either way. */
+  const pending = useRef<number | null>(null)
+  const raf = useRef(0)
+  const lastSent = useRef<number | 'auto' | null>(null)
+  const queueValue = (v: number) => {
+    pending.current = v
+    if (raf.current) return
+    raf.current = requestAnimationFrame(() => {
+      raf.current = 0
+      const next = pending.current
+      pending.current = null
+      if (next == null || next === lastSent.current) return
+      lastSent.current = next
+      onChange(next)
+    })
+  }
+  /* AND FLUSH ON RELEASE, synchronously. rAF is not guaranteed to run: a hidden tab or a
+     backgrounded phone starves it, and without this the last value of a drag would sit in
+     the queue forever and the gesture would silently do nothing. Coalescing is an
+     optimisation for the frames in between; the value you let go on is not optional. */
+  const flushValue = () => {
+    setScrub(false)
+    if (raf.current) { cancelAnimationFrame(raf.current); raf.current = 0 }
+    const next = pending.current
+    pending.current = null
+    if (next == null || next === lastSent.current) return
+    lastSent.current = next
+    onChange(next)
+  }
+  useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current) }, [])
 
   const valueAt = (clientX: number, el: HTMLElement) => {
     const r = el.getBoundingClientRect()
@@ -202,6 +263,7 @@ export function AxisSlider({
      pointerdown is what buys the choice -- it suppresses the focus that would otherwise
      happen immediately, and focus() is called on the way up if it turned out to be a tap. */
   const numDrag = useRef<{ x: number; y: number; id: number; live: boolean } | null>(null)
+  const stepDrag = useRef<{ x: number; y: number; id: number; live: boolean } | null>(null)
   const onNumDown = (e: ReactPointerEvent<HTMLInputElement>) => {
     if (disabled || e.pointerType === 'mouse' || numFocused) return
     e.preventDefault()
@@ -213,9 +275,10 @@ export function AxisSlider({
     if (!d || e.pointerId !== d.id) return
     if (!d.live) {
       const dx = Math.abs(e.clientX - d.x), dy = Math.abs(e.clientY - d.y)
-      if (dx < 3 && dy < 3) return
-      if (dy > dx) { numDrag.current = null; return }   // vertical: the tray keeps it
+      if (dx < 6 && dy < 6) return
+      if (dy > dx * 1.5) { numDrag.current = null; return }   // clearly vertical: the tray keeps it
       d.live = true
+      setScrub(true)
       try { e.currentTarget.setPointerCapture(d.id) } catch { /* best effort */ }
     }
     /* Measured against the RANGE, not the field: the value maps to the rail's width, and
@@ -223,12 +286,14 @@ export function AxisSlider({
     const el = rangeRef.current
     if (!el) return
     const v = valueAt(e.clientX, el)
-    if (v != null && v !== value) onChange(v)
+    if (v != null) queueValue(v)
   }
   const onNumUp = (e: ReactPointerEvent<HTMLInputElement>) => {
     const d = numDrag.current
     numDrag.current = null
     if (!d) return
+    flushValue()
+    release()
     if (d.live) { try { e.currentTarget.releasePointerCapture(d.id) } catch { /* gone */ } ; return }
     e.currentTarget.focus()   // it was a tap after all
   }
@@ -257,25 +322,30 @@ export function AxisSlider({
     if (!d || e.pointerId !== d.id) return
     if (!d.live) {
       const dx = Math.abs(e.clientX - d.x), dy = Math.abs(e.clientY - d.y)
-      /* 3px of slop so a tap that wobbles is still a tap, not a drag that nudges the value
-         before you have let go. */
-      if (dx < 3 && dy < 3) return
-      /* VERTICAL BELONGS TO THE PAGE. Letting go here is what makes touch-action: pan-y
-         workable -- the browser is already free to scroll, and by dropping the gesture we
-         guarantee we are not competing for it. Taking every gesture instead (with
-         touch-action: none) left a phone unable to scroll AND unable to drag. */
-      if (dy > dx) { dragRef.current = null; return }
+      /* HYSTERESIS, and this is the bug that made "drag from anywhere" not work. Deciding
+         on the FIRST sample past 3px, then killing the gesture outright when it looked
+         vertical, meant a finger that rolled slightly on the way down -- which is most of
+         them, on a 32px bar -- lost the drag before it began, with no way back. What was
+         left was whatever the native input does: jump on tap, drag only from the thumb.
+         So: wait for 6px of real movement, and only concede to the scroller when the
+         gesture is CLEARLY vertical (1.5x). Anything ambiguous stays ours, and a gesture
+         that has not resolved yet is left undecided rather than thrown away. */
+      if (dx < 6 && dy < 6) return
+      if (dy > dx * 1.5) { dragRef.current = null; return }
       d.live = true
+      setScrub(true)
       try { e.currentTarget.setPointerCapture(d.id) } catch { /* capture is best-effort */ }
     }
     const v = valueAt(e.clientX, e.currentTarget)
-    if (v != null && v !== value) onChange(v)
+    if (v != null) queueValue(v)
     e.preventDefault()
   }
   const onTouchUp = (e: ReactPointerEvent<HTMLInputElement>) => {
     const d = dragRef.current
     if (d?.live) { try { e.currentTarget.releasePointerCapture(d.id) } catch { /* already gone */ } }
     dragRef.current = null
+    flushValue()
+    release()
   }
 
   // How far along the track the value sits, as a percentage. Only variant="track" paints
@@ -418,10 +488,36 @@ export function AxisSlider({
                   type="button"
                   tabIndex={-1}
                   className="slider-step-btn"
-                  onPointerDown={e => { e.preventDefault(); startStep(dir) }}
-                  onPointerUp={stopStep}
+                  /* THE ARROWS PASS A DRAG ON TOO. They sit over the rail's right end, so
+                     while they swallowed presses outright you could not drag a value that
+                     had parked beneath them -- the same fault the number field had, and
+                     between the two of them most of the right side of the bar was dead.
+                     The step still fires immediately on press, because hold-to-repeat
+                     needs that; if the press then turns into a horizontal drag, the
+                     repeat is cancelled and the gesture becomes a rail drag instead. */
+                  onPointerDown={e => { e.preventDefault(); stepDrag.current = { x: e.clientX, y: e.clientY, id: e.pointerId, live: false }; startStep(dir); engage() }}
+                  onPointerMove={e => {
+                    const d = stepDrag.current
+                    if (!d || e.pointerId !== d.id) return
+                    if (d.live) {
+                      const el2 = rangeRef.current
+                      if (el2) { const v2 = valueAt(e.clientX, el2); if (v2 != null) queueValue(v2) }
+                      return
+                    }
+                    const dx = Math.abs(e.clientX - d.x), dy = Math.abs(e.clientY - d.y)
+                    if (dx < 6 && dy < 6) return
+                    if (dy > dx * 1.5) { stepDrag.current = null; return }
+                    d.live = true
+                    setScrub(true)
+                    stopStep()
+                    dragRef.current = { x: d.x, y: d.y, id: d.id, live: true }
+                    try { e.currentTarget.setPointerCapture(d.id) } catch { /* best effort */ }
+                    const el = rangeRef.current
+                    if (el) { const v = valueAt(e.clientX, el); if (v != null) queueValue(v) }
+                  }}
+                  onPointerUp={e => { stepDrag.current = null; dragRef.current = null; stopStep(); flushValue(); release() }}
                   onPointerLeave={stopStep}
-                  onPointerCancel={stopStep}
+                  onPointerCancel={e => { stepDrag.current = null; dragRef.current = null; stopStep(); flushValue(); release() }}
                 >
                   <svg viewBox="0 0 10 6" width="10" height="6" aria-hidden="true">
                     <path d={chevronPath(dir, 10, 6)}
