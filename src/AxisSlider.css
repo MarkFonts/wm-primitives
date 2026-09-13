@@ -522,7 +522,13 @@
      sync, and it cannot drift from the thumb because there is no thumb. */
   .slider-row--track { position: relative; gap: 0; }
 
-  .slider-row--track .slider-track-wrap { position: absolute; inset: 0; margin: 0; }
+  /* NO SIDE PADDING IN THIS VARIANT. The wrap carries `padding: 0 16px` so a visible thumb
+     has room to sit at either end without clipping. Here the input is opacity: 0 and the
+     fill is drawn by the label, so there is no thumb to protect -- and the padding instead
+     took 16px off each end of the bar and gave it to nothing. The rail stopped short of
+     the ends it is supposed to reach, so MIN and MAX were the two values you could not
+     press, the ew-resize cursor did not appear there, and a click simply did nothing. */
+  .slider-row--track .slider-track-wrap { position: absolute; inset: 0; margin: 0; padding: 0; }
   .slider-row--track .slider-track-wrap input[type="range"] {
     width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize;
     /* Claim the horizontal gesture only. `none` here would take the page's vertical scroll
