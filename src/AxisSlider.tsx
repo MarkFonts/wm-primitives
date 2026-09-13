@@ -24,7 +24,7 @@
 //   • marker  — a ◆ "baked default" indicator before the value
 //   • onRangePointerDown — hook on the range thumb (e.g. drag-to-flash a zone)
 //   • disabled — dim/lock the control (e.g. a frozen axis)
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { nbMinus } from './format'
 import { CHEVRON, chevronPath } from './chevronGeometry'
@@ -165,6 +165,22 @@ export function AxisSlider({
      Mouse is untouched: the native input already handles it, and capturing there would add
      a second code path for a case that works. */
   const dragRef = useRef<{ x: number; y: number; id: number; live: boolean } | null>(null)
+  const rangeRef = useRef<HTMLInputElement>(null)
+
+  /* ENGAGEMENT. On a coarse pointer the bar rests at two thirds of the row, leaving an
+     inert shelf above and below it to put a thumb on -- see AxisSlider.css. Touching the
+     control fills the row for a few seconds, so a second adjustment does not have to be
+     aimed as precisely as the first.
+     The row's HEIGHT never changes, only the bar inside it: nothing reflows, and the thing
+     you were pointing at is still where you left it. */
+  const [engaged, setEngaged] = useState(false)
+  const engageTimer = useRef<number | null>(null)
+  const engage = () => {
+    setEngaged(true)
+    if (engageTimer.current) clearTimeout(engageTimer.current)
+    engageTimer.current = window.setTimeout(() => setEngaged(false), 3000)
+  }
+  useEffect(() => () => { if (engageTimer.current) clearTimeout(engageTimer.current) }, [])
 
   const valueAt = (clientX: number, el: HTMLElement) => {
     const r = el.getBoundingClientRect()
@@ -177,9 +193,64 @@ export function AxisSlider({
     return Math.min(max, Math.max(min, +snapped.toFixed(6)))
   }
 
+  /* THE VALUE FIELD TAKES A TAP AND PASSES ON A DRAG. It sits over the last fifth of the
+     track, so while it swallowed presses outright the right end of every rail was
+     undraggable -- and that is exactly where a high value parks its own thumb. You could
+     only jump it by tapping somewhere else.
+     So the press is judged the same way the rail's is: a tap focuses the field for typing,
+     a horizontal drag drives the value as if the digits were not there. preventDefault on
+     pointerdown is what buys the choice -- it suppresses the focus that would otherwise
+     happen immediately, and focus() is called on the way up if it turned out to be a tap. */
+  const numDrag = useRef<{ x: number; y: number; id: number; live: boolean } | null>(null)
+  const onNumDown = (e: ReactPointerEvent<HTMLInputElement>) => {
+    if (disabled || e.pointerType === 'mouse' || numFocused) return
+    e.preventDefault()
+    numDrag.current = { x: e.clientX, y: e.clientY, id: e.pointerId, live: false }
+    engage()
+  }
+  const onNumMove = (e: ReactPointerEvent<HTMLInputElement>) => {
+    const d = numDrag.current
+    if (!d || e.pointerId !== d.id) return
+    if (!d.live) {
+      const dx = Math.abs(e.clientX - d.x), dy = Math.abs(e.clientY - d.y)
+      if (dx < 3 && dy < 3) return
+      if (dy > dx) { numDrag.current = null; return }   // vertical: the tray keeps it
+      d.live = true
+      try { e.currentTarget.setPointerCapture(d.id) } catch { /* best effort */ }
+    }
+    /* Measured against the RANGE, not the field: the value maps to the rail's width, and
+       the field is a fifth of it sitting at one end. */
+    const el = rangeRef.current
+    if (!el) return
+    const v = valueAt(e.clientX, el)
+    if (v != null && v !== value) onChange(v)
+  }
+  const onNumUp = (e: ReactPointerEvent<HTMLInputElement>) => {
+    const d = numDrag.current
+    numDrag.current = null
+    if (!d) return
+    if (d.live) { try { e.currentTarget.releasePointerCapture(d.id) } catch { /* gone */ } ; return }
+    e.currentTarget.focus()   // it was a tap after all
+  }
+
+  /* HORIZONTAL WHEEL ONLY, and never vertical. Scroll-to-adjust was removed here for a
+     good reason -- hovering a control while scrolling a panel is the common case, and a
+     wheel that edits turns a scroll into an unnoticed edit. That argument is about deltaY.
+     A sideways gesture over a horizontal control cannot be mistaken for scrolling a panel,
+     so it can carry the edit the vertical one must not. */
+  const onWheel = (e: ReactWheelEvent<HTMLDivElement>) => {
+    if (disabled) return
+    if (!e.deltaX || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return
+    e.preventDefault()
+    const base = typeof value === 'number' ? value : (autoValue ?? min)
+    onChange(Math.min(max, Math.max(min, base + Math.sign(e.deltaX) * step)))
+    engage()
+  }
+
   const onTouchDown = (e: ReactPointerEvent<HTMLInputElement>) => {
     if (disabled || e.pointerType === 'mouse') return
     dragRef.current = { x: e.clientX, y: e.clientY, id: e.pointerId, live: false }
+    engage()
   }
   const onTouchMove = (e: ReactPointerEvent<HTMLInputElement>) => {
     const d = dragRef.current
@@ -216,7 +287,8 @@ export function AxisSlider({
   return (
     <div
       ref={rowRef}
-      className={`slider-row${disabled ? ' slider-row--off' : ''}${variant !== 'default' ? ` slider-row--${variant}` : ''}${field === 'box' ? ' slider-row--boxed' : ''}`}
+      className={`slider-row${disabled ? ' slider-row--off' : ''}${variant !== 'default' ? ` slider-row--${variant}` : ''}${field === 'box' ? ' slider-row--boxed' : ''}${engaged ? ' slider-row--engaged' : ''}`}
+      onWheel={onWheel}
       style={{ '--pct': `${valuePct}%` } as CSSProperties}
     >
       {hintPos && createPortal(
@@ -282,6 +354,10 @@ export function AxisSlider({
                label reading 1200. */
             value={numberValue}
             disabled={disabled}
+            onPointerDown={onNumDown}
+            onPointerMove={onNumMove}
+            onPointerUp={onNumUp}
+            onPointerCancel={onNumUp}
             onFocus={() => { handleFocus(); setNumFocused(true) }}
             onBlur={() => {
               setNumFocused(false)
@@ -370,6 +446,7 @@ export function AxisSlider({
             it ON the bar without moving it anywhere it can be misread. */}
         {refPct != null && <span className="slider-ref" style={{ left: `clamp(5px, ${refPct}%, calc(100% - 5px))` }} aria-hidden="true" />}
         <input
+          ref={rangeRef}
           type="range"
           min={min}
           max={max}

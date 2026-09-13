@@ -375,9 +375,21 @@
        unrelated arrows at opposite ends of the value; pushing each to the edge it points
        away from closes that to a pair while the 46x40 of touchable area stays. Same
        arrangement the triplet's stepper uses. */
-    .slider-step-btn { width: 40px; height: 23px; }
-    .slider-step-btn:first-child { align-items: end; padding-bottom: 1px; }
-    .slider-step-btn + .slider-step-btn { align-items: start; padding-top: 1px; }
+    /* SHORT BOX, BIG TARGET. At 23px each the pair stood 46px tall and propped the bar
+       open to the full row, so the resting shelf could not exist -- the bar cannot be
+       shorter than its tallest content. It also threw the two marks to the extremes of
+       the row, which is why they read as too high and too low against the buttons beside
+       them.
+       16px each lets the bar sit at 32 and brings the marks within 8px of each other. The
+       touch area is given back with padding and taken out of layout with an equal negative
+       margin -- 3px, not more, because the two buttons are stacked and any larger would
+       have them overlapping, which makes up and down ambiguous at the seam. */
+    .slider-step-btn {
+      width: 40px; height: 16px;
+      padding-block: 3px; margin-block: -3px;
+    }
+    .slider-step-btn:first-child { align-items: end; }
+    .slider-step-btn + .slider-step-btn { align-items: start; }
   }
   @media (prefers-reduced-motion: reduce) {
     .slider-step-btn::before { transition: none; }
@@ -564,7 +576,42 @@
      not select what you are about to retype. */
   .slider-row--track .slider-label { user-select: none; }
   .slider-row--track .slider-number { user-select: text; }
-  @media (pointer: coarse) { .slider-row--track .slider-label { min-height: 44px; } }
+  /* ── the resting shelf ────────────────────────────────────────────────────────
+     On a coarse pointer every one of these rows was 48px of live target sitting 6px from
+     the next one, so there was nowhere on the rail to put a thumb that was not a control.
+     Big rows, and unusable for exactly that reason -- the fix is subtraction, not growth.
+
+     The ROW stays 48px always. Only the BAR inside it changes, so nothing reflows and the
+     thing you were aiming at does not move. At rest the bar gives back a third of its
+     height as an inert shelf; touching it fills the row for three seconds, so a second
+     adjustment need not be aimed as carefully as the first.
+
+     The input is inset LESS than the bar, and asymmetrically: +5px above, +3px below. That
+     is occlusion forgiveness -- a finger hides what it is over, so people aim with its
+     visible top edge and miss high. What is left inert is ~3px above and ~5px below, plus
+     the 6px seam between rows: an 8-11px band you can rest on. */
+  @media (pointer: coarse) {
+    .slider-row--track { min-height: 48px; justify-content: center; }
+    .slider-row--track .slider-label {
+      min-height: 32px;
+      transition: min-height var(--dur-fast, .12s) ease;
+    }
+    .slider-row--track .slider-track-wrap { top: 3px; bottom: 5px; }
+
+    /* --nudge OFF in the bar. That 2px padding-bottom on .slider-label-left is an optical
+       baseline correction for the DESKTOP layout, where the label sits above the track and
+       wants pushing down onto it. Inside the bar the label is vertically CENTRED, so the
+       padding is counted as part of the box being centred: 14px of text in a 16px box put
+       the name 2px high of the number and stepper beside it. Right correction, wrong
+       context -- so it is removed here rather than retuned, and desktop keeps it. */
+    .slider-row--track .slider-label-left { padding-bottom: 0; }
+
+    .slider-row--track.slider-row--engaged .slider-label { min-height: 48px; }
+    .slider-row--track.slider-row--engaged .slider-track-wrap { top: 0; bottom: 0; }
+  }
+  @media (pointer: coarse) and (prefers-reduced-motion: reduce) {
+    .slider-row--track .slider-label { transition: none; }
+  }
 
   /* ── track: the field hugs its digits, and one slot holds unit-or-arrows ──────
      Two things the default variant gets away with and this one cannot.
