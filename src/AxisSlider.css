@@ -318,6 +318,26 @@
   .slider-step-btn:active::before { opacity: 1; transition: none; }
 
   @media (pointer: coarse) {
+    /* A FINGER-SIZED TARGET FOR THE VALUE, without moving it. The field measured 23x14 on
+       a phone -- it is sized to its digits, which is right for the eye and hopeless for a
+       thumb, so tapping the number to type simply missed. Padding grows the hit box and an
+       equal negative margin gives the space straight back, so nothing shifts: the digits
+       stay exactly where they were and the target now fills the row's height.
+       It does take that area from the bar's drag, deliberately -- over the digits, the
+       likelier intent is to type. */
+    /* `input.` on both, and that is the third specificity fight this file has had -- the
+       header documents the other two. `.slider-row--track .slider-number` sets padding: 0
+       in this same layer at (0,2,0), and it sits LATER in the file, so matching its weight
+       was not enough: at equal specificity source order decides. Adding the element makes
+       these (0,1,1) and (0,2,1), which wins from anywhere in the file rather than only
+       from below it. */
+    input.slider-number,
+    .slider-row--track input.slider-number {
+      padding: 12px 8px;
+      margin: -12px -8px;
+      position: relative;
+      z-index: 2;
+    }
     /* Permanent here, so back into the layout and measured with the row -- and the
        suffix stops yielding, because nothing is being anticipated.
 
@@ -496,13 +516,12 @@
     /* Claim the horizontal gesture only. `none` here would take the page's vertical scroll
        with it wherever the pointer crossed a rail, which is most of a rail. */
     touch-action: pan-y;
-    /* ON TOUCH THE ROW IS THE SLIDER'S, whole. pan-y is the timid answer: it leaves the
-       gesture ambiguous until a direction resolves, and on a 46px-tall full-width bar inside
-       a scrolling sheet the scroller wins nearly every time -- which is why the rails read
-       as dead on a phone. `none` hands the row's own 46px to the control outright. The
-       page is still scrollable from everywhere that is not a rail, and a rail is a thing
-       you came to drag. */
-    @media (pointer: coarse) { touch-action: none; }
+    /* pan-y STAYS on touch. `none` was tried and was strictly worse: it took the page's
+       vertical scroll away from every row AND the drag still did not work, so a phone got
+       neither. The direction is judged in AxisSlider.tsx instead -- the first few pixels
+       decide, a horizontal move claims the pointer and drives the value, a vertical one is
+       released to the scroller untouched. Declaring the answer in CSS can only ever be
+       right for one of the two gestures; deciding it per gesture can be right for both. */
   }
   .slider-row--track .slider-track-wrap input[type="range"]:disabled { cursor: default; }
 

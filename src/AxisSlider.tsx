@@ -155,10 +155,13 @@ export function AxisSlider({
   const committed = nbMinus(display != null ? String(display) : String(value))
   const numberValue = draft ?? committed
 
-  /* TOUCH DRAG, DRIVEN HERE RATHER THAN LEFT TO THE INPUT. The CSS gives the row to this
-     control on a coarse pointer, so once a finger is down the whole gesture is ours -- and
-     this makes the drag definite rather than hoping a native range answers touch the way it
-     answers a mouse, which is exactly what was in doubt when the rails read as dead.
+  /* TOUCH DRAG, DRIVEN HERE RATHER THAN LEFT TO THE INPUT -- and the direction judged
+     rather than declared. touch-action can only state one answer before anyone has moved:
+     `pan-y` leaves a horizontal drag to be won or lost against the scroller, `none` wins it
+     by taking the page's scroll away from every row. Both were tried and both were wrong;
+     `none` was worse, giving a phone neither gesture.
+     So: hold pan-y so the browser can always scroll, watch the first few pixels, and claim
+     the pointer only once the movement is clearly horizontal.
      Mouse is untouched: the native input already handles it, and capturing there would add
      a second code path for a case that works. */
   const dragRef = useRef<{ x: number; y: number; id: number; live: boolean } | null>(null)
@@ -182,10 +185,15 @@ export function AxisSlider({
     const d = dragRef.current
     if (!d || e.pointerId !== d.id) return
     if (!d.live) {
+      const dx = Math.abs(e.clientX - d.x), dy = Math.abs(e.clientY - d.y)
       /* 3px of slop so a tap that wobbles is still a tap, not a drag that nudges the value
-         a step before you have let go. Direction is NOT judged: the row is the slider's, so
-         a finger that moves at all is driving it. */
-      if (Math.abs(e.clientX - d.x) < 3 && Math.abs(e.clientY - d.y) < 3) return
+         before you have let go. */
+      if (dx < 3 && dy < 3) return
+      /* VERTICAL BELONGS TO THE PAGE. Letting go here is what makes touch-action: pan-y
+         workable -- the browser is already free to scroll, and by dropping the gesture we
+         guarantee we are not competing for it. Taking every gesture instead (with
+         touch-action: none) left a phone unable to scroll AND unable to drag. */
+      if (dy > dx) { dragRef.current = null; return }
       d.live = true
       try { e.currentTarget.setPointerCapture(d.id) } catch { /* capture is best-effort */ }
     }
