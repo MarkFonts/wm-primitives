@@ -27,6 +27,9 @@ export type { AxisSliderProps } from './src/AxisSlider'
 // min / desired / max as ONE control. Extracted from ReCal's H&J rail, which had the
 // right layout on native number inputs -- platform steppers that cannot be themed and
 // a hyphen where a minus belongs.
+export { StopSlider } from './src/StopSlider'
+export type { StopSliderProps, Stop } from './src/StopSlider'
+
 export { AxisTriplet } from './src/AxisTriplet'
 export type { AxisTripletProps, Band } from './src/AxisTriplet'
 
