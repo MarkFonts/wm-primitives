@@ -9,6 +9,33 @@ Newest first.
 
 ---
 
+## 2026-09-13 — flattersatz without a document
+
+**An injected measurer.** `measurerFrom(spec)`, and `layoutParagraph` now takes either a
+DOM element or `{ width, measure(text, type) }` where the element used to go.
+
+The probe was the only thing in the file that needed a document, and it is still the right
+way to measure text the browser is going to draw — it inherits the axes, the features and
+the optical size, and a canvas 2d context silently ignores `font-variation-settings` in
+Chrome, so there is no shortcut. But everything downstream of it — the greedy walk, the
+Knuth-Plass composer, hyphenation by rule, protrusion, the widow killer — only ever asked
+the measurer for `measure`, `space` and `em`. None of it ever touched the DOM.
+
+So a caller that already shapes its own text can hand that in. WORDMAKE is the one that
+asked: its preview, its node export and its seven render workers all break the same copy,
+and two of those three have no document — but all three can pass `advance(coord, text,
+size)` from the shaper they already agree on. Same breaker, same rag, in a browser and in
+a worker.
+
+`measureAt` stays optional. Without it `widthAxis()` measures no axis and the expansion
+stage leaves the type alone, which is the honest answer for a measurer that cannot move
+one — and not a silent scaleX.
+
+The DOM path is byte-for-byte unchanged: `measurerFrom` returns null for anything that is
+not a spec, which is how `layoutParagraph` tells an element from one.
+
+---
+
 ## 2026-09-13 — the dial answers a finger
 
 The mobile pass. Every item here was reported from a phone, and several of the fixes

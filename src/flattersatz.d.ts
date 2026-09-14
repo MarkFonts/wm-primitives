@@ -18,6 +18,34 @@ export type RunStyles = Partial<Record<string, object>>
 export interface Band { min: number; desired: number; max: number }
 export type Budget = Band | number
 
+/** What layoutParagraph measures with when there is no DOM element to measure in:
+ *  a column width, plus the caller's own shaper. See `measurerFrom` in flattersatz.js. */
+export interface MeasurerSpec {
+  /** The column width, in px. A reference element would have been asked for this. */
+  width: number
+  measure(text: string, type?: string): number
+  /** Re-measure along `wdth`. Omit and the expansion stage finds no axis and does
+   *  nothing -- which is honest, and is not a silent scaleX. */
+  measureAt?(axisValue: number, text: string, type?: string): number
+  fvsAt?(axisValue: number): string
+  /** Defaults to measure(' '). */
+  space?: number
+  /** Defaults to 16. */
+  em?: number
+}
+
+/** Normalise a MeasurerSpec, filling the optional half. Null for anything that is not
+ *  one -- which is how layoutParagraph tells an element from a spec. */
+export function measurerFrom(spec: unknown): Measurer | null
+
+export interface Measurer {
+  measure(text: string, type?: string): number
+  measureAt(axisValue: number, text: string, type?: string): number
+  fvsAt(axisValue: number): string
+  space: number
+  em: number
+}
+
 export interface FitOptions {
   mode: FitMode
   /** flattersatz: how much narrower the odd lines' measure is, in px */
@@ -87,10 +115,12 @@ export function budgetsOf(limits: Partial<FitOptions>): { wordSpacing: Band; tra
  *  rather than a scaleX. Detected by measuring, so it needs no fvar parsing. */
 export function widthAxis(m: unknown): boolean
 
-/** Null when the mode is off, the text is empty, or the element cannot be measured yet. */
+/** Null when the mode is off, the text is empty, or the column cannot be measured yet.
+ *  `reference` is the element the text is set in, or a MeasurerSpec for a caller that
+ *  shapes its own text and has no document (a render worker, say). */
 export function layoutParagraph(
   input: string | readonly Run[],
-  reference: HTMLElement,
+  reference: HTMLElement | MeasurerSpec,
   opts: Partial<FitOptions>,
   indentPx?: number,
 ): FittedLine[] | null
