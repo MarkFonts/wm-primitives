@@ -4,7 +4,8 @@ A log of decisions, not of diffs — `git log` already has the diffs. Each entry
 moved and what it cost, because most of these were reached by getting them wrong first and
 the wrong version is the useful part.
 
-Companion to [DIAL.md](DIAL.md) (the dial's spec) and [SLIDERS.md](SLIDERS.md) (the census).
+Companion to [DIAL.md](DIAL.md) (the dial's layout), [GESTURES.md](GESTURES.md) (what it does
+under a pointer), [SLIDERS.md](SLIDERS.md) (the census) and [EVAL.md](EVAL.md) (how it is tested).
 Newest first.
 
 ---

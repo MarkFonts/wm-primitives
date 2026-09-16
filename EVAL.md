@@ -76,7 +76,7 @@ each one is a bug that has already happened once:
 
 | id | case | asserts | source |
 | --- | --- | --- | --- |
-| B1 | press-and-drag from *anywhere* on a track row | value follows finger; direction judged after 6px, conceded only at 1.5× vertical | `d14ae6a` |
+| B1 | touch/pen press-and-drag from *anywhere* on a track row (mouse is native) | value follows finger; direction judged after 6px, conceded only at 1.5× vertical | `d14ae6a` · G1 |
 | B2 | vertical swipe starting on a track row | page scrolls, value unchanged | `ffa2e95` |
 | B3 | tap at x = 0 and x = width−1 | commits `min` and `max` | `0e55d1f` |
 | B4 | `ew-resize` cursor across full rail width | at 0.7px, mid, width−1 | `0e55d1f` |
@@ -87,10 +87,13 @@ each one is a bug that has already happened once:
 | B9 | engaged bar does not shrink while pointer is still down | `release()` starts the timer, not `engage()` | `d14ae6a` |
 | B10 | 120Hz synthetic drag, 60 samples | ≤ one `onChange` per frame; last sample always delivered (test with page hidden) | `d14ae6a` |
 | B11 | `data-scrubbing` on root exactly during a live drag | present after 6px, gone on lift | `d14ae6a` |
-| B12 | keyboard: focus number field, ArrowUp/Down, Home/End | steps, clamps, `aria-valuenow` follows | DIAL.md |
+| B12 | keyboard: focus number field, ArrowUp/Down, Shift for ×10 | steps, clamps, `aria-valuenow` follows; Home/End are not bound | GESTURES G24 |
 | B13 | `auto` button/keystroke on an opsz dial | `'auto'` emitted; `a` key only when `allowAuto` | props doc |
 | B14 | reference marker at `reference = min` | clamped ≥ 5px from the corner | `4cf89bf` |
 | B15 | DIAL R1/R2: every value in a rail shares one right edge; every tag one x | measured across a real rail in each host | DIAL.md |
+
+The full promise list is [GESTURES.md](GESTURES.md) (G1–G36); the B-ids above are the
+first tests to write, not the whole spec.
 
 Steppers, `StopSlider`, `AxisTriplet`, `Icon` states and `Collapse` get their own short
 tables on the same pattern once the AxisSlider ones exist and are green — that control is
@@ -216,7 +219,7 @@ Ordered by what would have caught the most of last month's rework per hour spent
 rendering pulled forward because of Q1.
 
 ```
-0. GESTURES.md   the §2 table promoted to a spec, one line per case, commit-traced   ~1 hour
+0. GESTURES.md   the §2 table promoted to a spec, one line per case, commit-traced   DONE bb3c8c8+
              → DIAL.md covers layout only; tests need something to cite (Q4)
 1. D1 + D2   consumer lint/type/build matrix in wm-primitives CI; red blocks notify   ~half a day
              → verify: push a deliberately broken token, watch it fail HERE, not in ReCal
