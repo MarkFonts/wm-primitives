@@ -9,6 +9,9 @@ export interface Host {
   themes: readonly ('dark' | 'light')[]
   /** Put the host in the theme before the app boots. */
   setTheme: (page: Page, theme: 'dark' | 'light') => Promise<void>
+  /** false: the host draws the primitive's CSS but not its component -- render only,
+   *  no gestures to test (opsz-proofer). Default true. */
+  gestures?: boolean
 }
 
 export const HOSTS: readonly Host[] = [
@@ -34,6 +37,7 @@ export const HOSTS: readonly Host[] = [
     url: '/opsz-proofer/',
     themes: ['dark', 'light'],
     setTheme: (page, theme) => page.emulateMedia({ colorScheme: theme }),
+    gestures: false,
   },
 ]
 
