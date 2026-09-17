@@ -206,9 +206,13 @@ version of this test, and the dry run should come first.
 | W4 | run `lint:tokens` in the stub | did it exist / was it findable / did it need `.tokenlint.json` explained |
 
 The score is a count of **silent failures** — things that did nothing with no message.
-Every one is a candidate for a dev-mode `console.warn` in the primitive (e.g. "AxisSlider
-mounted but `--ui-font` is unset on `:root`"). That is the cheapest fix the whole battery
-can propose and it is the one nothing measures today.
+Every one is a candidate for a dev-mode `console.warn` in the primitive. That is the
+cheapest fix the whole battery can propose and it is the one nothing measures today.
+
+**Run 2026-09-17, result: two silent failures, two misleading errors, ~12 min and six
+wrong turns to a correct dial.** The rail vanishes without `color.css` imported;
+`color-scheme: dark` alone is black on black. Both are in [HOWTO.md](HOWTO.md) with the
+warn() they want.
 
 **Who it is for (Q6):** you in six months, or a collaborator with access to the private
 repos. So the stub is not thrown away — it becomes `HOWTO.md`: *"a new dial design lives
@@ -234,7 +238,7 @@ rendering pulled forward because of Q1.
              → verify: revert 0e55d1f locally, B3/B4 go red
 4. D4 + D5   live-bundle check as a deploy step (deployed consumers only)          DONE fp 3dd0bcb · ReCal 6f1be5b · wmt 8b33dfa
              → verify: compare against the hash checked by hand last session
-5. §6 wiring run on a stub → HOWTO.md first draft + the warn() list                ~2 hours
+5. §6 wiring run on a stub → HOWTO.md first draft + the warn() list                DONE HOWTO.md
 6. §5 spec-fidelity fixtures + RUNBOOK, one run across three models                ~1 day
              → output: the "docs were silent here" list into DIAL.md / GESTURES.md
 7. opsz-proofer joins the matrix 1:1. Kernpare joins §2/§3 + D6. WORDMAKE joins the

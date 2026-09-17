@@ -5,7 +5,8 @@ moved and what it cost, because most of these were reached by getting them wrong
 the wrong version is the useful part.
 
 Companion to [DIAL.md](DIAL.md) (the dial's layout), [GESTURES.md](GESTURES.md) (what it does
-under a pointer), [SLIDERS.md](SLIDERS.md) (the census) and [EVAL.md](EVAL.md) (how it is tested).
+under a pointer), [SLIDERS.md](SLIDERS.md) (the census), [EVAL.md](EVAL.md) (how it is tested) and
+[HOWTO.md](HOWTO.md) (how to wire it in, and add a dial).
 Newest first.
 
 ---
