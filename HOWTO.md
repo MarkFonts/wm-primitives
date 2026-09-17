@@ -77,6 +77,18 @@ switch the colour ramp, which is keyed on `[data-theme]` and `prefers-color-sche
 result is dark ink on a dark ground with no error — the exact failure the lint config's
 comment predicts. Set `data-theme`, and the ramp follows (it sets `color-scheme` for you).
 
+### 6b · The theme switch, if you want one
+
+```tsx
+<ThemeSwitch look="marks" />      // three Material icons; the host loads the icon font
+<ThemeSwitch look="words" />      // the Auto / Light / Dark pill
+```
+
+Both write `wm-theme` and stamp `data-theme` (step 6) — so the switch *is* how a host
+satisfies step 6 at runtime. Stamp before first paint with a head script that mirrors
+`bootTheme()` (font-proofer's is one line in `index.html`). A page without React mounts
+the same engine on its own buttons: `mountThemeSwitch(el)` from `shared/src/theme.js`.
+
 ### 7 · Render one
 
 ```tsx
