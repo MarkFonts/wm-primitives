@@ -18,6 +18,8 @@ on:
       - 'index.ts'
       - 'fonts/**'      # the canonical Cal Sans lives here; a rebuild must follow it
       - 'scripts/lint-tokens.mjs'
+      - 'scripts/build-dial.mjs'
+      - 'dist/**'
       - 'tests/**'
       - 'playwright.config.ts'
       - '.github/workflows/consumers.yml'
@@ -27,6 +29,8 @@ on:
       - 'index.ts'
       - 'fonts/**'
       - 'scripts/lint-tokens.mjs'
+      - 'scripts/build-dial.mjs'
+      - 'dist/**'
       - 'tests/**'
       - 'playwright.config.ts'
       - '.github/workflows/consumers.yml'
@@ -106,6 +110,26 @@ jobs:
         working-directory: ${{ matrix.workdir }}
         run: python3 build.py
 
+  # dist/dial.js is built from src/AxisSlider.tsx and COMMITTED, because the pages that
+  # need it run no npm. A source change without a rebuild ships the old dial to them
+  # silently; this fails on the commit that did it.
+  dial:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build:dial
+      - name: dist/ must match the source
+        run: |
+          if ! git diff --quiet -- dist/; then
+            git --no-pager diff --stat -- dist/
+            echo "::error file=dist/dial.js::dist/ is stale against src/ -- run 'npm run build:dial' and commit dist/"
+            exit 1
+          fi
+
   # EVAL.md §2 + §3 -- behaviour and rendering, on both hosts built against this commit,
   # in Chromium and WebKit. Behaviour is a gate: a red row here is a bug, and dispatch
   # waits on this job (Q3). Rendering is a report: its step is continue-on-error, and
@@ -167,7 +191,7 @@ jobs:
 
   # -- the old notify.yml, verbatim below this line, now gated on check ------------------
   dispatch:
-    needs: [check, browser]
+    needs: [check, browser, dial]
     # Never from a PR: a PR is a question, not a release.
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
