@@ -9,8 +9,9 @@ The battery from [EVAL.md](../EVAL.md). What exists so far:
 | `__screenshots__/` | 3 | the baselines, **committed**, cut on linux in CI |
 
 The hosts are the consumers' *built* `dist/`, served by `serve.mjs` at the base path each
-deploys to. Locally they are the sibling checkouts (`../font-proofer/dist`, `../ReCal/dist`
-— build them first); in CI they are fresh checkouts with this commit in `shared/`.
+deploys to. Locally they are the sibling checkouts (`../font-proofer/dist`, `../ReCal/dist`,
+`../wordmarktools/opsz-proofer/dist` — build them first; `../wordmarktools/kernpare` is
+served as-is); in CI they are fresh checkouts with this commit in `shared/`.
 
 ```
 npm run test:behaviour         # gates dispatch in CI

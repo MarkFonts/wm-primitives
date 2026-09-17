@@ -25,6 +25,16 @@ export const HOSTS: readonly Host[] = [
     themes: ['dark'],
     setTheme: async () => {},
   },
+  /* opsz-proofer's rows are HAND-EMITTED .slider-row HTML from build.py -- the
+     primitive's class names without its component (SLIDERS.md 57-59). It is here for
+     exactly that reason: the day AxisSlider changes structure, its rows drift, and the
+     baseline and the parity numbers are what will say so. No JS gestures to test. */
+  {
+    name: 'opsz-proofer',
+    url: '/opsz-proofer/',
+    themes: ['dark', 'light'],
+    setTheme: (page, theme) => page.emulateMedia({ colorScheme: theme }),
+  },
 ]
 
 /* Nothing leaves localhost. Analytics failed on every probe run and a screenshot must
