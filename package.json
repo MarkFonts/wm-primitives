@@ -20,7 +20,9 @@
     "lint:tokens": "node scripts/lint-tokens.mjs",
     "serve": "node tests/serve.mjs",
     "test:render": "playwright test tests/render",
-    "test:render:update": "playwright test tests/render --update-snapshots"
+    "test:render:update": "playwright test tests/render --update-snapshots",
+    "test:behaviour": "playwright test tests/behaviour",
+    "test": "playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0"

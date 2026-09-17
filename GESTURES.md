@@ -3,7 +3,7 @@
 The behaviour spec. [DIAL.md](DIAL.md) says where things sit; this says what they *do*
 when touched, pressed, typed at or scrolled. One row per promise, each traced to the
 commit where the opposite behaviour was a reported bug — so a row here is not a wish, it
-is something that has already gone wrong once. The tests in `tests/` cite these ids.
+is something that has already gone wrong once. The tests in `tests/behaviour/` cite these ids; `rail.spec.ts` covers G1–G5, G8, G9, G11–13.
 
 Read against `src/AxisSlider.tsx`. If this and the code disagree, the code is a bug or
 this is stale; either way the row says which commit to read.
@@ -29,6 +29,13 @@ Every threshold in one place, so a test and the code cannot drift on a constant.
 `touch-action` on the rail is **`pan-y`**, always. The direction of a gesture is decided
 by the rules below, not by that property — it states one answer before anyone has moved.
 
+**Capture.** A touch is never asked for `setPointerCapture` — the browser has already
+captured it to the element it went down on, and asking again makes Chromium fire
+`lostpointercapture` for the hand-over, which the rail reads as a lift. Pen and mouse
+still capture. And once a touch drag is live, `touchmove` is cancelled so the native
+range stops following the finger on its own: one path to the host, not two.
+(`6325c50`, found by `tests/behaviour` G9.)
+
 ---
 
 ## 1 · The rail
@@ -39,14 +46,14 @@ follows. Every rule in this section is for **touch and pen** (`pointerType !== '
 | id | gesture | promise | commit |
 | --- | --- | --- | --- |
 | G1 | finger down anywhere on the row, then ≥ 6px of movement that is not clearly vertical | value follows the finger for the rest of the gesture, from wherever it started — not only from the thumb | `d14ae6a` |
-| G2 | finger down on the row, then movement that is clearly vertical (dy > 1.5 dx) | the page scrolls; the value never changes; the gesture is handed back and not reclaimed | `ffa2e95` |
-| G3 | finger down, movement < 6px, lift | no value change (the native tap-to-jump still applies on mouse; on touch a sub-threshold press is a no-op) | `d14ae6a` |
+| G2 | finger down on the row, then movement that is clearly vertical (dy > 1.5 dx) | the page scrolls; the gesture is handed back and not reclaimed; and the value is **put back** to what it was at touch-down, because the native range had already jumped it to the finger on `pointerdown` | `ffa2e95`, `6325c50` |
+| G3 | finger down, movement < 6px, lift | a tap, and a tap is the native input's: the value jumps to the tap point. The rail never claims it, so `data-scrubbing` is never set | `d14ae6a` |
 | G4 | a gesture that wanders — first sample looks vertical, later samples horizontal | still becomes a drag; undecided is not the same as refused | `d14ae6a` |
 | G5 | press at x = 0 / x = width − 1 of the track row | reaches `min` / `max`; nothing at the ends of the bar is dead | `0e55d1f` |
 | G6 | the value is read from the pointer's x against the **rail**, wherever the press began (field, stepper, rail) | one mapping, `valueAt`, for all three | `0a0429c` |
 | G7 | during a live drag, `pointermove` at 120Hz | host receives at most one `onChange` per animation frame, always the most recent position, never the same value twice in a row | `d14ae6a` |
 | G8 | lift, with a value still queued and no frame having run (hidden tab, backgrounded page) | the queued value is delivered synchronously on lift; the gesture cannot end on a value the host never saw | `d14ae6a` |
-| G9 | the whole of a live drag | `<html data-scrubbing>` is present from the moment the gesture is claimed until lift, and absent otherwise | `d14ae6a` |
+| G9 | the whole of a live drag | `<html data-scrubbing>` is present from the moment the gesture is claimed until lift, and absent otherwise — including under a real touch, where it used to last one frame | `d14ae6a`, `6325c50` |
 | G10 | `reference` at or near `min` / `max` | the marker sits ≥ 5px from either end, never on the rounded corner | `4cf89bf` |
 
 ---

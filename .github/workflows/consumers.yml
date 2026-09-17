@@ -106,13 +106,12 @@ jobs:
         working-directory: ${{ matrix.workdir }}
         run: python3 build.py
 
-  # EVAL.md §3 -- rendering. Both hosts built here, screenshotted by Playwright in two
-  # pointer profiles and held to the committed baselines under tests/__screenshots__.
-  # continue-on-error, on purpose (Q3): a rendering diff is a question for an eye, not
-  # a reason to withhold a deploy. The images and the parity report are the artifact.
-  render:
+  # EVAL.md §2 + §3 -- behaviour and rendering, on both hosts built against this commit,
+  # in Chromium and WebKit. Behaviour is a gate: a red row here is a bug, and dispatch
+  # waits on this job (Q3). Rendering is a report: its step is continue-on-error, and
+  # the diffs plus the parity numbers are the artifact, for an eye.
+  browser:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v5
       - uses: actions/checkout@v5
@@ -131,7 +130,14 @@ jobs:
       - run: cd hosts/ReCal && npm ci && npm run build
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
-      - name: Screenshot every dial in every host
+      - name: Behaviour (GESTURES.md) -- gates dispatch
+        env:
+          FONT_PROOFER_DIST: ${{ github.workspace }}/hosts/font-proofer/dist
+          RECAL_DIST: ${{ github.workspace }}/hosts/ReCal/dist
+        run: npx playwright test tests/behaviour
+      - name: Rendering (EVAL §3) -- reports, never blocks
+        if: always()
+        continue-on-error: true
         env:
           FONT_PROOFER_DIST: ${{ github.workspace }}/hosts/font-proofer/dist
           RECAL_DIST: ${{ github.workspace }}/hosts/ReCal/dist
@@ -147,7 +153,7 @@ jobs:
 
   # -- the old notify.yml, verbatim below this line, now gated on check ------------------
   dispatch:
-    needs: check
+    needs: [check, browser]
     # Never from a PR: a PR is a question, not a release.
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest

@@ -28,5 +28,9 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
     { name: 'iphone',  use: { ...devices['iPhone 14'] } },
+    /* Behaviour only. WebKit cannot be handed a touch drag, so the iphone project
+       synthesises pointer events; this one is Chromium wearing the same phone so the
+       gesture is a REAL touch, with the browser arbitrating it (tests/behaviour). */
+    { name: 'touch',   use: { ...devices['iPhone 14'], defaultBrowserType: 'chromium' }, testMatch: /behaviour\/.*\.spec\.ts$/ },
   ],
 })
