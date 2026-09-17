@@ -230,7 +230,7 @@ rendering pulled forward because of Q1.
              → verify: push a deliberately broken token, watch it fail HERE, not in ReCal
 2. §3 baselines + cross-host parity: AxisSlider rows, HDR structural, dark/light, 2 profiles  DONE tests/render
              → verify: set GRAD to −50, the ladder diff goes red; Type Matrix allowlisted
-3. B1–B4, B8–B10   Playwright, font-proofer + ReCal, Chromium + WebKit/iPhone     ~1–2 days
+3. B1–B4, B8–B10   Playwright, font-proofer + ReCal, Chromium + WebKit/iPhone     DONE tests/behaviour
              → verify: revert 0e55d1f locally, B3/B4 go red
 4. D4 + D5   live-bundle check as a deploy step (deployed consumers only)          ~2 hours
              → verify: compare against the hash checked by hand last session

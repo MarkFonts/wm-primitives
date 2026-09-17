@@ -41,7 +41,7 @@ const measure = (row: Locator) => row.evaluate(el => {
     field: cs('input.slider-number', ['font-size', 'font-weight', 'padding', 'margin', 'color', 'width']),
     step: cs('.slider-step-btn', ['width', 'height', 'padding', 'margin']),
     track: cs('.slider-track-wrap', ['top', 'bottom', 'padding', 'height']),
-    input: cs('input[type="range"]', ['height', 'opacity']),
+    input: cs('input[type="range"]', ['height', 'opacity', 'cursor']),
   }
 })
 

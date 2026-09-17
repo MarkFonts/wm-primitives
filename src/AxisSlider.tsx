@@ -164,8 +164,31 @@ export function AxisSlider({
      the pointer only once the movement is clearly horizontal.
      Mouse is untouched: the native input already handles it, and capturing there would add
      a second code path for a case that works. */
-  const dragRef = useRef<{ x: number; y: number; id: number; live: boolean } | null>(null)
+  const dragRef = useRef<{ x: number; y: number; id: number; live: boolean; v0: number | 'auto' } | null>(null)
   const rangeRef = useRef<HTMLInputElement>(null)
+
+  /* NO setPointerCapture FOR A TOUCH, and this was measured, not reasoned (tests/behaviour,
+     G9). A touch pointer is already captured to its pointerdown target by the browser.
+     Asking for it again makes Chromium fire lostpointercapture for the hand-over -- and
+     onLostPointerCapture is onTouchUp, so the drag ended on its first live frame, the
+     scrubbing flag came off, and the native range took the rest of the gesture straight
+     through onChange at touch rate. Every promise below held for exactly one frame. */
+  const capture = (e: ReactPointerEvent<Element>, id: number) => {
+    if (e.pointerType === 'touch') return
+    try { e.currentTarget.setPointerCapture(id) } catch { /* best effort */ }
+  }
+
+  /* AND THE NATIVE RANGE MUST NOT TRACK THE FINGER ONCE WE DO. It follows a touch on its
+     own, and every step of that is an input event, uncoalesced -- a second path to the
+     host at 120Hz beside the one-per-frame path above. touchmove has to be cancelled to
+     stop it, and React registers touch listeners passive, so this one is added by hand. */
+  useEffect(() => {
+    const el = rangeRef.current
+    if (!el) return
+    const stop = (e: TouchEvent) => { if (dragRef.current?.live) e.preventDefault() }
+    el.addEventListener('touchmove', stop, { passive: false })
+    return () => el.removeEventListener('touchmove', stop)
+  }, [])
 
   /* ENGAGEMENT. On a coarse pointer the bar rests at two thirds of the row, leaving an
      inert shelf above and below it to put a thumb on -- see AxisSlider.css. Touching the
@@ -279,7 +302,7 @@ export function AxisSlider({
       if (dy > dx * 1.5) { numDrag.current = null; return }   // clearly vertical: the tray keeps it
       d.live = true
       setScrub(true)
-      try { e.currentTarget.setPointerCapture(d.id) } catch { /* best effort */ }
+      capture(e, d.id)
     }
     /* Measured against the RANGE, not the field: the value maps to the rail's width, and
        the field is a fifth of it sitting at one end. */
@@ -314,8 +337,16 @@ export function AxisSlider({
 
   const onTouchDown = (e: ReactPointerEvent<HTMLInputElement>) => {
     if (disabled || e.pointerType === 'mouse') return
-    dragRef.current = { x: e.clientX, y: e.clientY, id: e.pointerId, live: false }
+    dragRef.current = { x: e.clientX, y: e.clientY, id: e.pointerId, live: false, v0: valueRef.current }
     engage()
+  }
+  /* The native range jumps to the touch point on pointerdown, before any direction is
+     known. A tap keeps that -- it is how a tap works. A gesture that turns out to be a
+     scroll must not: the bar you brushed on the way past would otherwise be left where
+     your finger landed. So conceding puts the value back to what it was at touch-down. */
+  const concede = (d: { v0: number | 'auto' }) => {
+    dragRef.current = null
+    if (valueRef.current !== d.v0) onChange(d.v0)
   }
   const onTouchMove = (e: ReactPointerEvent<HTMLInputElement>) => {
     const d = dragRef.current
@@ -331,10 +362,10 @@ export function AxisSlider({
          gesture is CLEARLY vertical (1.5x). Anything ambiguous stays ours, and a gesture
          that has not resolved yet is left undecided rather than thrown away. */
       if (dx < 6 && dy < 6) return
-      if (dy > dx * 1.5) { dragRef.current = null; return }
+      if (dy > dx * 1.5) { concede(d); return }
       d.live = true
       setScrub(true)
-      try { e.currentTarget.setPointerCapture(d.id) } catch { /* capture is best-effort */ }
+      capture(e, d.id)
     }
     const v = valueAt(e.clientX, e.currentTarget)
     if (v != null) queueValue(v)
@@ -342,7 +373,9 @@ export function AxisSlider({
   }
   const onTouchUp = (e: ReactPointerEvent<HTMLInputElement>) => {
     const d = dragRef.current
-    if (d?.live) { try { e.currentTarget.releasePointerCapture(d.id) } catch { /* already gone */ } }
+    if (d?.live && e.pointerType !== 'touch') { try { e.currentTarget.releasePointerCapture(d.id) } catch { /* already gone */ } }
+    // The browser took the gesture (a scroll): same as conceding it ourselves.
+    if (d && !d.live && e.type === 'pointercancel') concede(d)
     dragRef.current = null
     flushValue()
     release()
@@ -510,8 +543,8 @@ export function AxisSlider({
                     d.live = true
                     setScrub(true)
                     stopStep()
-                    dragRef.current = { x: d.x, y: d.y, id: d.id, live: true }
-                    try { e.currentTarget.setPointerCapture(d.id) } catch { /* best effort */ }
+                    dragRef.current = { x: d.x, y: d.y, id: d.id, live: true, v0: valueRef.current }
+                    capture(e, d.id)
                     const el = rangeRef.current
                     if (el) { const v = valueAt(e.clientX, el); if (v != null) queueValue(v) }
                   }}

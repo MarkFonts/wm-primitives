@@ -174,3 +174,5 @@ matching transform reset is the trap.
   field's touch target made three. At equal specificity, source order decides.
 - **An effect that is invisible in a screenshot can only be judged on the device.** HDR is
   the sharpest case; touch is the next.
+- **A synthesised event tests the component; only a real one tests the browser.** The
+  capture bug passed every synthetic run and failed the first real touch.
