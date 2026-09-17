@@ -149,8 +149,8 @@ This is where "pushed ≠ shipped" gets a test instead of a memory.
 | D1 | every consumer's `lint:tokens` passes against wm-primitives HEAD | `consumers.yml` `check` job: checks out each consumer, puts *this commit* in its `shared/`, runs its lint — **before** `dispatch` (the old notify.yml, now a dependent job in the same file). This is the ReCal `--glow-pos` failure, moved from the consumer's deploy to the primitive's push. |
 | D2 | every consumer's `tsc --noEmit` and `vite build` pass against HEAD | same job. A type or import break is currently discovered by three separate red runs. |
 | D3 | the dispatch landed | `consumers.yml` already fails loudly on a missing token; add: poll each consumer's run for the dispatched SHA and fail if none appears within 2 min |
-| D4 | the live bundle is the pushed commit | after each consumer's deploy: fetch the deployed `index.html`, extract the bundle hash, compare to the build's. What was done by hand at the end of the last session, as a step. |
-| D5 | the pin is truthful | `git -C shared rev-parse HEAD` in the consumer equals what D4 served |
+| D4 | the live bundle is the pushed commit | each deploy's last step, *The site serves what this run built*: polls `wordmark.nyc/<app>/` for up to 10 min until it serves the bundle (opsz-proofer: the `index.html` sha) this run built; fails loudly otherwise; says so if a later run superseded it. What was done by hand at the end of the last session, as a step. |
+| D5 | the pin is truthful | the same step writes the `shared/` commit it built from into the job summary beside the served bundle — the run log is the answer to "what is live?" |
 | D6 | the git route round-trips | a clean `git clone --recurse-submodules` of each consumer builds from nothing — catches `.gitmodules` drift and case-insensitive filename collisions (`Specimen` / `specimen.ts`) |
 
 Sections 2 and 3 run inside D1's matrix so behaviour is judged on the *deployed* build,
@@ -232,7 +232,7 @@ rendering pulled forward because of Q1.
              → verify: set GRAD to −50, the ladder diff goes red; Type Matrix allowlisted
 3. B1–B4, B8–B10   Playwright, font-proofer + ReCal, Chromium + WebKit/iPhone     DONE tests/behaviour
              → verify: revert 0e55d1f locally, B3/B4 go red
-4. D4 + D5   live-bundle check as a deploy step (deployed consumers only)          ~2 hours
+4. D4 + D5   live-bundle check as a deploy step (deployed consumers only)          DONE fp 3dd0bcb · ReCal 6f1be5b · wmt 8b33dfa
              → verify: compare against the hash checked by hand last session
 5. §6 wiring run on a stub → HOWTO.md first draft + the warn() list                ~2 hours
 6. §5 spec-fidelity fixtures + RUNBOOK, one run across three models                ~1 day
