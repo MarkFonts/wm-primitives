@@ -39,6 +39,14 @@ export type { ChevronProps } from './src/Chevron'
 export { Icon } from './src/Icon'
 export type { IconProps } from './src/Icon'
 
+// ThemeSwitch -- Auto / Light / Dark, both looks (marks, words) over one engine. The
+// engine is plain JS so a page without React (Kernpare) drives the same control with
+// mountThemeSwitch(); the head-script stamp before first paint is bootTheme().
+export { ThemeSwitch } from './src/ThemeSwitch'
+export type { ThemeSwitchProps } from './src/ThemeSwitch'
+export { THEMES, THEME_KEY, readTheme, applyTheme, bootTheme, mountThemeSwitch } from './src/theme.js'
+export type { Theme } from './src/theme.js'
+
 // BlockStyleRail — h1/h2/h3/¶ stacked in the margin of the block being edited, at the
 // bottom of the ink ladder until you reach for them.
 export { BlockStyleRail } from './src/BlockStyleRail'
