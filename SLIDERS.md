@@ -150,6 +150,15 @@ instead of the component.
 
 ### What the icon census says
 
+**Rule, 2026-09-17: a chevron is the SVG `Chevron`, never a text glyph.** ReCal's style
+menus carried `▾` (U+25BE) as text; set in Cal Sans at micro size it was a ~9px triangle
+that matched nothing else in the app — Mark's screenshot: "my chevron in cal sans is so
+tiny." Same class of drift as the platform's own `<select>` arrow, which both apps
+already replace. The glyph is out; `<Chevron dir={-1} width={10} height={6} />` is in,
+so it follows `currentColor`, the hover inversion, and the derived stroke like every
+other mark. If a character is ever the only option (a `content:` string, an SVG-less
+context), it is an exception to write down here, not a choice.
+
 **The same chevron is drawn four ways.** The primitive draws it twice on purpose —
 10×6 for the dial, 7×6 redrawn for the triplet's narrower gutter, and the redraw is
 correct, because scaling would have thinned the stroke. But font-proofer also ships
