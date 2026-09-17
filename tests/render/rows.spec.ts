@@ -15,8 +15,8 @@ import { HOSTS, sealed, settle } from './hosts'
 const PARITY_DIR = join('test-results', 'parity')
 
 const labelOf = async (row: Locator) => {
-  const name = row.locator('.slider-label-name').first()
-  const raw = (await name.count()) ? await name.textContent() : await row.locator('.slider-label-left').first().textContent()
+  const name = row.locator('.slider-label-name, .slider-label-text').first()
+  const raw = (await name.count()) ? await name.textContent() : (await row.textContent())?.trim().split(/\s+/)[0]
   return (raw ?? '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'row'
 }
 
@@ -64,6 +64,7 @@ for (const host of HOSTS) for (const theme of host.themes) {
         const row = rows.nth(i)
         const box = await row.boundingBox()
         if (!box || box.height === 0) continue          // collapsed tray / hidden panel
+        if (!(await row.isVisible())) continue          // visibility:hidden ancestor (opsz-proofer's calibration row)
         await row.scrollIntoViewIfNeeded()
         const variant = (await row.getAttribute('class'))?.includes('slider-row--track') ? 'track' : 'default'
         let label = await labelOf(row)

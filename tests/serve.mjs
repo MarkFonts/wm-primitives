@@ -8,8 +8,12 @@ import { readFile, stat } from 'node:fs/promises'
 import { join, extname, resolve } from 'node:path'
 
 const HOSTS = {
-  '/font-proofer': process.env.FONT_PROOFER_DIST ?? resolve('../font-proofer/dist'),
-  '/recalsans':    process.env.RECAL_DIST        ?? resolve('../ReCal/dist'),
+  '/font-proofer': { root: process.env.FONT_PROOFER_DIST ?? resolve('../font-proofer/dist'), spa: true },
+  '/recalsans':    { root: process.env.RECAL_DIST        ?? resolve('../ReCal/dist'),        spa: true },
+  // Static pages: a missing file is a 404, not index.html -- kernpare fetches JSON and
+  // would otherwise be handed HTML to parse.
+  '/opsz-proofer': { root: process.env.OPSZ_PROOFER_DIST ?? resolve('../wordmarktools/opsz-proofer/dist'), spa: false },
+  '/kernpare':     { root: process.env.KERNPARE_DIR      ?? resolve('../wordmarktools/kernpare'),          spa: false },
 }
 const PORT = Number(process.env.PORT ?? 4173)
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
@@ -20,13 +24,13 @@ createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x')
   const base = Object.keys(HOSTS).find(b => url.pathname === b || url.pathname.startsWith(b + '/'))
   if (!base) { res.writeHead(404); return res.end('no such host: ' + url.pathname) }
-  const root = HOSTS[base]
+  const { root, spa } = HOSTS[base]
   let rel = decodeURIComponent(url.pathname.slice(base.length)) || '/'
   let file = join(root, rel)
   try {
     const s = await stat(file)
     if (s.isDirectory()) file = join(file, 'index.html')
-  } catch { file = join(root, 'index.html') }      // SPA fallback
+  } catch { if (spa) file = join(root, 'index.html') }      // SPA fallback
   try {
     const body = await readFile(file)
     res.writeHead(200, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream', 'cache-control': 'no-store' })

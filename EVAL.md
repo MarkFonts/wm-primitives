@@ -243,6 +243,20 @@ rendering pulled forward because of Q1.
              → output: the "docs were silent here" list into DIAL.md / GESTURES.md
 7. opsz-proofer joins the matrix 1:1. Kernpare joins §2/§3 + D6. WORDMAKE joins the
    day it has a submodule — and step 6 runs again against its port.
+   DONE, as far as each is ready (2026-09-17):
+   · opsz-proofer — render baselines, dark + light, and the parity numbers. Its rows are
+     hand-emitted HTML wearing the primitive's classes (SLIDERS.md 57-59), so the
+     parity report is now the drift detector the census asked for. No gestures: no JS.
+   · Kernpare — takes only toggleGroup.css and draws no dial. Joins as: clean checkout
+     loads with no exception, and the shared toggle group holds its baseline. No token
+     lint yet: its kern-group-analysis UI is styled as it is on purpose and would need
+     an exemption first. Not deployed anywhere; served static for the test.
+   · WORDMAKE — still no submodule. Nothing to test.
+   · geist-serif-morf — asked about; NOT a git repo, uses nothing from the primitives,
+     one native range input. It is a port candidate, not a consumer. What Mark said it
+     and Kernpare would need before anyone else could use them — baked-in font metrics,
+     precisely formatted kern lists — is product work the battery cannot do; it can
+     only tell you when it is done.
 8. Remaining controls get §2 tables: StopSlider, AxisTriplet, Icon, Collapse
 ```
 

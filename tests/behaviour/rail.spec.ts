@@ -24,7 +24,7 @@ const heights = (row: Locator) => row.evaluate(el => ({
   bar: el.querySelector('.slider-label')!.getBoundingClientRect().height,
 }))
 
-for (const host of HOSTS) {
+for (const host of HOSTS.filter(h => h.gestures !== false)) {
   test.describe(`${host.name}`, () => {
     test.beforeEach(async ({ page }) => {
       await sealed(page)
