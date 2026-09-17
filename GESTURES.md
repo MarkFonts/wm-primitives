@@ -4,6 +4,9 @@ The behaviour spec. [DIAL.md](DIAL.md) says where things sit; this says what the
 when touched, pressed, typed at or scrolled. One row per promise, each traced to the
 commit where the opposite behaviour was a reported bug — so a row here is not a wish, it
 is something that has already gone wrong once. The tests in `tests/behaviour/` cite these ids; `rail.spec.ts` covers G1–G5, G8, G9, G11–13.
+**Ids are permanent.** A new promise takes the next number at the end of its section's
+range — append; never renumber. (Spec-fidelity run 2026-09-17: one model inserted a row
+and shifted ten ids, which would have broken every test citing them.)
 
 Read against `src/AxisSlider.tsx`. If this and the code disagree, the code is a bug or
 this is stale; either way the row says which commit to read.
@@ -87,6 +90,13 @@ One text input, not a number input — it has to show U+2212.
 | G24 | `ArrowUp` / `ArrowDown`, held | ±`step`, clamped; the OS key-repeat carries the hold. `Shift` makes it ±10·step. `Home`/`End` are **not** bound | `ffa2e95` |
 | G25 | `a` with `allowAuto` | commits `'auto'`; without `allowAuto` the key types | props doc |
 | G26 | first focus on a dial with `allowAuto`, not yet auto | a hint appears below the field once per mount and leaves after 3000ms | `handleFocus` |
+
+**When a printable key may be a command here.** A key that can appear *inside* a value
+(`0`–`9`, `-`, `.`) may be bound only while no draft is in progress — the first keystroke
+of a fresh edit, when the digits are still selected (G16). A key that cannot appear in a
+number (`a`) may be bound always (G25). New single-key shortcuts go in `onKeyDown` beside
+`a`, with their row here. (Derived independently by two models in the 2026-09-17 run; the
+docs had not said it.)
 
 ---
 

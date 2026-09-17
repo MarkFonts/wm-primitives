@@ -239,7 +239,7 @@ rendering pulled forward because of Q1.
 4. D4 + D5   live-bundle check as a deploy step (deployed consumers only)          DONE fp 3dd0bcb · ReCal 6f1be5b · wmt 8b33dfa
              → verify: compare against the hash checked by hand last session
 5. §6 wiring run on a stub → HOWTO.md first draft + the warn() list                DONE HOWTO.md
-6. §5 spec-fidelity fixtures + RUNBOOK, one run across three models                ~1 day
+6. §5 spec-fidelity fixtures + RUNBOOK, one run across three models                DONE tests/spec-fidelity/results/2026-09-17.md
              → output: the "docs were silent here" list into DIAL.md / GESTURES.md
 7. opsz-proofer joins the matrix 1:1. Kernpare joins §2/§3 + D6. WORDMAKE joins the
    day it has a submodule — and step 6 runs again against its port.

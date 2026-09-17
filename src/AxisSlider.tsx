@@ -48,7 +48,8 @@ export interface AxisSliderProps {
   display?: string | number
   /** Show a locked region on the track up to this value. */
   lockedAbove?: number | null
-  /** Enable the `a`-for-auto text field (e.g. opsz). */
+  /** Enable the `a`-for-auto text field (e.g. opsz). A fresh dial with this set starts
+   *  as `'auto'` (showing `autoValue`); a number is what the user has chosen. */
   allowAuto?: boolean
   /** Show the named `auto` checkbox beside the tag. Defaults ON wherever allowAuto is
    *  set: the keystroke alone is unreachable on a phone (no keypad this field can raise
@@ -478,6 +479,9 @@ export function AxisSlider({
               }
             }}
             onKeyDown={e => {
+              /* Single-key shortcuts live here, beside `a`, each with a row in GESTURES §3.
+                 The rule for which keys may be claimed is written there: a key that can
+                 appear inside a value is a command only while no draft is in progress. */
               if (allowAuto && e.key === 'a') { e.preventDefault(); onChange('auto'); return }
               /* Enter commits the draft without waiting for a blur -- on a phone that is
                  the "done" key, and there may be nowhere obvious to tap next. Escape

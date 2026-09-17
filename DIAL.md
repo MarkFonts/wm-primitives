@@ -121,6 +121,9 @@ Arrive at it by measuring the widest row, not by choosing.
 
 ---
 
+Measure the widest row **including its `auto` pill** — a row that carries one needs
+~20px more column than its bare name. The 125px above is Optical size *with* the pill.
+
 ## 6 · Ownership
 
 **The primitive owns structure, behaviour and the field.** The host themes through
@@ -138,6 +141,13 @@ one has to out-specify anyone. Two consequences that cost an evening:
    position is fixed when it is first *created*. If a component's CSS opens
    `@layer wm.controls` before the statement is read, the statement can no longer move it.
    Import the entry stylesheet before anything that pulls in a primitive.
+
+**Theming from outside, in two sentences.** Every active state the dial paints — the
+focused value and its underline, the marker, the focus rings — comes from **`--accent`**,
+which `color.css` leaves for the app to define. A host that wants its signal colour there
+sets `--accent: var(--signal)` on its root and changes nothing else: no selector, layered
+or not, and nothing under `shared/`. And the label is *already* one ink step below the
+value: its `--text-muted` is the same number as `--ink-quiet`, by design.
 
 ### Fallbacks
 

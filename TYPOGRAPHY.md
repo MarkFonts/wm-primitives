@@ -307,6 +307,9 @@ ground and stays honest in both themes. `--text-rgb` already exists for exactly 
 and it is **comma-separated**, so use the `rgba()` form (the space/slash syntax needs
 `232 232 232` and will silently drop the whole declaration):
 
+Written out, an ink is one line: `color: rgba(var(--text-rgb), var(--ink-quiet));` — the
+comma form, because `--text-rgb` is three comma-separated numbers.
+
 ```css
 color: rgba(var(--text-rgb), var(--ink-quiet));
 ```
