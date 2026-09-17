@@ -124,6 +124,22 @@ for (const host of HOSTS) {
     test.describe('mouse', () => {
       test.skip(({ hasTouch }) => hasTouch, 'a mouse, not a finger')
 
+      test('G19-G23 · typing composes; only Enter or blur commits, clamped', async ({ page }) => {
+        const row = sizeRow(page); const field = row.locator('input.slider-number')
+        const { min, max } = await bounds(row)
+        const before = await readValue(row)
+        await field.click(); await field.press('ControlOrMeta+a')
+        await field.pressSequentially(String(max * 10))          // out of range while typing
+        expect(await field.inputValue()).toBe(String(max * 10))   // the draft is shown verbatim
+        expect(await range(row).inputValue()).toBe(String(before)) // nothing reached the host
+        await field.press('Enter')
+        expect(await readValue(row)).toBe(max)                    // committed, clamped
+        await field.click(); await field.press('ControlOrMeta+a'); await field.pressSequentially('zz'); await field.press('Escape')
+        expect(await readValue(row)).toBe(max)                    // abandoned, value kept
+        await field.click(); await field.press('ControlOrMeta+a'); await field.pressSequentially(String(min)); await page.mouse.click(5, 5)
+        expect(await readValue(row)).toBe(min)                    // blur commits too
+      })
+
       test('G5 · the ends of the bar are min and max', async ({ page }) => {
         const row = sizeRow(page); const r = range(row)
         const { min, max } = await bounds(row)

@@ -318,7 +318,10 @@ export function AxisSlider({
     flushValue()
     release()
     if (d.live) { try { e.currentTarget.releasePointerCapture(d.id) } catch { /* gone */ } ; return }
-    e.currentTarget.focus()   // it was a tap after all
+    // It was a tap after all. Focus AND select: the caret alone lands after the last
+    // digit, and replacing 1660 then means four backspaces before a new number can begin.
+    e.currentTarget.focus()
+    e.currentTarget.select()
   }
 
   /* HORIZONTAL WHEEL ONLY, and never vertical. Scroll-to-adjust was removed here for a
@@ -481,13 +484,17 @@ export function AxisSlider({
                  abandons it and puts the live value back. */
               if (e.key === 'Enter') { e.currentTarget.blur(); return }
               if (e.key === 'Escape') { setDraft(null); e.currentTarget.blur(); return }
-              if (draft != null) setDraft(null)
               /* The arrow keys came free with type=number and have to be put back. Held,
                  the OS repeats keydown by itself, so this reads the same as the native
                  field did. Shift is the coarse step, as it is in every design tool. */
               const dir = e.key === 'ArrowUp' ? 1 : e.key === 'ArrowDown' ? -1 : 0
               if (!dir) return
               e.preventDefault()
+              /* An arrow abandons whatever was half-typed and steps the LIVE value. Only
+                 here: clearing the draft on every key, as this once did, snapped the
+                 field back to the committed number between two characters of the same
+                 word now that keystrokes no longer commit. */
+              setDraft(null)
               const base = typeof value === 'number' ? value : (autoValue ?? min)
               onChange(Math.min(max, Math.max(min, base + dir * step * (e.shiftKey ? 10 : 1))))
             }}
@@ -504,13 +511,14 @@ export function AxisSlider({
               const shown = String(e.target.value)
               const raw = shown.replace('−', '-').trim()
               if (allowAuto && raw.toLowerCase() === 'auto') { setDraft(null); onChange('auto'); return }
+              /* Draft only. Nothing reaches the host until Enter or blur. Propagating
+                 in-range keystrokes was tried (ffa2e95) and it is worse than it sounds on a
+                 phone: on the way to 1660 the proof jumps to 16, then 166, and a host that
+                 clamps its own value writes that back into the field under your thumb --
+                 so the digits you were typing were being edited by the thing you were
+                 typing them for. A field is a place to compose a number; the rail and the
+                 arrows are the live controls. */
               setDraft(shown)
-              const n = parseFloat(raw)
-              if (Number.isNaN(n)) return
-              /* In range: propagate, so the proof follows the digits as before. Out of
-                 range: hold it in the draft and let blur clamp it -- committing min on
-                 the first digit of a longer number is exactly what made this unusable. */
-              if (n >= min && n <= max) onChange(n)
             }}
           />
           {!disabled && (

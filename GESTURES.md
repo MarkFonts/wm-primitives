@@ -76,11 +76,11 @@ One text input, not a number input — it has to show U+2212.
 
 | id | gesture | promise | commit |
 | --- | --- | --- | --- |
-| G16 | tap (touch/pen, < 6px movement) | focuses for typing; the tap did not jump the value | `0a0429c` |
+| G16 | tap (touch/pen, < 6px movement) | focuses for typing **with the digits selected**, so the next keystroke replaces them; the tap did not jump the value | `0a0429c`, field-typing |
 | G17 | press and horizontal drag (touch/pen) | drives the value exactly as a rail drag would (G1, G6–G9); the field does **not** take focus | `0a0429c` |
 | G18 | mouse | native: click focuses, no drag | `0a0429c` |
-| G19 | typing while focused | the field shows the draft verbatim, including empty, `-`, and out-of-range intermediates; an **in-range** draft propagates on each keystroke; nothing out of range ever reaches `onChange` | `ffa2e95` |
-| G20 | select-all then type `2`,`4` on a min-8 dial | `8` is never emitted; `24` is committed on blur | `ffa2e95` |
+| G19 | typing while focused | the field shows the draft verbatim, including empty, `-`, and out-of-range intermediates; **nothing reaches `onChange` until Enter or blur** — the proof does not chase the digits, and a host that clamps cannot rewrite the field mid-word | `ffa2e95`, field-typing |
+| G20 | type `2`,`4` on a min-8 dial | nothing is emitted while typing; `24` is committed on Enter or blur | `ffa2e95` |
 | G21 | blur with an empty or unparseable draft | reverts to the committed value; `onChange` not called | `ffa2e95` |
 | G22 | blur with a parseable draft | clamped to `[min, max]`, then committed | `ffa2e95` |
 | G23 | `Enter` | commits (blurs); `Escape` abandons the draft and blurs | `ffa2e95` |
