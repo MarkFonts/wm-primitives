@@ -55,7 +55,11 @@ export function mountThemeSwitch(el, { key = THEME_KEY, legacyKeys = [], onChang
   })
   const set = t => { paint(applyTheme(t, key)); onChange?.(t) }
   const clicks = buttons.map(b => { const h = () => set(b.dataset.mode); b.addEventListener('click', h); return [b, h] })
-  paint(readTheme(key, legacyKeys))
+  /* First paint follows what is already ON <html> when that is a real theme -- the head
+     script stamped it from storage, and a page restoring a session may have restamped it
+     before this module ran. Storage is the fallback, not the authority, at mount. */
+  const stamped = el.ownerDocument.documentElement.dataset.theme
+  paint(THEMES.includes(stamped) ? stamped : readTheme(key, legacyKeys))
   return {
     get: () => readTheme(key, legacyKeys),
     set,
