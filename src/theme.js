@@ -55,6 +55,10 @@ export function mountThemeSwitch(el, { key = THEME_KEY, legacyKeys = [], onChang
   })
   const set = t => { paint(applyTheme(t, key)); onChange?.(t) }
   const clicks = buttons.map(b => { const h = () => set(b.dataset.mode); b.addEventListener('click', h); return [b, h] })
+  // Something else may apply a theme (a session restore, a shortcut): follow the event.
+  const root = el.ownerDocument.documentElement
+  const follow = e => paint(e.detail)
+  root.addEventListener('wm-theme', follow)
   /* First paint follows what is already ON <html> when that is a real theme -- the head
      script stamped it from storage, and a page restoring a session may have restamped it
      before this module ran. Storage is the fallback, not the authority, at mount. */
@@ -63,6 +67,6 @@ export function mountThemeSwitch(el, { key = THEME_KEY, legacyKeys = [], onChang
   return {
     get: () => readTheme(key, legacyKeys),
     set,
-    destroy: () => clicks.forEach(([b, h]) => b.removeEventListener('click', h)),
+    destroy: () => { clicks.forEach(([b, h]) => b.removeEventListener('click', h)); root.removeEventListener('wm-theme', follow) },
   }
 }
