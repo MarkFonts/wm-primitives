@@ -9,3 +9,8 @@ reference/
 # (../../src/… from docs/system/pages/). build.py strips those links from the published
 # page, which inlines the same files from src/ instead.
 docs/src
+
+# Playwright (EVAL.md §2-3). Baselines under tests/**/__screenshots__ ARE committed.
+node_modules/
+test-results/
+playwright-report/

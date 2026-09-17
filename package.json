@@ -9,14 +9,20 @@
     "*.css"
   ],
   "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18",
+    "@use-gesture/react": ">=10",
     "motion": ">=12",
-    "@use-gesture/react": ">=10"
+    "react": ">=18",
+    "react-dom": ">=18"
   },
   "license": "UNLICENSED",
   "private": false,
   "scripts": {
-    "lint:tokens": "node scripts/lint-tokens.mjs"
+    "lint:tokens": "node scripts/lint-tokens.mjs",
+    "serve": "node tests/serve.mjs",
+    "test:render": "playwright test tests/render",
+    "test:render:update": "playwright test tests/render --update-snapshots"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
   }
 }

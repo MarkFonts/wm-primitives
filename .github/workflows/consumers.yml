@@ -18,6 +18,8 @@ on:
       - 'index.ts'
       - 'fonts/**'      # the canonical Cal Sans lives here; a rebuild must follow it
       - 'scripts/lint-tokens.mjs'
+      - 'tests/**'
+      - 'playwright.config.ts'
       - '.github/workflows/consumers.yml'
   pull_request:
     paths:
@@ -25,6 +27,8 @@ on:
       - 'index.ts'
       - 'fonts/**'
       - 'scripts/lint-tokens.mjs'
+      - 'tests/**'
+      - 'playwright.config.ts'
       - '.github/workflows/consumers.yml'
   # Re-run without inventing a commit -- the day a token changes or a consumer is added.
   workflow_dispatch:
@@ -101,6 +105,45 @@ jobs:
         name: Build
         working-directory: ${{ matrix.workdir }}
         run: python3 build.py
+
+  # EVAL.md §3 -- rendering. Both hosts built here, screenshotted by Playwright in two
+  # pointer profiles and held to the committed baselines under tests/__screenshots__.
+  # continue-on-error, on purpose (Q3): a rendering diff is a question for an eye, not
+  # a reason to withhold a deploy. The images and the parity report are the artifact.
+  render:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with: { repository: MarkFonts/font-proofer, path: hosts/font-proofer, submodules: false }
+      - uses: actions/checkout@v5
+        with: { repository: MarkFonts/ReCal, path: hosts/ReCal, submodules: false }
+      # Each host's shared/ is THIS commit, exactly as in check.
+      - run: |
+          rm -rf hosts/font-proofer/shared hosts/ReCal/shared
+          git clone -q --no-checkout . hosts/font-proofer/shared && git -C hosts/font-proofer/shared checkout -q ${{ github.sha }}
+          git clone -q --no-checkout . hosts/ReCal/shared        && git -C hosts/ReCal/shared        checkout -q ${{ github.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - run: cd hosts/font-proofer && npm ci && npm run build
+      - run: cd hosts/ReCal && npm ci && npm run build
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Screenshot every dial in every host
+        env:
+          FONT_PROOFER_DIST: ${{ github.workspace }}/hosts/font-proofer/dist
+          RECAL_DIST: ${{ github.workspace }}/hosts/ReCal/dist
+        run: npx playwright test tests/render
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-${{ github.sha }}
+          path: |
+            playwright-report
+            test-results
+          retention-days: 14
 
   # -- the old notify.yml, verbatim below this line, now gated on check ------------------
   dispatch:
