@@ -109,11 +109,16 @@ suite adds `windows-latest` × Chromium/Edge as a third context; nothing else ch
 
 ## 3 · Rendering — the same control in every host
 
-**Method:** Playwright screenshots, pixel-diffed two ways: against a checked-in
-baseline (did *this host* change?) and **against the other hosts** (do font-proofer,
-ReCal and opsz-proofer draw the same row the same?). The second is the promise from Q1
-made into a number. Per theme × pointer profile. Baselines are regenerated only by a
-deliberate command, never by a failing run.
+**Method:** Playwright screenshots of every visible dial row, pixel-diffed against a
+checked-in baseline (did *this host* change?), per theme × pointer profile. Baselines are
+regenerated only by a deliberate command, never by a failing run.
+
+**Across hosts, numbers rather than pixels.** The hosts show different labels and values,
+so two screenshots of `size` can never be equal; what *can* be equal is the row height,
+label size and weight, bar height, field and stepper size. Those are read off the
+computed style of one row per variant per host and every disagreement is printed. That
+is the Q1 promise made into a number, and it never fails a run: a host overriding a
+primitive is allowed by the layer contract, and the report exists to show *where*.
 
 Cross-host diffs are **reported, not gating** (see Q3): the run posts the diff image
 and both crops as an artifact, because the judgement of whether a 2px shift matters is
@@ -223,7 +228,7 @@ rendering pulled forward because of Q1.
              → DIAL.md covers layout only; tests need something to cite (Q4)
 1. D1 + D2   consumer lint/type/build matrix in wm-primitives CI; red blocks notify   DONE consumers.yml
              → verify: push a deliberately broken token, watch it fail HERE, not in ReCal
-2. §3 baselines + cross-host diffs: AxisSlider rows, icon ladder, dark/light, 2 profiles  ~half a day
+2. §3 baselines + cross-host parity: AxisSlider rows, HDR structural, dark/light, 2 profiles  DONE tests/render
              → verify: set GRAD to −50, the ladder diff goes red; Type Matrix allowlisted
 3. B1–B4, B8–B10   Playwright, font-proofer + ReCal, Chromium + WebKit/iPhone     ~1–2 days
              → verify: revert 0e55d1f locally, B3/B4 go red
