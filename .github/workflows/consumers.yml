@@ -144,6 +144,8 @@ jobs:
         env:
           FONT_PROOFER_DIST: ${{ github.workspace }}/hosts/font-proofer/dist
           RECAL_DIST: ${{ github.workspace }}/hosts/ReCal/dist
+          OPSZ_PROOFER_DIST: ${{ github.workspace }}/hosts/wordmarktools/opsz-proofer/dist
+          KERNPARE_DIR: ${{ github.workspace }}/hosts/wordmarktools/kernpare
         run: npx playwright test tests/behaviour
       - name: Rendering (EVAL §3) -- reports, never blocks
         if: always()
