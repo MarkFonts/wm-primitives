@@ -484,13 +484,17 @@ export function AxisSlider({
                  abandons it and puts the live value back. */
               if (e.key === 'Enter') { e.currentTarget.blur(); return }
               if (e.key === 'Escape') { setDraft(null); e.currentTarget.blur(); return }
-              if (draft != null) setDraft(null)
               /* The arrow keys came free with type=number and have to be put back. Held,
                  the OS repeats keydown by itself, so this reads the same as the native
                  field did. Shift is the coarse step, as it is in every design tool. */
               const dir = e.key === 'ArrowUp' ? 1 : e.key === 'ArrowDown' ? -1 : 0
               if (!dir) return
               e.preventDefault()
+              /* An arrow abandons whatever was half-typed and steps the LIVE value. Only
+                 here: clearing the draft on every key, as this once did, snapped the
+                 field back to the committed number between two characters of the same
+                 word now that keystrokes no longer commit. */
+              setDraft(null)
               const base = typeof value === 'number' ? value : (autoValue ?? min)
               onChange(Math.min(max, Math.max(min, base + dir * step * (e.shiftKey ? 10 : 1))))
             }}
