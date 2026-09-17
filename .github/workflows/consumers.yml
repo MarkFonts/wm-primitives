@@ -1,0 +1,138 @@
+# Every consumer is built against THIS commit before any consumer is told to deploy.
+#
+# Before this file, a primitive change was pushed, three repos were dispatched, and each
+# found out on its own whether the change broke it -- ReCal's deploy failed on lint-tokens
+# for a token declared nowhere, and nothing shipped, and the primitive push had been green
+# for twenty minutes. The check belongs on the commit that caused it. (EVAL.md, D1-D2, Q3.)
+#
+# Two jobs. `check` builds each consumer with its shared/ submodule pointed at github.sha;
+# `dispatch` -- the old notify.yml, unchanged -- runs only if every leg of check is green.
+# A red behaviour test will gate here too, once tests/ exists; today the gate is lint,
+# tsc where the consumer runs it, and the consumer's own build.
+name: Consumers
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'index.ts'
+      - 'fonts/**'      # the canonical Cal Sans lives here; a rebuild must follow it
+      - 'scripts/lint-tokens.mjs'
+      - '.github/workflows/consumers.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'index.ts'
+      - 'fonts/**'
+      - 'scripts/lint-tokens.mjs'
+      - '.github/workflows/consumers.yml'
+  # Re-run without inventing a commit -- the day a token changes or a consumer is added.
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      # One consumer's failure must not hide another's result.
+      fail-fast: false
+      matrix:
+        include:
+          # Kernpare and WORDMAKE are local apps with no build; they join as D6 (clean
+          # clone runs) when they have one. Kernpare is not here yet; WORDMAKE has no
+          # submodule to point.
+          - name: font-proofer
+            repo: MarkFonts/font-proofer
+            shared: shared
+            kind: node
+          - name: ReCal
+            repo: MarkFonts/ReCal
+            shared: shared
+            kind: node
+          - name: opsz-proofer
+            repo: MarkFonts/wordmarktools
+            shared: opsz-proofer/shared
+            kind: python
+            workdir: opsz-proofer
+    steps:
+      # wordmarktools is private, so this is also the proof that the token can READ the
+      # consumers, not only dispatch to them. The two public legs fall back to the job
+      # token if the secret is missing; the private one cannot, and says so.
+      - name: Check out ${{ matrix.name }}
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ matrix.repo }}
+          token: ${{ secrets.WORDMARK_DEPLOY_TOKEN4 || github.token }}
+          submodules: false
+
+      # The submodule directory is left empty above and THIS commit is put in its place --
+      # not `--remote` (that is main, which for a PR is not the thing under test) and not
+      # the consumer's pin (that is the past).
+      - name: Point ${{ matrix.shared }} at this commit
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.sha }}
+          path: ${{ matrix.shared }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      # Mirrors each consumer's deploy.yml step for step, so a green here means the deploy
+      # would have been green. If a deploy grows a step, it grows here.
+      - name: Hold to the house system
+        working-directory: ${{ matrix.workdir || '.' }}
+        run: node shared/scripts/lint-tokens.mjs
+
+      - if: matrix.kind == 'node'
+        run: npm ci
+      - if: matrix.kind == 'node'
+        name: Build (tsc where the consumer runs it)
+        run: npm run build
+
+      - if: matrix.kind == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - if: matrix.kind == 'python'
+        run: pip install fonttools brotli
+      - if: matrix.kind == 'python'
+        name: Build
+        working-directory: ${{ matrix.workdir }}
+        run: python3 build.py
+
+  # -- the old notify.yml, verbatim below this line, now gated on check ------------------
+  dispatch:
+    needs: check
+    # Never from a PR: a PR is a question, not a release.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      # One consumer's failure must not cancel the others. The default fail-fast
+      # cancelled font-proofer and ReCal the first time the wordmarktools leg 404'd,
+      # so adding a consumer stopped the two that already worked from being told
+      # anything -- the opposite of what this workflow is for.
+      fail-fast: false
+      matrix:
+        # wordmarktools, not opsz-proofer: the tool is a directory inside that repo, and
+        # a dispatch addresses a repo. Its deploy-opsz-proofer.yml already listens for
+        # primitive-updated and has been waiting on this line.
+        repo: [font-proofer, ReCal, wordmarktools]
+    steps:
+      - name: Trigger ${{ matrix.repo }} deploy
+        env:
+          TOKEN: ${{ secrets.WORDMARK_DEPLOY_TOKEN4 }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::WORDMARK_DEPLOY_TOKEN4 is not set — ${{ matrix.repo }} was NOT told to rebuild."
+            echo "A green run here previously meant 'dispatched OR silently skipped', which is"
+            echo "indistinguishable from a successful deploy. Failing loudly instead."
+            exit 1
+          fi
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/MarkFonts/${{ matrix.repo }}/dispatches" \
+            -d '{"event_type":"primitive-updated"}'

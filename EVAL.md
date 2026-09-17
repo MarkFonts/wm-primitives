@@ -20,7 +20,7 @@ Out of scope on purpose: the GitHub Pages system site. It is a showing, not a co
 | Automated tests in any consumer | **none** (font-proofer, ReCal, wordmarktools) |
 | Consumers | font-proofer, ReCal, `wordmarktools/kernpare`, `wordmarktools/opsz-proofer` — all git submodules at `shared/`. Two kinds: **deployed** (font-proofer, ReCal, opsz-proofer → wordmark.nyc) and **local** (Kernpare, WORDMAKE — run on the user's machine, read local folders, render on the CPU) |
 | **WORDMAKE** | `wordmarktools/wordmake/` has a PLAN, a VISION and a `dist/` — **no submodule, no import**. Nothing to evaluate yet; it is a port waiting to happen. |
-| Deploy chain | push to `src/` → `notify.yml` dispatches 3 repos → each `deploy.yml` builds against **latest main** (not its pin), bumps the pin, pushes into `wordmark` |
+| Deploy chain | push to `src/` → `consumers.yml` checks 3 consumers against the commit, then dispatches 3 repos → each `deploy.yml` builds against **latest main** (not its pin), bumps the pin, pushes into `wordmark` |
 | What "verified" has meant | screenshots, DevTools measurements in one session, one phone, and `gh run list` after a push |
 | Spec documents | `DIAL.md` (rules R1–R4), `SLIDERS.md` (census), `TYPOGRAPHY.md`, `CHANGELOG.md`, the CSS headers |
 
@@ -141,9 +141,9 @@ This is where "pushed ≠ shipped" gets a test instead of a memory.
 
 | id | check | how |
 | --- | --- | --- |
-| D1 | every consumer's `lint:tokens` passes against wm-primitives HEAD | a matrix job in wm-primitives that checks out each consumer, updates the submodule, runs its lint — **before** notify fires. This is the ReCal `--glow-pos` failure, moved from the consumer's deploy to the primitive's push. |
+| D1 | every consumer's `lint:tokens` passes against wm-primitives HEAD | `consumers.yml` `check` job: checks out each consumer, puts *this commit* in its `shared/`, runs its lint — **before** `dispatch` (the old notify.yml, now a dependent job in the same file). This is the ReCal `--glow-pos` failure, moved from the consumer's deploy to the primitive's push. |
 | D2 | every consumer's `tsc --noEmit` and `vite build` pass against HEAD | same job. A type or import break is currently discovered by three separate red runs. |
-| D3 | the dispatch landed | notify.yml already fails loudly on a missing token; add: poll each consumer's run for the dispatched SHA and fail if none appears within 2 min |
+| D3 | the dispatch landed | `consumers.yml` already fails loudly on a missing token; add: poll each consumer's run for the dispatched SHA and fail if none appears within 2 min |
 | D4 | the live bundle is the pushed commit | after each consumer's deploy: fetch the deployed `index.html`, extract the bundle hash, compare to the build's. What was done by hand at the end of the last session, as a step. |
 | D5 | the pin is truthful | `git -C shared rev-parse HEAD` in the consumer equals what D4 served |
 | D6 | the git route round-trips | a clean `git clone --recurse-submodules` of each consumer builds from nothing — catches `.gitmodules` drift and case-insensitive filename collisions (`Specimen` / `specimen.ts`) |
@@ -151,7 +151,7 @@ This is where "pushed ≠ shipped" gets a test instead of a memory.
 Sections 2 and 3 run inside D1's matrix so behaviour is judged on the *deployed* build,
 not the local one.
 
-**What blocks (Q3):** a red **behaviour** test or a failed D1/D2 stops `notify.yml` from
+**What blocks (Q3):** a red **behaviour** test or a failed D1/D2 stops `consumers.yml` from
 dispatching — those are bugs, and shipping one to three sites to look at it has never
 been the point. A **rendering** diff does not block; it attaches images to the run. The
 change still ships and you judge it live, which is how you have been working, minus the
@@ -221,7 +221,7 @@ rendering pulled forward because of Q1.
 ```
 0. GESTURES.md   the §2 table promoted to a spec, one line per case, commit-traced   DONE bb3c8c8+
              → DIAL.md covers layout only; tests need something to cite (Q4)
-1. D1 + D2   consumer lint/type/build matrix in wm-primitives CI; red blocks notify   ~half a day
+1. D1 + D2   consumer lint/type/build matrix in wm-primitives CI; red blocks notify   DONE consumers.yml
              → verify: push a deliberately broken token, watch it fail HERE, not in ReCal
 2. §3 baselines + cross-host diffs: AxisSlider rows, icon ladder, dark/light, 2 profiles  ~half a day
              → verify: set GRAD to −50, the ladder diff goes red; Type Matrix allowlisted
