@@ -244,13 +244,19 @@ rendering pulled forward because of Q1.
 7. opsz-proofer joins the matrix 1:1. Kernpare joins §2/§3 + D6. WORDMAKE joins the
    day it has a submodule — and step 6 runs again against its port.
    DONE, as far as each is ready (2026-09-17):
-   · opsz-proofer — render baselines, dark + light, and the parity numbers. Its rows are
-     hand-emitted HTML wearing the primitive's classes (SLIDERS.md 57-59), so the
-     parity report is now the drift detector the census asked for. No gestures: no JS.
-   · Kernpare — takes only toggleGroup.css and draws no dial. Joins as: clean checkout
-     loads with no exception, and the shared toggle group holds its baseline. No token
-     lint yet: its kern-group-analysis UI is styled as it is on purpose and would need
-     an exemption first. Not deployed anywhere; served static for the test.
+   · opsz-proofer — render baselines, dark + light, and the parity numbers. Its rows
+     WERE hand-emitted HTML wearing the primitive's classes (SLIDERS.md 57-59); since
+     wordmarktools 5f4c808 they are the component itself via `dist/dial.js`, so the
+     baselines now watch the real dial. Gestures still off for it: the rail suite
+     drives a `tracking` track row, and this page draws `default` rows -- a suite for
+     that variant is the next thing to write here.
+   · Kernpare — took only toggleGroup.css at first. Since wordmarktools 45f060e it links
+     the token sheets and aliases its palette to the house names; since 291c5f1 its
+     Auto / Light / Dark is the ThemeSwitch engine; since 5f4c808 its two preview numbers
+     are `wmDial` (track). Tests: clean checkout loads (a 12-pair fixture stands in for
+     its gitignored data on a runner), the toggle group and the switch hold baselines,
+     the switch passes G38-G41. No token lint yet: the kern-group-analysis UI is styled
+     as it is on purpose and needs an exemption first. Not deployed; served static.
    · WORDMAKE — still no submodule. Nothing to test.
    · geist-serif-morf — asked about; NOT a git repo, uses nothing from the primitives,
      one native range input. It is a port candidate, not a consumer. What Mark said it
