@@ -125,6 +125,9 @@ export function AxisSlider({
      is a delay then an interval, at roughly the rates a key repeat uses. */
   const valueRef = useRef(value)
   valueRef.current = value
+  /* Shed float dust on every discrete step, as valueAt already does for the rail:
+     1.6 + 0.1 is 1.7000000000000002, and the field printed it in full. */
+  const clean = (n: number) => +n.toFixed(6)
   const holdRef = useRef<{ t?: number; i?: number }>({})
   const stopStep = () => {
     clearTimeout(holdRef.current.t); clearInterval(holdRef.current.i)
@@ -133,7 +136,7 @@ export function AxisSlider({
   const startStep = (dir: 1 | -1) => {
     const bump = () => {
       const base = typeof valueRef.current === 'number' ? valueRef.current : (autoValue ?? min)
-      onChange(Math.min(max, Math.max(min, base + dir * step)))
+      onChange(clean(Math.min(max, Math.max(min, base + dir * step))))
     }
     bump()
     holdRef.current.t = window.setTimeout(() => {
@@ -335,7 +338,7 @@ export function AxisSlider({
     if (!e.deltaX || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return
     e.preventDefault()
     const base = typeof value === 'number' ? value : (autoValue ?? min)
-    onChange(Math.min(max, Math.max(min, base + Math.sign(e.deltaX) * step)))
+    onChange(clean(Math.min(max, Math.max(min, base + Math.sign(e.deltaX) * step))))
     engage()
   }
 
@@ -500,7 +503,7 @@ export function AxisSlider({
                  word now that keystrokes no longer commit. */
               setDraft(null)
               const base = typeof value === 'number' ? value : (autoValue ?? min)
-              onChange(Math.min(max, Math.max(min, base + dir * step * (e.shiftKey ? 10 : 1))))
+              onChange(clean(Math.min(max, Math.max(min, base + dir * step * (e.shiftKey ? 10 : 1)))))
             }}
             onChange={e => {
               /* min/max on the element stops the STEPPERS going out of range, but a typed
