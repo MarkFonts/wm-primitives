@@ -145,6 +145,22 @@ Written down so a test does not get invented for it.
 
 ---
 
+## 8 · The theme switch
+
+`ThemeSwitch` (both looks) and `mountThemeSwitch()` (a page without React) over one
+engine, `theme.js`. Tested in `tests/behaviour/theme.spec.ts`.
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G38 | press Auto / Light / Dark | `<html data-theme>` is that value — **always present, including `auto`** | theme-switch |
+| G39 | the same press | stored under **one** key, `wm-theme`, in every app; a page migrating from its own key reads it once and never writes it again | theme-switch |
+| G40 | the same press | `aria-pressed="true"` on exactly one button; the look (ink on the mark, or the pill) follows it | theme-switch |
+| G41 | a theme applied by anything else — a session restore, a shortcut — fires `wm-theme` on `<html>` | the switch follows the event; a canvas painted with token colours repaints on it | theme-switch |
+| G42 | reload | the choice is what it was (font-proofer). Kernpare restores its *session's* theme over storage, by its own prior design | theme-switch |
+
+**Not promised:** where it sits. Both apps park it top-right and fade it; that is the
+app's, not the control's.
+
 ## Other controls
 
 `StopSlider`, `AxisTriplet`, `Icon`, `Collapse` get their own sections here as their

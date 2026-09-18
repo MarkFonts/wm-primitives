@@ -125,6 +125,10 @@ jobs:
           for d in hosts/font-proofer/shared hosts/ReCal/shared hosts/wordmarktools/opsz-proofer/shared hosts/wordmarktools/kernpare/shared; do
             rm -rf "$d"; git clone -q --no-checkout . "$d" && git -C "$d" checkout -q ${{ github.sha }}
           done
+      # Kernpare's data files are generated from a font source and gitignored; the page
+      # hides its panels without them. A 12-pair fixture stands in on a runner.
+      - run: |
+          [ -f hosts/wordmarktools/kernpare/data.json ] || cp hosts/wordmarktools/kernpare/fixture/data.json hosts/wordmarktools/kernpare/data.json
       - uses: actions/setup-node@v5
         with:
           node-version: 20
@@ -140,6 +144,8 @@ jobs:
         env:
           FONT_PROOFER_DIST: ${{ github.workspace }}/hosts/font-proofer/dist
           RECAL_DIST: ${{ github.workspace }}/hosts/ReCal/dist
+          OPSZ_PROOFER_DIST: ${{ github.workspace }}/hosts/wordmarktools/opsz-proofer/dist
+          KERNPARE_DIR: ${{ github.workspace }}/hosts/wordmarktools/kernpare
         run: npx playwright test tests/behaviour
       - name: Rendering (EVAL §3) -- reports, never blocks
         if: always()

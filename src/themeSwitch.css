@@ -1,0 +1,9 @@
+/* themeSwitch.css -- the `marks` look: three icon buttons in a row. The `words` look is
+   toggleGroup.css and needs nothing here. Placement stays in the app. */
+@layer wm.controls {
+  .wm-theme {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-01, 4px);
+  }
+}

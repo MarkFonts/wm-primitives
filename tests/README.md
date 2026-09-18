@@ -4,7 +4,7 @@ The battery from [EVAL.md](../EVAL.md). What exists so far:
 
 | dir | EVAL § | what it holds |
 | --- | --- | --- |
-| `behaviour/` | 2 | GESTURES.md, on the built hosts: a real Chromium touch (CDP) and a synthesised WebKit one, plus a mouse |
+| `behaviour/` | 2 | GESTURES.md, on the built hosts: a real Chromium touch (CDP) and a synthesised WebKit one, plus a mouse; `theme.spec.ts` for the switch |
 | `render/` | 3 | every visible dial row in every host, screenshotted and held to a baseline; the cross-host parity report |
 | `__screenshots__/` | 3 | the baselines, **committed**, cut on linux in CI |
 
