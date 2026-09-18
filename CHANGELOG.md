@@ -11,6 +11,98 @@ Newest first.
 
 ---
 
+## 2026-09-17 — the dial for pages without React
+
+**`dist/dial.js`: one source, a second output.** `a0e1645`
+Kernpare and opsz-proofer are not React apps, and the census records what happened when
+one of them hand-wrote the dial's markup: the class names with none of the behaviour,
+free to drift the first time `AxisSlider.tsx` changed shape. A plain-JS port would be
+the same drift with more code. So `AxisSlider.tsx` itself, React inside, is bundled by
+esbuild into a script tag (`wmDial.mount(el, props)` → `get / set / update / destroy`),
+~70 KB gzipped. The bundle is committed because those pages run no npm; a `dial` job
+fails the push that changes the source without rebuilding it, and dispatch waits on it.
+
+**And the two pages took it.** wordmarktools `5f4c808`
+opsz-proofer's three hand-emitted rows — the census's 57–59 — are `wmDial.mount` now;
+`build.py` inlines the bundle's CSS in place of `AxisSlider.css` and ships `dial.js`
+beside the page. Scroll-to-adjust went with the markup: the dial refuses a vertical
+wheel on purpose. Kernpare's *Italic angle* and *Glyph size* are dials where two number
+inputs were. Fifty-nine sliders in the census; none is a copy any more.
+
+**This log was silent for a night, and that was a bug.** Five entries were inserted by
+anchoring each on the heading of the one before, and the first anchor only ever existed
+on a side branch. Every insert was a no-op that raised nothing. They are all below now,
+under an assertion.
+
+---
+
+## 2026-09-17 — the other controls get their rows
+
+**GESTURES §9 (the triplet) and §10 (the mark), with tests.** PR #17
+Thirteen promises: the triplet's stepper, arrows, typing, the carry rule (an edit that
+would cross a neighbour moves the neighbour, never clamps the edit), `offset`,
+`disabled`; the mark's ladder on both grounds, hover never landing on an active mark,
+the swatch only in the dark, `opsz` clamped to the axis, `label` → `aria`.
+
+**A held stepper on the triplet moved one step and stood still.** PR #17
+The repeat timer fired on schedule and committed from the band captured at press time
+— base+step, base+step, base+step. `AxisSlider` had guarded its own stepper against
+exactly this with a ref; the triplet had not. Found by G43 on its first run.
+
+**Open, written down rather than decided:** the triplet still commits a parseable
+number on every keystroke (G45); the dial stopped doing that today (G19). Two fields,
+one keystroke, two behaviours.
+
+---
+
+## 2026-09-17 — the theme switch is one control
+
+**`ThemeSwitch`, both looks, one engine.** `b5ae658`
+Auto / Light / Dark existed twice and was missing once: font-proofer drew three Material
+marks, Kernpare three words in a pill, ReCal none (light-only tokens, by decision). Each
+had its own storage key and its own idea of what `auto` stamps on `<html>`. `theme.js`
+is the engine, plain JS so a page without React drives the same buttons with
+`mountThemeSwitch()`; the React form has both looks. One key, `wm-theme`; the attribute
+always present; a `wm-theme` event on `<html>` so a canvas painted with token colours
+can repaint. Placement stays in the app.
+
+**Chevrons: never a text glyph.** `6dbcb99`, ReCal `6b5f5df`, Kernpare `cb49925`
+ReCal's style menus carried `▾` set in Cal Sans — a 9px triangle matching nothing.
+Kernpare's preset select wore Chrome's arrow. Both are the house chevron now.
+
+**The parity report earned its keep on day one.** The `track` variant agrees on every
+number in every host; the `default` variant is two controls (ReCal 14px rail via the
+offered `--dial-track-h`, font-proofer 24px + `padding: 0 16px` unlayered); ReCal's rows
+show `cursor: pointer` where the primitive says `ew-resize`. Written down, not changed.
+
+---
+
+## 2026-09-17 — the battery, and the first bug it found
+
+**EVAL.md, GESTURES.md, tests/.** `67aee88` `7da3285` `da86e1a`
+A methodology (five audiences, eight decisions), a behaviour spec (36 promises, each
+traced to the commit where the opposite was a bug), and the suites: every consumer built
+against the commit before any is told to deploy; every dial row in every host held to a
+linux baseline with cross-host parity as numbers; the gesture promises run as Playwright
+in a real Chromium touch and a synthesised WebKit one; the deploys wait until the site
+serves what they built; a docs-only run across three models that put eight missing
+sentences into the docs.
+
+**A touch keeps its own capture.** `6325c50`
+Found by the behaviour suite on its second run, under a *real* touch — the synthesised
+one had passed. Asking `setPointerCapture` for a touch pointer, which the browser has
+already captured, made Chromium fire `lostpointercapture` for the hand-over, and
+`onLostPointerCapture` is `onTouchUp`. The drag ended on its first live frame,
+`data-scrubbing` came off, and the native range carried the rest as ~28 uncoalesced
+`input` events. Every promise of the mobile pass held for exactly one frame.
+
+**The field composes; Enter or blur commits.** `7970694`
+From the phone: typing toward 1660 had the proof jump to 16, then 166, and a host that
+clamps wrote its answer back into the field mid-word. Draft only now; a tap selects the
+digits; only an arrow abandons the draft.
+
+---
+
 ## 2026-09-13 — the dial answers a finger
 
 The mobile pass. Every item here was reported from a phone, and several of the fixes
