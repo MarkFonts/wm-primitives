@@ -161,10 +161,43 @@ engine, `theme.js`. Tested in `tests/behaviour/theme.spec.ts`.
 **Not promised:** where it sits. Both apps park it top-right and fade it; that is the
 app's, not the control's.
 
+## 9 · The triplet
+
+`AxisTriplet`: min / desired / max as one row, three fields, no rail. Deployed in the
+Fitting panel's H&J section in both apps. Tested in `tests/behaviour/triplet.spec.ts`.
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G43 | press a stepper | one step on down; repeat after 400ms, then every 60ms; lift, leave or cancel stops it (the dial's G27–G28, same numbers) | `AxisTriplet.tsx` |
+| G44 | `ArrowUp` / `ArrowDown` in a field | ±`step`, `Shift` ×10; abandons a draft first | `AxisTriplet.tsx` |
+| G45 | typing in a field | the field shows the draft verbatim; `""`, `-`, `-.` and `.` are held as on-the-way; **a parseable number commits immediately**, clamped to `[min, max]` | `AxisTriplet.tsx` |
+| G46 | an edit that would cross a neighbour | the neighbour is **carried**, never the edit clamped: min pushes desired up and desired pushes max; max pulls desired down and desired pulls min; desired pushes both outward | `carry()` |
+| G47 | `offset` | the field shows `stored − offset` and commits `typed + offset` — letter space is stored 100-centred and shown 0-centred | props |
+| G48 | `disabled` | the row is at .45 opacity and takes no pointer | `AxisTriplet.css` |
+
+**Open, not promised:** G45 commits while typing; the dial (G19) stopped doing that on
+2026-09-17 because the proof chased the digits. The triplet has no rail and its numbers
+are not previewed by a re-raster, so the argument is weaker here — but the two fields
+now behave differently under the same keystroke, and that is a decision to make, not
+a fact to test.
+
+## 10 · The mark
+
+`Icon`: a Material Symbols mark on the same axes as the type beside it. Tested in
+`tests/behaviour/icon.spec.ts`; the swatch structurally in `tests/render/rows.spec.ts`.
+
+| id | state | promise | commit |
+| --- | --- | --- | --- |
+| G49 | rest / hover / active | GRAD **dark 50 · 100 · 75**, **light 100 · 150 · 100**. Hover is the top of the ladder; active is one rung below hover, on both grounds | `5a7f38e` |
+| G50 | `off` | the rest rung, and **no hover** — a control that cannot act does not brighten | `icon.css` |
+| G51 | hover over an active mark, by its own class or an ancestor `.active` | **nothing.** Hover never repaints an active mark: with `background-clip: text` a repaint at ink-quiet would *replace* the swatch, not dim it | `5a7f38e` |
+| G52 | active, dark ground | the mark is masked with the PQ swatch (HDR); `dynamic-range-limit: no-limit`. Light ground: no swatch, plain full ink — the boost has nowhere to go | `5a7f38e` |
+| G53 | `size` | sets `font-size` **and** `opsz` together; `opsz` clamped to the axis, 20–48, so the setting stays valid rather than silently ignored | `Icon.tsx` |
+| G54 | `label` | given: `aria-label`; absent: `aria-hidden` — the adjacent text names it | `Icon.tsx` |
+| G55 | a press on a stepper | the chevron brightens — no disc, no second shape (G31) | `bf491f7` |
+
 ## Other controls
 
-`StopSlider`, `AxisTriplet`, `Icon`, `Collapse` get their own sections here as their
-tests are written (EVAL.md step 8). Until then the only promise recorded is that
-`AxisTriplet`'s steppers follow G27–G31 by the same CSS, and `StopSlider`'s rail carries
-`touch-action: pan-y` with **no** JS direction judgement yet — a phone can scroll over
-it, but cannot yet drag it from anywhere. That is a known gap, not a promise.
+`StopSlider` and `Collapse` are not deployed anywhere yet and have no rows. `StopSlider`'s
+rail carries `touch-action: pan-y` with **no** JS direction judgement — a phone can scroll
+over it, but cannot drag it from anywhere. A known gap, not a promise, until it ships.

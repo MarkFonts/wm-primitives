@@ -83,9 +83,16 @@ export function AxisTriplet({
   const [draft, setDraft] = useState<{ k: Key; text: string } | null>(null)
   const hold = useRef<{ t?: number; i?: number }>({})
 
-  const shown = (k: Key) => +(value[k] - offset).toFixed(2)
+  /* The latest band, for the repeat timer. `value` in a closure is the band as it was
+     when the press began, so a hold committed base+step, base+step, base+step -- one
+     step, then standing still on schedule (found by tests/behaviour G43). AxisSlider
+     guards its stepper the same way with valueRef. */
+  const valueRef = useRef(value)
+  valueRef.current = value
+
+  const shown = (k: Key) => +(valueRef.current[k] - offset).toFixed(2)
   const commit = (k: Key, display: number) =>
-    onChange(carry(value, k, Math.min(max, Math.max(min, display)) + offset))
+    onChange(carry(valueRef.current, k, Math.min(max, Math.max(min, display)) + offset))
 
   /* A drawn button gets no native repeat, so press-and-hold is a timer: one step, a
      400ms wait for the intent, then 60ms repeats. Matches AxisSlider's stepper. */
