@@ -18,6 +18,7 @@ import { createRoot } from 'react-dom/client'
 import { AxisSlider, type AxisSliderProps } from './AxisSlider'
 import { Chevron } from './Chevron'
 import { Icon } from './Icon'
+import { ThemeSwitch, type ThemeSwitchProps } from './ThemeSwitch'
 
 export type DialProps = Omit<AxisSliderProps, 'value' | 'onChange'> & {
   value: number | 'auto'
@@ -53,6 +54,15 @@ export function mount(el: Element, props: DialProps): DialHandle {
     update: patch => { current = { ...current, ...patch }; if ('value' in patch && patch.value !== undefined) { value = patch.value; setFromOutside?.(patch.value) } setProps?.(current) },
     destroy: () => root.unmount(),
   }
+}
+
+/* The theme switch, for the same pages: Kernpare drove its own three buttons through
+   theme.js and kept its words pill; this mounts the React form, so the marks look is
+   available without React on the page. The engine underneath is the same file. */
+export function mountTheme(el: Element, props: ThemeSwitchProps = {}) {
+  const root = createRoot(el)
+  root.render(<StrictMode><ThemeSwitch look="marks" {...props} /></StrictMode>)
+  return { destroy: () => root.unmount() }
 }
 
 // The marks and chevrons travel too: a page that has the dial may as well draw its
