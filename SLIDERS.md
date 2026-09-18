@@ -66,9 +66,9 @@ Counted 2026-09-07 across wm-primitives, font-proofer, ReCal, opsz-proofer and k
 | 54 | Weight | ReCal | compare / landing rail |  | bare `<input type=range>` | ❌ |
 | 55 | Ascender Height | ReCal | compare / landing rail |  | bare `<input type=range>` | ❌ |
 | 56 | Sharp | ReCal | compare / landing rail |  | bare `<input type=range>` | ❌ |
-| 57 | screen | opsz-proofer | header rail |  | hand-emitted `.slider-row` HTML | ❌ ‡ |
-| 58 | display size | opsz-proofer | header rail | `<span class="material-symbols-outlined">format_size</span>` | hand-emitted `.slider-row` HTML | ❌ ‡ |
-| 59 | wght | opsz-proofer | header rail |  | hand-emitted `.slider-row` HTML | ❌ ‡ |
+| 57 | screen | opsz-proofer | header rail |  | `wmDial.mount` (AxisSlider via `dist/dial.js`) | ✅ |
+| 58 | display size | opsz-proofer | header rail | `<span class="material-symbols-outlined">format_size</span>` | `wmDial.mount` (AxisSlider via `dist/dial.js`) | ✅ |
+| 59 | wght | opsz-proofer | header rail |  | `wmDial.mount` (AxisSlider via `dist/dial.js`) | ✅ |
 
 † Ported from a hand-built row with a native `auto` checkbox, 2026-09-07. Not yet committed.
 
@@ -76,8 +76,9 @@ Counted 2026-09-07 across wm-primitives, font-proofer, ReCal, opsz-proofer and k
 `.slider-label-text` and `.slider-number` as strings. It gets the styling for free and
 none of the behaviour — no `auto`, no typed minus, no drawn steppers.
 
-**kernpare** has none. Its 194 `type="range"` matches are all inside `shared/` — the
-primitives' own stylesheet, not its own controls.
+**kernpare** has two since 2026-09-17 — *Italic angle* and *Glyph size*, `wmDial.mount`
+(track variant) where two `type="number"` fields were. Before that it had none; its 194
+`type="range"` matches were all inside `shared/`.
 
 
 
@@ -90,11 +91,11 @@ seven native ranges with their own `.pm-label` markup, in the same app whose oth
 rails are all the component. Same seven parameters as the preview bar and the matrix
 pins, drawn a third way.
 
-**opsz-proofer (57–59) is the subtler case.** Nothing looks wrong, because it copies the
-class names — which is exactly why nobody has noticed it is a copy. It is the same
-failure as docs card 05 was: a control wearing the primitive's name, free to drift from
-it, and it will drift the first time `AxisSlider.tsx` changes structure rather than
-styling.
+**opsz-proofer (57–59) was the subtler case**, and is closed as of 2026-09-17. It copied
+the class names — which is exactly why nobody noticed it was a copy — and would have
+drifted the first time `AxisSlider.tsx` changed structure. It now mounts the component
+itself from `dist/dial.js` (HOWTO, "A page without React"); the parity report had
+already been watching the copy for exactly that drift.
 
 **Card 04's stop slider (13) is a genuine exception** — it is a different control
 (named stops with a thumb that travels between them), not a copy of this one. It is on
