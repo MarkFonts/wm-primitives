@@ -22,9 +22,15 @@
     "test:render": "playwright test tests/render",
     "test:render:update": "playwright test tests/render --update-snapshots",
     "test:behaviour": "playwright test tests/behaviour",
-    "test": "playwright test"
+    "test": "playwright test",
+    "build:dial": "node scripts/build-dial.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "^1.63.0"
+    "@playwright/test": "^1.63.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "esbuild": "^0.28.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   }
 }

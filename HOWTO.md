@@ -135,6 +135,27 @@ git -C shared fetch ../wm-primitives <branch> && git -C shared checkout FETCH_HE
 
 ---
 
+### A page without React: `dist/dial.js`
+
+Kernpare and opsz-proofer are not React apps. They get the **same** dial — not a port,
+the component itself with React bundled in — from `shared/dist/dial.js` (global
+`wmDial`, ~70 KB gzipped) and `shared/dist/dial.css`:
+
+```html
+<link rel="stylesheet" href="shared/dist/dial.css">
+<script src="shared/dist/dial.js"></script>
+<script>
+  const size = wmDial.mount(document.getElementById('size'),
+    { label: 'Glyph size', value: 76, min: 20, max: 200, step: 5, suffix: 'px', variant: 'track',
+      onChange: v => draw() })
+  size.get(); size.set(90); size.update({ max: 300 }); size.destroy()
+</script>
+```
+
+Steps 4–6 still apply: the page links the token sheets and stamps `data-theme`. The
+bundle is **committed** (`npm run build:dial`) because these pages run no npm; CI fails
+a source change that forgot to rebuild it. `Chevron` and `Icon` ride along on `wmDial`.
+
 ## Part B · Adding a new dial design
 
 A dial design is a **variant** of `AxisSlider`, not a new component. `default`, `track`,
