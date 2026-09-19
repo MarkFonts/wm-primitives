@@ -7,5 +7,10 @@
   "default.track.padding": "font-proofer's unlayered padding: 0 16px so the round thumb clears the ends; the layer contract allows it",
   "default.input.h": "follows --dial-track-h",
   "default.input.height": "follows --dial-track-h",
-  "track.input.cursor": "ReCal's track rows show pointer where the primitive says ew-resize; recorded 2026-09-17, unresolved (NEXT.md D)"
+  "track.input.cursor": "ReCal's track rows show pointer where the primitive says ew-resize; recorded 2026-09-17, unresolved (NEXT.md D)",
+  "default.label.font-size": "the dial inherits its type size from the host and sets none of its own: 16px in font-proofer and ReCal, 12px in opsz-proofer's panel. A decision for the primitive to make (NEXT.md D), recorded 2026-09-19",
+  "default.label.h": "the dial inherits its type size from the host and sets none of its own: 16px in font-proofer and ReCal, 12px in opsz-proofer's panel. A decision for the primitive to make (NEXT.md D), recorded 2026-09-19",
+  "default.label.line-height": "the dial inherits its type size from the host and sets none of its own: 16px in font-proofer and ReCal, 12px in opsz-proofer's panel. A decision for the primitive to make (NEXT.md D), recorded 2026-09-19",
+  "default.name.font-size": "the dial inherits its type size from the host and sets none of its own: 16px in font-proofer and ReCal, 12px in opsz-proofer's panel. A decision for the primitive to make (NEXT.md D), recorded 2026-09-19",
+  "default.name.h": "the dial inherits its type size from the host and sets none of its own: 16px in font-proofer and ReCal, 12px in opsz-proofer's panel. A decision for the primitive to make (NEXT.md D), recorded 2026-09-19"
 }

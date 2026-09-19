@@ -65,6 +65,9 @@ a task. Skip nothing above the line you are on; below it, pick.
       Decide whether the promise is per-pointer or universal; the test follows.
 - [ ] **`default` variant: 14px or 24px rail?** Two hosts, two answers, both sanctioned.
       Pick, or name it a per-host choice in DIAL §7.
+- [ ] **The dial's type size is inherited.** 16px in font-proofer and ReCal, 12px in
+      opsz-proofer's panel; the primitive sets none. The parity gate allows it with a
+      reason today. Pick a role (`t-ui`?) and own it, or say inheritance is the design.
 - [ ] **`em` on the measure dial** means the page's em, not the type's. Rename the
       suffix, or convert.
 - [ ] **StopSlider and Collapse** ship nowhere. Ship them or move them to `reference/`.
