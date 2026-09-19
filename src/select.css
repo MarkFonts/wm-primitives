@@ -1,0 +1,41 @@
+/* select.css -- a native <select> wearing the house chevron.
+ *
+ * Three apps had the same fix written three times: appearance: none on the select, a
+ * wrapper to hang a real <Chevron> off, the mark absolutely placed at the right edge
+ * and told not to take the click. font-proofer's .instance-select-wrap, ReCal's
+ * .rail-preset-wrap, Kernpare's .sel-wrap -- one pattern, three names. This is the one.
+ *
+ *   <span class="wm-select-wrap"><select class="wm-select">…</select><Chevron/></span>
+ *
+ * The select stays native (the options list is the platform's, on purpose); only its
+ * closed face is ours. A page without React inlines the chevron path (Kernpare does). */
+@layer wm.controls {
+  .wm-select-wrap { position: relative; display: block; }
+  .wm-select {
+    width: 100%;
+    padding: var(--spacing-02, 6px) var(--spacing-06, 24px) var(--spacing-02, 6px) var(--spacing-03, 8px);
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem);
+    color: var(--text, inherit);
+    background: var(--surface, transparent);
+    border: 1px solid var(--border, currentColor);
+    border-radius: var(--radius, 6px);
+    corner-shape: superellipse(var(--corner-k, 1.2));
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color var(--dur-fast, .12s) ease;
+  }
+  .wm-select:hover { border-color: var(--text-dim, currentColor); }
+  .wm-select:focus { outline: none; }
+  .wm-select:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+  .wm-select-wrap .wm-chevron {
+    position: absolute;
+    right: var(--spacing-03, 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;   /* the select is what you click; the mark is on top of it */
+    color: var(--text-muted, inherit);
+  }
+  .wm-select-wrap:has(> select[hidden]) { display: none; }
+}

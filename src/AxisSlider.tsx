@@ -21,7 +21,6 @@
 // from min/max (so it can never go stale).
 //
 // Optional extras (used by ReCal's rail, ignored elsewhere):
-//   • marker  — a ◆ "baked default" indicator before the value
 //   • onRangePointerDown — hook on the range thumb (e.g. drag-to-flash a zone)
 //   • disabled — dim/lock the control (e.g. a frozen axis)
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from 'react'
@@ -58,8 +57,6 @@ export interface AxisSliderProps {
    *  existed. Pass false for the key only. */
   autoButton?: boolean
   autoValue?: number
-  /** Optional ◆ "baked default" marker before the value (suppressed for variant="diamond"). */
-  marker?: boolean
   /** Optional hook on the range thumb's pointer-down (e.g. drag-to-flash). */
   onRangePointerDown?: (e: ReactPointerEvent<HTMLInputElement>) => void
   /** Dim/disable the control (e.g. a frozen axis). */
@@ -86,7 +83,7 @@ export interface AxisSliderProps {
 
 export function AxisSlider({
   label, tag, value, min, max, step = 1, onChange, display,
-  lockedAbove, allowAuto, autoButton = true, autoValue, marker, onRangePointerDown, disabled,
+  lockedAbove, allowAuto, autoButton = true, autoValue, onRangePointerDown, disabled,
   variant = 'default', field = 'underline', reference, suffix, showRange,
 }: AxisSliderProps) {
   const [numFocused, setNumFocused] = useState(false)
@@ -445,7 +442,6 @@ export function AxisSlider({
           {showRange && <span className="slider-range">{min}–{max}</span>}
         </span>
         <span className="slider-value">
-          {marker && variant !== 'diamond' && <span className="slider-marker" aria-hidden="true">◆</span>}
           <input
             ref={inputRef}
             className="slider-number"

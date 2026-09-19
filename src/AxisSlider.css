@@ -79,13 +79,8 @@
     white-space: nowrap;
   }
 
-  /* value = optional ◆ marker + the editable number/auto field */
+  /* value = the editable number/auto field */
   .slider-value { display: flex; align-items: baseline; gap: var(--spacing-01, 4px); flex-shrink: 0; }
-  .slider-marker {
-    font-size: var(--type-micro-size); line-height: 1;
-    color: var(--marker-default, var(--accent, currentColor));
-    transform: translateY(-1px);
-  }
   /* THE FIELD, and the primitive owns all of it. font-proofer used to dress this itself --
      a box, a border, a 64px width and its own focus colour -- while ReCal styled none of
      it, so the same component wore two different clothes and each app fought the other's

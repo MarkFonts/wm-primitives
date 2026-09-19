@@ -81,6 +81,21 @@ for (const b of blocks) {
   md += `| ${names || '*(types only)*'} | ${what || '—'} | ${by.join(', ') || '—'} | ${specFor(b.from)} |\n`
 }
 if (cssOnly.length) md += `\nCSS-only modules (imported from an app's entry stylesheet, nothing to export): ${cssOnly.map(c => '`' + c + '`').join(', ')}.\n`
+/* ---- the marks: which Material Symbols name each consumer draws ---- */
+const marks = {}
+for (const [name, text] of Object.entries(consumers)) {
+  const found = new Set([...text.matchAll(/<Icon\s+name=["']([a-z_0-9]+)/g)].map(m => m[1]))
+  for (const m of text.matchAll(/material-symbols-outlined["'][^>]*>\s*([a-z_0-9]+)\s*</g)) found.add(m[1])
+  for (const n of found) (marks[n] ??= new Set()).add(name)
+}
+// The switch's three are drawn by the primitive, not named by any host: scanning hosts
+// for them made the table depend on which branch a laptop had checked out.
+for (const n of ['brightness_auto', 'light_mode', 'dark_mode']) (marks[n] ??= new Set()).add('ThemeSwitch (every host that mounts it)')
+const ownMarks = new Set([...idx.matchAll(/'([a-z_0-9]+)'/g)].map(m => m[1]).filter(() => false))
+if (Object.keys(marks).length) {
+  md += `\n## Marks\n\nMaterial Symbols names each consumer draws (\`<Icon name>\` and raw ligatures), so removing one is a search, not a guess. The subset font carries what \`scripts/\` last cut; a name here that is not in it prints as text.\n\n| mark | drawn by |\n| --- | --- |\n`
+  for (const [n, who] of Object.entries(marks).sort()) md += `| \`${n}\` | ${[...who].join(', ')} |\n`
+}
 writeFileSync(join(ROOT, 'COMPONENTS.md'), md)
 
 /* ---- host contract ---- */

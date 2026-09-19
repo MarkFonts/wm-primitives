@@ -29,4 +29,23 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `PARA_STYLE_ORDER` `PARA_STYLE_LABEL` `PARA_STYLE_DEFAULTS` `fitOptionsFor` | The four paragraph styles both paragraph views show, and the one-liner that turns a style plus the font's H&J bands into fit options. The keys, labels, numbers and the resolver only; each app keeps the font fields it dra… | ReCal, font-proofer | — |
 | *(types only)* | — | — | FITTING-MAP.md |
 
-CSS-only modules (imported from an app's entry stylesheet, nothing to export): `src/motion.css`, `src/color.css`.
+CSS-only modules (imported from an app's entry stylesheet, nothing to export): `src/button.css`, `src/select.css`, `src/motion.css`, `src/color.css`.
+
+## Marks
+
+Material Symbols names each consumer draws (`<Icon name>` and raw ligatures), so removing one is a search, not a guess. The subset font carries what `scripts/` last cut; a name here that is not in it prints as text.
+
+| mark | drawn by |
+| --- | --- |
+| `brightness_auto` | ThemeSwitch (every host that mounts it) |
+| `calendar_month` | font-proofer |
+| `dark_mode` | ThemeSwitch (every host that mounts it) |
+| `discover_tune` | font-proofer |
+| `format_paragraph` | font-proofer |
+| `forms_add_on` | font-proofer |
+| `grid_view` | font-proofer |
+| `insert_text` | font-proofer |
+| `keyboard_arrow_up` | font-proofer |
+| `light_mode` | ThemeSwitch (every host that mounts it) |
+| `settings_backup_restore` | font-proofer |
+| `text_fields` | font-proofer |

@@ -1,0 +1,68 @@
+/* button.css -- the house BUTTON, the one that has a face.
+ *
+ * Three buttons already existed as primitives without being named as such: the mark
+ * (.wm-icon-btn, all target and no face), the pill (.ui-seg, one of N), and -- drawn
+ * five ways across four apps -- the boxed button: a surface, a hairline, the house
+ * corner, ink that brightens on hover. CHROME.md counts them: 63 button rules in
+ * font-proofer, 50 in ReCal, 16 in Kernpare, and the boxed one is most of them, each
+ * with its own padding and radius.
+ *
+ * This is that button, once. Everything is a token with a fallback, in @layer
+ * wm.controls like the dial, so a host can override any line with an unlayered rule.
+ *
+ *   .wm-btn            boxed: surface, hairline, corner, quiet ink
+ *   .wm-btn.active     the chosen one of a set: raised surface, full ink
+ *   .wm-btn--solid     the one primary action on a screen: ink ground, ground ink
+ *   .wm-btn--quiet     no hairline until hover (a row of secondary actions)
+ *   :disabled          .4 opacity, no pointer, no hover
+ *
+ * Sizing is the dial's: --spacing-02 x --spacing-03 padding, --type-ui-size, --radius.
+ * The touch floor is the mark's: 44px on a coarse pointer, as padding, not height. */
+@layer wm.controls {
+  .wm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-02, 6px);
+    padding: var(--spacing-02, 6px) var(--spacing-03, 8px);
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 1.4);
+    color: var(--text-muted, rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62)));
+    background: var(--surface, transparent);
+    border: 1px solid var(--border, currentColor);
+    border-radius: var(--radius, 6px);
+    corner-shape: superellipse(var(--corner-k, 1.2));
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--dur-fast, .12s) ease, border-color var(--dur-fast, .12s) ease, background var(--dur-fast, .12s) ease;
+  }
+  .wm-btn:hover:not(:disabled) { color: var(--text, inherit); border-color: var(--text-dim, currentColor); }
+  .wm-btn:active:not(:disabled) { background: var(--surface-hi, var(--surface)); }
+  .wm-btn.active, .wm-btn[aria-pressed="true"] {
+    color: var(--text, inherit);
+    background: var(--surface-hi, var(--surface));
+    border-color: var(--text-dim, currentColor);
+  }
+  .wm-btn--solid {
+    color: var(--bg, #111);
+    background: var(--text, #e8e8e8);
+    border-color: var(--text, #e8e8e8);
+  }
+  .wm-btn--solid:hover:not(:disabled) { color: var(--bg, #111); filter: brightness(1.08); }
+  .wm-btn--quiet { border-color: transparent; background: transparent; }
+  .wm-btn--quiet:hover:not(:disabled) { border-color: var(--border, currentColor); }
+  .wm-btn:disabled { opacity: .4; cursor: default; }
+  .wm-btn:focus { outline: none; }
+  .wm-btn:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+  /* Two or more side by side: a row, not a stack. */
+  .wm-btn-row { display: flex; gap: var(--spacing-02, 6px); flex-wrap: wrap; }
+  .wm-btn-row > .wm-btn { flex: 1 1 auto; }
+  @media (pointer: coarse) {
+    .wm-btn { min-height: 44px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wm-btn { transition: none; }
+  }
+}
