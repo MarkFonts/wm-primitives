@@ -150,12 +150,12 @@ for (const host of HOSTS.filter(h => h.gestures !== false && h.rows?.length)) fo
         const { min, max } = await bounds(row)
         const b = (await r.boundingBox())!
         const y = b.y + b.height / 2
-        await page.mouse.move(b.x + b.width * 0.75, y); await page.mouse.down()
-        const jumped = await readValue(row)
-        expect(jumped).toBeGreaterThan(min + (max - min) * 0.6)   // the press is a jump, not a focus
-        await page.mouse.move(b.x + b.width * 0.25, y, { steps: 8 })
-        const dragged = await readValue(row)
-        expect(dragged).toBeLessThan(min + (max - min) * 0.4)     // and the thumb followed
+        // The middle of the bar: on the track row the value field sits at the right and
+        // takes the pointer on purpose (a press there types), so 75% is not the bar.
+        await page.mouse.move(b.x + b.width * 0.5, y); await page.mouse.down()
+        await expect.poll(() => readValue(row)).toBeGreaterThan(min + (max - min) * 0.35) // the press is a jump, not a focus
+        await page.mouse.move(b.x + b.width * 0.1, y, { steps: 8 })
+        await expect.poll(() => readValue(row)).toBeLessThan(min + (max - min) * 0.25)    // and the thumb followed
         await page.mouse.up()
         expect(await scrubbing(page)).toBe(false)                 // the rail never claimed it
       })
