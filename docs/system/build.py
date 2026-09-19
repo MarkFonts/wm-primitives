@@ -219,6 +219,18 @@ def build_section(sid, label, path, kicker):
         js  += "\n" + ex_js
 
 
+    # A placeholder chapter, asked for on 2026-09-19: the house button drawn from the
+    # corner law -- the G2 corner, and the pad scale for the space inside the shape. The
+    # heading is real so the rail lists it; the body says it is not written yet.
+    if sid == "corners":
+        html += ('<h2>The button <span>placeholder &#8212; the G2 corner and the space inside it</span></h2>'
+                 '<p class="wm-placeholder">Not written yet. The house button (<code>.wm-btn</code>, '
+                 '<code>src/button.css</code>) is the corner law applied to a control: the G2 '
+                 'superellipse on its corners, the pad scale for the space between the shape and '
+                 'its label, and the cap rule (<code>padding-x &#8805; 0.6 &#215; radius</code>) that '
+                 'keeps a small radius from pinching. This chapter will draw it at every size on the '
+                 'ladder and show where the label sits inside each.</p>')
+
     # ids are document-global: prefix them, and every reference to them.
     ids = set(re.findall(r'\bid="([^"]+)"', html))
     for old in sorted(ids, key=len, reverse=True):
@@ -427,7 +439,88 @@ def six_outline():
 SIX_CMDS, SIX_VB = six_outline()
 
 build_type_page()
-secs = [build_section(*s) for s in SECTIONS]
+# ---------------------------------------------------------------- the README, rendered
+# NEXT.md E: "a public system page that is the README rendered, not a gallery beside it".
+# The README is the package's front door -- the promise, what you get, what you owe, how
+# to wire it, how it ships -- and this page used to be a second front door that said none
+# of that. So the README is section 00 here, rendered from the same file GitHub renders,
+# with a converter small enough to live in this script: headings, paragraphs, bullets,
+# links, inline code, bold. It does not need more than the README uses; if the README
+# grows a feature this cannot draw, the build fails on it rather than dropping it.
+GITHUB = "https://github.com/MarkFonts/wm-primitives/blob/main/"
+
+def md_inline(t):
+    import html as _h
+    t = _h.escape(t, quote=False)
+    t = re.sub(r'`([^`]+)`', r'<code>\1</code>', t)
+    t = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', t)
+    t = re.sub(r'(?<![*\w])\*(?!\*)(.+?)\*(?!\*)', r'<i>\1</i>', t)
+    def link(m):
+        text, href = m.group(1), m.group(2)
+        if not re.match(r'https?://|#', href):
+            href = GITHUB + href          # DIAL.md, .github/workflows/consumers.yml, ...
+        return f'<a href="{href}">{text}</a>'
+    return re.sub(r'\[([^\]]+)\]\(([^)]+)\)', link, t)
+
+def render_md(text):
+    out, para, items, ordered = [], [], [], False
+    def flush_p():
+        if para: out.append(f"<p>{md_inline(' '.join(para))}</p>"); para.clear()
+    def flush_l():
+        nonlocal ordered
+        if items:
+            tag = "ol" if ordered else "ul"
+            out.append(f"<{tag}>" + "".join(f"<li>{md_inline(i)}</li>" for i in items) + f"</{tag}>")
+            items.clear()
+    for line in text.split("\n"):
+        if line.startswith("# "):            # the H1 is the package name; the page has one
+            flush_p(); flush_l(); continue
+        if line.startswith("## "):
+            flush_p(); flush_l(); out.append(f"<h2>{md_inline(line[3:])}</h2>"); continue
+        if line.startswith("### "):
+            flush_p(); flush_l(); out.append(f"<h3>{md_inline(line[4:])}</h3>"); continue
+        m = re.match(r'^(\d+)\. (.*)', line) or re.match(r'^(-) (.*)', line)
+        if m:
+            flush_p(); flush_l() if (m.group(1) != "-") != ordered else None
+            ordered = m.group(1) != "-"; items.append(m.group(2)); continue
+        if line.startswith("  ") and items:    # a wrapped list item
+            items[-1] += " " + line.strip(); continue
+        if not line.strip():
+            flush_p(); flush_l(); continue
+        if line.startswith(("```", "|", ">")):
+            raise SystemExit(f"build: README uses markdown this renderer does not draw: {line[:30]!r}")
+        para.append(line.strip())
+    flush_p(); flush_l()
+    return "\n".join(out)
+
+README_CSS = """
+.readme{max-width:72ch;font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,1.55)}
+.readme h2{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:40px 0 8px}
+.readme h3{font-size:var(--type-body-size,1rem);margin:24px 0 4px}
+.readme p{margin:0 0 14px}
+.readme ul,.readme ol{margin:0 0 14px;padding-left:1.3em}
+.readme li{margin:0 0 6px}
+.readme code{font-family:"PaperMono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
+.readme a{color:inherit;text-decoration:underline;text-underline-offset:.15em;text-decoration-color:var(--dim,currentColor)}
+.readme a:hover{text-decoration-color:currentColor}
+.readme>p:first-child{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5)}
+"""
+
+def build_readme():
+    html = f'<div class="readme">{render_md((PKG/"README.md").read_text())}</div>'
+    chapters = []
+    def tag_h2(m):
+        text = re.sub(r'<[^>]+>', '', m.group(1)).strip()
+        cid = f"readme-c{len(chapters)+1}"
+        chapters.append((cid, text if len(text) <= 38 else text[:37].rstrip(" ,.;:-") + "…"))
+        return f'<h2 id="{cid}">{m.group(1)}</h2>'
+    html = re.sub(r'<h2>(.*?)</h2>', tag_h2, html, flags=re.S)
+    esc = lambda t: "".join(c if ord(c) < 128 else f"&#{ord(c)};" for c in t)
+    return dict(sid="readme", label="The package", title="README", kicker="the promise, and what you owe it",
+                css=scope_css(README_CSS, "#s-readme"), html=esc(html), js="",
+                chapters=[(c, esc(t)) for c, t in chapters])
+
+secs = [build_readme()] + [build_section(*s) for s in SECTIONS]
 
 # ---------------------------------------------------------------- the faces
 def face(name):
@@ -709,9 +802,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
   font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
   font-variation-settings:"GEOM" 100;transition:color .15s}
 .wm-lvl0 u{text-decoration:none;font-variant-numeric:tabular-nums;margin-right:10px;opacity:.65}
-.wm-lvl1{position:relative;display:block;text-decoration:none;padding:3px 0;
+.wm-lvl1{position:relative;display:grid;grid-template-columns:1.5em 1fr;text-decoration:none;padding:3px 0;
   margin-left:18px;font-size:12px;line-height:1.35;color:var(--ink-3);
   font-variation-settings:"GEOM" 25;transition:color .15s}
+.wm-lvl1 u{text-decoration:none;font-variant-numeric:tabular-nums;opacity:.65}
 /* the section tick crosses the rule; the chapter tick sits clear of it, to the right */
 .wm-lvl0::before{content:"";position:absolute;left:-22px;top:50%;width:14px;height:1px;
   background:var(--line)}
@@ -842,17 +936,35 @@ html,body{margin:0;padding:0;background:var(--bg)}
 
 CHAPTER_CAP = 7   # past this a page's own headings stop being an outline and become a list
 
+# The README is 00: the prelude, so the six laws stay 01-06 and the hero's "6 laws" stays
+# a count and not a lie. Chapter lines carry their numeral in its own column (<u>), so a
+# title that wraps aligns under its first word, not under the number -- the README's
+# headings are "1 · What you get", and the numeral is lifted out of the text for that.
+# A section that lists the same chapter twice (corner-law and circles both have "The 5
+# pills") shows it once.
+def rail_chapter(cid, txt):
+    m = re.match(r'^(\d+)\s*(?:&#183;|&#8226;|\u00b7|-)\s*(.*)$', txt)
+    num, text = (m.group(1), m.group(2)) if m else ("", txt)
+    return f'<a class="wm-lvl1" href="#{cid}"><u>{num}</u><span>{text}</span></a>'
+
+def dedupe(chapters):
+    seen, out = set(), []
+    for cid, txt in chapters:
+        key = re.sub(r'\W+', '', txt).lower()
+        if key in seen: continue
+        seen.add(key); out.append((cid, txt))
+    return out
+
 rail = []
-for i, s in enumerate(secs, 1):
-    chapters = "".join(
-        f'<a class="wm-lvl1" href="#{cid}">{txt}</a>' for cid, txt in s["chapters"][:CHAPTER_CAP])
+for i, s in enumerate(secs):
+    chapters = "".join(rail_chapter(cid, txt) for cid, txt in dedupe(s["chapters"])[:CHAPTER_CAP])
     rail.append(
         f'<div class="wm-grp"><a class="wm-lvl0" href="#s-{s["sid"]}">'
         f'<u>{i:02d}</u>{s["label"]}</a>{chapters}</div>')
 rail = "".join(rail)
 
 body_parts = []
-for i, s in enumerate(secs, 1):
+for i, s in enumerate(secs):
     # Only a number and a rule. Every page already opens with its own H1, and printing the
     # title again above it read as a stutter.
     body_parts.append(f"""
@@ -877,6 +989,7 @@ resets = "\n".join(
 # width. Release that one too, so all six share the shell's column rather than stacking
 # six different measures down the page.
 resets += "\n#s-type>.wrap{max-width:none;margin:0;padding:0;width:auto}"
+resets += "\n.wm-placeholder{max-width:64ch;color:var(--ink-2);border:1px dashed var(--line);border-radius:12px;padding:16px 20px;margin:8px 0 40px}"
 resets += ("\n#s-corners .grid.g3,#s-circles .grid.g3,#s-space .grid.g3{grid-template-columns:repeat(auto-fit,minmax(430px,1fr))}")
 
 css_parts = "\n".join(f"/* ===== {s['sid']} ===== */\n{s['css']}" for s in secs) + \

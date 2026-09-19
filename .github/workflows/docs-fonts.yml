@@ -14,7 +14,9 @@ name: rebuild docs for a font bump
 on:
   push:
     branches: [main]
-    paths: ['fonts/**']
+    # fonts/: the bump. README.md and the builder: the system page renders the README as
+    # its first section (NEXT.md E), so an edit to either is a stale page until rebuilt.
+    paths: ['fonts/**', 'README.md', 'docs/system/build.py']
   workflow_dispatch:
 
 # A second bump landing mid-rebuild would race this one to the same generated files.

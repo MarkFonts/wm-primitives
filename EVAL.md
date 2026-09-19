@@ -264,7 +264,7 @@ rendering pulled forward because of Q1.
      precisely formatted kern lists — is product work the battery cannot do; it can
      only tell you when it is done.
 8. Remaining controls get §2 tables: AxisTriplet, Icon — DONE GESTURES §9–10, tests/behaviour/{triplet,icon}.spec.ts.
-   Collapse ships inside Fitting (GESTURES §11, 2026-09-19); StopSlider never existed here.
+   Collapse ships inside Fitting (GESTURES §11, 2026-09-19); StopSlider is on flattersatz-headless, with WORDMAKE.
 ```
 
 Nothing here changes a primitive. Steps 1 and 4 are CI only; 2 and 3 add a `tests/`

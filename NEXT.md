@@ -76,17 +76,39 @@ a task. Skip nothing above the line you are on; below it, pick.
 
 ## E · Getting it into more hands
 
-- [ ] **WORDMAKE joins.** It has no submodule. The day it does, run the spec-fidelity
-      book against its port (tests/spec-fidelity/RUNBOOK.md) — that is the real version
-      of the docs test.
+- [ ] **WORDMAKE joins.** Found 2026-09-19: it already builds on the primitives — six
+      token sheets, `AxisSlider`, `Icon`, `Collapse`, `EditableTextBlock` — through a
+      `shared` that is a *symlink* to the laptop's wm-primitives checkout, and it imports
+      `StopSlider` and `StyleScopeDropdown`, which live on the `flattersatz-headless`
+      branch (2 ahead, 25 behind main), not on main. Three steps, in order: merge that
+      branch (or lift the two files); symlink → submodule; a `wordmake` leg in
+      `consumers.yml`. Then the spec-fidelity book (tests/spec-fidelity/RUNBOOK.md)
+      against the port. Step one is a decision, not a chore: the branch is somebody's
+      work in progress.
 - [ ] **Kernpare and geist-serif-morf as "usable by others".** Product work, not system
-      work: baked-in font metrics, formatted kern lists. Define done for each; the wiring
-      test (HOWTO) can then measure it.
-- [ ] **Windows.** EVAL Q2 deferred it. One more runner, one more baseline set.
-- [ ] **The Kernpare token lint.** Needs the analysis-UI exemption written first; then
-      the same gate the other apps have.
-- [ ] **A public system page that is the README rendered**, not a gallery beside it.
-      Today the Pages site is for show (your words) and the README is thin; one source.
+      work. Done, proposed 2026-09-19 — strike what is wrong:
+      - *Kernpare:* a stranger with a `.glyphspackage` runs `pack.py` then `serve.py`
+        from the README alone and sees their pairs; `data.json` is the only thing the
+        page needs, no Glyphs install; the kern lists export in the `left;right;value`
+        form the README promises, and one line of it round-trips through Glyphs; the
+        Adobe attribution is on the page, not only in NOTICE.
+      - *geist-serif-morf:* it is three HTML files and a `.glyphs` in a folder with no
+        README and no repo. Done is: a README that says what it is (a morph between two
+        dated cuts of Geist Serif), the font it embeds and its licence, and one command
+        or URL that opens it. Whether its playhead becomes the house dial is a
+        question for after that.
+- [x] **Windows.** A `windows` job in `consumers.yml`: the same hosts, Chromium, the
+      render suite only, its own baselines in `tests/__screenshots__/win32/`. A report,
+      never a gate (EVAL Q2's order was iPhone first). 2026-09-19.
+- [x] **The Kernpare token lint.** The linter reads `<style>` blocks out of an `.html`
+      root, and a `token-lint: off -- reason` … `token-lint: on` fence marks the analysis
+      UI as the named exception it is. The chrome outside the fences moved onto the
+      scales (fifty-four literals); Kernpare is a `check` leg in `consumers.yml`, lint
+      only. 2026-09-19.
+- [x] **A public system page that is the README rendered**, not a gallery beside it.
+      The README is section 01 of the Pages site now, rendered by `docs/system/build.py`
+      from the same file GitHub shows; an edit to either rebuilds the page
+      (`docs-fonts.yml`). The gallery follows it. 2026-09-19.
 
 ## F · Process, so the next month is cheaper than the last
 

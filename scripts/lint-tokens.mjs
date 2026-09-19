@@ -49,11 +49,27 @@ const STEPS = new Set([0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64])
    the thing being banned. */
 const SIZE_OK = /^(?:var\(|inherit|initial|unset|smaller|larger|\d*\.?\d+(?:cq[whibmax]+|em|ex|ch|%|rem)\b)/
 
-const walk = dir => readdirSync(dir).flatMap(name => {
-  const p = join(dir, name)
-  if (name === 'node_modules' || name === 'dist' || name === '.git') return []
-  return statSync(p).isDirectory() ? walk(p) : p.endsWith('.css') ? [p] : []
-})
+/* A root may be a directory (walked for .css) or one file. An .html file counts: Kernpare
+   is a single index.html with its CSS in <style> blocks, and a page that cannot be linted
+   because of where it keeps its stylesheet is a page that drifts. Everything outside the
+   <style> blocks is blanked, line for line, so a problem's line number is the file's. */
+const walk = dir => statSync(dir).isDirectory()
+  ? readdirSync(dir).flatMap(name => {
+      const p = join(dir, name)
+      if (name === 'node_modules' || name === 'dist' || name === '.git') return []
+      return statSync(p).isDirectory() ? walk(p) : /\.(css|html)$/.test(p) ? [p] : []
+    })
+  : [dir]
+const styleOnly = (file, text) => {
+  if (!file.endsWith('.html')) return text
+  let out = '', at = 0
+  for (const m of text.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)) {
+    const open = m.index + m[0].indexOf(m[1])
+    out += text.slice(at, open).replace(/[^\n]/g, ' ') + m[1]
+    at = open + m[1].length
+  }
+  return out + text.slice(at).replace(/[^\n]/g, ' ')
+}
 
 const stripFallbacks = s => s.replace(/var\([^()]*(?:\([^()]*\)[^()]*)*\)/g, '')
 const problems = []
@@ -82,7 +98,7 @@ for (const dir of cfg.tokenSources ?? []) {
   const abs = join(ROOT, dir.split('/').join(sep))
   if (!existsSync(abs)) continue
   for (const file of walk(abs))
-    for (const m of decomment(readFileSync(file, 'utf8')).matchAll(/(--[\w-]+)\s*:/g))
+    for (const m of decomment(styleOnly(file, readFileSync(file, 'utf8'))).matchAll(/(--[\w-]+)\s*:/g))
       declared.add(m[1])
 }
 
@@ -91,7 +107,7 @@ for (const root of cfg.roots ?? ['src']) {
   if (!existsSync(abs)) continue
   for (const file of walk(abs)) {
     const rel = relative(ROOT, file)
-    const text = readFileSync(file, 'utf8')
+    const text = styleOnly(file, readFileSync(file, 'utf8'))
 
     decomment(text).split('\n').forEach((line, i) => {
       /* A declaration is `--x:`; a read is `var(--x` -- and `var(--x, 8px)` carries a
@@ -106,6 +122,7 @@ for (const root of cfg.roots ?? ['src']) {
 
     if (EXEMPT.some(e => rel === e || rel.startsWith(e + sep))) continue
     const lines = text.split('\n')
+    let off = false
 
     lines.forEach((line, i) => {
       const at = `${rel}:${i + 1}`
@@ -119,6 +136,18 @@ for (const root of cfg.roots ?? ['src']) {
          everybody learns to ignore. */
       const allow = /token-lint:\s*allow\s*--\s*\S/
       if (allow.test(line) || (i > 0 && allow.test(lines[i - 1]))) return
+
+      /* A REGION may be off the system, with a reason, for a design that is deliberately
+         its own -- Kernpare's kern-group analysis is styled like a terminal on purpose,
+         and its file also holds the page chrome that must not be:
+             /* token-lint: off -- the analysis UI is Severance on purpose *\/
+             ...
+             /* token-lint: on *\/
+         Between the two, literals are not judged. References still are, above: a renamed
+         token breaks a terminal the same as anything else. */
+      if (/token-lint:\s*off\s*--\s*\S/.test(line)) { off = true; return }
+      if (/token-lint:\s*on\b/.test(line)) { off = false; return }
+      if (off) return
 
       /* gap is spacing on the same scale as padding, and sits inches away from it in the
          same rule -- checking one and not the other is how 10px gaps survived a padding
