@@ -252,6 +252,131 @@ for (const [name, sites] of wantsRefs ? used : []) {
   problems.push(`${sites[0].at}  var(${name}) is declared nowhere  (${sites.length} use${sites.length > 1 ? 's' : ''}: ${where})`)
 }
 
+/* ── TOKEN TYPES ─────────────────────────────────────────────────────────────────────
+ *
+ * A token can be declared, spelled right, read with a fallback, and still be wrong,
+ * because nothing until now checked WHAT KIND of value it holds. --dial-thumb is the
+ * dial thumb's SIZE -- `width: var(--dial-thumb, 14px)` -- and a host that reads the
+ * name as a colour and sets #e8e8e8 makes that declaration invalid at computed-value
+ * time. The thumb collapses, and because a range input maps a click through its thumb
+ * geometry, EVERY SLIDER IN THE APP then snaps to its minimum on click. No error, no
+ * warning, and the symptom is nowhere near the cause. That happened; this is the rule.
+ *
+ * It is the same failure family as color.css's: a custom property that does not resolve
+ * is not a value you can see going missing, it is a declaration the engine drops.
+ *
+ * TYPES ARE INFERRED, NOT DECLARED BY HAND. A hand-kept list is another thing to drift.
+ * Each read of a token says what it is twice over -- by the property it sits in
+ * (`width:` wants a length) and by its own fallback (`var(--x, 14px)`) -- so the type is
+ * read off the package's own usage. Which also means the check has teeth against this
+ * package first: if two files disagree about what a token is, that is a problem here,
+ * before any consumer is involved.
+ *
+ * What it catches:
+ *   - a DECLARATION whose value contradicts how the token is read (in roots, and in any
+ *     tokenSources or extra files passed on argv -- point it at a consumer's CSS)
+ *   - two reads that disagree with each other about the type
+ *   - a fallback that contradicts its own property
+ *
+ * It stays quiet where it cannot be sure: a token read only through var() with no
+ * fallback and no telling property has no inferred type and is skipped. */
+
+/* `stroke-width` is deliberately NOT here: SVG takes it unitless, so --chevron-stroke: 1.15
+   is correct and a length rule would call it wrong. A property only earns a place on this
+   list if a bare number in it would be invalid. */
+const TYPE_OF_PROP = [
+  [/^(width|height|min-|max-|inset|top|right|bottom|left|margin|padding|gap|border-radius|border-width|outline-offset|flex-basis|translate|text-underline-offset)/, 'length'],
+  [/^(color|fill|stroke|background-color|border-color|outline-color|caret-color|accent-color|text-decoration-color)$/, 'color'],
+  [/^(opacity|z-index|flex-grow|flex-shrink|font-weight|order)$/, 'number'],
+  [/^(transition-duration|animation-duration|transition-delay|animation-delay)$/, 'time'],
+]
+const LOOKS = [
+  [/^-?(\d*\.)?\d+(px|rem|em|ch|ex|vh|vw|vmin|vmax|cm|mm|in|pt|pc|q|lh|cap|ic|rlh)$/i, 'length'],
+  [/^(#[0-9a-f]{3,8}|transparent|currentcolor)$/i, 'color'],
+  [/^(rgb|rgba|hsl|hsla|hwb|lab|lch|oklab|oklch|color|color-mix)\(/i, 'color'],
+  [/^-?(\d*\.)?\d+(m?s)$/i, 'time'],
+  [/^-?(\d*\.)?\d+$/, 'number'],
+]
+const looksLike = v => {
+  const t = v.trim().replace(/\s*!important$/, '')
+  if (/^(0|auto|none|inherit|initial|unset|revert)$/i.test(t)) return null   // type-neutral
+  if (/^(var|calc|clamp|min|max|env)\(/i.test(t)) return null               // computed; no claim
+  for (const [re, kind] of LOOKS) if (re.test(t)) return kind
+  return null
+}
+const typeOfProp = prop => {
+  for (const [re, kind] of TYPE_OF_PROP) if (re.test(prop)) return kind
+  return null
+}
+
+if (cfg.hostTokens || cfg.tokenSources) {
+  /* name -> { type, why[] } gathered from every read, then every declaration judged. */
+  const inferred = new Map()
+  const note = (name, kind, why) => {
+    if (!kind) return
+    const e = inferred.get(name) ?? { kinds: new Map() }
+    e.kinds.set(kind, (e.kinds.get(kind) ?? []).concat(why))
+    inferred.set(name, e)
+  }
+  const decls = new Map()   // name -> [{ at, value }]
+
+  const extra = process.argv.slice(2).map(f => join(ROOT, f.split('/').join(sep)))
+  const files = [...(cfg.roots ?? ['src']), ...(cfg.tokenSources ?? [])]
+    .map(d => join(ROOT, d.split('/').join(sep))).filter(existsSync).flatMap(walk)
+    .concat(extra.filter(existsSync))
+
+  for (const file of files) {
+    const rel = relative(ROOT, file)
+    decomment(readFileSync(file, 'utf8')).split('\n').forEach((line, i) => {
+      const at = `${rel}:${i + 1}`
+      /* Reads: the property this var() sits in, and the fallback it carries. */
+      for (const m of line.matchAll(/([-a-z]+)\s*:\s*([^;}]*var\([^;}]*)/g)) {
+        const prop = m[1], rest = m[2]
+        if (prop.startsWith('--')) continue          // a token defined from another
+        /* THE PROPERTY ONLY SPEAKS FOR A TOP-LEVEL var(). Nested inside a function it
+           says nothing about the token: `color: rgba(var(--text-rgb), var(--ink-quiet))`
+           is a colour built from a component list and an alpha, and reading either as
+           "a colour because the property is color:" is how this rule's first draft
+           reported five false positives in this package alone. Depth is tracked rather
+           than guessed; the fallback still speaks at any depth, because a literal is a
+           literal wherever it sits. */
+        let depth = 0
+        for (let i = 0; i < rest.length; i++) {
+          if (rest[i] === ')') { depth--; continue }
+          if (rest[i] !== '(') continue
+          const head = rest.slice(0, i + 1)
+          const isVar = /var\($/.test(head)
+          depth++
+          if (!isVar) continue
+          const tail = rest.slice(i + 1)
+          const v = tail.match(/^\s*(--[\w-]+)\s*(?:,\s*([^),]+))?/)
+          if (!v) continue
+          if (depth === 1) note(v[1], typeOfProp(prop), `${at} (${prop}:)`)
+          if (v[2]) note(v[1], looksLike(v[2]), `${at} (fallback ${v[2].trim()})`)
+        }
+      }
+      /* Declarations, to be judged against the above. */
+      for (const m of line.matchAll(/(--[\w-]+)\s*:\s*([^;}]+)/g))
+        decls.set(m[1], (decls.get(m[1]) ?? []).concat({ at, value: m[2].trim() }))
+    })
+  }
+
+  for (const [name, e] of inferred) {
+    const kinds = [...e.kinds.keys()]
+    if (kinds.length > 1) {
+      const spread = kinds.map(k => `${k} at ${e.kinds.get(k)[0]}`).join(', vs ')
+      problems.push(`${e.kinds.get(kinds[0])[0]}  ${name} is read as two different types  (${spread})`)
+      continue
+    }
+    const want = kinds[0]
+    for (const d of decls.get(name) ?? []) {
+      const got = looksLike(d.value)
+      if (got && got !== want)
+        problems.push(`${d.at}  ${name} is a ${want}, declared as a ${got}  (${name}: ${d.value})  -- read as ${want} at ${e.kinds.get(want)[0]}`)
+    }
+  }
+}
+
 /* Notes, not failures. A bare host token is a real risk -- an undefined custom property
    is invalid at computed-value time, so a consumer that misses --text inherits a colour
    rather than falling back to one -- but there are too many to fail on today, and a

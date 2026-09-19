@@ -77,6 +77,37 @@ its rows. `StopSlider` was a name in four documents and no file.
 **ReCal's measure is in body ems now.** `.para-doc` sets the `p` style's size, so `34em`
 is thirty-four of them rather than of the page's 16px. (ReCal, not here.)
 
+## 2026-09-19 — the linter learns what a token IS
+
+**A token can be declared, spelled right, read with a fallback, and still be wrong.**
+`--dial-thumb` is the dial thumb's SIZE — `width: var(--dial-thumb, 14px)` — and a host
+that reads the name as a colour and sets `#e8e8e8` makes that declaration invalid at
+computed-value time. The thumb collapses; because a range input maps a click through its
+thumb geometry, EVERY SLIDER IN THE APP then snaps to its minimum on click. No error, no
+warning, and the symptom nowhere near the cause. It cost most of an afternoon, chasing a
+control that would not drag, before the cause turned out to be one line in the host.
+
+Same failure family as color.css's: a custom property that does not resolve is not a value
+you watch go missing, it is a declaration the engine drops.
+
+**Types are inferred, not hand-declared.** A list of expected types is one more thing to
+drift out of date. Every read already says what a token is twice — by the property it sits
+in (`width:` wants a length) and by its own fallback (`var(--x, 14px)`) — so the type is
+read off this package's own usage. Which gives the rule teeth here first: two files that
+disagree about what a token is are a problem before any consumer is involved.
+
+**THE PROPERTY ONLY SPEAKS FOR A TOP-LEVEL `var()`.** The first draft read the outer
+property whatever the nesting and reported five false positives in this package alone:
+`color: rgba(var(--text-rgb), var(--ink-quiet, .62))` is a colour built from a component
+list and an alpha, and neither is a colour. Depth is tracked now. `stroke-width` is off the
+length list for the same kind of reason — SVG takes it unitless, so `--chevron-stroke: 1.15`
+is correct.
+
+**It runs against a consumer too.** Paths on argv are linted alongside `roots`, so
+`node scripts/lint-tokens.mjs ../font-proofer/src/app.css` checks that app's declarations
+against the contract this package's usage implies — which is where the bug actually was.
+
+---
 ## 2026-09-19 — a curve per channel
 
 **`blend()` could never have reproduced Mass Driver's tool, and the barrel said it could.**
