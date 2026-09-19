@@ -30,9 +30,10 @@ if (!existsSync(CONFIG)) {
 const cfg = JSON.parse(readFileSync(CONFIG, 'utf8'))
 const EXEMPT = (cfg.exempt ?? []).map(p => p.split('/').join(sep))
 
-/* A host token with no prose is a token nobody can be told to define. */
-{
-  const docs = cfg.hostTokenDocs ?? {}
+/* A host token with no prose is a token nobody can be told to define. Only where the
+   config keeps prose at all (this package); a consumer's list is its own. */
+if (cfg.hostTokenDocs) {
+  const docs = cfg.hostTokenDocs
   const undocumented = (cfg.hostTokens ?? []).filter(t => !docs[t])
   if (undocumented.length) {
     console.error(`lint-tokens: ${undocumented.length} host token(s) with no entry in hostTokenDocs: ${undocumented.join(' ')}`)
