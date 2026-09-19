@@ -123,9 +123,9 @@ a task. Skip nothing above the line you are on; below it, pick.
 - [ ] **Retire `git` on this machine for the private repos**, or fix it. Measured
       2026-09-19, with a real timer: `ls-remote`, `status` and `fetch` on the public and the
       private repos all complete in 0.5–1.6s, with the keychain helper and without it. The
-      hang is intermittent, not a configuration; the two documented cases were a push
-      during a rebase and a status while a second Claude session was using the same
-      checkout. Two things to change anyway: `~/.gitconfig` says `filter.lfs.required =
+      hang is intermittent, not a configuration; the documented cases are `checkout` and
+      `pull --rebase` (stalling in `merge-base`), each with GitHub Desktop open, and on
+      the 17th with a second Claude session using the same checkout. Two things to change anyway: `~/.gitconfig` says `filter.lfs.required =
       true` and `git-lfs` is not installed, which fails any repo that ever adds an LFS
       attribute; and `gh auth git-credential` can stand in for the keychain helper, which
       cannot prompt from a sandbox. The guarded-call habit and the API route stay until a
