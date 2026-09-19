@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test'
 import { sealed, settle } from './hosts'
 
-/* The two looks of ThemeSwitch, held to a baseline: font-proofer's marks (dark and
-   light, since the marks carry the ink ladder) and Kernpare's words. */
+/* ThemeSwitch held to a baseline: font-proofer's marks in dark and light (the marks
+   carry the ink ladder) and Kernpare's, which took the marks look too on 2026-09-17 --
+   the `words` baseline outlived that by two days. */
 test.describe('theme switch', () => {
   for (const theme of ['dark', 'light'] as const) {
     test(`font-proofer · marks · ${theme}`, async ({ page }) => {
@@ -12,9 +13,9 @@ test.describe('theme switch', () => {
       await expect(page.locator('#theme-toggle')).toHaveScreenshot(`theme-marks-${theme}.png`)
     })
   }
-  test('kernpare · words', async ({ page }) => {
+  test('kernpare · marks', async ({ page }) => {
     await sealed(page)
     await page.goto('/kernpare/'); await settle(page)
-    await expect(page.locator('#theme-toggle')).toHaveScreenshot('theme-words.png')
+    await expect(page.locator('#theme-toggle')).toHaveScreenshot('theme-kernpare-marks.png')
   })
 })

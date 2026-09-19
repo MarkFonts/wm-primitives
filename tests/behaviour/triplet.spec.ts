@@ -59,13 +59,19 @@ test.describe('font-proofer · triplet', () => {
     ;[, des1] = await read(page); expect(des1).toBeGreaterThanOrEqual(des0 + 1 + 4)
   })
 
-  test('G45 · "-" and "." are held; a number commits at once, clamped', async ({ page }) => {
+  test('G45 · typing composes; only Enter or blur commits; Escape abandons', async ({ page }) => {
+    const [min0, des0, max0] = await read(page)
     const des = fields(page).nth(1)
     await des.click(); await des.press('ControlOrMeta+a'); await des.pressSequentially('-')
-    expect(await des.inputValue()).toMatch(/^[-−]$/)
-    await des.pressSequentially('5')
-    expect(await des.inputValue()).toMatch(/^[-−]5$/)
-    const [min1] = await read(page); expect(min1).toBeLessThanOrEqual(-5 > 0 ? -5 : 0)
-    await des.press('Escape'); await des.press('Tab')
+    expect(await des.inputValue()).toMatch(/^[-−]$/)             // the draft, verbatim
+    await des.pressSequentially(String(max0 + 7))
+    expect(await des.inputValue()).toMatch(/^[-−]/)              // still the draft, out of range
+    const [min1, , max1] = await read(page)
+    expect(min1).toBe(min0); expect(max1).toBe(max0)              // nothing reached the host
+    await des.press('Escape')
+    expect(await read(page)).toEqual([min0, des0, max0])         // abandoned, band untouched
+    await des.click(); await des.press('ControlOrMeta+a'); await des.pressSequentially(String(max0 + 7)); await des.press('Enter')
+    const [, des2, max2] = await read(page)
+    expect(des2).toBe(max0 + 7); expect(max2).toBe(max0 + 7)     // committed on Enter, carried
   })
 })

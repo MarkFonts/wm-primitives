@@ -76,11 +76,15 @@ export function AxisTriplet({
   offset = 0, step = 1, min = -Infinity, max = Infinity, disabled, showHeads,
 }: AxisTripletProps) {
   /* While a field has focus it shows the draft you are typing, not the store's
-     reformatted value — reformatting mid-keystroke eats the minus you just hit and
-     makes "-" impossible to type. The draft is dropped on blur, so the store always
-     wins in the end. Kept as one {key,text} rather than swapping the input between
-     controlled and uncontrolled, which React warns about and which loses the caret. */
+     reformatted value, and NOTHING reaches onChange until Enter or blur (GESTURES §0,
+     the typing rule; the dial's G19). Committing per keystroke clamped and carried the
+     field out from under the caret: typing 24 on a min-8 band became 8, then 84. Kept
+     as one {key,text} rather than swapping the input between controlled and
+     uncontrolled, which React warns about and which loses the caret. */
   const [draft, setDraft] = useState<{ k: Key; text: string } | null>(null)
+  /* Escape drops the draft and then blurs; the blur handler runs before React has
+     applied that setState, so it reads the abandonment from here, not from `draft`. */
+  const abandoned = useRef(false)
   const hold = useRef<{ t?: number; i?: number }>({})
 
   /* The latest band, for the repeat timer. `value` in a closure is the band as it was
@@ -141,8 +145,19 @@ export function AxisTriplet({
                 aria-valuenow={shown(k)}
                 disabled={disabled}
                 value={draft && draft.k === k ? draft.text : nbMinus(String(shown(k)))}
-                onBlur={() => setDraft(null)}
+                onBlur={() => {
+                  /* The draft commits here, and only here: Enter blurs, Tab blurs, a tap
+                     elsewhere blurs. Unparseable ("", "-", "zz") reverts to the store. */
+                  if (draft && draft.k === k && !abandoned.current) {
+                    const n = parseFloat(draft.text.replace('−', '-').trim())
+                    if (!Number.isNaN(n)) commit(k, n)
+                  }
+                  abandoned.current = false
+                  setDraft(null)
+                }}
                 onKeyDown={e => {
+                  if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); return }
+                  if (e.key === 'Escape') { e.preventDefault(); abandoned.current = true; e.currentTarget.blur(); return }
                   const dir = e.key === 'ArrowUp' ? 1 : e.key === 'ArrowDown' ? -1 : 0
                   if (!dir) return
                   e.preventDefault()
@@ -154,18 +169,7 @@ export function AxisTriplet({
                   setDraft(null)
                   commit(k, +(shown(k) + dir * step * (e.shiftKey ? 10 : 1)).toFixed(2))
                 }}
-                onChange={e => {
-                  /* The field renders U+2212, so U+2212 is what comes back. One parse
-                     for both paths, or a typed minus reads as NaN. */
-                  const text = String(e.target.value)
-                  setDraft({ k, text })
-                  const raw = text.replace('−', '-').trim()
-                  /* "", "-" and "-." are on the way to a number, not numbers. Committing
-                     them would clamp the field out from under the caret. */
-                  if (raw === '' || raw === '-' || raw === '-.' || raw === '.') return
-                  const n = parseFloat(raw)
-                  if (!Number.isNaN(n)) commit(k, n)
-                }}
+                onChange={e => setDraft({ k, text: String(e.target.value) })}
               />
               {!disabled && (
                 <span className="triplet-step" aria-hidden="true">

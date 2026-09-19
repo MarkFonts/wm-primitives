@@ -11,6 +11,46 @@ Newest first.
 
 ---
 
+## 2026-09-19 — the open decisions, closed (NEXT.md D)
+
+**Typing commits on Enter or blur, in every field.** The dial had moved there on the 17th;
+the triplet still committed per keystroke, so typing `24` on a min-8 band became 8, then
+84, with the neighbours carried along on each step. One rule now, GESTURES §0 *Typing*.
+G45 and its test changed to match.
+
+**The dial's type size was never inherited — its box was.** The text is 12px in every
+host and always was. What the parity report read as 16px was the label *container*,
+which set no size or leading of its own, so a row was 18px in the two React hosts and
+18.8px in opsz-proofer's 12px/1.4 panel. `.slider-label` sets both now, and the type
+tokens carry fallbacks (`0.75rem`, `1.4`, `0.5625rem` for the tag) so a host that never
+loads `type.css` gets the same box. Five allowlist lines existed for this.
+
+**The parity gate had been crashing since it was written.** `__dirname` in an ES module;
+rendering is continue-on-error, so the crash read as a report with nothing in it. Two
+runs on main went by like that. `import.meta.url` now, and the run after this one is the
+first the gate has actually judged.
+
+**Three render baselines outlived the thing they pictured.** Kernpare's `.ui-seg` (the pill
+it retired for the house button), its `theme-words` (it took the marks look), and
+opsz-proofer's two rows (the `input[type="text"]` scoping). All from the 17th; all
+reported, none blocking, none read. Re-cut from CI, and the Kernpare test now pictures
+the house button.
+
+**Mouse drag-from-anywhere is native, and proven.** The native range jumps on press and
+keeps dragging from there. G18 says so and a test holds it; the promise is per pointer.
+
+**`--dial-track-h` is the host's.** 24px default, 14 floor, DIAL §7. ReCal's 14 is not
+drift.
+
+**`Collapse` was shipping all along.** Nothing imports it by name except `Fitting`, which
+wraps its two H&J sections in it — so the census read "unshipped". GESTURES §11 now has
+its rows. `StopSlider` was a name in four documents and no file.
+
+**ReCal's measure is in body ems now.** `.para-doc` sets the `p` style's size, so `34em`
+is thirty-four of them rather than of the page's 16px. (ReCal, not here.)
+
+---
+
 ## 2026-09-17 — the dial for pages without React
 
 **`dist/dial.js`: one source, a second output.** `a0e1645`

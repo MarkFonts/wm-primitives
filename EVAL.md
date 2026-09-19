@@ -95,7 +95,7 @@ each one is a bug that has already happened once:
 The full promise list is [GESTURES.md](GESTURES.md) (G1–G36); the B-ids above are the
 first tests to write, not the whole spec.
 
-Steppers, `StopSlider`, `AxisTriplet`, `Icon` states and `Collapse` get their own short
+Steppers, `AxisTriplet`, `Icon` states and `Collapse` get their own short
 tables on the same pattern once the AxisSlider ones exist and are green — that control is
 the one with the most reported failures, so it is first.
 
@@ -264,7 +264,7 @@ rendering pulled forward because of Q1.
      precisely formatted kern lists — is product work the battery cannot do; it can
      only tell you when it is done.
 8. Remaining controls get §2 tables: AxisTriplet, Icon — DONE GESTURES §9–10, tests/behaviour/{triplet,icon}.spec.ts.
-   StopSlider and Collapse are not deployed anywhere; they get rows when they ship.
+   Collapse ships inside Fitting (GESTURES §11, 2026-09-19); StopSlider never existed here.
 ```
 
 Nothing here changes a primitive. Steps 1 and 4 are CI only; 2 and 3 add a `tests/`
