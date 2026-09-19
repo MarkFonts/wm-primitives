@@ -330,7 +330,12 @@ if (cfg.hostTokens || cfg.tokenSources) {
     decomment(readFileSync(file, 'utf8')).split('\n').forEach((line, i) => {
       const at = `${rel}:${i + 1}`
       /* Reads: the property this var() sits in, and the fallback it carries. */
-      for (const m of line.matchAll(/([-a-z]+)\s*:\s*([^;}]*var\([^;}]*)/g)) {
+      /* QUOTES END A DECLARATION TOO, and that is not pedantry now that a root may be
+         .html: an inline style="" attribute is terminated by its quote, not a semicolon.
+         Stopping only at `;` and `}` ran straight out of one attribute and into the next
+         tag -- in kernpare it paired `font-weight` from one <span> with a var() inside
+         the NEXT one and reported a colour token as being read as a number. */
+      for (const m of line.matchAll(/([-a-z]+)\s*:\s*([^;}"']*var\([^;}"']*)/g)) {
         const prop = m[1], rest = m[2]
         if (prop.startsWith('--')) continue          // a token defined from another
         /* THE PROPERTY ONLY SPEAKS FOR A TOP-LEVEL var(). Nested inside a function it
@@ -356,7 +361,7 @@ if (cfg.hostTokens || cfg.tokenSources) {
         }
       }
       /* Declarations, to be judged against the above. */
-      for (const m of line.matchAll(/(--[\w-]+)\s*:\s*([^;}]+)/g))
+      for (const m of line.matchAll(/(--[\w-]+)\s*:\s*([^;}"']+)/g))
         decls.set(m[1], (decls.get(m[1]) ?? []).concat({ at, value: m[2].trim() }))
     })
   }
