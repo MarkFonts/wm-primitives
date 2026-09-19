@@ -89,6 +89,13 @@ export type {
   LetterboxConfig, LetterboxHandle, LetterboxSpeckle, LetterboxLayers,
 } from './src/letterbox.js'
 
+// The house button (src/button.css -- no JS to export). The boxed one: .wm-btn, with
+// .active, --solid, --quiet. The mark (.wm-icon-btn) lives in icon.css, the pill (.ui-seg)
+// in toggleGroup.css. CHROME.md is the census that produced it.
+
+// A native <select> wearing the house chevron (src/select.css -- no JS to export):
+// .wm-select-wrap around .wm-select, with a <Chevron/> hung off the wrapper.
+
 // Motion tokens. Additive like type.css -- it defines --dur-* and styles no element.
 // Apps import it from their entry stylesheet, beside type.css. Before it existed the
 // system had three "fast" values and a --dur-fast only ReCal defined, at 140ms, against

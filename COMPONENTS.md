@@ -14,7 +14,7 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `AxisTriplet` | min / desired / max as ONE control. Extracted from ReCal's H&J rail, which had the right layout on native number inputs -- platform steppers that cannot be themed and a hyphen where a minus belongs. | — | GESTURES.md §9 |
 | `Chevron` | The one chevron, at the house angle, with a stroke derived from its width. | font-proofer, ReCal | SLIDERS.md (icon census) |
 | `Icon` | Icon — a Material Symbols mark on the same axes as the type beside it. The HOST loads the font (see Icon.tsx for the link tag and its four axes); this exports the component and the ink/weight contract only. | font-proofer | GESTURES.md §10 |
-| `ThemeSwitch` | ThemeSwitch -- Auto / Light / Dark, both looks (marks, words) over one engine. The engine is plain JS so a page without React (Kernpare) drives the same control with mountThemeSwitch(); the head-script stamp before first… | font-proofer | GESTURES.md §8 |
+| `ThemeSwitch` | ThemeSwitch -- Auto / Light / Dark, both looks (marks, words) over one engine. The engine is plain JS so a page without React (Kernpare) drives the same control with mountThemeSwitch(); the head-script stamp before first… | — | GESTURES.md §8 |
 | `THEMES` `THEME_KEY` `readTheme` `applyTheme` `bootTheme` `mountThemeSwitch` | The theme engine itself, for a page without React (bootTheme in a head script). | Kernpare | GESTURES.md §8 |
 | `BlockStyleRail` | BlockStyleRail — h1/h2/h3/¶ stacked in the margin of the block being edited, at the bottom of the ink ladder until you reach for them. | font-proofer | — |
 | `makeGlyphSets` `parseCmapRanges` `isSupported` `enumerateCmap` | Glyph-set matching + cmap parsing (Glyphs scene). Each app composes its own extra groups / alternates on top of the shared base groups. | font-proofer, ReCal | — |
@@ -22,11 +22,30 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `EditableTextBlock` | Canonical contentEditable text-block lifecycle (raw-while-focused, commit-on-blur, caret capture/restore). Pairs with caret.ts + editRail.css. | font-proofer, ReCal | — |
 | `GlyphPicker` `measureGlyphMetrics` | Interactive glyph browser: equal-sized cell grid + viewer/U+ readout, search, copy-to-clipboard, ssXX alternate groups (wm-primitives #2). | font-proofer, ReCal | — |
 | `createLetterbox` `JEROME` | The letterbox: the house wordmark scanned and packed with prose (Charlie Clark's pretext effect). Plain-JS engine, because wordmark.nyc and this repo's system page script-tag it directly, and ReCal's landing pages load i… | ReCal | README (letterbox) |
-| `ROLES` `POSTER` `INK` `TRACK_CAPS` `LANDINGS` `typeStyle` `ink` | Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/ --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so importing it cannot reach existing markup. Apps import… | Kernpare, ReCal, opsz-proofer | TYPOGRAPHY.md |
+| `ROLES` `POSTER` `INK` `TRACK_CAPS` `LANDINGS` `typeStyle` `ink` | Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/ --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so importing it cannot reach existing markup. Apps import… | Kernpare, font-proofer, ReCal, opsz-proofer | TYPOGRAPHY.md |
 | `Collapse` | A disclosure box that measures its own content, so a section's height is never a number anyone has to keep up to date. Used by the fitting panel's two sections. | font-proofer | — |
 | `FittingControls` `fittingMode` `AlignmentButtons` `ALIGNMENTS` `FittedParagraph` | The line-fitting controls. The engine above is consumed directly by static pages; this is the interface both paragraph views render — font-proofer in its sidebar, ReCal in the floating Type panel. Alignment stays with th… | font-proofer, ReCal | FITTING-MAP.md |
 | `SpecimenNav` | Long public-domain works: authored whole in specimens/<slug>.txt, served as the chunks build-specimens.mjs cuts at each FORM FEED, fetched only as far as the reader asks. The tail control travels with the loader: both ap… | font-proofer, ReCal | — |
 | `PARA_STYLE_ORDER` `PARA_STYLE_LABEL` `PARA_STYLE_DEFAULTS` `fitOptionsFor` | The four paragraph styles both paragraph views show, and the one-liner that turns a style plus the font's H&J bands into fit options. The keys, labels, numbers and the resolver only; each app keeps the font fields it dra… | ReCal, font-proofer | — |
 | *(types only)* | — | — | FITTING-MAP.md |
 
-CSS-only modules (imported from an app's entry stylesheet, nothing to export): `src/motion.css`, `src/color.css`.
+CSS-only modules (imported from an app's entry stylesheet, nothing to export): `src/button.css`, `src/select.css`, `src/motion.css`, `src/color.css`.
+
+## Marks
+
+Material Symbols names each consumer draws (`<Icon name>` and raw ligatures), so removing one is a search, not a guess. The subset font carries what `scripts/` last cut; a name here that is not in it prints as text.
+
+| mark | drawn by |
+| --- | --- |
+| `brightness_auto` | font-proofer |
+| `calendar_month` | font-proofer |
+| `dark_mode` | font-proofer |
+| `discover_tune` | font-proofer |
+| `format_paragraph` | font-proofer |
+| `forms_add_on` | font-proofer |
+| `grid_view` | font-proofer |
+| `insert_text` | font-proofer |
+| `keyboard_arrow_up` | font-proofer |
+| `light_mode` | font-proofer |
+| `settings_backup_restore` | font-proofer |
+| `text_fields` | font-proofer |
