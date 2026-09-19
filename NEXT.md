@@ -120,8 +120,16 @@ a task. Skip nothing above the line you are on; below it, pick.
 - [x] **A release tag when a consumer-visible contract changes.** Policy in README §5;
       `v0.1.0` cut on main 2026-09-19 as the contract's first fixed point. Consumers still
       deploy from `main` by choice; pinning a tag is one line in their deploy.
-- [ ] **Retire `git` on this machine for the private repos**, or fix it. The memory file
-      says why; every session pays for it.
+- [ ] **Retire `git` on this machine for the private repos**, or fix it. Measured
+      2026-09-19, with a real timer: `ls-remote`, `status` and `fetch` on the public and the
+      private repos all complete in 0.5–1.6s, with the keychain helper and without it. The
+      hang is intermittent, not a configuration; the two documented cases were a push
+      during a rebase and a status while a second Claude session was using the same
+      checkout. Two things to change anyway: `~/.gitconfig` says `filter.lfs.required =
+      true` and `git-lfs` is not installed, which fails any repo that ever adds an LFS
+      attribute; and `gh auth git-credential` can stand in for the keychain helper, which
+      cannot prompt from a sandbox. The guarded-call habit and the API route stay until a
+      hang is caught with `GIT_TRACE=1` attached.
 
 ---
 
