@@ -18,12 +18,23 @@ the triplet still committed per keystroke, so typing `24` on a min-8 band became
 84, with the neighbours carried along on each step. One rule now, GESTURES §0 *Typing*.
 G45 and its test changed to match.
 
-**The dial's type size was never inherited by design.** `AxisSlider.css` asked for
-`--type-ui-size` with no fallback; opsz-proofer inlines `type.css` and got 12px, the two
-React hosts don't and got the page's 16. Five parity-allowlist lines carried that. The
-fallback is baked in (`0.75rem`, the `ui` role; `0.5625rem` for the tag) and the lines are
-gone. font-proofer's and ReCal's dial labels get smaller; the baselines for both will
-re-cut from CI.
+**The dial's type size was never inherited — its box was.** The text is 12px in every
+host and always was. What the parity report read as 16px was the label *container*,
+which set no size or leading of its own, so a row was 18px in the two React hosts and
+18.8px in opsz-proofer's 12px/1.4 panel. `.slider-label` sets both now, and the type
+tokens carry fallbacks (`0.75rem`, `1.4`, `0.5625rem` for the tag) so a host that never
+loads `type.css` gets the same box. Five allowlist lines existed for this.
+
+**The parity gate had been crashing since it was written.** `__dirname` in an ES module;
+rendering is continue-on-error, so the crash read as a report with nothing in it. Two
+runs on main went by like that. `import.meta.url` now, and the run after this one is the
+first the gate has actually judged.
+
+**Three render baselines outlived the thing they pictured.** Kernpare's `.ui-seg` (the pill
+it retired for the house button), its `theme-words` (it took the marks look), and
+opsz-proofer's two rows (the `input[type="text"]` scoping). All from the 17th; all
+reported, none blocking, none read. Re-cut from CI, and the Kernpare test now pictures
+the house button.
 
 **Mouse drag-from-anywhere is native, and proven.** The native range jumps on press and
 keeps dragging from there. G18 says so and a test holds it; the promise is per pointer.

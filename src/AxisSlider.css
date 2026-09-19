@@ -23,7 +23,13 @@
   .slider-row { display: flex; flex-direction: column; gap: 3px; }
   .slider-row--off { opacity: 0.4; }
 
-  .slider-label { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  /* The label box sets its own size and leading, so the row is the same height in a
+     16px/normal page and a 12px/1.4 panel: before this it inherited both, and the parity
+     report read 18px rows in two hosts and 18.8 in the third (NEXT.md D, 2026-09-19). */
+  .slider-label {
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    font-size: var(--type-ui-size, 0.75rem); line-height: var(--type-ui-lead, 1.4);
+  }
   .slider-label-left {
     display: flex; align-items: baseline; gap: var(--spacing-01, 4px);
     /* Takes the row's leftover rather than collapsing to its own content. On flex:0 1 auto

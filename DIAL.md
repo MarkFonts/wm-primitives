@@ -181,8 +181,9 @@ vanish silently: `lockedAbove` and `reference`.
 host says otherwise, and 14px is the floor (below it the thumb has nothing to sit in).
 font-proofer takes the default; ReCal sets 14 on its Type Matrix surface. Both are right,
 the parity allowlist says so, and the number is not the primitive's to pick — decided
-2026-09-19. The dial's **type size** is: 12px, the `ui` role, with a fallback baked into
-`AxisSlider.css` so a host that never loads `type.css` gets the same dial as one that does.
+2026-09-19. The dial's **type size and leading** are its own: 12px, the `ui` role, 1.4,
+set on the label box with fallbacks baked into `AxisSlider.css`, so a host that never
+loads `type.css` gets the same row as one that does.
 
 ---
 

@@ -1,6 +1,6 @@
 import { test, expect, type Page, type Locator } from '@playwright/test'
 import { mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { HOSTS, sealed, settle } from './hosts'
 
 /* EVAL.md §3 -- rendering.
@@ -121,7 +121,7 @@ test('parity report: the same dial in every host', async ({}, info) => {
   /* A GATE now, not only a report (NEXT.md B): every disagreement must be in
      parity-allow.json with a reason, or the run is red. The report above still prints
      the allowed ones so the list can be re-read against what is live. */
-  const allow = JSON.parse(readFileSync(join(__dirname, 'parity-allow.json'), 'utf8')) as Record<string, string>
+  const allow = JSON.parse(readFileSync(fileURLToPath(new URL('parity-allow.json', import.meta.url)), 'utf8')) as Record<string, string>
   const unexplained = lines.map(l => l.split('\n')[0]).filter(k => !(k in allow))
   expect(unexplained, 'cross-host disagreements with no entry in tests/render/parity-allow.json').toEqual([])
 })

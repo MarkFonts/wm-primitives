@@ -65,9 +65,9 @@ a task. Skip nothing above the line you are on; below it, pick.
       wherever the press lands; the G18 test proves it. 2026-09-19.
 - [x] **`default` variant: 14px or 24px rail?** Per host: `--dial-track-h`, 24 default,
       14 floor. DIAL §7. 2026-09-19.
-- [x] **The dial's type size is inherited.** It was never inheritance: the dial asked for
-      `--type-ui-size` with no fallback, and two hosts don't load `type.css`. Fallback
-      baked in; 12px everywhere. 2026-09-19.
+- [x] **The dial's type size is inherited.** The text never was — 12px in every host —
+      but the label *box* inherited size and leading, so rows were 18px in two hosts and
+      18.8 in the third. The box sets both now; the tokens got fallbacks. 2026-09-19.
 - [x] **`em` on the measure dial** — converted: ReCal's `.para-doc` takes the body
       style's size, so `34em` is 34 body ems. 2026-09-19.
 - [x] **StopSlider and Collapse** — Collapse ships: `Fitting` wraps its two sections in
