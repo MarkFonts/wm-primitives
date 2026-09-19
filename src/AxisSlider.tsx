@@ -30,6 +30,7 @@ import { nbMinus } from './format'
 import { CHEVRON, chevronPath } from './chevronGeometry'
 import './chevron.css'
 import './AxisSlider.css'
+import { checkHostContract } from './contract'
 
 export interface AxisSliderProps {
   /** Human-readable name, shown first — "Weight", "Optical size", "size".
@@ -220,6 +221,8 @@ export function AxisSlider({
     else delete root.dataset.scrubbing
   }
   useEffect(() => () => setScrub(false), [])
+  // The host contract, checked once per page in dev: HOWTO.md's two silent failures.
+  useEffect(() => { if (rowRef.current) checkHostContract(rowRef.current) }, [])
 
   const engage = () => {
     setEngaged(true)

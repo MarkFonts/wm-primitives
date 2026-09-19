@@ -2,16 +2,18 @@ import { test, expect, type Page, type Locator } from '@playwright/test'
 import { HOSTS, sealed, settle } from '../render/hosts'
 import { touchDrag, touchPress, at } from './gesture'
 
-/* GESTURES.md §1-2, on the built host, in the one track-variant row both hosts draw
-   with nothing between the dial and its state: `tracking`. (`size` is capped by
-   font-proofer's paragraph comfort limit, so a drag there lands where the host says.)
-   The ids in the test names are the spec's. */
+/* GESTURES.md §1-2, on the built hosts, one row per VARIANT each host draws (hosts.ts
+   `rows`): the track row is the mobile-pass design, the default row the native-thumb
+   one. The engagement promises (G11-13) are track-only by design. The ids in the test
+   names are the spec's. */
 
-const sizeRow = (page: Page) =>
-  page.locator('.slider-row--track').filter({ has: page.locator('.slider-label-name', { hasText: /^tracking$/ }) })
+type RowCfg = NonNullable<(typeof HOSTS)[number]['rows']>[number]
+const rowOf = (page: Page, cfg: RowCfg) =>
+  page.locator(cfg.variant === 'track' ? '.slider-row--track' : '.slider-row:not(.slider-row--track)')
+    .filter({ has: page.locator('.slider-label-name', { hasText: cfg.label }) })
     .filter({ visible: true }).first()
 
-const readValue = (row: Locator) => row.locator('input.slider-number').inputValue().then(v => parseFloat(v.replace('−', '-')))
+const readValue = (row: Locator) => row.locator('input.slider-number').inputValue().then(v => parseFloat(v.replace('\u2212', '-')))
 const range = (row: Locator) => row.locator('input[type="range"]')
 const bounds = async (row: Locator) => {
   const r = range(row)
@@ -24,13 +26,15 @@ const heights = (row: Locator) => row.evaluate(el => ({
   bar: el.querySelector('.slider-label')!.getBoundingClientRect().height,
 }))
 
-for (const host of HOSTS.filter(h => h.gestures !== false)) {
-  test.describe(`${host.name}`, () => {
+for (const host of HOSTS.filter(h => h.gestures !== false && h.rows?.length)) for (const cfg of host.rows!) {
+  const sizeRow = (page: Page) => rowOf(page, cfg)
+  test.describe(`${host.name} · ${cfg.variant}`, () => {
     test.beforeEach(async ({ page }) => {
       await sealed(page)
       await host.setTheme(page, 'dark')
       await page.goto(host.url)
       await settle(page)
+      if (cfg.open) { await cfg.open(page); await settle(page) }
       await expect(sizeRow(page)).toBeVisible()
       await sizeRow(page).scrollIntoViewIfNeeded()
     })
@@ -93,15 +97,16 @@ for (const host of HOSTS.filter(h => h.gestures !== false)) {
         const row = sizeRow(page); const r = range(row)
         expect(await scrubbing(page)).toBe(false)
         const p = await at(r, 0.4)
-        // hold at the end of the move so the attribute can be read mid-gesture
-        const mid = touchDrag(page, r, [p, { x: p.x + 20, y: p.y }, { x: p.x + 50, y: p.y }], { hold: 400 })
-        await page.waitForTimeout(150)
-        expect(await scrubbing(page)).toBe(true)
+        // hold at the end of the move so the attribute can be read mid-gesture -- polled,
+        // not read at a fixed delay: a slow runner had not begun dispatching at 150ms
+        const mid = touchDrag(page, r, [p, { x: p.x + 20, y: p.y }, { x: p.x + 50, y: p.y }], { hold: 900 })
+        await expect.poll(() => scrubbing(page), { timeout: 700 }).toBe(true)
         await mid
         expect(await scrubbing(page)).toBe(false)
       })
 
       test('G11-13 · the row holds its height; only the bar grows, and it stays grown for 3s after lift', async ({ page }) => {
+        test.skip(cfg.variant !== 'track', 'engagement is the track variant\'s design')
         const row = sizeRow(page); const r = range(row)
         const rest = await heights(row)
         expect(rest.row).toBe(48); expect(rest.bar).toBe(32)
