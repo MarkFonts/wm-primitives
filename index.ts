@@ -1,26 +1,32 @@
 // Barrel for WORDMARK's shared cross-app UI primitives. The component modules
 // import their own token-based CSS, so consumers just import from here.
+
+// The named-style / scope picker: rows + label + spec chips, single- or multi-select.
 export { StyleScopeList, default as StyleScopeDropdown } from './src/StyleScopeDropdown'
 export type {
   ScopeChipKind, ScopeChip, ScopeRow,
   StyleScopeDropdownProps, StyleScopeListProps,
 } from './src/StyleScopeDropdown'
 
+// A one-word emphasis toggle that sits in the text it marks up.
 export { InlineEmphasisBubble } from './src/InlineEmphasisBubble'
 export type { InlineEmphasisBubbleProps } from './src/InlineEmphasisBubble'
 
+// Caret capture and restore for contentEditable blocks.
 export { placeCaretAtStart, placeCaretAtEnd, placeCaretAtOffset, caretCharOffset } from './src/caret'
 
+// The inline-markup tokeniser the editable blocks share.
 export { splitInlineMarkup, isPlainRun } from './src/inlineMarkup'
 export type { InlineTokenType, InlineToken } from './src/inlineMarkup'
 
 // UI-kit board (component gallery preview). JS module — consumers on tsc need allowJs.
 export { default as UiKitBoard } from './src/UiKitBoard'
 
-// Auto-deploy: a push touching src/ or this file fires .github/workflows/consumers.yml,
-// which dispatches font-proofer + ReCal to rebuild against latest and redeploy to
-// wordmark — so a primitive change ships everywhere without bumping each app.
+// (A push touching src/ or this file runs .github/workflows/consumers.yml: every consumer
+// is built and tested against the commit, then told to redeploy.)
 
+// The dial: one number on one axis, with a rail, a field and a stepper. Four variants.
+// The spec is DIAL.md, the promises GESTURES.md, the tests tests/behaviour.
 export { AxisSlider } from './src/AxisSlider'
 export type { AxisSliderProps } from './src/AxisSlider'
 
@@ -30,12 +36,13 @@ export type { AxisSliderProps } from './src/AxisSlider'
 export { AxisTriplet } from './src/AxisTriplet'
 export type { AxisTripletProps, Band } from './src/AxisTriplet'
 
-// Icon — a Material Symbols mark on the same axes as the type beside it. The HOST loads
-// the font (see Icon.tsx for the link tag and its four axes); this exports the component
-// and the ink/weight contract only.
+// The one chevron, at the house angle, with a stroke derived from its width.
 export { Chevron } from './src/Chevron'
 export type { ChevronProps } from './src/Chevron'
 
+// Icon — a Material Symbols mark on the same axes as the type beside it. The HOST loads
+// the font (see Icon.tsx for the link tag and its four axes); this exports the component
+// and the ink/weight contract only.
 export { Icon } from './src/Icon'
 export type { IconProps } from './src/Icon'
 
@@ -44,6 +51,7 @@ export type { IconProps } from './src/Icon'
 // mountThemeSwitch(); the head-script stamp before first paint is bootTheme().
 export { ThemeSwitch } from './src/ThemeSwitch'
 export type { ThemeSwitchProps } from './src/ThemeSwitch'
+// The theme engine itself, for a page without React (bootTheme in a head script).
 export { THEMES, THEME_KEY, readTheme, applyTheme, bootTheme, mountThemeSwitch } from './src/theme.js'
 export type { Theme } from './src/theme.js'
 
@@ -57,7 +65,7 @@ export type { BlockStyleRailProps } from './src/BlockStyleRail'
 export { makeGlyphSets, parseCmapRanges, isSupported, enumerateCmap } from './src/glyphset'
 export type { CmapRanges, GlyphGroups } from './src/glyphset'
 
-// Small text / number formatting helpers.
+// A real minus (U+2212) for readouts, never a hyphen.
 export { nbMinus } from './src/format'
 
 // Canonical contentEditable text-block lifecycle (raw-while-focused, commit-on-blur,

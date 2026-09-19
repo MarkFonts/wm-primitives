@@ -23,7 +23,8 @@
     "test:render:update": "playwright test tests/render --update-snapshots",
     "test:behaviour": "playwright test tests/behaviour",
     "test": "playwright test",
-    "build:dial": "node scripts/build-dial.mjs"
+    "build:dial": "node scripts/build-dial.mjs",
+    "gen:index": "node scripts/gen-index.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

@@ -19,6 +19,8 @@ on:
       - 'fonts/**'      # the canonical Cal Sans lives here; a rebuild must follow it
       - 'scripts/lint-tokens.mjs'
       - 'scripts/build-dial.mjs'
+      - 'scripts/gen-index.mjs'
+      - '.tokenlint.json'
       - 'dist/**'
       - 'tests/**'
       - 'playwright.config.ts'
@@ -30,6 +32,8 @@ on:
       - 'fonts/**'
       - 'scripts/lint-tokens.mjs'
       - 'scripts/build-dial.mjs'
+      - 'scripts/gen-index.mjs'
+      - '.tokenlint.json'
       - 'dist/**'
       - 'tests/**'
       - 'playwright.config.ts'
@@ -122,6 +126,14 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm run build:dial
+      - name: COMPONENTS.md and HOST-CONTRACT.md must match their inputs
+        run: |
+          node scripts/gen-index.mjs
+          if ! git diff --quiet -- COMPONENTS.md HOST-CONTRACT.md; then
+            git --no-pager diff --stat -- COMPONENTS.md HOST-CONTRACT.md
+            echo "::error file=COMPONENTS.md::index.ts or .tokenlint.json changed without 'node scripts/gen-index.mjs' -- run it and commit"
+            exit 1
+          fi
       - name: dist/ must match the source
         run: |
           if ! git diff --quiet -- dist/; then

@@ -57,5 +57,156 @@
     "--gp-opsz",
     "--locked-pct",
     "--pct"
-  ]
+  ],
+  "_hostTokenDocs": "Prose twin of hostTokens, one line each: [what it is, what happens without it]. gen-index.mjs renders HOST-CONTRACT.md from this; lint-tokens fails a hostToken with no entry.",
+  "hostTokenDocs": {
+    "--accent": [
+      "the colour every active state paints from: the focused value and its rule, the marker, focus rings",
+      "controls show no active state -- a focused dial looks like a resting one"
+    ],
+    "--axis-label-w": [
+      "the dial's name column, a floor (DIAL \u00a75); measure the rail's widest name including the auto pill",
+      "defaults to 105px; long names push the tags out of their column (R2)"
+    ],
+    "--bg": [
+      "the page ground",
+      "the rail bar and chips paint transparent over whatever the page has"
+    ],
+    "--bg-elevated": [
+      "a raised surface: the boxed value field",
+      "falls back to --surface"
+    ],
+    "--bg-hover": [
+      "hover ground for the fitting panel's buttons",
+      "no hover feedback there"
+    ],
+    "--border": [
+      "the one hairline: rails, fields, chips, the toggle pill",
+      "the rail VANISHES -- label and value render, the track does not (HOWTO, silent failure 1)"
+    ],
+    "--border-subtle": [
+      "a lighter hairline for cell grids",
+      "falls back to --border"
+    ],
+    "--dial-thumb": [
+      "thumb diameter on the default rail",
+      "20px"
+    ],
+    "--dial-track-h": [
+      "rail height on the default variant; ReCal sets 14px, font-proofer keeps 24px",
+      "24px -- and this is why the same dial is two heights across hosts (parity report)"
+    ],
+    "--edit-rail": [
+      "the block-style rail's resting ink",
+      "falls back to the ink ladder"
+    ],
+    "--edit-rail-target": [
+      "its hit-target width",
+      "40px"
+    ],
+    "--err": [
+      "error signal colour",
+      "a literal red"
+    ],
+    "--gp-ui-font": [
+      "the glyph picker's chrome face, if it differs from --ui-font",
+      "falls back to --ui-font"
+    ],
+    "--gp-ui-fvs": [
+      "its font-variation-settings",
+      "none"
+    ],
+    "--ink": [
+      "the toggle pill's text",
+      "falls back to --text"
+    ],
+    "--marker-default": [
+      "the stock-value marker's colour on a rail",
+      "falls back to --text-dim"
+    ],
+    "--muted": [
+      "the toggle pill's border",
+      "a literal grey"
+    ],
+    "--ok": [
+      "the 'auto' state's green and the good-signal colour",
+      "the auto dot is ink-coloured instead of green"
+    ],
+    "--radius": [
+      "the corner of every box: fields, chips, buttons, the pill's children",
+      "6px; corners.css then applies the superellipse to it"
+    ],
+    "--radius-sm": [
+      "the smaller corner: tags, small fields",
+      "falls back to --radius"
+    ],
+    "--scrollbar-thumb": [
+      "the house 6px scrollbar's thumb",
+      "a literal grey"
+    ],
+    "--scrollbar-thumb-hover": [
+      "its hover",
+      "a literal grey"
+    ],
+    "--specimen-fade-height": [
+      "how tall the specimen's bottom fade is",
+      "a literal height"
+    ],
+    "--surface": [
+      "a panel ground one step off --bg",
+      "chips and pills lose their ground and read as text"
+    ],
+    "--surface-2": [
+      "(listed, read nowhere -- kept until the census removes it)",
+      "nothing"
+    ],
+    "--surface-hi": [
+      "the highest surface: menus, popovers, the engaged bar",
+      "menus paint over the page with no ground"
+    ],
+    "--text": [
+      "full ink",
+      "everything inherits the page colour -- on a dark page with no ramp that is black on black (HOWTO, silent failure 2)"
+    ],
+    "--text-dim": [
+      "the faint step: tags, ranges, resting chevrons",
+      "same as --text; the hierarchy flattens"
+    ],
+    "--text-muted": [
+      "the quiet step: labels. By design the same number as --ink-quiet",
+      "same as --text; labels and values look alike"
+    ],
+    "--track-empty": [
+      "the unfilled part of a rail",
+      "falls back to --border"
+    ],
+    "--ui-font": [
+      "the chrome face -- every control's type",
+      "system-ui, on purpose (HOWTO)"
+    ],
+    "--ui-fvs": [
+      "its font-variation-settings, for a variable chrome face",
+      "none"
+    ],
+    "--vm-lh": [
+      "the vertical-metrics line-height (UiKitBoard only)",
+      "gallery only"
+    ],
+    "--vs": [
+      "a variation-settings string (UiKitBoard only)",
+      "gallery only"
+    ],
+    "--w-bold": [
+      "bold weight number (UiKitBoard only)",
+      "gallery only"
+    ],
+    "--w-default": [
+      "default weight number (UiKitBoard only)",
+      "gallery only"
+    ],
+    "--warn": [
+      "warning signal colour",
+      "a literal amber"
+    ]
+  }
 }
