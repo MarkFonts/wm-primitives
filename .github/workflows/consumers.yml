@@ -50,9 +50,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Kernpare and WORDMAKE are local apps with no build; they join as D6 (clean
-          # clone runs) when they have one. Kernpare is not here yet; WORDMAKE has no
-          # submodule to point.
+          # Kernpare and WORDMAKE are local apps with no build. Kernpare joins here for
+          # its lint only (NEXT.md E): one index.html, its CSS read through the markup,
+          # the analysis UI fenced off on purpose. Its rendering and gestures are in the
+          # browser job. WORDMAKE builds against wm-primitives through a symlinked
+          # shared/ and imports StopSlider and StyleScopeDropdown, which live on the
+          # flattersatz-headless branch, not main -- it joins the day that lands.
+          - name: kernpare
+            repo: MarkFonts/wordmarktools
+            shared: kernpare/shared
+            kind: html
+            workdir: kernpare
           - name: font-proofer
             repo: MarkFonts/font-proofer
             shared: shared
@@ -202,6 +210,65 @@ jobs:
           path: |
             playwright-report
             test-results
+          retention-days: 14
+
+  # EVAL Q2 deferred Windows; NEXT.md E takes it up. Rendering only, on a Windows runner,
+  # against its own baseline set (tests/__screenshots__/win32/): the promise is that the
+  # same dial renders the same on the OS the collaborator has, not that Windows matches
+  # linux pixel for pixel -- it never will, the text rasteriser is a different one. A
+  # report like the linux rendering step, never a gate; the behaviour suite already runs
+  # in Chromium on linux and a mouse is a mouse.
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with: { repository: MarkFonts/font-proofer, path: hosts/font-proofer, submodules: false }
+      - uses: actions/checkout@v5
+        with: { repository: MarkFonts/ReCal, path: hosts/ReCal, submodules: false }
+      - uses: actions/checkout@v5
+        with: { repository: MarkFonts/wordmarktools, path: hosts/wordmarktools, submodules: false, token: "${{ secrets.WORDMARK_DEPLOY_TOKEN4 }}" }
+      - run: |
+          for d in hosts/font-proofer/shared hosts/ReCal/shared hosts/wordmarktools/opsz-proofer/shared hosts/wordmarktools/kernpare/shared; do
+            rm -rf "$d"; git clone -q --no-checkout . "$d" && git -C "$d" checkout -q ${{ github.sha }}
+          done
+      - run: |
+          [ -f hosts/wordmarktools/kernpare/data.json ] || cp hosts/wordmarktools/kernpare/fixture/data.json hosts/wordmarktools/kernpare/data.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - run: cd hosts/font-proofer && npm ci && npm run build
+      - run: cd hosts/ReCal && npm ci && npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install fonttools brotli && cd hosts/wordmarktools/opsz-proofer && python3 build.py
+      - run: npm ci
+      - run: npx playwright install chromium
+      - name: Rendering on Windows (EVAL Q2) -- reports, never blocks
+        continue-on-error: true
+        env:
+          WM_PLATFORM: win32
+          FONT_PROOFER_DIST: ${{ github.workspace }}/hosts/font-proofer/dist
+          RECAL_DIST: ${{ github.workspace }}/hosts/ReCal/dist
+          OPSZ_PROOFER_DIST: ${{ github.workspace }}/hosts/wordmarktools/opsz-proofer/dist
+          KERNPARE_DIR: ${{ github.workspace }}/hosts/wordmarktools/kernpare
+        # No win32 baselines yet means this is the run that cuts them: they are written
+        # and uploaded, and the commit that adds them is the next one.
+        run: |
+          if [ -d tests/__screenshots__/win32 ]; then npx playwright test tests/render --project=desktop
+          else npx playwright test tests/render --project=desktop --update-snapshots; fi
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-win32-${{ github.sha }}
+          path: |
+            playwright-report
+            test-results
+            tests/__screenshots__/win32
           retention-days: 14
 
   # -- the old notify.yml, verbatim below this line, now gated on check ------------------

@@ -201,7 +201,8 @@ earlier. One rule now, in §0.
 
 ## Other controls
 
-`StopSlider` never existed in this repo — the census named it, no file did (2026-09-19).
+`StopSlider` is not on main — it lives on the `flattersatz-headless` branch, where
+WORDMAKE builds against it (NEXT.md E). It gets rows here when that lands (2026-09-19).
 
 ## 11 · Collapse
 

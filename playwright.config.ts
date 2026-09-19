@@ -11,7 +11,10 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
-  snapshotPathTemplate: '{testDir}/__screenshots__/{projectName}/{arg}{ext}',
+  /* Baselines are per OS only where an OS has its own runner: linux is the default set,
+     and consumers.yml's windows job sets WM_PLATFORM=win32 to read and write
+     tests/__screenshots__/win32/ instead. A Mac still compares against linux (README). */
+  snapshotPathTemplate: `{testDir}/__screenshots__/${process.env.WM_PLATFORM ? process.env.WM_PLATFORM + '/' : ''}{projectName}/{arg}{ext}`,
   updateSnapshots: process.env.CI ? 'none' : 'missing',
   expect: {
     toHaveScreenshot: { animations: 'disabled', caret: 'hide', maxDiffPixelRatio: 0.002 },

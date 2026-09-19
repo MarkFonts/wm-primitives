@@ -11,6 +11,33 @@ Newest first.
 
 ---
 
+## 2026-09-19 — into more hands (NEXT.md E)
+
+**Kernpare is held to the system.** The linter could not read it: one `index.html`, its
+CSS in two `<style>` blocks, and a linter that walked `.css` files. It reads style blocks
+out of an `.html` root now, line numbers intact, and a region can be fenced
+`token-lint: off -- reason` … `token-lint: on` for a design that is deliberately its own
+— the kern-group analysis UI is Severance on purpose and stays so. Everything outside the
+fences was fifty-four literals off the scales; they are steps and roles now. A `kernpare`
+leg in `consumers.yml` runs the lint on every push.
+
+**The system page is the README.** The Pages site opened with a poster and six galleries
+and said nothing about what the package promises or what a host owes it; the README said
+all of that and was rendered only by GitHub. `build.py` renders it as section 01 with a
+converter the size of the README's own markdown, and a README edit rebuilds the page.
+
+**Windows renders.** A `windows` job, Chromium on `windows-latest`, the render suite
+against its own baselines under `tests/__screenshots__/win32/`. A report, like the linux
+rendering step; the first run cut the baselines.
+
+**WORDMAKE was closer than the docs said, and further.** EVAL had it as "no submodule, no
+import". It imports six sheets and five components — through a symlink to the laptop's
+checkout, and two of the components (`StopSlider`, `StyleScopeDropdown`) exist only on
+the `flattersatz-headless` branch. So "StopSlider never had a file" (yesterday's entry)
+was true of main and not of the repo. NEXT.md E has the three steps.
+
+---
+
 ## 2026-09-19 — the open decisions, closed (NEXT.md D)
 
 **Typing commits on Enter or blur, in every field.** The dial had moved there on the 17th;

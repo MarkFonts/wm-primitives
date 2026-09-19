@@ -427,7 +427,88 @@ def six_outline():
 SIX_CMDS, SIX_VB = six_outline()
 
 build_type_page()
-secs = [build_section(*s) for s in SECTIONS]
+# ---------------------------------------------------------------- the README, rendered
+# NEXT.md E: "a public system page that is the README rendered, not a gallery beside it".
+# The README is the package's front door -- the promise, what you get, what you owe, how
+# to wire it, how it ships -- and this page used to be a second front door that said none
+# of that. So the README is section 00 here, rendered from the same file GitHub renders,
+# with a converter small enough to live in this script: headings, paragraphs, bullets,
+# links, inline code, bold. It does not need more than the README uses; if the README
+# grows a feature this cannot draw, the build fails on it rather than dropping it.
+GITHUB = "https://github.com/MarkFonts/wm-primitives/blob/main/"
+
+def md_inline(t):
+    import html as _h
+    t = _h.escape(t, quote=False)
+    t = re.sub(r'`([^`]+)`', r'<code>\1</code>', t)
+    t = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', t)
+    t = re.sub(r'(?<![*\w])\*(?!\*)(.+?)\*(?!\*)', r'<i>\1</i>', t)
+    def link(m):
+        text, href = m.group(1), m.group(2)
+        if not re.match(r'https?://|#', href):
+            href = GITHUB + href          # DIAL.md, .github/workflows/consumers.yml, ...
+        return f'<a href="{href}">{text}</a>'
+    return re.sub(r'\[([^\]]+)\]\(([^)]+)\)', link, t)
+
+def render_md(text):
+    out, para, items, ordered = [], [], [], False
+    def flush_p():
+        if para: out.append(f"<p>{md_inline(' '.join(para))}</p>"); para.clear()
+    def flush_l():
+        nonlocal ordered
+        if items:
+            tag = "ol" if ordered else "ul"
+            out.append(f"<{tag}>" + "".join(f"<li>{md_inline(i)}</li>" for i in items) + f"</{tag}>")
+            items.clear()
+    for line in text.split("\n"):
+        if line.startswith("# "):            # the H1 is the package name; the page has one
+            flush_p(); flush_l(); continue
+        if line.startswith("## "):
+            flush_p(); flush_l(); out.append(f"<h2>{md_inline(line[3:])}</h2>"); continue
+        if line.startswith("### "):
+            flush_p(); flush_l(); out.append(f"<h3>{md_inline(line[4:])}</h3>"); continue
+        m = re.match(r'^(\d+)\. (.*)', line) or re.match(r'^(-) (.*)', line)
+        if m:
+            flush_p(); flush_l() if (m.group(1) != "-") != ordered else None
+            ordered = m.group(1) != "-"; items.append(m.group(2)); continue
+        if line.startswith("  ") and items:    # a wrapped list item
+            items[-1] += " " + line.strip(); continue
+        if not line.strip():
+            flush_p(); flush_l(); continue
+        if line.startswith(("```", "|", ">")):
+            raise SystemExit(f"build: README uses markdown this renderer does not draw: {line[:30]!r}")
+        para.append(line.strip())
+    flush_p(); flush_l()
+    return "\n".join(out)
+
+README_CSS = """
+.readme{max-width:72ch;font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,1.55)}
+.readme h2{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:40px 0 8px}
+.readme h3{font-size:var(--type-body-size,1rem);margin:24px 0 4px}
+.readme p{margin:0 0 14px}
+.readme ul,.readme ol{margin:0 0 14px;padding-left:1.3em}
+.readme li{margin:0 0 6px}
+.readme code{font-family:"PaperMono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
+.readme a{color:inherit;text-decoration:underline;text-underline-offset:.15em;text-decoration-color:var(--dim,currentColor)}
+.readme a:hover{text-decoration-color:currentColor}
+.readme>p:first-child{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5)}
+"""
+
+def build_readme():
+    html = f'<div class="readme">{render_md((PKG/"README.md").read_text())}</div>'
+    chapters = []
+    def tag_h2(m):
+        text = re.sub(r'<[^>]+>', '', m.group(1)).strip()
+        cid = f"readme-c{len(chapters)+1}"
+        chapters.append((cid, text if len(text) <= 38 else text[:37].rstrip(" ,.;:-") + "…"))
+        return f'<h2 id="{cid}">{m.group(1)}</h2>'
+    html = re.sub(r'<h2>(.*?)</h2>', tag_h2, html, flags=re.S)
+    esc = lambda t: "".join(c if ord(c) < 128 else f"&#{ord(c)};" for c in t)
+    return dict(sid="readme", label="The package", title="README", kicker="the promise, and what you owe it",
+                css=scope_css(README_CSS, "#s-readme"), html=esc(html), js="",
+                chapters=[(c, esc(t)) for c, t in chapters])
+
+secs = [build_readme()] + [build_section(*s) for s in SECTIONS]
 
 # ---------------------------------------------------------------- the faces
 def face(name):

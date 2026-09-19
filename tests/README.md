@@ -21,7 +21,8 @@ npx playwright show-report     # the diffs, side by side
 ```
 
 A run on a Mac compares macOS text rendering against linux baselines and will report
-small diffs. That is information, not a verdict: read the report, and only re-cut
+small diffs. Windows has its own set: `consumers.yml`'s `windows` job sets
+`WM_PLATFORM=win32` and reads `tests/__screenshots__/win32/` instead (report only). That is information, not a verdict: read the report, and only re-cut
 baselines from CI (`workflow_dispatch` on Consumers, then download the artifact).
 
 Cross-host is **numbers, not pixels**. The hosts show different labels and values, so two
