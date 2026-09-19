@@ -19,6 +19,8 @@ on:
       - 'fonts/**'      # the canonical Cal Sans lives here; a rebuild must follow it
       - 'scripts/lint-tokens.mjs'
       - 'scripts/build-dial.mjs'
+      - 'scripts/gen-index.mjs'
+      - '.tokenlint.json'
       - 'dist/**'
       - 'tests/**'
       - 'playwright.config.ts'
@@ -30,6 +32,8 @@ on:
       - 'fonts/**'
       - 'scripts/lint-tokens.mjs'
       - 'scripts/build-dial.mjs'
+      - 'scripts/gen-index.mjs'
+      - '.tokenlint.json'
       - 'dist/**'
       - 'tests/**'
       - 'playwright.config.ts'
@@ -164,6 +168,17 @@ jobs:
       - run: pip install fonttools brotli && cd hosts/wordmarktools/opsz-proofer && python3 build.py
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
+      # The "drawn by" column needs the consumers' sources, which only this job has.
+      - name: COMPONENTS.md and HOST-CONTRACT.md must match their inputs
+        env:
+          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html
+        run: |
+          node scripts/gen-index.mjs
+          if ! git diff --quiet -- COMPONENTS.md HOST-CONTRACT.md; then
+            git --no-pager diff -- COMPONENTS.md HOST-CONTRACT.md | head -40
+            echo "::error file=COMPONENTS.md::index.ts or .tokenlint.json changed without 'node scripts/gen-index.mjs' -- run it and commit"
+            exit 1
+          fi
       - name: Behaviour (GESTURES.md) -- gates dispatch
         env:
           FONT_PROOFER_DIST: ${{ github.workspace }}/hosts/font-proofer/dist

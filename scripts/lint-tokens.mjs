@@ -30,6 +30,17 @@ if (!existsSync(CONFIG)) {
 const cfg = JSON.parse(readFileSync(CONFIG, 'utf8'))
 const EXEMPT = (cfg.exempt ?? []).map(p => p.split('/').join(sep))
 
+/* A host token with no prose is a token nobody can be told to define. Only where the
+   config keeps prose at all (this package); a consumer's list is its own. */
+if (cfg.hostTokenDocs) {
+  const docs = cfg.hostTokenDocs
+  const undocumented = (cfg.hostTokens ?? []).filter(t => !docs[t])
+  if (undocumented.length) {
+    console.error(`lint-tokens: ${undocumented.length} host token(s) with no entry in hostTokenDocs: ${undocumented.join(' ')}`)
+    process.exit(1)
+  }
+}
+
 /* The scale, and the only padding values allowed to appear as literals. 0 is always fine. */
 const STEPS = new Set([0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64])
 

@@ -1,43 +1,69 @@
 # wm-primitives
 
-**→ [The system, illustrated](https://markfonts.github.io/wm-primitives/)** — type,
-corners, circles, space, and color, with every rule shown as live CSS rather than a
-screenshot. Source and build in [`docs/system/`](docs/system/README.md).
+**The promise: every control works and renders the same, from one source.** A dial in
+font-proofer, in ReCal, in opsz-proofer and in Kernpare is the same file, and a change
+to it reaches all four only after every one of them has been built, driven with a
+finger, and screenshotted against a baseline. If something here is inconsistent, that
+is a bug with a test missing, not a style choice.
 
-Shared, cross-app UI primitives for WORDMARK's font tools — **font-proofer** and
-**ReCal Sans**. Consumed as a **git submodule** (not a published npm package);
-each app's own Vite/tsc compiles the TSX source directly, so there's no build step
-here.
+This page is in the order you meet things. Everything it links to is the source; if
+this page and a linked file disagree, the file is right.
 
-The rules live in the CSS, not in the page: `src/type.css` (roles, inks, signals),
-`src/corners.css` (the corner law and its circle exclusions), `src/space.css` (the
-`--spacing-*` scale, the cap rule, the alignment rule). If the page and the CSS disagree,
-the CSS is right.
+## 1 · What you get
 
-## Contents
+[COMPONENTS.md](COMPONENTS.md) — every export, one line each, which apps draw it, and
+where its spec lives. Generated from `index.ts`, never hand-kept.
 
-- **`createLetterbox` / `Letterbox`** — the house wordmark scanned at display size and
-  packed with prose (Charlie Clark's implementation of Cheng Lou's PreText). One engine for wordmark.nyc's hero
-  and footer, this repo's colophon, and ReCal. Two optional colour mechanisms:
-  `speckle` (a seeded share of glyphs tinted ink → `--signal`, one canvas) and `layers`
-  (every glyph repainted on front canvases at a phased alpha — only pays where something
-  sits *between* the layers). Plain-JS engine, because two call sites are static HTML
-  that script-tag it; `Letterbox` is the React form.
-- **`StyleScopeList` / `StyleScopeDropdown`** — the named-style / scope picker
-  (rows + label + spec chips, single- or multi-select). Token-based CSS bridges to
-  each app's theme via `var(--…)` fallbacks. A `.ssd-list--dense` variant keeps
-  many-chip rows compact.
+The ones people come for:
 
-## Use
+- **`AxisSlider`** — the dial. One number on one axis; rail, field, stepper; four
+  variants. Spec [DIAL.md](DIAL.md), promises [GESTURES.md](GESTURES.md).
+- **`ThemeSwitch`** — Auto / Light / Dark, one engine, two looks.
+- **`Icon`** and **`Chevron`** — the one mark, the one chevron.
+- **`dist/dial.js`** — the dial for a page with no React, same source, as a script tag.
+- Tokens, in four sheets that style nothing until you use them: `color.css`,
+  `type.css` ([TYPOGRAPHY.md](TYPOGRAPHY.md)), `space.css`, `motion.css`.
 
-```ts
-import { StyleScopeList } from '@markfonts/wm-primitives'
-```
+## 2 · What you must supply
 
-The component imports its own CSS, so no separate stylesheet import is needed.
+[HOST-CONTRACT.md](HOST-CONTRACT.md) — the tokens the consuming app defines, what each
+is, and what breaks without it. Two have no safe fallback: without `--border` the rail
+is invisible; without a theme stamped as `data-theme` a dark page is black on black.
+Both were found by wiring a bare app and are the first two steps of the HOWTO.
 
-## Design rules
+## 3 · How to wire it in, and add a dial
 
-- **Font identity only** — props carry font family/axes, never proofing size.
-- **Token-based** styling with fallbacks: `var(--surface-2, var(--bg-elevated))`.
-- **Typed TSX** so ReCal's `tsc` type-checks it and font-proofer's esbuild strips types.
+[HOWTO.md](HOWTO.md). Part A: a submodule at `shared/`, the peer deps, the three token
+sheets, the contract, `data-theme`, one dial rendered — ten steps, each one a trap that
+was hit once. Part B: a new dial design is a *variant*, and how the receiving app takes
+it.
+
+## 4 · How to override
+
+Every rule this package writes is inside `@layer wm.*`. **An unlayered rule in your app
+beats any of them, at any specificity, first try.** Theme through tokens
+(`--accent: var(--signal)`), choose behaviour through props, and reach in with a
+selector only as a last resort — where the layer guarantees you win. The header of
+`src/AxisSlider.css` is the long form.
+
+## 5 · How you know it shipped
+
+Push to `main`. [`consumers.yml`](.github/workflows/consumers.yml) checks out every
+consumer, puts your commit in its `shared/`, runs its lint and build, drives the
+gestures in Chromium and WebKit, screenshots every row, and only then tells the apps
+to deploy. Each app's deploy then waits until wordmark.nyc serves the bundle it built.
+Green means *live*, not pushed. [EVAL.md](EVAL.md) is the methodology;
+[tests/README.md](tests/README.md) the suites.
+
+## The rest
+
+- [CHANGELOG.md](CHANGELOG.md) — what changed and what it cost. Most entries are a fix
+  for a fix; the wrong version is the useful part.
+- [SLIDERS.md](SLIDERS.md) — the census. Fifty-nine sliders, none a copy.
+- [NEXT.md](NEXT.md) — the checklist from here to a system a stranger is fluent in.
+- [The system, illustrated](https://markfonts.github.io/wm-primitives/) — type, corners,
+  circles, space, colour as live CSS. A showing, not a consumer.
+
+Consumed as a git submodule, not an npm package; each app's Vite/tsc compiles the TSX
+directly. Typed TSX; token-based CSS with fallbacks; font identity only — props carry
+family and axes, never proofing size.
