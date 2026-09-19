@@ -77,6 +77,49 @@ its rows. `StopSlider` was a name in four documents and no file.
 **ReCal's measure is in body ems now.** `.para-doc` sets the `p` style's size, so `34em`
 is thirty-four of them rather than of the page's 16px. (ReCal, not here.)
 
+## 2026-09-19 — the system page gets section 06
+
+**Ramps sits beside Colour rather than inside it.** 05 has a stated premise — every colour
+literal in the three style bases, 692 of them, audited — and a curve is not a literal.
+Appending to it would break the one thing that section promises, so 06 is its own, and
+"Who uses what" moves to 07. Numbering is positional in `SECTIONS`, so the rail renumbered
+itself and the chapter ids came off the page's own headings.
+
+**It is generated.** `scripts/build-ramps.mjs` imports a live compile of `src/gradient.ts`
+and writes the page from it: every gradient is a string the engine emitted, and the
+residual table, the blur radii in the chapter heading and the channel-plot endpoints are
+all read off the package. The engine's output changed three times on the day the section
+was written; a page with those figures typed into it would have been wrong within the hour
+and looked authoritative the whole time.
+
+**No JavaScript.** `css=6.2KB html=31.7KB js=0.0KB`. A scrim, a blend and a channel ramp
+are declarations, and the blur stack is twelve divs with inline styles, so the assembled
+page pays nothing at runtime. The dither tile is read out of `src/gradient.css` so the page
+shows the noise that actually ships.
+
+**Two things the build taught, both the same lesson.** The assembled page is LIGHT by
+default and a scoped `body{color}` travels with its section: every heading and table value
+that inherited `#e8e8e8` went white-on-white while the explicitly-greyed prose survived.
+Ink is the host's now; this page states a colour only where it also states the ground. And
+the banding demo first spanned **2 levels instead of 18**, because an alpha ramp only has
+the range its backdrop gives it — it was measuring the page, not the quantisation.
+
+**`.wm-dither` has to sit after whatever quantises, not under it.** Inside the masked
+element the noise modulated the ink before the mask touched it: 19 terraces either way,
+126px widest in both. On the wrapper it lands on the composited result and the widest run
+collapses to 10px. That generalises past this page.
+
+**`ramps.copy.md` is the writing handoff.** All 31 strings are hoisted into one `COPY`
+object with no prose left in the template, so a writing pass edits an object and never
+markup. The brief carries the measured figures with a "state nothing that is not on this
+list" rule, because several plausible claims about this material are false and the page
+exists partly to correct one of them.
+
+`docs/index.html` is NOT in this commit: it inlines `src/`, and that tree currently carries
+an unrelated in-flight edit to `AxisSlider.css`. Rebuild with
+`python3 docs/system/build.py --linked` once it is clean.
+
+---
 ## 2026-09-19 — the linter learns what a token IS
 
 **A token can be declared, spelled right, read with a fallback, and still be wrong.**
