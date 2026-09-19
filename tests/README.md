@@ -16,7 +16,7 @@ served as-is); in CI they are fresh checkouts with this commit in `shared/`.
 ```
 npm run test:behaviour         # gates dispatch in CI
 npm run test:render            # compare against the committed baselines
-npm run test:render:update     # re-cut them -- deliberate, after an intended change
+npm run test:render:update     # re-cut them -- refuses outside CI (scripts/update-snapshots.mjs)
 npx playwright show-report     # the diffs, side by side
 ```
 

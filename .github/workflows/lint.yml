@@ -28,6 +28,32 @@ jobs:
           node-version: 20
       - run: node scripts/lint-tokens.mjs
 
+  # A PR that changes what ships -- src/, index.ts, dist/ -- carries a CHANGELOG entry, or
+  # it is red. The log went silent for a night once (CHANGELOG 2026-09-17: five inserts
+  # that no-op'd on a stale anchor) and nobody noticed until the entries were rebuilt
+  # from the PRs; this is the check that would have noticed. Docs-only and test-only PRs
+  # are exempt: the log is a log of decisions, not of diffs.
+  changelog:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: A change to what ships has a CHANGELOG entry
+        run: |
+          changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          echo "$changed"
+          if echo "$changed" | grep -qE '^(src/|index\.ts$|dist/)'; then
+            if ! echo "$changed" | grep -qx 'CHANGELOG.md'; then
+              echo "::error file=CHANGELOG.md::this PR changes src/, index.ts or dist/ and CHANGELOG.md has no entry -- write what moved and what it cost (newest first, under a dated heading)"
+              exit 1
+            fi
+            echo "CHANGELOG.md changed -- ok"
+          else
+            echo "nothing that ships changed -- no entry required"
+          fi
+
   # docs/fonts/ is a build-time copy of the faces `calbuild --bump` publishes into
   # fonts/, and docs/system/build.py makes the copy. But nothing runs build.py in CI, so
   # a bump lands in fonts/ and the docs page keeps serving the old face until somebody

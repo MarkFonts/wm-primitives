@@ -112,13 +112,14 @@ a task. Skip nothing above the line you are on; below it, pick.
 
 ## F · Process, so the next month is cheaper than the last
 
-- [ ] **A CHANGELOG entry per PR, asserted.** The night the log went silent is in it.
-      Done: the CHANGELOG check is a CI step — a PR touching `src/` without an entry is red.
-- [ ] **Baselines re-cut from CI only.** README says it; make `test:render:update` refuse
-      to run outside CI unless forced.
-- [ ] **A release tag when a consumer-visible contract changes** (a prop, a token name,
-      `wmDial`'s API). Consumers pin by tag, not by "latest main" — the `--remote` deploy
-      is convenient and it is also why "what is live" needed a step to answer.
+- [x] **A CHANGELOG entry per PR, asserted.** `lint.yml` `changelog`: a PR that touches
+      `src/`, `index.ts` or `dist/` without a CHANGELOG change is red. 2026-09-19.
+- [x] **Baselines re-cut from CI only.** `test:render:update` runs
+      `scripts/update-snapshots.mjs`, which refuses outside CI and prints the artifact
+      route; `WM_FORCE_BASELINES=1` overrides, on the record. 2026-09-19.
+- [x] **A release tag when a consumer-visible contract changes.** Policy in README §5;
+      `v0.1.0` cut on main 2026-09-19 as the contract's first fixed point. Consumers still
+      deploy from `main` by choice; pinning a tag is one line in their deploy.
 - [ ] **Retire `git` on this machine for the private repos**, or fix it. The memory file
       says why; every session pays for it.
 
