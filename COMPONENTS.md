@@ -28,6 +28,8 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `SpecimenNav` | Long public-domain works: authored whole in specimens/<slug>.txt, served as the chunks build-specimens.mjs cuts at each FORM FEED, fetched only as far as the reader asks. The tail control travels with the loader: both ap… | font-proofer, ReCal | — |
 | `PARA_STYLE_ORDER` `PARA_STYLE_LABEL` `PARA_STYLE_DEFAULTS` `fitOptionsFor` | The four paragraph styles both paragraph views show, and the one-liner that turns a style plus the font's H&J bands into fit options. The keys, labels, numbers and the resolver only; each app keeps the font fields it dra… | ReCal, font-proofer | — |
 | *(types only)* | — | — | FITTING-MAP.md |
+| `EASES` `resolveEase` `bezierPoint` `bezierY` `rampStops` `scrim` `maskRamp` `blend` `blurLayers` `declaration` `channelBlend` `resolveRGB` `CHANNEL_NAMES` | Gradients — the shape of a ramp, and the three things a ramp can carry. The package already faded in three places and spelled it two ways; one of those spellings was the two-stop fade the other one wrote a paragraph expl… | ReCal, font-proofer | GRADIENTS.md |
+| `ProgressiveBlur` `CurveEditor` `ChannelCurves` `GradientControls` `GradientPreview` `gradientCss` `GRADIENT_DEFAULTS` | A scrim and a blend are declarations and need no component. Progressive blur is not a declaration — it is a stack of masked backdrop layers, so it is DOM, and the stack is here once instead of in each consumer (where the… | — | — |
 
 CSS-only modules (imported from an app's entry stylesheet, nothing to export): `src/button.css`, `src/select.css`, `src/motion.css`, `src/color.css`.
 

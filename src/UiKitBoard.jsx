@@ -14,6 +14,7 @@ import './UiKitBoard.css'
 import { useState, useEffect, useLayoutEffect, useRef, Fragment } from 'react'
 import { motion, useMotionValue, useMotionValueEvent } from 'motion/react'
 import { useDragScroll } from './useDragScroll'
+import { maskRamp } from './gradient'
 
 // ── Copy pools (rotated by pass index so panels vary as you scroll) ──────────────
 const at = (a, i) => a[((i % a.length) + a.length) % a.length]
@@ -777,10 +778,15 @@ export default function UiKitBoard({ fontStyle, weight = 400, boldWeight = 700, 
 
   // The fade MUST end exactly at topInset (see UiKitBoard.css) — row 0 rests there, so a
   // longer span would still be resolving over its own cards at rest, a visible "permafade"
-  // with no overlay above it to justify one. Gentle rather than a full fade-to-nothing:
-  // dips to ~55% opacity at the very top edge, never vanishing.
+  // with no overlay above it to justify one. That is what `span` is for: the stops are a
+  // fraction of the inset, not of the strip, so a resize cannot move the end.
+  // Gentle rather than a full fade-to-nothing: .55 at the very top edge, never vanishing.
+  //
+  // This WAS the two-stop ramp Specimen.css spent a paragraph warning against — the one
+  // that puts a visible edge where the fade starts. It is the clothoid now, and the
+  // curve's slow end lands on full reveal, which is the join that showed.
   const topMask = topInset > 0
-    ? `linear-gradient(to bottom, rgba(0,0,0,.55), black ${topInset}px)`
+    ? maskRamp({ dir: 'to bottom', from: .55, to: 1, span: `${topInset}px` })
     : undefined
 
   return (
