@@ -55,6 +55,14 @@ to deploy. Each app's deploy then waits until wordmark.nyc serves the bundle it 
 Green means *live*, not pushed. [EVAL.md](EVAL.md) is the methodology;
 [tests/README.md](tests/README.md) the suites.
 
+**Tags.** A change to what a consumer can see — a prop, a token name in
+[HOST-CONTRACT.md](HOST-CONTRACT.md), `wmDial`'s API, a CSS class a host is told to use —
+gets a tag: `v0.<minor>.<patch>`, minor for a contract change, patch for anything else
+that ships, and the CHANGELOG entry names it. The deploys build against `main` today
+(`git submodule update --remote`), which is why "what is live" needed its own check; a
+consumer that wants to stand still pins the tag instead. `v0.1.0` is the contract as of
+2026-09-19.
+
 ## The rest
 
 - [CHANGELOG.md](CHANGELOG.md) — what changed and what it cost. Most entries are a fix

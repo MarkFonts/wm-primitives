@@ -11,6 +11,23 @@ Newest first.
 
 ---
 
+## 2026-09-19 — process (NEXT.md F) · v0.1.0
+
+**A PR that changes what ships carries a CHANGELOG entry, or it is red.** `lint.yml`
+`changelog`, on `pull_request`: `src/`, `index.ts` or `dist/` changed without this file
+changing fails. Docs and tests are exempt — this is a log of decisions.
+
+**`test:render:update` refuses outside CI.** The baselines are linux's; a Mac that re-cut
+them would make the next CI run red on every row. `WM_FORCE_BASELINES=1` for the day the
+runner is wrong, and the commit says so.
+
+**Tags.** `v0.1.0` is the contract as it stands: the props in `AxisSliderProps`, the
+tokens in HOST-CONTRACT.md, `wmDial.mount / get / set / update / destroy / mountTheme`,
+`.wm-btn` and `.wm-select`. A change to any of those bumps the minor and gets a tag; the
+policy is in README §5. `package.json` says 0.1.0 to match.
+
+---
+
 ## 2026-09-19 — into more hands (NEXT.md E)
 
 **Kernpare is held to the system.** The linter could not read it: one `index.html`, its

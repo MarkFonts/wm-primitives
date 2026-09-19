@@ -1,6 +1,6 @@
 {
   "name": "@markfonts/wm-primitives",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Shared cross-app UI primitives for WORDMARK's font tools (font-proofer, ReCal Sans). Consumed as a git submodule; each app's Vite/tsc compiles the source directly.",
   "type": "module",
   "main": "index.ts",
@@ -20,7 +20,7 @@
     "lint:tokens": "node scripts/lint-tokens.mjs",
     "serve": "node tests/serve.mjs",
     "test:render": "playwright test tests/render",
-    "test:render:update": "playwright test tests/render --update-snapshots",
+    "test:render:update": "node scripts/update-snapshots.mjs",
     "test:behaviour": "playwright test tests/behaviour",
     "test": "playwright test",
     "build:dial": "node scripts/build-dial.mjs",
