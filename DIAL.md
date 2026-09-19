@@ -177,6 +177,13 @@ thumb.
 Two features live on the range track and must be painted onto the bar in `track`, or they
 vanish silently: `lockedAbove` and `reference`.
 
+**The `default` rail's height is the host's choice.** `--dial-track-h` is 24px unless the
+host says otherwise, and 14px is the floor (below it the thumb has nothing to sit in).
+font-proofer takes the default; ReCal sets 14 on its Type Matrix surface. Both are right,
+the parity allowlist says so, and the number is not the primitive's to pick — decided
+2026-09-19. The dial's **type size** is: 12px, the `ui` role, with a fallback baked into
+`AxisSlider.css` so a host that never loads `type.css` gets the same dial as one that does.
+
 ---
 
 ## 8 · Checklist

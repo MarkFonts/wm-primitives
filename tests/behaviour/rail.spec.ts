@@ -145,6 +145,21 @@ for (const host of HOSTS.filter(h => h.gestures !== false && h.rows?.length)) fo
         expect(await readValue(row)).toBe(min)                    // blur commits too
       })
 
+      test('G18 · a mouse press anywhere jumps, and the drag that follows is native', async ({ page }) => {
+        const row = sizeRow(page); const r = range(row)
+        const { min, max } = await bounds(row)
+        const b = (await r.boundingBox())!
+        const y = b.y + b.height / 2
+        await page.mouse.move(b.x + b.width * 0.75, y); await page.mouse.down()
+        const jumped = await readValue(row)
+        expect(jumped).toBeGreaterThan(min + (max - min) * 0.6)   // the press is a jump, not a focus
+        await page.mouse.move(b.x + b.width * 0.25, y, { steps: 8 })
+        const dragged = await readValue(row)
+        expect(dragged).toBeLessThan(min + (max - min) * 0.4)     // and the thumb followed
+        await page.mouse.up()
+        expect(await scrubbing(page)).toBe(false)                 // the rail never claimed it
+      })
+
       test('G5 · the ends of the bar are min and max', async ({ page }) => {
         const row = sizeRow(page); const r = range(row)
         const { min, max } = await bounds(row)

@@ -59,18 +59,20 @@ a task. Skip nothing above the line you are on; below it, pick.
 
 ## D · The decisions still open (write them down or they get re-argued)
 
-- [ ] **Typing commits when?** The dial commits on Enter/blur (G19); the triplet on every
-      keystroke (G45). One answer, in GESTURES §0.
-- [ ] **Mouse drag-from-anywhere.** Touch and pen have it; mouse is native (thumb only).
-      Decide whether the promise is per-pointer or universal; the test follows.
-- [ ] **`default` variant: 14px or 24px rail?** Two hosts, two answers, both sanctioned.
-      Pick, or name it a per-host choice in DIAL §7.
-- [ ] **The dial's type size is inherited.** 16px in font-proofer and ReCal, 12px in
-      opsz-proofer's panel; the primitive sets none. The parity gate allows it with a
-      reason today. Pick a role (`t-ui`?) and own it, or say inheritance is the design.
-- [ ] **`em` on the measure dial** means the page's em, not the type's. Rename the
-      suffix, or convert.
-- [ ] **StopSlider and Collapse** ship nowhere. Ship them or move them to `reference/`.
+- [x] **Typing commits when?** Enter or blur, everywhere; Escape abandons. GESTURES §0
+      *Typing*; the triplet moved (G45), its test with it. 2026-09-19.
+- [x] **Mouse drag-from-anywhere.** Per pointer. The native range already drags from
+      wherever the press lands; the G18 test proves it. 2026-09-19.
+- [x] **`default` variant: 14px or 24px rail?** Per host: `--dial-track-h`, 24 default,
+      14 floor. DIAL §7. 2026-09-19.
+- [x] **The dial's type size is inherited.** It was never inheritance: the dial asked for
+      `--type-ui-size` with no fallback, and two hosts don't load `type.css`. Fallback
+      baked in; 12px everywhere. 2026-09-19.
+- [x] **`em` on the measure dial** — converted: ReCal's `.para-doc` takes the body
+      style's size, so `34em` is 34 body ems. 2026-09-19.
+- [x] **StopSlider and Collapse** — Collapse ships: `Fitting` wraps its two sections in
+      it, in both apps' H&J panels (GESTURES §11). StopSlider was a name with no file.
+      2026-09-19.
 
 ## E · Getting it into more hands
 

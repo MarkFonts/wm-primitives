@@ -32,6 +32,11 @@ Every threshold in one place, so a test and the code cannot drift on a constant.
 `touch-action` on the rail is **`pan-y`**, always. The direction of a gesture is decided
 by the rules below, not by that property — it states one answer before anyone has moved.
 
+**Typing.** A field shows the draft verbatim and **nothing reaches the host until Enter or
+blur**; Escape abandons it. Every field: the dial's (G19–G23) and the triplet's (G45).
+Decided 2026-09-19, after the triplet committed per keystroke and typing 24 on a min-8
+band became 8, then 84 — the same chase the dial had lost on the 17th.
+
 **Capture.** A touch is never asked for `setPointerCapture` — the browser has already
 captured it to the element it went down on, and asking again makes Chromium fire
 `lostpointercapture` for the hand-over, which the rail reads as a lift. Pen and mouse
@@ -43,8 +48,10 @@ range stops following the finger on its own: one path to the host, not two.
 
 ## 1 · The rail
 
-Mouse is left to the native `<input type=range>`: click jumps, drag from the thumb
-follows. Every rule in this section is for **touch and pen** (`pointerType !== 'mouse'`).
+Mouse is left to the native `<input type=range>`: a press anywhere jumps the thumb to the
+pointer, and holding on keeps dragging it from there — which is drag-from-anywhere, paid
+for by the platform (G18). Every rule in this section is for **touch and pen**
+(`pointerType !== 'mouse'`); the promise is per pointer, decided 2026-09-19.
 
 | id | gesture | promise | commit |
 | --- | --- | --- | --- |
@@ -81,7 +88,7 @@ One text input, not a number input — it has to show U+2212.
 | --- | --- | --- | --- |
 | G16 | tap (touch/pen, < 6px movement) | focuses for typing **with the digits selected**, so the next keystroke replaces them; the tap did not jump the value | `0a0429c`, field-typing |
 | G17 | press and horizontal drag (touch/pen) | drives the value exactly as a rail drag would (G1, G6–G9); the field does **not** take focus | `0a0429c` |
-| G18 | mouse | native: click focuses, no drag | `0a0429c` |
+| G18 | mouse | native: a press anywhere on the rail jumps the value there, and the drag that follows moves it; `data-scrubbing` is never set | `0a0429c`, G18 test |
 | G19 | typing while focused | the field shows the draft verbatim, including empty, `-`, and out-of-range intermediates; **nothing reaches `onChange` until Enter or blur** — the proof does not chase the digits, and a host that clamps cannot rewrite the field mid-word | `ffa2e95`, field-typing |
 | G20 | type `2`,`4` on a min-8 dial | nothing is emitted while typing; `24` is committed on Enter or blur | `ffa2e95` |
 | G21 | blur with an empty or unparseable draft | reverts to the committed value; `onChange` not called | `ffa2e95` |
@@ -135,9 +142,8 @@ docs had not said it.)
 
 Written down so a test does not get invented for it.
 
-- **Mouse drag from anywhere on the rail.** Native behaviour only. The hysteresis path is
-  touch and pen; a mouse click jumps and a mouse drag needs the thumb (or, on the track
-  variant, is native tap-and-follow).
+- **Mouse hysteresis.** The 6px / 1.5× judgement is touch and pen only. A mouse gets the
+  native range, which already drags from anywhere (G18) — no scroller to concede to.
 - **`Home` / `End` / `PageUp` / `PageDown`** in the field.
 - **Vertical wheel to adjust.** Deliberately absent (G33).
 - **A tablet profile.** Phone and desktop only (EVAL.md Q2).
@@ -170,16 +176,13 @@ Fitting panel's H&J section in both apps. Tested in `tests/behaviour/triplet.spe
 | --- | --- | --- | --- |
 | G43 | press a stepper | one step on down; repeat after 400ms, then every 60ms; lift, leave or cancel stops it (the dial's G27–G28, same numbers) | `AxisTriplet.tsx` |
 | G44 | `ArrowUp` / `ArrowDown` in a field | ±`step`, `Shift` ×10; abandons a draft first | `AxisTriplet.tsx` |
-| G45 | typing in a field | the field shows the draft verbatim; `""`, `-`, `-.` and `.` are held as on-the-way; **a parseable number commits immediately**, clamped to `[min, max]` | `AxisTriplet.tsx` |
+| G45 | typing in a field | the field shows the draft verbatim; **nothing reaches `onChange` until Enter or blur**, then clamped to `[min, max]` and carried (G46); Escape abandons (§0, the typing rule) | `AxisTriplet.tsx` |
 | G46 | an edit that would cross a neighbour | the neighbour is **carried**, never the edit clamped: min pushes desired up and desired pushes max; max pulls desired down and desired pulls min; desired pushes both outward | `carry()` |
 | G47 | `offset` | the field shows `stored − offset` and commits `typed + offset` — letter space is stored 100-centred and shown 0-centred | props |
 | G48 | `disabled` | the row is at .45 opacity and takes no pointer | `AxisTriplet.css` |
 
-**Open, not promised:** G45 commits while typing; the dial (G19) stopped doing that on
-2026-09-17 because the proof chased the digits. The triplet has no rail and its numbers
-are not previewed by a re-raster, so the argument is weaker here — but the two fields
-now behave differently under the same keystroke, and that is a decision to make, not
-a fact to test.
+Until 2026-09-19 G45 committed per keystroke, the behaviour the dial had dropped two days
+earlier. One rule now, in §0.
 
 ## 10 · The mark
 
@@ -198,6 +201,17 @@ a fact to test.
 
 ## Other controls
 
-`StopSlider` and `Collapse` are not deployed anywhere yet and have no rows. `StopSlider`'s
-rail carries `touch-action: pan-y` with **no** JS direction judgement — a phone can scroll
-over it, but cannot drag it from anywhere. A known gap, not a promise, until it ships.
+`StopSlider` never existed in this repo — the census named it, no file did (2026-09-19).
+
+## 11 · Collapse
+
+`Collapse`: a disclosure box that measures its own content, so a section's height is
+never a number anyone maintains. It ships inside `Fitting` — font-proofer's H&J panel
+holds two — which is why NEXT.md D had it down as unshipped: nothing imports it by name
+but the primitive that wraps it. No gesture of its own; the triplet tests (G43–G46) run
+inside an open one, and `triplet.spec.ts` opens it the way a hand would.
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G56 | `open` flips | the box animates between 0 and its measured content height, then drops the cap so a label that wraps later is not clipped | `Collapse.tsx` |
+| G57 | content changes while open | the height follows the content; nothing is typed in | `Collapse.tsx` |

@@ -32,8 +32,11 @@
     flex: 1 1 auto;
     min-width: 0; overflow: visible; padding-bottom: var(--nudge, 2px);
   }
+  /* The dial's type is the ui role, 12px, whether or not the host loads type.css --
+     without the fallback two hosts inherited the page's 16px and one got 12, and the
+     parity gate carried five allowlist lines for it (NEXT.md D, closed 2026-09-19). */
   .slider-label-text {
-    font-size: var(--type-ui-size);
+    font-size: var(--type-ui-size, 0.75rem);
     color: var(--text-muted);
     font-family: var(--ui-font, system-ui, sans-serif);
     white-space: nowrap; overflow: visible; text-overflow: clip;
@@ -65,7 +68,7 @@
     gap: var(--spacing-01, 4px);
   }
   .slider-tag {
-    font-size: var(--type-micro-size);
+    font-size: var(--type-micro-size, 0.5625rem);
     color: var(--text-muted);
     font-family: var(--ui-font, system-ui, sans-serif);
     letter-spacing: 0;              /* the tag is lowercase: the caps token does not apply */
@@ -96,7 +99,7 @@
      the rule is the value's own width, so it has to be. */
   .slider-number {
     font-family: var(--ui-font, system-ui, sans-serif);
-    font-size: var(--type-ui-size);
+    font-size: var(--type-ui-size, 0.75rem);
     color: var(--text);
     background: transparent;
     border: none;
@@ -453,7 +456,7 @@
 
   .slider-auto-hint {
     position: fixed;
-    font-size: var(--type-ui-size);
+    font-size: var(--type-ui-size, 0.75rem);
     color: var(--text);
     background: var(--bg-elevated, var(--surface));
     border: 1px solid var(--border);
@@ -497,7 +500,7 @@
   /* Static unit label after the editable field (px/%/em) — hides while the field is
      focused so you edit just the raw number, reappears on blur. No layout shift. */
   .slider-suffix {
-    font-size: var(--type-ui-size); color: var(--text-muted);
+    font-size: var(--type-ui-size, 0.75rem); color: var(--text-muted);
     font-feature-settings: "tnum"; margin-left: -3px; pointer-events: none;
   }
   .slider-suffix--hidden { visibility: hidden; }

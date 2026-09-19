@@ -11,6 +11,35 @@ Newest first.
 
 ---
 
+## 2026-09-19 — the open decisions, closed (NEXT.md D)
+
+**Typing commits on Enter or blur, in every field.** The dial had moved there on the 17th;
+the triplet still committed per keystroke, so typing `24` on a min-8 band became 8, then
+84, with the neighbours carried along on each step. One rule now, GESTURES §0 *Typing*.
+G45 and its test changed to match.
+
+**The dial's type size was never inherited by design.** `AxisSlider.css` asked for
+`--type-ui-size` with no fallback; opsz-proofer inlines `type.css` and got 12px, the two
+React hosts don't and got the page's 16. Five parity-allowlist lines carried that. The
+fallback is baked in (`0.75rem`, the `ui` role; `0.5625rem` for the tag) and the lines are
+gone. font-proofer's and ReCal's dial labels get smaller; the baselines for both will
+re-cut from CI.
+
+**Mouse drag-from-anywhere is native, and proven.** The native range jumps on press and
+keeps dragging from there. G18 says so and a test holds it; the promise is per pointer.
+
+**`--dial-track-h` is the host's.** 24px default, 14 floor, DIAL §7. ReCal's 14 is not
+drift.
+
+**`Collapse` was shipping all along.** Nothing imports it by name except `Fitting`, which
+wraps its two H&J sections in it — so the census read "unshipped". GESTURES §11 now has
+its rows. `StopSlider` was a name in four documents and no file.
+
+**ReCal's measure is in body ems now.** `.para-doc` sets the `p` style's size, so `34em`
+is thirty-four of them rather than of the page's 16px. (ReCal, not here.)
+
+---
+
 ## 2026-09-17 — the dial for pages without React
 
 **`dist/dial.js`: one source, a second output.** `a0e1645`
