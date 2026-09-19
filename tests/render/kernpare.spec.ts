@@ -18,9 +18,12 @@ test.describe('kernpare', () => {
     expect(errors, 'uncaught exceptions on load').toEqual([])
     const btn = page.locator('.wm-btn').first()
     await expect(btn).toBeVisible()
-    // The actual, as a file in the report, so a missing or changed baseline can be
-    // re-cut from CI without a second run (README: baselines come from CI only).
-    await btn.screenshot({ path: info.outputPath('kernpare-wm-btn-actual.png') })
+    // The actual, as a file in the report, so a missing baseline can be cut from CI
+    // without a second run (README: baselines come from CI only). CSS pixels, as
+    // toHaveScreenshot compares -- on the 3x iphone project the default is device
+    // pixels, and a baseline cut from that is three times too big. Its own name, so
+    // Playwright's own `-actual` on a failed compare is not fighting over the file.
+    await btn.screenshot({ path: info.outputPath('kernpare-wm-btn-shot.png'), scale: 'css' })
     await expect(btn).toHaveScreenshot('kernpare-wm-btn.png')
   })
 })
