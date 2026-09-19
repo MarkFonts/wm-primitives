@@ -1,0 +1,13 @@
+<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><title>wmDial contract</title>
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css"><link rel="stylesheet" href="/dial/shared/src/motion.css">
+<link rel="stylesheet" href="/dial/shared/dist/dial.css">
+<style>:root{--ui-font:system-ui;--text-rgb:232,232,232} body{background:var(--bg);color:var(--text);padding:24px;width:360px}</style>
+</head><body>
+<div id="a"></div><div id="b" style="margin-top:12px"></div><div id="t" style="margin-top:12px"></div>
+<script src="/dial/shared/dist/dial.js"></script>
+<script>
+  window.log = []
+  window.da = wmDial.mount(document.getElementById('a'), { label: 'Glyph size', value: 76, min: 20, max: 200, step: 5, suffix: 'px', variant: 'track', onChange: v => log.push(['a', v]) })
+  window.db = wmDial.mount(document.getElementById('b'), { label: 'Italic angle', value: 9.5, min: 0, max: 30, step: 0.5, suffix: '°', onChange: v => log.push(['b', v]) })
+  window.dt = wmDial.mountTheme(document.getElementById('t'))
+</script></body></html>
