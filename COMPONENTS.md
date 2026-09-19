@@ -37,15 +37,15 @@ Material Symbols names each consumer draws (`<Icon name>` and raw ligatures), so
 
 | mark | drawn by |
 | --- | --- |
-| `brightness_auto` | font-proofer |
+| `brightness_auto` | ThemeSwitch (every host that mounts it) |
 | `calendar_month` | font-proofer |
-| `dark_mode` | font-proofer |
+| `dark_mode` | ThemeSwitch (every host that mounts it) |
 | `discover_tune` | font-proofer |
 | `format_paragraph` | font-proofer |
 | `forms_add_on` | font-proofer |
 | `grid_view` | font-proofer |
 | `insert_text` | font-proofer |
 | `keyboard_arrow_up` | font-proofer |
-| `light_mode` | font-proofer |
+| `light_mode` | ThemeSwitch (every host that mounts it) |
 | `settings_backup_restore` | font-proofer |
 | `text_fields` | font-proofer |
