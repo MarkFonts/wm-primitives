@@ -15,7 +15,9 @@ const isDev = (): boolean => {
     const env = (import.meta as unknown as { env?: { DEV?: boolean } }).env
     if (env && typeof env.DEV === 'boolean') return env.DEV
   } catch { /* not a module context that has it */ }
-  try { return typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production' } catch { return false }
+  // No `process` identifier: a consumer's tsc without @types/node rejects it. The bundle
+  // defines process.env.NODE_ENV, so esbuild still folds this to a constant.
+  try { const g = globalThis as unknown as { process?: { env?: { NODE_ENV?: string } } }; return g.process?.env?.NODE_ENV !== 'production' } catch { return false }
 }
 
 export function checkHostContract(el: Element): void {
