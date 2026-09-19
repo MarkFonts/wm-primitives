@@ -163,8 +163,7 @@ export type { FitMode, FitOptions, FittedLine } from './src/flattersatz'
 // and Takehiko Ono's pens IS cubic-bezier(0.416, 0.657, 0.695, 1) — fitted to their seven
 // hand-written stops, RMS 0.00065 in alpha. Mass Driver's resampler eases colour with the
 // same control points; variablur eases a blur radius with them.
-export { EASES, resolveEase, bezierPoint, bezierY, rampStops,
-         scrim, maskRamp, blend, blurLayers, declaration } from './src/gradient'
+export { EASES, resolveEase, bezierPoint, bezierY, rampStops, scrim, maskRamp, blend, blurLayers, declaration } from './src/gradient'
 export type { Bezier, Ease, EaseName, RampOptions, Stop, Space,
               BlurLayer, BlurOptions } from './src/gradient'
 
@@ -184,7 +183,6 @@ export type { Triple, ChannelSpace, ChannelBlendOptions } from './src/gradient'
 // numbers that matter in a gradient are the two control points and you cannot type those.
 // Named for the headline export: ./src/Gradient and ./src/gradient are one module on a
 // case-insensitive filesystem, the same trap SpecimenNav is named around.
-export { ProgressiveBlur, CurveEditor, GradientControls, GradientPreview,
-         gradientCss, GRADIENT_DEFAULTS } from './src/GradientControls'
+export { ProgressiveBlur, CurveEditor, ChannelCurves, GradientControls, GradientPreview, gradientCss, GRADIENT_DEFAULTS } from './src/GradientControls'
 export type { ProgressiveBlurProps, CurveEditorProps, GradientControlsProps,
               GradientSpec, GradientKind } from './src/GradientControls'
