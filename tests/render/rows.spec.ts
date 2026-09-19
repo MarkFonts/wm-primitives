@@ -1,5 +1,6 @@
 import { test, expect, type Page, type Locator } from '@playwright/test'
 import { mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { HOSTS, sealed, settle } from './hosts'
 
