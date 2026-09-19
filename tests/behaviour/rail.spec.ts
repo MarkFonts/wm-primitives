@@ -97,10 +97,10 @@ for (const host of HOSTS.filter(h => h.gestures !== false && h.rows?.length)) fo
         const row = sizeRow(page); const r = range(row)
         expect(await scrubbing(page)).toBe(false)
         const p = await at(r, 0.4)
-        // hold at the end of the move so the attribute can be read mid-gesture
-        const mid = touchDrag(page, r, [p, { x: p.x + 20, y: p.y }, { x: p.x + 50, y: p.y }], { hold: 400 })
-        await page.waitForTimeout(150)
-        expect(await scrubbing(page)).toBe(true)
+        // hold at the end of the move so the attribute can be read mid-gesture -- polled,
+        // not read at a fixed delay: a slow runner had not begun dispatching at 150ms
+        const mid = touchDrag(page, r, [p, { x: p.x + 20, y: p.y }, { x: p.x + 50, y: p.y }], { hold: 900 })
+        await expect.poll(() => scrubbing(page), { timeout: 700 }).toBe(true)
         await mid
         expect(await scrubbing(page)).toBe(false)
       })
