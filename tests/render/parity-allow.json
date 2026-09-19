@@ -7,8 +7,5 @@
   "default.track.padding": "font-proofer's unlayered padding: 0 16px so the round thumb clears the ends; the layer contract allows it",
   "default.input.h": "`--dial-track-h` is a per-host knob (DIAL §7, decided 2026-09-19): 24px default, ReCal's Type Matrix asks for 14",
   "default.input.height": "`--dial-track-h` is a per-host knob (DIAL §7, decided 2026-09-19): 24px default, ReCal's Type Matrix asks for 14",
-  "track.input.cursor": "ReCal's track rows show pointer where the primitive says ew-resize; recorded 2026-09-17, unresolved (NEXT.md D)",
-  "default.label.h": "the dial sets its type SIZE (12px, ui role) but not its line-height, which the host's body still sets; recorded 2026-09-19 -- if the hosts agree after the size fix, delete this line",
-  "default.label.line-height": "the dial sets its type SIZE (12px, ui role) but not its line-height, which the host's body still sets; recorded 2026-09-19 -- if the hosts agree after the size fix, delete this line",
-  "default.name.h": "the dial sets its type SIZE (12px, ui role) but not its line-height, which the host's body still sets; recorded 2026-09-19 -- if the hosts agree after the size fix, delete this line"
+  "track.input.cursor": "ReCal's track rows show pointer where the primitive says ew-resize; recorded 2026-09-17, unresolved (NEXT.md D)"
 }

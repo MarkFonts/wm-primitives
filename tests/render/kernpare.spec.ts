@@ -9,7 +9,7 @@ import { sealed, settle } from './hosts'
    Its kern-group analysis UI is styled the way it is on purpose (Severance) and is not
    compared to anything. */
 test.describe('kernpare', () => {
-  test('a clean checkout loads, and the shared toggle group matches', async ({ page }) => {
+  test('a clean checkout loads, and the shared toggle group matches', async ({ page }, info) => {
     const errors: string[] = []
     page.on('pageerror', e => errors.push(e.message))
     await sealed(page)
@@ -18,6 +18,9 @@ test.describe('kernpare', () => {
     expect(errors, 'uncaught exceptions on load').toEqual([])
     const btn = page.locator('.wm-btn').first()
     await expect(btn).toBeVisible()
+    // The actual, as a file in the report, so a missing or changed baseline can be
+    // re-cut from CI without a second run (README: baselines come from CI only).
+    await btn.screenshot({ path: info.outputPath('kernpare-wm-btn-actual.png') })
     await expect(btn).toHaveScreenshot('kernpare-wm-btn.png')
   })
 })
