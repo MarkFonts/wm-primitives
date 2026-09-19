@@ -1,0 +1,382 @@
+/* gradient.css — chrome for the gradient controls, and the two rules the blur stack
+ * cannot express as inline style.
+ *
+ * The LAYERS carry their own filter and mask as inline style (blurLayers() computes both,
+ * and neither is a constant), so what is left here is the geometry that makes a stack of
+ * absolutely-positioned siblings behave as one lens. That part is fixed, and belongs in a
+ * stylesheet rather than in six identical style objects.
+ *
+ * Host contract: --ui-font, and the colour ramp from color.css. Every token carries a
+ * fallback, because the curve editor is the kind of thing that gets dropped into a
+ * scratch page with no stylesheet at all and then reported as broken.
+ */
+
+/* ── the progressive blur stack ───────────────────────────────────────────────────── */
+
+.wm-blur {
+  inset: 0;
+  /* A lens, not a lid: it sits over the content it blurs and must not take a click
+     away from it. The layers inherit this rather than repeating it. */
+  pointer-events: none;
+  /* Its own stacking context, so a page does not have to guess a z-index for the six
+     children — and so the layers compose against each other rather than against
+     whatever the host has already put on the layer below. */
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.wm-blur-layer {
+  position: absolute;
+  inset: 0;
+  /* Nothing is painted here. The element exists so its BACKDROP can be filtered, which
+     is why a background of any kind would be wrong: it would be the thing you see
+     instead of the blurred content behind it. */
+}
+
+/* ── the curve editor ─────────────────────────────────────────────────────────────── */
+
+.grad-curve {
+  width: 100%;
+  max-width: 180px;
+  /* The box is square, and the aspect ratio holds it square through any column width:
+     a curve read on a stretched field is not the curve that ships. */
+  aspect-ratio: 1;
+  /* The handles are dragged, and a drag on a touch screen is a scroll unless this says
+     otherwise. Without it the editor works with a mouse and does nothing on a phone. */
+  touch-action: none;
+  overflow: visible;
+}
+
+.grad-curve-field {
+  fill: var(--surface, #1a1a1a);
+  stroke: var(--border, rgba(232, 232, 232, .14));
+  stroke-width: 1;
+}
+
+/* The straight line the curve is pulled off. Dashed and faint: it is the reference, not
+   a second curve, and at solid weight the eye reads two paths of equal standing. */
+.grad-curve-linear {
+  stroke: var(--border, rgba(232, 232, 232, .14));
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+/* Each handle's arm back to the end it governs — without them the two dots are floating
+   and nothing says which end each one is bending. */
+.grad-curve-arm {
+  stroke: var(--text-dim, rgba(232, 232, 232, .38));
+  stroke-width: 1;
+}
+
+.grad-curve-path {
+  fill: none;
+  stroke: var(--text, #e8e8e8);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Where the stops actually land. This is the whole argument for sampling by curve
+   parameter: the marks crowd where the curve bends, and you can see them do it. */
+.grad-curve-mark {
+  fill: var(--bg, #0f0f0f);
+  stroke: var(--text, #e8e8e8);
+  stroke-width: 1.5;
+}
+
+.grad-curve-handle {
+  fill: var(--accent, #e8e8e8);
+  stroke: var(--bg, #0f0f0f);
+  stroke-width: 2;
+  cursor: grab;
+  transition: r var(--dur-fast, 140ms);
+}
+.grad-curve-handle:hover { r: 8; }
+.grad-curve-handle.held { r: 8; cursor: grabbing; }
+
+/* ── the channel view (Mass Driver's three graphs) ────────────────────────────────── */
+
+/* Three tracks side by side at a rail's width, so each is small. That is the right
+   trade: the shape of a channel curve is legible at this size, and the alternative --
+   one big graph with a channel selector -- hides the fact that you are steering three
+   things against each other, which is the only reason to be in this view. */
+.grad-channels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-02, 6px);
+}
+
+.grad-channel { min-width: 0; }
+
+.grad-channel-head {
+  display: flex;
+  align-items: baseline;
+  /* NOT space-between, and this was a real misread in the wild. At 180px a head pushed
+     its name and its state to opposite ends, which put ~160px between two things that
+     belong together and 6px -- the column gap -- between a channel's state and the NEXT
+     channel's name. Proximity wins over order every time, so the row read "linear G",
+     i.e. "G is linear", while G was steered and R was the linear one.
+     Grouped left: "G  reset" is one object, and the column's own slack separates it
+     from the next. */
+  justify-content: flex-start;
+  gap: var(--spacing-02, 6px);
+  margin-bottom: var(--nudge, 2px);
+  /* Reserve the row whether or not a reset is showing, or the plots below sit at two
+     different heights across the three columns. */
+  min-height: 1.2em;
+}
+
+/* The channel's own name carries its own ink -- R, G and B are the three primaries and
+   naming them in grey throws away the one cue that costs nothing. In hsl these read as
+   H, S, L against the same three colours, which is a small lie the position corrects. */
+.grad-channel-name {
+  font-family: ui-monospace, monospace;
+  font-size: var(--type-micro-size, 0.5625rem);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+}
+.grad-channel-name.ch-0 { color: oklch(63% .2 25); }
+.grad-channel-name.ch-1 { color: oklch(63% .2 145); }
+.grad-channel-name.ch-2 { color: oklch(63% .2 265); }
+
+.grad-channel-reset {
+  font-family: ui-monospace, monospace;
+  font-size: var(--type-micro-size, 0.5625rem);
+  color: var(--text-dim, rgba(232, 232, 232, .38));
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--dur-fast, 140ms);
+}
+.grad-channel-reset:hover:not([disabled]) { color: var(--text, #e8e8e8); }
+/* Not steered yet: the word still reports the state, so the row never goes blank. */
+.grad-channel-reset[disabled] { cursor: default; opacity: .55; }
+
+/* A channel that cannot move keeps its plot -- the level line IS the information -- and
+   sheds every part that says "drag me": no handles, no control arms, no grab cursor. No
+   tint either: dimming it was one more way of saying what the line already says, and a
+   dimmed handle is still a handle. */
+.grad-curve.locked { cursor: default; touch-action: auto; }
+.grad-curve.locked .grad-curve-path { stroke: var(--text-dim, rgba(232, 232, 232, .38)); }
+
+/* Below ~330px the three squares fall under 100px each, which is where a curve stops
+   being draggable rather than merely small. Stack them there. */
+@container wm-grad (max-width: 330px) {
+  .grad-channels { grid-template-columns: 1fr; }
+  /* Stacked, each one gets the full width back, so cap it or a single curve becomes a
+     billboard in a panel full of 12px rows. */
+  .grad-channels .grad-curve { max-width: 150px; }
+}
+
+/* ── the panel ────────────────────────────────────────────────────────────────────── */
+
+.grad-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-04, 12px);
+  font-family: var(--ui-font, inherit);
+  /* THE CONTAINMENT LIVES HERE, not on .grad-channels, and that is not a style choice:
+     a container query styles a container's DESCENDANTS and can never style the container
+     it queries. Declaring it on the grid and then querying the grid is a rule that
+     silently never fires -- which it did, leaving three 96px curve editors in a 300px
+     rail while the query reported nothing wrong.
+
+     Queried on the PANEL, not the viewport, because this control lives in a sidebar: a
+     rail is narrow on a wide screen, and a media query answers the wrong question. */
+  container: wm-grad / inline-size;
+}
+
+.grad-curve-row { display: flex; justify-content: center; }
+
+/* The presets get their own full-width row rather than a column beside the editor.
+   Five of them never fit beside a 120px square at a rail's real width, and a pill that
+   wraps inside its own 999px track draws as a blob rather than as a track. */
+.grad-presets { display: flex; }
+.grad-presets > button { flex: 1; text-align: center; }
+
+.grad-readout {
+  font-family: ui-monospace, monospace;
+  font-size: var(--type-micro-size, 0.5625rem);
+  line-height: var(--type-micro-lead, 1.2);
+  color: var(--text-dim, rgba(232, 232, 232, .38));
+  text-align: center;
+  /* One line. It is a readout of four numbers, and breaking it mid-number -- which
+     `overflow-wrap: anywhere` did, at "0.416 , 0.657" -- makes it unreadable in exactly
+     the situation it exists for. If the rail is too narrow, it clips. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grad-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-02, 6px);
+  font-size: var(--type-ui-size, 0.75rem);
+  color: var(--text-muted, rgba(232, 232, 232, .62));
+}
+
+.grad-row-label { flex: 0 0 auto; }
+
+.grad-swatch {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  border: 1px solid var(--border, rgba(232, 232, 232, .14));
+  border-radius: var(--radius-sm, 3px);
+  /* The value is set as this element's background so the BROWSER resolves it. A swatch
+     that parses the token itself is the colophon bug (see color.css). */
+}
+
+.grad-token {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, monospace;
+  font-size: var(--type-micro-size, 0.5625rem);
+  color: var(--text, #e8e8e8);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border, rgba(232, 232, 232, .14));
+  padding: var(--spacing-01, 3px) 0;
+}
+.grad-token:focus {
+  outline: none;
+  border-bottom-color: var(--text, #e8e8e8);
+}
+
+/* Same switch as Fitting's, because it is the same thing: a named state with its value
+   spelled out beside it rather than a checkbox you have to interpret. */
+.grad-switch {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--spacing-02, 6px);
+  padding: var(--spacing-02, 6px) var(--spacing-03, 8px);
+  font-family: inherit;
+  font-size: var(--type-ui-size, 0.75rem);
+  color: var(--text-muted, rgba(232, 232, 232, .62));
+  background: none;
+  border: 1px solid var(--border, rgba(232, 232, 232, .14));
+  border-radius: var(--radius, 6px);
+  cursor: pointer;
+  transition: color var(--dur-fast, 140ms), border-color var(--dur-fast, 140ms);
+}
+.grad-switch:hover { color: var(--text, #e8e8e8); }
+.grad-switch.active { color: var(--text, #e8e8e8); border-color: var(--text-dim, rgba(232, 232, 232, .38)); }
+.grad-switch-state { color: var(--text-dim, rgba(232, 232, 232, .38)); }
+
+.grad-copy {
+  padding: var(--spacing-02, 6px) var(--spacing-04, 12px);
+  font-family: inherit;
+  font-size: var(--type-ui-size, 0.75rem);
+  color: var(--bg, #0f0f0f);
+  background: var(--text, #e8e8e8);
+  border: none;
+  border-radius: var(--radius, 6px);
+  cursor: pointer;
+}
+.grad-copy:hover { opacity: .85; }
+
+/* ── the preview ──────────────────────────────────────────────────────────────────── */
+
+/* Type under the ramp, not a swatch. Over flat colour every curve looks correct; the
+   banding these curves exist to remove only shows over content with edges in it. */
+.grad-preview {
+  position: relative;
+  height: 120px;
+  overflow: hidden;
+  background: var(--bg, #0f0f0f);
+  border: 1px solid var(--border, rgba(232, 232, 232, .14));
+  border-radius: var(--radius, 6px);
+}
+
+.grad-preview-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-03, 8px);
+  padding: var(--spacing-04, 12px);
+}
+
+/* Bars standing in for lines of text: real text would drag the preview into whatever
+   face the host has loaded, and the point being made is about the ramp. */
+.grad-preview-line {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--text, #e8e8e8);
+  opacity: .55;
+}
+.grad-preview-line:nth-child(3n) { width: 72%; }
+.grad-preview-line:nth-child(3n + 1) { width: 94%; }
+.grad-preview-line:nth-child(3n + 2) { width: 83%; }
+
+.grad-preview-ramp {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+
+/* ── dither ───────────────────────────────────────────────────────────────────────
+ *
+ * Banding is not the curve and it is not the stop count. A ramp crossing ~94 of the 256
+ * available levels over 190px spends about two pixels per level, and the eye finds those
+ * edges. More stops cannot help -- an 8-stop ramp and a 2-stop ramp band identically,
+ * measured. Nothing in CSS asks for more output bits, so sub-level noise is the only
+ * control a page has: break the terraces rather than try to out-resolve them.
+ *
+ * MOSTLY YOU DO NOT NEED THIS. Skia already dithers a background gradient and very
+ * nearly does not dither a mask. The same ramp, measured: a per-pixel deviation of 2.98
+ * as `background-image` against 0.22 as `mask-image`, longest flat terrace 6px against
+ * 13px. So scrim() is dithered for you and maskRamp() is not, and this class is for the
+ * second case -- a mask over a FLAT ground, which is the one place in this package that
+ * bands. Where the ground allows it, moving the ramp into a background over a
+ * background-color is the cheaper fix and costs nothing.
+ *
+ * BIPOLAR, THROUGH `overlay`. A value of exactly 128 is an overlay no-op, so the tile
+ * nudges the backdrop up as often as down. One-sided noise only darkens.
+ *
+ * STRENGTH IS A KNOB, AND IT HAS TO BE. Overlay's effect on the backdrop is 2b for a
+ * dark base and 2(1-b) for a light one, so the SAME tile lands about five times harder
+ * in the midtones than it does near white:
+ *
+ *     base .50  ->  one tile level is ~1.0 output levels
+ *     base .91  ->  one tile level is ~0.18 output levels
+ *
+ * Ship one fixed amplitude and you get a choice between grain you can see in a midtone
+ * ramp and nothing at all on a light one. Both failures were rendered before this
+ * comment was written. So the tile carries headroom (+-8) and `--wm-dither` scales it:
+ *
+ *     --wm-dither: .12    midtones, a saturated blend
+ *     --wm-dither: .9     a pale ramp, or ink near white
+ *
+ * Start at the default, and only raise it while the banding is still visible. If the
+ * grain shows first, the ramp did not need dither.
+ *
+ * ONE TEXEL PER DEVICE PIXEL. Left alone the 64px tile paints 2x2 device-pixel blocks on
+ * a retina display: the grain doubles in size and stops being invisible, which is the
+ * failure where the cure reads worse than the disease. The media queries put it back.
+ *
+ * Apply to the element carrying the ramp; it is positioned for you. */
+
+/* The default lives on :root rather than on .wm-dither, so a host can raise or drop it
+   for a whole panel and an element can still override it inline. Declared on the class
+   it would beat any ancestor's value, which is the opposite of a knob. */
+:root { --wm-dither: .25; }
+
+.wm-dither { position: relative; }
+.wm-dither::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url(data:image/png;base64,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);
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+  opacity: var(--wm-dither, .25);
+}
+@media (min-resolution: 2dppx) {
+  .wm-dither::after { background-size: 32px 32px; }
+}
+@media (min-resolution: 3dppx) {
+  .wm-dither::after { background-size: 21.33px 21.33px; }
+}

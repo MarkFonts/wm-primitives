@@ -11,21 +11,19 @@
      was the whole reason the fade looked absent in the proofers. */
   position: relative;
   z-index: 1;
-  /* Eased, not a straight two-stop ramp. A linear interpolation in alpha does NOT read
-     as linear: perceived lightness moves fastest at the transparent end, so a plain
-     `transparent → --bg` puts a visible edge where the fade starts and then crawls. The
-     stops below approximate an ease-in curve (alpha ≈ t²), which is what makes a long
-     fade read as the ink thinning out rather than as a panel laid over the text.
-     Kept in --bg so it works on either theme without knowing which one is on. */
-  background: linear-gradient(
-    to bottom,
-    rgb(0 0 0 / 0) 0%,
-    color-mix(in srgb, var(--bg) 8%, transparent) 25%,
-    color-mix(in srgb, var(--bg) 22%, transparent) 45%,
-    color-mix(in srgb, var(--bg) 45%, transparent) 65%,
-    color-mix(in srgb, var(--bg) 72%, transparent) 82%,
-    var(--bg) 100%
-  );
+  /* THE RAMP IS NOT HERE ANY MORE. It is scrim('var(--bg)', { dir: 'to top' }) from
+     gradient.ts, set by SpecimenNav as an inline background-image.
+
+     What used to sit here was six stops hand-fitted to alpha ≈ t², under a paragraph
+     explaining why a straight two-stop ramp will not do: perceived lightness moves
+     fastest at the transparent end, so `transparent → --bg` puts a visible edge where
+     the fade starts and then crawls. That reasoning was right and is now GRADIENTS.md;
+     what was wrong was that it lived in one file's comment while UiKitBoard built the
+     exact ramp it warns against, inline, forty lines of JS away.
+
+     `to top`, so the ramp runs from full --bg at the bottom to nothing at the top, and
+     the clothoid's stops crowd toward the transparent end -- which is the end where an
+     edge would show. Still --bg, so it works on either theme without knowing which. */
 }
 
 /* Read further, or leave. Right-aligned so the pair sits under the rag rather than

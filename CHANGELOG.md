@@ -5,7 +5,8 @@ moved and what it cost, because most of these were reached by getting them wrong
 the wrong version is the useful part.
 
 Companion to [DIAL.md](DIAL.md) (the dial's layout), [GESTURES.md](GESTURES.md) (what it does
-under a pointer), [SLIDERS.md](SLIDERS.md) (the census), [EVAL.md](EVAL.md) (how it is tested) and
+under a pointer), [SLIDERS.md](SLIDERS.md) (the census), [GRADIENTS.md](GRADIENTS.md) (the shape of a ramp),
+[EVAL.md](EVAL.md) (how it is tested) and
 [HOWTO.md](HOWTO.md) (how to wire it in, and add a dial).
 Newest first.
 
@@ -75,6 +76,107 @@ its rows. `StopSlider` was a name in four documents and no file.
 
 **ReCal's measure is in body ems now.** `.para-doc` sets the `p` style's size, so `34em`
 is thirty-four of them rather than of the page's 16px. (ReCal, not here.)
+
+## 2026-09-19 — a curve per channel
+
+**`blend()` could never have reproduced Mass Driver's tool, and the barrel said it could.**
+One ease on the interpolation parameter remaps R, G and B together: it re-spaces the stops
+along a path and cannot bend the path. Their resampler gives each channel its own curve.
+Stated as a test now — one curve on all three channels lands the midpoint *exactly* on the
+straight line between the endpoints; steering G alone puts it 20 levels off it.
+
+**`channelBlend()` reproduces their published output byte for byte.**
+`#F65030 → #3050F6`, five samples, no control points →
+`linear-gradient(90deg, #f65030, #c45061, #935093, #6150c4, #3050f6)`. Ties round DOWN to
+get there: a linear R from 246 to 48 passes through exactly 196.5 and 97.5, and their stops
+are 196 and 97. Stops sit at even positions, unlike `rampStops()` — their curves are value
+against *position*, so sampling by curve parameter would be reading their graphs wrong.
+
+**It is the one function here that resolves a colour**, and the exception is the point:
+steering a channel means knowing what the channel is, and `color-mix()` exists precisely so
+this package never has to look. It resolves the way the house rule requires — through the
+engine, never a regex. Two hops, because a canvas `fillStyle` cannot expand `var(--accent)`:
+computed style first, 1×1 canvas second.
+
+**Their demo pair hides the feature.** G is 80 at both ends of `#F65030 → #3050F6`, so every
+curve on it is a no-op — which is why the first render of this looked broken and why the
+control now labels that channel `flat` and dashes its curve.
+
+**Two CSS bugs found by rendering it rather than by reading it.** The three editors kept
+their `grid-template-columns: repeat(3, 1fr)` inside a 300px rail, at 96px each, because the
+stacking rule was a *viewport* media query and the viewport was 1000px wide. Replaced with a
+container query — and then the first version of that never fired either, since a container
+query styles a container's DESCENDANTS and cannot style the container it queries. The
+containment sits on `.grad-controls` and the query names it.
+
+New: `channelBlend`, `resolveRGB`, `rgbToHsl`, `CHANNEL_NAMES`, `ChannelCurves`, a
+`'channels'` kind on `GradientSpec`. 29 assertions.
+
+---
+
+## 2026-09-18 — gradients get an engine
+
+**One fade, two spellings, one of them the bug the other one documents.**
+`Specimen.css` carries six hand-picked stops and a paragraph explaining that a straight
+two-stop ramp "puts a visible edge where the fade starts and then crawls".
+`UiKitBoard.jsx` builds its top mask inline as exactly that two-stop ramp. Same shape as
+`--dur-fast` before `motion.css`, so it gets the same treatment: `src/gradient.ts`, with
+the number in it.
+
+**Four references turned out to be one technique.** The clothoid-gradient pens ease the
+ALPHA; Mass Driver's resampler eases the COLOUR by dragging control points onto the
+interpolation and sampling back to plain stops; variablur eases a BLUR RADIUS. Three
+channels, one cubic Bézier — so one sampler and three emitters (`scrim`, `blend`,
+`blurLayers`), not three engines.
+
+**The clothoid IS a Bézier, measured rather than assumed.** Fitting `cubic-bezier()` to
+the pen's seven hand-written stops lands on `(0.416, 0.657, 0.695, 1)` at an RMS error of
+0.00065 in alpha, worst case 0.0013 — a third of one step in 8-bit. It is the default,
+because `linear` is the wrong default for a fade and the default nobody passes is the one
+that ships.
+
+**Sampling is by curve parameter, not by position**, which is why the stops crowd toward
+the transparent end the way the pen's own do. Sampling `y` at equal `x` draws the same
+curve with the stops in the wrong places: smooth where nothing happens, faceted where
+everything does.
+
+**Progressive blur composes by quadrature, and that is the whole difference.** Each layer
+blurs what the layers under it already blurred, so σ² = σ₁² + σ₂²: a band that should read
+at 12px on top of 9px gets sqrt(12² − 9²) = 7.9, not 3. The common version of this trick
+hands each layer the curve's value and goes to mush a third of the way in. Tested at 2, 4,
+6 and 10 layers — the radii compose back to the radius that was asked for.
+
+**Nothing parses a colour.** Every emitter mixes through `color-mix()`, so a ramp can be
+built out of `var(--bg)` without this package learning what `--bg` resolves to — the
+colophon-wordmark rule from `color.css`, applied before it could be broken again.
+
+**Named `GradientControls.tsx`, not `Gradient.tsx`.** On a case-insensitive filesystem
+`./src/Gradient` and `./src/gradient` are one module: the barrel resolves both imports to
+the engine and fails at build with a missing export naming the component. `tsc` caught it;
+`SpecimenNav` and `letterbox.js` are already named around the same trap.
+
+**Both call sites took it, and no baseline moved.** `Specimen.css`'s six stops are gone;
+`SpecimenNav` sets `scrim('var(--bg)', { dir: 'to top' })` instead. `UiKitBoard`'s inline
+two-stop mask is `maskRamp({ from: .55, to: 1, span })`. The claim that these sat under
+render baselines was wrong — every committed screenshot is a dial row or `kernpare-ui-seg`,
+and nothing shoots either fade — so they were checked by rendering both ramps against their
+old strings on identical content.
+
+The tail is visually unchanged, which is the expected result: the clothoid tracks the
+hand-fitted t² curve within a few points across the whole ramp, because the hand curve was
+aiming at the same thing. The board mask improved at the join — its alpha now decelerates
+into full reveal (`.55 → .667 → … → .992 → 1`) where the two-stop version arrived linearly,
+and that arrival was the visible edge `Specimen.css` spent a paragraph warning about, in
+the one file that was building it.
+
+**`span` earned its way into `RampOptions`** doing it. The board's mask must end EXACTLY at
+the chrome's inset, so positions are emitted as a fraction of a length —
+`calc(0.1704 * 48px)` — rather than as percentages of a strip that resizes.
+
+New: `src/gradient.ts`, `src/GradientControls.tsx`, `src/gradient.css`,
+`tests/unit/gradient.spec.ts` (44 assertions, no browser and no host — the engine is
+numbers), [GRADIENTS.md](GRADIENTS.md).
+Converted: `src/Specimen.css`, `src/SpecimenNav.tsx`, `src/UiKitBoard.jsx`.
 
 ---
 

@@ -152,3 +152,39 @@ export type { ParaStyleKey, ParaStyleBase } from './src/paraStyles'
 
 export type { FittingControlsProps, Alignment } from './src/Fitting'
 export type { FitMode, FitOptions, FittedLine } from './src/flattersatz'
+
+// Gradients — the shape of a ramp, and the three things a ramp can carry. The package
+// already faded in three places and spelled it two ways; one of those spellings was the
+// two-stop fade the other one wrote a paragraph explaining you must not use. Same shape
+// as --dur-fast before motion.css. GRADIENTS.md has the reasoning.
+//
+// One mechanism, because the four techniques it was built from are one: a cubic Bézier's
+// control points, sampled by curve parameter. The "clothoid gradient" of Lukas Hermann's
+// and Takehiko Ono's pens IS cubic-bezier(0.416, 0.657, 0.695, 1) — fitted to their seven
+// hand-written stops, RMS 0.00065 in alpha. Mass Driver's resampler eases colour with the
+// same control points; variablur eases a blur radius with them.
+export { EASES, resolveEase, bezierPoint, bezierY, rampStops,
+         scrim, maskRamp, blend, blurLayers, declaration } from './src/gradient'
+export type { Bezier, Ease, EaseName, RampOptions, Stop, Space,
+              BlurLayer, BlurOptions } from './src/gradient'
+
+// Mass Driver's schema: a curve PER CHANNEL, not one curve on the interpolation. The
+// difference is the path — one ease re-spaces the stops along a fixed line through
+// colour space, three curves move the line. Reproduces their published output exactly
+// (tests/unit). It is the one thing here that resolves a colour, because steering a
+// channel means knowing what the channel is; it resolves through a 1x1 canvas, the way
+// letterbox.js does, and never with a regex.
+export { channelBlend, resolveRGB, CHANNEL_NAMES } from './src/gradient'
+export type { Triple, ChannelSpace, ChannelBlendOptions } from './src/gradient'
+
+// A scrim and a blend are declarations and need no component. Progressive blur is not a
+// declaration — it is a stack of masked backdrop layers, so it is DOM, and the stack is
+// here once instead of in each consumer (where the Gaussian quadrature gets dropped and
+// the blur arrives far too fast). GradientControls is the curve editor, because the
+// numbers that matter in a gradient are the two control points and you cannot type those.
+// Named for the headline export: ./src/Gradient and ./src/gradient are one module on a
+// case-insensitive filesystem, the same trap SpecimenNav is named around.
+export { ProgressiveBlur, CurveEditor, GradientControls, GradientPreview,
+         gradientCss, GRADIENT_DEFAULTS } from './src/GradientControls'
+export type { ProgressiveBlurProps, CurveEditorProps, GradientControlsProps,
+              GradientSpec, GradientKind } from './src/GradientControls'
