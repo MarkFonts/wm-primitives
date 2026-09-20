@@ -20,10 +20,19 @@
 /* Standalone only -- build.py strips every @font-face and declares the faces once for
    the whole document. Here so that opening this file directly renders in Cal Sans and
    draws real marks instead of printing "format_align_left" in words. */
-/* THE RANGE IS PART OF THE DECLARATION. Without `font-weight: 400 700` the engine treats
-   this variable face as a single 400 instance, so every font-weight: 500/600 on the page
-   was SYNTHETIC BOLD -- the browser smearing the roman -- rather than the wght axis the
-   face actually carries. 67 of them. Declaring the range hands those back to the font. */
+/* THE RANGE IS DECLARED BECAUSE THE SPEC SAYS A VARIABLE FACE CARRIES ONE -- not because
+   anything was broken. An earlier version of this comment claimed the page's 67 bold spans
+   had been SYNTHETIC BOLD before this line existed. THAT WAS WRONG, and it is corrected
+   here rather than quietly deleted.
+   Measured on the page as it actually stood: 400/500/600/700 came out at
+   337.88/344.22/355.10/361.37 for one test string -- four different widths, so Chrome was
+   reaching the wght axis perfectly well without the descriptor. The false claim came from
+   a JS `new FontFace(name, url)` probe, whose `weight` descriptor DEFAULTS to `normal` and
+   therefore clamps to 400. A CSS @font-face with the descriptor merely OMITTED does not
+   behave that way here, so the probe measured something this page never did. The lesson is
+   the cheaper half: test the artefact, not a model of it.
+   The line stays. An engine entitled to read the spec strictly would clamp to 400, the
+   range costs nothing, and the live system page carries the same omission in build.py. */
 @font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype");
   font-weight: 400 700; font-style: normal; font-display:swap; }
 @font-face{ font-family:"Material Symbols Outlined"; src:url("../../fonts/MaterialSymbolsOutlined.woff2") format("woff2"); font-weight:100 700; font-display:block; }
@@ -126,15 +135,16 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
 /* iOS inflates text in a column it thinks is too narrow, which would judge the type at a
    size nothing ships. */
 .bt-page{ -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
-  /* Nothing on this page may be faked. With the weight range declared above there is a
-     real wght axis to reach, and the italic is reached by axis below -- so synthesis has
-     nothing left to do except go wrong. */
+  /* Nothing on this page may be faked. The weight axis was already being reached; the
+     italic is reached by axis below. Synthesis has nothing left to do except go wrong. */
   font-synthesis: none; }
 
 /* CAL SANS'S ITALIC IS AN AXIS, NOT A SECOND FILE. One face is declared, and it is the
    roman, so `font-style: italic` had no italic to resolve to and every <i> on the page was
    a SLANTED ROMAN the engine drew itself. On a page about this foundry's own type that is
-   the one thing that must not happen.
+   the one thing that must not happen. This one was measured on the page itself and holds:
+   `font-style: italic` rendered at 337.88, the roman's own width to the hundredth, because
+   it WAS the roman; the axis renders 337.11.
    font-variation-settings names only the axes it lists, so 'ital' alone leaves wght under
    font-weight's control and a bold italic still gets its real weight. font-style goes back
    to normal so nothing slants what the axis has already italicised. */
