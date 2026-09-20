@@ -12,6 +12,40 @@ Newest first.
 
 ---
 
+## 2026-09-20 — a mask does not bound a backdrop-filter
+
+**`blurLayers()` was building a uniform smear.** Measured down the system page's blur
+panel, sharpness was flat at 0.1 from the first line to the last, against 8.7–16.8 with
+the layer stack removed. Not a tuning problem and not a small one: there was no
+progression at any radius, and at 4px every line was equally destroyed.
+
+Every version of the function had each layer fill the element and cut it back to a band
+with `mask-image` — which is how the technique is published everywhere, and which does
+not bound a `backdrop-filter`. In the assembled page one layer masked to the top 25%
+blurs the *whole* panel, and each further layer compounds: one measured 1.8, three 0.2,
+six 0.1. `mask-image`, `-webkit-mask-image`, the `mask` shorthand, `mask-mode: alpha` and
+`will-change: mask` all render identically, and the same markup in a standalone page
+masks correctly — a compositing-path difference, not a syntax error. Which part of the
+assembly triggers it is still unknown; the layers' computed styles are identical in both
+documents but for width.
+
+**So the bands are geometry.** Each layer states its own `inset` and blurs its own rows,
+which holds in every document tested. `BlurLayer` loses `maskImage`/`WebkitMaskImage` and
+gains `inset`; `.wm-blur-layer` loses `inset: 0`, which would otherwise hand every band
+the whole element and restore the bug in silence.
+
+**What it cost:** the feather. A band edge is a step in radius now, not a fade, so the
+seam is hidden by making the step small rather than by blending it — which is what
+`layers` buys, and why the default moves 6 → 16. At 12 the bands read as horizontal
+strips, at 16 they do not, at 32 it is no better. Each band is a separate backdrop
+rasterisation, so it is the first number to lower under a scrolling list.
+
+The two unit tests that read mask stops were asserting the right properties through the
+wrong surface. Tiling is an identity now rather than a coverage integral — band *i*'s far
+edge **is** band *i+1*'s near edge, asserted exactly, which is why `inset` states both
+edges instead of a height. Added one that the layers carry no mask at all, because a mask
+coming back would come back silently.
+
 ## 2026-09-20 — the ramps demos move
 
 **The section shipped inert.** Six chapters of baked CSS that state a default and cannot
