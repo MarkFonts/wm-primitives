@@ -12,6 +12,31 @@ Newest first.
 
 ---
 
+## 2026-09-20 — the ramps demos move
+
+**The section shipped inert.** Six chapters of baked CSS that state a default and cannot
+be pushed off it: a reader who wants to know what four stops looks like, or where a blur
+stops being legible, had to take the page's word. Five native ranges now — `stops` on the
+scrim pair, `radius` / `layers` / `hold` on the blur stacks, dither strength on the banded
+pair — driving the engine inlined into the page.
+
+**No framework for it.** `src/gradient.ts` is 3.5KB and has no dependencies, which is the
+whole reason it can be inlined; `dist/dial.js` already ships one React and a second bundle
+here would ship another for the sake of a slider. `js=9.0KB` for the section, against 0.
+The page stays correct with JS off — every demo is baked at its default and the controls
+only re-emit.
+
+Wired by class and `data-` attribute, never by id: `build.py` rebinds
+`document.querySelector` to the section root but leaves `getElementById` alone, and renames
+ids on the way in. Checked after Ramps moved inside Color (#28) — the root is `#s-color`
+now and all five still drive.
+
+**And the copy left the generator.** The `COPY` object sat at the top of
+`build-ramps.mjs`, so a writing pass and the machinery were one edit surface and two people
+could not work at once. The 36 strings are `docs/system/pages/ramps.copy.js` now, an
+exported function taking the measured values so the live figures still interpolate and
+still cannot be retyped. The generator holds no prose at all.
+
 ## 2026-09-19 — process (NEXT.md F) · v0.1.0
 
 **A PR that changes what ships carries a CHANGELOG entry, or it is red.** `lint.yml`
