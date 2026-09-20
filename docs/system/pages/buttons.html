@@ -745,10 +745,17 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
 
 /* ── the verdict table ────────────────────────────────────────────────────── */
 .bt-tbl-wrap{ overflow-x: auto; overscroll-behavior-x: contain; margin: 0 0 1.25rem; }
-.bt-tbl{ border-collapse: collapse; width: 100%; min-width: 34rem; max-width: 60em;
+.bt-tbl{ border-collapse: collapse; width: 100%; min-width: 42rem; max-width: 60em;
   font-size: .8125rem; }
+/* A COLUMN HEAD IS A LABEL, NOT A SENTENCE -- it does not wrap. "5 states" and "in situ"
+   were breaking across two lines while the other six stayed on one, which made the whole
+   header row 40px tall and set two of the labels half a line above the rest. nowrap, and
+   the min-width below carries the cost where it belongs: the wrapper scrolls.
+   vertical-align: bottom so every label sits on the row's baseline rather than being
+   centred in a box whose height the longest label decides. */
 .bt-tbl th{ text-align: left; font-weight: 600; font-size: .625rem; letter-spacing: .1em;
   text-transform: uppercase; color: var(--bt-ink3); padding: 0 .75rem .5rem 0;
+  white-space: nowrap; vertical-align: bottom;
   border-bottom: var(--bt-hair) solid var(--bt-line); font-variation-settings:'opsz' 10; }
 .bt-tbl td{ padding: .5rem .75rem .5rem 0; border-bottom: var(--bt-hair) solid var(--bt-line);
   color: var(--bt-ink2); vertical-align: top; }
