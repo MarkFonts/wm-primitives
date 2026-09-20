@@ -25,7 +25,7 @@
 export const copy = v => ({
 
   title: `Ramps`,
-  lede: `One curve, three channels. A scrim's alpha, a blend's colour and a blur's radius are one cubic B&#233;zier applied to three quantities: one sampler, three emitters, no third engine. Every gradient on this page is a string <code>src/gradient.ts</code> emitted; nothing here is typed in, so nothing here can go stale on its own.`,
+  lede: `One curve, two channels. A scrim's alpha and a blend's colour are one cubic B&#233;zier applied to two quantities: one sampler, two emitters, no second engine. The blur that used to be the third is one radius, and the page says why. Every gradient here is a string <code>src/gradient.ts</code> emitted; nothing is typed in, so nothing can go stale on its own.`,
 
   c1_title: `The curve`,
   c1_tag: `cubic-bezier(${v.EASES.clothoid.join(', ')})`,
@@ -35,8 +35,8 @@ export const copy = v => ({
   c3_tag: `the midpoint, four spaces`,
   c4_title: `Steering a channel`,
   c4_tag: `Mass Driver's schema`,
-  c5_title: `Progressive blur`,
-  c5_tag: `${v.radii.join(' &#183; ')} px`,
+  c5_title: `The blur`,
+  c5_tag: `one radius, not a ramp`,
   c6_title: `Banding`,
   c6_tag: `8-bit, and what no curve can fix`,
 
@@ -48,14 +48,8 @@ export const copy = v => ({
 
   note4: `One curve on the interpolation re-spaces the stops <b>along</b> a fixed path through colour space. A curve <b>per channel</b> moves the path. Left: the same two colours with one channel steered at a time &#8212; the ramp leaves the straight line between its endpoints, which is how a ramp escapes sRGB's grey without changing space. Right: the three channels of <code>${v.MD_A}</code> &#8594; <code>${v.MD_B}</code>, each on its own axis. R falls, B rises, and <b>G does not move</b>. That flat channel is why the pair never greys, and why steering G on it does nothing at all. <code>channelBlend()</code> reproduces Mass Driver's published output byte for byte; the equality is a test.`,
 
-  note5: `variablur's effect as a stack of backdrop layers, each owning <b>one band</b> at that band's absolute radius. Not a cumulative stack: that one <b>ghosts</b>. <code>backdrop-filter</code> blurs what is behind the layer, so at partial alpha the compositor blends a blurred copy over the still-sharp original and live text doubles. The bands are <b>geometry</b>, not masks, and that is not a style choice: everyone publishes this technique with each layer cut to a band by <code>mask-image</code>, and in this page one layer masked to the top quarter blurred the whole panel &#8212; six stacked took sharpness down the panel to a flat <b>${v.blur.smeared}</b> against <b>${v.blur.sharpLo}&#8211;${v.blur.sharpHi}</b> with the stack removed, a uniform smear, the one thing a progressive blur must not be. A band placed by <code>inset</code> blurs its own rows and nothing else. The cost is the feather: a band's edge is a step in radius, so the seam is hidden by making the step small rather than by blending it, which is what <code>layers</code> buys. Only the radius follows the curve, and the default curve holds the start &#8212; text stops being legible around 4px, and the first band has to stay under that. The right-hand panel also holds the first lines with <code>start</code>: without it the smallest radius in the stack lands inside the first line's ascenders.`,
+  note5: `One <code>backdrop-filter</code>, one radius, nothing masked. This chapter was a progressive blur until 2026-09-20 and every way of building one over live text failed the same way. Hard bands: no ghost, but the radius jumps at each boundary and the staircase shows. Feathered bands: no steps, but at partial mask alpha the compositor blends the blurred copy over the still-sharp original &#8212; when it was tried, one full-cover layer at half alpha measured a peak edge of <b>${v.blur.feather.peak}</b> against <b>${v.blur.feather.sharp}</b> unblurred and <b>${v.blur.feather.blurred}</b> fully blurred, so half the sharp text survives in every feather zone and the words double. That construction is not on this page any more; the figures are kept with their method so the decision stays checkable. Content copies: the same defect, measured worse. A stepless blur that varies down the page needs the text rasterised to a canvas, which costs the live text, and live text is the point. So: a uniform blur, whose row-to-row sharpness change across the panel below is <b>${v.blur.uniformDelta}</b>, and a slider on its radius. The first draft of this chapter blamed the mask for smearing the whole panel; the mask was never broken. The page's <code>corner-shape: superellipse</code> drops a mask on any layer whose host has a non-round corner, and only the host, which is why resetting the layers changed nothing. Found by lifting the panel up its ancestors until masking worked.`,
 
-  /* note5b: NOT WIRED. Written 2026-09-20 for the hours the two blur panels were to be
-     withdrawn (the masked stack smeared the whole panel); the stack became geometry the
-     same day and the panels stayed. Kept as the line to wire under c5's radius table if a
-     figure there ever has to come out again, so that is a generator change and not a
-     writing job. v.blur.* describe the OLD stack and read in past tense. */
-  note5b: `The two panels that belong here are withdrawn. In the assembled page the stack renders as one uniform blur from the first line to the last &#8212; sharpness measured flat at ${v.blur.smeared} down the panel, against ${v.blur.sharpLo}&#8211;${v.blur.sharpHi} with the stack hidden &#8212; so the figure showed a smear where the technique makes a progression, and a figure that misrepresents the technique is worse than none. The radii above are still the engine's; the panels return when the layer stack is fixed.`,
 
   note6: `It blurs pixels. It does not redact. The words stay in the DOM &#8212; selectable, copyable, findable, and read aloud in full by a screen reader, which sees no blur. Never use it to withhold anything.`,
 
@@ -65,8 +59,6 @@ export const copy = v => ({
 
   ctl_stops: `stops`,
   ctl_radius: `radius`,
-  ctl_layers: `layers`,
-  ctl_hold: `hold`,
   ctl_dither: `dither`,
 
   cap1: `alpha against position &#183; dots = the engine's stops`,
@@ -74,8 +66,7 @@ export const copy = v => ({
   cap3a: `no scrim &#183; the control`,
   cap3: `linear &#183; the line shows on row two`,
   cap4: `clothoid &#183; the default`,
-  cap5: `start 0`,
-  cap6: `start 'calc(12px + 2lh)' &#183; the first lines held`,
+  cap5: `one uniform backdrop-filter &#183; nothing masked, so nothing to ghost or step`,
   cap7a: `the control &#183; alpha 0 &#8594; 1 &#183; ${v.band.steepLevels} levels at ${v.band.steepPerLevel}px &#183; too dense to separate &#183; fuses`,
   cap7b: `the same endpoints as a <code>background-image</code> &#183; Skia dithers before it quantises &#183; the step itself halves, to ${v.band.jumpBg}`,
   cap7: `the dark fade as a mask over flat ground &#183; ${v.band.levels} levels at ${v.band.perLevel}px &#183; column step ${v.band.jumpMask} &#183; bands`,

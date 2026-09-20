@@ -12,6 +12,41 @@ Newest first.
 
 ---
 
+## 2026-09-20 — progressive blur is retired; one blur, with a radius
+
+**It could not be made to work, and three attempts is enough.** A stepless progressive
+blur over live DOM text is not achievable with `backdrop-filter`. Both constructions
+were built and both were rejected on sight:
+
+- **Hard-edged bands.** Every pixel sits under exactly one layer at alpha 1, so nothing
+  ghosts — but the radius jumps at each boundary and the staircase is plainly visible.
+- **Feathered bands.** No steps, but `backdrop-filter` at partial mask alpha composites
+  the blurred copy *over the still-sharp original*. Measured: uniform mask alpha 0.5
+  leaves a peak edge of **108**, against **217** unblurred and **19** fully blurred.
+  Exactly half the sharp text survives, in every feather zone, and it reads as a seam
+  through the type.
+
+There is no third option in CSS. A true per-pixel variable blur — what variablur does in
+Metal — needs the content rasterised to a canvas, which costs the live text that the
+effect exists to preserve.
+
+**§05 is now "The blur": one uniform `backdrop-filter` and a radius slider.** Nothing is
+masked, so there is no partial alpha to ghost and no second radius to step to. Measured
+across the panel, the biggest row-to-row change in local sharpness is 0.002 at 12px and
+0.001 at 30px — flat, which is the whole point.
+
+`blurLayers()` and `ProgressiveBlur` are deprecated rather than deleted, so the finding
+stays beside the code. No call site in this package used them; `SpecimenNav` uses
+`scrim()` and `UiKitBoard` uses `maskRamp()`, and a fade has never had any of these
+problems.
+
+**It also closes [NEXT.md](NEXT.md) D.** The mask was never the thing that was broken.
+`corner-shape: superellipse(1.2)`, applied page-wide, drops the mask on any layer whose
+HOST carries a non-round corner shape — only the host, which is why resetting the layers
+changed nothing and why the computed styles gave nothing away. Found by lifting the
+panel up its ancestor chain until masking started working. The claim that `mask-image`
+does not bound a `backdrop-filter` was wrong and is corrected wherever it was made.
+
 ## 2026-09-20 — the icon face is a subset, and a lint knows what it holds
 
 **`icon.css` said the full 3.9MB face shipped so a subset could never drift. The file

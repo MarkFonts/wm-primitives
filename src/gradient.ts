@@ -357,6 +357,24 @@ const feather = (
 ) => SMOOTH.map(({ t, a }) =>
   `rgb(0 0 0 / ${amt(rising ? a : 1 - a)}) ${at(from + (to - from) * t)}`)
 
+/**
+ * @deprecated Retired 2026-09-20. A stepless progressive blur over live DOM text is not
+ * achievable with `backdrop-filter`, and both constructions were shipped and rejected:
+ *
+ *   - hard-edged bands: every pixel sits under exactly one layer at alpha 1, so there is
+ *     no ghost, but the radius jumps at each boundary and the staircase is visible.
+ *   - feathered bands: no steps, but `backdrop-filter` at partial mask alpha composites
+ *     the blurred copy OVER the still-sharp original. Measured on the system page, a
+ *     uniform mask alpha of 0.5 leaves a peak edge of 108 against 217 unblurred and 19
+ *     fully blurred -- exactly half the sharp text survives, in every feather zone.
+ *
+ * There is no third option in CSS. A true per-pixel variable blur (what variablur does
+ * in Metal) needs the content rasterised to a canvas, which costs the live text.
+ *
+ * Kept, not deleted, so the finding stays next to the code. For a fade use `scrim()` or
+ * `maskRamp()`, which have no artifact at all; for a single uniform blur use one
+ * `backdrop-filter` and no mask.
+ */
 export function blurLayers(o: BlurOptions = {}): BlurLayer[] {
   const { dir = 'to bottom', radius = 24, layers = 8, ease = 'ease-in-out', start = 0 } = o
   const n = Math.max(1, Math.round(layers))

@@ -65,6 +65,8 @@ export interface ProgressiveBlurProps {
  *  backdrop-filter inside a scroll container is sampled before the scroll offset is
  *  applied and the blur lags the content. The fix is the same one the fixed-header case
  *  wants — position it against the viewport, not the scroller. */
+/** @deprecated Retired 2026-09-20 with `blurLayers()` -- see its note for the two
+ *  artifacts and why neither is fixable. Use a scrim, or one uniform blur. */
 export function ProgressiveBlur({
   radius = 24, layers = 8, ease = 'ease-in-out', dir = 'to bottom', start = 0,
   position = 'absolute', className = '', style,

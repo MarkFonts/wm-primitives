@@ -74,14 +74,14 @@ a task. Skip nothing above the line you are on; below it, pick.
       it, in both apps' H&J panels (GESTURES §11). StopSlider was a name with no file.
       2026-09-19.
 
-- [ ] **Reduce the mask-vs-backdrop-filter claim to a minimal repro.** Ramps §c5, GRADIENTS.md
-      and the 2026-09-20 CHANGELOG entry say `mask-image` does not bound `backdrop-filter`
-      in the assembled page. It reproduces every way it was tried (five mask spellings,
-      isolation on and off, one layer and six) and the same markup masks correctly in a
-      standalone page — but which part of the assembly triggers it was never isolated, and
-      the computed styles match apart from width. The published claim rests on one
-      document. Until a minimal repro exists it is an observation, and the three places
-      that state it should say so or point here.
+- [x] **Reduce the mask-vs-backdrop-filter claim to a minimal repro.** Done 2026-09-20.
+      It was never a property of `backdrop-filter`: `corner-shape: superellipse(1.2)`,
+      applied page-wide, drops the mask on any layer whose HOST carries a non-round
+      corner shape. Only the host matters, which is why resetting the layers changed
+      nothing and why the computed styles gave nothing away. Found by lifting the panel
+      up its ancestor chain until masking started working. The claim is corrected
+      wherever it was stated, and the progressive blur it was blocking has since been
+      retired for unrelated reasons -- see the 2026-09-20 CHANGELOG entry.
 
 ## E · Getting it into more hands
 
