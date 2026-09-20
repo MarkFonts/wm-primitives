@@ -108,16 +108,28 @@ const bandLevels = levelsFor(BAND_FROM, BAND_TO)
 const steepLevels = levelsFor(0, 1)
 const lightLevels = levelsFor(LIGHT_FROM, LIGHT_TO)
 
-/* MEASURED in Chromium by decoding the rendered band, at the width the assembled page
-   gives it. Re-take these if the band's range, width or dither strength changes. */
+/* MEASURED in Chromium by decoding the rendered band, AT THE SECTION'S 1080px MEASURE,
+   which puts the band at 1024px once the part's 28px padding is taken off each side.
+   That measure is a max-width, so narrower viewports scale the band and the lengths
+   here with it: these are true of the >=1080 case and indicative below it.
+
+   Which of these move with width, and which do not, is worth keeping straight:
+     - px-per-level is width/levels, so it moves arithmetically
+     - the RUN lengths are decoded off a render, so they have to be re-taken, not scaled
+     - the JUMPS do not move at all. A step in the column mean is a property of the
+       quantiser, not of how many pixels you spread it over. When the measure went
+       1143 -> 1080 (band 1414 -> 1024) every jump came back identical, and that is the
+       expected result rather than a lucky one.
+   Re-take these if the band's range, the section's measure or the dither strength
+   changes; the jumps only if the range or the dither does. */
 const MEASURED = {
   ditherBg: 2.98,      // per-pixel deviation, same ramp as background-image
   ditherMask: 0.22,    //   "                            as mask-image
-  terrace: 13,         // px per level across the dark band -- the density the eye reads
-  runMask: 33,         // widest identical run across the dark mask row, px
+  terrace: 14,         // px per level across the dark band -- the density the eye reads
+  runMask: 35,         // widest identical run across the dark mask row, px
   runDither: 23,       //   "   with .wm-dither: broken up, not removed
   terraceSteep: 5,     //   "   the steep control: dense enough to fuse
-  terraceLight: 13,    //   "   the light control: same density, other end of the scale
+  terraceLight: 14,    //   "   the light control: same density, other end of the scale
   /* The last three rows all carry 76 levels, so px-per-level cannot tell them apart.
      What separates them is the size of the step left in the COLUMN MEAN. */
   jumpMask: 0.99,      // the staircase itself
