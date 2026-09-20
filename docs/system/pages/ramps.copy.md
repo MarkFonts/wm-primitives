@@ -77,7 +77,7 @@ From the rest of the repo — match `SLIDERS.md`, `DIAL.md`, `color.css`'s heade
 
 ## the slots
 
-39 total. `title`, `lede`, `c1..c6_title`, `c1..c6_tag`, `note1..8`, `cap1..8`, `cap3a`, `cap7a`, `cap7b`, `cap7c`,
+36 total. `title`, `lede`, `c1..c6_title`, `c1..c6_tag`, `note1..8`, `cap1..5`, `cap7`, `cap8`, `cap3a`, `cap7a`, `cap7b`, `cap7c`,
 and `ctl_stops` `ctl_radius` `ctl_layers` `ctl_hold` `ctl_dither` — the slider labels.
 
 **tags** = the right-hand label on a chapter rule. Short. Lowercase unless it's code.
@@ -122,25 +122,21 @@ and `ctl_stops` `ctl_radius` `ctl_layers` `ctl_hold` `ctl_dither` — the slider
   grey and why steering G there does nothing.
 - live slots: `${MD_A}` `${MD_B}`
 
-### c5 · Progressive blur — `c5_tag` is live
-- 2026-09-20: the masked stack smeared the whole panel in the assembled page (sharpness a
-  flat 0.1 down the panel against 8.7–16.8 with the stack hidden). Bands are geometry now,
-  each layer placed by `inset`; the two panels measure 9.1→0.1 and 9.2, 10.0→0.1, and do
-  what their captions say. `note5` says so; `v.blur.*` are the OLD stack's figures and
-  read in past tense. `note5b` exists unwired for the day a figure has to come out.
-- `layers` runs 4–32, default 8. The count buys fidelity to the easing, not smoothness:
-  each band takes the radius at its far edge, so a coarse stack is systematically blurrier
-  than the curve and a fine one tracks it while sampling into more steps. Headed at 2×,
-  8, 16 and 32 are hard to tell apart, hence 8. (An earlier line here said 12 showed
-  strips and 16 did not; that was read off a 1:1 headless strip and was wrong.)
-- on screen: two prose panels, `start 0` vs held — with `radius` / `layers` / `hold`
-  sliders. Both stacks rebuild; only the right one takes the hold.
-- `note5` — tiled bands not a cumulative stack (which **ghosts**: a blurred copy over the
-  still-sharp original, a double image on live text). Bands evenly spaced, only the radius
-  follows the curve. `start` holds the first lines.
-- `note6` — the limitation. Blurs pixels, does **not** redact. Still selectable, copyable,
-  findable, read aloud in full. Never use to withhold anything. **Keep this blunt.**
-- live slot: `${radii.join(' &#183; ')}`
+### c5 · The blur
+- on screen: one prose panel under one uniform `backdrop-filter`, a `radius` slider.
+  Nothing masked, nothing stacked.
+- history, for the copy: it was a progressive blur until 2026-09-20 and every construction
+  failed over live text — hard bands step, feathered bands ghost (partial mask alpha
+  composites the blurred copy over the still-sharp original), content copies ghost worse.
+  A stepless varying blur needs the text rasterised, which costs the live text. So one
+  radius. `note5` tells that story and names the correction: the mask was never broken,
+  `corner-shape: superellipse` on the HOST drops a mask on any layer under it.
+- `note6` — the limitation, unchanged and still true of one blur. Blurs pixels, does
+  **not** redact. Still selectable, copyable, findable, read aloud in full. **Keep it blunt.**
+- no live slots now. `v.blur.*` (the old stack's smear figures) and `v.radii` are read by
+  nothing; retire them in the generator when convenient.
+- `blurLayers` and `ProgressiveBlur` are deprecated in `src/gradient.ts`, not deleted, so
+  the finding stays with the code. No call site used them.
 
 ### c6 · Banding
 - on screen: **five full-width rows** over a stated dark ground, same ink, same
