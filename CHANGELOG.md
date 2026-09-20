@@ -42,6 +42,38 @@ Kernpare's wrapping is reverted (wordmarktools `46afddd` → back).
 
 ---
 
+## 2026-09-20 — the blur has no steps, and the reason it had them
+
+**A progressive blur should not have visible steps, and ours did.** The fix earlier
+today bounded each band by geometry instead of by a mask, which stopped the stack
+rendering as one uniform smear — but hard-edged bands are a staircase of discrete radii,
+and at a real display that staircase is what you see. Feathering is not a refinement
+here; it is the technique.
+
+**Why the mask had to be abandoned, and why it did not.** A masked layer appeared not to
+bound a `backdrop-filter` in the assembled page. It does. What broke it was
+`corner-shape: superellipse(1.2)`, applied page-wide to every element: a non-round
+corner shape on the element that **contains** the stack silently drops the layers'
+masks. Only the host matters — the layers' own corner-shape is irrelevant, which is why
+resetting them changed nothing and why nothing in the computed styles pointed at it. The
+earlier entry said the generalisation was not established and that reducing it to a
+minimal repro was [NEXT.md](NEXT.md) D. This is that repro, and it closes the item: it
+was never a property of `backdrop-filter`.
+
+`gradient.css` now resets the host from inside the primitive with
+`:has(> .wm-blur) { corner-shape: round }`, so a page that adopts a squircle everywhere
+does not have to know any of this.
+
+**Both, not either.** Each layer keeps its own box AND carries a feathered mask. The
+mask removes the steps; the geometry is the floor, so if a mask is ever dropped again
+the stack degrades to visible bands rather than to a uniform smear — a bad gradient
+instead of no gradient.
+
+**What it costs:** at `start 0` the first line is now slightly soft rather than crisp.
+That is correct and already documented — the smallest radius in a 24px stack is 1.35px
+and lands inside the first line's ascenders, which is the entire reason `start` exists.
+The hard-band version's crisp first line was an artefact of the defect.
+
 ## 2026-09-20 — the blur bands stop relying on a mask
 
 **`blurLayers()` was building a uniform smear.** Measured down the system page's blur

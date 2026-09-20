@@ -198,7 +198,8 @@ const mdPlots = ['#e05', '#0b6', '#48f'].map((h, i) =>
 /* ── 05 · progressive blur, as static DOM ────────────────────────────────────────── */
 const blurStack = (radius, start) => g.blurLayers({ radius, start })
   .map(l => `<div style="inset:${l.inset};backdrop-filter:${l.backdropFilter};` +
-             `-webkit-backdrop-filter:${l.backdropFilter}"></div>`).join('')
+             `-webkit-backdrop-filter:${l.backdropFilter};-webkit-mask-image:${l.maskImage};` +
+             `mask-image:${l.maskImage}"></div>`).join('')
 const LINES = ['Hamburgefonstiv — the tail of the work goes on', 'past the point where the reader can still be',
   'sure of it, which is the whole affordance: a', 'hard cut reads as the end of the specimen',
   'rather than the end of what has loaded so far.', 'The fade is not decoration. It is the signal',
@@ -356,6 +357,10 @@ svg.chan .ln{stroke-width:2.5}
 .spec.tall{height:300px}
 .spec.tall p{margin:0 0 3px;font-size:11.5px;line-height:1.34}
 .spec .veil{position:absolute;inset:0;pointer-events:none}
+/* See gradient.css: a non-round corner-shape on the host drops the layers' masks and the
+   panel blurs uniformly. This page sets superellipse(1.2) on every element, so the host
+   of a blur stack has to opt back out. */
+:has(> .stack){corner-shape:round}
 .stack{position:absolute;inset:0;pointer-events:none;isolation:isolate;overflow:hidden}
 .stack>div{position:absolute;inset:0}
 </style>
@@ -464,7 +469,8 @@ const paint = (sel, start) => {
   const layers = +document.querySelector('input[data-k="layers"]').value
   wrap.innerHTML = blurLayers({ radius, layers, start }).map(l =>
     '<div style="inset:' + l.inset + ';backdrop-filter:' + l.backdropFilter +
-    ';-webkit-backdrop-filter:' + l.backdropFilter + '"></div>').join('')
+    ';-webkit-backdrop-filter:' + l.backdropFilter + ';-webkit-mask-image:' + l.maskImage +
+    ';mask-image:' + l.maskImage + '"></div>').join('')
 }
 const blur = () => {
   const hold = +document.querySelector('input[data-k="hold"]').value / 100

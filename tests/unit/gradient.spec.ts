@@ -117,40 +117,71 @@ test.describe('progressive blur', () => {
   })
 
   test('the bands tile the whole span, ends clamped', () => {
-    /* A gap at either end leaves a strip no layer covers -- content that is simply not
-       blurred at the very edge. */
+    /* A gap at either end leaves a strip no layer covers. The boxes now carry their own
+       feather, so they OVERLAP by half a band -- the first still starts at 0 and the
+       last still finishes at 100. */
     const stack = blurLayers({ layers: 5 })
-    expect(stack[0].inset).toBe('0% 0 80% 0')
-    expect(stack[stack.length - 1].inset).toBe('80% 0 0% 0')
+    expect(stack[0].inset).toBe('0% 0 70% 0')
+    expect(stack[stack.length - 1].inset).toBe('70% 0 0% 0')
   })
 
-  test('every point stays covered: the bands are exactly adjacent', () => {
-    /* The stack must never thin out between bands. With geometry that is not a coverage
-       integral any more, it is an identity -- band i's far edge IS band i+1's near edge,
-       and any rounding between the two is a bright hairline across blurred text. This is
-       why the inset states both edges instead of a height. */
+  test('consecutive boxes overlap, and the union leaves no gap', () => {
+    /* Adjacency was the old, hard-edged invariant. Feathered bands have to overlap or
+       there is nothing to fade between; what must still hold is that the union covers
+       the whole ramp, with every hand-over inside a shared strip. */
     const stack = blurLayers({ layers: 9 })
-    const edges = stack.map(l => {
+    const box = stack.map(l => {
       const [top, , bottom] = l.inset.split(' ')
       return [parseFloat(top), 100 - parseFloat(bottom)] as const
     })
-    expect(edges[0][0]).toBe(0)
-    expect(edges[edges.length - 1][1]).toBeCloseTo(100, 6)
-    for (let i = 1; i < edges.length; i++)
-      expect(edges[i][0], `band ${i} starts where band ${i - 1} ends`)
-        .toBeCloseTo(edges[i - 1][1], 6)
+    expect(box[0][0]).toBe(0)
+    expect(box[box.length - 1][1]).toBeCloseTo(100, 6)
+    for (let i = 1; i < box.length; i++) {
+      expect(box[i][0], `band ${i} starts before band ${i - 1} ends`)
+        .toBeLessThan(box[i - 1][1])
+      expect(box[i][0], `band ${i} starts after band ${i - 2} ends`)
+        .toBeGreaterThanOrEqual(i >= 2 ? box[i - 2][1] - 1e-6 : 0)
+    }
   })
 
-  test('no band is masked: geometry is what bounds the filter', () => {
-    /* The regression this whole rewrite exists for. A masked full-size layer blurred the
-       entire element in the assembled system page -- measured sharpness flat at 0.1 down
-       a panel against 8.7-16.8 with the stack removed. If a mask ever comes back, it will
-       come back silently, so the shape is asserted rather than the behaviour. */
+  test('every band carries a feather, and the ends are clamped', () => {
+    /* The feather is what removes the steps. Without it the stack is a staircase of
+       discrete radii and a progressive blur has no business having one. The ends are
+       clamped because a feather on the first or last band leaves a strip no layer
+       covers -- content that is simply not blurred at the very edge. */
+    const stack = blurLayers({ layers: 5 })
+    expect(stack[0].maskImage).toContain('rgb(0 0 0 / 1) 0%')
+    expect(stack[stack.length - 1].maskImage).toContain('rgb(0 0 0 / 1) 100%')
+    for (const l of stack.slice(1, -1)) {
+      /* a middle band rises from nothing and falls back to it, inside its own box */
+      expect(l.maskImage).toContain('rgb(0 0 0 / 0) 0%')
+      expect(l.maskImage).toContain('rgb(0 0 0 / 0) 100%')
+    }
+  })
+
+  test('the feather is smooth, not a two-stop ramp', () => {
+    /* A linear hand-over kinks where it meets the next band, and the kink reads as a
+       line across the text -- the exact defect a two-stop feather produced. Every
+       feather is sampled through smoothstep, so the alpha curve bends rather than
+       corners, and smoothstep is symmetric: a(t) + a(1-t) === 1. */
+    const mid = blurLayers({ layers: 4 })[1].maskImage
+    const alphas = [...mid.matchAll(/rgb\(0 0 0 \/ ([\d.]+)\)/g)].map(m => parseFloat(m[1]))
+    const rise = alphas.slice(0, alphas.indexOf(1) + 1)
+    expect(rise.length).toBeGreaterThanOrEqual(5)
+    expect(rise[0]).toBe(0)
+    expect(rise[rise.length - 1]).toBe(1)
+    expect(rise[1] + rise[rise.length - 2]).toBeCloseTo(1, 3)
+    expect(rise[Math.floor(rise.length / 2)]).toBeCloseTo(0.5, 6)
+  })
+
+  test('a layer is bounded by geometry as well as by its mask', () => {
+    /* Belt and braces, and the braces were earned: a non-round corner-shape on the HOST
+       silently drops the mask, and with a full-size layer that turns the whole element
+       into one uniform smear. Bounded by its own box, the worst case is visible steps --
+       a bad gradient rather than no gradient. */
     for (const l of blurLayers({ layers: 4 })) {
-      expect(l).not.toHaveProperty('maskImage')
-      expect(l).not.toHaveProperty('WebkitMaskImage')
-      expect(Object.keys(l).sort())
-        .toEqual(['WebkitBackdropFilter', 'backdropFilter', 'inset'])
+      expect(l.inset).toBeTruthy()
+      expect(l.inset).not.toBe('0 0 0 0')
     }
   })
 
@@ -165,14 +196,14 @@ test.describe('progressive blur', () => {
   })
 
   test('a horizontal dir moves the bands to the other axis', () => {
-    /* inset is `top right bottom left`, so a sideways ramp is not the vertical one with a
-       different gradient direction -- it is different edges. Getting this wrong makes
-       every band full-height and the stack blurs everything, the same failure as a mask. */
+    /* inset is `top right bottom left`, so a sideways ramp is not the vertical one with
+       a different gradient direction -- it is different edges. Getting this wrong makes
+       every band full-height and the stack blurs everything. */
     const across = blurLayers({ layers: 4, dir: 'to right' })
     const [top, right, bottom, left] = across[0].inset.split(' ')
     expect([top, bottom]).toEqual(['0', '0'])
     expect(left).toBe('0%')
-    expect(right).toBe('75%')
+    expect(right).toBe('62.5%')
   })
 
   test('a length offset becomes calc, so lh and friends survive', () => {

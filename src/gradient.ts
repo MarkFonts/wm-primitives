@@ -226,9 +226,13 @@ export function blend(from: string, to: string, o: RampOptions & { space?: Space
 export interface BlurLayer {
   backdropFilter: string
   WebkitBackdropFilter: string
-  /** The band's own box, as an `inset` shorthand. This is GEOMETRY, not a mask, and the
-   *  distinction is the whole reason this function was rewritten -- see below. */
+  /** The band's own box, as an `inset` shorthand: the band plus its feather, and nothing
+   *  more. Bounds the filter even where a mask is dropped. */
   inset: string
+  /** Feathers the hand-over between bands INSIDE that box, which is what keeps the ramp
+   *  from showing steps. Needs the host at `corner-shape: round` -- see blurLayers(). */
+  maskImage: string
+  WebkitMaskImage: string
 }
 
 export interface BlurOptions extends Omit<RampOptions, 'from' | 'to' | 'stops' | 'span'> {
@@ -360,47 +364,24 @@ const feather = (
 export function blurLayers(o: BlurOptions = {}): BlurLayer[] {
   const { dir = 'to bottom', radius = 24, layers = 8, ease = 'ease-in-out', start = 0 } = o
   const n = Math.max(1, Math.round(layers))
-  /* GEOMETRY, NOT MASKS. Every earlier version of this made each layer fill the element
-     and cut it back to a band with mask-image. That is the technique everyone publishes,
-     and in the assembled system page it does not hold: a single layer masked
-     to the top 25% blurred the WHOLE panel, and six of them stacked took measured
-     sharpness down the panel to a flat 0.1 against 8.7-16.8 with the stack removed. A
-     uniform smear, which is the one thing a progressive blur must not be.
-     The mask is ignored outright there -- mask-image, -webkit-mask-image, the shorthand,
-     mask-mode: alpha and will-change: mask all render identically, and the same markup
-     in a standalone page masks correctly. So it is a compositing-path difference, not a
-     syntax error, and not something to depend on either way.
-     How far that generalises was never established -- the trigger is unisolated and the
-     computed styles match in both documents but for width -- so this is one page, not a
-     law about the platform (NEXT.md D holds the open item). It does not need to be a
-     law: geometry bounded the filter in
-     both documents, a band positioned at top/height blurs its own rows and nothing else,
-     and preferring it costs nothing but the feather below.
-
-     The cost is the feather: a band's edge is now a step in radius rather than a fade,
-     so the seam has to be hidden by making the step small instead of by blending it.
-
-     What the count buys is FIDELITY TO THE EASING, not smoothness. Each band takes the
-     radius at its far edge, so a coarse stack is systematically blurrier than the curve
-     it samples and a fine one tracks the curve while sampling it into more steps.
-     It was briefly 16, chosen off a 1:1 screenshot of a 994x88 strip where 12 looked
-     like horizontal strips and 16 did not. Headed at 2x -- which is where most of this
-     is read -- 8, 16 and 32 are hard to tell apart and 8 arguably reads best, so that
-     was nearly triple the backdrop rasterisations for a difference visible only in the
-     harness that picked it. Each band is a separate rasterisation, so this is still the
-     first number to lower under a scrolling list.
-
-     One thing that looks like a defect and is not: over text, a heavily blurred line IS
-     a horizontal bar, and nine lines are nine bars. Those are the lines, not seams. */
+  /* GEOMETRY AND A MASK, AND THE REASON FOR BOTH.
+     A progressive blur has no business having visible steps. The mask is what removes
+     them: each band feathers into its neighbours, so the radius hands over continuously
+     instead of jumping at a boundary. That is the whole technique.
+     It was briefly geometry alone, with hard-edged bands, because mask-image appeared not
+     to bound a backdrop-filter in the assembled system page. It does -- what broke it was
+     `corner-shape: superellipse(1.2)` applied to every element on that page. A non-round
+     corner shape on an ANCESTOR of the stack (not on the layers; only the host matters)
+     drops the mask and the whole panel blurs uniformly. Resetting the host to
+     `corner-shape: round` restores it, which gradient.css now does via :has().
+     Geometry stays anyway, as the floor. Each layer's box is its own band plus feather
+     and nothing more, so if a mask is ever dropped again the stack degrades to visible
+     steps rather than to a uniform smear -- a bad gradient instead of no gradient. */
   const horizontal = /right|left|^(90|270)deg/.test(dir)
   const reverse = /to left|to top|270deg/.test(dir)
-  /* Every edge is a fraction of the RAMP, which may not be the whole element. With a
-     length offset that cannot be a percentage, so it is arithmetic CSS does at layout. */
   const edge = typeof start === 'string'
     ? (f: number) => `calc(${start} + (100% - ${start}) * ${amt(f)})`
     : (f: number) => `${pct(start + (1 - start) * f)}%`
-  /* The far edge is stated as a distance from the far side, so a plain fraction stays a
-     plain percentage instead of becoming calc(100% - 45%) for no reason. */
   const back = typeof start === 'string'
     ? (f: number) => `calc((100% - ${start}) * ${amt(1 - f)})`
     : (f: number) => `${pct((1 - start) * (1 - f))}%`
@@ -408,17 +389,30 @@ export function blurLayers(o: BlurOptions = {}): BlurLayer[] {
   for (let i = 0; i < n; i++) {
     const a = i / n, b = (i + 1) / n
     /* The band's FAR edge, not its midpoint: sampling the middle means the last band
-       reads at ease(1 - 1/2n) and the stack never reaches the radius that was asked
-       for. At the far edge the final layer is exactly `radius`, which is the promise. */
+       reads at ease(1 - 1/2n) and the stack never reaches the radius that was asked for. */
     const r = radius * bezierY(ease, b)
-    const near = edge(reverse ? 1 - b : a)
-    const far = back(reverse ? 1 - a : b)
-    /* inset: top right bottom left. Stating both edges rather than an extent keeps the
-       bands exactly adjacent at any element size -- a height in percent rounds, and the
-       gap it leaves is a bright hairline across blurred text. */
+    /* Half a band of feather each side. A full band was the first attempt and it put the
+       second layer's radius at 50% alpha across the very top of the element; half keeps
+       each pixel inside at most two windows and leaves the first band to itself. */
+    const w = (b - a) / 2
+    const first = i === 0, last = i === n - 1
+    const lo = first ? 0 : a - w, hi = last ? 1 : b + w
+    const near = edge(reverse ? 1 - hi : lo)
+    const far = back(reverse ? 1 - lo : hi)
     const inset = horizontal ? `0 ${far} 0 ${near}` : `${near} 0 ${far} 0`
+    /* The mask is stated in the LAYER's own box, which is [lo, hi] of the ramp, so the
+       feather fractions have to be rescaled into it. Ends are clamped: a feather on the
+       first or last band would leave a strip no layer covers. */
+    const span = hi - lo
+    const fIn = (a - lo) / span, fOut = (b - lo) / span
+    const stops: string[] = []
+    if (first) stops.push(`rgb(0 0 0 / 1) 0%`)
+    else stops.push(...SMOOTH.map(({ t, a: v }) => `rgb(0 0 0 / ${amt(v)}) ${pct(fIn * t)}%`))
+    if (last) stops.push(`rgb(0 0 0 / 1) 100%`)
+    else stops.push(...SMOOTH.map(({ t, a: v }) => `rgb(0 0 0 / ${amt(1 - v)}) ${pct(fOut + (1 - fOut) * t)}%`))
+    const mask = `linear-gradient(${dir}, ${stops.join(', ')})`
     const blur = `blur(${+r.toFixed(2)}px)`
-    out.push({ backdropFilter: blur, WebkitBackdropFilter: blur, inset })
+    out.push({ backdropFilter: blur, WebkitBackdropFilter: blur, inset, maskImage: mask, WebkitMaskImage: mask })
   }
   return out
 }

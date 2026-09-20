@@ -27,6 +27,16 @@
   overflow: hidden;
 }
 
+/* THE HOST MUST BE ROUND-CORNERED, AND THIS IS NOT CosMETIC.
+   A non-round `corner-shape` on the element that CONTAINS the stack silently drops the
+   layers' masks: the whole host blurs uniformly instead of progressively, and nothing in
+   the DOM or the computed styles says why. It was `corner-shape: superellipse(1.2)`
+   applied page-wide that produced it here, and it cost a rewrite of blurLayers before
+   the cause was found. The layers' own corner-shape is irrelevant -- only the host's.
+   :has() puts the reset on the host from inside the primitive, so a page that adopts a
+   squircle everywhere does not have to know this. */
+:has(> .wm-blur) { corner-shape: round }
+
 .wm-blur-layer {
   position: absolute;
   /* Nothing is painted here. The element exists so its BACKDROP can be filtered, which

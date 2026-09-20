@@ -184,21 +184,20 @@ flat, and add `.wm-dither` if the result bands.
 `blurLayers()` is variablur's effect as a stack of backdrop layers, because the web has no
 way to vary one filter's strength across an element.
 
-**The bands are geometry, not masks — and that is not a style choice.** Everyone publishes
-this technique with each layer filling the element and cut back to a band by `mask-image`.
-In this package's own system page that did not hold: a single layer masked to the top 25%
-blurred the *whole* panel, and six stacked took measured sharpness down the panel to a flat
-0.1 against 8.7–16.8 with the stack removed — a uniform smear, which is the one thing a
-progressive blur must not be. `mask-image`, `-webkit-mask-image`, the `mask` shorthand,
-`mask-mode: alpha` and `will-change: mask` all render identically.
+**Bands are geometry AND a mask, and each does a different job.** The mask feathers the
+hand-over between bands, which is what keeps the ramp from showing steps — that is the
+technique, not a refinement of it. The geometry bounds each layer to its own band plus
+feather, which is the floor: if a mask is ever dropped the stack degrades to visible
+bands rather than to one uniform smear.
 
-Read that as one document rather than as a rule about the platform. The same markup in a
-standalone page masks correctly, so it is not a syntax error and the compositing path is
-the obvious suspect, but the trigger was never isolated — the layers' computed styles are
-the same in both but for width. The conclusion drawn here is narrow and practical: a mask
-is not a dependable bound for a `backdrop-filter`, and a band positioned by `inset` blurs
-its own rows and nothing else in every document tested. Geometry costs nothing to prefer.
-Reducing the mask behaviour to a minimal repro is [NEXT.md](NEXT.md) D.
+**The host must be round-cornered.** A non-round `corner-shape` on the element that
+*contains* the stack silently drops the layers' masks, and with full-size layers that
+turns the whole host into a uniform blur. Only the host matters; the layers' own
+corner-shape is irrelevant. `gradient.css` resets it from inside the primitive with
+`:has(> .wm-blur) { corner-shape: round }`, so a page using a squircle everywhere does
+not have to know. This cost a rewrite of `blurLayers` before the cause was found — the
+symptom looks exactly like `mask-image` not bounding a `backdrop-filter`, and nothing in
+the DOM or the computed styles says otherwise.
 
 The cost is the feather: a band's edge is a step in radius rather than a fade, so the seam
 is hidden by making the step small rather than by blending it.
