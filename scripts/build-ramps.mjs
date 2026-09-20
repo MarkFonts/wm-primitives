@@ -123,6 +123,13 @@ const MEASURED = {
   jumpMask: 0.99,      // the staircase itself
   jumpBg: 0.49,        // as a background-image: Skia halves it
   jumpDither: 1.29,    // masked + .wm-dither: the step survives, with noise on top
+  /* MEASURED down the c5 blur panel in the ASSEMBLED page: mean |dx| between adjacent
+     pixels per horizontal slice, which is the cheapest proxy for "is there detail here".
+     The stack flattens it to a constant; hidden, the same panel keeps its text. These
+     are the numbers note5b quotes, so they live here rather than in the prose. */
+  blurSmeared: 0.1,    // sharpness with the layer stack, every slice, top to bottom
+  blurSharpLo: 8.7,    // sharpness with the stack hidden, quietest slice
+  blurSharpHi: 16.8,   //   "                              busiest slice
   dLdark: 0.365,       // CIELAB dL* of one 8-bit step at the dark row's foot
   dLlight: 0.351,      //   "                        at the light row's foot
 }
@@ -255,7 +262,8 @@ const COPY = copy({ EASES: g.EASES, radii, worst, rms, MD_A, MD_B,
           lightLevels, lightPerLevel: MEASURED.terraceLight,
           jumpMask: MEASURED.jumpMask, jumpBg: MEASURED.jumpBg, jumpDither: MEASURED.jumpDither,
           dLdark: MEASURED.dLdark, dLlight: MEASURED.dLlight },
-  dither: { bg: MEASURED.ditherBg, mask: MEASURED.ditherMask } })
+  dither: { bg: MEASURED.ditherBg, mask: MEASURED.ditherMask },
+  blur: { smeared: MEASURED.blurSmeared, sharpLo: MEASURED.blurSharpLo, sharpHi: MEASURED.blurSharpHi } })
 
 const page = `<!doctype html><meta charset=utf-8><title>ramps</title><style>
 @font-face{font-family:"CalSansVF";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}

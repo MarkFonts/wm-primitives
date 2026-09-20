@@ -55,7 +55,7 @@ export const copy = v => ({
      not clipping backdrop-filter there, cause not yet isolated). Wired by the generator
      only while the panels are out. cap5 and cap6 stay: the panels come back the moment
      blurLayers is fixed, and their captions should not be a writing job again. */
-  note5b: `The two panels that belong here are withdrawn. In the assembled page the stack renders as one uniform blur from the first line to the last &#8212; sharpness measured flat at 0.1 down the panel, against 9&#8211;17 with the stack hidden &#8212; so the figure showed a smear where the technique makes a progression, and a figure that misrepresents the technique is worse than none. The radii above are still the engine's; the panels return when the layer stack is fixed.`,
+  note5b: `The two panels that belong here are withdrawn. In the assembled page the stack renders as one uniform blur from the first line to the last &#8212; sharpness measured flat at ${v.blur.smeared} down the panel, against ${v.blur.sharpLo}&#8211;${v.blur.sharpHi} with the stack hidden &#8212; so the figure showed a smear where the technique makes a progression, and a figure that misrepresents the technique is worse than none. The radii above are still the engine's; the panels return when the layer stack is fixed.`,
 
   note6: `It blurs pixels. It does not redact. The words stay in the DOM &#8212; selectable, copyable, findable, and read aloud in full by a screen reader, which sees no blur. Never use it to withhold anything.`,
 
