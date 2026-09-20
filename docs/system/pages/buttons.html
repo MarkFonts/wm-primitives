@@ -620,6 +620,67 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
 .bt-as-btn{ width: auto; justify-content: center; padding: .5rem .75rem;
   font-size: .8125rem; }
 
+/* ── the screamer ──────────────────────────────────────────────────────
+   The one call to action, in each family's loudest form, after wordmark.nyc's hero pill.
+
+   IT IS NOT THE UI BUTTON MADE BIGGER, and that is the whole point of including it. The
+   rail runs at opsz 10; Cal Sans's axis is 8..14..45 and a display line belongs at the top
+   of it. Scaling a 13px button to 34px and leaving opsz where it was would print the small
+   optical size large -- thicker stems, looser fit, larger gaps -- which is mis-drawn, not
+   merely big. The real hero pill already does this: opsz 45, wght 700, GEOM 50.
+
+   THE ALIGNMENT IS FIXED BY TAKING SPACE OFF THE BOTTOM, not by adding it to the top and
+   not by touching the face. YTAS is left alone: the ascenders are drawn where they are
+   drawn, and this is a spacing problem.
+
+   Measured rather than nudged. With line-height 1 this face puts its baseline 0.8275em
+   below the top of the line box, so the cap top sits 0.1075em down and the descender falls
+   0.0650em PAST the bottom -- which means the room reserved under the baseline is worth
+   more than it looks. The hero pill then adds 0.38em of padding below against 0.22em
+   above, so the real gap under the descender is 0.315em while the gap over the caps is
+   0.328em of mostly empty line box: it reads tight on top because the bottom is carrying
+   space nothing occupies.
+
+   text-box-trim removes that space rather than balancing it. Trimmed to cap and baseline
+   the box IS the lettering, symmetric padding is optical centring by construction, and the
+   descender hangs into the lower padding with 0.1025em to spare instead of 0.315em. The
+   whole pill comes down from 1.70em to 1.40em, and the type sits in the middle of it. */
+.bt-scream-panel{ grid-column: 1 / -1; }
+.bt-cta{ display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+/* A true circle on a square box -- the corner law's own exclusion list, restated. */
+.bt-avatar{ width: clamp(38px, 5vw, 58px); height: clamp(38px, 5vw, 58px);
+  border-radius: 50%; corner-shape: round; overflow: hidden; flex-shrink: 0;
+  background: color-mix(in oklab, #808080 12%, transparent); }
+.bt-avatar img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.bt-scream{
+  --bt-r: 16px;        /* 2^4 -- one rung up the corner scale from the UI's 8 */
+  --bt-hair: 1.5px;    /* a keyline scales with the thing it encloses */
+  font-size: clamp(22px, 3vw, 34px);
+  line-height: 1;
+  font-variation-settings:'opsz' 45,'wght' 700,'GEOM' 50;
+  padding: .2325em .7em .1675em;
+  gap: 0;
+  white-space: nowrap; }
+@supports (text-box-trim: trim-both) {
+  /* An explicit box rather than padding, so a family that draws a keyline does not come
+     out 3px taller than one that does not -- box-sizing keeps the stroke inside. The
+     trimmed content box is cap-to-baseline, so centring it in that box is the same
+     optical centring the padding pair does, and now every family is exactly 1.40em. */
+  .bt-scream{ text-box-trim: trim-both; text-box-edge: cap alphabetic;
+              height: 1.4em; padding-block: 0; padding-inline: .7em;
+              align-items: center; }
+  .bt-scream--r{ padding-inline: 0; }
+}
+.bt-scream-arrow{ font-variation-settings:'opsz' 45,'wght' 700,'GEOM' 50; }
+.bt-scream--z{ border-radius: var(--bt-pill); }
+.bt-scream--r{ padding-inline: 0; text-decoration-thickness: .08em;
+  text-underline-offset: .16em; }
+.bt-scream--b{ --bt-tick: 22px; }
+.bt-scream--f{ width: auto; }
+.bt-scream-note{ font-size: .8125rem; color: var(--bt-ink2); margin: .875rem 0 0; }
+.bt-scream-note b{ color: var(--bt-ink); font-weight: 500; }
+
 /* ── the verdict table ────────────────────────────────────────────────────── */
 .bt-tbl-wrap{ overflow-x: auto; overscroll-behavior-x: contain; margin: 0 0 1.25rem; }
 .bt-tbl{ border-collapse: collapse; width: 100%; min-width: 34rem; max-width: 60em;
@@ -744,6 +805,15 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-k bt-k--solid bt-scream bt-scream--k" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note">Ink ground, ground ink. The keyline's loudest is a filled box.</p>
+    </div>
+
   </div>
   <p class="bt-cost"><b>What it costs.</b> Nothing separates a resting editable line from a
   divider under a heading, so the family is only honest in a document that never draws a
@@ -819,6 +889,15 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-z bt-z--solid bt-scream bt-scream--z" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note">The nearest thing to the real hero pill: signal ground, radius half the height.</p>
+    </div>
+
   </div>
   <p class="bt-cost"><b>What it costs.</b> Width. The padding rule is not optional on a pill
   and four icon buttons in a rail become a scroll. The resting wash is the real risk: at 5%
@@ -894,6 +973,15 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-r bt-r--solid bt-scream bt-scream--r" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note">No box at any size. The rule thickens with the type instead of staying 1px.</p>
+    </div>
+
   </div>
   <p class="bt-cost"><b>What it costs.</b> Three things. The 44px floor is bought entirely
   with invisible padding, so two stacked actions are 88px of line box or they overlap. Two
@@ -970,6 +1058,15 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-p bt-p--solid bt-scream bt-scream--p" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note">A lit plate at display scale. The highlight and the drop scale with it.</p>
+    </div>
+
   </div>
   <p class="bt-cost"><b>What it costs.</b> The corner law already records the fault, and this
   family is built on the thing that has it: <b>an inset box-shadow follows
@@ -1049,6 +1146,15 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-b bt-b--solid bt-scream bt-scream--b" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note">Solid, because ticks at 34px are ceremony a primary cannot afford.</p>
+    </div>
+
   </div>
   <p class="bt-cost"><b>What it costs.</b> <code>mask-composite: intersect</code> is the
   whole mechanism; where it is missing the mask collapses and the full border paints, which
@@ -1147,6 +1253,15 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-f-row is-on bt-scream bt-scream--f" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note">And here is the family's ceiling: chosen IS the loudest thing it owns.</p>
+    </div>
+
   </div>
   <p class="bt-cost"><b>What it costs.</b> A resting row states nothing on its own &mdash;
   which is the brief&rsquo;s failure exactly, and the family survives it only on two
@@ -1163,6 +1278,73 @@ same card, so the comparison is between designs and not between demos.</p>
   not a value</b> &mdash; so if 06 wins the rail, something else still has to win the
   paragraph, and the two have to look like one decision.</p>
 </div>
+
+<!-- ═══ coverage ═════════════════════════════════════════════════ -->
+<h2>What each one demonstrates</h2>
+<p class="bt-lede">All six now draw the <b>same six specimens on the same content</b>, so a
+difference between two cells is a difference between designs. Where a cell is empty the
+family <i>cannot</i> do that thing, and that is the finding &mdash; not an omission.</p>
+
+<div class="bt-tbl-wrap">
+<table class="bt-tbl">
+  <tr>
+    <th>family</th><th>buttons</th><th>rail</th><th>5 states</th><th>editable</th>
+    <th>in situ</th><th>screamer</th><th>cannot do</th>
+  </tr>
+  <tr><td>01 Keyline</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="no">&mdash;</td></tr>
+  <tr><td>02 Lozenge</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="no">&mdash;</td></tr>
+  <tr><td>03 Rule</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="no">an icon-only button &mdash; there is nothing to draw it in, so those
+    actions borrow 01</td></tr>
+  <tr><td>04 Plate</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="no">the house corner on its own wells &mdash; inset shadow follows
+    border-radius, not corner-shape</td></tr>
+  <tr><td>05 Bracket</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="no">ticks at display size &mdash; its screamer has to go solid, so the
+    family does not reach its own primary</td></tr>
+  <tr><td>06 Rail</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
+    <td class="no">a primary louder than <i>chosen</i>, and an editable that is prose
+    rather than a value</td></tr>
+</table>
+</div>
+
+<p class="bt-lede"><b>The screamer is not the UI button made bigger</b>, and that is why it
+earns a row. The rail runs at <code>opsz 10</code>; Cal Sans's axis is <b>8&thinsp;&ndash;&thinsp;14&thinsp;&ndash;&thinsp;45</b>
+and a display line belongs at the top of it. Scaling a 13px button to 34px and leaving the
+optical size alone prints the <i>small</i> drawing large &mdash; thicker stems, looser
+fit &mdash; which is mis-drawn rather than merely big. Every screamer here runs
+<code>opsz 45, wght 700, GEOM 50</code>, which is what the real hero pill runs.</p>
+
+<p class="bt-lede"><b>It reads tight on top because the bottom is carrying space nothing
+occupies.</b> The face is left alone &mdash; no axis is touched. With
+<code>line-height: 1</code> the baseline sits 0.8275em down, the cap top 0.1075em down, and
+the descender falls 0.0650em <i>past</i> the bottom of the line box; the hero pill then
+adds 0.38em of padding below against 0.22em above, which leaves 0.315em of clear air under
+the descender and a top gap that is mostly empty line box. <code>text-box-trim</code>
+<b>removes that room rather than balancing it</b>: trimmed to cap and baseline the box is
+the lettering itself, symmetric padding becomes optical centring by construction, and the
+descender hangs with 0.1025em to spare. The pill comes down from 1.70em to 1.40em and the
+type sits in the middle of it.</p>
+
+<p class="bt-lede"><b>What none of the six demonstrate</b>, and would have to be decided
+separately: a pending or loading state; a destructive action that has to look dangerous
+without a second hue; a label that wraps to two lines; a count or badge riding the
+enclosure; a split button; and an HDR <i>chosen</i> state on an enclosure rather than on a
+mark &mdash; the row below shows the mechanism, and no family assumes it.</p>
 
 <!-- ═══ the mechanism ════════════════════════════════════════════════════ -->
 <h2>One swatch, two ways to cut it</h2>
