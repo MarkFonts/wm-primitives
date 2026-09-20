@@ -135,13 +135,22 @@ const MEASURED = {
   jumpMask: 0.99,      // the staircase itself
   jumpBg: 0.49,        // as a background-image: Skia halves it
   jumpDither: 1.29,    // masked + .wm-dither: the step survives, with noise on top
-  /* MEASURED down the c5 blur panel in the ASSEMBLED page: mean |dx| between adjacent
-     pixels per horizontal slice, which is the cheapest proxy for "is there detail here".
-     The stack flattens it to a constant; hidden, the same panel keeps its text. These
-     are the numbers note5b quotes, so they live here rather than in the prose. */
-  blurSmeared: 0.1,    // sharpness with the layer stack, every slice, top to bottom
-  blurSharpLo: 8.7,    // sharpness with the stack hidden, quietest slice
-  blurSharpHi: 16.8,   //   "                              busiest slice
+  /* WHY THE PROGRESSIVE BLUR WAS RETIRED, as three numbers. Peak |dx| between adjacent
+     pixels in the top third of the c5 panel, with ONE full-cover backdrop-filter layer
+     at a uniform mask alpha. At alpha 1 the text is gone; at alpha 0 it is untouched; at
+     alpha 0.5 exactly half the sharp edge survives, because backdrop-filter composites
+     the blurred copy OVER the still-sharp original. Every feather zone in a graduated
+     stack runs through that, which is the seam you could see through the type.
+     NOT RE-TAKEABLE FROM THE PAGE: the construction these describe is not shipped any
+     more. They are evidence for a decision, kept with their method so the decision can
+     be checked, not a property of anything §05 now renders. */
+  featherPeak: 108,    // peak edge at mask alpha 0.5
+  featherSharp: 217,   //   "            with no blur at all
+  featherBlurred: 19,  //   "            at alpha 1, fully blurred
+  /* MEASURED on what §05 DOES render: the biggest row-to-row change in local sharpness
+     down the panel, smoothed over 16 rows so the text's own lines do not count. One
+     uniform radius has nothing to step between, and this is what that looks like. */
+  uniformDelta: 0.002, // at radius 12; 0.0015 at radius 30
   dLdark: 0.365,       // CIELAB dL* of one 8-bit step at the dark row's foot
   dLlight: 0.351,      //   "                        at the light row's foot
 }
@@ -212,9 +221,6 @@ const proseBlock = LINES.map(l => `<p>${l}</p>`).join('')
 const denseBlock = LINES.concat(LINES.slice(0, 6)).map(l => `<p>${l}</p>`).join('')
 /* The radius ladder the chapter quotes. Sampled at 6 for the table because 16 numbers
    is a list, not a figure -- the stack itself runs at the default. */
-/* The ladder the retired stack emitted. Kept only because the chapter's prose refers to
-   it when explaining what was wrong with a ramp of discrete radii. */
-const radii = g.blurLayers({ radius: 24, layers: 6 }).map(l => l.backdropFilter.slice(5, -3))
 
 /* ── 02 · the edge, and 06 · banding ─────────────────────────────────────────────── */
 /* A SCRIM NEEDS A CONTROL BESIDE IT. Fading --bg over a --bg ground is the real use --
@@ -274,7 +280,7 @@ const bandBg = `linear-gradient(90deg, rgb(${over(BAND_FROM)} ${over(BAND_FROM)}
 
 /* The copy lives in docs/system/pages/ramps.copy.js and nowhere else. Nothing in this
    file is prose; a writing pass never opens it. */
-const COPY = copy({ EASES: g.EASES, radii, worst, rms, MD_A, MD_B,
+const COPY = copy({ EASES: g.EASES, worst, rms, MD_A, MD_B,
   sat, luma, band: { levels: bandLevels, perLevel: MEASURED.terrace, terrace: MEASURED.terrace,
           dithered: MEASURED.runDither, run: MEASURED.runMask,
           steepLevels, steepPerLevel: MEASURED.terraceSteep, steepTerrace: MEASURED.terraceSteep,
@@ -282,7 +288,9 @@ const COPY = copy({ EASES: g.EASES, radii, worst, rms, MD_A, MD_B,
           jumpMask: MEASURED.jumpMask, jumpBg: MEASURED.jumpBg, jumpDither: MEASURED.jumpDither,
           dLdark: MEASURED.dLdark, dLlight: MEASURED.dLlight },
   dither: { bg: MEASURED.ditherBg, mask: MEASURED.ditherMask },
-  blur: { smeared: MEASURED.blurSmeared, sharpLo: MEASURED.blurSharpLo, sharpHi: MEASURED.blurSharpHi } })
+  blur: { uniformDelta: MEASURED.uniformDelta,
+          feather: { peak: MEASURED.featherPeak, sharp: MEASURED.featherSharp,
+                     blurred: MEASURED.featherBlurred } } })
 
 const page = `<!doctype html><meta charset=utf-8><title>ramps</title><style>
 @font-face{font-family:"CalSansVF";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
@@ -474,7 +482,6 @@ ctl('dither', v => {
 writeFileSync('docs/system/pages/ramps.html', page)
 console.log(`ramps.html: ${(page.length / 1024).toFixed(1)} KB`)
 console.log(`  clothoid fit  RMS ${rms.toFixed(5)}, worst ${worst.toFixed(4)}`)
-console.log(`  blur radii    ${radii.join(' ')}`)
 console.log(`  sat           srgb ${sat.srgb}%  oklab ${sat.oklab}%  oklch ${sat.oklch}%`)
 console.log(`  luma          srgb ${luma.srgb}  oklab ${luma.oklab}`)
 console.log(`  band          ${bandLevels} levels at ${MEASURED.terrace}px each, run ${MEASURED.runMask}px -> ${MEASURED.runDither}px dithered`)
