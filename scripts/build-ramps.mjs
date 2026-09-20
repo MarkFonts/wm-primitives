@@ -99,17 +99,25 @@ const luma = Object.fromEntries(['srgb', 'oklab']
   .map(sp => [sp, lumaOf(midpoint(rgb('#c8452f'), rgb('#2f7d54'), sp))]))
 
 /* COMPUTED from the band's own parameters: #e8e8e8 ink at BAND_FROM..BAND_TO alpha over
-   the #0f0f0f ground the wrapper states. That is what "how many levels" means. */
-const BAND_FROM = .45, BAND_TO = .59
-const bandLevels = Math.round((BAND_TO - BAND_FROM) * (0xe8 - 0x0f))
+   the #0f0f0f ground the wrapper states. That is what "how many levels" means.
+   The steep band is the control and crosses the whole alpha range at the same width. */
+const BAND_FROM = .25, BAND_TO = .30
+const levelsFor = (a0, a1) => Math.round((a1 - a0) * (0xe8 - 0x0f))
+const bandLevels = levelsFor(BAND_FROM, BAND_TO)
+const steepLevels = levelsFor(0, 1)
 
 /* MEASURED in Chromium by decoding the rendered band, at the width the assembled page
    gives it. Re-take these if the band's range, width or dither strength changes. */
 const MEASURED = {
   ditherBg: 2.98,      // per-pixel deviation, same ramp as background-image
   ditherMask: 0.22,    //   "                            as mask-image
-  terrace: 98,         // widest flat run across the undithered band, px
-  terraceDithered: 10,  //   "            across the dithered one
+  terrace: 155,        // widest flat run across the shallow band, px, at full width
+  terraceDithered: 13, //   "            with .wm-dither on the wrapper at its .18 default
+  terraceSteep: 12,    //   "            across the steep control, same width
+  terraceBg: 68,       //   "            the same endpoints as a background-image
+  jumpMask: 0.99,      // largest 1px step in the COLUMN MEAN -- the staircase itself
+  jumpBg: 0.49,        //   "   as a background-image: Skia halves it
+  jumpDither: 1.08,    //   "   masked + .wm-dither: the step survives, noise on top
 }
 
 /* ── 01 · the curve ──────────────────────────────────────────────────────────────── */
@@ -188,50 +196,92 @@ const scrimOf = ease => g.scrim('#0f0f0f', { ease, dir: 'to top' })
    AND IT STILL HAS TO BE AMPLIFIED, which took two failed attempts to accept. .5 -> .58
    was measurably terraced and visually a flat grey slab. Widening to .3 -> .62 gave more
    terraces, not more visible ones -- because the step between two of them is ONE level,
-   about 0.4% of brightness, which is near the floor of what an eye resolves on a mid
-   grey and is erased outright by any downscaling. No choice of range fixes that: the
-   thing being demonstrated is, by definition, almost too small to see.
+   and one level is one level wherever you put it.
 
-   So the band is centred on mid-grey (.45 -> .59 puts it around 128) and shown TWICE:
-   as it renders, and through filter: contrast(6). Same pixels, same quantisation, the
-   difference amplified until the steps are legible -- and the caption says so, because
-   an amplified picture presented as a plain one is a lie about how bad the problem is.
-   Centring is what makes the filter usable: contrast() pivots on 0.5, so a band sitting
-   off-centre clips to black or white before its steps separate. */
-const bandDemo = g.maskRamp({ dir: '90deg', from: BAND_FROM, to: BAND_TO })
+   The first attempt centred the band on mid-grey and showed it twice, the second copy
+   through filter: contrast(6), on the theory that the steps were simply too small to
+   see. That was the wrong diagnosis and the fix made it worse. contrast() pivots on 0.5
+   and rescales everything through it, so the amplified copy no longer sat on the ground
+   it was composited over: a .45->.59 band renders 113->142, and at contrast(6) that is
+   41->215, a near-full-range gradient floating on a #0f0f0f page it has stopped having
+   any relationship to. It read as a different picture rather than a louder one, and the
+   dither twin came out looking like heavy grain, which argues against the very thing
+   the chapter recommends.
+
+   What actually governs visibility is not the size of the step, it is the WIDTH of the
+   terrace: a one-level boundary is invisible over 4px and obvious as a straight edge
+   over 150. So the band crosses FEWER levels over the same width. .25 -> .30 is 11
+   levels across the full column -- terraces 155px wide, plainly visible with no filter
+   on them at all -- against the steep control's 217 levels at 12px, which is smooth.
+   Same ink, same ground, same quantiser; only the slope differs. Nothing here is
+   amplified, so nothing here has to be disclaimed.
+
+   Measuring the fixes rather than assuming them turned up a correction the chapter
+   used to get wrong. .wm-dither does NOT remove the staircase. It cannot: the tile is
+   fixed bipolar noise composited through overlay AFTER the compositor has quantised the
+   mask, so it can only sit on top of the steps. It breaks the widest run from 155px to
+   13 and it hides the edge well, but average a column and the 1-level step is still
+   there -- and raising the strength raises the noise faster than it lowers the step.
+   Skia's own dithering of a background-image gradient does better at the thing that
+   matters, halving the step in the column mean, which is what the 2.98-against-0.22
+   pair was always measuring. Neither makes an 11-level ramp over 990px disappear. That
+   is the honest result and the chapter now shows all four so it can say so.
+
+   The ramp is LINEAR, not the page's own clothoid. Everywhere else the ease is the
+   subject; here the subject is levels per pixel, and a clothoid varies that along the
+   ramp -- it crowds the stops, so the widest terrace stops being the average one and
+   the figure quietly reports two effects at once. On a linear ramp "11 levels over
+   994px" means 90px each, which is what the caption claims. */
+const bandDemo = g.maskRamp({ dir: '90deg', ease: 'linear', stops: 64, from: BAND_FROM, to: BAND_TO })
+const bandSteep = g.maskRamp({ dir: '90deg', ease: 'linear', stops: 64, from: 0, to: 1 })
+/* The same two endpoints the mask composites to (#e8e8e8 at .25 and .30 over #0f0f0f),
+   written as a background-image so Skia dithers it. Computed, not typed, so it tracks
+   BAND_FROM/BAND_TO. */
+const over = a => Math.round(0x0f + a * (0xe8 - 0x0f))
+const bandBg = `linear-gradient(90deg, rgb(${over(BAND_FROM)} ${over(BAND_FROM)} ${over(BAND_FROM)}), `
+  + `rgb(${over(BAND_TO)} ${over(BAND_TO)} ${over(BAND_TO)}))`
 
 
 /* The copy lives in docs/system/pages/ramps.copy.js and nowhere else. Nothing in this
    file is prose; a writing pass never opens it. */
 const COPY = copy({ EASES: g.EASES, radii, worst, rms, MD_A, MD_B,
-  sat, luma, band: { levels: bandLevels, terrace: MEASURED.terrace, dithered: MEASURED.terraceDithered },
+  sat, luma, band: { levels: bandLevels, terrace: MEASURED.terrace, dithered: MEASURED.terraceDithered,
+          steepLevels, steepTerrace: MEASURED.terraceSteep, bg: MEASURED.terraceBg,
+          jumpMask: MEASURED.jumpMask, jumpBg: MEASURED.jumpBg, jumpDither: MEASURED.jumpDither },
   dither: { bg: MEASURED.ditherBg, mask: MEASURED.ditherMask } })
 
 const page = `<!doctype html><meta charset=utf-8><title>ramps</title><style>
 @font-face{font-family:"CalSansVF";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
 @font-face{font-family:"Face";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
 *{box-sizing:border-box}
-/* NO COLOR ON BODY. Standalone this page is dark, but build.py scopes it into a
-   document that is LIGHT by default -- and a scoped body rule carries its ink with it,
-   so every heading and table value that inherited #e8e8e8 went white-on-white in the
-   assembled page while the explicitly-greyed prose survived. Ink is the host's; this
-   page only ever states a colour where it also states the ground under it. */
-body{margin:0;background:#0f0f0f;font-family:"CalSansVF",system-ui,sans-serif;
+/* COLOR ON BODY, PAIRED WITH THE GROUND ON BODY. This rule scopes to .part-1 -- the
+   ramps part alone, not the whole of #s-color -- so the ink lands exactly where the
+   #0f0f0f beside it does, and the Color audit above keeps the host's.
+   Leaving the colour off was the bug: the ground here is stated unconditionally while
+   the host's ink follows the host's scheme, so in light mode every heading, table cell
+   and caption that inherited rendered near-black on near-black, and only the spans
+   carrying a literal stayed readable. State both or state neither. */
+body{margin:0;background:#0f0f0f;color:#c9c9c9;font-family:"CalSansVF",system-ui,sans-serif;
  font-optical-sizing:auto;font-variation-settings:"GEOM" 25;padding:32px 28px 8px}
-h1{font-size:23px;margin:0 0 5px} .lede{color:var(--ink-2,#8a8a8a);font-size:13px;margin:0 0 22px;max-width:84ch}
+h1{font-size:23px;margin:0 0 5px} .lede{color:#9a9a9a;font-size:13px;margin:0 0 22px;max-width:84ch}
 h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:34px 0 12px;padding-bottom:7px;
  border-bottom:1px solid #222;display:flex;justify-content:space-between}
 h2 span{color:#7d7d7d;letter-spacing:0;text-transform:none;font-size:10px}
-/* THE AUDIT'S INK, NOT A LITERAL. These notes sit inside section 05 beside the Color
-   audit's, which are 13.5px at var(--ink-2); two note styles in one section is a seam,
-   and in light mode a flat grey literal is the weak ink this page already lost once.
-   The fallback keeps the standalone page readable, where --ink-2 does not exist. */
-p.note{color:var(--ink-2,#8a8a8a);font-size:13.5px;line-height:1.5;margin:0 0 14px;max-width:84ch}
+/* LITERAL INK, BECAUSE THIS PART STATES ITS OWN GROUND. These notes sit inside section
+   05 beside the Color audit's, so they were briefly switched to var(--ink-2) to match
+   them. That was wrong, and it broke the part outright: --ink-2 follows the HOST's
+   colour scheme, this body states background:#0f0f0f unconditionally, and in light mode
+   every note, heading and caption here rendered near-black on near-black. Only the
+   <code> spans, which carry a literal, stayed legible.
+   The rule the rest of this file already follows: state ink only where you also state
+   the ground, and then state both. Matching the audit on SIZE (13.5px) is right;
+   matching it on colour cannot be, because the two sit on different grounds. */
+p.note{color:#9a9a9a;font-size:13.5px;line-height:1.5;margin:0 0 14px;max-width:84ch}
 p.note b{font-weight:400}
 code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#7d7d7d}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px}
 figure{margin:0}
-figcaption{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:var(--ink-3,#7d7d7d);margin-top:5px}
+figcaption{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:#8a8a8a;margin-top:5px}
 .band{height:84px;border-radius:5px;position:relative;overflow:hidden}
 /* Full width on purpose: the terraces need the pixels. And the wrap STATES THE GROUND --
    an alpha ramp only has the range its backdrop gives it, and on the assembled page's
@@ -244,11 +294,8 @@ figcaption{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:var(--
    actually are. Worth knowing generally: .wm-dither has to sit after whatever quantises,
    not under it. */
 .bandwrap{background:#0f0f0f;border-radius:5px;overflow:hidden;position:relative}
-.bandgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
-/* The same band, amplified. contrast() pivots on 0.5, which is why the ramp is centred
-   on mid-grey: off-centre it clips before the steps separate. */
-.bandwrap.amp{filter:contrast(6)}
-.band.wide{height:64px;border-radius:0}
+.bandstack{display:grid;gap:14px}
+.band.wide{height:72px;border-radius:0}
 /* A control row. Native range on purpose: this page carries no component library, and
    a slider that needs one would mean shipping React to a page that otherwise needs
    none. The page renders correctly with JS off -- every demo is baked at its default
@@ -338,15 +385,15 @@ svg.chan .ln{stroke-width:2.5}
 <h2>${COPY.c6_title} <span>${COPY.c6_tag}</span></h2>
 <p class="note">${COPY.note7}</p>
 <p class="note">${COPY.note8}</p>
-<div class="bandgrid">
+<div class="bandstack">
+<figure><div class="bandwrap"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandSteep};mask-image:${bandSteep}"></div></div>
+<figcaption>${COPY.cap7a}</figcaption></figure>
 <figure><div class="bandwrap"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
 <figcaption>${COPY.cap7}</figcaption></figure>
-<figure><div class="bandwrap amp"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
-<figcaption>${COPY.cap7amp}</figcaption></figure>
+<figure><div class="bandwrap"><div class="band wide" style="background:${bandBg}"></div></div>
+<figcaption>${COPY.cap7b}</figcaption></figure>
 <figure><div class="bandwrap dither" data-dither><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
 <figcaption>${COPY.cap8}</figcaption></figure>
-<figure><div class="bandwrap dither amp" data-dither><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
-<figcaption>${COPY.cap8amp}</figcaption></figure>
 </div>
 <div class="ctl"><label>${COPY.ctl_dither}</label><input type="range" data-k="dither" min="0" max="60" step="1" value="18"><output>.18</output></div>
 
