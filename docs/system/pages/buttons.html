@@ -58,6 +58,17 @@
   --bt-stroke-press: 1.8px;
   --bt-dur: .14s;
 
+  /* DEPTH IS NOT KEYED TO THE INK. 04 was drawn with its highlight mixed from --bt-ink and
+     its shadow from --bt-bg, and those two SWAP with the theme while the sun does not: in
+     light mode the top edge went dark and the cast shadow went white, so every plate lit
+     from below and read as a dent. A highlight is white and a shadow is black in both
+     themes; only how hard they press changes. */
+  --bt-lift:     rgba(255,255,255,.16);   /* light from above */
+  --bt-drop:     rgba(0,0,0,.50);         /* what the plate casts */
+  --bt-sink:     rgba(0,0,0,.38);         /* light caught inside a hole */
+  --bt-plate-top: color-mix(in oklab, #fff 10%, var(--bt-sf2));
+  --bt-sunk-bg:  color-mix(in oklab, #000 30%, var(--bt-sf));
+
   font-family: var(--bt-font);
   font-size: 16px;
   line-height: 1.55;
@@ -74,6 +85,16 @@
     --bt-line: var(--line, var(--border, rgba(22,22,22,.16)));
     --bt-signal: var(--signal, #5c6b00);
     --bt-on-signal: var(--bg, #f4f4f4);
+    /* Same directions, different pressure. On a light ground the lift has to be near-opaque
+       white to read at all against #ebebeb, and the drop has to come right down or every
+       plate wears a bruise. */
+    --bt-lift:     rgba(255,255,255,.95);
+    --bt-drop:     rgba(0,0,0,.16);
+    --bt-sink:     rgba(0,0,0,.10);
+    --bt-plate-top: #ffffff;
+    /* 6% landed on #ebebeb -- the same luminance as --surface-hi, so the well and the
+       resting plate were one colour and the hole did not exist. Measured, not chosen. */
+    --bt-sunk-bg:  color-mix(in oklab, #000 13%, var(--bt-sf));
   }
 }
 .bt-page *, .bt-page *::before, .bt-page *::after{ corner-shape: superellipse(var(--corner-k, 1.2)); }
@@ -311,36 +332,38 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
   padding: .5rem .75rem; font: inherit; font-size: .8125rem; font-family: var(--bt-font);
   font-variation-settings:'opsz' 10;
   color: var(--bt-ink); cursor: pointer; border: 0; border-radius: var(--bt-r);
-  background: linear-gradient(180deg, color-mix(in oklab, var(--bt-ink) 4%, var(--bt-sf2)), var(--bt-sf2));
-  box-shadow: inset 0 var(--bt-hair) 0 color-mix(in oklab, var(--bt-ink) 16%, transparent),
-              0 1px 2px color-mix(in oklab, var(--bt-bg) 70%, transparent),
-              0 0 0 var(--bt-hair) color-mix(in oklab, var(--bt-bg) 60%, transparent);
+  background: linear-gradient(180deg, var(--bt-plate-top), var(--bt-sf2));
+  box-shadow: inset 0 var(--bt-hair) 0 var(--bt-lift),
+              0 1px 2px var(--bt-drop),
+              0 0 0 var(--bt-hair) var(--bt-drop);
   white-space: nowrap; -webkit-tap-highlight-color: transparent;
   transition: background var(--bt-dur) ease, box-shadow var(--bt-dur) ease, transform var(--bt-dur) ease; }
-.bt-p:hover:not(:disabled){ background: linear-gradient(180deg, color-mix(in oklab, var(--bt-ink) 10%, var(--bt-sf2)), color-mix(in oklab, var(--bt-ink) 3%, var(--bt-sf2))); }
-.bt-p.s-h{ background: linear-gradient(180deg, color-mix(in oklab, var(--bt-ink) 10%, var(--bt-sf2)), color-mix(in oklab, var(--bt-ink) 3%, var(--bt-sf2))); }
+.bt-p:hover:not(:disabled){ background: linear-gradient(180deg, color-mix(in oklab, #fff 55%, var(--bt-plate-top)), color-mix(in oklab, var(--bt-plate-top) 55%, var(--bt-sf2))); }
+.bt-p.s-h{ background: linear-gradient(180deg, color-mix(in oklab, #fff 55%, var(--bt-plate-top)), color-mix(in oklab, var(--bt-plate-top) 55%, var(--bt-sf2))); }
 /* Pressed, the plate goes INTO the ground: highlight off, shadow inside, 1px down. */
-.bt-p:active:not(:disabled), .bt-p.s-p{ background: color-mix(in oklab, var(--bt-bg) 45%, var(--bt-sf));
-  box-shadow: inset 0 2px 3px color-mix(in oklab, var(--bt-bg) 85%, transparent),
-              inset 0 0 0 var(--bt-hair) color-mix(in oklab, var(--bt-bg) 60%, transparent);
+.bt-p:active:not(:disabled), .bt-p.s-p{ background: var(--bt-sunk-bg);
+  box-shadow: inset 0 2px 3px var(--bt-sink),
+              inset 0 0 0 var(--bt-hair) var(--bt-sink);
   transform: translateY(1px); }
 .bt-p.s-f{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
 .bt-p:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
 .bt-p:disabled{ opacity: .45; cursor: default; box-shadow: none; background: var(--bt-sf); }
-.bt-p.is-on{ background: color-mix(in oklab, var(--bt-bg) 45%, var(--bt-sf));
-  box-shadow: inset 0 2px 3px color-mix(in oklab, var(--bt-bg) 85%, transparent); }
+.bt-p.is-on{ background: var(--bt-sunk-bg);
+  box-shadow: inset 0 2px 3px var(--bt-sink),
+              inset 0 0 0 var(--bt-hair) var(--bt-sink); }
 .bt-p--solid{ color: var(--bt-on-signal);
-  background: linear-gradient(180deg, color-mix(in oklab, #fff 18%, var(--bt-signal)), var(--bt-signal)); }
+  background: linear-gradient(180deg, color-mix(in oklab, #fff 18%, var(--bt-signal)), var(--bt-signal));
+  box-shadow: inset 0 var(--bt-hair) 0 var(--bt-lift), 0 1px 2px var(--bt-drop); }
 .bt-p--ico{ padding: .5rem; }
 /* The hole. Type goes in holes. */
 .bt-p-ed{ padding: .375rem .625rem; border-radius: var(--bt-r-sm); color: var(--bt-ink);
-  background: color-mix(in oklab, var(--bt-bg) 55%, var(--bt-sf));
-  box-shadow: inset 0 var(--bt-hair) 2px color-mix(in oklab, var(--bt-bg) 80%, transparent),
-              inset 0 0 0 var(--bt-hair) color-mix(in oklab, var(--bt-bg) 50%, transparent);
+  background: var(--bt-sunk-bg);
+  box-shadow: inset 0 var(--bt-hair) 2px var(--bt-sink),
+              inset 0 0 0 var(--bt-hair) var(--bt-sink);
   transition: box-shadow var(--bt-dur) ease; }
-.bt-p-ed:hover, .bt-p-ed.s-h{ box-shadow: inset 0 var(--bt-hair) 3px color-mix(in oklab, var(--bt-bg) 90%, transparent),
+.bt-p-ed:hover, .bt-p-ed.s-h{ box-shadow: inset 0 var(--bt-hair) 3px var(--bt-sink),
               inset 0 0 0 var(--bt-hair) var(--bt-ink3); }
-.bt-p-ed:focus{ box-shadow: inset 0 var(--bt-hair) 3px color-mix(in oklab, var(--bt-bg) 90%, transparent),
+.bt-p-ed:focus{ box-shadow: inset 0 var(--bt-hair) 3px var(--bt-sink),
               inset 0 0 0 var(--bt-hair) var(--bt-signal); caret-color: var(--bt-signal); }
 
 /* ═══ 05 BRACKET ══════════════════════════════════════════════════════════════
@@ -443,7 +466,7 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
    place in this family where an edge is drawn at rest, and it draws the SET, not a
    button -- which is why it does not contradict the claim above. */
 .bt-f-seg{ display: flex; padding: 3px; gap: 3px; border-radius: 12px;
-  background: color-mix(in oklab, var(--bt-bg) 60%, var(--bt-sf)); }
+  background: var(--bt-sunk-bg); }
 .bt-f-seg > button{ flex: 1 1 0; padding: .4375rem .875rem; font: inherit;
   font-size: .8125rem; font-family: var(--bt-font); color: var(--bt-ink3);
   background: none; border: 0; border-radius: 9px; cursor: pointer;
@@ -459,7 +482,7 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
   background: var(--bt-sf); }
 .bt-f-lab{ flex: 1 1 auto; min-width: 0; display: flex; align-items: center;
   padding: .5rem .75rem; font-size: .8125rem; color: var(--bt-ink3);
-  background: color-mix(in oklab, var(--bt-bg) 45%, var(--bt-sf)); }
+  background: var(--bt-sunk-bg); }
 .bt-f-val{ flex: 0 0 auto; display: flex; align-items: baseline; gap: .25rem;
   padding: .5rem .75rem; font-size: .8125rem; color: var(--bt-ink); }
 .bt-f-unit{ color: var(--bt-ink3); font-size: .75rem; }
@@ -582,6 +605,21 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
 .bt-hdr-marks{ display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
 .bt-hdr-cell{ display: flex; flex-direction: column; align-items: center; gap: .5rem; }
 
+/* ── one specimen set, six languages ─────────────────────────────────
+   Every family now draws BOTH shapes on the same content: a row of buttons, and a rail of
+   icon-and-label rows with one of them chosen. Before this, 06 was the only one showing a
+   rail and the only one NOT showing buttons, so the thing that looked like a difference
+   between designs was partly a difference between demos.
+   Modifiers rather than per-family row classes: the family's own rule already carries its
+   edges, grounds and five states, and a row is the same button at a different width. They
+   sit after every family block so source order settles the padding they override. */
+.bt-rail-list{ display: flex; flex-direction: column; gap: 2px; }
+.bt-as-row{ display: flex; width: 100%; align-items: center; justify-content: flex-start;
+  gap: .625rem; padding: .5rem .625rem; font-size: .875rem; text-align: left;
+  margin-right: 0; }
+.bt-as-btn{ width: auto; justify-content: center; padding: .5rem .75rem;
+  font-size: .8125rem; }
+
 /* ── the verdict table ────────────────────────────────────────────────────── */
 .bt-tbl-wrap{ overflow-x: auto; overscroll-behavior-x: contain; margin: 0 0 1.25rem; }
 .bt-tbl{ border-collapse: collapse; width: 100%; min-width: 34rem; max-width: 60em;
@@ -651,13 +689,23 @@ same card, so the comparison is between designs and not between demos.</p>
     <div class="bt-panel">
       <p class="bt-panel-lab">Enclosure</p>
       <div class="bt-row">
-        <button class="bt-k bt-hit" type="button">Kern lists</button>
-        <button class="bt-k bt-k--solid bt-hit" type="button">Link roman + italic</button>
+        <button class="bt-k bt-hit" type="button"><span class="bt-i bt-i--sm">text_fields</span>Kern lists</button>
+        <button class="bt-k bt-k--solid bt-hit" type="button"><span class="bt-i bt-i--sm">format_italic</span>Link roman + italic</button>
       </div>
       <div class="bt-row">
         <button class="bt-k bt-hit" type="button"><span class="bt-i bt-i--sm">content_copy</span>10 Reg</button>
         <button class="bt-k bt-k--ico bt-hit bt-ico" type="button" aria-label="Reset"><span class="bt-i">settings_backup_restore</span></button>
-        <button class="bt-k bt-hit" type="button" disabled>Average pairs</button>
+        <button class="bt-k bt-hit" type="button" disabled><span class="bt-i bt-i--sm">discover_tune</span>Average pairs</button>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">The same rail</p>
+      <div class="bt-rail-list">
+        <button class="bt-k bt-as-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
+        <button class="bt-k bt-as-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
+        <button class="bt-k bt-as-row is-on bt-hit" type="button"><span class="bt-i">format_paragraph</span>Paragraph<span class="bt-sp"></span><span class="bt-i bt-i--sm">discover_tune</span></button>
+        <button class="bt-k bt-as-row bt-hit" type="button"><span class="bt-i">text_fields</span>Type Scale</button>
+        <button class="bt-k bt-as-row bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button>
       </div>
     </div>
     <div class="bt-panel">
@@ -716,13 +764,23 @@ same card, so the comparison is between designs and not between demos.</p>
     <div class="bt-panel">
       <p class="bt-panel-lab">Enclosure</p>
       <div class="bt-row">
-        <button class="bt-z bt-hit" type="button">Kern lists</button>
-        <button class="bt-z bt-z--solid bt-hit" type="button">Let&rsquo;s talk type</button>
+        <button class="bt-z bt-hit" type="button"><span class="bt-i bt-i--sm">text_fields</span>Kern lists</button>
+        <button class="bt-z bt-z--solid bt-hit" type="button"><span class="bt-i bt-i--sm">forms_add_on</span>Let&rsquo;s talk type</button>
       </div>
       <div class="bt-row">
         <button class="bt-z bt-hit" type="button"><span class="bt-i bt-i--sm">content_copy</span>10 Reg</button>
         <button class="bt-z bt-z--ico bt-hit bt-ico" type="button" aria-label="Reset"><span class="bt-i">settings_backup_restore</span></button>
-        <button class="bt-z bt-hit" type="button" disabled>Average pairs</button>
+        <button class="bt-z bt-hit" type="button" disabled><span class="bt-i bt-i--sm">discover_tune</span>Average pairs</button>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">The same rail</p>
+      <div class="bt-rail-list">
+        <button class="bt-z bt-as-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
+        <button class="bt-z bt-as-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
+        <button class="bt-z bt-as-row is-on bt-hit" type="button"><span class="bt-i">format_paragraph</span>Paragraph<span class="bt-sp"></span><span class="bt-i bt-i--sm">discover_tune</span></button>
+        <button class="bt-z bt-as-row bt-hit" type="button"><span class="bt-i">text_fields</span>Type Scale</button>
+        <button class="bt-z bt-as-row bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button>
       </div>
     </div>
     <div class="bt-panel">
@@ -784,15 +842,25 @@ same card, so the comparison is between designs and not between demos.</p>
     <div class="bt-panel">
       <p class="bt-panel-lab">Enclosure</p>
       <div class="bt-row">
-        <button class="bt-r bt-hit" type="button">Kern lists</button>
-        <button class="bt-r bt-r--solid bt-hit" type="button">Link roman + italic</button>
+        <button class="bt-r bt-hit" type="button"><span class="bt-i bt-i--sm">text_fields</span>Kern lists</button>
+        <button class="bt-r bt-r--solid bt-hit" type="button"><span class="bt-i bt-i--sm">format_italic</span>Link roman + italic</button>
       </div>
       <div class="bt-row">
         <button class="bt-r bt-hit" type="button"><span class="bt-i bt-i--sm">content_copy</span>10 Reg</button>
-        <button class="bt-r bt-hit" type="button" disabled>Average pairs</button>
+        <button class="bt-r bt-hit" type="button" disabled><span class="bt-i bt-i--sm">discover_tune</span>Average pairs</button>
       </div>
       <p class="bt-cost" style="margin-top:.75rem"><b>No icon-only form.</b> There is nothing
       to draw it in. Those actions borrow 01.</p>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">The same rail</p>
+      <div class="bt-rail-list">
+        <button class="bt-r bt-as-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
+        <button class="bt-r bt-as-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
+        <button class="bt-r bt-as-row is-on bt-hit" type="button"><span class="bt-i">format_paragraph</span>Paragraph<span class="bt-sp"></span><span class="bt-i bt-i--sm">discover_tune</span></button>
+        <button class="bt-r bt-as-row bt-hit" type="button"><span class="bt-i">text_fields</span>Type Scale</button>
+        <button class="bt-r bt-as-row bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button>
+      </div>
     </div>
     <div class="bt-panel">
       <p class="bt-panel-lab">States</p>
@@ -847,13 +915,23 @@ same card, so the comparison is between designs and not between demos.</p>
     <div class="bt-panel">
       <p class="bt-panel-lab">Enclosure</p>
       <div class="bt-row">
-        <button class="bt-p bt-hit" type="button">Kern lists</button>
-        <button class="bt-p bt-p--solid bt-hit" type="button">Link roman + italic</button>
+        <button class="bt-p bt-hit" type="button"><span class="bt-i bt-i--sm">text_fields</span>Kern lists</button>
+        <button class="bt-p bt-p--solid bt-hit" type="button"><span class="bt-i bt-i--sm">format_italic</span>Link roman + italic</button>
       </div>
       <div class="bt-row">
         <button class="bt-p bt-hit" type="button"><span class="bt-i bt-i--sm">content_copy</span>10 Reg</button>
         <button class="bt-p bt-p--ico bt-hit bt-ico" type="button" aria-label="Reset"><span class="bt-i">settings_backup_restore</span></button>
-        <button class="bt-p bt-hit" type="button" disabled>Average pairs</button>
+        <button class="bt-p bt-hit" type="button" disabled><span class="bt-i bt-i--sm">discover_tune</span>Average pairs</button>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">The same rail</p>
+      <div class="bt-rail-list">
+        <button class="bt-p bt-as-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
+        <button class="bt-p bt-as-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
+        <button class="bt-p bt-as-row is-on bt-hit" type="button"><span class="bt-i">format_paragraph</span>Paragraph<span class="bt-sp"></span><span class="bt-i bt-i--sm">discover_tune</span></button>
+        <button class="bt-p bt-as-row bt-hit" type="button"><span class="bt-i">text_fields</span>Type Scale</button>
+        <button class="bt-p bt-as-row bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button>
       </div>
     </div>
     <div class="bt-panel">
@@ -916,13 +994,23 @@ same card, so the comparison is between designs and not between demos.</p>
     <div class="bt-panel">
       <p class="bt-panel-lab">Enclosure</p>
       <div class="bt-row">
-        <button class="bt-b bt-hit" type="button">Kern lists</button>
-        <button class="bt-b bt-b--solid bt-hit" type="button">Link roman + italic</button>
+        <button class="bt-b bt-hit" type="button"><span class="bt-i bt-i--sm">text_fields</span>Kern lists</button>
+        <button class="bt-b bt-b--solid bt-hit" type="button"><span class="bt-i bt-i--sm">format_italic</span>Link roman + italic</button>
       </div>
       <div class="bt-row">
         <button class="bt-b bt-hit" type="button"><span class="bt-i bt-i--sm">content_copy</span>10 Reg</button>
         <button class="bt-b bt-b--ico bt-hit bt-ico" type="button" aria-label="Reset"><span class="bt-i">settings_backup_restore</span></button>
-        <button class="bt-b bt-hit" type="button" disabled>Average pairs</button>
+        <button class="bt-b bt-hit" type="button" disabled><span class="bt-i bt-i--sm">discover_tune</span>Average pairs</button>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">The same rail</p>
+      <div class="bt-rail-list">
+        <button class="bt-b bt-as-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
+        <button class="bt-b bt-as-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
+        <button class="bt-b bt-as-row is-on bt-hit" type="button"><span class="bt-i">format_paragraph</span>Paragraph<span class="bt-sp"></span><span class="bt-i bt-i--sm">discover_tune</span></button>
+        <button class="bt-b bt-as-row bt-hit" type="button"><span class="bt-i">text_fields</span>Type Scale</button>
+        <button class="bt-b bt-as-row bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button>
       </div>
     </div>
     <div class="bt-panel">
@@ -998,6 +1086,21 @@ same card, so the comparison is between designs and not between demos.</p>
         <button class="bt-f-ico is-on bt-hit bt-ico" type="button" aria-label="Align right"><span class="bt-i">format_align_right</span></button>
         <button class="bt-f-ico bt-hit bt-ico" type="button" aria-label="Reset"><span class="bt-i">settings_backup_restore</span></button>
       </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">The same buttons</p>
+      <div class="bt-row">
+        <button class="bt-f-row bt-as-btn bt-hit" type="button"><span class="bt-i bt-i--sm">text_fields</span>Kern lists</button>
+        <button class="bt-f-row bt-as-btn is-on bt-hit" type="button"><span class="bt-i bt-i--sm">format_italic</span>Link roman + italic</button>
+      </div>
+      <div class="bt-row">
+        <button class="bt-f-row bt-as-btn bt-hit" type="button"><span class="bt-i bt-i--sm">content_copy</span>10 Reg</button>
+        <button class="bt-f-ico bt-hit bt-ico" type="button" aria-label="Reset"><span class="bt-i">settings_backup_restore</span></button>
+        <button class="bt-f-row bt-as-btn bt-hit" type="button" disabled><span class="bt-i bt-i--sm">discover_tune</span>Average pairs</button>
+      </div>
+      <p class="bt-cost" style="margin-top:.75rem">The primary is the giveaway: 06 spends
+      its enclosure on <i>chosen</i>, so the one action that matters can only borrow the
+      same ground. <b>There is no louder left to go.</b></p>
     </div>
     <div class="bt-panel">
       <p class="bt-panel-lab">States</p>
