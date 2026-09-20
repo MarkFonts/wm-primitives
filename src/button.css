@@ -17,13 +17,20 @@
  *   :disabled          .4 opacity, no pointer, no hover
  *
  * Sizing is the dial's: --spacing-02 x --spacing-03 padding, --type-ui-size, --radius.
- * The touch floor is the mark's: 44px on a coarse pointer, as padding, not height. */
+ * The touch floor is the mark's: 44px on a coarse pointer, as padding, not height.
+ *
+ * THE GAP IS FOR A MARK, NOT FOR TEXT. The box is inline-flex so a mark can sit beside
+ * its word, but a flex box makes every bare text run an item, and a blanket `gap` then
+ * lands inside a label written with inline markup -- Kernpare's <u>D</u>elete Pairs
+ * came apart at the D (2026-09-20). So there is no gap. The space is a margin on the
+ * mark itself, on whichever side faces the label: a mark is the Icon component
+ * (.wm-icon, Material Symbols) or anything a host flags with data-mark. Text, however
+ * it is marked up, sits flush. */
 @layer wm.controls {
   .wm-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-02, 6px);
     padding: var(--spacing-02, 6px) var(--spacing-03, 8px);
     font-family: var(--ui-font, system-ui, sans-serif);
     font-size: var(--type-ui-size, 0.75rem);
@@ -38,6 +45,9 @@
     -webkit-tap-highlight-color: transparent;
     transition: color var(--dur-fast, .12s) ease, border-color var(--dur-fast, .12s) ease, background var(--dur-fast, .12s) ease;
   }
+  /* The mark's own space, on the side that faces the label. */
+  .wm-btn > :is(.wm-icon, [data-mark]):not(:last-child) { margin-right: var(--spacing-02, 6px); }
+  .wm-btn > :is(.wm-icon, [data-mark]):not(:first-child) { margin-left: var(--spacing-02, 6px); }
   .wm-btn:hover:not(:disabled) { color: var(--text, inherit); border-color: var(--text-dim, currentColor); }
   .wm-btn:active:not(:disabled) { background: var(--surface-hi, var(--surface)); }
   .wm-btn.active, .wm-btn[aria-pressed="true"] {
