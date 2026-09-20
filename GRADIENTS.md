@@ -201,10 +201,20 @@ its own rows and nothing else in every document tested. Geometry costs nothing t
 Reducing the mask behaviour to a minimal repro is [NEXT.md](NEXT.md) D.
 
 The cost is the feather: a band's edge is a step in radius rather than a fade, so the seam
-is hidden by making the step small rather than by blending it. That is what `layers` buys.
-At 12 the bands read as horizontal strips, at 16 they do not, and 32 is no better — hence
-the default of 16. Each band is a separate backdrop rasterisation, so it is the first number
-to lower if a stack has to sit under a scrolling list.
+is hidden by making the step small rather than by blending it.
+
+**What `layers` buys is fidelity to the easing, not smoothness.** Each band takes the radius
+at its FAR edge, so a coarse stack is systematically blurrier than the curve it samples,
+and a fine one tracks the curve more closely while sampling it into more steps. Judged
+headed at 2×, 8 and 16 and 32 are hard to tell apart; an earlier pass read 16 as visibly
+better than 12, but that was a 1:1 screenshot of a short strip and it does not survive a
+real display. The default is **8**. Each band is a separate backdrop rasterisation, so it
+remains the first number to lower under a scrolling list.
+
+Worth knowing when you look at one over text: a heavily blurred line of type IS a
+horizontal bar, and nine lines are nine bars. Those are the lines, not seams between
+bands — which is why holding the first lines with `start` reads so much better than
+letting the ramp begin at the edge.
 
 **The obvious construction ghosts.** Have each layer reveal everything from its band onward
 and add a little more blur, so the strengths accumulate — it composes beautifully on paper.
