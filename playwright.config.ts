@@ -23,7 +23,14 @@ export default defineConfig({
     baseURL: 'http://localhost:4173',
     trace: 'retain-on-failure',
   },
-  webServer: {
+  /* tests/unit is arithmetic -- it imports src/gradient.ts and asserts on strings, with no
+     page, no host and no server. Starting one for it is not merely waste: tests/serve.mjs
+     serves the consumer builds, its readiness URL is font-proofer's, and in CI the unit
+     step runs BEFORE the job exports FONT_PROOFER_DIST and friends. So the probe 404s, the
+     runner waits the full 60s and the suite fails having executed no test -- which is what
+     happened the first time the unit job ran, and what happens in any worktree without the
+     sibling checkouts. The flag says "these tests need no host", not "skip the server". */
+  webServer: process.env.WM_NO_HOST ? undefined : {
     command: 'node tests/serve.mjs',
     url: 'http://localhost:4173/font-proofer/',
     reuseExistingServer: !process.env.CI,

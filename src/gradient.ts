@@ -226,8 +226,9 @@ export function blend(from: string, to: string, o: RampOptions & { space?: Space
 export interface BlurLayer {
   backdropFilter: string
   WebkitBackdropFilter: string
-  maskImage: string
-  WebkitMaskImage: string
+  /** The band's own box, as an `inset` shorthand. This is GEOMETRY, not a mask, and the
+   *  distinction is the whole reason this function was rewritten -- see below. */
+  inset: string
 }
 
 export interface BlurOptions extends Omit<RampOptions, 'from' | 'to' | 'stops' | 'span'> {
@@ -357,14 +358,39 @@ const feather = (
   `rgb(0 0 0 / ${amt(rising ? a : 1 - a)}) ${at(from + (to - from) * t)}`)
 
 export function blurLayers(o: BlurOptions = {}): BlurLayer[] {
-  const { dir = 'to bottom', radius = 24, layers = 6, ease = 'ease-in-out', start = 0 } = o
+  const { dir = 'to bottom', radius = 24, layers = 16, ease = 'ease-in-out', start = 0 } = o
   const n = Math.max(1, Math.round(layers))
-  /* Every stop is a fraction of the RAMP, which may not be the whole element. With a
-     length offset that cannot be a percentage, so it is arithmetic CSS does at layout:
-     the ramp is (100% - start) long and begins at start. */
-  const at = typeof start === 'string'
+  /* GEOMETRY, NOT MASKS. Every earlier version of this made each layer fill the element
+     and cut it back to a band with mask-image. That is the technique everyone publishes
+     and it does not survive contact: in the assembled system page a single layer masked
+     to the top 25% blurred the WHOLE panel, and six of them stacked took measured
+     sharpness down the panel to a flat 0.1 against 8.7-16.8 with the stack removed. A
+     uniform smear, which is the one thing a progressive blur must not be.
+     The mask is ignored outright there -- mask-image, -webkit-mask-image, the shorthand,
+     mask-mode: alpha and will-change: mask all render identically, and the same markup
+     in a standalone page masks correctly. So it is a compositing-path difference, not a
+     syntax error, and not something to depend on either way.
+     Real geometry always bounds the filter. A band positioned at top/height blurs its
+     own rows and nothing else, in both documents, with no mask involved.
+
+     The cost is the feather: a band's edge is now a step in radius rather than a fade,
+     so the seam has to be hidden by making the step small instead of by blending it.
+     That is what the layer count buys, and why the default moved from 6 to 16 -- at 12
+     the bands read as horizontal strips, at 16 they do not, and at 32 it is no better.
+     Each band is a separate backdrop rasterisation, so 16 is the number to lower first
+     if a stack has to sit under a scrolling list. */
+  const horizontal = /right|left|^(90|270)deg/.test(dir)
+  const reverse = /to left|to top|270deg/.test(dir)
+  /* Every edge is a fraction of the RAMP, which may not be the whole element. With a
+     length offset that cannot be a percentage, so it is arithmetic CSS does at layout. */
+  const edge = typeof start === 'string'
     ? (f: number) => `calc(${start} + (100% - ${start}) * ${amt(f)})`
     : (f: number) => `${pct(start + (1 - start) * f)}%`
+  /* The far edge is stated as a distance from the far side, so a plain fraction stays a
+     plain percentage instead of becoming calc(100% - 45%) for no reason. */
+  const back = typeof start === 'string'
+    ? (f: number) => `calc((100% - ${start}) * ${amt(1 - f)})`
+    : (f: number) => `${pct((1 - start) * (1 - f))}%`
   const out: BlurLayer[] = []
   for (let i = 0; i < n; i++) {
     const a = i / n, b = (i + 1) / n
@@ -372,26 +398,14 @@ export function blurLayers(o: BlurOptions = {}): BlurLayer[] {
        reads at ease(1 - 1/2n) and the stack never reaches the radius that was asked
        for. At the far edge the final layer is exactly `radius`, which is the promise. */
     const r = radius * bezierY(ease, b)
-    /* A full band's worth of feather on each side, so the windows overlap completely and
-       the sum of the stack is smooth rather than merely continuous. Narrower and the
-       hand-over happens over too few pixels to hide. */
-    const w = b - a
-    const first = i === 0, last = i === n - 1
-    const stops: string[] = []
-    /* The first layer: opaque from the very start when the ramp owns the whole element,
-       but when there is an offset it has to FEATHER IN from it -- a hard onset at the
-       offset is the edge this whole file is about, and it would land right under the line
-       the offset exists to protect. Half a band, because the onset is from nothing to the
-       smallest radius in the stack and does not need a full one. */
-    if (first) {
-      if (start === 0) stops.push(`rgb(0 0 0 / 1) ${at(0)}`)
-      else stops.push(...feather(0, w / 2, true, at))
-    } else stops.push(...feather(Math.max(0, a - w), a, true, at))
-    if (last) stops.push(`rgb(0 0 0 / 1) ${at(1)}`)
-    else stops.push(...feather(b, Math.min(1, b + w), false, at))
-    const mask = `linear-gradient(${dir}, ${stops.join(', ')})`
+    const near = edge(reverse ? 1 - b : a)
+    const far = back(reverse ? 1 - a : b)
+    /* inset: top right bottom left. Stating both edges rather than an extent keeps the
+       bands exactly adjacent at any element size -- a height in percent rounds, and the
+       gap it leaves is a bright hairline across blurred text. */
+    const inset = horizontal ? `0 ${far} 0 ${near}` : `${near} 0 ${far} 0`
     const blur = `blur(${+r.toFixed(2)}px)`
-    out.push({ backdropFilter: blur, WebkitBackdropFilter: blur, maskImage: mask, WebkitMaskImage: mask })
+    out.push({ backdropFilter: blur, WebkitBackdropFilter: blur, inset })
   }
   return out
 }

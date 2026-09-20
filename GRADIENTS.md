@@ -104,7 +104,7 @@ import { scrim, maskRamp, blend, blurLayers, rampStops, EASES } from './shared'
 scrim('var(--bg)')                              // background-image, 8 stops, clothoid
 maskRamp({ dir: 'to right', stops: 6 })         // mask-image
 blend('var(--accent)', 'var(--bg)', { space: 'oklab' })
-blurLayers({ radius: 24, layers: 6 })           // style objects, one per layer
+blurLayers({ radius: 24 })                      // style objects, one band each
 rampStops({ ease: [0.4, 0, 0.6, 1], stops: 5 }) // the numbers, for an SVG or a canvas
 ```
 
@@ -118,7 +118,7 @@ percentage of the strip is a different number every time the strip resizes, and 
 longer than the inset leaves the ramp still resolving over content with nothing above it —
 a permafade, which `UiKitBoard`'s own comment calls a real bug rather than a tuning problem.
 The ends are spelled plainly (`0`, `48px`), because `calc(0 * 48px)` is correct and
-unreadable. `blurLayers` does not take it: its masks are bands, and the option would
+unreadable. `blurLayers` does not take it: its bands are geometry, and the option would
 silently do nothing.
 
 **Defaults, and what earned them.** `stops: 8` is where banding stops being visible on a
@@ -181,8 +181,25 @@ flat, and add `.wm-dither` if the result bands.
 
 ## Progressive blur: tiled bands, not a cumulative stack
 
-`blurLayers()` is variablur's effect as a stack of masked backdrop layers, because the web
-has no way to vary one filter's strength across an element.
+`blurLayers()` is variablur's effect as a stack of backdrop layers, because the web has no
+way to vary one filter's strength across an element.
+
+**The bands are geometry, not masks — and that is not a style choice.** Everyone publishes
+this technique with each layer filling the element and cut back to a band by `mask-image`.
+It does not survive contact. In this package's own system page a single layer masked to the
+top 25% blurred the *whole* panel, and six stacked took measured sharpness down the panel to
+a flat 0.1 against 8.7–16.8 with the stack removed: a uniform smear, which is the one thing
+a progressive blur must not be. `mask-image`, `-webkit-mask-image`, the `mask` shorthand,
+`mask-mode: alpha` and `will-change: mask` all render identically, and the same markup in a
+standalone page masks correctly — so it is a compositing-path difference, not a syntax
+error, and not something to depend on either way. A band positioned by `inset` blurs its own
+rows and nothing else, in every document tested.
+
+The cost is the feather: a band's edge is a step in radius rather than a fade, so the seam
+is hidden by making the step small rather than by blending it. That is what `layers` buys.
+At 12 the bands read as horizontal strips, at 16 they do not, and 32 is no better — hence
+the default of 16. Each band is a separate backdrop rasterisation, so it is the first number
+to lower if a stack has to sit under a scrolling list.
 
 **The obvious construction ghosts.** Have each layer reveal everything from its band onward
 and add a little more blur, so the strengths accumulate — it composes beautifully on paper.

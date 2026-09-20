@@ -77,7 +77,7 @@ From the rest of the repo — match `SLIDERS.md`, `DIAL.md`, `color.css`'s heade
 
 ## the slots
 
-36 total. `title`, `lede`, `c1..c6_title`, `c1..c6_tag`, `note1..8`, `cap1..8`, `cap3a`,
+39 total. `title`, `lede`, `c1..c6_title`, `c1..c6_tag`, `note1..8`, `cap1..8`, `cap3a`, `cap7a`, `cap7b`, `cap7c`,
 and `ctl_stops` `ctl_radius` `ctl_layers` `ctl_hold` `ctl_dither` — the slider labels.
 
 **tags** = the right-hand label on a chapter rule. Short. Lowercase unless it's code.
@@ -123,6 +123,12 @@ and `ctl_stops` `ctl_radius` `ctl_layers` `ctl_hold` `ctl_dither` — the slider
 - live slots: `${MD_A}` `${MD_B}`
 
 ### c5 · Progressive blur — `c5_tag` is live
+- 2026-09-20: the masked stack smeared the whole panel in the assembled page (sharpness a
+  flat 0.1 down the panel against 8.7–16.8 with the stack hidden). Bands are geometry now,
+  each layer placed by `inset`; the two panels measure 9.1→0.1 and 9.2, 10.0→0.1, and do
+  what their captions say. `note5` says so; `v.blur.*` are the OLD stack's figures and
+  read in past tense. `note5b` exists unwired for the day a figure has to come out.
+- `layers` runs 4–32, default 16: at 12 the bands read as strips, at 16 they do not.
 - on screen: two prose panels, `start 0` vs held — with `radius` / `layers` / `hold`
   sliders. Both stacks rebuild; only the right one takes the hold.
 - `note5` — tiled bands not a cumulative stack (which **ghosts**: a blurred copy over the
@@ -133,13 +139,26 @@ and `ctl_stops` `ctl_radius` `ctl_layers` `ctl_hold` `ctl_dither` — the slider
 - live slot: `${radii.join(' &#183; ')}`
 
 ### c6 · Banding
-- on screen: **two full-width bands stacked**, undithered then dithered, over a stated
-  dark ground, with a `dither` slider on the second — at 0 the terraces come back
-- `note7` — ~94 of 256 levels over 190px ≈ 2px per level. More stops **cannot** help.
-- `note8` — Skia dithers a background gradient and near-as-nothing a mask. So a scrim is
-  dithered for you; a mask over a flat ground is not.
-- the demo now crosses a narrow alpha range over a wide box, so the terraces are tens of
-  pixels wide. Copy may point at them directly.
+- on screen: **five full-width rows** over a stated dark ground, same ink, same
+  quantiser, in this order: the steep control (alpha 0→1, fuses) · the dark fade (the
+  failure: bands) · the light control (same levels, same density, clean) · the same
+  endpoints as a `background-image` · the mask with `.wm-dither`. A `dither` slider on
+  the last; at 0 the steps come back. No filter, no amplified copy.
+- `note7` — the mechanism is **repetition, not the edge**: one step is ~0.37 ΔL* wherever
+  it sits and invisible alone; steps 5px apart fuse, 13px apart band, 155px apart vanish
+  into a flat field. Visibility peaks. Tone matters on its own (dark row bands, light row
+  with the same numbers is clean). More stops **cannot** help.
+- `note8` — Skia dithers a background gradient and near-as-nothing a mask. `.wm-dither`
+  sits after the quantiser, so it **hides the edge and does not remove the step**; the
+  background row halves the step because it dithers before quantising. The chapter's
+  first draft said dither removes the staircase and its second said wide terraces make
+  it visible; note8 says both were wrong.
+- live slots, all `v.band`: `levels` `perLevel` · `steepLevels` `steepPerLevel` ·
+  `lightLevels` `lightPerLevel` · `dLdark` `dLlight` · `jumpMask` `jumpBg` `jumpDither` ·
+  `run` `dithered`; and `v.dither.bg` `v.dither.mask`. MEASURED off a real render (a block
+  in the generator, marked as such), not derived. The last three rows share 76 levels, so
+  px-per-level cannot separate them: quote the column step.
+- captions, in row order: `cap7a` `cap7` `cap7c` `cap7b` `cap8`.
 
 ---
 
@@ -187,20 +206,24 @@ difference in timing rather than a difference in *where the fade announces itsel
 is denser and the boxes taller (300px) so more lines fall inside the ramp.
 New slot: `cap3a`.
 
-**c6 Banding** — now two full-width bands stacked, crossing a *narrow* alpha range
-(.5 → .58) instead of the whole range over a short box. Same quantisation, given room:
-**19 levels across 1050px, widest terrace 126px.** Dithered, the widest run collapses to
-**10px**. Captions `cap7` `cap8` rewritten to match.
+**c6 Banding** — went through four shapes on 2026-09-19/20 and the copy followed each:
+two bands crossing a narrow alpha range; a 2×2 with a `contrast(6)` column (dropped:
+contrast pivots on 0.5 and rescaled the copy off its ground, 113→142 became 41→215, a
+different picture rather than a louder one); four rows at 11 levels / 155px, which Mark
+could not see a single step in, because a lone edge is below threshold and banding is
+the repetition; now five rows at a density that bands. The numbers moved every time,
+which is why they are slots and the brief no longer repeats them.
 
-Two things that surfaced while fixing it, both worth knowing:
+Two things that surfaced on the way, both worth knowing:
 
 - an alpha ramp only has the range its **backdrop** gives it. The band sat on the
   assembled page's light default at first and spanned 2 levels, not 18 — it was measuring
   the page, not the quantisation. It states its own ground now (`.bandwrap`).
 - **`.wm-dither` has to sit after whatever quantises, not under it.** Inside the masked
   element the noise modulated the ink *before* the mask touched it, and did measurably
-  nothing: 19 terraces either way, 126px widest in both. On the wrapper it lands on the
-  composited result. This generalises beyond this page.
+  nothing. On the wrapper it lands on the composited result. And even there it hides the
+  edge without removing the step — the column mean keeps the jump. This generalises
+  beyond this page.
 
 ⚠ One caveat for whoever reviews: terraces are a 1:1 phenomenon. Screenshots that get
 downscaled average them away, so judge this chapter on a real display at 100%, not from

@@ -66,7 +66,7 @@ export interface ProgressiveBlurProps {
  *  applied and the blur lags the content. The fix is the same one the fixed-header case
  *  wants — position it against the viewport, not the scroller. */
 export function ProgressiveBlur({
-  radius = 24, layers = 6, ease = 'ease-in-out', dir = 'to bottom', start = 0,
+  radius = 24, layers = 16, ease = 'ease-in-out', dir = 'to bottom', start = 0,
   position = 'absolute', className = '', style,
 }: ProgressiveBlurProps) {
   const stack = useMemo(() => blurLayers({ radius, layers, ease, dir, start }),

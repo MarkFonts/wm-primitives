@@ -99,18 +99,41 @@ const luma = Object.fromEntries(['srgb', 'oklab']
   .map(sp => [sp, lumaOf(midpoint(rgb('#c8452f'), rgb('#2f7d54'), sp))]))
 
 /* COMPUTED from the band's own parameters: #e8e8e8 ink at BAND_FROM..BAND_TO alpha over
-   the #0f0f0f ground the wrapper states. That is what "how many levels" means. */
-const BAND_FROM = .45, BAND_TO = .59
-const bandLevels = Math.round((BAND_TO - BAND_FROM) * (0xe8 - 0x0f))
+   the #0f0f0f ground the wrapper states. That is what "how many levels" means.
+   The steep band is the control and crosses the whole alpha range at the same width. */
+const BAND_FROM = 0, BAND_TO = .35
+const LIGHT_FROM = .65, LIGHT_TO = 1
+const levelsFor = (a0, a1) => Math.round((a1 - a0) * (0xe8 - 0x0f))
+const bandLevels = levelsFor(BAND_FROM, BAND_TO)
+const steepLevels = levelsFor(0, 1)
+const lightLevels = levelsFor(LIGHT_FROM, LIGHT_TO)
 
 /* MEASURED in Chromium by decoding the rendered band, at the width the assembled page
    gives it. Re-take these if the band's range, width or dither strength changes. */
 const MEASURED = {
   ditherBg: 2.98,      // per-pixel deviation, same ramp as background-image
   ditherMask: 0.22,    //   "                            as mask-image
-  terrace: 98,         // widest flat run across the undithered band, px
-  terraceDithered: 10,  //   "            across the dithered one
+  terrace: 13,         // px per level across the dark band -- the density the eye reads
+  runMask: 33,         // widest identical run across the dark mask row, px
+  runDither: 23,       //   "   with .wm-dither: broken up, not removed
+  terraceSteep: 5,     //   "   the steep control: dense enough to fuse
+  terraceLight: 13,    //   "   the light control: same density, other end of the scale
+  /* The last three rows all carry 76 levels, so px-per-level cannot tell them apart.
+     What separates them is the size of the step left in the COLUMN MEAN. */
+  jumpMask: 0.99,      // the staircase itself
+  jumpBg: 0.49,        // as a background-image: Skia halves it
+  jumpDither: 1.29,    // masked + .wm-dither: the step survives, with noise on top
+  /* MEASURED down the c5 blur panel in the ASSEMBLED page: mean |dx| between adjacent
+     pixels per horizontal slice, which is the cheapest proxy for "is there detail here".
+     The stack flattens it to a constant; hidden, the same panel keeps its text. These
+     are the numbers note5b quotes, so they live here rather than in the prose. */
+  blurSmeared: 0.1,    // sharpness with the layer stack, every slice, top to bottom
+  blurSharpLo: 8.7,    // sharpness with the stack hidden, quietest slice
+  blurSharpHi: 16.8,   //   "                              busiest slice
+  dLdark: 0.365,       // CIELAB dL* of one 8-bit step at the dark row's foot
+  dLlight: 0.351,      //   "                        at the light row's foot
 }
+
 
 /* ── 01 · the curve ──────────────────────────────────────────────────────────────── */
 const PEN = [[0, 1], [.5, .30], [.65, .15], [.755, .075], [.8285, .037], [.88, .019], [1, 0]]
@@ -161,9 +184,9 @@ const mdPlots = ['#e05', '#0b6', '#48f'].map((h, i) =>
   chan(MD_A, MD_B, i, ['R', 'G', 'B'][i], h)).join('')
 
 /* ── 05 · progressive blur, as static DOM ────────────────────────────────────────── */
-const blurStack = (radius, start) => g.blurLayers({ radius, layers: 6, start })
-  .map(l => `<div style="backdrop-filter:${l.backdropFilter};-webkit-backdrop-filter:${l.backdropFilter};` +
-             `-webkit-mask-image:${l.maskImage};mask-image:${l.maskImage}"></div>`).join('')
+const blurStack = (radius, start) => g.blurLayers({ radius, start })
+  .map(l => `<div style="inset:${l.inset};backdrop-filter:${l.backdropFilter};` +
+             `-webkit-backdrop-filter:${l.backdropFilter}"></div>`).join('')
 const LINES = ['Hamburgefonstiv — the tail of the work goes on', 'past the point where the reader can still be',
   'sure of it, which is the whole affordance: a', 'hard cut reads as the end of the specimen',
   'rather than the end of what has loaded so far.', 'The fade is not decoration. It is the signal',
@@ -172,6 +195,8 @@ const LINES = ['Hamburgefonstiv — the tail of the work goes on', 'past the poi
 const proseBlock = LINES.map(l => `<p>${l}</p>`).join('')
 /* Denser and doubled, so the ramp has lines to act on rather than empty box. */
 const denseBlock = LINES.concat(LINES.slice(0, 6)).map(l => `<p>${l}</p>`).join('')
+/* The radius ladder the chapter quotes. Sampled at 6 for the table because 16 numbers
+   is a list, not a figure -- the stack itself runs at the default. */
 const radii = g.blurLayers({ radius: 24, layers: 6 }).map(l => l.backdropFilter.slice(5, -3))
 
 /* ── 02 · the edge, and 06 · banding ─────────────────────────────────────────────── */
@@ -188,50 +213,92 @@ const scrimOf = ease => g.scrim('#0f0f0f', { ease, dir: 'to top' })
    AND IT STILL HAS TO BE AMPLIFIED, which took two failed attempts to accept. .5 -> .58
    was measurably terraced and visually a flat grey slab. Widening to .3 -> .62 gave more
    terraces, not more visible ones -- because the step between two of them is ONE level,
-   about 0.4% of brightness, which is near the floor of what an eye resolves on a mid
-   grey and is erased outright by any downscaling. No choice of range fixes that: the
-   thing being demonstrated is, by definition, almost too small to see.
+   and one level is one level wherever you put it.
 
-   So the band is centred on mid-grey (.45 -> .59 puts it around 128) and shown TWICE:
-   as it renders, and through filter: contrast(6). Same pixels, same quantisation, the
-   difference amplified until the steps are legible -- and the caption says so, because
-   an amplified picture presented as a plain one is a lie about how bad the problem is.
-   Centring is what makes the filter usable: contrast() pivots on 0.5, so a band sitting
-   off-centre clips to black or white before its steps separate. */
-const bandDemo = g.maskRamp({ dir: '90deg', from: BAND_FROM, to: BAND_TO })
+   Two wrong diagnoses before this one, both worth leaving on the record.
+
+   First: that the steps were too SMALL to see, fixed by showing the band again through
+   filter: contrast(6). contrast() pivots on 0.5 and rescales everything through it, so
+   the amplified copy stopped sitting on the ground it was composited over -- 113->142
+   became 41->215, a near-full-range gradient floating on a #0f0f0f page it had no
+   relationship to. A different picture, not a louder one.
+
+   Second: that what mattered was terrace WIDTH, fixed by crossing fewer levels over the
+   same width -- 11 levels at 155px each. That is the worst choice available. It reads
+   as one flat grey (11 levels is 4% of the range: there is no visible gradient left to
+   band) and every step is an isolated edge of about 0.37 dL*, which is under threshold
+   on its own. Too flat to be a gradient and too sparse to show a step, from one cause.
+
+   What the eye actually catches is the REPETITION. Many steps close together read as a
+   pattern; that pattern is what people mean by banding. So visibility is not monotonic
+   in terrace width, it peaks: 5px per level fuses into a smooth ramp, 13px bands hard,
+   155px disappears into a flat field.
+
+   And position on the tone scale matters independently, which CIELAB says it should not.
+   The dark row and the light row below are the same 76 levels at the same 13px, and
+   their per-step dL* differs by a twentieth (0.365 against 0.351) -- yet the dark one
+   bands unmistakably and the light one is clean. Lab is uniform for small patches, not
+   for a 1-level edge run across a wide smooth field, and this is the cheapest available
+   demonstration of the gap. It is also why banding complaints are always about the dark
+   end of a gradient. */
+const bandDemo = g.maskRamp({ dir: '90deg', ease: 'linear', stops: 64, from: BAND_FROM, to: BAND_TO })
+const bandSteep = g.maskRamp({ dir: '90deg', ease: 'linear', stops: 64, from: 0, to: 1 })
+/* Same level count and same px-per-level as bandDemo, at the other end of the scale.
+   This row is the control for the tonal claim, not decoration: drop it and "the dark
+   end is where it shows" is an assertion. */
+const bandLight = g.maskRamp({ dir: '90deg', ease: 'linear', stops: 64, from: LIGHT_FROM, to: LIGHT_TO })
+/* LINEAR, not the page's own clothoid. Everywhere else the ease is the subject; here
+   the subject is levels per pixel, and a clothoid varies that along the ramp -- it
+   crowds the stops, so px-per-level stops being one number. */
+const over = a => Math.round(0x0f + a * (0xe8 - 0x0f))
+const bandBg = `linear-gradient(90deg, rgb(${over(BAND_FROM)} ${over(BAND_FROM)} ${over(BAND_FROM)}), `
+  + `rgb(${over(BAND_TO)} ${over(BAND_TO)} ${over(BAND_TO)}))`
 
 
 /* The copy lives in docs/system/pages/ramps.copy.js and nowhere else. Nothing in this
    file is prose; a writing pass never opens it. */
 const COPY = copy({ EASES: g.EASES, radii, worst, rms, MD_A, MD_B,
-  sat, luma, band: { levels: bandLevels, terrace: MEASURED.terrace, dithered: MEASURED.terraceDithered },
-  dither: { bg: MEASURED.ditherBg, mask: MEASURED.ditherMask } })
+  sat, luma, band: { levels: bandLevels, perLevel: MEASURED.terrace, terrace: MEASURED.terrace,
+          dithered: MEASURED.runDither, run: MEASURED.runMask,
+          steepLevels, steepPerLevel: MEASURED.terraceSteep, steepTerrace: MEASURED.terraceSteep,
+          lightLevels, lightPerLevel: MEASURED.terraceLight,
+          jumpMask: MEASURED.jumpMask, jumpBg: MEASURED.jumpBg, jumpDither: MEASURED.jumpDither,
+          dLdark: MEASURED.dLdark, dLlight: MEASURED.dLlight },
+  dither: { bg: MEASURED.ditherBg, mask: MEASURED.ditherMask },
+  blur: { smeared: MEASURED.blurSmeared, sharpLo: MEASURED.blurSharpLo, sharpHi: MEASURED.blurSharpHi } })
 
 const page = `<!doctype html><meta charset=utf-8><title>ramps</title><style>
 @font-face{font-family:"CalSansVF";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
 @font-face{font-family:"Face";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
 *{box-sizing:border-box}
-/* NO COLOR ON BODY. Standalone this page is dark, but build.py scopes it into a
-   document that is LIGHT by default -- and a scoped body rule carries its ink with it,
-   so every heading and table value that inherited #e8e8e8 went white-on-white in the
-   assembled page while the explicitly-greyed prose survived. Ink is the host's; this
-   page only ever states a colour where it also states the ground under it. */
-body{margin:0;background:#0f0f0f;font-family:"CalSansVF",system-ui,sans-serif;
+/* COLOR ON BODY, PAIRED WITH THE GROUND ON BODY. This rule scopes to .part-1 -- the
+   ramps part alone, not the whole of #s-color -- so the ink lands exactly where the
+   #0f0f0f beside it does, and the Color audit above keeps the host's.
+   Leaving the colour off was the bug: the ground here is stated unconditionally while
+   the host's ink follows the host's scheme, so in light mode every heading, table cell
+   and caption that inherited rendered near-black on near-black, and only the spans
+   carrying a literal stayed readable. State both or state neither. */
+body{margin:0;background:#0f0f0f;color:#c9c9c9;font-family:"CalSansVF",system-ui,sans-serif;
  font-optical-sizing:auto;font-variation-settings:"GEOM" 25;padding:32px 28px 8px}
-h1{font-size:23px;margin:0 0 5px} .lede{color:var(--ink-2,#8a8a8a);font-size:13px;margin:0 0 22px;max-width:84ch}
+h1{font-size:23px;margin:0 0 5px} .lede{color:#9a9a9a;font-size:13px;margin:0 0 22px;max-width:84ch}
 h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:34px 0 12px;padding-bottom:7px;
  border-bottom:1px solid #222;display:flex;justify-content:space-between}
 h2 span{color:#7d7d7d;letter-spacing:0;text-transform:none;font-size:10px}
-/* THE AUDIT'S INK, NOT A LITERAL. These notes sit inside section 05 beside the Color
-   audit's, which are 13.5px at var(--ink-2); two note styles in one section is a seam,
-   and in light mode a flat grey literal is the weak ink this page already lost once.
-   The fallback keeps the standalone page readable, where --ink-2 does not exist. */
-p.note{color:var(--ink-2,#8a8a8a);font-size:13.5px;line-height:1.5;margin:0 0 14px;max-width:84ch}
+/* LITERAL INK, BECAUSE THIS PART STATES ITS OWN GROUND. These notes sit inside section
+   05 beside the Color audit's, so they were briefly switched to var(--ink-2) to match
+   them. That was wrong, and it broke the part outright: --ink-2 follows the HOST's
+   colour scheme, this body states background:#0f0f0f unconditionally, and in light mode
+   every note, heading and caption here rendered near-black on near-black. Only the
+   <code> spans, which carry a literal, stayed legible.
+   The rule the rest of this file already follows: state ink only where you also state
+   the ground, and then state both. Matching the audit on SIZE (13.5px) is right;
+   matching it on colour cannot be, because the two sit on different grounds. */
+p.note{color:#9a9a9a;font-size:13.5px;line-height:1.5;margin:0 0 14px;max-width:84ch}
 p.note b{font-weight:400}
 code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#7d7d7d}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px}
 figure{margin:0}
-figcaption{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:var(--ink-3,#7d7d7d);margin-top:5px}
+figcaption{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:#8a8a8a;margin-top:5px}
 .band{height:84px;border-radius:5px;position:relative;overflow:hidden}
 /* Full width on purpose: the terraces need the pixels. And the wrap STATES THE GROUND --
    an alpha ramp only has the range its backdrop gives it, and on the assembled page's
@@ -244,11 +311,8 @@ figcaption{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:var(--
    actually are. Worth knowing generally: .wm-dither has to sit after whatever quantises,
    not under it. */
 .bandwrap{background:#0f0f0f;border-radius:5px;overflow:hidden;position:relative}
-.bandgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
-/* The same band, amplified. contrast() pivots on 0.5, which is why the ramp is centred
-   on mid-grey: off-centre it clips before the steps separate. */
-.bandwrap.amp{filter:contrast(6)}
-.band.wide{height:64px;border-radius:0}
+.bandstack{display:grid;gap:14px}
+.band.wide{height:88px;border-radius:0}
 /* A control row. Native range on purpose: this page carries no component library, and
    a slider that needs one would mean shipping React to a page that otherwise needs
    none. The page renders correctly with JS off -- every demo is baked at its default
@@ -330,7 +394,7 @@ svg.chan .ln{stroke-width:2.5}
 </div>
 <div class="ctls">
 <div class="ctl"><label>${COPY.ctl_radius}</label><input type="range" data-k="radius" min="4" max="48" step="1" value="24"><output>24</output></div>
-<div class="ctl"><label>${COPY.ctl_layers}</label><input type="range" data-k="layers" min="2" max="10" step="1" value="6"><output>6</output></div>
+<div class="ctl"><label>${COPY.ctl_layers}</label><input type="range" data-k="layers" min="4" max="32" step="1" value="16"><output>16</output></div>
 <div class="ctl"><label>${COPY.ctl_hold}</label><input type="range" data-k="hold" min="0" max="40" step="1" value="0"><output>0</output></div>
 </div>
 <p class="note" style="margin-top:14px">${COPY.note6}</p>
@@ -338,15 +402,17 @@ svg.chan .ln{stroke-width:2.5}
 <h2>${COPY.c6_title} <span>${COPY.c6_tag}</span></h2>
 <p class="note">${COPY.note7}</p>
 <p class="note">${COPY.note8}</p>
-<div class="bandgrid">
+<div class="bandstack">
+<figure><div class="bandwrap"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandSteep};mask-image:${bandSteep}"></div></div>
+<figcaption>${COPY.cap7a}</figcaption></figure>
 <figure><div class="bandwrap"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
 <figcaption>${COPY.cap7}</figcaption></figure>
-<figure><div class="bandwrap amp"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
-<figcaption>${COPY.cap7amp}</figcaption></figure>
+<figure><div class="bandwrap"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandLight};mask-image:${bandLight}"></div></div>
+<figcaption>${COPY.cap7c}</figcaption></figure>
+<figure><div class="bandwrap"><div class="band wide" style="background:${bandBg}"></div></div>
+<figcaption>${COPY.cap7b}</figcaption></figure>
 <figure><div class="bandwrap dither" data-dither><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
 <figcaption>${COPY.cap8}</figcaption></figure>
-<figure><div class="bandwrap dither amp" data-dither><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
-<figcaption>${COPY.cap8amp}</figcaption></figure>
 </div>
 <div class="ctl"><label>${COPY.ctl_dither}</label><input type="range" data-k="dither" min="0" max="60" step="1" value="18"><output>.18</output></div>
 
@@ -385,13 +451,18 @@ const paint = (sel, start) => {
   const radius = +document.querySelector('input[data-k="radius"]').value
   const layers = +document.querySelector('input[data-k="layers"]').value
   wrap.innerHTML = blurLayers({ radius, layers, start }).map(l =>
-    '<div style="backdrop-filter:' + l.backdropFilter + ';-webkit-backdrop-filter:' + l.backdropFilter +
-    ';-webkit-mask-image:' + l.maskImage + ';mask-image:' + l.maskImage + '"></div>').join('')
+    '<div style="inset:' + l.inset + ';backdrop-filter:' + l.backdropFilter +
+    ';-webkit-backdrop-filter:' + l.backdropFilter + '"></div>').join('')
 }
 const blur = () => {
   const hold = +document.querySelector('input[data-k="hold"]').value / 100
   paint('[data-stack="plain"]', 0)
-  paint('[data-stack="held"]', hold)
+  /* At 0 the held panel keeps the line-based offset it is captioned with, rather than
+     becoming a second copy of the panel beside it. The first repaint used to overwrite
+     the static calc() with the slider's zero, so the pair rendered identically on load
+     and the hold appeared to do nothing until the slider was touched -- which read as a
+     dead control rather than as a default. */
+  paint('[data-stack="held"]', hold || 'calc(12px + 2lh)')
 }
 ctl('radius', v => { blur(); return v + 'px' })
 ctl('layers', v => { blur(); return v })
@@ -411,4 +482,4 @@ console.log(`  clothoid fit  RMS ${rms.toFixed(5)}, worst ${worst.toFixed(4)}`)
 console.log(`  blur radii    ${radii.join(' ')}`)
 console.log(`  sat           srgb ${sat.srgb}%  oklab ${sat.oklab}%  oklch ${sat.oklch}%`)
 console.log(`  luma          srgb ${luma.srgb}  oklab ${luma.oklab}`)
-console.log(`  band          ${bandLevels} levels, terrace ${MEASURED.terrace}px -> ${MEASURED.terraceDithered}px dithered`)
+console.log(`  band          ${bandLevels} levels at ${MEASURED.terrace}px each, run ${MEASURED.runMask}px -> ${MEASURED.runDither}px dithered`)
