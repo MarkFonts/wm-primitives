@@ -946,7 +946,11 @@ html,body{margin:0;padding:0;background:var(--bg)}
 }
 """
 
-CHAPTER_CAP = 7   # past this a page's own headings stop being an outline and become a list
+# No cap. There was one (7), on the thought that past it a page's headings stop being
+# an outline and become a list -- and then Color took the six ramps chapters and the rail
+# showed two of them, which is worse than a long list: an index that hides entries is
+# not an index. Lifted 2026-09-19; the rail scrolls as a whole now, so length costs nothing.
+CHAPTER_CAP = None
 
 # The README is 00: the prelude, so the six laws stay 01-06 and the hero's "6 laws" stays
 # a count and not a lie. Chapter lines carry their numeral in its own column (<u>), so a
