@@ -187,6 +187,10 @@ jobs:
             echo "::error file=COMPONENTS.md::index.ts or .tokenlint.json changed without 'node scripts/gen-index.mjs' -- run it and commit"
             exit 1
           fi
+      # The gradient engine is numbers: tests/unit runs with no host, but it ran nowhere in
+      # CI until 2026-09-20 -- a branch shipped it green only from a laptop's node.
+      - name: Unit (the engine) -- gates dispatch
+        run: npx playwright test tests/unit --project=desktop
       - name: Behaviour (GESTURES.md) -- gates dispatch
         env:
           FONT_PROOFER_DIST: ${{ github.workspace }}/hosts/font-proofer/dist

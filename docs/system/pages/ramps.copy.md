@@ -123,10 +123,12 @@ and `ctl_stops` `ctl_radius` `ctl_layers` `ctl_hold` `ctl_dither` — the slider
 - live slots: `${MD_A}` `${MD_B}`
 
 ### c5 · Progressive blur — `c5_tag` is live
-- ⚠ 2026-09-20: the assembled demo does not show a progression (sharpness measured flat
-  at 0.1 down the panel; mask-image is not clipping backdrop-filter in the assembled
-  page). Under repair in the generator. Until it is fixed, copy describes the technique
-  and claims nothing about what the panel on this page shows.
+- 2026-09-20: the masked stack smeared the whole panel in the assembled page (sharpness a
+  flat 0.1 down the panel against 8.7–16.8 with the stack hidden). Bands are geometry now,
+  each layer placed by `inset`; the two panels measure 9.1→0.1 and 9.2, 10.0→0.1, and do
+  what their captions say. `note5` says so; `v.blur.*` are the OLD stack's figures and
+  read in past tense. `note5b` exists unwired for the day a figure has to come out.
+- `layers` runs 4–32, default 16: at 12 the bands read as strips, at 16 they do not.
 - on screen: two prose panels, `start 0` vs held — with `radius` / `layers` / `hold`
   sliders. Both stacks rebuild; only the right one takes the hold.
 - `note5` — tiled bands not a cumulative stack (which **ghosts**: a blurred copy over the
