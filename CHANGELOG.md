@@ -12,6 +12,16 @@ Newest first.
 
 ---
 
+## 2026-09-20 — the house button splits a word
+
+**A flex box makes a bare text run an item.** `.wm-btn` is inline-flex with a 6px gap so
+a mark can sit beside its word; Kernpare writes its labels `<u>D</u>elete Pairs` for the
+access keys, and the gap fell between the D and the rest. Every affected label is wrapped
+in one span on the Kernpare side (wordmarktools `46afddd`); the rule is on the button's
+own header, since the next host will write the same markup. The button is unchanged.
+
+---
+
 ## 2026-09-20 — the blur bands stop relying on a mask
 
 **`blurLayers()` was building a uniform smear.** Measured down the system page's blur
