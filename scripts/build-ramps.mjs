@@ -23,8 +23,13 @@ const bundled = await build({
   entryPoints: ['src/gradient.ts'], bundle: true, format: 'esm', write: false,
   target: ['es2022'], logLevel: 'warning',
 })
+const engineSrc = bundled.outputFiles[0].text
 const g = await import('data:text/javascript;base64,' +
-  Buffer.from(bundled.outputFiles[0].text).toString('base64'))
+  Buffer.from(engineSrc).toString('base64'))
+/* The same text, minus its ESM export, for inlining into the page. 3.5KB and no
+   dependencies -- the sliders need the engine, not React, and dist/dial.js already
+   ships one React that a second bundle here would duplicate. */
+const engineInline = engineSrc.replace(/export\s*\{[\s\S]*?\};?\s*$/, '')
 
 /* The dither tile is read out of the shipped stylesheet rather than regenerated, so the
    page demonstrates the same noise the package actually applies. */
@@ -137,7 +142,7 @@ const bandDemo = g.maskRamp({ dir: '90deg', from: .5, to: .58 })
  * ────────────────────────────────────────────────────────────────────────────────── */
 const COPY = {
   title: `Ramps`,
-  lede: `One curve, three channels. The alpha of a scrim, the colour of a blend and the radius of a blur are the same cubic B&#233;zier applied to different quantities &#8212; so the package has one sampler and three emitters rather than three engines. Every gradient on this page is a string <code>src/gradient.ts</code> emitted; none of it is typed in.`,
+  lede: `One curve, three channels. The alpha of a scrim, the colour of a blend and the radius of a blur are the same cubic B&#233;zier applied to different quantities &#8212; one sampler and three emitters, not three engines. Every gradient on this page is a string emitted by <code>src/gradient.ts</code>; none of it is typed in.`,
   c1_title: `The curve`,
   c1_tag: `cubic-bezier(${g.EASES.clothoid.join(', ')})`,
   c2_title: `The edge`,
@@ -151,13 +156,18 @@ const COPY = {
   c6_title: `Banding`,
   c6_tag: `8-bit, and what the engine cannot fix`,
   note1: `Two CodePens make the same fade by hand, seven stops written out one at a time. Fitting a <code>cubic-bezier()</code> to those seven numbers lands within <b>${worst.toFixed(4)}</b> of every one of them, RMS <b>${rms.toFixed(5)}</b> &#8212; about a third of one step in 8-bit. The hand-written version and the curve are the same fade, so the clothoid is a preset here, not a code path. The white dots are where the eight default stops fall: they crowd toward the transparent end, because the curve is sampled by its own parameter rather than at even positions.`,
-  note2: `Interpolate alpha in a straight line and it does not read as straight: perceived lightness moves fastest at the transparent end, so the fade announces itself where it starts and then crawls. Both panels fade the same colour over the same text across the same distance. Only the curve differs. This is the whole argument for the file.`,
+  note2: `Interpolate alpha in a straight line and it does not read as straight: perceived lightness moves fastest at the transparent end, so the fade announces itself where it starts and then crawls. Against the unveiled panel, both scrims fade the same colour over the same text across the same distance &#8212; only the curve differs. This is the whole argument for the file.`,
   note3: `The received wisdom is that oklab rescues a gradient from the grey midpoint sRGB gives you. <b>It does not.</b> A straight line between opposite hues passes through the neutral axis in any rectangular space, because that is where the axis is. What oklab buys is even <b>lightness</b>. Only <b>oklch</b> holds the chroma, by interpolating hue as an angle and going around rather than through &#8212; at the cost of a hue nobody picked. The default stays oklab because it is the predictable one.`,
   note4: `One curve on the interpolation re-spaces the stops <b>along</b> a fixed path through colour space. A curve <b>per channel</b> moves the path itself. Below left: the same two colours with one channel steered at a time &#8212; the ramp leaves the straight line between its endpoints, which is how the tool escapes sRGB's mud without changing space. Below right: the three graphs for <code>${MD_A}</code> &#8594; <code>${MD_B}</code>, plotted on each channel's own axis. R falls, B rises, and <b>G does not move at all</b> &#8212; which is why that pair never goes grey, and why a curve on G there does nothing.`,
   note5: `variablur's effect, as a stack of masked backdrop layers. Each layer owns <b>one band</b> at full opacity carrying that band's absolute radius &#8212; not a cumulative stack, which ghosts: <code>backdrop-filter</code> blurs what is behind the layer, so at partial mask alpha the compositor blends a blurred copy over the still-sharp original and live text shows a double image. Bands are evenly spaced; only the radius follows the curve. The right-hand panel holds the first lines with <code>start</code>, because the smallest stop in the stack still lands inside the first line's ascenders otherwise.`,
   note6: `It blurs pixels; it does not redact. The words stay in the DOM &#8212; selectable, copyable, findable, and read aloud in full by a screen reader, which sees no blur at all. Never use it to withhold anything.`,
-  note7: `A ramp crossing ~94 of the 256 available levels over 190px spends about two pixels per level, and the eye finds those edges. <b>More stops cannot help</b> &#8212; an 8-stop ramp and a 2-stop ramp band identically. Nothing in CSS asks for more output bits, so sub-level noise is the only control there is, and every band on this page carries it.`,
+  note7: `A ramp crossing ~94 of the 256 available levels over 190px spends about two pixels per level, and the eye finds those edges. <b>More stops cannot help</b> &#8212; an 8-stop ramp and a 2-stop ramp band identically. Nothing in CSS asks for more output bits, so sub-level noise is the only control there is, and every band on this page carries it. The bands below cross a narrow slice of the range at full width, so each level lands wide enough to point at.`,
   note8: `Mostly you do not need it: Skia already dithers a background gradient and very nearly does not dither a mask &#8212; the same ramp measures a per-pixel deviation of <b>2.98</b> as <code>background-image</code> against <b>0.22</b> as <code>mask-image</code>. So a scrim is dithered for you and a mask over a flat ground is not, which is the one place in this package that bands.`,
+  ctl_stops: `stops`,
+  ctl_radius: `radius`,
+  ctl_layers: `layers`,
+  ctl_hold: `hold`,
+  ctl_dither: `dither`,
   cap1: `alpha against position &#183; dots = the engine's stops`,
   cap2: `the pens' seven stops, against the fitted curve`,
   cap3a: `no scrim &#183; the control`,
@@ -165,8 +175,8 @@ const COPY = {
   cap4: `clothoid &#183; the default`,
   cap5: `start 0`,
   cap6: `start 'calc(12px + 2lh)'`,
-  cap7: `a narrow alpha range over a wide box &#183; ~18 levels, no dither &#183; the terraces are the bug`,
-  cap8: `the same ramp, the same 18 levels, with .wm-dither`,
+  cap7: `a narrow alpha range over a wide box &#183; no dither &#183; the terraces are the bug`,
+  cap8: `the same ramp, the same levels, with .wm-dither`,
 }
 
 const page = `<!doctype html><meta charset=utf-8><title>ramps</title><style>
@@ -203,9 +213,19 @@ figcaption{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:#7d7d7
    not under it. */
 .bandwrap{background:#0f0f0f;border-radius:5px;overflow:hidden;position:relative}
 .band.wide{height:64px;border-radius:0}
+/* A control row. Native range on purpose: this page carries no component library, and
+   a slider that needs one would mean shipping React to a page that otherwise needs
+   none. The page renders correctly with JS off -- every demo is baked at its default
+   and the sliders only re-emit. */
+.ctl{display:flex;align-items:center;gap:10px;margin:12px 0 2px;
+ font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#7d7d7d}
+.ctl label{min-width:46px}
+.ctl input[type=range]{flex:1;max-width:260px;accent-color:#3f95c9;height:16px}
+.ctl output{min-width:3ch;text-align:right;font-variant-numeric:tabular-nums}
+.ctls{display:flex;flex-wrap:wrap;gap:6px 28px}
 .dither{position:relative}
 .dither::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:url(${DITHER});
- background-repeat:repeat;mix-blend-mode:overlay;opacity:.18}
+ background-repeat:repeat;mix-blend-mode:overlay;opacity:var(--wm-dither,.18)}
 @media (min-resolution:2dppx){.dither::after{background-size:32px 32px}}
 table{width:100%;border-collapse:collapse;font-size:12px;max-width:560px}
 td,th{padding:6px 10px 6px 0;border-bottom:1px solid #222;text-align:left}
@@ -248,11 +268,12 @@ svg.chan .ln{stroke-width:2.5}
 <div class="row" style="grid-template-columns:repeat(3,1fr)">
 <figure><div class="spec tall">${denseBlock}</div>
 <figcaption>${COPY.cap3a}</figcaption></figure>
-<figure><div class="spec tall">${denseBlock}<div class="veil" style="background-image:${scrimOf('linear')}"></div></div>
+<figure><div class="spec tall">${denseBlock}<div class="veil" data-veil="linear" style="background-image:${scrimOf('linear')}"></div></div>
 <figcaption>${COPY.cap3}</figcaption></figure>
-<figure><div class="spec tall">${denseBlock}<div class="veil" style="background-image:${scrimOf('clothoid')}"></div></div>
+<figure><div class="spec tall">${denseBlock}<div class="veil" data-veil="clothoid" style="background-image:${scrimOf('clothoid')}"></div></div>
 <figcaption>${COPY.cap4}</figcaption></figure>
 </div>
+<div class="ctl"><label>${COPY.ctl_stops}</label><input type="range" data-k="stops" min="2" max="16" step="1" value="8"><output>8</output></div>
 
 <h2>${COPY.c3_title} <span>${COPY.c3_tag}</span></h2>
 <p class="note">${COPY.note3}</p>
@@ -266,10 +287,15 @@ svg.chan .ln{stroke-width:2.5}
 <h2>${COPY.c5_title} <span>${COPY.c5_tag}</span></h2>
 <p class="note">${COPY.note5}</p>
 <div class="row" style="grid-template-columns:1fr 1fr">
-<figure><div class="spec">${proseBlock}<div class="stack">${blurStack(24, 0)}</div></div>
+<figure><div class="spec">${proseBlock}<div class="stack" data-stack="plain">${blurStack(24, 0)}</div></div>
 <figcaption>${COPY.cap5}</figcaption></figure>
-<figure><div class="spec">${proseBlock}<div class="stack">${blurStack(24, 'calc(12px + 2lh)')}</div></div>
+<figure><div class="spec">${proseBlock}<div class="stack" data-stack="held">${blurStack(24, 'calc(12px + 2lh)')}</div></div>
 <figcaption>${COPY.cap6}</figcaption></figure>
+</div>
+<div class="ctls">
+<div class="ctl"><label>${COPY.ctl_radius}</label><input type="range" data-k="radius" min="4" max="48" step="1" value="24"><output>24</output></div>
+<div class="ctl"><label>${COPY.ctl_layers}</label><input type="range" data-k="layers" min="2" max="10" step="1" value="6"><output>6</output></div>
+<div class="ctl"><label>${COPY.ctl_hold}</label><input type="range" data-k="hold" min="0" max="40" step="1" value="0"><output>0</output></div>
 </div>
 <p class="note" style="margin-top:14px">${COPY.note6}</p>
 
@@ -278,8 +304,64 @@ svg.chan .ln{stroke-width:2.5}
 <p class="note">${COPY.note8}</p>
 <figure style="margin-top:4px"><div class="bandwrap"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
 <figcaption>${COPY.cap7}</figcaption></figure>
-<figure style="margin-top:14px"><div class="bandwrap dither"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
+<figure style="margin-top:14px"><div class="bandwrap dither" data-dither><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
 <figcaption>${COPY.cap8}</figcaption></figure>
+<div class="ctl"><label>${COPY.ctl_dither}</label><input type="range" data-k="dither" min="0" max="60" step="1" value="18"><output>.18</output></div>
+
+<script>
+/* The engine, inlined -- the same src/gradient.ts this page was generated from, so a
+   slider and the baked default cannot disagree. No framework: every control is a native
+   range, and the page is correct with JS off because each demo ships at its default.
+
+   build.py rebinds document.querySelector to the section root and RENAMES ids, so
+   everything below addresses by class and data- attribute and never by id. */
+${engineInline}
+
+const ctl = (k, fn) => {
+  const el = document.querySelector('input[data-k="' + k + '"]')
+  if (!el) return
+  const out = el.nextElementSibling
+  const run = () => { const v = +el.value; if (out) out.textContent = fn(v) ?? v }
+  el.addEventListener('input', run)
+  run()
+}
+
+/* c2 -- the same stop count on both scrims, so the comparison stays honest. Pull it
+   under five and the ramp facets; that is the sampling, not the curve. */
+ctl('stops', n => {
+  for (const ease of ['linear', 'clothoid']) {
+    const el = document.querySelector('[data-veil="' + ease + '"]')
+    if (el) el.style.backgroundImage = scrim('#0f0f0f', { ease, dir: 'to top', stops: n })
+  }
+})
+
+/* c5 -- both stacks rebuild; only the right one takes the hold, so the pair keeps
+   showing what the offset buys. */
+const paint = (sel, start) => {
+  const wrap = document.querySelector(sel)
+  if (!wrap) return
+  const radius = +document.querySelector('input[data-k="radius"]').value
+  const layers = +document.querySelector('input[data-k="layers"]').value
+  wrap.innerHTML = blurLayers({ radius, layers, start }).map(l =>
+    '<div style="backdrop-filter:' + l.backdropFilter + ';-webkit-backdrop-filter:' + l.backdropFilter +
+    ';-webkit-mask-image:' + l.maskImage + ';mask-image:' + l.maskImage + '"></div>').join('')
+}
+const blur = () => {
+  const hold = +document.querySelector('input[data-k="hold"]').value / 100
+  paint('[data-stack="plain"]', 0)
+  paint('[data-stack="held"]', hold)
+}
+ctl('radius', v => { blur(); return v + 'px' })
+ctl('layers', v => { blur(); return v })
+ctl('hold',   v => { blur(); return v + '%' })
+
+/* c6 -- the dither's own strength. At 0 the terraces come back, which is the point. */
+ctl('dither', v => {
+  const el = document.querySelector('[data-dither]')
+  if (el) el.style.setProperty('--wm-dither', v / 100)
+  return (v / 100).toFixed(2)
+})
+</script>
 `
 writeFileSync('docs/system/pages/ramps.html', page)
 console.log(`ramps.html: ${(page.length / 1024).toFixed(1)} KB`)

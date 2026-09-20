@@ -5,14 +5,39 @@ Not prose itself. Bullets, slots, and the facts you are allowed to state.
 
 ---
 
+## where
+
+Repo root, absolute:
+
+```
+/Users/Mark/Documents/Github/wm-primitives
+```
+
+Everything below is relative to it.
+
+```
+scripts/build-ramps.mjs              the COPY object — the only file you edit
+docs/system/pages/ramps.copy.md      this brief
+docs/system/pages/ramps.html         the page it writes — generated, never hand-edit
+docs/index.html                      the assembled site — generated, never hand-edit
+```
+
 ## how to edit
 
 - Everything you touch is the `COPY` object at the top of `scripts/build-ramps.mjs`.
 - Nothing else in that file is prose. You never touch markup.
-- Rebuild: `node scripts/build-ramps.mjs && python3 docs/system/build.py --linked`
+- Rebuild, from the repo root:
+
+  ```
+  cd /Users/Mark/Documents/Github/wm-primitives
+  node scripts/build-ramps.mjs && python3 docs/system/build.py --linked
+  ```
+
 - Check standalone: open `docs/system/pages/ramps.html`
 - Check assembled: open `docs/index.html`, jump to `#s-ramps`. **Check light mode too** —
   the assembled page is light by default and this section already lost its ink once.
+- Don't commit `docs/index.html` unless the tree is clean; it inlines `src/`, so a rebuild
+  sweeps in whatever else is uncommitted.
 
 ### the one hard rule
 
@@ -47,7 +72,8 @@ From the rest of the repo — match `SLIDERS.md`, `DIAL.md`, `color.css`'s heade
 
 ## the slots
 
-31 total. `title`, `lede`, `c1..c6_title`, `c1..c6_tag`, `note1..8`, `cap1..8` plus `cap3a`.
+36 total. `title`, `lede`, `c1..c6_title`, `c1..c6_tag`, `note1..8`, `cap1..8`, `cap3a`,
+and `ctl_stops` `ctl_radius` `ctl_layers` `ctl_hold` `ctl_dither` — the slider labels.
 
 **tags** = the right-hand label on a chapter rule. Short. Lowercase unless it's code.
 
@@ -68,7 +94,8 @@ From the rest of the repo — match `SLIDERS.md`, `DIAL.md`, `color.css`'s heade
 - `cap1` `cap2` are the two figure captions
 
 ### c2 · The edge
-- on screen: **three** prose panels — no scrim (control) · linear · clothoid
+- on screen: **three** prose panels — no scrim (control) · linear · clothoid — and a
+  `stops` slider driving both scrims at once
 - `note2` — perceived lightness moves fastest at the transparent end, so a straight alpha
   ramp announces itself where it starts and then crawls
 - the control panel is the point of comparison; copy can now say "against the unveiled
@@ -91,7 +118,8 @@ From the rest of the repo — match `SLIDERS.md`, `DIAL.md`, `color.css`'s heade
 - live slots: `${MD_A}` `${MD_B}`
 
 ### c5 · Progressive blur — `c5_tag` is live
-- on screen: two prose panels, `start 0` vs `start 'calc(12px + 2lh)'`
+- on screen: two prose panels, `start 0` vs held — with `radius` / `layers` / `hold`
+  sliders. Both stacks rebuild; only the right one takes the hold.
 - `note5` — tiled bands not a cumulative stack (which **ghosts**: a blurred copy over the
   still-sharp original, a double image on live text). Bands evenly spaced, only the radius
   follows the curve. `start` holds the first lines.
@@ -101,7 +129,7 @@ From the rest of the repo — match `SLIDERS.md`, `DIAL.md`, `color.css`'s heade
 
 ### c6 · Banding
 - on screen: **two full-width bands stacked**, undithered then dithered, over a stated
-  dark ground
+  dark ground, with a `dither` slider on the second — at 0 the terraces come back
 - `note7` — ~94 of 256 levels over 190px ≈ 2px per level. More stops **cannot** help.
 - `note8` — Skia dithers a background gradient and near-as-nothing a mask. So a scrim is
   dithered for you; a mask over a flat ground is not.
@@ -183,3 +211,16 @@ template. Placeholder convention for anything not yet written:
 ```
 
 `TK` is the marker; the build does not fail on it, so grep before publishing.
+
+---
+
+## the sliders
+
+The page carries the engine inlined (3.5 KB, no framework) and five native range inputs.
+Nothing to write here beyond the five `ctl_*` labels, but two things to know:
+
+- **The page is correct with JS off.** Every demo is baked at its default and the sliders
+  only re-emit, so copy should describe the default state and not assume interaction.
+- `build.py` rebinds `document.querySelector` to the section root and **renames ids**, so
+  the script addresses everything by class and `data-` attribute. If you add a demo that
+  needs wiring, follow that; an id will silently miss.
