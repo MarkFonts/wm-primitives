@@ -117,58 +117,68 @@ test.describe('progressive blur', () => {
   })
 
   test('the bands tile the whole span, ends clamped', () => {
-    /* A feather on the first or last band leaves a strip no layer covers -- content that
-       is simply not blurred at the very edge. */
+    /* A gap at either end leaves a strip no layer covers -- content that is simply not
+       blurred at the very edge. */
     const stack = blurLayers({ layers: 5 })
-    expect(stack[0].maskImage).toContain('rgb(0 0 0 / 1) 0%')
-    expect(stack[stack.length - 1].maskImage).toContain('rgb(0 0 0 / 1) 100%')
+    expect(stack[0].inset).toBe('0% 0 80% 0')
+    expect(stack[stack.length - 1].inset).toBe('80% 0 0% 0')
   })
 
-  test('every point stays covered, and the hand-over is smooth', () => {
-    /* The stack must never thin out to nothing between bands, and the coverage curve must
-       not kink -- a kink in the blur profile is a hard line across the text, which is the
-       exact defect a two-stop feather produced. */
-    const stack = blurLayers({ layers: 6 })
-    const alphaAt = (mask: string, p: number) => {
-      const st = [...mask.matchAll(/rgb\(0 0 0 \/ ([\d.]+)\) ([\d.]+)%/g)]
-        .map(m => [parseFloat(m[2]), parseFloat(m[1])] as const)
-      if (p <= st[0][0]) return st[0][1]
-      if (p >= st[st.length - 1][0]) return st[st.length - 1][1]
-      for (let i = 1; i < st.length; i++)
-        if (p <= st[i][0]) {
-          const [a, va] = st[i - 1], [b, vb] = st[i]
-          return va + (vb - va) * (p - a) / (b - a)
-        }
-      return 0
+  test('every point stays covered: the bands are exactly adjacent', () => {
+    /* The stack must never thin out between bands. With geometry that is not a coverage
+       integral any more, it is an identity -- band i's far edge IS band i+1's near edge,
+       and any rounding between the two is a bright hairline across blurred text. This is
+       why the inset states both edges instead of a height. */
+    const stack = blurLayers({ layers: 9 })
+    const edges = stack.map(l => {
+      const [top, , bottom] = l.inset.split(' ')
+      return [parseFloat(top), 100 - parseFloat(bottom)] as const
+    })
+    expect(edges[0][0]).toBe(0)
+    expect(edges[edges.length - 1][1]).toBeCloseTo(100, 6)
+    for (let i = 1; i < edges.length; i++)
+      expect(edges[i][0], `band ${i} starts where band ${i - 1} ends`)
+        .toBeCloseTo(edges[i - 1][1], 6)
+  })
+
+  test('no band is masked: geometry is what bounds the filter', () => {
+    /* The regression this whole rewrite exists for. A masked full-size layer blurred the
+       entire element in the assembled system page -- measured sharpness flat at 0.1 down
+       a panel against 8.7-16.8 with the stack removed. If a mask ever comes back, it will
+       come back silently, so the shape is asserted rather than the behaviour. */
+    for (const l of blurLayers({ layers: 4 })) {
+      expect(l).not.toHaveProperty('maskImage')
+      expect(l).not.toHaveProperty('WebkitMaskImage')
+      expect(Object.keys(l).sort())
+        .toEqual(['WebkitBackdropFilter', 'backdropFilter', 'inset'])
     }
-    const cover: number[] = []
-    for (let p = 0; p <= 100; p += 2)
-      cover.push(stack.reduce((sum, l) => sum + alphaAt(l.maskImage, p), 0))
-    expect(Math.min(...cover)).toBeGreaterThanOrEqual(1)
-    /* No second-difference spike: the profile bends, it does not corner. */
-    let worst = 0
-    for (let i = 2; i < cover.length; i++)
-      worst = Math.max(worst, Math.abs(cover[i] - 2 * cover[i - 1] + cover[i - 2]))
-    expect(worst).toBeLessThan(0.35)
   })
 
-  test('start holds the leading edge, and feathers in rather than cutting', () => {
+  test('start holds the leading edge', () => {
     /* Over text the useful ramp does not begin at the element's edge: the smallest stop
        in a 24px stack is still 1.35px, and that lands inside the first line's ascenders.
-       With an offset nothing before it is touched -- and the onset is feathered, because
-       a hard one would be the same visible edge, landing right under the line the offset
-       exists to protect. */
+       With an offset nothing before it is touched. */
     const held = blurLayers({ layers: 4, start: 0.25 })
-    expect(held[0].maskImage).toContain('rgb(0 0 0 / 0) 25%')      // nothing before 25%
-    expect(held[0].maskImage).not.toContain('rgb(0 0 0 / 1) 25%')  // and no hard onset
+    expect(held[0].inset.split(' ')[0]).toBe('25%')   // nothing before 25%
     const plain = blurLayers({ layers: 4 })
-    expect(plain[0].maskImage).toContain('rgb(0 0 0 / 1) 0%')      // no offset: opaque at 0
+    expect(plain[0].inset.split(' ')[0]).toBe('0%')   // no offset: starts at 0
+  })
+
+  test('a horizontal dir moves the bands to the other axis', () => {
+    /* inset is `top right bottom left`, so a sideways ramp is not the vertical one with a
+       different gradient direction -- it is different edges. Getting this wrong makes
+       every band full-height and the stack blurs everything, the same failure as a mask. */
+    const across = blurLayers({ layers: 4, dir: 'to right' })
+    const [top, right, bottom, left] = across[0].inset.split(' ')
+    expect([top, bottom]).toEqual(['0', '0'])
+    expect(left).toBe('0%')
+    expect(right).toBe('75%')
   })
 
   test('a length offset becomes calc, so lh and friends survive', () => {
     /* `start: "1lh"` is the useful one -- hold the first line, ramp after it. It cannot
        be folded into a percentage, so the arithmetic is handed to CSS. */
-    const m = blurLayers({ layers: 3, start: '1lh' })[0].maskImage
+    const m = blurLayers({ layers: 3, start: '1lh' })[0].inset
     expect(m).toContain('calc(1lh + (100% - 1lh) *')
     expect(m).not.toMatch(/\bNaN\b/)
   })
@@ -177,8 +187,7 @@ test.describe('progressive blur', () => {
     /* Position and strength are different questions. Placing bands by curve parameter
        made ease-in crowd them into the last 5% of the span. */
     const edges = (ease: 'linear' | 'ease-in' | 'clothoid') =>
-      blurLayers({ layers: 4, ease })
-        .map(l => (l.maskImage.match(/rgb\(0 0 0 \/ 1\) ([\d.]+)%/g) ?? []).join('|'))
+      blurLayers({ layers: 4, ease }).map(l => l.inset)
     expect(edges('ease-in')).toEqual(edges('clothoid'))
     expect(edges('linear')).toEqual(edges('ease-in'))
   })

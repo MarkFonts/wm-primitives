@@ -184,9 +184,9 @@ const mdPlots = ['#e05', '#0b6', '#48f'].map((h, i) =>
   chan(MD_A, MD_B, i, ['R', 'G', 'B'][i], h)).join('')
 
 /* ── 05 · progressive blur, as static DOM ────────────────────────────────────────── */
-const blurStack = (radius, start) => g.blurLayers({ radius, layers: 6, start })
-  .map(l => `<div style="backdrop-filter:${l.backdropFilter};-webkit-backdrop-filter:${l.backdropFilter};` +
-             `-webkit-mask-image:${l.maskImage};mask-image:${l.maskImage}"></div>`).join('')
+const blurStack = (radius, start) => g.blurLayers({ radius, start })
+  .map(l => `<div style="inset:${l.inset};backdrop-filter:${l.backdropFilter};` +
+             `-webkit-backdrop-filter:${l.backdropFilter}"></div>`).join('')
 const LINES = ['Hamburgefonstiv — the tail of the work goes on', 'past the point where the reader can still be',
   'sure of it, which is the whole affordance: a', 'hard cut reads as the end of the specimen',
   'rather than the end of what has loaded so far.', 'The fade is not decoration. It is the signal',
@@ -195,6 +195,8 @@ const LINES = ['Hamburgefonstiv — the tail of the work goes on', 'past the poi
 const proseBlock = LINES.map(l => `<p>${l}</p>`).join('')
 /* Denser and doubled, so the ramp has lines to act on rather than empty box. */
 const denseBlock = LINES.concat(LINES.slice(0, 6)).map(l => `<p>${l}</p>`).join('')
+/* The radius ladder the chapter quotes. Sampled at 6 for the table because 16 numbers
+   is a list, not a figure -- the stack itself runs at the default. */
 const radii = g.blurLayers({ radius: 24, layers: 6 }).map(l => l.backdropFilter.slice(5, -3))
 
 /* ── 02 · the edge, and 06 · banding ─────────────────────────────────────────────── */
@@ -392,7 +394,7 @@ svg.chan .ln{stroke-width:2.5}
 </div>
 <div class="ctls">
 <div class="ctl"><label>${COPY.ctl_radius}</label><input type="range" data-k="radius" min="4" max="48" step="1" value="24"><output>24</output></div>
-<div class="ctl"><label>${COPY.ctl_layers}</label><input type="range" data-k="layers" min="2" max="10" step="1" value="6"><output>6</output></div>
+<div class="ctl"><label>${COPY.ctl_layers}</label><input type="range" data-k="layers" min="4" max="32" step="1" value="16"><output>16</output></div>
 <div class="ctl"><label>${COPY.ctl_hold}</label><input type="range" data-k="hold" min="0" max="40" step="1" value="0"><output>0</output></div>
 </div>
 <p class="note" style="margin-top:14px">${COPY.note6}</p>
@@ -449,13 +451,18 @@ const paint = (sel, start) => {
   const radius = +document.querySelector('input[data-k="radius"]').value
   const layers = +document.querySelector('input[data-k="layers"]').value
   wrap.innerHTML = blurLayers({ radius, layers, start }).map(l =>
-    '<div style="backdrop-filter:' + l.backdropFilter + ';-webkit-backdrop-filter:' + l.backdropFilter +
-    ';-webkit-mask-image:' + l.maskImage + ';mask-image:' + l.maskImage + '"></div>').join('')
+    '<div style="inset:' + l.inset + ';backdrop-filter:' + l.backdropFilter +
+    ';-webkit-backdrop-filter:' + l.backdropFilter + '"></div>').join('')
 }
 const blur = () => {
   const hold = +document.querySelector('input[data-k="hold"]').value / 100
   paint('[data-stack="plain"]', 0)
-  paint('[data-stack="held"]', hold)
+  /* At 0 the held panel keeps the line-based offset it is captioned with, rather than
+     becoming a second copy of the panel beside it. The first repaint used to overwrite
+     the static calc() with the slider's zero, so the pair rendered identically on load
+     and the hold appeared to do nothing until the slider was touched -- which read as a
+     dead control rather than as a default. */
+  paint('[data-stack="held"]', hold || 'calc(12px + 2lh)')
 }
 ctl('radius', v => { blur(); return v + 'px' })
 ctl('layers', v => { blur(); return v })

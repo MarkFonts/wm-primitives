@@ -1,10 +1,12 @@
 /* gradient.css — chrome for the gradient controls, and the two rules the blur stack
  * cannot express as inline style.
  *
- * The LAYERS carry their own filter and mask as inline style (blurLayers() computes both,
- * and neither is a constant), so what is left here is the geometry that makes a stack of
- * absolutely-positioned siblings behave as one lens. That part is fixed, and belongs in a
- * stylesheet rather than in six identical style objects.
+ * The LAYERS carry their own filter and their own box as inline style (blurLayers()
+ * computes both, and neither is a constant), so what is left here is what every layer
+ * shares. Note what is NOT here: `inset: 0`. Each band states its own inset, because
+ * geometry is the only thing that actually bounds a backdrop-filter -- a mask does not,
+ * in at least one real document. A layer that inherited `inset: 0` would blur the whole
+ * element and the stack would render as a uniform smear.
  *
  * Host contract: --ui-font, and the colour ramp from color.css. Every token carries a
  * fallback, because the curve editor is the kind of thing that gets dropped into a
@@ -18,7 +20,7 @@
   /* A lens, not a lid: it sits over the content it blurs and must not take a click
      away from it. The layers inherit this rather than repeating it. */
   pointer-events: none;
-  /* Its own stacking context, so a page does not have to guess a z-index for the six
+  /* Its own stacking context, so a page does not have to guess a z-index for the
      children — and so the layers compose against each other rather than against
      whatever the host has already put on the layer below. */
   isolation: isolate;
@@ -27,7 +29,6 @@
 
 .wm-blur-layer {
   position: absolute;
-  inset: 0;
   /* Nothing is painted here. The element exists so its BACKDROP can be filtered, which
      is why a background of any kind would be wrong: it would be the thing you see
      instead of the blurred content behind it. */
