@@ -205,7 +205,19 @@ const mdPlots = ['#e05', '#0b6', '#48f'].map((h, i) =>
   chan(MD_A, MD_B, i, ['R', 'G', 'B'][i], h)).join('')
 
 /* ── 05 · the blur, as static DOM ───────────────────────────────────────────────── */
-/* ONE blur, not a stack. The progressive version is retired -- see GRADIENTS.md and
+/* Shown against an untouched twin. A uniform blur has no sharp region of its own -- at
+   any useful radius the whole panel is illegible, which reads as a broken figure rather
+   than as an effect. The pair gives the eye its reference back without reintroducing a
+   stack: same prose, same box, one difference.
+
+   THE DEFAULT IS 3px, AND IT IS NOT TIMIDITY. This chapter's own prose says type stops
+   being legible around 4px; the panel opened at 12, which is three times past the point
+   where anything is left to look at, and it rendered as a formless grey field you could
+   not tell was text. At 3 it is plainly the same lines as the panel beside it, blurred
+   past reading but not past recognition, which is what a figure has to show. The slider
+   tops out at 24 rather than 48 for the same reason -- the useful range is the first
+   few pixels, and giving half the travel to radii that all look identical wastes it.
+   ONE blur, not a stack. The progressive version is retired -- see GRADIENTS.md and
    the note this chapter carries. A single uniform backdrop-filter has neither of the
    artifacts that killed it: nothing is masked, so there is no partial alpha to ghost,
    and there is one radius, so there is nothing to step between. */
@@ -410,12 +422,14 @@ svg.chan .ln{stroke-width:2.5}
 
 <h2>${COPY.c5_title} <span>${COPY.c5_tag}</span></h2>
 <p class="note">${COPY.note5}</p>
-<div class="row" style="grid-template-columns:1fr">
-<figure><div class="spec">${proseBlock}${flatBlur(12)}</div>
+<div class="row" style="grid-template-columns:1fr 1fr">
+<figure><div class="spec">${proseBlock}</div>
+<figcaption>${COPY.cap5a}</figcaption></figure>
+<figure><div class="spec">${proseBlock}${flatBlur(3)}</div>
 <figcaption>${COPY.cap5}</figcaption></figure>
 </div>
 <div class="ctls">
-<div class="ctl"><label>${COPY.ctl_radius}</label><input type="range" data-k="radius" min="0" max="48" step="1" value="12"><output>12</output></div>
+<div class="ctl"><label>${COPY.ctl_radius}</label><input type="range" data-k="radius" min="0" max="24" step="1" value="3"><output>3</output></div>
 </div>
 <p class="note" style="margin-top:14px">${COPY.note6}</p>
 
