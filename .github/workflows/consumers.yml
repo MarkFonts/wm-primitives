@@ -189,14 +189,14 @@ jobs:
           fi
       # The gradient engine is numbers: tests/unit runs with no host, but it ran nowhere in
       # CI until 2026-09-20 -- a branch shipped it green only from a laptop's node.
-      # Same hosts env as the suites below: playwright.config.ts starts tests/serve.mjs for
-      # every run and waits on /font-proofer/, and without the paths that wait times out.
+      # It waited on tests/serve.mjs at first and timed out, because playwright.config.ts
+      # starts that server for every run and probes /font-proofer/. Handing this step the
+      # hosts env would fix the wait, but it would also make an arithmetic suite depend on
+      # four consumer builds: a broken host would then fail the engine's assertions, which
+      # is the wrong signal from the wrong job. WM_NO_HOST drops the server instead.
       - name: Unit (the engine) -- gates dispatch
         env:
-          FONT_PROOFER_DIST: ${{ github.workspace }}/hosts/font-proofer/dist
-          RECAL_DIST: ${{ github.workspace }}/hosts/ReCal/dist
-          OPSZ_PROOFER_DIST: ${{ github.workspace }}/hosts/wordmarktools/opsz-proofer/dist
-          KERNPARE_DIR: ${{ github.workspace }}/hosts/wordmarktools/kernpare
+          WM_NO_HOST: '1'
         run: npx playwright test tests/unit --project=desktop
       - name: Behaviour (GESTURES.md) -- gates dispatch
         env:
