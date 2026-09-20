@@ -172,7 +172,14 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
   color: var(--bt-ink3); margin: 0 0 .875rem; font-variation-settings:'opsz' 10; }
 .bt-row{ display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
 .bt-row + .bt-row{ margin-top: .625rem; }
-.bt-stack{ display: flex; flex-direction: column; gap: .75rem; align-items: flex-start; }
+/* THE GAP HAS TO BEAT THE RULE'S OWN OFFSET, or an open bottom edge stops belonging to
+   anything. At .75rem the stack put 12px between items while 01's keyline sat 10.3px under
+   its own text -- 6px of padding plus the line-box's half-leading -- so the rule was
+   equidistant between the line above it and the line below, and read as a divider BETWEEN
+   two rows rather than as the underline OF one. Ownership in an open shape is proximity and
+   nothing else: 24px against 10.3px is better than two to one, and the rule joins the text
+   it belongs to. The closed families do not need this, but it does not hurt them. */
+.bt-stack{ display: flex; flex-direction: column; gap: 1.5rem; align-items: flex-start; }
 .bt-cost{ font-size: .8125rem; line-height: 1.45; color: var(--bt-ink2);
   margin: 1rem 0 0; max-width: 46em; }
 .bt-cost b{ color: var(--bt-ink); font-weight: 500; }
