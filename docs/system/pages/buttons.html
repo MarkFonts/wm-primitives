@@ -817,12 +817,17 @@ what a thing looks like when pressing it does something. <b>One editable mark</b
 what text looks like when it is yours to change. They are one decision because they are the
 same question asked twice, and because getting the second one wrong is how you end up with
 a bulleted list of unformatted links that each open a modal, with nothing on the page to
-say so. Every family below answers both in its own language, with the same content in the
-same card, so the comparison is between designs and not between demos.</p>
+say so. Every family below answers both in its own language, on the same
+content, so the comparison is between designs and not between demos.</p>
 
 <div class="bt-laws">
   <h3>What all six obey</h3>
   <table>
+    <tr><td>radius</td><td><b>A constant, never a function of the box.</b> A display
+    button takes the same corner as the one it is louder than; only the type, the stroke and
+    the space change with size. The pill is the exception that proves it &mdash; 999px means
+    <i>half the height</i>, so it is allowed only on a single-line control whose height is
+    fixed, and anything that can wrap takes the constant instead.</td></tr>
     <tr><td>corner</td><td><code>superellipse(1.2)</code>, radius on the 2^k scale. Safari has no <code>corner-shape</code> and degrades silently to the plain radius &mdash; which is the corner every app shipped before the law, so nothing regresses.</td></tr>
     <tr><td>target</td><td>44px on a coarse pointer, bought as <b>padding</b>, never as height. A target has to exist; it does not have to be visible, and it must not be paid for by shrinking the mark.</td></tr>
     <tr><td>padding-x</td><td>&ge; 0.6 &times; the radius. On a pill the radius is half the height, so a 34px pill owes 10.2px each side.</td></tr>
@@ -833,10 +838,8 @@ same card, so the comparison is between designs and not between demos.</p>
     <tr><td>label</td><td><b>A button is text.</b> A mark is an addition that has to earn
     itself, and most labels never do: &ldquo;Kern lists&rdquo;, &ldquo;10 Reg&rdquo;,
     &ldquo;Average pairs&rdquo; and &ldquo;Next specimen&rdquo; name things no icon is
-    about. An earlier draft of this page gave each of them one anyway &mdash; a T for kern
-    lists, an italic <i>I</i> for a link command &mdash; which is how a set ends up with
-    marks that decorate instead of identify. Every enclosure below is therefore <b>text
-    only</b>. Two exceptions, both deliberate: a <b>rail row</b>, where the mark is the
+    about, and giving them one anyway is how a set ends up with marks that decorate instead
+    of identify. Every button below is therefore <b>text only</b>. Two exceptions, both deliberate: a <b>rail row</b>, where the mark is the
     thing you scan and the name is the confirmation; and the <b>icon-only</b> button, which
     is not a label with a mark but a target that is <i>only</i> a mark.</td></tr>
   </table>
@@ -859,7 +862,7 @@ same card, so the comparison is between designs and not between demos.</p>
 
   <div class="bt-rack">
     <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <p class="bt-panel-lab">Screamer</p>
       <div class="bt-cta">
         <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
         <button class="bt-k bt-scream bt-scream--k" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
@@ -936,14 +939,16 @@ same card, so the comparison is between designs and not between demos.</p>
 <div class="bt-fam">
   <div class="bt-fam-head"><span class="bt-idx">02</span><h3 style="margin:0;font-size:1.125rem;font-weight:500">Lozenge</h3></div>
   <p class="bt-thesis"><b>A ground, not an edge.</b> No hairline anywhere in the family. An
-  action is a filled pill; an editable is the same pill with the fill taken almost all the
-  way out &mdash; a wash at 5% that comes up to 12% as you approach. Highlighter instead of
+  action is a filled pill; an editable is the same ground with the fill taken almost all
+  the way out &mdash; a wash at 5% that comes up to 12% as you approach. The wash takes the
+  constant corner rather than the pill, because a wash wraps and a pill's radius would grow
+  with it. Highlighter instead of
   rule, so the mark sits <i>behind</i> the words and never competes with the type's own
   baseline furniture.</p>
 
   <div class="bt-rack">
     <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <p class="bt-panel-lab">Screamer</p>
       <div class="bt-cta">
         <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
         <button class="bt-z bt-z--solid bt-scream bt-scream--z" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
@@ -1010,8 +1015,8 @@ same card, so the comparison is between designs and not between demos.</p>
     </div>
 
   </div>
-  <p class="bt-cost"><b>What it costs.</b> Width. The padding rule is not optional on a pill
-  and four icon buttons in a rail become a scroll. The resting wash is the real risk: at 5%
+  <p class="bt-cost"><b>What it costs.</b> Width. The padding rule is not optional on a pill,
+  and four icon buttons in a row become a scroll. The resting wash is the real risk: at 5%
   on <code>--surface</code> it is almost invisible, so this family needs the editable text
   to sit on <code>--bg</code>, and it needs testing on a screen that is not the one it was
   drawn on. It also has the strongest primary in the set &mdash; one signal pill in a view
@@ -1030,7 +1035,7 @@ same card, so the comparison is between designs and not between demos.</p>
 
   <div class="bt-rack">
     <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <p class="bt-panel-lab">Screamer</p>
       <div class="bt-cta">
         <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
         <button class="bt-r bt-r--solid bt-scream bt-scream--r" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
@@ -1119,7 +1124,7 @@ same card, so the comparison is between designs and not between demos.</p>
 
   <div class="bt-rack">
     <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <p class="bt-panel-lab">Screamer</p>
       <div class="bt-cta">
         <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
         <button class="bt-p bt-scream bt-scream--p" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
@@ -1207,7 +1212,7 @@ same card, so the comparison is between designs and not between demos.</p>
 
   <div class="bt-rack">
     <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <p class="bt-panel-lab">Screamer</p>
       <div class="bt-cta">
         <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
         <button class="bt-b bt-scream bt-scream--b" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
@@ -1296,7 +1301,7 @@ same card, so the comparison is between designs and not between demos.</p>
 
   <div class="bt-rack">
     <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <p class="bt-panel-lab">Screamer</p>
       <div class="bt-cta">
         <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
         <button class="bt-f-row is-on bt-scream bt-scream--f" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
@@ -1345,7 +1350,7 @@ same card, so the comparison is between designs and not between demos.</p>
       </div>
     </div>
     <div class="bt-panel">
-      <p class="bt-panel-lab">Editable &mdash; the rule is the value&rsquo;s own width</p>
+      <p class="bt-panel-lab">Editable</p>
       <div class="bt-stack" style="width:100%">
         <div class="bt-f-field" style="width:100%">
           <span class="bt-f-lab">measure</span>
@@ -1402,17 +1407,14 @@ same card, so the comparison is between designs and not between demos.</p>
 <p class="bt-lede">All six draw the <b>same six specimens, in the same order, on the same
 content</b> &mdash; screamer, buttons, rail, states, editable, in situ &mdash; so a column
 means one thing all the way down the page and a difference between two cells is a difference
-between designs. 06 used to lead with its rail, because the rail is the shape it is
-<i>about</i>; that put its buttons where everything else put its rail and made the page
-harder to read across. Its argument lives in its prose now, where it cannot cost anything.
-Where a cell is empty the family <i>cannot</i> do that thing, and that is the finding &mdash;
+between designs. Where a cell is empty the family <i>cannot</i> do that thing, and that is the finding &mdash;
 not an omission.</p>
 
 <div class="bt-tbl-wrap">
 <table class="bt-tbl">
   <tr>
-    <th>family</th><th>buttons</th><th>rail</th><th>5 states</th><th>editable</th>
-    <th>in situ</th><th>screamer</th><th>cannot do</th>
+    <th>family</th><th>screamer</th><th>buttons</th><th>rail</th><th>5 states</th>
+    <th>editable</th><th>in situ</th><th>cannot do</th>
   </tr>
   <tr><td>01 Keyline</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
@@ -1476,8 +1478,7 @@ type sits in the middle of it.</p>
 
 <p class="bt-lede"><b>What none of the six demonstrate</b>, and would have to be decided
 separately: a pending or loading state; a destructive action that has to look dangerous
-without a second hue; a label that wraps to two lines; a count or badge riding the
-enclosure; a split button; and an HDR <i>chosen</i> state on an enclosure rather than on a
+without a second hue; a <i>button</i> label that wraps to two lines; a count or badge riding the enclosure; a split button; and an HDR <i>chosen</i> state on an enclosure rather than on a
 mark &mdash; the row below shows the mechanism, and no family assumes it.</p>
 
 <!-- ═══ the mechanism ════════════════════════════════════════════════════ -->
@@ -1603,17 +1604,17 @@ brief asks for, and the one a hover state cannot supply.</p>
     <td>a well: the hole</td>
   </tr>
   <tr>
+    <td>05 Bracket</td>
+    <td>quiet but unmistakable</td><td class="yes">yes</td>
+    <td class="no">9px ticks read as noise</td><td class="yes">padding</td>
+    <td class="yes">degrades to 01</td><td>brackets around the words</td>
+  </tr>
+  <tr>
     <td>06 Rail</td>
     <td class="no">nothing, unless the row keeps its mark and its width</td>
     <td class="yes">bare mark</td><td class="yes">it IS the rail</td>
     <td class="yes">row height</td><td class="yes">grounds, not corners</td>
     <td class="yes">the rule the dial ships</td>
-  </tr>
-  <tr>
-    <td>05 Bracket</td>
-    <td>quiet but unmistakable</td><td class="yes">yes</td>
-    <td class="no">9px ticks read as noise</td><td class="yes">padding</td>
-    <td class="yes">degrades to 01</td><td>brackets around the words</td>
   </tr>
 </table></div>
 
@@ -1630,7 +1631,7 @@ test before it is adopted rather than after.</p>
 <p class="bt-lede"><b>02</b> keeps the two jobs it already has &mdash; the one primary
 action, and one-of-N &mdash; as a variant, not a rival. <b>04</b> is the strongest at rest
 and is blocked by the engine, not by taste. <b>05</b> is the one worth keeping drawn for a
-hero or an empty state, where a single button can afford nine pixels of ceremony. <b>03</b>
+hero or an empty state, where a single button can afford ceremony a dense rail cannot. <b>03</b>
 is the one to reject on purpose rather than by omission: it is the most typographic answer
 here and it fails exactly where the brief says not to.</p>
 
