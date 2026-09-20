@@ -647,10 +647,24 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
    whole pill comes down from 1.70em to 1.40em, and the type sits in the middle of it. */
 .bt-scream-panel{ grid-column: 1 / -1; }
 .bt-cta{ display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-/* A true circle on a square box -- the corner law's own exclusion list, restated. */
+/* THE HEADSHOT TAKES THE HOUSE CORNER, and this is a deliberate departure worth knowing
+   about: src/corners.css names `.ui-avatar` in its circle exclusions, on the reasoning that
+   a superellipse on a square box "reads as a rounded square rather than a shape decision".
+   Beside a G2 button that argument inverts -- a circle is the one shape in the lockup that
+   is NOT following the corner law, and it reads as a sticker dropped next to the button
+   rather than as part of it.
+   So the avatar takes the same radius as the button it stands next to, which means it also
+   changes per family: on a pill the radius is half the box and a square box comes out round
+   anyway, so 02 gets its circle back by arithmetic rather than by exception.
+   If this is right, corners.css's exclusion list is what should change -- not this page. */
 .bt-avatar{ width: clamp(38px, 5vw, 58px); height: clamp(38px, 5vw, 58px);
-  border-radius: 50%; corner-shape: round; overflow: hidden; flex-shrink: 0;
+  border-radius: 16px; corner-shape: superellipse(var(--corner-k, 1.2));
+  overflow: hidden; flex-shrink: 0;
   background: color-mix(in oklab, #808080 12%, transparent); }
+/* :has(), not a class on every .bt-cta -- the family is already named on the button, and
+   the selector carries no comma, which the assembler's prelude splitter cannot survive. */
+.bt-cta:has(.bt-scream--z) .bt-avatar{ border-radius: var(--bt-pill); }
+.bt-cta:has(.bt-scream--r) .bt-avatar{ border-radius: 0; }
 .bt-avatar img{ width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .bt-scream{
@@ -673,11 +687,31 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
   .bt-scream--r{ padding-inline: 0; }
 }
 .bt-scream-arrow{ font-variation-settings:'opsz' 45,'wght' 700,'GEOM' 50; }
+/* LOUD IS NOT THE SAME AS FILLED, and the first draft got this wrong: every screamer
+   borrowed its family's --solid, so five of the six came out as a filled rounded box, and
+   the display row -- the one place the six should be furthest apart -- was where they
+   converged. A family shouts in its own device or it is not that family at display size.
+     01 thickens its keyline      04 raises its plate      05 heavies its ticks
+     02 fills, because a ground IS its thesis
+     03 thickens its rule and never draws a box
+     06 grounds the row, because a ground is what chosen means to it */
+.bt-scream--k{ --bt-hair: 2.5px; color: var(--bt-ink); border-color: var(--bt-ink);
+  background: var(--bt-sf); }
+.bt-scream--k:hover:not(:disabled){ background: var(--bt-sf2); border-color: var(--bt-ink); }
+.bt-scream--p{ box-shadow: inset 0 var(--bt-hair) 0 var(--bt-lift),
+                           0 3px 6px var(--bt-drop),
+                           0 0 0 1px var(--bt-drop); }
+.bt-scream--b{ --bt-tick: 26px; color: var(--bt-ink); }
+.bt-scream--b::before{ border-width: 3px; border-color: var(--bt-ink); }
 .bt-scream--z{ border-radius: var(--bt-pill); }
-.bt-scream--r{ padding-inline: 0; text-decoration-thickness: .08em;
+/* .08em came out at 1.76px -- the same stroke the UI button uses when it is HELD, which
+   is not a display weight, it is the small rule at a bigger size. .1em scales with the
+   type as the family says its rule does. */
+.bt-scream--r{ padding-inline: 0; text-decoration-thickness: .1em;
   text-underline-offset: .16em; }
 .bt-scream--b{ --bt-tick: 22px; }
-.bt-scream--f{ width: auto; }
+/* .bt-f-row hard-codes the rail's 10px; a display box takes the display radius. */
+.bt-scream--f{ width: auto; border-radius: var(--bt-r); }
 .bt-scream-note{ font-size: .8125rem; color: var(--bt-ink2); margin: .875rem 0 0; }
 .bt-scream-note b{ color: var(--bt-ink); font-weight: 500; }
 
@@ -747,6 +781,14 @@ same card, so the comparison is between designs and not between demos.</p>
   no rule under a heading is ever decorative.</p>
 
   <div class="bt-rack">
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-k bt-scream bt-scream--k" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note"><b>Loud is not filled.</b> The keyline thickens to 2.5px and takes full ink on both the edge and the label. It is still the same box &mdash; which is the point of the family.</p>
+    </div>
     <div class="bt-panel">
       <p class="bt-panel-lab">Enclosure</p>
       <div class="bt-row">
@@ -805,14 +847,6 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
-    <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
-      <div class="bt-cta">
-        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
-        <button class="bt-k bt-k--solid bt-scream bt-scream--k" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
-      </div>
-      <p class="bt-scream-note">Ink ground, ground ink. The keyline's loudest is a filled box.</p>
-    </div>
 
   </div>
   <p class="bt-cost"><b>What it costs.</b> Nothing separates a resting editable line from a
@@ -831,6 +865,14 @@ same card, so the comparison is between designs and not between demos.</p>
   baseline furniture.</p>
 
   <div class="bt-rack">
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-z bt-z--solid bt-scream bt-scream--z" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note">The nearest thing to the real hero pill: signal ground, radius half the height.</p>
+    </div>
     <div class="bt-panel">
       <p class="bt-panel-lab">Enclosure</p>
       <div class="bt-row">
@@ -889,14 +931,6 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
-    <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
-      <div class="bt-cta">
-        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
-        <button class="bt-z bt-z--solid bt-scream bt-scream--z" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
-      </div>
-      <p class="bt-scream-note">The nearest thing to the real hero pill: signal ground, radius half the height.</p>
-    </div>
 
   </div>
   <p class="bt-cost"><b>What it costs.</b> Width. The padding rule is not optional on a pill
@@ -918,6 +952,14 @@ same card, so the comparison is between designs and not between demos.</p>
   <b>nothing else in the document may be underlined</b>.</p>
 
   <div class="bt-rack">
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-r bt-r--solid bt-scream bt-scream--r" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note">No box at any size. The rule thickens with the type instead of staying 1px.</p>
+    </div>
     <div class="bt-panel">
       <p class="bt-panel-lab">Enclosure</p>
       <div class="bt-row">
@@ -940,6 +982,13 @@ same card, so the comparison is between designs and not between demos.</p>
         <button class="bt-r bt-as-row bt-hit" type="button"><span class="bt-i">text_fields</span>Type Scale</button>
         <button class="bt-r bt-as-row bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button>
       </div>
+      <p class="bt-cost"><b>And this is where the family runs out.</b> The rule scopes to
+      the <i>text</i>, so in a row the leading mark, the label and the trailing mark are
+      three objects at the same height with nothing holding them together &mdash; an
+      underline cannot reach across a flex gap, and the row never becomes one thing. A box
+      does that for free, which is the argument for a box. Widening the rule to span the
+      whole row does bind it, and then it is a divider: the one mark this family has
+      already means "press", so it cannot also mean "these belong together".</p>
     </div>
     <div class="bt-panel">
       <p class="bt-panel-lab">States</p>
@@ -973,14 +1022,6 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
-    <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
-      <div class="bt-cta">
-        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
-        <button class="bt-r bt-r--solid bt-scream bt-scream--r" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
-      </div>
-      <p class="bt-scream-note">No box at any size. The rule thickens with the type instead of staying 1px.</p>
-    </div>
 
   </div>
   <p class="bt-cost"><b>What it costs.</b> Three things. The 44px floor is bought entirely
@@ -1000,6 +1041,14 @@ same card, so the comparison is between designs and not between demos.</p>
   changing colour.</p>
 
   <div class="bt-rack">
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-p bt-scream bt-scream--p" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note"><b>Still a plate, not a fill.</b> The lift stays a 1px highlight and the drop goes from 2px to 6px: the hill gets taller rather than becoming a colour.</p>
+    </div>
     <div class="bt-panel">
       <p class="bt-panel-lab">Enclosure</p>
       <div class="bt-row">
@@ -1058,14 +1107,6 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
-    <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
-      <div class="bt-cta">
-        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
-        <button class="bt-p bt-p--solid bt-scream bt-scream--p" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
-      </div>
-      <p class="bt-scream-note">A lit plate at display scale. The highlight and the drop scale with it.</p>
-    </div>
 
   </div>
   <p class="bt-cost"><b>What it costs.</b> The corner law already records the fault, and this
@@ -1088,6 +1129,14 @@ same card, so the comparison is between designs and not between demos.</p>
   brackets around the words, the way a field is marked on a drawing.</p>
 
   <div class="bt-rack">
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-b bt-scream bt-scream--b" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note"><b>The ticks get heavier instead of surrendering.</b> 3px, full ink, run out to 26px &mdash; the family's own device at display scale rather than a borrowed fill.</p>
+    </div>
     <div class="bt-panel">
       <p class="bt-panel-lab">Enclosure</p>
       <div class="bt-row">
@@ -1146,14 +1195,6 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
-    <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
-      <div class="bt-cta">
-        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
-        <button class="bt-b bt-b--solid bt-scream bt-scream--b" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
-      </div>
-      <p class="bt-scream-note">Solid, because ticks at 34px are ceremony a primary cannot afford.</p>
-    </div>
 
   </div>
   <p class="bt-cost"><b>What it costs.</b> <code>mask-composite: intersect</code> is the
@@ -1177,6 +1218,14 @@ same card, so the comparison is between designs and not between demos.</p>
   and the rule together.</p>
 
   <div class="bt-rack">
+    <div class="bt-panel bt-scream-panel">
+      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
+      <div class="bt-cta">
+        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
+        <button class="bt-f-row is-on bt-scream bt-scream--f" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
+      </div>
+      <p class="bt-scream-note">And here is the family's ceiling: chosen IS the loudest thing it owns.</p>
+    </div>
     <div class="bt-panel">
       <p class="bt-panel-lab">Enclosure &mdash; the row is the button</p>
       <div class="bt-f-rail">
@@ -1253,14 +1302,6 @@ same card, so the comparison is between designs and not between demos.</p>
         </div>
       </div>
     </div>
-    <div class="bt-panel bt-scream-panel">
-      <p class="bt-panel-lab">Screamer &mdash; the one call to action</p>
-      <div class="bt-cta">
-        <span class="bt-avatar"><img src="https://wordmark.nyc/mark-davis.png" alt="" width="58" height="58" loading="lazy"></span>
-        <button class="bt-f-row is-on bt-scream bt-scream--f" type="button">Let&rsquo;s talk type&thinsp;<span class="bt-scream-arrow">&#x2197;</span></button>
-      </div>
-      <p class="bt-scream-note">And here is the family's ceiling: chosen IS the loudest thing it owns.</p>
-    </div>
 
   </div>
   <p class="bt-cost"><b>What it costs.</b> A resting row states nothing on its own &mdash;
@@ -1302,8 +1343,9 @@ family <i>cannot</i> do that thing, and that is the finding &mdash; not an omiss
   <tr><td>03 Rule</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
-    <td class="no">an icon-only button &mdash; there is nothing to draw it in, so those
-    actions borrow 01</td></tr>
+    <td class="no">an icon-only button &mdash; nothing to draw it in; and <b>a row</b>
+    &mdash; the rule scopes to the text, so a leading mark, a label and a trailing mark
+    never become one object</td></tr>
   <tr><td>04 Plate</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
@@ -1312,8 +1354,8 @@ family <i>cannot</i> do that thing, and that is the finding &mdash; not an omiss
   <tr><td>05 Bracket</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
-    <td class="no">ticks at display size &mdash; its screamer has to go solid, so the
-    family does not reach its own primary</td></tr>
+    <td class="no">&mdash; (its cost is legibility: 9px ticks read as noise in a dense
+    rail, not as an edge)</td></tr>
   <tr><td>06 Rail</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
