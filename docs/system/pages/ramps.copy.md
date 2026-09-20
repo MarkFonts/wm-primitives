@@ -128,7 +128,11 @@ and `ctl_stops` `ctl_radius` `ctl_layers` `ctl_hold` `ctl_dither` — the slider
   each layer placed by `inset`; the two panels measure 9.1→0.1 and 9.2, 10.0→0.1, and do
   what their captions say. `note5` says so; `v.blur.*` are the OLD stack's figures and
   read in past tense. `note5b` exists unwired for the day a figure has to come out.
-- `layers` runs 4–32, default 16: at 12 the bands read as strips, at 16 they do not.
+- `layers` runs 4–32, default 8. The count buys fidelity to the easing, not smoothness:
+  each band takes the radius at its far edge, so a coarse stack is systematically blurrier
+  than the curve and a fine one tracks it while sampling into more steps. Headed at 2×,
+  8, 16 and 32 are hard to tell apart, hence 8. (An earlier line here said 12 showed
+  strips and 16 did not; that was read off a 1:1 headless strip and was wrong.)
 - on screen: two prose panels, `start 0` vs held — with `radius` / `layers` / `hold`
   sliders. Both stacks rebuild; only the right one takes the hold.
 - `note5` — tiled bands not a cumulative stack (which **ghosts**: a blurred copy over the
