@@ -77,7 +77,7 @@ From the rest of the repo — match `SLIDERS.md`, `DIAL.md`, `color.css`'s heade
 
 ## the slots
 
-36 total. `title`, `lede`, `c1..c6_title`, `c1..c6_tag`, `note1..8`, `cap1..8`, `cap3a`,
+38 total. `title`, `lede`, `c1..c6_title`, `c1..c6_tag`, `note1..8`, `cap1..8`, `cap3a`, `cap7a`, `cap7b`,
 and `ctl_stops` `ctl_radius` `ctl_layers` `ctl_hold` `ctl_dither` — the slider labels.
 
 **tags** = the right-hand label on a chapter rule. Short. Lowercase unless it's code.
@@ -133,13 +133,24 @@ and `ctl_stops` `ctl_radius` `ctl_layers` `ctl_hold` `ctl_dither` — the slider
 - live slot: `${radii.join(' &#183; ')}`
 
 ### c6 · Banding
-- on screen: **two full-width bands stacked**, undithered then dithered, over a stated
-  dark ground, with a `dither` slider on the second — at 0 the terraces come back
-- `note7` — ~94 of 256 levels over 190px ≈ 2px per level. More stops **cannot** help.
-- `note8` — Skia dithers a background gradient and near-as-nothing a mask. So a scrim is
-  dithered for you; a mask over a flat ground is not.
-- the demo now crosses a narrow alpha range over a wide box, so the terraces are tens of
-  pixels wide. Copy may point at them directly.
+- on screen: **four full-width rows** over a stated dark ground, same ink, same
+  quantiser: the steep control (alpha 0→1) · the shallow ramp as a mask · the same
+  endpoints as a `background-image` · the mask with `.wm-dither`. A `dither` slider on the
+  last; at 0 the terraces come back. No filter, no amplified copy — terraces are visible
+  unaided in every shallow row.
+- `note7` — the terrace's **width** decides visibility, not the step's size. More stops
+  **cannot** help. Steep vs shallow differ only in slope; the last two are the two ways
+  out, and neither is a cure.
+- `note8` — Skia dithers a background gradient and near-as-nothing a mask. `.wm-dither`
+  sits after the quantiser, so it **hides the edge and does not remove the step** (the
+  column-mean jump survives); the background row halves the step because it dithers
+  before quantising. The first draft claimed dither removed the staircase; say it did.
+- live slots: `${v.band.levels}` `${v.band.terrace}` `${v.band.dithered}`
+  `${v.band.steepLevels}` `${v.band.steepTerrace}` `${v.band.bg}` `${v.band.jumpMask}`
+  `${v.band.jumpBg}` `${v.band.jumpDither}` and `${v.dither.bg}` `${v.dither.mask}`.
+  `v.band` and `v.dither` are MEASURED off a real render (a block in the generator,
+  marked as such), not derived — keep reading them from the slot.
+- captions: `cap7a` control · `cap7` mask · `cap7b` background · `cap8` dithered.
 
 ---
 
@@ -187,20 +198,23 @@ difference in timing rather than a difference in *where the fade announces itsel
 is denser and the boxes taller (300px) so more lines fall inside the ramp.
 New slot: `cap3a`.
 
-**c6 Banding** — now two full-width bands stacked, crossing a *narrow* alpha range
-(.5 → .58) instead of the whole range over a short box. Same quantisation, given room:
-**19 levels across 1050px, widest terrace 126px.** Dithered, the widest run collapses to
-**10px**. Captions `cap7` `cap8` rewritten to match.
+**c6 Banding** — went through three shapes on 2026-09-19/20 and the copy followed each:
+two bands crossing a narrow alpha range; then a 2×2 with a `contrast(6)` column, which
+was dropped because contrast pivots on 0.5 and rescaled the copy off its ground (113→142
+became 41→215, a different picture rather than a louder one); now four rows, measured.
+The numbers moved every time, which is why they are slots and the brief no longer
+repeats them.
 
-Two things that surfaced while fixing it, both worth knowing:
+Two things that surfaced on the way, both worth knowing:
 
 - an alpha ramp only has the range its **backdrop** gives it. The band sat on the
   assembled page's light default at first and spanned 2 levels, not 18 — it was measuring
   the page, not the quantisation. It states its own ground now (`.bandwrap`).
 - **`.wm-dither` has to sit after whatever quantises, not under it.** Inside the masked
   element the noise modulated the ink *before* the mask touched it, and did measurably
-  nothing: 19 terraces either way, 126px widest in both. On the wrapper it lands on the
-  composited result. This generalises beyond this page.
+  nothing. On the wrapper it lands on the composited result. And even there it hides the
+  edge without removing the step — the column mean keeps the jump. This generalises
+  beyond this page.
 
 ⚠ One caveat for whoever reviews: terraces are a 1:1 phenomenon. Screenshots that get
 downscaled average them away, so judge this chapter on a real display at 100%, not from
