@@ -224,6 +224,10 @@ def build_section(sid, label, path, kicker):
         js  += "\n" + ex_js
 
 
+    if sid == "controls":
+        html += wip_html()
+        css += scope_css(WIP_CSS, root)
+
     # A placeholder chapter, asked for on 2026-09-19: the house button drawn from the
     # corner law -- the G2 corner, and the pad scale for the space inside the shape. The
     # heading is real so the rail lists it; the body says it is not written yet.
@@ -529,6 +533,45 @@ def build_readme():
                 css=scope_css(README_CSS, "#s-readme"), html=esc(html), js="",
                 chapters=[(c, esc(t)) for c, t in chapters])
 
+# ---------------------------------------------------------------- WIP primitives
+# The last chapter: what is being decided, not what is decided. Everything above it is a
+# law with a lint; everything here is a page to choose from, and nothing here ships.
+# Drawn in HATCH -- extremely thin 45-degree hairlines instead of a grey fill -- so a
+# work-in-progress surface can never be mistaken for a finished one (Mark, 2026-09-20).
+# One entry per proposal page in docs/system/pages/ that build.py does NOT assemble.
+WIP = [
+    ("system/pages/buttons.html", "Six ways to say press",
+     "the button as six families, Keyline, Lozenge, Rule, Plate, Bracket, Rail, each drawing "
+     "the same six specimens, with a coverage table of what each cannot do. Explorations: none "
+     "chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; "
+     "NEXT.md G says what a choice, if one is ever made, changes."),
+]
+WIP_CSS = """
+.wip{max-width:72ch}
+.wip>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2)}
+.wip>p b{color:var(--ink);font-weight:600}
+.wip-list{display:grid;gap:16px;margin:0;padding:0;list-style:none}
+.wip-card{display:block;position:relative;padding:22px 24px;text-decoration:none;color:inherit;
+  border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
+  background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
+  transition:border-color .15s,background-color .15s}
+.wip-card:hover{border-color:var(--ink-3)}
+.wip-card b{display:block;font-size:var(--type-lede-size,1.125rem);font-weight:600;line-height:1.3;margin:0 0 6px;color:var(--ink)}
+.wip-card i{display:block;font-style:normal;font-size:var(--type-ui-size,.75rem);line-height:1.5;color:var(--ink-2);max-width:56ch}
+.wip-card u{position:absolute;top:18px;right:20px;text-decoration:none;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+"""
+def wip_html():
+    """The last chapter of Interface (03): the controls still being decided. Its own id, `wip`,
+    which the assembler prefixes to `controls-wip`; the poster's button points there."""
+    esc = lambda t: "".join(c if ord(c) < 128 else f"&#{ord(c)};" for c in t)
+    cards = "".join(f'<li><a class="wip-card" href="{href}"><u>undecided</u><b>{esc(title)}</b><i>{esc(what)}</i></a></li>'
+                    for href, title, what in WIP)
+    return ('<h2>WIP primitives <span>pages to decide from</span></h2>'
+            '<div class="wip" id="wip"><p><b>Nothing here ships.</b> A control above has a spec and a test; a page here '
+            'has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline '
+            'so it cannot pass for finished.</p>'
+            f'<ul class="wip-list">{cards}</ul></div>')
+
 secs = [build_readme()] + [build_section(*s) for s in SECTIONS]
 
 # ---------------------------------------------------------------- the faces
@@ -758,6 +801,15 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-stat b{display:block;font-size:30px;line-height:1;font-weight:600;letter-spacing:-.02em;
   font-variant-numeric:tabular-nums;color:var(--ink);font-variation-settings:"GEOM" 50}
 .wm-stat i{display:block;font-style:normal;font-size:12px;color:var(--ink-3);margin-top:9px}
+/* The one button on the poster, and it is not a law: the door to the pages still being
+   decided. Hatched, not filled -- extremely thin 45-degree hairlines -- so a work-in-progress
+   surface reads as one at a glance. */
+.wm-wip{display:inline-flex;align-items:baseline;gap:12px;align-self:center;margin-left:auto;padding:12px 18px;text-decoration:none;color:var(--ink);
+  border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
+  background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
+  font-size:13px;font-weight:600;letter-spacing:.02em;transition:border-color .15s}
+.wm-wip i{font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3)}
+.wm-wip:hover{border-color:var(--ink-3)}
 @media (max-width:720px){.wm-stat{padding:0 18px}}
 
 /* ---- The outline is an AXIS, not a sidebar. No panel, no card, no active pill: a
@@ -1676,6 +1728,7 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
         <div class="wm-stat"><b>7</b><i>type roles</i></div>
         <div class="wm-stat"><b>12</b><i>space steps</i></div>
         <div class="wm-stat"><b>G2</b><i>corners, as the font is drawn</i></div>
+        <a class="wm-wip" href="#controls-wip"><span>WIP primitives</span><i>pages to decide from &#8594;</i></a>
       </div>
     </div>
   </header>

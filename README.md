@@ -68,6 +68,8 @@ consumer that wants to stand still pins the tag instead. `v0.1.0` is the contrac
 - [CHANGELOG.md](CHANGELOG.md) — what changed and what it cost. Most entries are a fix
   for a fix; the wrong version is the useful part.
 - [SLIDERS.md](SLIDERS.md) — the census. Fifty-nine sliders, none a copy.
+- [BUTTONS.md](BUTTONS.md) — six button families to decide from, what each demonstrates and
+  cannot do, and what none of them has had yet. None chosen.
 - [NEXT.md](NEXT.md) — the checklist from here to a system a stranger is fluent in.
 - [The system, illustrated](https://markfonts.github.io/wm-primitives/) — type, corners,
   circles, space, colour as live CSS. A showing, not a consumer.
