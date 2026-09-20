@@ -681,7 +681,13 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
   --bt-hair: 1.5px;    /* the STROKE scales; it is ink, not geometry */
   font-size: clamp(22px, 3vw, 34px);
   line-height: 1;
-  font-variation-settings:'opsz' 45,'wght' 700,'GEOM' 50;
+  /* WEIGHT IS NOT PART OF "DISPLAY". opsz 45 is, because that is what the size IS; 700 is
+     a second emphasis on top of whatever the enclosure is already doing, and icon.css
+     already states the rule for this -- once one thing carries the emphasis, "a heavier
+     stroke on top is two emphases stacked". A 2.5px keyline, a .1em rule, 3px ticks and a
+     raised plate are each loud by themselves, and the type in them can stay at 400 where
+     Cal Sans is drawn. Only 02 keeps 700, below, and for a reason rather than for volume. */
+  font-variation-settings:'opsz' 45,'wght' 400,'GEOM' 50;
   padding: .2325em .7em .1675em;
   gap: 0;
   white-space: nowrap; }
@@ -695,7 +701,9 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
               align-items: center; }
   .bt-scream--r{ padding-inline: 0; }
 }
-.bt-scream-arrow{ font-variation-settings:'opsz' 45,'wght' 700,'GEOM' 50; }
+/* The arrow INHERITS. It was pinned to 700 -- copied from .hero-pill-arrow, where the
+   pill around it is also 700 -- so on a 400 screamer it was the one bold thing in the
+   lockup. font-variation-settings inherits, so there is nothing left to say here. */
 /* LOUD IS NOT THE SAME AS FILLED, and the first draft got this wrong: every screamer
    borrowed its family's --solid, so five of the six came out as a filled rounded box, and
    the display row -- the one place the six should be furthest apart -- was where they
@@ -712,7 +720,12 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
                            0 0 0 1px var(--bt-drop); }
 .bt-scream--b{ --bt-tick: 26px; color: var(--bt-ink); }
 .bt-scream--b::before{ border-width: 3px; border-color: var(--bt-ink); }
-.bt-scream--z{ border-radius: var(--bt-pill); }
+/* 02 IS THE EXCEPTION, and the reason is the ground rather than the volume: it is the
+   only family whose screamer inverts -- dark ink on a signal field. Weight there is
+   holding the counters open against a flat colour, which is a legibility job, not
+   emphasis. Every other family keeps its ink on the ground it already had. */
+.bt-scream--z{ border-radius: var(--bt-pill);
+  font-variation-settings:'opsz' 45,'wght' 700,'GEOM' 50; }
 /* .08em came out at 1.76px -- the same stroke the UI button uses when it is HELD, which
    is not a display weight, it is the small rule at a bigger size. .1em scales with the
    type as the family says its rule does. */
@@ -1377,7 +1390,17 @@ earns a row. The rail runs at <code>opsz 10</code>; Cal Sans's axis is <b>8&thin
 and a display line belongs at the top of it. Scaling a 13px button to 34px and leaving the
 optical size alone prints the <i>small</i> drawing large &mdash; thicker stems, looser
 fit &mdash; which is mis-drawn rather than merely big. Every screamer here runs
-<code>opsz 45, wght 700, GEOM 50</code>, which is what the real hero pill runs.</p>
+<code>opsz 45</code> and <code>GEOM 50</code>, which is what the real hero pill runs.</p>
+
+<p class="bt-lede"><b>Weight is not part of &ldquo;display&rdquo;, though.</b> The hero pill
+is also <code>wght 700</code>, and copying that to all six was a second emphasis stacked on
+whatever the enclosure was already doing &mdash; the rule <code>icon.css</code> states for
+the mark: once one thing carries the emphasis, <i>a heavier stroke on top is two emphases
+stacked</i>. A 2.5px keyline, a 0.1em rule, 3px ticks and a raised plate are each loud by
+themselves, so their type stays at <b>400</b>, where Cal Sans is drawn. <b>02 keeps 700</b>,
+and for a legibility reason rather than a volume one: it is the only screamer that inverts
+&mdash; dark ink on a signal field &mdash; and weight there is holding the counters open
+against a flat colour.</p>
 
 <p class="bt-lede"><b>It reads tight on top because the bottom is carrying space nothing
 occupies.</b> The face is left alone &mdash; no axis is touched. With
