@@ -74,6 +74,15 @@ a task. Skip nothing above the line you are on; below it, pick.
       it, in both apps' H&J panels (GESTURES §11). StopSlider was a name with no file.
       2026-09-19.
 
+- [ ] **Reduce the mask-vs-backdrop-filter claim to a minimal repro.** Ramps §c5, GRADIENTS.md
+      and the 2026-09-20 CHANGELOG entry say `mask-image` does not bound `backdrop-filter`
+      in the assembled page. It reproduces every way it was tried (five mask spellings,
+      isolation on and off, one layer and six) and the same markup masks correctly in a
+      standalone page — but which part of the assembly triggers it was never isolated, and
+      the computed styles match apart from width. The published claim rests on one
+      document. Until a minimal repro exists it is an observation, and the three places
+      that state it should say so or point here.
+
 ## E · Getting it into more hands
 
 - [ ] **WORDMAKE joins.** Found 2026-09-19: it already builds on the primitives — six
