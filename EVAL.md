@@ -1,7 +1,9 @@
 # Evaluating the primitives — methodology and plan
 
-2026-09-16. The eight questions were answered the same day; the decisions are in §8 and
-folded into the sections above them.
+Written 2026-09-16; the eight questions were answered the same day (§8) and folded into
+the sections above them. Executed 2026-09-17 to 19: §7 says what each step became, and
+§0 was rewritten on the 19th to say where things stand now rather than where they stood
+when this was a plan. Everything else reads as the method it is.
 
 The question this answers: **does a primitive do what it says, where it is actually
 deployed, for a finger, a mouse, a CI runner, another LLM, and a person wiring it in a
@@ -12,27 +14,26 @@ Out of scope on purpose: the GitHub Pages system site. It is a showing, not a co
 
 ---
 
-## 0 · Where we stand (measured, not assumed)
+## 0 · Where we stand (2026-09-19; on the 16th every row said *none*)
 
-| | today |
+| | now |
 | --- | --- |
-| Automated tests in wm-primitives | **none** — one linter (`lint-tokens.mjs`) |
-| Automated tests in any consumer | **none** (font-proofer, ReCal, wordmarktools) |
-| Consumers | font-proofer, ReCal, `wordmarktools/kernpare`, `wordmarktools/opsz-proofer` — all git submodules at `shared/`. Two kinds: **deployed** (font-proofer, ReCal, opsz-proofer → wordmark.nyc) and **local** (Kernpare, WORDMAKE — run on the user's machine, read local folders, render on the CPU) |
-| **WORDMAKE** | `wordmarktools/wordmake/` has a PLAN, a VISION and a `dist/` — **no submodule, no import**. Nothing to evaluate yet; it is a port waiting to happen. |
-| Deploy chain | push to `src/` → `consumers.yml` checks 3 consumers against the commit, then dispatches 3 repos → each `deploy.yml` builds against **latest main** (not its pin), bumps the pin, pushes into `wordmark` |
-| What "verified" has meant | screenshots, DevTools measurements in one session, one phone, and `gh run list` after a push |
-| Spec documents | `DIAL.md` (rules R1–R4), `SLIDERS.md` (census), `TYPOGRAPHY.md`, `CHANGELOG.md`, the CSS headers |
+| Automated tests in wm-primitives | `tests/behaviour` (GESTURES G1–G57, three pointer profiles; gates dispatch), `tests/render` (baselines per host × theme × profile, plus the cross-host parity gate), `tests/unit` (the gradient engine), `tests/spec-fidelity` (a model builds from the docs alone), `lint-tokens.mjs` |
+| Automated tests in the consumers | none of their own; `consumers.yml` builds, lints and drives each one against every push here, which is where the tests belong |
+| Consumers | font-proofer, ReCal, `wordmarktools/opsz-proofer`, `wordmarktools/kernpare` — submodules at `shared/`. **Deployed** (the first three → wordmark.nyc) and **local** (Kernpare; served static, lint + render + gestures in CI, a 12-pair fixture standing in for its gitignored data) |
+| **WORDMAKE** | builds on the primitives already — six token sheets, `AxisSlider`, `Icon`, `Collapse`, `EditableTextBlock` — through a `shared` that is a symlink to the laptop's checkout, and imports `StopSlider` and `StyleScopeDropdown`, which exist only on `flattersatz-headless`. Joins CI the day that branch lands and the symlink is a submodule (NEXT.md E) |
+| Deploy chain | push → `consumers.yml`: the check matrix (four consumers, this commit in their `shared/`), the `dial` bundle-freshness job, `browser` (behaviour gates; rendering and parity report), `windows` (rendering, report) → `dispatch` to three repos → each `deploy.yml` builds against latest main, bumps its pin, pushes into `wordmark`, and ends with *The site serves what this run built* |
+| What "verified" means | the run log: green means live, not pushed |
+| Spec documents | `GESTURES.md` (the promises, one id per case), `DIAL.md`, `TYPOGRAPHY.md`, `GRADIENTS.md`, `HOWTO.md`, `HOST-CONTRACT.md` and `COMPONENTS.md` (generated), `RULES.md` (which rule has a lint, a test, or an eye), `CHROME.md`, `SLIDERS.md`, `CHANGELOG.md`, the CSS headers |
 
 The CHANGELOG's own tally: roughly half of September's entries were a fix for a fix, and
 every wrong one looked right where it was written. That is the thing the battery is for.
 It has to run somewhere other than the environment the change was made in.
 
-**Porting note.** Kernpare consumes the submodule but was not on the mobile pass at all;
-WORDMAKE does not consume it yet. Both must still be ported *correctly*, and both are
-**local apps**, not sites: they need local folders and CPU rendering, so "deployed" for
-them means *builds and runs from a clean clone on a laptop*, and the live-bundle checks
-in §4 do not apply. They get the §2/§3 suites in full and a §4 variant (D6 only).
+**Porting note.** Kernpare and WORDMAKE are **local apps**, not sites: they need local
+folders and CPU rendering, so "deployed" for them means *builds and runs from a clean
+clone on a laptop*, and the live-bundle checks in §4 do not apply. Kernpare is on the
+§2/§3 suites and the token lint since the 19th; WORDMAKE is the row above.
 
 ---
 
@@ -49,8 +50,8 @@ future human     →  wiring cost     how long, and how many silent failures, to
 **The promise (Q1):** everything works *and* renders the same, from one source. So
 rendering parity across hosts is the headline, not a per-host nicety, and §3 leads §2 in
 the plan. Known divergent controls — ReCal's Type Matrix sliders — are listed in an
-allowlist the rendering suite skips, so a hack stays a named hack rather than a red run
-everyone learns to ignore.
+allowlist (`tests/render/parity-allow.json`, one reason per line), so a hack stays a
+named hack rather than a red run everyone learns to ignore.
 
 Each row is a separate suite because each fails in a different way. A control can pass
 behaviour and fail rendering (HDR gated wrong in light mode), pass both and fail deploy
@@ -92,18 +93,16 @@ each one is a bug that has already happened once:
 | B14 | reference marker at `reference = min` | clamped ≥ 5px from the corner | `4cf89bf` |
 | B15 | DIAL R1/R2: every value in a rail shares one right edge; every tag one x | measured across a real rail in each host | DIAL.md |
 
-The full promise list is [GESTURES.md](GESTURES.md) (G1–G36); the B-ids above are the
-first tests to write, not the whole spec.
-
-Steppers, `AxisTriplet`, `Icon` states and `Collapse` get their own short
-tables on the same pattern once the AxisSlider ones exist and are green — that control is
-the one with the most reported failures, so it is first.
+The promise list is [GESTURES.md](GESTURES.md), G1–G57; the B-ids above were the first
+tests written, and every one of them is a G-id there now. The stepper (§4), the triplet
+(§9), the mark (§10) and Collapse (§11) have their own tables and specs.
 
 **Pointer profiles (Q2).** Each case runs under two Playwright contexts: desktop mouse
 in Chromium, and **WebKit with the iPhone device descriptor** — Playwright's WebKit is
 the closest thing to Safari a runner can drive; it is not Safari, and any phone-only
-failure still ends on the phone. No tablet. When Windows becomes a target, the same
-suite adds `windows-latest` × Chromium/Edge as a third context; nothing else changes.
+failure still ends on the phone. No tablet. A third context, Chromium on
+`windows-latest`, renders against its own baselines since 2026-09-19 — a report, since a
+mouse is a mouse and the behaviour suite already has one.
 
 ---
 
@@ -116,13 +115,14 @@ regenerated only by a deliberate command, never by a failing run.
 **Across hosts, numbers rather than pixels.** The hosts show different labels and values,
 so two screenshots of `size` can never be equal; what *can* be equal is the row height,
 label size and weight, bar height, field and stepper size. Those are read off the
-computed style of one row per variant per host and every disagreement is printed. That
-is the Q1 promise made into a number, and it never fails a run: a host overriding a
-primitive is allowed by the layer contract, and the report exists to show *where*.
+computed style of one row per variant per host, and every disagreement is either on
+the allowlist with a reason or a red run. That is the Q1 promise made into a number. It
+became a gate on the 17th (NEXT.md B) and had crashed silently on every run until the
+19th, which is its own entry in the CHANGELOG.
 
-Cross-host diffs are **reported, not gating** (see Q3): the run posts the diff image
-and both crops as an artifact, because the judgement of whether a 2px shift matters is
-yours and has to be made by eye.
+Pixel diffs against a baseline are **reported, not gating** (see Q3): the run posts the
+diff image and both crops as an artifact, because the judgement of whether a 2px shift
+matters is yours and has to be made by eye.
 
 What this catches that behaviour tests cannot: the icon ladder's wrong end value, hover
 repainting over active, the ramp-under-text that deleted every label, `--nudge` shifting
@@ -134,9 +134,10 @@ a centred label 2px. All four were visible; none were assertable as a number.
   the computed `background-image` on an active mark in dark mode contains the AVIF
   data URI; in light mode it is `none` and `dynamic-range-limit` is `standard`. Whether it
   *glows* is still a device check, and the plan says so rather than pretending.
-- **Fonts.** Variable-axis rendering differs by OS. Baselines are per-runner
-  (`ubuntu-latest` only); a local run on macOS compares against nothing and reports
-  diffs as *information*, not failure.
+- **Fonts.** Variable-axis rendering differs by OS. Baselines are per-runner: linux is
+  the set, `tests/__screenshots__/win32/` the Windows one; a local run on macOS compares
+  against linux and reports diffs as *information*, not failure, and
+  `test:render:update` refuses to re-cut them there.
 
 ---
 
@@ -148,7 +149,7 @@ This is where "pushed ≠ shipped" gets a test instead of a memory.
 | --- | --- | --- |
 | D1 | every consumer's `lint:tokens` passes against wm-primitives HEAD | `consumers.yml` `check` job: checks out each consumer, puts *this commit* in its `shared/`, runs its lint — **before** `dispatch` (the old notify.yml, now a dependent job in the same file). This is the ReCal `--glow-pos` failure, moved from the consumer's deploy to the primitive's push. |
 | D2 | every consumer's `tsc --noEmit` and `vite build` pass against HEAD | same job. A type or import break is currently discovered by three separate red runs. |
-| D3 | the dispatch landed | `consumers.yml` already fails loudly on a missing token; add: poll each consumer's run for the dispatched SHA and fail if none appears within 2 min |
+| D3 | the dispatch landed | `consumers.yml` fails loudly on a missing token. The poll for each consumer's run — fail if none appears within 2 min — is **not built**; D4 has covered the gap in practice, since a deploy that never ran never serves the bundle |
 | D4 | the live bundle is the pushed commit | each deploy's last step, *The site serves what this run built*: polls `wordmark.nyc/<app>/` for up to 10 min until it serves the bundle (opsz-proofer: the `index.html` sha) this run built; fails loudly otherwise; says so if a later run superseded it. What was done by hand at the end of the last session, as a step. |
 | D5 | the pin is truthful | the same step writes the `shared/` commit it built from into the job summary beside the served bundle — the run log is the answer to "what is live?" |
 | D6 | the git route round-trips | a clean `git clone --recurse-submodules` of each consumer builds from nothing — catches `.gitmodules` drift and case-insensitive filename collisions (`Specimen` / `specimen.ts`) |
@@ -206,8 +207,9 @@ version of this test, and the dry run should come first.
 | W4 | run `lint:tokens` in the stub | did it exist / was it findable / did it need `.tokenlint.json` explained |
 
 The score is a count of **silent failures** — things that did nothing with no message.
-Every one is a candidate for a dev-mode `console.warn` in the primitive. That is the
-cheapest fix the whole battery can propose and it is the one nothing measures today.
+Every one became a dev-mode `console.warn` in the primitive (`src/contract.ts`: no
+`--border`, a dark `color-scheme` with no `data-theme`). The cheapest fix the whole
+battery can propose, and it was the first one taken (NEXT.md B).
 
 **Run 2026-09-17, result: two silent failures, two misleading errors, ~12 min and six
 wrong turns to a correct dial.** The rail vanishes without `color.css` imported;
@@ -247,17 +249,17 @@ rendering pulled forward because of Q1.
    · opsz-proofer — render baselines, dark + light, and the parity numbers. Its rows
      WERE hand-emitted HTML wearing the primitive's classes (SLIDERS.md 57-59); since
      wordmarktools 5f4c808 they are the component itself via `dist/dial.js`, so the
-     baselines now watch the real dial. Gestures still off for it: the rail suite
-     drives a `tracking` track row, and this page draws `default` rows -- a suite for
-     that variant is the next thing to write here.
+     baselines now watch the real dial. The rail suite runs per variant per host since
+     NEXT.md B, so its `default` rows get G1–G23 like everyone else's.
    · Kernpare — took only toggleGroup.css at first. Since wordmarktools 45f060e it links
      the token sheets and aliases its palette to the house names; since 291c5f1 its
      Auto / Light / Dark is the ThemeSwitch engine; since 5f4c808 its two preview numbers
      are `wmDial` (track). Tests: clean checkout loads (a 12-pair fixture stands in for
      its gitignored data on a runner), the toggle group and the switch hold baselines,
-     the switch passes G38-G41. No token lint yet: the kern-group-analysis UI is styled
-     as it is on purpose and needs an exemption first. Not deployed; served static.
-   · WORDMAKE — still no submodule. Nothing to test.
+     the switch passes G38-G41. Token lint since 2026-09-19: the linter reads its
+     `<style>` blocks, the kern-group-analysis UI is fenced as the named exception it is,
+     and the chrome outside the fence is on the scales. Not deployed; served static.
+   · WORDMAKE — see §0: on the primitives through a symlink, two components on a branch.
    · geist-serif-morf — asked about; NOT a git repo, uses nothing from the primitives,
      one native range input. It is a port candidate, not a consumer. What Mark said it
      and Kernpare would need before anyone else could use them — baked-in font metrics,
@@ -277,10 +279,10 @@ directory and a `test.yml`; 0, 5 and 6 produce documents.
 | q | asked | decided |
 | --- | --- | --- |
 | Q1 | same control everywhere, or same behaviour dressed per app? | **Both, from one source.** Rendering parity is the headline. Type Matrix is a named exception on an allowlist. |
-| Q2 | which phone? tablet? | **iPhone / Safari** → WebKit + iPhone descriptor. No tablet. Windows later, as an added runner. |
+| Q2 | which phone? tablet? | **iPhone / Safari** → WebKit + iPhone descriptor. No tablet. Windows later, as an added runner — added 2026-09-19, rendering only. |
 | Q3 | does red block deploy? | Recommended and taken: **behaviour red blocks dispatch; rendering diffs report with images and ship.** |
 | Q4 | spec of record for gestures? | Recommended and taken: **`GESTURES.md`, which *is* the §2 table**, written first (step 0). Ad-hoc testing on one receiving copy of font-proofer was the whole method until now. |
 | Q5 | HDR pass criterion? | **Structural assertion in CI + a manual sign-off checklist.** A Swift decode proving the asset's PQ values is a later nicety. |
 | Q6 | who is the future human? | **You in six months, or a collaborator on the private repos.** The wiring run becomes `HOWTO.md`. |
 | Q7 | LLM test once or repeatable? | **Repeatable**: fixtures + `RUNBOOK.md`, written so a post-compaction session can run it. |
-| Q8 | kernpare / opsz-proofer / WORDMAKE on the same promise? | **opsz-proofer 1:1. WORDMAKE 1:1 when it exists.** Kernpare and WORDMAKE are **local apps** (local folders, CPU rendering): full §2/§3, deploy checks reduce to "clean clone builds and runs". |
+| Q8 | kernpare / opsz-proofer / WORDMAKE on the same promise? | **opsz-proofer 1:1 (done). WORDMAKE 1:1 when it joins (§0).** Kernpare and WORDMAKE are **local apps** (local folders, CPU rendering): full §2/§3, deploy checks reduce to "clean clone builds and runs". |
