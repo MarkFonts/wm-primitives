@@ -1,6 +1,6 @@
 # BUTTONS.md — the enclosure proposal, and what is left to decide
 
-**Status: six families drawn, none chosen.** The page is
+**Status: six explorations drawn. None chosen, none production-ready** (§ 0). The page is
 [`docs/system/pages/buttons.html`](docs/system/pages/buttons.html), linked from *07 · WIP
 primitives* and deliberately **not** registered in `build.py`'s `SECTIONS` — it is a page to
 decide from, and only the family that wins becomes `src/button.css`.
@@ -9,6 +9,36 @@ What a win changes across the system — the language, the lint, the v0.2.0 bump
 apps — is [NEXT.md § G](NEXT.md). **This file is the proposal's own state and the order the
 decisions have to be taken in.** Where the two disagree, § G is the plan and this is the
 evidence.
+
+---
+
+## 0 · These are explorations. None of them is production-ready.
+
+**Nothing here is asking for a decision, and nothing below is due.** What is on the page is
+six drawings that render. What a primitive needs before it ships is a different list, and
+none of the six has had any of it:
+
+- [ ] **No accessibility pass.** Contrast was measured for 04's depth tokens and for nothing
+      else. The five states have not been checked at any size, and no editable mark has been
+      near a screen reader. The `contenteditable` in the specimens is a demo device so the
+      affordance can be judged against the thing it promises — it is not a proposal.
+- [ ] **No keyboard pass** beyond `:focus-visible` existing in every family. Tab order, the
+      chosen-state announcement, and whether "chosen" is `aria-pressed` or
+      `aria-current` are all undecided.
+- [ ] **No device testing** beyond one phone at one width. Touch sizing auto-enables on a
+      coarse pointer; whether the 44px floor is right *per family* is untested.
+- [ ] **No Safari verification.** It has no `corner-shape`, so every family degrades to a
+      plain radius there — the page says so, but nobody has looked. 05 additionally depends
+      on `mask-composite: intersect`, and its fallback is to paint as 01.
+- [ ] **No tests.** `tests/render` has no rows for any of this and `tests/behaviour` has no
+      button suite. The five states are five promises and none of them is tested.
+- [ ] **No token lint.** The page is deliberately page-local CSS with literal values, which
+      puts all six outside `.tokenlint.json`'s reach. Only the winner gets linted, because
+      only the winner becomes a primitive.
+- [ ] **No consumer trial.** Nothing has been built against font-proofer, ReCal or Kernpare.
+- [ ] **Reduced motion** is honoured on the page but not specified; **RTL** is untested.
+
+Treat the page as a place to look, and this file as what has been learned so far.
 
 ---
 
@@ -52,7 +82,10 @@ words, and it had to be raised to ink-2 to get a fair test. The affordance is on
 from not existing. It also depends on a document-wide "nothing else may be underlined" rule
 that no component can enforce.
 
-## 3 · The decisions, in the order they have to be taken
+## 3 · When a decision is wanted, this is the order
+
+Not a schedule. Recorded now because the order is the useful part and it is
+cheaper to write down than to re-argue.
 
 - [ ] **D1 · Decide the editable mark first, not the enclosure.** It is the half of the
       brief with a shipped answer already in the building: `.slider-number` in
