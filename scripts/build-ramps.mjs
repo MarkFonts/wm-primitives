@@ -17,14 +17,20 @@
  */
 import { build } from 'esbuild'
 import { readFileSync, writeFileSync } from 'node:fs'
+import { copy } from '../docs/system/pages/ramps.copy.js'
 
 /* The engine, compiled and imported, so the page cannot disagree with the package. */
 const bundled = await build({
   entryPoints: ['src/gradient.ts'], bundle: true, format: 'esm', write: false,
   target: ['es2022'], logLevel: 'warning',
 })
+const engineSrc = bundled.outputFiles[0].text
 const g = await import('data:text/javascript;base64,' +
-  Buffer.from(bundled.outputFiles[0].text).toString('base64'))
+  Buffer.from(engineSrc).toString('base64'))
+/* The same text, minus its ESM export, for inlining into the page. 3.5KB and no
+   dependencies -- the sliders need the engine, not React, and dist/dial.js already
+   ships one React that a second bundle here would duplicate. */
+const engineInline = engineSrc.replace(/export\s*\{[\s\S]*?\};?\s*$/, '')
 
 /* The dither tile is read out of the shipped stylesheet rather than regenerated, so the
    page demonstrates the same noise the package actually applies. */
@@ -38,6 +44,73 @@ const MD_A = '#F65030', MD_B = '#3050F6'    // Mass Driver's own pair: G is flat
    triple for this case, which is also why it is testable outside a browser at all. */
 const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16))
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+
+/* ── the numbers the copy is allowed to state ────────────────────────────────────────
+ *
+ * Two kinds, and the difference matters. COMPUTED ones are derived here from the same
+ * inputs the page renders from, so they cannot drift from the picture beside them.
+ * MEASURED ones are facts about a browser -- how much Skia dithers, how wide a terrace
+ * comes out -- which no amount of arithmetic here can produce. They are constants with
+ * their provenance attached, and if the demo they describe changes they must be taken
+ * again. That is the whole reason they are here rather than typed into a sentence: one
+ * place to find, and a comment saying how.
+ * ────────────────────────────────────────────────────────────────────────────────── */
+
+/* sRGB <-> OKLab/OKLCh. Checked against the browser's own color-mix() on the page's pair:
+   oklab and oklch land on the same bytes exactly, srgb within one unit of blue. */
+const s2l = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4 }
+const l2s = c => Math.max(0, Math.min(255, Math.round(255 * (c <= 0.0031308 ? c * 12.92 : 1.055 * c ** (1 / 2.4) - 0.055))))
+const toOklab = ([r, gg, b]) => {
+  const R = s2l(r), G = s2l(gg), B = s2l(b)
+  const l = Math.cbrt(0.4122214708 * R + 0.5363325363 * G + 0.0514459929 * B)
+  const m = Math.cbrt(0.2119034982 * R + 0.6806995451 * G + 0.1073969566 * B)
+  const t = Math.cbrt(0.0883024619 * R + 0.2817188376 * G + 0.6299787005 * B)
+  return [0.2104542553*l + 0.7936177850*m - 0.0040720468*t,
+          1.9779984951*l - 2.4285922050*m + 0.4505937099*t,
+          0.0259040371*l + 0.7827717662*m - 0.8086757660*t]
+}
+const fromOklab = ([L, a, b]) => {
+  const l = (L + 0.3963377774*a + 0.2158037573*b) ** 3
+  const m = (L - 0.1055613458*a - 0.0638541728*b) ** 3
+  const t = (L - 0.0894841775*a - 1.2914855480*b) ** 3
+  return [l2s( 4.0767416621*l - 3.3077115913*m + 0.2309699292*t),
+          l2s(-1.2684380046*l + 2.6097574011*m - 0.3413193965*t),
+          l2s(-0.0041960863*l - 0.7034186147*m + 1.7076147010*t)]
+}
+const toOklch = c => { const [L, a, b] = toOklab(c); return [L, Math.hypot(a, b), (Math.atan2(b, a) * 180 / Math.PI + 360) % 360] }
+const fromOklch = ([L, C, h]) => fromOklab([L, C * Math.cos(h * Math.PI / 180), C * Math.sin(h * Math.PI / 180)])
+
+const midpoint = (A, B, space) => {
+  if (space === 'srgb') return A.map((v, i) => Math.round((v + B[i]) / 2))
+  if (space === 'oklab') { const a = toOklab(A), b = toOklab(B); return fromOklab(a.map((v, i) => (v + b[i]) / 2)) }
+  const a = toOklch(A), b = toOklch(B)
+  let dh = b[2] - a[2]; if (dh > 180) dh -= 360; if (dh < -180) dh += 360
+  return fromOklch([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, a[2] + dh / 2])
+}
+const satOf = ([r, gg, b] ) => { const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b); return mx === 0 ? 0 : Math.round((mx - mn) / mx * 100) }
+const lumaOf = ([r, gg, b]) => Math.round(0.2126 * r + 0.7152 * gg + 0.0722 * b)
+
+/* COMPUTED. lab is deliberately absent: CSS lab() is D50-referenced and this is D65, so a
+   figure from here would disagree with the swatch the browser paints beside it. The
+   argument is srgb against oklab against oklch; lab is a fourth swatch, not a claim. */
+const sat = Object.fromEntries(['srgb', 'oklab', 'oklch']
+  .map(sp => [sp, satOf(midpoint(rgb(A), rgb(B), sp))]))
+const luma = Object.fromEntries(['srgb', 'oklab']
+  .map(sp => [sp, lumaOf(midpoint(rgb('#c8452f'), rgb('#2f7d54'), sp))]))
+
+/* COMPUTED from the band's own parameters: #e8e8e8 ink at BAND_FROM..BAND_TO alpha over
+   the #0f0f0f ground the wrapper states. That is what "how many levels" means. */
+const BAND_FROM = .45, BAND_TO = .59
+const bandLevels = Math.round((BAND_TO - BAND_FROM) * (0xe8 - 0x0f))
+
+/* MEASURED in Chromium by decoding the rendered band, at the width the assembled page
+   gives it. Re-take these if the band's range, width or dither strength changes. */
+const MEASURED = {
+  ditherBg: 2.98,      // per-pixel deviation, same ramp as background-image
+  ditherMask: 0.22,    //   "                            as mask-image
+  terrace: 98,         // widest flat run across the undithered band, px
+  terraceDithered: 10,  //   "            across the dithered one
+}
 
 /* ── 01 · the curve ──────────────────────────────────────────────────────────────── */
 const PEN = [[0, 1], [.5, .30], [.65, .15], [.755, .075], [.8285, .037], [.88, .019], [1, 0]]
@@ -111,63 +184,28 @@ const scrimOf = ease => g.scrim('#0f0f0f', { ease, dir: 'to top' })
 /* THE TERRACES HAVE TO BE GIVEN ROOM. Banding is levels-per-pixel, so a ramp that
    crosses the whole range over a short box hides it -- the steps are a pixel apart and
    the page is usually viewed scaled. Crossing a NARROW range over a WIDE box is the same
-   phenomenon with the evidence enlarged: .5 -> .58 of #e8e8e8 over #0f0f0f is ~18 levels,
-   so at full column width each terrace is tens of pixels across and impossible to miss.
-   Nothing is exaggerated -- it is the identical quantisation, given space. */
-const bandDemo = g.maskRamp({ dir: '90deg', from: .5, to: .58 })
+   phenomenon with the evidence enlarged.
+   AND IT STILL HAS TO BE AMPLIFIED, which took two failed attempts to accept. .5 -> .58
+   was measurably terraced and visually a flat grey slab. Widening to .3 -> .62 gave more
+   terraces, not more visible ones -- because the step between two of them is ONE level,
+   about 0.4% of brightness, which is near the floor of what an eye resolves on a mid
+   grey and is erased outright by any downscaling. No choice of range fixes that: the
+   thing being demonstrated is, by definition, almost too small to see.
+
+   So the band is centred on mid-grey (.45 -> .59 puts it around 128) and shown TWICE:
+   as it renders, and through filter: contrast(6). Same pixels, same quantisation, the
+   difference amplified until the steps are legible -- and the caption says so, because
+   an amplified picture presented as a plain one is a lie about how bad the problem is.
+   Centring is what makes the filter usable: contrast() pivots on 0.5, so a band sitting
+   off-centre clips to black or white before its steps separate. */
+const bandDemo = g.maskRamp({ dir: '90deg', from: BAND_FROM, to: BAND_TO })
 
 
-/* ── THE COPY ─────────────────────────────────────────────────────────────────────────
- *
- * Every word on the page is in this object and nowhere else. Nothing below it is prose,
- * so a writing pass never touches markup and cannot break the build by editing a tag.
- *
- * ${...} IS A LIVE VALUE FROM THE ENGINE, NOT DECORATION. Those are measured -- the
- * clothoid's four numbers, the fitted residual, the blur radii -- and they change when
- * the engine changes. Keep every one of them; write around them. If a sentence needs a
- * number that is not already in a slot, ask for it rather than typing it in: the whole
- * point of generating this page is that no figure on it can go stale silently.
- *
- * Entities are HTML: &#8212; em dash, &#8594; arrow, &#183; middot, &#916; delta.
- * Inline markup allowed in notes: <b> (reads as emphasis, not weight) and <code>.
- *
- * House voice, from the rest of this repo: state the thing, then why it is that way, and
- * name the failure it came from. Numbers over adjectives. No hedging, no "simply", no
- * "just". A sentence earns its place by saying something that was not obvious.
- * ────────────────────────────────────────────────────────────────────────────────── */
-const COPY = {
-  title: `Ramps`,
-  lede: `One curve, three channels. The alpha of a scrim, the colour of a blend and the radius of a blur are the same cubic B&#233;zier applied to different quantities &#8212; so the package has one sampler and three emitters rather than three engines. Every gradient on this page is a string <code>src/gradient.ts</code> emitted; none of it is typed in.`,
-  c1_title: `The curve`,
-  c1_tag: `cubic-bezier(${g.EASES.clothoid.join(', ')})`,
-  c2_title: `The edge`,
-  c2_tag: `why linear will not do`,
-  c3_title: `Where you mix`,
-  c3_tag: `the midpoint, four spaces`,
-  c4_title: `Steering a channel`,
-  c4_tag: `Mass Driver's schema`,
-  c5_title: `Progressive blur`,
-  c5_tag: `${radii.join(' &#183; ')} px`,
-  c6_title: `Banding`,
-  c6_tag: `8-bit, and what the engine cannot fix`,
-  note1: `Two CodePens make the same fade by hand, seven stops written out one at a time. Fitting a <code>cubic-bezier()</code> to those seven numbers lands within <b>${worst.toFixed(4)}</b> of every one of them, RMS <b>${rms.toFixed(5)}</b> &#8212; about a third of one step in 8-bit. The hand-written version and the curve are the same fade, so the clothoid is a preset here, not a code path. The white dots are where the eight default stops fall: they crowd toward the transparent end, because the curve is sampled by its own parameter rather than at even positions.`,
-  note2: `Interpolate alpha in a straight line and it does not read as straight: perceived lightness moves fastest at the transparent end, so the fade announces itself where it starts and then crawls. Both panels fade the same colour over the same text across the same distance. Only the curve differs. This is the whole argument for the file.`,
-  note3: `The received wisdom is that oklab rescues a gradient from the grey midpoint sRGB gives you. <b>It does not.</b> A straight line between opposite hues passes through the neutral axis in any rectangular space, because that is where the axis is. What oklab buys is even <b>lightness</b>. Only <b>oklch</b> holds the chroma, by interpolating hue as an angle and going around rather than through &#8212; at the cost of a hue nobody picked. The default stays oklab because it is the predictable one.`,
-  note4: `One curve on the interpolation re-spaces the stops <b>along</b> a fixed path through colour space. A curve <b>per channel</b> moves the path itself. Below left: the same two colours with one channel steered at a time &#8212; the ramp leaves the straight line between its endpoints, which is how the tool escapes sRGB's mud without changing space. Below right: the three graphs for <code>${MD_A}</code> &#8594; <code>${MD_B}</code>, plotted on each channel's own axis. R falls, B rises, and <b>G does not move at all</b> &#8212; which is why that pair never goes grey, and why a curve on G there does nothing.`,
-  note5: `variablur's effect, as a stack of masked backdrop layers. Each layer owns <b>one band</b> at full opacity carrying that band's absolute radius &#8212; not a cumulative stack, which ghosts: <code>backdrop-filter</code> blurs what is behind the layer, so at partial mask alpha the compositor blends a blurred copy over the still-sharp original and live text shows a double image. Bands are evenly spaced; only the radius follows the curve. The right-hand panel holds the first lines with <code>start</code>, because the smallest stop in the stack still lands inside the first line's ascenders otherwise.`,
-  note6: `It blurs pixels; it does not redact. The words stay in the DOM &#8212; selectable, copyable, findable, and read aloud in full by a screen reader, which sees no blur at all. Never use it to withhold anything.`,
-  note7: `A ramp crossing ~94 of the 256 available levels over 190px spends about two pixels per level, and the eye finds those edges. <b>More stops cannot help</b> &#8212; an 8-stop ramp and a 2-stop ramp band identically. Nothing in CSS asks for more output bits, so sub-level noise is the only control there is, and every band on this page carries it.`,
-  note8: `Mostly you do not need it: Skia already dithers a background gradient and very nearly does not dither a mask &#8212; the same ramp measures a per-pixel deviation of <b>2.98</b> as <code>background-image</code> against <b>0.22</b> as <code>mask-image</code>. So a scrim is dithered for you and a mask over a flat ground is not, which is the one place in this package that bands.`,
-  cap1: `alpha against position &#183; dots = the engine's stops`,
-  cap2: `the pens' seven stops, against the fitted curve`,
-  cap3a: `no scrim &#183; the control`,
-  cap3: `linear`,
-  cap4: `clothoid &#183; the default`,
-  cap5: `start 0`,
-  cap6: `start 'calc(12px + 2lh)'`,
-  cap7: `a narrow alpha range over a wide box &#183; ~18 levels, no dither &#183; the terraces are the bug`,
-  cap8: `the same ramp, the same 18 levels, with .wm-dither`,
-}
+/* The copy lives in docs/system/pages/ramps.copy.js and nowhere else. Nothing in this
+   file is prose; a writing pass never opens it. */
+const COPY = copy({ EASES: g.EASES, radii, worst, rms, MD_A, MD_B,
+  sat, luma, band: { levels: bandLevels, terrace: MEASURED.terrace, dithered: MEASURED.terraceDithered },
+  dither: { bg: MEASURED.ditherBg, mask: MEASURED.ditherMask } })
 
 const page = `<!doctype html><meta charset=utf-8><title>ramps</title><style>
 @font-face{font-family:"CalSansVF";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
@@ -179,17 +217,21 @@ const page = `<!doctype html><meta charset=utf-8><title>ramps</title><style>
    assembled page while the explicitly-greyed prose survived. Ink is the host's; this
    page only ever states a colour where it also states the ground under it. */
 body{margin:0;background:#0f0f0f;font-family:"CalSansVF",system-ui,sans-serif;
- font-optical-sizing:auto;font-variation-settings:"GEOM" 25;padding:32px 28px 90px}
-h1{font-size:23px;margin:0 0 5px} .lede{color:#8a8a8a;font-size:13px;margin:0 0 22px;max-width:84ch}
+ font-optical-sizing:auto;font-variation-settings:"GEOM" 25;padding:32px 28px 8px}
+h1{font-size:23px;margin:0 0 5px} .lede{color:var(--ink-2,#8a8a8a);font-size:13px;margin:0 0 22px;max-width:84ch}
 h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:34px 0 12px;padding-bottom:7px;
  border-bottom:1px solid #222;display:flex;justify-content:space-between}
 h2 span{color:#7d7d7d;letter-spacing:0;text-transform:none;font-size:10px}
-p.note{color:#8a8a8a;font-size:12.5px;line-height:1.5;margin:0 0 14px;max-width:84ch}
+/* THE AUDIT'S INK, NOT A LITERAL. These notes sit inside section 05 beside the Color
+   audit's, which are 13.5px at var(--ink-2); two note styles in one section is a seam,
+   and in light mode a flat grey literal is the weak ink this page already lost once.
+   The fallback keeps the standalone page readable, where --ink-2 does not exist. */
+p.note{color:var(--ink-2,#8a8a8a);font-size:13.5px;line-height:1.5;margin:0 0 14px;max-width:84ch}
 p.note b{font-weight:400}
 code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#7d7d7d}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px}
 figure{margin:0}
-figcaption{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:#7d7d7d;margin-top:5px}
+figcaption{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:var(--ink-3,#7d7d7d);margin-top:5px}
 .band{height:84px;border-radius:5px;position:relative;overflow:hidden}
 /* Full width on purpose: the terraces need the pixels. And the wrap STATES THE GROUND --
    an alpha ramp only has the range its backdrop gives it, and on the assembled page's
@@ -202,10 +244,24 @@ figcaption{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:#7d7d7
    actually are. Worth knowing generally: .wm-dither has to sit after whatever quantises,
    not under it. */
 .bandwrap{background:#0f0f0f;border-radius:5px;overflow:hidden;position:relative}
+.bandgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+/* The same band, amplified. contrast() pivots on 0.5, which is why the ramp is centred
+   on mid-grey: off-centre it clips before the steps separate. */
+.bandwrap.amp{filter:contrast(6)}
 .band.wide{height:64px;border-radius:0}
+/* A control row. Native range on purpose: this page carries no component library, and
+   a slider that needs one would mean shipping React to a page that otherwise needs
+   none. The page renders correctly with JS off -- every demo is baked at its default
+   and the sliders only re-emit. */
+.ctl{display:flex;align-items:center;gap:10px;margin:12px 0 2px;
+ font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#7d7d7d}
+.ctl label{min-width:46px}
+.ctl input[type=range]{flex:1;max-width:260px;accent-color:#3f95c9;height:16px}
+.ctl output{min-width:3ch;text-align:right;font-variant-numeric:tabular-nums}
+.ctls{display:flex;flex-wrap:wrap;gap:6px 28px}
 .dither{position:relative}
 .dither::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:url(${DITHER});
- background-repeat:repeat;mix-blend-mode:overlay;opacity:.18}
+ background-repeat:repeat;mix-blend-mode:overlay;opacity:var(--wm-dither,.18)}
 @media (min-resolution:2dppx){.dither::after{background-size:32px 32px}}
 table{width:100%;border-collapse:collapse;font-size:12px;max-width:560px}
 td,th{padding:6px 10px 6px 0;border-bottom:1px solid #222;text-align:left}
@@ -248,11 +304,12 @@ svg.chan .ln{stroke-width:2.5}
 <div class="row" style="grid-template-columns:repeat(3,1fr)">
 <figure><div class="spec tall">${denseBlock}</div>
 <figcaption>${COPY.cap3a}</figcaption></figure>
-<figure><div class="spec tall">${denseBlock}<div class="veil" style="background-image:${scrimOf('linear')}"></div></div>
+<figure><div class="spec tall">${denseBlock}<div class="veil" data-veil="linear" style="background-image:${scrimOf('linear')}"></div></div>
 <figcaption>${COPY.cap3}</figcaption></figure>
-<figure><div class="spec tall">${denseBlock}<div class="veil" style="background-image:${scrimOf('clothoid')}"></div></div>
+<figure><div class="spec tall">${denseBlock}<div class="veil" data-veil="clothoid" style="background-image:${scrimOf('clothoid')}"></div></div>
 <figcaption>${COPY.cap4}</figcaption></figure>
 </div>
+<div class="ctl"><label>${COPY.ctl_stops}</label><input type="range" data-k="stops" min="2" max="16" step="1" value="8"><output>8</output></div>
 
 <h2>${COPY.c3_title} <span>${COPY.c3_tag}</span></h2>
 <p class="note">${COPY.note3}</p>
@@ -266,22 +323,92 @@ svg.chan .ln{stroke-width:2.5}
 <h2>${COPY.c5_title} <span>${COPY.c5_tag}</span></h2>
 <p class="note">${COPY.note5}</p>
 <div class="row" style="grid-template-columns:1fr 1fr">
-<figure><div class="spec">${proseBlock}<div class="stack">${blurStack(24, 0)}</div></div>
+<figure><div class="spec">${proseBlock}<div class="stack" data-stack="plain">${blurStack(24, 0)}</div></div>
 <figcaption>${COPY.cap5}</figcaption></figure>
-<figure><div class="spec">${proseBlock}<div class="stack">${blurStack(24, 'calc(12px + 2lh)')}</div></div>
+<figure><div class="spec">${proseBlock}<div class="stack" data-stack="held">${blurStack(24, 'calc(12px + 2lh)')}</div></div>
 <figcaption>${COPY.cap6}</figcaption></figure>
+</div>
+<div class="ctls">
+<div class="ctl"><label>${COPY.ctl_radius}</label><input type="range" data-k="radius" min="4" max="48" step="1" value="24"><output>24</output></div>
+<div class="ctl"><label>${COPY.ctl_layers}</label><input type="range" data-k="layers" min="2" max="10" step="1" value="6"><output>6</output></div>
+<div class="ctl"><label>${COPY.ctl_hold}</label><input type="range" data-k="hold" min="0" max="40" step="1" value="0"><output>0</output></div>
 </div>
 <p class="note" style="margin-top:14px">${COPY.note6}</p>
 
 <h2>${COPY.c6_title} <span>${COPY.c6_tag}</span></h2>
 <p class="note">${COPY.note7}</p>
 <p class="note">${COPY.note8}</p>
-<figure style="margin-top:4px"><div class="bandwrap"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
+<div class="bandgrid">
+<figure><div class="bandwrap"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
 <figcaption>${COPY.cap7}</figcaption></figure>
-<figure style="margin-top:14px"><div class="bandwrap dither"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
+<figure><div class="bandwrap amp"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
+<figcaption>${COPY.cap7amp}</figcaption></figure>
+<figure><div class="bandwrap dither" data-dither><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
 <figcaption>${COPY.cap8}</figcaption></figure>
+<figure><div class="bandwrap dither amp" data-dither><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
+<figcaption>${COPY.cap8amp}</figcaption></figure>
+</div>
+<div class="ctl"><label>${COPY.ctl_dither}</label><input type="range" data-k="dither" min="0" max="60" step="1" value="18"><output>.18</output></div>
+
+<script>
+/* The engine, inlined -- the same src/gradient.ts this page was generated from, so a
+   slider and the baked default cannot disagree. No framework: every control is a native
+   range, and the page is correct with JS off because each demo ships at its default.
+
+   build.py rebinds document.querySelector to the section root and RENAMES ids, so
+   everything below addresses by class and data- attribute and never by id. */
+${engineInline}
+
+const ctl = (k, fn) => {
+  const el = document.querySelector('input[data-k="' + k + '"]')
+  if (!el) return
+  const out = el.nextElementSibling
+  const run = () => { const v = +el.value; if (out) out.textContent = fn(v) ?? v }
+  el.addEventListener('input', run)
+  run()
+}
+
+/* c2 -- the same stop count on both scrims, so the comparison stays honest. Pull it
+   under five and the ramp facets; that is the sampling, not the curve. */
+ctl('stops', n => {
+  for (const ease of ['linear', 'clothoid']) {
+    const el = document.querySelector('[data-veil="' + ease + '"]')
+    if (el) el.style.backgroundImage = scrim('#0f0f0f', { ease, dir: 'to top', stops: n })
+  }
+})
+
+/* c5 -- both stacks rebuild; only the right one takes the hold, so the pair keeps
+   showing what the offset buys. */
+const paint = (sel, start) => {
+  const wrap = document.querySelector(sel)
+  if (!wrap) return
+  const radius = +document.querySelector('input[data-k="radius"]').value
+  const layers = +document.querySelector('input[data-k="layers"]').value
+  wrap.innerHTML = blurLayers({ radius, layers, start }).map(l =>
+    '<div style="backdrop-filter:' + l.backdropFilter + ';-webkit-backdrop-filter:' + l.backdropFilter +
+    ';-webkit-mask-image:' + l.maskImage + ';mask-image:' + l.maskImage + '"></div>').join('')
+}
+const blur = () => {
+  const hold = +document.querySelector('input[data-k="hold"]').value / 100
+  paint('[data-stack="plain"]', 0)
+  paint('[data-stack="held"]', hold)
+}
+ctl('radius', v => { blur(); return v + 'px' })
+ctl('layers', v => { blur(); return v })
+ctl('hold',   v => { blur(); return v + '%' })
+
+/* c6 -- the dither's own strength. At 0 the terraces come back, which is the point. */
+ctl('dither', v => {
+  const el = document.querySelector('[data-dither]')
+  if (el) el.style.setProperty('--wm-dither', v / 100)
+  return (v / 100).toFixed(2)
+})
+</script>
 `
 writeFileSync('docs/system/pages/ramps.html', page)
 console.log(`ramps.html: ${(page.length / 1024).toFixed(1)} KB`)
 console.log(`  clothoid fit  RMS ${rms.toFixed(5)}, worst ${worst.toFixed(4)}`)
 console.log(`  blur radii    ${radii.join(' ')}`)
+console.log(`  sat           srgb ${sat.srgb}%  oklab ${sat.oklab}%  oklch ${sat.oklch}%`)
+console.log(`  luma          srgb ${luma.srgb}  oklab ${luma.oklab}`)
+console.log(`  band          ${bandLevels} levels, terrace ${MEASURED.terrace}px -> ${MEASURED.terraceDithered}px dithered`)
