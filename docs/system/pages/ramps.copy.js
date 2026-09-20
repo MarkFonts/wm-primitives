@@ -25,11 +25,12 @@
 export const copy = v => ({
 
   title: `Ramps`,
-  lede: `One curve, three channels. The alpha of a scrim, the colour of a blend and the radius of a blur are the same cubic B&#233;zier applied to different quantities &#8212; one sampler and three emitters, not three engines. Every gradient on this page is a string emitted by <code>src/gradient.ts</code>; none of it is typed in.`,
+  lede: `One curve, three channels. A scrim's alpha, a blend's colour and a blur's radius are one cubic B&#233;zier applied to three quantities: one sampler, three emitters, no third engine. Every gradient on this page is a string <code>src/gradient.ts</code> emitted; nothing here is typed in, so nothing here can go stale on its own.`,
+
   c1_title: `The curve`,
   c1_tag: `cubic-bezier(${v.EASES.clothoid.join(', ')})`,
   c2_title: `The edge`,
-  c2_tag: `why linear will not do`,
+  c2_tag: `where a fade announces itself`,
   c3_title: `Where you mix`,
   c3_tag: `the midpoint, four spaces`,
   c4_title: `Steering a channel`,
@@ -37,27 +38,37 @@ export const copy = v => ({
   c5_title: `Progressive blur`,
   c5_tag: `${v.radii.join(' &#183; ')} px`,
   c6_title: `Banding`,
-  c6_tag: `8-bit, and what the engine cannot fix`,
-  note1: `Two CodePens make the same fade by hand, seven stops written out one at a time. Fitting a <code>cubic-bezier()</code> to those seven numbers lands within <b>${v.worst.toFixed(4)}</b> of every one of them, RMS <b>${v.rms.toFixed(5)}</b> &#8212; about a third of one step in 8-bit. The hand-written version and the curve are the same fade, so the clothoid is a preset here, not a code path. The white dots are where the eight default stops fall: they crowd toward the transparent end, because the curve is sampled by its own parameter rather than at even positions.`,
-  note2: `Interpolate alpha in a straight line and it does not read as straight: perceived lightness moves fastest at the transparent end, so the fade announces itself where it starts and then crawls. Against the unveiled panel, both scrims fade the same colour over the same text across the same distance &#8212; only the curve differs. This is the whole argument for the file.`,
-  note3: `The received wisdom is that oklab rescues a gradient from the grey midpoint sRGB gives you. <b>It does not.</b> A straight line between opposite hues passes through the neutral axis in any rectangular space, because that is where the axis is. What oklab buys is even <b>lightness</b>. Only <b>oklch</b> holds the chroma, by interpolating hue as an angle and going around rather than through &#8212; at the cost of a hue nobody picked. The default stays oklab because it is the predictable one.`,
-  note4: `One curve on the interpolation re-spaces the stops <b>along</b> a fixed path through colour space. A curve <b>per channel</b> moves the path itself. Below left: the same two colours with one channel steered at a time &#8212; the ramp leaves the straight line between its endpoints, which is how the tool escapes sRGB's mud without changing space. Below right: the three graphs for <code>${v.MD_A}</code> &#8594; <code>${v.MD_B}</code>, plotted on each channel's own axis. R falls, B rises, and <b>G does not move at all</b> &#8212; which is why that pair never goes grey, and why a curve on G there does nothing.`,
-  note5: `variablur's effect, as a stack of masked backdrop layers. Each layer owns <b>one band</b> at full opacity carrying that band's absolute radius &#8212; not a cumulative stack, which ghosts: <code>backdrop-filter</code> blurs what is behind the layer, so at partial mask alpha the compositor blends a blurred copy over the still-sharp original and live text shows a double image. Bands are evenly spaced; only the radius follows the curve. The right-hand panel holds the first lines with <code>start</code>, because the smallest stop in the stack still lands inside the first line's ascenders otherwise.`,
-  note6: `It blurs pixels; it does not redact. The words stay in the DOM &#8212; selectable, copyable, findable, and read aloud in full by a screen reader, which sees no blur at all. Never use it to withhold anything.`,
-  note7: `A ramp crossing ~94 of the 256 available levels over 190px spends about two pixels per level, and the eye finds those edges. <b>More stops cannot help</b> &#8212; an 8-stop ramp and a 2-stop ramp band identically. Nothing in CSS asks for more output bits, so sub-level noise is the only control there is, and every band on this page carries it. The bands below cross a narrow slice of the range at full width, so each level lands wide enough to point at.`,
-  note8: `Mostly you do not need it: Skia already dithers a background gradient and very nearly does not dither a mask &#8212; the same ramp measures a per-pixel deviation of <b>2.98</b> as <code>background-image</code> against <b>0.22</b> as <code>mask-image</code>. So a scrim is dithered for you and a mask over a flat ground is not, which is the one place in this package that bands.`,
+  c6_tag: `8-bit, and what no curve can fix`,
+
+  note1: `Two CodePens make this fade by hand: seven stops, each typed in. A <code>cubic-bezier()</code> fitted to those seven lands within <b>${v.worst.toFixed(4)}</b> of every one, RMS <b>${v.rms.toFixed(5)}</b> &#8212; a third of one step in 8-bit. The fit is measured, not asserted, and it means the clothoid is a <b>preset</b> here, not a code path: the hand-written fade and the curve are the same fade. The white dots are the eight default stops. They crowd toward the transparent end because the curve is sampled by its own parameter, not at even positions &#8212; which is where the pens' own stops crowd too.`,
+
+  note2: `A straight alpha ramp does not read as straight. Perceived lightness moves fastest at the transparent end, so a linear fade announces itself where it starts and then crawls; on live text that is a visible line across the second row of type, and it is the failure this curve was fitted to remove. The unveiled panel is the control: both scrims fade the same colour over the same text across the same distance, and only the curve differs.`,
+
+  note3: `The received wisdom is that oklab rescues a gradient from the grey sRGB puts at its midpoint. <b>It does not.</b> A straight line between opposite hues crosses the neutral axis in <b>any</b> rectangular space, because that is where the axis is; the four bands above show the same crossing in three of them. What oklab buys is even <b>lightness</b> &#8212; the red&#8594;green ramp no longer dips dark in the middle. Only <b>oklch</b> holds chroma, by treating hue as an angle and going around the axis instead of through it, and it pays with a hue nobody picked. The default stays oklab: it is the predictable one, and the first draft of this page had the claim the wrong way round.`,
+
+  note4: `One curve on the interpolation re-spaces the stops <b>along</b> a fixed path through colour space. A curve <b>per channel</b> moves the path. Left: the same two colours with one channel steered at a time &#8212; the ramp leaves the straight line between its endpoints, which is how a ramp escapes sRGB's grey without changing space. Right: the three channels of <code>${v.MD_A}</code> &#8594; <code>${v.MD_B}</code>, each on its own axis. R falls, B rises, and <b>G does not move</b>. That flat channel is why the pair never greys, and why steering G on it does nothing at all. <code>channelBlend()</code> reproduces Mass Driver's published output byte for byte; the equality is a test.`,
+
+  note5: `variablur's effect as a stack of masked backdrop layers, each owning <b>one band</b> at full opacity with that band's absolute radius. Not a cumulative stack: that one <b>ghosts</b>. <code>backdrop-filter</code> blurs what is behind the layer, so at partial mask alpha the compositor blends a blurred copy over the still-sharp original and live text doubles. Bands are evenly spaced; only the radius follows the curve, and the default curve holds the start &#8212; text stops being legible around 4px, and the first band has to stay under that. The right-hand panel also holds the first lines with <code>start</code>: without it the smallest radius in the stack lands inside the first line's ascenders.`,
+
+  note6: `It blurs pixels. It does not redact. The words stay in the DOM &#8212; selectable, copyable, findable, and read aloud in full by a screen reader, which sees no blur. Never use it to withhold anything.`,
+
+  note7: `Eight bits give 256 levels of alpha, and a ramp that spends a few pixels on each one shows every step as a terrace. The eye finds those edges. <b>More stops cannot help</b>: an 8-stop ramp and a 2-stop ramp quantise to the same levels and band identically, and nothing in CSS asks for more output bits. Sub-level noise is the only control there is, and every band on this page carries it. The two bands below cross a narrow slice of the range at full width, so each level lands wide enough to point at &#8212; undithered first, dithered second.`,
+
+  note8: `Mostly you do not need it. Skia dithers a <code>background-image</code> gradient and very nearly does not dither a <code>mask-image</code>, so a scrim is dithered for you and a mask over a flat ground is not: that mask is the one place in this package that bands. <code>.wm-dither</code> has to sit <b>after</b> whatever quantises, on the wrapper, not inside the masked element &#8212; inside, the noise modulated the ink before the mask touched it and measurably did nothing. Judge this chapter on a real display at 100%: a downscaled screenshot averages the terraces away.`,
+
   ctl_stops: `stops`,
   ctl_radius: `radius`,
   ctl_layers: `layers`,
   ctl_hold: `hold`,
   ctl_dither: `dither`,
+
   cap1: `alpha against position &#183; dots = the engine's stops`,
-  cap2: `the pens' seven stops, against the fitted curve`,
+  cap2: `the pens' seven stops against the fitted curve &#183; residual per stop`,
   cap3a: `no scrim &#183; the control`,
-  cap3: `linear`,
+  cap3: `linear &#183; the line shows on row two`,
   cap4: `clothoid &#183; the default`,
   cap5: `start 0`,
-  cap6: `start 'calc(12px + 2lh)'`,
+  cap6: `start 'calc(12px + 2lh)' &#183; the first lines held`,
   cap7: `a narrow alpha range over a wide box &#183; no dither &#183; the terraces are the bug`,
-  cap8: `the same ramp, the same levels, with .wm-dither`,
+  cap8: `the same ramp, the same levels, with .wm-dither on the wrapper`,
 })
