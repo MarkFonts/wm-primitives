@@ -219,7 +219,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
    surface reads as one at a glance. */
 .wm-wip{display:inline-flex;align-items:baseline;gap:12px;align-self:center;margin-left:auto;padding:12px 18px;text-decoration:none;color:var(--ink);
   border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
-  background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--ink) 16%,transparent) 0 .5px,transparent .5px 9px);
+  background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
   font-size:13px;font-weight:600;letter-spacing:.02em;transition:border-color .15s}
 .wm-wip i{font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3)}
 .wm-wip:hover{border-color:var(--ink-3)}
@@ -3365,6 +3365,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
   font-size: var(--type-micro-size, 10px);
   color: var(--text-dim);
 }
+#s-controls .wip{max-width:72ch}#s-controls .wip>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2)}#s-controls .wip>p b{color:var(--ink);font-weight:600}#s-controls .wip-list{display:grid;gap:16px;margin:0;padding:0;list-style:none}#s-controls .wip-card{display:block;position:relative;padding:22px 24px;text-decoration:none;color:inherit;
+  border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
+  background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
+  transition:border-color .15s,background-color .15s}#s-controls .wip-card:hover{border-color:var(--ink-3)}#s-controls .wip-card b{display:block;font-size:var(--type-lede-size,1.125rem);font-weight:600;line-height:1.3;margin:0 0 6px;color:var(--ink)}#s-controls .wip-card i{display:block;font-style:normal;font-size:var(--type-ui-size,.75rem);line-height:1.5;color:var(--ink-2);max-width:56ch}#s-controls .wip-card u{position:absolute;top:18px;right:20px;text-decoration:none;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 
 /* ===== space ===== */
 #s-space *{box-sizing:border-box}#s-space{margin:0;background:#0f0f0f;color:#e8e8e8;font-family:"CalSansVF",system-ui,sans-serif;
@@ -4421,12 +4425,6 @@ html,body{margin:0;padding:0;background:var(--bg)}
   --warn:#ff8557; --warn:oklch(var(--l-warn) .165 var(--hue-a11y));
 }@media(prefers-color-scheme:light){#s-usage{}}:root[data-theme=dark] #s-usage{}:root[data-theme=light] #s-usage{}#s-usage{}#s-usage h1{font-size:29px;margin:0 0 6px;letter-spacing:-.01em}#s-usage .lede{color:var(--ink2);max-width:76ch;margin:0 0 26px}#s-usage details{background:var(--card);border:1px solid var(--line);border-radius:9px;margin-bottom:7px;overflow:hidden}#s-usage summary{cursor:pointer;padding:11px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;list-style:none}#s-usage summary::-webkit-details-marker{display:none}#s-usage .sw{width:15px;height:15px;border-radius:4px;display:inline-block;flex:none;border:1px solid rgba(128,128,128,.45)}#s-usage summary code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}#s-usage .warn{color:var(--warn);font-weight:400;font-size:11.5px}#s-usage .ok{color:var(--ink3);font-weight:400;font-size:11.5px}#s-usage .n{color:var(--ink3);font-size:11.5px;font-variant-numeric:tabular-nums}#s-usage .tags{display:flex;gap:5px;flex-wrap:wrap}#s-usage .tag{font-size:10.5px;border:1px solid var(--line);border-radius:99px;padding:1px 7px;color:var(--ink2)}#s-usage .meta{flex-basis:100%;color:var(--ink3);font-size:11px}#s-usage table{width:100%;border-collapse:collapse;font-size:12px;border-top:1px solid var(--line)}#s-usage td{padding:4px 12px 4px 14px;border-bottom:1px solid var(--line);vertical-align:top}#s-usage .r{color:var(--ink);white-space:nowrap}#s-usage .p code,#s-usage .s{color:var(--ink2)}#s-usage .s{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;max-width:34ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#s-usage .t{color:var(--ink3);font-size:11px;white-space:nowrap}#s-usage .l{color:var(--ink3);font-family:ui-monospace,Menlo,monospace;font-size:10.5px;white-space:nowrap;text-align:right}
 
-/* ===== wip ===== */
-#s-wip .wip{max-width:72ch}#s-wip .wip>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2)}#s-wip .wip>p b{color:var(--ink);font-weight:600}#s-wip .wip-list{display:grid;gap:16px;margin:0;padding:0;list-style:none}#s-wip .wip-card{display:block;position:relative;padding:22px 24px;text-decoration:none;color:inherit;
-  border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
-  background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--ink) 16%,transparent) 0 .5px,transparent .5px 9px);
-  transition:border-color .15s,background-color .15s}#s-wip .wip-card:hover{border-color:var(--ink-3)}#s-wip .wip-card b{display:block;font-size:var(--type-lede-size,1.125rem);font-weight:600;line-height:1.3;margin:0 0 6px;color:var(--ink)}#s-wip .wip-card i{display:block;font-style:normal;font-size:var(--type-ui-size,.75rem);line-height:1.5;color:var(--ink-2);max-width:56ch}#s-wip .wip-card u{position:absolute;top:18px;right:20px;text-decoration:none;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
-
 /* ===== page-furniture resets ===== */
 #s-readme{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
 #s-type{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
@@ -4435,14 +4433,13 @@ html,body{margin:0;padding:0;background:var(--bg)}
 #s-space{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
 #s-color{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
 #s-usage{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
-#s-wip{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
 #s-type>.wrap{max-width:none;margin:0;padding:0;width:auto}
 .wm-placeholder{max-width:64ch;color:var(--ink-2);border:1px dashed var(--line);border-radius:12px;padding:16px 20px;margin:8px 0 40px}
 #s-corners .grid.g3,#s-circles .grid.g3,#s-space .grid.g3{grid-template-columns:repeat(auto-fit,minmax(430px,1fr))}
 </style>
 <div class="wm">
   <div class="wm-doc">
-  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in"><div class="wm-grp"><a class="wm-lvl0" href="#s-readme"><u>00</u>The package</a><a class="wm-lvl1" href="#readme-c1"><u>1</u><span>What you get</span></a><a class="wm-lvl1" href="#readme-c2"><u>2</u><span>What you must supply</span></a><a class="wm-lvl1" href="#readme-c3"><u>3</u><span>How to wire it in, and add a dial</span></a><a class="wm-lvl1" href="#readme-c4"><u>4</u><span>How to override</span></a><a class="wm-lvl1" href="#readme-c5"><u>5</u><span>How you know it shipped</span></a><a class="wm-lvl1" href="#readme-c6"><u></u><span>The rest</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1"><u></u><span>The 5 pills</span></a><a class="wm-lvl1" href="#corners-c2"><u></u><span>The radius ladder</span></a><a class="wm-lvl1" href="#corners-c3"><u></u><span>Asymmetric corners</span></a><a class="wm-lvl1" href="#corners-c4"><u></u><span>The 13 circles</span></a><a class="wm-lvl1" href="#corners-c6"><u></u><span>The button</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u>03</u>Interface</a><a class="wm-lvl1" href="#controls-c1"><u></u><span>The marks</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1"><u></u><span>The steps</span></a><a class="wm-lvl1" href="#space-c2"><u></u><span>The cap rule</span></a><a class="wm-lvl1" href="#space-c3"><u></u><span>Use a step</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1"><u></u><span>The vocabulary</span></a><a class="wm-lvl1" href="#color-c2"><u></u><span>Literal colors outside App.css</span></a><a class="wm-lvl1" href="#color-c3"><u></u><span>The GEOM zones</span></a><a class="wm-lvl1" href="#color-c4"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#color-c5"><u></u><span>The edge</span></a><a class="wm-lvl1" href="#color-c6"><u></u><span>Where you mix</span></a><a class="wm-lvl1" href="#color-c7"><u></u><span>Steering a channel</span></a><a class="wm-lvl1" href="#color-c8"><u></u><span>Progressive blur</span></a><a class="wm-lvl1" href="#color-c9"><u></u><span>Banding</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-wip"><u>07</u>WIP primitives</a></div></div></div>
+  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in"><div class="wm-grp"><a class="wm-lvl0" href="#s-readme"><u>00</u>The package</a><a class="wm-lvl1" href="#readme-c1"><u>1</u><span>What you get</span></a><a class="wm-lvl1" href="#readme-c2"><u>2</u><span>What you must supply</span></a><a class="wm-lvl1" href="#readme-c3"><u>3</u><span>How to wire it in, and add a dial</span></a><a class="wm-lvl1" href="#readme-c4"><u>4</u><span>How to override</span></a><a class="wm-lvl1" href="#readme-c5"><u>5</u><span>How you know it shipped</span></a><a class="wm-lvl1" href="#readme-c6"><u></u><span>The rest</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1"><u></u><span>The 5 pills</span></a><a class="wm-lvl1" href="#corners-c2"><u></u><span>The radius ladder</span></a><a class="wm-lvl1" href="#corners-c3"><u></u><span>Asymmetric corners</span></a><a class="wm-lvl1" href="#corners-c4"><u></u><span>The 13 circles</span></a><a class="wm-lvl1" href="#corners-c6"><u></u><span>The button</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u>03</u>Interface</a><a class="wm-lvl1" href="#controls-c1"><u></u><span>The marks</span></a><a class="wm-lvl1" href="#controls-c2"><u></u><span>WIP primitives</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1"><u></u><span>The steps</span></a><a class="wm-lvl1" href="#space-c2"><u></u><span>The cap rule</span></a><a class="wm-lvl1" href="#space-c3"><u></u><span>Use a step</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1"><u></u><span>The vocabulary</span></a><a class="wm-lvl1" href="#color-c2"><u></u><span>Literal colors outside App.css</span></a><a class="wm-lvl1" href="#color-c3"><u></u><span>The GEOM zones</span></a><a class="wm-lvl1" href="#color-c4"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#color-c5"><u></u><span>The edge</span></a><a class="wm-lvl1" href="#color-c6"><u></u><span>Where you mix</span></a><a class="wm-lvl1" href="#color-c7"><u></u><span>Steering a channel</span></a><a class="wm-lvl1" href="#color-c8"><u></u><span>Progressive blur</span></a><a class="wm-lvl1" href="#color-c9"><u></u><span>Banding</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div></div></div>
     <span class="wm-rail-foot">wm&#8209;primitives</span></nav></div>
   <div class="wm-main">
   <header class="wm-head">
@@ -4463,7 +4460,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
         <div class="wm-stat"><b>7</b><i>type roles</i></div>
         <div class="wm-stat"><b>12</b><i>space steps</i></div>
         <div class="wm-stat"><b>G2</b><i>corners, as the font is drawn</i></div>
-        <a class="wm-wip" href="#s-wip"><span>WIP primitives</span><i>pages to decide from &#8594;</i></a>
+        <a class="wm-wip" href="#controls-wip"><span>WIP primitives</span><i>pages to decide from &#8594;</i></a>
       </div>
     </div>
   </header>
@@ -5354,7 +5351,7 @@ width rather than fixed &mdash; optical sizing by another name: at one absolute 
 chevron carries more ink per unit of mark and reads heavier.</p>
 <div class="marks marks--chev" id="controls-m-chevrons"></div>
 
-</div>
+<h2 id="controls-c2">WIP primitives <span>pages to decide from</span></h2><div class="wip" id="controls-wip"><p><b>Nothing here ships.</b> A control above has a spec and a test; a page here has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline so it cannot pass for finished.</p><ul class="wip-list"><li><a class="wip-card" href="system/pages/buttons.html"><u>undecided</u><b>Six ways to say press</b><i>the button as six families -- Keyline, Lozenge, Rule, Plate, Bracket, Rail -- each drawing the same six specimens, with a coverage table of what each cannot do. Explorations: none chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; NEXT.md G says what a choice, if one is ever made, changes.</i></a></li></ul></div></div>
 </section>
 <section class="wm-sec">
   <div class="wm-sec-head"><div class="wm-n">04 &middot; Space</div></div>
@@ -6462,10 +6459,6 @@ the ones a value-to-token sweep would silently merge.</p>
  &#183; <em>no token</em></span></summary>
 <table><tr><td class="r">painted as text</td><td class="p"><code>color</code></td><td class="s">.coss-no-more</td><td class="t">base</td><td class="l">font-proofer/App.css</td></tr></table></details>
 </div>
-</section>
-<section class="wm-sec">
-  <div class="wm-sec-head"><div class="wm-n">07 &middot; WIP primitives</div></div>
-  <div class="wm-body" id="s-wip"><div class="wip"><p><b>Nothing here ships.</b> A law above has a lint; a page here has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline so it cannot pass for finished.</p><ul class="wip-list"><li><a class="wip-card" href="system/pages/buttons.html"><u>undecided</u><b>Six ways to say press</b><i>the button as six families -- Keyline, Lozenge, Rule, Plate, Bracket, Rail -- each drawing the same six specimens, with a coverage table of what each cannot do. Explorations: none chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; NEXT.md G says what a choice, if one is ever made, changes.</i></a></li></ul></div></div>
 </section>
   </div>
   </div>
