@@ -145,8 +145,12 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
   margin: 0 0 2rem; padding: .75rem 0; border-bottom: var(--bt-hair) solid var(--bt-line); }
 .bt-bar span{ font-size: .625rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--bt-ink3); margin-right: .25rem; font-variation-settings:'opsz' 10; }
+/* nowrap so these stay ONE line: a pill is half its height, so a two-line "Touch sizing"
+   grew a 25px corner while the pill beside it had 13. The bar wraps instead -- it is
+   flex-wrap already. Same law as the lozenge below; it applies to the page's own chrome,
+   not only to the specimens. */
 .bt-bar button{ font: inherit; font-size: .8125rem; font-family: var(--bt-font);
-  padding: .25rem .75rem; background: var(--bt-sf); color: var(--bt-ink2);
+  padding: .25rem .75rem; background: var(--bt-sf); color: var(--bt-ink2); white-space: nowrap;
   border: var(--bt-hair) solid var(--bt-line); border-radius: var(--bt-pill); cursor: pointer; }
 .bt-bar button[aria-pressed="true"]{ background: var(--bt-ink); color: var(--bt-bg); border-color: var(--bt-ink); }
 .bt-bar button:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
@@ -285,7 +289,12 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
 .bt-z--ico{ padding: .5rem; aspect-ratio: 1; }
 /* The editable is the same lozenge with the fill taken out: a wash that is barely there
    until approached. Highlighter, not rule. */
-.bt-z-ed{ display: inline-block; padding: .25rem .875rem; border-radius: var(--bt-pill);
+/* A PILL IS FOR ONE LINE. 999px means "half the height", so the moment this wraps the
+   curve grows with the box and a two-line editable wears a corner twice the size of a
+   one-line one -- the same shape saying two different things. Single-line controls in this
+   family keep the pill because their height is fixed; anything that can wrap takes the
+   constant. That is a law, not a patch: the radius never follows the height. */
+.bt-z-ed{ display: inline-block; padding: .3rem .625rem; border-radius: var(--bt-r);
   background: color-mix(in oklab, var(--bt-ink) 5%, transparent); color: var(--bt-ink);
   transition: background var(--bt-dur) ease; }
 .bt-z-ed:hover{ background: color-mix(in oklab, var(--bt-ink) 12%, transparent); }
@@ -653,23 +662,23 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
    Beside a G2 button that argument inverts -- a circle is the one shape in the lockup that
    is NOT following the corner law, and it reads as a sticker dropped next to the button
    rather than as part of it.
-   So the avatar takes the same radius as the button it stands next to, which means it also
-   changes per family: on a pill the radius is half the box and a square box comes out round
-   anyway, so 02 gets its circle back by arithmetic rather than by exception.
-   If this is right, corners.css's exclusion list is what should change -- not this page. */
+   ONE radius, not the button's. Matching each family put the headshot at 999px beside a
+   pill -- which is a circle again, arrived at from the other direction -- and at 0 beside
+   03. The corner is a constant, so the headshot carries the same 8px everywhere and only
+   its box changes size. */
 .bt-avatar{ width: clamp(38px, 5vw, 58px); height: clamp(38px, 5vw, 58px);
-  border-radius: 16px; corner-shape: superellipse(var(--corner-k, 1.2));
+  border-radius: var(--bt-r); corner-shape: superellipse(var(--corner-k, 1.2));
   overflow: hidden; flex-shrink: 0;
   background: color-mix(in oklab, #808080 12%, transparent); }
-/* :has(), not a class on every .bt-cta -- the family is already named on the button, and
-   the selector carries no comma, which the assembler's prelude splitter cannot survive. */
-.bt-cta:has(.bt-scream--z) .bt-avatar{ border-radius: var(--bt-pill); }
-.bt-cta:has(.bt-scream--r) .bt-avatar{ border-radius: 0; }
 .bt-avatar img{ width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .bt-scream{
-  --bt-r: 16px;        /* 2^4 -- one rung up the corner scale from the UI's 8 */
-  --bt-hair: 1.5px;    /* a keyline scales with the thing it encloses */
+  /* THE RADIUS DOES NOT GROW WITH THE BOX. This carried --bt-r: 16px, "one rung up the
+     corner scale", which is the same mistake as a pill on a paragraph: it makes the corner
+     a function of size, so a display button is blobbier than the button it is louder than.
+     The corner is a constant the eye learns once. 8px here and 8px in the rail -- what
+     changes at display size is the type, the stroke and the space, never the curve. */
+  --bt-hair: 1.5px;    /* the STROKE scales; it is ink, not geometry */
   font-size: clamp(22px, 3vw, 34px);
   line-height: 1;
   font-variation-settings:'opsz' 45,'wght' 700,'GEOM' 50;
@@ -710,8 +719,7 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
 .bt-scream--r{ padding-inline: 0; text-decoration-thickness: .1em;
   text-underline-offset: .16em; }
 .bt-scream--b{ --bt-tick: 22px; }
-/* .bt-f-row hard-codes the rail's 10px; a display box takes the display radius. */
-.bt-scream--f{ width: auto; border-radius: var(--bt-r); }
+.bt-scream--f{ width: auto; }
 .bt-scream-note{ font-size: .8125rem; color: var(--bt-ink2); margin: .875rem 0 0; }
 .bt-scream-note b{ color: var(--bt-ink); font-weight: 500; }
 
