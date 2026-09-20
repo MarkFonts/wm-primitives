@@ -537,7 +537,9 @@ def build_readme():
 # One entry per proposal page in docs/system/pages/ that build.py does NOT assemble.
 WIP = [
     ("system/pages/buttons.html", "Six ways to say press",
-     "the button, as six families: one wins and becomes src/button.css (NEXT.md G)"),
+     "the button as six families -- Keyline, Lozenge, Rule, Plate, Bracket, Rail -- each drawing "
+     "the same six specimens, with a coverage table of what each cannot do. One wins and becomes "
+     "src/button.css (NEXT.md G)."),
 ]
 WIP_CSS = """
 .wip{max-width:72ch}
