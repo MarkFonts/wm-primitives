@@ -177,6 +177,12 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
       # The "drawn by" column needs the consumers' sources, which only this job has.
+      # Every icon name in every consumer is one the shipped face draws (lint-icons.py;
+      # the package's own names are checked in lint.yml, this is the consumers').
+      - name: Icon names the face can draw
+        env:
+          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html
+        run: python3 scripts/lint-icons.py
       - name: COMPONENTS.md and HOST-CONTRACT.md must match their inputs
         env:
           WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html

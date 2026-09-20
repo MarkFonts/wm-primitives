@@ -12,6 +12,23 @@ Newest first.
 
 ---
 
+## 2026-09-20 — the icon face is a subset, and a lint knows what it holds
+
+**`icon.css` said the full 3.9MB face shipped so a subset could never drift. The file
+was a 16KB subset of 24 ligatures.** Found by the "Button designs" session reading a
+screenshot closely: a name outside the subset does not print as words, the ligature
+never forms and the browser draws the component glyphs the font happens to hold, so
+`undo` was two strokes and `arrow_outward` a circle, and both passed as icons. The
+comment now says what ships and what the failure looks like. The guard is
+`scripts/lint-icons.py`: it reads the GSUB and fails any name in the code the face
+cannot draw — the package's names in `lint.yml`, every consumer's in `consumers.yml`.
+Its first run caught the JSDoc example on `Icon.tsx` (`reset_settings`, not in the
+face). WORDMAKE uses seven names outside the subset and is unaffected only because it
+loads the full face from Google itself; the day it joins CI it either grows the subset
+or loses the link.
+
+---
+
 ## 2026-09-20 — the house button splits a word
 
 **A flex box makes a bare text run an item.** `.wm-btn` was inline-flex with a 6px gap so
