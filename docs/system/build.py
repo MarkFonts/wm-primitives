@@ -783,16 +783,22 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm em,.wm i,.wm cite,.wm dfn,.wm var{font-style:normal;font-variation-settings:'ital' 1}
 .wm-foot{grid-column:2}
 .wm-railcol{grid-row:1;min-height:100%}
+/* A column: the index scrolls when it is taller than the viewport, and the foot sits
+   BELOW it in flow. It used to be pinned to the scroller's bottom edge and the rule was
+   drawn on the scroller too -- so once the index outgrew 88vh (Color took the ramps'
+   six chapters, 2026-09-19) the rule stopped short of the last groups and the foot sat
+   on top of them. The rule now lives on the inner box, which is as tall as the index. */
 .wm-rail{position:sticky;top:0;height:100vh;z-index:90;
-  display:flex;align-items:center;pointer-events:none}
-.wm-axis{position:relative;padding:0 0 0 40px;width:100%;max-height:88vh;overflow-y:auto;
+  display:flex;flex-direction:column;justify-content:center;pointer-events:none}
+.wm-axis{width:100%;max-height:calc(100vh - 56px);overflow-y:auto;flex:0 1 auto;
   scrollbar-width:none;pointer-events:auto}
 .wm-axis::-webkit-scrollbar{display:none}
+.wm-axis-in{position:relative;padding:0 0 0 40px}
 /* the rule itself, and the travelled portion of it */
-.wm-axis::before{content:"";position:absolute;left:22px;top:6px;bottom:6px;width:2px;
+.wm-axis-in::before{content:"";position:absolute;left:22px;top:6px;bottom:6px;width:2px;
   background:var(--line)}
-.wm-axis::after{content:"";position:absolute;left:22px;top:6px;width:2px;
-  height:calc(var(--prog,0) * (100% - 12px));background:var(--ink-3);transition:height .18s linear}
+.wm-axis-in::after{content:"";position:absolute;left:22px;top:6px;width:2px;
+  height:var(--prog-px,0px);background:var(--ink-3);transition:height .18s linear}
 .wm-grp{margin:0 0 20px}
 .wm-grp:last-child{margin-bottom:0}
 /* HIERARCHY, on the house rules: one signal per distinction.
@@ -827,8 +833,8 @@ html,body{margin:0;padding:0;background:var(--bg)}
   border-radius:50%;corner-shape:round;background:var(--ink)}
 .wm-lvl0.on::before{left:-24px}
 .wm-lvl1.on::before{left:-42px}
-.wm-rail-foot{position:absolute;left:40px;bottom:0;font-size:9px;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--ink-3)}
+.wm-rail-foot{flex:0 0 auto;margin:14px 0 0 40px;font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);pointer-events:auto}
 
 /* content-visibility:auto was tried here and reverted. It implies contain: layout
    style paint, so every section became a containment boundary -- the bend lost the
@@ -922,8 +928,9 @@ html,body{margin:0;padding:0;background:var(--bg)}
   .wm-rail{position:sticky;top:0;height:auto;width:auto;
     background:var(--bg);
     border-bottom:1px solid var(--line)}
-  .wm-axis{display:flex;gap:0;padding:0 20px;max-height:none;overflow-x:auto;overflow-y:hidden}
-  .wm-axis::before,.wm-axis::after,.wm-rail-foot{display:none}
+  .wm-axis{max-height:none;overflow-x:auto;overflow-y:hidden}
+  .wm-axis-in{display:flex;gap:0;padding:0 20px}
+  .wm-axis-in::before,.wm-axis-in::after,.wm-rail-foot{display:none}
   .wm-grp{margin:0;display:flex;align-items:center;flex:0 0 auto}
   .wm-lvl1{display:none}
   .wm-lvl0{padding:14px 15px}
@@ -1600,13 +1607,15 @@ SPY = """
     }
     links.forEach(function(a,i){a.classList.toggle('on',i===best);});
 
-    var doc=document.documentElement;
-    var p=doc.scrollHeight-innerHeight;
-    rail.style.setProperty('--prog', p>0 ? Math.min(1,Math.max(0,scrollY/p)) : 0);
+    /* The travelled rule ends AT the dot. It used to be the page's scroll fraction,
+       which put its end wherever the document's height said, unrelated to the link
+       that was lit -- two devices for one state (2026-09-19). One number now: the lit
+       link's centre, measured in the index's own box. */
     if(best>-1){ var el=links[best];
+      rail.style.setProperty('--prog-px', (el.offsetTop + el.offsetHeight/2 - 6) + 'px');
       var rb=rail.getBoundingClientRect(), eb=el.getBoundingClientRect();
       if(eb.top<rb.top+8||eb.bottom>rb.bottom-8) el.scrollIntoView({block:'nearest'});
-    }
+    } else rail.style.setProperty('--prog-px', '0px');
   }
   addEventListener('scroll',tick,{passive:true}); addEventListener('resize',tick); tick();
 })();
@@ -1634,8 +1643,8 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 </style>
 <div class="wm">
   <div class="wm-doc">
-  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis">{rail}
-    <span class="wm-rail-foot">wm&#8209;primitives</span></div></nav></div>
+  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in">{rail}</div></div>
+    <span class="wm-rail-foot">wm&#8209;primitives</span></nav></div>
   <div class="wm-main">
   <header class="wm-head">
     <svg class="wm-six" id="wm6" viewBox="{SIX_VB}" aria-hidden="true"></svg>
