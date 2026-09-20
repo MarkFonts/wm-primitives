@@ -486,6 +486,102 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
 .bt-f-sel:hover{ color: var(--bt-ink); }
 .bt-f-sel:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
 
+/* ═══ THE HDR MARK ══════════════════════════════════════════════════════
+   Not a seventh family. A MECHANISM that already ships, reproduced so it can be seen
+   beside the six: icon.css paints the chosen mark with it, AxisSlider.css and
+   AxisTriplet.css flash the stepper chevron with it. The swatch is byte-identical in all
+   three and is read out of icon.css at build time rather than retyped.
+
+   font-proofer's own src/ carries none of this -- it arrives through shared/. There is
+   nothing to port.
+
+   THE PROPERTY IS RENAMED, and that is not cosmetic. icon.css registers --icon-hdr, and
+   the assembled page inlines icon.css into THIS section; a second @property for that name
+   would silently replace the shipped registration. --bt-hdr is the same number under a
+   name this page owns. */
+@property --bt-hdr { syntax:'<number>'; inherits: true; initial-value: 1; }
+
+.bt-hdr-pair{ display: flex; gap: 1px; background: var(--bt-line); border-radius: var(--bt-r);
+  overflow: hidden; }
+.bt-hdr-chip{ flex: 1 1 0; min-width: 0; padding: 1.75rem .5rem; text-align: center;
+  font-size: .625rem; letter-spacing: .1em; text-transform: uppercase; color: #111;
+  background: #fff; }
+/* The same white twice: sRGB #fff on the left, the PQ swatch let past SDR white on the
+   right. On an SDR screen they are one colour, and that is the demonstration. */
+.bt-hdr-chip--hdr{ background-image: url('data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAE1pUHJhdmlmbWlhZm1pZjEAAAFebWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAAOcGl0bQAAAAAAAQAAADhpaW5mAAAAAAACAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAFWluZmUCAAABAAIAAEV4aWYAAAAAGmlyZWYAAAAAAAAADmNkc2MAAgABAAEAAACBaXBycAAAAGBpcGNvAAAAE2NvbHJuY2x4AAkAEAABgAAAAAxjbGxpA+gAQAAAABRpc3BlAAAAAAAAAGQAAABkAAAACWlyb3QAAAAAEHBpeGkAAAAAAwoKCgAAAAxhdjFDgQBMAAAAABlpcG1hAAAAAAAAAAEAAQaBAgMFhoQAAAAsaWxvYwAAAABEAAACAAEAAAABAAAB0AAAADcAAgAAAAEAAAGOAAAAQgAAAAFtZGF0AAAAAAAAAIkAAAAGRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAZKADAAQAAAABAAAAZAAAAAASAAoNAAAAAzY8Z//ChIgAwjIkEAGEgAYYYYi0VMregO56Wg+x6xnwsfoJWaYWX85G+ibLVJ6A');
+  background-size: 100% 100%; background-repeat: no-repeat;
+  dynamic-range-limit: no-limit; }
+
+/* CUT A -- THE GLYPH IS THE MASK. color:transparent + background-clip:text makes the
+   engine rasterise the letterform as a mask instead of as smoothed coloured text, and the
+   swatch shows through it. This is also why active reads heavier than its GRAD implies: a
+   mask is full grayscale coverage -- more actual pixels, not bloom.
+   Two layers so the boost is a SLOPE. Top is ordinary ink at alpha (1 - --bt-hdr), bottom
+   is the HDR white. At 0 the ink is opaque and the mark looks exactly as it did, which is
+   why the handover is invisible. background-image cannot be interpolated, so nothing about
+   the paint animates -- only that one registered number. */
+.bt-hdr-mark{ font-family:"Material Symbols Outlined"; font-weight: normal; line-height: 1;
+  font-feature-settings:'liga'; display: inline-flex; overflow: hidden; max-width: 1.2em;
+  font-size: 56px; font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 75,'opsz' 48;
+  color: transparent;
+  background-image:
+    linear-gradient(
+      rgba(var(--text-rgb, 232,232,232), calc(1 - var(--bt-hdr))),
+      rgba(var(--text-rgb, 232,232,232), calc(1 - var(--bt-hdr)))),
+    url('data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAE1pUHJhdmlmbWlhZm1pZjEAAAFebWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAAOcGl0bQAAAAAAAQAAADhpaW5mAAAAAAACAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAFWluZmUCAAABAAIAAEV4aWYAAAAAGmlyZWYAAAAAAAAADmNkc2MAAgABAAEAAACBaXBycAAAAGBpcGNvAAAAE2NvbHJuY2x4AAkAEAABgAAAAAxjbGxpA+gAQAAAABRpc3BlAAAAAAAAAGQAAABkAAAACWlyb3QAAAAAEHBpeGkAAAAAAwoKCgAAAAxhdjFDgQBMAAAAABlpcG1hAAAAAAAAAAEAAQaBAgMFhoQAAAAsaWxvYwAAAABEAAACAAEAAAABAAAB0AAAADcAAgAAAAEAAAGOAAAAQgAAAAFtZGF0AAAAAAAAAIkAAAAGRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAZKADAAQAAAABAAAAZAAAAAASAAoNAAAAAzY8Z//ChIgAwjIkEAGEgAYYYYi0VMregO56Wg+x6xnwsfoJWaYWX85G+ibLVJ6A');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  dynamic-range-limit: no-limit; }
+.bt-hdr-0{ --bt-hdr: 0; }
+.bt-hdr-50{ --bt-hdr: .5; }
+.bt-hdr-100{ --bt-hdr: 1; }
+
+/* CUT B -- A SHAPE IS THE MASK. The swatch is the paint; an SVG chevron cuts it, so the
+   thing that lights up is the thing you pressed. Momentary is two durations rather than an
+   animation: opacity snaps on at :active with duration 0 and eases back out, so the flash
+   cannot lag the press. The mask is the chevron at its HOVER stroke, because a press
+   almost always arrives through a hover and a mask thinner than the stroke under it leaves
+   a rim of ink showing around the light. */
+.bt-hdr-step{ position: relative; display: inline-flex; align-items: center;
+  justify-content: center; width: 44px; height: 32px; padding: 0; cursor: pointer;
+  color: var(--bt-ink3); background: var(--bt-sf);
+  border: var(--bt-hair) solid var(--bt-line); border-radius: var(--bt-pill); }
+.bt-hdr-step svg{ display: block; }
+.bt-hdr-step:hover{ color: var(--bt-ink); }
+.bt-hdr-step::before{ content:''; position: absolute; inset: 0; pointer-events: none;
+  background-image: url('data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAE1pUHJhdmlmbWlhZm1pZjEAAAFebWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAAOcGl0bQAAAAAAAQAAADhpaW5mAAAAAAACAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAFWluZmUCAAABAAIAAEV4aWYAAAAAGmlyZWYAAAAAAAAADmNkc2MAAgABAAEAAACBaXBycAAAAGBpcGNvAAAAE2NvbHJuY2x4AAkAEAABgAAAAAxjbGxpA+gAQAAAABRpc3BlAAAAAAAAAGQAAABkAAAACWlyb3QAAAAAEHBpeGkAAAAAAwoKCgAAAAxhdjFDgQBMAAAAABlpcG1hAAAAAAAAAAEAAQaBAgMFhoQAAAAsaWxvYwAAAABEAAACAAEAAAABAAAB0AAAADcAAgAAAAEAAAGOAAAAQgAAAAFtZGF0AAAAAAAAAIkAAAAGRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAZKADAAQAAAABAAAAZAAAAAASAAoNAAAAAzY8Z//ChIgAwjIkEAGEgAYYYYi0VMregO56Wg+x6xnwsfoJWaYWX85G+ibLVJ6A');
+  background-size: 100% 100%; background-repeat: no-repeat;
+  dynamic-range-limit: no-limit;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 4.38 5 1.62 9 4.38' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 4.38 5 1.62 9 4.38' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E");
+  mask-repeat: no-repeat; mask-position: center; mask-size: 10px 6px;
+  -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; -webkit-mask-size: 10px 6px;
+  opacity: 0;
+  transition: opacity calc(var(--bt-dur) * 2) ease-out; }
+.bt-hdr-step:active::before{ opacity: 1; transition-duration: 0s; }
+
+/* THE LIGHT GATE, unwound exactly as the shipped rule unwinds it: clip back to border-box
+   so the glyph is smoothed coloured text again and not a mask, the number to 0, and the
+   range limit back to standard. Physics, not taste -- the boost exists only for pixels
+   brighter than SDR white, and there is no darker-than-black to boost into. Ungated, the
+   swatch painted the chosen mark WHITE on a light page: the faintest thing in the row
+   rather than the fullest, which is the exact inverse of what active means. */
+.bt-hdr-light{ background: #ebebeb; border-radius: var(--bt-r); padding: 1.5rem 1rem;
+  text-align: center; }
+.bt-hdr-light .bt-hdr-mark{ --bt-hdr: 0;
+  color: #161616; background-image: none;
+  -webkit-background-clip: border-box; background-clip: border-box;
+  dynamic-range-limit: standard; }
+.bt-hdr-light .bt-hdr-cap{ color: #444; }
+
+.bt-hdr-range{ width: 100%; accent-color: var(--bt-signal); margin: .875rem 0 .25rem; }
+.bt-hdr-cap{ font-size: .625rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--bt-ink3); font-variation-settings:'opsz' 10; }
+.bt-hdr-marks{ display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+.bt-hdr-cell{ display: flex; flex-direction: column; align-items: center; gap: .5rem; }
+
 /* ── the verdict table ────────────────────────────────────────────────────── */
 .bt-tbl-wrap{ overflow-x: auto; overscroll-behavior-x: contain; margin: 0 0 1.25rem; }
 .bt-tbl{ border-collapse: collapse; width: 100%; min-width: 34rem; max-width: 60em;
@@ -965,6 +1061,95 @@ same card, so the comparison is between designs and not between demos.</p>
   paragraph, and the two have to look like one decision.</p>
 </div>
 
+<!-- ═══ the mechanism ════════════════════════════════════════════════════ -->
+<h2>One swatch, two ways to cut it</h2>
+<p class="bt-lede"><b>Not a seventh family &mdash; a mechanism, and one that already
+ships.</b> Active is the only state that leaves SDR. The ladder spends everything getting
+to <i>chosen</i> &mdash; faint to quiet to full, GRAD 50 to 100 to 150 &mdash; and then has
+nowhere left to go on a screen that can go further. So the chosen mark is painted with a
+flat PQ white instead of with ink. <code>src/icon.css</code> does it to the mark;
+<code>src/AxisSlider.css</code> and <code>src/AxisTriplet.css</code> do it to the stepper
+chevron. <b>font-proofer's own source carries none of it</b> &mdash; it arrives through
+<code>shared/</code> &mdash; so there is nothing here that is a port. The swatch below was
+read out of <code>icon.css</code> when this page was written, not retyped, and it is
+byte-identical in all three primitives.</p>
+
+<div class="bt-rack">
+  <div class="bt-panel">
+    <p class="bt-panel-lab">The swatch</p>
+    <div class="bt-hdr-pair">
+      <div class="bt-hdr-chip">sRGB #fff</div>
+      <div class="bt-hdr-chip bt-hdr-chip--hdr">PQ</div>
+    </div>
+    <p class="bt-cost">One pixel of <b>field-247</b>, its brightest &mdash; about
+    <b>1216 nits</b> through the PQ EOTF, and literally the same light the poster puts on
+    its headline. Deliberately <b>not PQ 1.0</b>: that is 10,000 nits, which no display
+    resolves, so the system tone-maps it &mdash; and clipping is where a bright white turns
+    chalky and shifts hue. Sampling the field's own peak also means a mark glows at exactly
+    the wordmark's white rather than outshining the logotype from 20px.
+    <b>If these two squares are the same colour, your screen is SDR</b> and everything
+    below will read as plain full ink.</p>
+  </div>
+
+  <div class="bt-panel">
+    <p class="bt-panel-lab">Cut A &mdash; the glyph is the mask</p>
+    <div class="bt-hdr-marks">
+      <span class="bt-hdr-cell"><span class="bt-hdr-mark bt-hdr-0">format_paragraph</span><span class="bt-hdr-cap">0</span></span>
+      <span class="bt-hdr-cell"><span class="bt-hdr-mark bt-hdr-50">format_paragraph</span><span class="bt-hdr-cap">0.5</span></span>
+      <span class="bt-hdr-cell"><span class="bt-hdr-mark bt-hdr-100">format_paragraph</span><span class="bt-hdr-cap">1</span></span>
+      <span class="bt-hdr-cell" id="bt-hdr-live"><span class="bt-hdr-mark">grid_view</span><span class="bt-hdr-cap" id="bt-hdr-read">live 1.00</span></span>
+    </div>
+    <input class="bt-hdr-range" id="bt-hdr-range" type="range" min="0" max="1" step="0.01" value="1" aria-label="HDR handover">
+    <p class="bt-cost"><code>color: transparent</code> plus
+    <code>background-clip: text</code> makes the engine rasterise the letterform as a
+    <b>mask</b> rather than as smoothed coloured text. That is also why a chosen mark reads
+    heavier than its GRAD implies &mdash; a mask is full grayscale coverage, more actual
+    pixels, not bloom. Two layers make the boost a <b>slope</b>: ink on top at alpha
+    (1 &minus; hdr), HDR white underneath. At 0 the ink is opaque and the mark looks exactly
+    as it did, which is why the handover is invisible. The paint itself cannot be
+    interpolated, so only that one registered number animates.</p>
+  </div>
+
+  <div class="bt-panel">
+    <p class="bt-panel-lab">Cut B &mdash; a shape is the mask</p>
+    <div class="bt-row">
+      <button class="bt-hdr-step" type="button" aria-label="Step up">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 4.38 5 1.62 9 4.38" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="bt-hdr-cap">hold it</span>
+    </div>
+    <p class="bt-cost">Same swatch, different cut: here it is the <b>paint</b>, and an SVG
+    chevron masks it &mdash; so the thing that lights up is the thing you pressed, rather
+    than a second shape appearing in a 10&times;6 box that already holds a chevron.
+    Momentary is <b>two durations, not an animation</b>: opacity snaps on at
+    <code>:active</code> with duration 0 and eases back out, so the flash cannot lag the
+    press or be re-triggered mid-decay by a repeat from the hold timer. The mask is drawn at
+    the chevron's <i>hover</i> stroke, because a press almost always arrives through a
+    hover and a mask thinner than the stroke under it leaves a rim of ink around the light.</p>
+  </div>
+
+  <div class="bt-panel">
+    <p class="bt-panel-lab">The light gate</p>
+    <div class="bt-hdr-light">
+      <span class="bt-hdr-mark">format_paragraph</span>
+      <div class="bt-hdr-cap" style="margin-top:.5rem">chosen, on a light ground</div>
+    </div>
+    <p class="bt-cost">On a light ground the whole thing is <b>unwound</b>: clip back to
+    border-box so the glyph is coloured text again and not a mask, the number to 0, the
+    range limit back to standard. Physics rather than taste &mdash; the boost exists only
+    for pixels <i>brighter than SDR white</i>, and there is no darker-than-black to boost
+    into. Left ungated, the swatch painted the chosen mark <b>white on a light page</b>:
+    the faintest thing in the row instead of the fullest, which is the exact inverse of
+    what active means.</p>
+  </div>
+</div>
+
+<p class="bt-cost" style="max-width:52em"><b>What this does not settle.</b> It is a
+technique for <i>marks</i>. Every family above decides a chosen state in ink, ground or
+edge, and none of them assumes a screen that goes past white. Putting an HDR chosen state
+on a button <i>enclosure</i> is a design question in its own right, not a port of this
+&mdash; so it is shown here and deliberately left out of all six.</p>
+
 <!-- ═══ verdict ══════════════════════════════════════════════════════════ -->
 <h2>Which one</h2>
 <p class="bt-lede">One column matters more than the others. <b>At rest</b> is whether the
@@ -1051,6 +1236,18 @@ here and it fails exactly where the brief says not to.</p>
     root.classList.add('touch');
     var tb = document.getElementById('bt-touch');
     if (tb) tb.setAttribute('aria-pressed', 'true');
+  }
+
+  // The HDR handover, live. Only the number moves -- the paint is two background layers
+  // that cannot be interpolated, which is the whole reason it is a registered property.
+  var hdrRange = document.getElementById('bt-hdr-range');
+  var hdrLive  = document.getElementById('bt-hdr-live');
+  var hdrRead  = document.getElementById('bt-hdr-read');
+  if (hdrRange && hdrLive) {
+    hdrRange.addEventListener('input', function(){
+      hdrLive.style.setProperty('--bt-hdr', hdrRange.value);
+      if (hdrRead) hdrRead.textContent = 'live ' + Number(hdrRange.value).toFixed(2);
+    });
   }
 
   var toggles = { 'bt-touch': 'touch', 'bt-target': 'target' };
