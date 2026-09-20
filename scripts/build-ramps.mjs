@@ -101,24 +101,32 @@ const luma = Object.fromEntries(['srgb', 'oklab']
 /* COMPUTED from the band's own parameters: #e8e8e8 ink at BAND_FROM..BAND_TO alpha over
    the #0f0f0f ground the wrapper states. That is what "how many levels" means.
    The steep band is the control and crosses the whole alpha range at the same width. */
-const BAND_FROM = .25, BAND_TO = .30
+const BAND_FROM = 0, BAND_TO = .35
+const LIGHT_FROM = .65, LIGHT_TO = 1
 const levelsFor = (a0, a1) => Math.round((a1 - a0) * (0xe8 - 0x0f))
 const bandLevels = levelsFor(BAND_FROM, BAND_TO)
 const steepLevels = levelsFor(0, 1)
+const lightLevels = levelsFor(LIGHT_FROM, LIGHT_TO)
 
 /* MEASURED in Chromium by decoding the rendered band, at the width the assembled page
    gives it. Re-take these if the band's range, width or dither strength changes. */
 const MEASURED = {
   ditherBg: 2.98,      // per-pixel deviation, same ramp as background-image
   ditherMask: 0.22,    //   "                            as mask-image
-  terrace: 155,        // widest flat run across the shallow band, px, at full width
-  terraceDithered: 13, //   "            with .wm-dither on the wrapper at its .18 default
-  terraceSteep: 12,    //   "            across the steep control, same width
-  terraceBg: 68,       //   "            the same endpoints as a background-image
-  jumpMask: 0.99,      // largest 1px step in the COLUMN MEAN -- the staircase itself
-  jumpBg: 0.49,        //   "   as a background-image: Skia halves it
-  jumpDither: 1.08,    //   "   masked + .wm-dither: the step survives, noise on top
+  terrace: 13,         // px per level across the dark band -- the density the eye reads
+  runMask: 33,         // widest identical run across the dark mask row, px
+  runDither: 23,       //   "   with .wm-dither: broken up, not removed
+  terraceSteep: 5,     //   "   the steep control: dense enough to fuse
+  terraceLight: 13,    //   "   the light control: same density, other end of the scale
+  /* The last three rows all carry 76 levels, so px-per-level cannot tell them apart.
+     What separates them is the size of the step left in the COLUMN MEAN. */
+  jumpMask: 0.99,      // the staircase itself
+  jumpBg: 0.49,        // as a background-image: Skia halves it
+  jumpDither: 1.29,    // masked + .wm-dither: the step survives, with noise on top
+  dLdark: 0.365,       // CIELAB dL* of one 8-bit step at the dark row's foot
+  dLlight: 0.351,      //   "                        at the light row's foot
 }
+
 
 /* ── 01 · the curve ──────────────────────────────────────────────────────────────── */
 const PEN = [[0, 1], [.5, .30], [.65, .15], [.755, .075], [.8285, .037], [.88, .019], [1, 0]]
@@ -198,45 +206,41 @@ const scrimOf = ease => g.scrim('#0f0f0f', { ease, dir: 'to top' })
    terraces, not more visible ones -- because the step between two of them is ONE level,
    and one level is one level wherever you put it.
 
-   The first attempt centred the band on mid-grey and showed it twice, the second copy
-   through filter: contrast(6), on the theory that the steps were simply too small to
-   see. That was the wrong diagnosis and the fix made it worse. contrast() pivots on 0.5
-   and rescales everything through it, so the amplified copy no longer sat on the ground
-   it was composited over: a .45->.59 band renders 113->142, and at contrast(6) that is
-   41->215, a near-full-range gradient floating on a #0f0f0f page it has stopped having
-   any relationship to. It read as a different picture rather than a louder one, and the
-   dither twin came out looking like heavy grain, which argues against the very thing
-   the chapter recommends.
+   Two wrong diagnoses before this one, both worth leaving on the record.
 
-   What actually governs visibility is not the size of the step, it is the WIDTH of the
-   terrace: a one-level boundary is invisible over 4px and obvious as a straight edge
-   over 150. So the band crosses FEWER levels over the same width. .25 -> .30 is 11
-   levels across the full column -- terraces 155px wide, plainly visible with no filter
-   on them at all -- against the steep control's 217 levels at 12px, which is smooth.
-   Same ink, same ground, same quantiser; only the slope differs. Nothing here is
-   amplified, so nothing here has to be disclaimed.
+   First: that the steps were too SMALL to see, fixed by showing the band again through
+   filter: contrast(6). contrast() pivots on 0.5 and rescales everything through it, so
+   the amplified copy stopped sitting on the ground it was composited over -- 113->142
+   became 41->215, a near-full-range gradient floating on a #0f0f0f page it had no
+   relationship to. A different picture, not a louder one.
 
-   Measuring the fixes rather than assuming them turned up a correction the chapter
-   used to get wrong. .wm-dither does NOT remove the staircase. It cannot: the tile is
-   fixed bipolar noise composited through overlay AFTER the compositor has quantised the
-   mask, so it can only sit on top of the steps. It breaks the widest run from 155px to
-   13 and it hides the edge well, but average a column and the 1-level step is still
-   there -- and raising the strength raises the noise faster than it lowers the step.
-   Skia's own dithering of a background-image gradient does better at the thing that
-   matters, halving the step in the column mean, which is what the 2.98-against-0.22
-   pair was always measuring. Neither makes an 11-level ramp over 990px disappear. That
-   is the honest result and the chapter now shows all four so it can say so.
+   Second: that what mattered was terrace WIDTH, fixed by crossing fewer levels over the
+   same width -- 11 levels at 155px each. That is the worst choice available. It reads
+   as one flat grey (11 levels is 4% of the range: there is no visible gradient left to
+   band) and every step is an isolated edge of about 0.37 dL*, which is under threshold
+   on its own. Too flat to be a gradient and too sparse to show a step, from one cause.
 
-   The ramp is LINEAR, not the page's own clothoid. Everywhere else the ease is the
-   subject; here the subject is levels per pixel, and a clothoid varies that along the
-   ramp -- it crowds the stops, so the widest terrace stops being the average one and
-   the figure quietly reports two effects at once. On a linear ramp "11 levels over
-   994px" means 90px each, which is what the caption claims. */
+   What the eye actually catches is the REPETITION. Many steps close together read as a
+   pattern; that pattern is what people mean by banding. So visibility is not monotonic
+   in terrace width, it peaks: 5px per level fuses into a smooth ramp, 13px bands hard,
+   155px disappears into a flat field.
+
+   And position on the tone scale matters independently, which CIELAB says it should not.
+   The dark row and the light row below are the same 76 levels at the same 13px, and
+   their per-step dL* differs by a twentieth (0.365 against 0.351) -- yet the dark one
+   bands unmistakably and the light one is clean. Lab is uniform for small patches, not
+   for a 1-level edge run across a wide smooth field, and this is the cheapest available
+   demonstration of the gap. It is also why banding complaints are always about the dark
+   end of a gradient. */
 const bandDemo = g.maskRamp({ dir: '90deg', ease: 'linear', stops: 64, from: BAND_FROM, to: BAND_TO })
 const bandSteep = g.maskRamp({ dir: '90deg', ease: 'linear', stops: 64, from: 0, to: 1 })
-/* The same two endpoints the mask composites to (#e8e8e8 at .25 and .30 over #0f0f0f),
-   written as a background-image so Skia dithers it. Computed, not typed, so it tracks
-   BAND_FROM/BAND_TO. */
+/* Same level count and same px-per-level as bandDemo, at the other end of the scale.
+   This row is the control for the tonal claim, not decoration: drop it and "the dark
+   end is where it shows" is an assertion. */
+const bandLight = g.maskRamp({ dir: '90deg', ease: 'linear', stops: 64, from: LIGHT_FROM, to: LIGHT_TO })
+/* LINEAR, not the page's own clothoid. Everywhere else the ease is the subject; here
+   the subject is levels per pixel, and a clothoid varies that along the ramp -- it
+   crowds the stops, so px-per-level stops being one number. */
 const over = a => Math.round(0x0f + a * (0xe8 - 0x0f))
 const bandBg = `linear-gradient(90deg, rgb(${over(BAND_FROM)} ${over(BAND_FROM)} ${over(BAND_FROM)}), `
   + `rgb(${over(BAND_TO)} ${over(BAND_TO)} ${over(BAND_TO)}))`
@@ -245,9 +249,12 @@ const bandBg = `linear-gradient(90deg, rgb(${over(BAND_FROM)} ${over(BAND_FROM)}
 /* The copy lives in docs/system/pages/ramps.copy.js and nowhere else. Nothing in this
    file is prose; a writing pass never opens it. */
 const COPY = copy({ EASES: g.EASES, radii, worst, rms, MD_A, MD_B,
-  sat, luma, band: { levels: bandLevels, terrace: MEASURED.terrace, dithered: MEASURED.terraceDithered,
-          steepLevels, steepTerrace: MEASURED.terraceSteep, bg: MEASURED.terraceBg,
-          jumpMask: MEASURED.jumpMask, jumpBg: MEASURED.jumpBg, jumpDither: MEASURED.jumpDither },
+  sat, luma, band: { levels: bandLevels, perLevel: MEASURED.terrace, terrace: MEASURED.terrace,
+          dithered: MEASURED.runDither, run: MEASURED.runMask,
+          steepLevels, steepPerLevel: MEASURED.terraceSteep, steepTerrace: MEASURED.terraceSteep,
+          lightLevels, lightPerLevel: MEASURED.terraceLight,
+          jumpMask: MEASURED.jumpMask, jumpBg: MEASURED.jumpBg, jumpDither: MEASURED.jumpDither,
+          dLdark: MEASURED.dLdark, dLlight: MEASURED.dLlight },
   dither: { bg: MEASURED.ditherBg, mask: MEASURED.ditherMask } })
 
 const page = `<!doctype html><meta charset=utf-8><title>ramps</title><style>
@@ -295,7 +302,7 @@ figcaption{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:#8a8a8
    not under it. */
 .bandwrap{background:#0f0f0f;border-radius:5px;overflow:hidden;position:relative}
 .bandstack{display:grid;gap:14px}
-.band.wide{height:72px;border-radius:0}
+.band.wide{height:88px;border-radius:0}
 /* A control row. Native range on purpose: this page carries no component library, and
    a slider that needs one would mean shipping React to a page that otherwise needs
    none. The page renders correctly with JS off -- every demo is baked at its default
@@ -390,6 +397,8 @@ svg.chan .ln{stroke-width:2.5}
 <figcaption>${COPY.cap7a}</figcaption></figure>
 <figure><div class="bandwrap"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
 <figcaption>${COPY.cap7}</figcaption></figure>
+<figure><div class="bandwrap"><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandLight};mask-image:${bandLight}"></div></div>
+<figcaption>${COPY.cap7c}</figcaption></figure>
 <figure><div class="bandwrap"><div class="band wide" style="background:${bandBg}"></div></div>
 <figcaption>${COPY.cap7b}</figcaption></figure>
 <figure><div class="bandwrap dither" data-dither><div class="band wide" style="background:#e8e8e8;-webkit-mask-image:${bandDemo};mask-image:${bandDemo}"></div></div>
@@ -458,4 +467,4 @@ console.log(`  clothoid fit  RMS ${rms.toFixed(5)}, worst ${worst.toFixed(4)}`)
 console.log(`  blur radii    ${radii.join(' ')}`)
 console.log(`  sat           srgb ${sat.srgb}%  oklab ${sat.oklab}%  oklch ${sat.oklch}%`)
 console.log(`  luma          srgb ${luma.srgb}  oklab ${luma.oklab}`)
-console.log(`  band          ${bandLevels} levels, terrace ${MEASURED.terrace}px -> ${MEASURED.terraceDithered}px dithered`)
+console.log(`  band          ${bandLevels} levels at ${MEASURED.terrace}px each, run ${MEASURED.runMask}px -> ${MEASURED.runDither}px dithered`)

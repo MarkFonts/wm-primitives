@@ -372,10 +372,15 @@ export function blurLayers(o: BlurOptions = {}): BlurLayer[] {
        reads at ease(1 - 1/2n) and the stack never reaches the radius that was asked
        for. At the far edge the final layer is exactly `radius`, which is the promise. */
     const r = radius * bezierY(ease, b)
-    /* A full band's worth of feather on each side, so the windows overlap completely and
-       the sum of the stack is smooth rather than merely continuous. Narrower and the
-       hand-over happens over too few pixels to hide. */
-    const w = b - a
+    /* HALF a band of feather, not a whole one. A full band was the first attempt, on the
+       theory that total overlap makes the sum smoothest -- and it does, but it also means
+       layer i is already half opaque at layer i-1's START. Stacked, that put the second
+       layer's radius at 50% alpha across the very top of the element: measured down a
+       6-layer 24px stack, sharpness was flat at 0.1 from first line to last. There was no
+       sharp region anywhere, only a uniform smear, which is the one thing a progressive
+       blur must not be. Half a band keeps each pixel inside at most two windows and
+       leaves the first band to itself. */
+    const w = (b - a) / 2
     const first = i === 0, last = i === n - 1
     const stops: string[] = []
     /* The first layer: opaque from the very start when the ramp owns the whole element,
