@@ -14,11 +14,14 @@ Newest first.
 
 ## 2026-09-20 — the house button splits a word
 
-**A flex box makes a bare text run an item.** `.wm-btn` is inline-flex with a 6px gap so
-a mark can sit beside its word; Kernpare writes its labels `<u>D</u>elete Pairs` for the
-access keys, and the gap fell between the D and the rest. Every affected label is wrapped
-in one span on the Kernpare side (wordmarktools `46afddd`); the rule is on the button's
-own header, since the next host will write the same markup. The button is unchanged.
+**A flex box makes a bare text run an item.** `.wm-btn` was inline-flex with a 6px gap so
+a mark could sit beside its word; Kernpare writes its labels `<u>D</u>elete Pairs` for
+the access keys, and the gap fell between the D and the rest. The first fix wrapped the
+labels on the Kernpare side, which Mark called duct tape, correctly: the button was
+asking every host to know a flex-box rule. So the gap is gone from the box and lives on
+the mark instead -- a margin on `.wm-icon` or anything flagged `data-mark`, on the side
+that faces the label. Text sits flush however it is marked up; a mark keeps its space.
+Kernpare's wrapping is reverted (wordmarktools `46afddd` → back).
 
 ---
 
