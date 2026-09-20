@@ -1,0 +1,1067 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Six ways to say press</title>
+<!-- Rides INSIDE section 03 as an extra source (build.py SECTIONS, the same mechanism
+     that puts circles inside the corner law). Everything is scoped to `#s-controls
+     .part-N`, so every class here carries a bt- prefix and nothing reaches the dial
+     page's markup or is reached by it.
+
+     SELF-CONTAINED ON PURPOSE. build.py strips a `../../src/` <link> from the SECTION's
+     first source only, not from an extra, so a link here would 404 in the assembled page
+     -- docs/../../src is outside what Pages serves. The five families are page-local CSS
+     anyway: they are five proposals, and only the one that wins becomes src/button.css.
+
+     NO COMMA MAY APPEAR INSIDE :is() / :not() / :where() ON THIS PAGE. The assembler
+     splits a selector prelude on top-level commas with a plain split(","), so
+     `.x:is(:hover, .s-h)` compiles to two half-selectors and the rule is lost, silently.
+     States are spelled as two comma-separated selectors instead. -->
+<style>
+/* Standalone only -- build.py strips every @font-face and declares the faces once for
+   the whole document. Here so that opening this file directly renders in Cal Sans and
+   draws real marks instead of printing "format_align_left" in words. */
+@font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype"); font-display:swap; }
+@font-face{ font-family:"Material Symbols Outlined"; src:url("../../fonts/MaterialSymbolsOutlined.woff2") format("woff2"); font-weight:100 700; font-display:block; }
+
+/* The tick length is a REGISTERED property because family 05 transitions it. An
+   unregistered custom property is a token stream, and a token stream has no
+   interpolation -- the ticks would snap to a closed box instead of running together. */
+@property --bt-tick{ syntax:'<length-percentage>'; inherits:false; initial-value:9px; }
+
+/* ── tokens ───────────────────────────────────────────────────────────────────
+   Nothing is declared on :root. The assembled page already carries the house roles
+   (--bg, --surface, --surface-hi, --ink, --line, --signal) and a :root block here
+   would be scoped onto this part and SHADOW them -- pinning one theme inside a page
+   that has a theme switch. So every token reads the house role and falls back to a
+   literal, which is the only value that exists when this file is opened on its own.
+   --text/--text-muted are the second link in each chain: that is the name the host
+   contract uses, and this page should also render inside a consuming app. */
+.bt-page{
+  --bt-bg:   var(--bg, #0f0f0f);
+  --bt-sf:   var(--surface, #1a1a1a);
+  --bt-sf2:  var(--surface-hi, #252525);
+  --bt-ink:  var(--ink, var(--text, #e8e8e8));
+  --bt-ink2: var(--ink-2, var(--text-muted, rgba(232,232,232,.62)));
+  --bt-ink3: var(--ink-3, var(--text-dim, rgba(232,232,232,.38)));
+  --bt-line: var(--line, var(--border, rgba(232,232,232,.14)));
+  --bt-signal: var(--signal, #eeff41);
+  --bt-on-signal: var(--bg, #0f0f0f);
+  --bt-font: var(--ui-font, "CalSansVF", system-ui, sans-serif);
+
+  /* the corner law, restated so the page is right standalone too */
+  --corner-k: 1.2;
+  --bt-r: 8px;        /* 2^3 -- the control radius */
+  --bt-r-sm: 4px;     /* 2^2 -- the inner radius */
+  --bt-pill: 999px;
+  --bt-hair: 1px;
+  --bt-stroke-hover: 1.2px;
+  --bt-stroke-press: 1.8px;
+  --bt-dur: .14s;
+
+  font-family: var(--bt-font);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--bt-ink);
+}
+@media (prefers-color-scheme: light){
+  .bt-page{
+    --bt-bg:   var(--bg, #f4f4f4);
+    --bt-sf:   var(--surface, #ffffff);
+    --bt-sf2:  var(--surface-hi, #ebebeb);
+    --bt-ink:  var(--ink, var(--text, #161616));
+    --bt-ink2: var(--ink-2, var(--text-muted, rgba(22,22,22,.66)));
+    --bt-ink3: var(--ink-3, var(--text-dim, rgba(22,22,22,.42)));
+    --bt-line: var(--line, var(--border, rgba(22,22,22,.16)));
+    --bt-signal: var(--signal, #5c6b00);
+    --bt-on-signal: var(--bg, #f4f4f4);
+  }
+}
+.bt-page *, .bt-page *::before, .bt-page *::after{ corner-shape: superellipse(var(--corner-k, 1.2)); }
+.bt-page *{ box-sizing: border-box; }
+
+/* NOBODY PAINTED THE CANVAS. Every token above is declared on .bt-page, and .bt-page set
+   a colour and no ground -- so opened on its own the page was --ink on the UA's white,
+   which in dark mode is near-white on white. It did not show up in a preview pane,
+   because the pane's own backdrop is dark and the transparent page let it through. On a
+   real browser it is unreadable.
+   var(--bg) with a per-theme fallback, not a literal: the assembled page resolves the
+   house role and stays themed, and only the standalone view falls through to the
+   literal. The build scopes `html`/`body` onto this part, where both lines are correct
+   for it too. */
+html, body { margin: 0; background: var(--bg, #0f0f0f); }
+@media (prefers-color-scheme: light){
+  html, body { background: var(--bg, #f4f4f4); }
+}
+/* Standalone only -- set by script when there is no section around this part, because
+   inside the assembled document the section already owns the page's gutter and a second
+   one would step this part in from the dial above it. */
+.bt-page.standalone{ background: var(--bt-bg); min-height: 100vh;
+  padding: 1.75rem 16px 4rem; }
+/* iOS inflates text in a column it thinks is too narrow, which would judge the type at a
+   size nothing ships. */
+.bt-page{ -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* A rule name or a token is one long unbreakable word at 360px. */
+.bt-lede, .bt-thesis, .bt-cost, .bt-laws td{ overflow-wrap: break-word; }
+
+/* ── page furniture ───────────────────────────────────────────────────────── */
+.bt-lede{ max-width: 46em; color: var(--bt-ink2); margin: 0 0 1.25rem; }
+.bt-lede b{ color: var(--bt-ink); font-weight: 500; }
+.bt-lede code{ font-family: var(--bt-font); font-variation-settings:'opsz' 10; font-size: .92em;
+  color: var(--bt-ink); background: var(--bt-sf); padding: .05em .3em; border-radius: var(--bt-r-sm); }
+
+.bt-laws{ background: var(--bt-sf); border: var(--bt-hair) solid var(--bt-line);
+  border-radius: var(--bt-r); padding: 1.25rem 1.5rem; margin: 0 0 2.5rem; max-width: 52em; }
+.bt-laws h3{ font-size: .6875rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--bt-ink3); margin: 0 0 .875rem; font-weight: 600; font-variation-settings:'opsz' 10; }
+.bt-laws table{ border-collapse: collapse; width: 100%; font-size: .8125rem; }
+.bt-laws td{ padding: .4rem .875rem .4rem 0; border-bottom: var(--bt-hair) solid var(--bt-line); vertical-align: top; }
+.bt-laws tr:last-child td{ border-bottom: 0; }
+.bt-laws td:first-child{ color: var(--bt-ink); white-space: nowrap; width: 9rem;
+  font-variation-settings:'opsz' 10; }
+.bt-laws td:last-child{ color: var(--bt-ink2); }
+
+.bt-bar{ display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+  margin: 0 0 2rem; padding: .75rem 0; border-bottom: var(--bt-hair) solid var(--bt-line); }
+.bt-bar span{ font-size: .625rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--bt-ink3); margin-right: .25rem; font-variation-settings:'opsz' 10; }
+.bt-bar button{ font: inherit; font-size: .8125rem; font-family: var(--bt-font);
+  padding: .25rem .75rem; background: var(--bt-sf); color: var(--bt-ink2);
+  border: var(--bt-hair) solid var(--bt-line); border-radius: var(--bt-pill); cursor: pointer; }
+.bt-bar button[aria-pressed="true"]{ background: var(--bt-ink); color: var(--bt-bg); border-color: var(--bt-ink); }
+.bt-bar button:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+
+/* ── a family block ───────────────────────────────────────────────────────── */
+.bt-fam{ margin: 0 0 3.5rem; }
+.bt-fam-head{ display: flex; align-items: baseline; gap: .75rem; margin: 0 0 .5rem; }
+.bt-idx{ font-size: .625rem; letter-spacing: .14em; color: var(--bt-signal);
+  font-variation-settings:'opsz' 10; }
+.bt-thesis{ max-width: 44em; color: var(--bt-ink2); font-size: .9375rem; margin: 0 0 1.25rem; }
+.bt-thesis b{ color: var(--bt-ink); font-weight: 500; }
+
+.bt-rack{ display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--bt-hair); background: var(--bt-line);
+  border: var(--bt-hair) solid var(--bt-line); border-radius: var(--bt-r); overflow: hidden; }
+.bt-panel{ background: var(--bt-bg); padding: 1.125rem 1.25rem 1.375rem; min-width: 0;
+  display: flex; flex-direction: column; }
+.bt-panel-lab{ font-size: .625rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--bt-ink3); margin: 0 0 .875rem; font-variation-settings:'opsz' 10; }
+.bt-row{ display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.bt-row + .bt-row{ margin-top: .625rem; }
+.bt-stack{ display: flex; flex-direction: column; gap: .75rem; align-items: flex-start; }
+.bt-cost{ font-size: .8125rem; line-height: 1.45; color: var(--bt-ink2);
+  margin: 1rem 0 0; max-width: 46em; }
+.bt-cost b{ color: var(--bt-ink); font-weight: 500; }
+
+/* A state is PINNED, not hovered: a page cannot hover four things at once, and the
+   ladder is the thing being compared. Every family therefore spells its hover and
+   press twice -- once as the pseudo-class, once as .s-h / .s-p -- and never as
+   :is(:hover, .s-h), which this build's selector splitter would tear in half. */
+.bt-st{ display: grid; grid-template-columns: auto 1fr; gap: .5rem .875rem; align-items: center; }
+.bt-st-lab{ font-size: .6875rem; color: var(--bt-ink3); font-variation-settings:'opsz' 10; }
+
+/* the mark. One family, one weight, GRAD carries the theme -- icon.css's rule, restated
+   locally because this page does not link src/.
+
+   THE SHIPPED FACE IS A 24-ICON SUBSET, and a name outside it does not fail loudly: the
+   ligature never forms and the browser draws the component glyphs instead, so `undo`
+   painted as two unrelated strokes and `arrow_outward` as a circle. Both looked like
+   icons. The whole list, from the GSUB of fonts/MaterialSymbolsOutlined.woff2:
+
+     brightness_auto  calendar_month  check  content_copy  dark_mode  discover_tune
+     format_align_center  format_align_justify  format_align_left  format_align_right
+     format_bold  format_h1  format_h2  format_h3  format_italic  format_paragraph
+     forms_add_on  grid_view  insert_text  keyboard_arrow_down  keyboard_arrow_up
+     light_mode  settings_backup_restore  text_fields
+
+   Nothing on this page may use a name that is not on it. Reset is
+   settings_backup_restore, not undo -- which is also what controls.html's mark table
+   calls it. */
+.bt-i{ font-family:"Material Symbols Outlined"; font-weight: normal; font-style: normal;
+  line-height: 1; letter-spacing: normal; text-transform: none; white-space: nowrap;
+  direction: ltr; font-feature-settings:'liga'; -webkit-font-smoothing: antialiased;
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  user-select: none; overflow: hidden; max-width: 1.25em; font-size: 20px;
+  font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 50,'opsz' 20; }
+.bt-i--sm{ font-size: 16px; max-width: 1em; font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 50,'opsz' 20; }
+@media (prefers-color-scheme: light){
+  .bt-i{ font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 100,'opsz' 20; }
+}
+
+/* ── the in-situ card, identical content in all five treatments ───────────── */
+.bt-situ{ background: var(--bt-sf); border: var(--bt-hair) solid var(--bt-line);
+  border-radius: var(--bt-r); padding: .875rem 1rem 1rem; }
+.bt-situ-head{ display: flex; justify-content: space-between; align-items: baseline;
+  font-size: .6875rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--bt-ink3); margin: 0 0 .5rem; font-variation-settings:'opsz' 10; }
+.bt-situ-head b{ color: var(--bt-ink2); font-weight: 500; letter-spacing: .14em; }
+.bt-situ-row{ display: flex; align-items: center; gap: .375rem; margin-top: .875rem; flex-wrap: wrap; }
+.bt-sp{ flex: 1 1 auto; min-width: .25rem; }
+.bt-seg{ display: inline-flex; gap: 2px; }
+
+/* ── try: touch sizing, and the target made visible ───────────────────────── */
+.bt-page.touch .bt-hit{ min-height: 44px; }
+.bt-page.touch .bt-hit.bt-ico{ min-width: 44px; }
+.bt-page.target .bt-hit{ outline: 1px dashed var(--bt-signal); outline-offset: 0; }
+.bt-page.target .bt-ed{ outline: 1px dashed var(--bt-signal); outline-offset: 0; }
+
+/* Every family's editable specimen is a real contenteditable, so the affordance can be
+   judged against the thing it promises. */
+.bt-ed{ display: block; outline: none; cursor: text; }
+.bt-ed:focus{ outline: none; }
+
+/* ═══ 01 KEYLINE ══════════════════════════════════════════════════════════════
+   The box, and one side of it. */
+.bt-k{ display: inline-flex; align-items: center; justify-content: center; gap: .375rem;
+  padding: .5rem .75rem; font: inherit; font-size: .8125rem; font-family: var(--bt-font);
+  font-variation-settings:'opsz' 10;
+  color: var(--bt-ink2); background: var(--bt-sf); cursor: pointer;
+  border: var(--bt-hair) solid var(--bt-line); border-radius: var(--bt-r);
+  white-space: nowrap; -webkit-tap-highlight-color: transparent;
+  transition: color var(--bt-dur) ease, border-color var(--bt-dur) ease, background var(--bt-dur) ease; }
+.bt-k:hover:not(:disabled){ color: var(--bt-ink); border-color: var(--bt-ink3); }
+.bt-k.s-h{ color: var(--bt-ink); border-color: var(--bt-ink3); }
+.bt-k:active:not(:disabled){ background: none; box-shadow: inset 0 0 0 var(--bt-stroke-press) currentColor; border-color: transparent; }
+.bt-k.s-p{ background: none; box-shadow: inset 0 0 0 var(--bt-stroke-press) currentColor; border-color: transparent; color: var(--bt-ink); }
+.bt-k.s-f{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+.bt-k:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+.bt-k:disabled{ opacity: .4; cursor: default; }
+.bt-k.is-on{ color: var(--bt-ink); background: var(--bt-sf2); border-color: var(--bt-ink3); }
+.bt-k--solid{ color: var(--bt-bg); background: var(--bt-ink); border-color: var(--bt-ink); }
+.bt-k--solid:hover:not(:disabled){ color: var(--bt-bg); filter: brightness(1.08); }
+.bt-k--ico{ padding: .5rem; }
+/* The editable is the SAME box showing one edge. Same radius, same inset, same colour --
+   which is the whole claim: hover completes the shape it was already part of. */
+.bt-k-ed{ padding: .375rem .5rem; border: var(--bt-hair) solid transparent;
+  border-bottom-color: var(--bt-line); border-radius: var(--bt-r);
+  color: var(--bt-ink); transition: border-color var(--bt-dur) ease, background var(--bt-dur) ease; }
+.bt-k-ed:hover{ border-color: var(--bt-line); background: var(--bt-sf); }
+.bt-k-ed.s-h{ border-color: var(--bt-line); background: var(--bt-sf); }
+.bt-k-ed:focus{ border-color: var(--bt-ink3); background: var(--bt-sf); caret-color: var(--bt-signal); }
+
+/* ═══ 02 LOZENGE ══════════════════════════════════════════════════════════════
+   A ground, not an edge. padding-x >= 0.6 x radius; on a pill the radius is half the
+   height, so a 34px pill owes 10.2px each side and is given 14. */
+.bt-z{ display: inline-flex; align-items: center; justify-content: center; gap: .375rem;
+  padding: .5rem .875rem; font: inherit; font-size: .8125rem; font-family: var(--bt-font);
+  font-variation-settings:'opsz' 10;
+  color: var(--bt-ink); background: var(--bt-sf2); cursor: pointer;
+  border: var(--bt-hair) solid transparent; border-radius: var(--bt-pill);
+  white-space: nowrap; -webkit-tap-highlight-color: transparent;
+  transition: background var(--bt-dur) ease, color var(--bt-dur) ease; }
+.bt-z:hover:not(:disabled){ background: color-mix(in oklab, var(--bt-ink) 16%, var(--bt-sf2)); }
+.bt-z.s-h{ background: color-mix(in oklab, var(--bt-ink) 16%, var(--bt-sf2)); }
+/* A pill is curved along its whole edge, where corners.css records that an inset
+   box-shadow does NOT follow corner-shape. So the press is a ground change, which is
+   clipped to the real shape. */
+.bt-z:active:not(:disabled){ background: color-mix(in oklab, var(--bt-ink) 30%, var(--bt-sf2)); }
+.bt-z.s-p{ background: color-mix(in oklab, var(--bt-ink) 30%, var(--bt-sf2)); }
+.bt-z.s-f{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+.bt-z:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+.bt-z:disabled{ opacity: .4; cursor: default; }
+.bt-z.is-on{ background: var(--bt-signal); color: var(--bt-on-signal); }
+.bt-z--solid{ background: var(--bt-signal); color: var(--bt-on-signal); }
+.bt-z--solid:hover:not(:disabled){ filter: brightness(1.06); }
+.bt-z--ico{ padding: .5rem; aspect-ratio: 1; }
+/* The editable is the same lozenge with the fill taken out: a wash that is barely there
+   until approached. Highlighter, not rule. */
+.bt-z-ed{ display: inline-block; padding: .25rem .875rem; border-radius: var(--bt-pill);
+  background: color-mix(in oklab, var(--bt-ink) 5%, transparent); color: var(--bt-ink);
+  transition: background var(--bt-dur) ease; }
+.bt-z-ed:hover{ background: color-mix(in oklab, var(--bt-ink) 12%, transparent); }
+.bt-z-ed.s-h{ background: color-mix(in oklab, var(--bt-ink) 12%, transparent); }
+.bt-z-ed:focus{ background: var(--bt-sf2); box-shadow: 0 0 0 1px var(--bt-ink3); caret-color: var(--bt-signal); }
+
+/* ═══ 03 RULE ═════════════════════════════════════════════════════════════════
+   The type is the control. No box in any state. The rule thickens on the same two
+   numbers the press law uses: 1.2 at hover, 1.8 held. */
+.bt-r{ display: inline-flex; align-items: center; gap: .375rem;
+  font: inherit; font-size: .8125rem; font-family: var(--bt-font);
+  font-variation-settings:'opsz' 10;
+  color: var(--bt-ink); background: none; border: 0; cursor: pointer;
+  padding: .5rem 0; margin-right: .25rem;
+  text-decoration: underline; text-decoration-thickness: var(--bt-hair);
+  text-underline-offset: .22em; text-decoration-color: var(--bt-ink2);
+  -webkit-tap-highlight-color: transparent;
+  transition: text-decoration-color var(--bt-dur) ease, text-decoration-thickness var(--bt-dur) ease; }
+.bt-r:hover:not(:disabled){ text-decoration-color: var(--bt-ink); text-decoration-thickness: var(--bt-stroke-hover); }
+.bt-r.s-h{ text-decoration-color: var(--bt-ink); text-decoration-thickness: var(--bt-stroke-hover); }
+.bt-r:active:not(:disabled){ text-decoration-thickness: var(--bt-stroke-press); text-decoration-color: var(--bt-ink); }
+.bt-r.s-p{ text-decoration-thickness: var(--bt-stroke-press); text-decoration-color: var(--bt-ink); }
+.bt-r.s-f{ outline: 2px solid var(--bt-signal); outline-offset: 3px; }
+.bt-r:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: 3px; }
+/* Disabled loses the rule ENTIRELY. In this family the rule is the affordance, so a
+   greyed rule would still say "press me" at a distance. */
+.bt-r:disabled{ color: var(--bt-ink3); text-decoration: none; cursor: default; }
+.bt-r.is-on{ text-decoration-color: var(--bt-signal); text-decoration-thickness: var(--bt-stroke-press); }
+.bt-r--solid{ text-decoration-color: var(--bt-signal); text-decoration-thickness: var(--bt-stroke-press); }
+/* Editable text takes the SAME rule, dashed. Solid means it happens; dashed means it is
+   yours to change. That is the only difference, and it has to be the only one. */
+.bt-r-ed{ color: var(--bt-ink); text-decoration: underline dashed;
+  text-decoration-thickness: var(--bt-hair); text-underline-offset: .22em;
+  text-decoration-color: var(--bt-ink3); padding: .125rem 0;
+  transition: text-decoration-color var(--bt-dur) ease; }
+.bt-r-ed:hover{ text-decoration-color: var(--bt-ink); }
+.bt-r-ed.s-h{ text-decoration-color: var(--bt-ink); }
+.bt-r-ed:focus{ text-decoration-style: solid; text-decoration-color: var(--bt-signal); caret-color: var(--bt-signal); }
+
+/* ═══ 04 PLATE ════════════════════════════════════════════════════════════════
+   Hills and holes. One lightness ramp, no hue, no second palette: raised is +L on the
+   ground with the light from above, recessed is -L with the light inside. */
+.bt-p{ display: inline-flex; align-items: center; justify-content: center; gap: .375rem;
+  padding: .5rem .75rem; font: inherit; font-size: .8125rem; font-family: var(--bt-font);
+  font-variation-settings:'opsz' 10;
+  color: var(--bt-ink); cursor: pointer; border: 0; border-radius: var(--bt-r);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--bt-ink) 4%, var(--bt-sf2)), var(--bt-sf2));
+  box-shadow: inset 0 var(--bt-hair) 0 color-mix(in oklab, var(--bt-ink) 16%, transparent),
+              0 1px 2px color-mix(in oklab, var(--bt-bg) 70%, transparent),
+              0 0 0 var(--bt-hair) color-mix(in oklab, var(--bt-bg) 60%, transparent);
+  white-space: nowrap; -webkit-tap-highlight-color: transparent;
+  transition: background var(--bt-dur) ease, box-shadow var(--bt-dur) ease, transform var(--bt-dur) ease; }
+.bt-p:hover:not(:disabled){ background: linear-gradient(180deg, color-mix(in oklab, var(--bt-ink) 10%, var(--bt-sf2)), color-mix(in oklab, var(--bt-ink) 3%, var(--bt-sf2))); }
+.bt-p.s-h{ background: linear-gradient(180deg, color-mix(in oklab, var(--bt-ink) 10%, var(--bt-sf2)), color-mix(in oklab, var(--bt-ink) 3%, var(--bt-sf2))); }
+/* Pressed, the plate goes INTO the ground: highlight off, shadow inside, 1px down. */
+.bt-p:active:not(:disabled), .bt-p.s-p{ background: color-mix(in oklab, var(--bt-bg) 45%, var(--bt-sf));
+  box-shadow: inset 0 2px 3px color-mix(in oklab, var(--bt-bg) 85%, transparent),
+              inset 0 0 0 var(--bt-hair) color-mix(in oklab, var(--bt-bg) 60%, transparent);
+  transform: translateY(1px); }
+.bt-p.s-f{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+.bt-p:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+.bt-p:disabled{ opacity: .45; cursor: default; box-shadow: none; background: var(--bt-sf); }
+.bt-p.is-on{ background: color-mix(in oklab, var(--bt-bg) 45%, var(--bt-sf));
+  box-shadow: inset 0 2px 3px color-mix(in oklab, var(--bt-bg) 85%, transparent); }
+.bt-p--solid{ color: var(--bt-on-signal);
+  background: linear-gradient(180deg, color-mix(in oklab, #fff 18%, var(--bt-signal)), var(--bt-signal)); }
+.bt-p--ico{ padding: .5rem; }
+/* The hole. Type goes in holes. */
+.bt-p-ed{ padding: .375rem .625rem; border-radius: var(--bt-r-sm); color: var(--bt-ink);
+  background: color-mix(in oklab, var(--bt-bg) 55%, var(--bt-sf));
+  box-shadow: inset 0 var(--bt-hair) 2px color-mix(in oklab, var(--bt-bg) 80%, transparent),
+              inset 0 0 0 var(--bt-hair) color-mix(in oklab, var(--bt-bg) 50%, transparent);
+  transition: box-shadow var(--bt-dur) ease; }
+.bt-p-ed:hover, .bt-p-ed.s-h{ box-shadow: inset 0 var(--bt-hair) 3px color-mix(in oklab, var(--bt-bg) 90%, transparent),
+              inset 0 0 0 var(--bt-hair) var(--bt-ink3); }
+.bt-p-ed:focus{ box-shadow: inset 0 var(--bt-hair) 3px color-mix(in oklab, var(--bt-bg) 90%, transparent),
+              inset 0 0 0 var(--bt-hair) var(--bt-signal); caret-color: var(--bt-signal); }
+
+/* ═══ 05 BRACKET ══════════════════════════════════════════════════════════════
+   The box exists; only its corners are inked. --bt-tick is how far along each edge the
+   ink runs, and hover runs it to 50% -- at which point the four ticks meet and the box
+   closes. Two masks INTERSECTED leave exactly the four corner squares; the border under
+   them is a real border, so the ticks carry the G2 curve rather than imitating it.
+   Where mask-composite is unsupported the whole border paints: the fallback is family
+   01, which is a correct button, and that is the reason this mechanism is acceptable. */
+.bt-b{ position: relative; display: inline-flex; align-items: center; justify-content: center;
+  gap: .375rem; padding: .5rem .875rem; font: inherit; font-size: .8125rem;
+  font-family: var(--bt-font); font-variation-settings:'opsz' 10;
+  color: var(--bt-ink2); background: none; border: 0; border-radius: var(--bt-r);
+  cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent;
+  --bt-tick: 9px;
+  transition: color var(--bt-dur) ease, --bt-tick .18s ease, background var(--bt-dur) ease; }
+.bt-b::before{ content:""; position: absolute; inset: 0; pointer-events: none;
+  border: var(--bt-stroke-hover) solid var(--bt-ink3); border-radius: var(--bt-r);
+  -webkit-mask-image:
+    linear-gradient(90deg, #000 0 var(--bt-tick), transparent var(--bt-tick) calc(100% - var(--bt-tick)), #000 calc(100% - var(--bt-tick)) 100%),
+    linear-gradient(180deg, #000 0 var(--bt-tick), transparent var(--bt-tick) calc(100% - var(--bt-tick)), #000 calc(100% - var(--bt-tick)) 100%);
+  mask-image:
+    linear-gradient(90deg, #000 0 var(--bt-tick), transparent var(--bt-tick) calc(100% - var(--bt-tick)), #000 calc(100% - var(--bt-tick)) 100%),
+    linear-gradient(180deg, #000 0 var(--bt-tick), transparent var(--bt-tick) calc(100% - var(--bt-tick)), #000 calc(100% - var(--bt-tick)) 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  transition: border-color var(--bt-dur) ease; }
+.bt-b:hover:not(:disabled){ color: var(--bt-ink); --bt-tick: 50%; }
+.bt-b.s-h{ color: var(--bt-ink); --bt-tick: 50%; }
+.bt-b:hover:not(:disabled)::before{ border-color: var(--bt-ink3); }
+.bt-b.s-h::before{ border-color: var(--bt-ink3); }
+.bt-b:active:not(:disabled), .bt-b.s-p{ color: var(--bt-ink); --bt-tick: 50%; background: var(--bt-sf); }
+.bt-b:active:not(:disabled)::before, .bt-b.s-p::before{ border-color: var(--bt-ink); border-width: var(--bt-stroke-press); }
+.bt-b.s-f{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+.bt-b:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+.bt-b:disabled{ color: var(--bt-ink3); cursor: default; }
+.bt-b:disabled::before{ border-color: var(--bt-line); }
+.bt-b.is-on{ color: var(--bt-ink); --bt-tick: 50%; }
+.bt-b.is-on::before{ border-color: var(--bt-signal); }
+.bt-b--solid{ color: var(--bt-on-signal); background: var(--bt-signal); }
+.bt-b--solid::before{ border-color: transparent; }
+.bt-b--ico{ padding: .5rem; }
+/* Editable text keeps only the pair: one horizontal mask leaves the left and right edges
+   with their corner stubs, which is a bracket on each side of the words. */
+.bt-b-ed{ position: relative; display: inline-block; padding: .25rem .625rem;
+  color: var(--bt-ink); --bt-tick: 7px; }
+.bt-b-ed::before{ content:""; position: absolute; inset: 0; pointer-events: none;
+  border: var(--bt-hair) solid var(--bt-ink3); border-radius: var(--bt-r-sm);
+  -webkit-mask-image: linear-gradient(90deg, #000 0 var(--bt-tick), transparent var(--bt-tick) calc(100% - var(--bt-tick)), #000 calc(100% - var(--bt-tick)) 100%);
+  mask-image: linear-gradient(90deg, #000 0 var(--bt-tick), transparent var(--bt-tick) calc(100% - var(--bt-tick)), #000 calc(100% - var(--bt-tick)) 100%);
+  transition: border-color var(--bt-dur) ease; }
+.bt-b-ed:hover::before, .bt-b-ed.s-h::before{ border-color: var(--bt-ink); }
+.bt-b-ed:focus::before{ border-color: var(--bt-signal); }
+.bt-b-ed:focus{ caret-color: var(--bt-signal); }
+
+/* ═══ 06 RAIL ════════════════════════════════════════════════════════════════════════════
+   Not a proposal. This is what font-proofer's rail already does, written down -- which is
+   why it is the only family here whose editable mark is a rule that SHIPS: the dial's
+   .slider-number is a 1px underline on the text at offset 2, and focus colours the digits
+   and the rule together at 2px. Copied from src/AxisSlider.css, not re-derived.
+
+   Its claim is the inversion of 01-05: AN ENCLOSURE MEANS CHOSEN, NOT PRESSABLE. A row
+   at rest has no edge at all; the ground arrives when it is the one that is on. What
+   keeps that from being the failure in the brief is that the row is a full-bleed target
+   with a mark at its head -- a thing a bulleted link is not. */
+.bt-f-rail{ display: flex; flex-direction: column; gap: 2px; }
+.bt-f-row{ display: flex; align-items: center; gap: .625rem; width: 100%;
+  padding: .5rem .625rem; font: inherit; font-size: .875rem; font-family: var(--bt-font);
+  color: var(--bt-ink2); background: none; border: 0; border-radius: 10px;
+  cursor: pointer; text-align: left; -webkit-tap-highlight-color: transparent;
+  transition: background var(--bt-dur) ease, color var(--bt-dur) ease; }
+.bt-f-row:hover:not(:disabled){ color: var(--bt-ink); background: color-mix(in oklab, var(--bt-ink) 6%, transparent); }
+.bt-f-row.s-h{ color: var(--bt-ink); background: color-mix(in oklab, var(--bt-ink) 6%, transparent); }
+.bt-f-row:active:not(:disabled), .bt-f-row.s-p{ color: var(--bt-ink); background: color-mix(in oklab, var(--bt-ink) 12%, transparent); }
+.bt-f-row.s-f{ outline: 2px solid var(--bt-signal); outline-offset: -2px; }
+.bt-f-row:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: -2px; }
+.bt-f-row:disabled{ color: var(--bt-ink3); cursor: default; }
+.bt-f-row.is-on{ color: var(--bt-ink); background: var(--bt-sf2); }
+.bt-f-row .bt-sp{ min-width: 0; }
+.bt-f-row .bt-i{ color: inherit; }
+/* Chosen presses the mark as well as the label: icon.css's ladder, on GRAD so nothing
+   in the row shifts by a fraction as it lights up. */
+.bt-f-row.is-on .bt-i{ font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 200,'opsz' 20; }
+
+/* The bare mark. No box, no ground, and the target is padding -- the rule icon.css
+   states and the reason .wm-icon draws nothing. */
+.bt-f-ico{ display: inline-flex; align-items: center; justify-content: center;
+  padding: .5rem; color: var(--bt-ink3); background: none; border: 0; border-radius: 8px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: color var(--bt-dur) ease, background var(--bt-dur) ease; }
+.bt-f-ico:hover:not(:disabled){ color: var(--bt-ink2); background: color-mix(in oklab, var(--bt-ink) 6%, transparent); }
+.bt-f-ico.s-h{ color: var(--bt-ink2); background: color-mix(in oklab, var(--bt-ink) 6%, transparent); }
+.bt-f-ico:active:not(:disabled), .bt-f-ico.s-p{ color: var(--bt-ink); background: color-mix(in oklab, var(--bt-ink) 12%, transparent); }
+.bt-f-ico.s-f{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+.bt-f-ico:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+.bt-f-ico.is-on{ color: var(--bt-ink); }
+.bt-f-ico.is-on .bt-i{ font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 200,'opsz' 20; }
+
+/* One of N: a sunk track with the chosen half raised out of it. The track is the only
+   place in this family where an edge is drawn at rest, and it draws the SET, not a
+   button -- which is why it does not contradict the claim above. */
+.bt-f-seg{ display: flex; padding: 3px; gap: 3px; border-radius: 12px;
+  background: color-mix(in oklab, var(--bt-bg) 60%, var(--bt-sf)); }
+.bt-f-seg > button{ flex: 1 1 0; padding: .4375rem .875rem; font: inherit;
+  font-size: .8125rem; font-family: var(--bt-font); color: var(--bt-ink3);
+  background: none; border: 0; border-radius: 9px; cursor: pointer;
+  transition: color var(--bt-dur) ease, background var(--bt-dur) ease; }
+.bt-f-seg > button:hover{ color: var(--bt-ink2); }
+.bt-f-seg > button.is-on{ color: var(--bt-ink); background: var(--bt-sf2); }
+.bt-f-seg > button:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: -1px; }
+
+/* The split lozenge: ONE enclosure, two cells. The label sits on a sunk ground, the
+   value on the surface, and the divide between them is a lightness step rather than a
+   line. This is the shape the rail in the screenshot repeats down its whole length. */
+.bt-f-field{ display: flex; align-items: stretch; border-radius: 10px; overflow: hidden;
+  background: var(--bt-sf); }
+.bt-f-lab{ flex: 1 1 auto; min-width: 0; display: flex; align-items: center;
+  padding: .5rem .75rem; font-size: .8125rem; color: var(--bt-ink3);
+  background: color-mix(in oklab, var(--bt-bg) 45%, var(--bt-sf)); }
+.bt-f-val{ flex: 0 0 auto; display: flex; align-items: baseline; gap: .25rem;
+  padding: .5rem .75rem; font-size: .8125rem; color: var(--bt-ink); }
+.bt-f-unit{ color: var(--bt-ink3); font-size: .75rem; }
+
+/* THE EDITABLE MARK, and the one line of this page that is a quotation. A border is
+   drawn on the padding box -- full field width, below the descender. text-decoration is
+   drawn on the TEXT, exactly as wide as the digits, and the offset sets it against the
+   baseline. The rule is the value's own width, so it has to be.
+   Focus colours the digits as well as the rule: a 1px signal at the foot of a small
+   field is easy to miss and invisible to anyone not looking straight at it. */
+.bt-f-ed{ display: inline-block; color: var(--bt-ink); font-feature-settings:"tnum";
+  padding: 2px 0; text-decoration: underline; text-decoration-thickness: 1px;
+  text-underline-offset: 2px; text-decoration-color: var(--bt-ink2);
+  transition: text-decoration-color var(--bt-dur) ease; }
+.bt-f-ed:hover{ text-decoration-color: var(--bt-ink); }
+.bt-f-ed.s-h{ text-decoration-color: var(--bt-ink); }
+.bt-f-ed:focus{ color: var(--bt-signal); text-decoration-color: var(--bt-signal);
+  text-decoration-thickness: 2px; caret-color: var(--bt-signal); }
+
+.bt-f-sel{ display: flex; align-items: center; gap: .5rem; width: 100%;
+  padding: .5625rem .75rem; font: inherit; font-size: .8125rem; font-family: var(--bt-font);
+  color: var(--bt-ink2); background: var(--bt-sf); border: 0; border-radius: 10px;
+  cursor: pointer; text-align: left; }
+.bt-f-sel:hover{ color: var(--bt-ink); }
+.bt-f-sel:focus-visible{ outline: 2px solid var(--bt-signal); outline-offset: 2px; }
+
+/* ── the verdict table ────────────────────────────────────────────────────── */
+.bt-tbl-wrap{ overflow-x: auto; overscroll-behavior-x: contain; margin: 0 0 1.25rem; }
+.bt-tbl{ border-collapse: collapse; width: 100%; min-width: 34rem; max-width: 60em;
+  font-size: .8125rem; }
+.bt-tbl th{ text-align: left; font-weight: 600; font-size: .625rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--bt-ink3); padding: 0 .75rem .5rem 0;
+  border-bottom: var(--bt-hair) solid var(--bt-line); font-variation-settings:'opsz' 10; }
+.bt-tbl td{ padding: .5rem .75rem .5rem 0; border-bottom: var(--bt-hair) solid var(--bt-line);
+  color: var(--bt-ink2); vertical-align: top; }
+.bt-tbl td:first-child{ color: var(--bt-ink); white-space: nowrap; }
+.bt-tbl .yes{ color: var(--bt-signal); }
+.bt-tbl .no{ color: var(--bt-ink3); }
+
+@media (prefers-reduced-motion: reduce){
+  .bt-page *{ transition: none !important; }
+}
+</style>
+
+<div class="bt-page" id="bt-root">
+
+<h2>The button, six ways</h2>
+
+<p class="bt-lede">The dial was drawn five ways before one was chosen. This is the same
+exercise for the thing next to it. There are already three buttons in the house that were
+never named as buttons &mdash; the mark, the pill, and a boxed one drawn five ways across
+four apps &mdash; and <code>CHROME.md</code> counts the cost: <b>63 button rules in
+font-proofer, 50 in ReCal, 16 in Kernpare</b>, most of them that same box with its own
+padding and its own radius.</p>
+
+<p class="bt-lede">Two things get decided here, and only two. <b>One enclosure</b> &mdash;
+what a thing looks like when pressing it does something. <b>One editable mark</b> &mdash;
+what text looks like when it is yours to change. They are one decision because they are the
+same question asked twice, and because getting the second one wrong is how you end up with
+a bulleted list of unformatted links that each open a modal, with nothing on the page to
+say so. Every family below answers both in its own language, with the same content in the
+same card, so the comparison is between designs and not between demos.</p>
+
+<div class="bt-laws">
+  <h3>What all six obey</h3>
+  <table>
+    <tr><td>corner</td><td><code>superellipse(1.2)</code>, radius on the 2^k scale. Safari has no <code>corner-shape</code> and degrades silently to the plain radius &mdash; which is the corner every app shipped before the law, so nothing regresses.</td></tr>
+    <tr><td>target</td><td>44px on a coarse pointer, bought as <b>padding</b>, never as height. A target has to exist; it does not have to be visible, and it must not be paid for by shrinking the mark.</td></tr>
+    <tr><td>padding-x</td><td>&ge; 0.6 &times; the radius. On a pill the radius is half the height, so a 34px pill owes 10.2px each side.</td></tr>
+    <tr><td>ink</td><td>faint / quiet / full = cannot act / present / chosen. Hover and pressed must not share an ink, or the ladder collapses.</td></tr>
+    <tr><td>mark</td><td>Material Symbols, one weight (300). Emphasis rides <code>GRAD</code>, so a row of marks cannot shift by a fraction as one lights up.</td></tr>
+    <tr><td>press</td><td>The stroke lands before the fill: the stroke acknowledges the tap, the fill confirms on release.</td></tr>
+    <tr><td>focus</td><td>2px, offset 2, on the signal. Never removed, in any family.</td></tr>
+  </table></div>
+</div>
+
+<div class="bt-bar">
+  <span>try</span>
+  <button id="bt-touch" type="button" aria-pressed="false">Touch sizing</button>
+  <button id="bt-target" type="button" aria-pressed="false">Show targets</button>
+</div>
+
+<!-- ═══ 01 ═══════════════════════════════════════════════════════════════ -->
+<div class="bt-fam">
+  <div class="bt-fam-head"><span class="bt-idx">01</span><h3 style="margin:0;font-size:1.125rem;font-weight:500">Keyline</h3></div>
+  <p class="bt-thesis"><b>A box, and one side of it.</b> A hairline on a surface, and an
+  editable line is the same box drawn with only its bottom edge &mdash; same radius, same
+  inset, same colour &mdash; which completes as you approach. The law is one sentence:
+  <b>a closed keyline means press; a bottom-only keyline means change</b>. It holds only if
+  no rule under a heading is ever decorative.</p>
+
+  <div class="bt-rack">
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Enclosure</p>
+      <div class="bt-row">
+        <button class="bt-k bt-hit" type="button">Kern lists</button>
+        <button class="bt-k bt-k--solid bt-hit" type="button">Link roman + italic</button>
+      </div>
+      <div class="bt-row">
+        <button class="bt-k bt-hit" type="button"><span class="bt-i bt-i--sm">content_copy</span>10 Reg</button>
+        <button class="bt-k bt-k--ico bt-hit bt-ico" type="button" aria-label="Reset"><span class="bt-i">settings_backup_restore</span></button>
+        <button class="bt-k bt-hit" type="button" disabled>Average pairs</button>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">States</p>
+      <div class="bt-st">
+        <span class="bt-st-lab">rest</span><span><button class="bt-k bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">hover</span><span><button class="bt-k s-h bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">held</span><span><button class="bt-k s-p bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">focus</span><span><button class="bt-k s-f bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">chosen</span><span><button class="bt-k is-on bt-hit" type="button">Delete pairs</button></span>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Editable</p>
+      <div class="bt-stack">
+        <span class="bt-ed bt-k-ed" contenteditable="plaintext-only" spellcheck="false">Turn any page into a booking portal</span>
+        <span class="bt-ed bt-k-ed s-h" contenteditable="plaintext-only" spellcheck="false">Track a no-show without asking who joined</span>
+        <span class="bt-ed bt-k-ed" contenteditable="plaintext-only" spellcheck="false">Reassign a booking when someone calls out</span>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">In situ</p>
+      <div class="bt-situ">
+        <div class="bt-situ-head"><b>Headline</b><span>20 &le; char</span></div>
+        <span class="bt-ed bt-k-ed" contenteditable="plaintext-only" spellcheck="false">Ours. Always Cal Sans at Base.</span>
+        <div class="bt-situ-row">
+          <button class="bt-k bt-k--ico bt-hit bt-ico" type="button" aria-label="Align left"><span class="bt-i">format_align_left</span></button>
+          <button class="bt-k bt-k--ico bt-hit bt-ico" type="button" aria-label="Align centre"><span class="bt-i">format_align_center</span></button>
+          <button class="bt-k bt-k--ico bt-hit bt-ico" type="button" aria-label="Align right"><span class="bt-i">format_align_right</span></button>
+          <button class="bt-k bt-k--ico is-on bt-hit bt-ico" type="button" aria-label="Justify"><span class="bt-i">format_align_justify</span></button>
+          <span class="bt-sp"></span>
+          <span class="bt-seg">
+            <button class="bt-k is-on bt-hit" type="button">Rom</button>
+            <button class="bt-k bt-hit" type="button">Ital</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="bt-cost"><b>What it costs.</b> Nothing separates a resting editable line from a
+  divider under a heading, so the family is only honest in a document that never draws a
+  decorative rule. In exchange it is the cheapest thing here: <code>src/button.css</code> is
+  already this box, and the editable mark is four declarations on top of it.</p>
+</div>
+
+<!-- ═══ 02 ═══════════════════════════════════════════════════════════════ -->
+<div class="bt-fam">
+  <div class="bt-fam-head"><span class="bt-idx">02</span><h3 style="margin:0;font-size:1.125rem;font-weight:500">Lozenge</h3></div>
+  <p class="bt-thesis"><b>A ground, not an edge.</b> No hairline anywhere in the family. An
+  action is a filled pill; an editable is the same pill with the fill taken almost all the
+  way out &mdash; a wash at 5% that comes up to 12% as you approach. Highlighter instead of
+  rule, so the mark sits <i>behind</i> the words and never competes with the type's own
+  baseline furniture.</p>
+
+  <div class="bt-rack">
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Enclosure</p>
+      <div class="bt-row">
+        <button class="bt-z bt-hit" type="button">Kern lists</button>
+        <button class="bt-z bt-z--solid bt-hit" type="button">Let&rsquo;s talk type</button>
+      </div>
+      <div class="bt-row">
+        <button class="bt-z bt-hit" type="button"><span class="bt-i bt-i--sm">content_copy</span>10 Reg</button>
+        <button class="bt-z bt-z--ico bt-hit bt-ico" type="button" aria-label="Reset"><span class="bt-i">settings_backup_restore</span></button>
+        <button class="bt-z bt-hit" type="button" disabled>Average pairs</button>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">States</p>
+      <div class="bt-st">
+        <span class="bt-st-lab">rest</span><span><button class="bt-z bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">hover</span><span><button class="bt-z s-h bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">held</span><span><button class="bt-z s-p bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">focus</span><span><button class="bt-z s-f bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">chosen</span><span><button class="bt-z is-on bt-hit" type="button">Delete pairs</button></span>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Editable</p>
+      <div class="bt-stack">
+        <span class="bt-ed bt-z-ed" contenteditable="plaintext-only" spellcheck="false">Turn any page into a booking portal</span>
+        <span class="bt-ed bt-z-ed s-h" contenteditable="plaintext-only" spellcheck="false">Track a no-show without asking who joined</span>
+        <span class="bt-ed bt-z-ed" contenteditable="plaintext-only" spellcheck="false">Reassign a booking when someone calls out</span>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">In situ</p>
+      <div class="bt-situ">
+        <div class="bt-situ-head"><b>Headline</b><span>20 &le; char</span></div>
+        <span class="bt-ed bt-z-ed" contenteditable="plaintext-only" spellcheck="false">Ours. Always Cal Sans at Base.</span>
+        <div class="bt-situ-row">
+          <button class="bt-z bt-z--ico bt-hit bt-ico" type="button" aria-label="Align left"><span class="bt-i">format_align_left</span></button>
+          <button class="bt-z bt-z--ico bt-hit bt-ico" type="button" aria-label="Align centre"><span class="bt-i">format_align_center</span></button>
+          <button class="bt-z bt-z--ico bt-hit bt-ico" type="button" aria-label="Align right"><span class="bt-i">format_align_right</span></button>
+          <button class="bt-z bt-z--ico is-on bt-hit bt-ico" type="button" aria-label="Justify"><span class="bt-i">format_align_justify</span></button>
+          <span class="bt-sp"></span>
+          <span class="bt-seg">
+            <button class="bt-z is-on bt-hit" type="button">Rom</button>
+            <button class="bt-z bt-hit" type="button">Ital</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="bt-cost"><b>What it costs.</b> Width. The padding rule is not optional on a pill
+  and four icon buttons in a rail become a scroll. The resting wash is the real risk: at 5%
+  on <code>--surface</code> it is almost invisible, so this family needs the editable text
+  to sit on <code>--bg</code>, and it needs testing on a screen that is not the one it was
+  drawn on. It also has the strongest primary in the set &mdash; one signal pill in a view
+  and nothing else competes.</p>
+</div>
+
+<!-- ═══ 03 ═══════════════════════════════════════════════════════════════ -->
+<div class="bt-fam">
+  <div class="bt-fam-head"><span class="bt-idx">03</span><h3 style="margin:0;font-size:1.125rem;font-weight:500">Rule</h3></div>
+  <p class="bt-thesis"><b>The type is the control.</b> No box in any state. An action is
+  ink-full with a solid rule at <code>1px</code>, thickening to the same two numbers the
+  press law uses &mdash; 1.2 under the pointer, 1.8 held. An editable is the identical rule,
+  <b>dashed</b>. Solid means it happens; dashed means it is yours. This is the one family
+  that can be wrong in the exact way the brief names, and the condition is absolute:
+  <b>nothing else in the document may be underlined</b>.</p>
+
+  <div class="bt-rack">
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Enclosure</p>
+      <div class="bt-row">
+        <button class="bt-r bt-hit" type="button">Kern lists</button>
+        <button class="bt-r bt-r--solid bt-hit" type="button">Link roman + italic</button>
+      </div>
+      <div class="bt-row">
+        <button class="bt-r bt-hit" type="button"><span class="bt-i bt-i--sm">content_copy</span>10 Reg</button>
+        <button class="bt-r bt-hit" type="button" disabled>Average pairs</button>
+      </div>
+      <p class="bt-cost" style="margin-top:.75rem"><b>No icon-only form.</b> There is nothing
+      to draw it in. Those actions borrow 01.</p>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">States</p>
+      <div class="bt-st">
+        <span class="bt-st-lab">rest</span><span><button class="bt-r bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">hover</span><span><button class="bt-r s-h bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">held</span><span><button class="bt-r s-p bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">focus</span><span><button class="bt-r s-f bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">chosen</span><span><button class="bt-r is-on bt-hit" type="button">Delete pairs</button></span>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Editable</p>
+      <div class="bt-stack">
+        <span class="bt-ed bt-r-ed" contenteditable="plaintext-only" spellcheck="false">Turn any page into a booking portal</span>
+        <span class="bt-ed bt-r-ed s-h" contenteditable="plaintext-only" spellcheck="false">Track a no-show without asking who joined</span>
+        <span class="bt-ed bt-r-ed" contenteditable="plaintext-only" spellcheck="false">Reassign a booking when someone calls out</span>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">In situ</p>
+      <div class="bt-situ">
+        <div class="bt-situ-head"><b>Headline</b><span>20 &le; char</span></div>
+        <span class="bt-ed bt-r-ed" contenteditable="plaintext-only" spellcheck="false">Ours. Always Cal Sans at Base.</span>
+        <div class="bt-situ-row">
+          <button class="bt-k bt-k--ico bt-hit bt-ico" type="button" aria-label="Align left"><span class="bt-i">format_align_left</span></button>
+          <button class="bt-k bt-k--ico is-on bt-hit bt-ico" type="button" aria-label="Justify"><span class="bt-i">format_align_justify</span></button>
+          <span class="bt-sp"></span>
+          <button class="bt-r is-on bt-hit" type="button">Rom</button>
+          <button class="bt-r bt-hit" type="button">Ital</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="bt-cost"><b>What it costs.</b> Three things. The 44px floor is bought entirely
+  with invisible padding, so two stacked actions are 88px of line box or they overlap. Two
+  actions side by side read as one sentence unless something separates them. And the whole
+  family depends on a document-wide prohibition that no component can enforce &mdash; the
+  first underlined caption someone adds takes the affordance down with it.</p>
+</div>
+
+<!-- ═══ 04 ═══════════════════════════════════════════════════════════════ -->
+<div class="bt-fam">
+  <div class="bt-fam-head"><span class="bt-idx">04</span><h3 style="margin:0;font-size:1.125rem;font-weight:500">Plate</h3></div>
+  <p class="bt-thesis"><b>Hills and holes.</b> Raised is press, recessed is type &mdash; and
+  nobody has to be taught it. One lightness ramp does all of it: the plate is +L on the
+  ground with the light from above, the well is &minus;L with the light inside, and there is
+  no hue and no second palette anywhere. Held, the plate goes into the ground rather than
+  changing colour.</p>
+
+  <div class="bt-rack">
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Enclosure</p>
+      <div class="bt-row">
+        <button class="bt-p bt-hit" type="button">Kern lists</button>
+        <button class="bt-p bt-p--solid bt-hit" type="button">Link roman + italic</button>
+      </div>
+      <div class="bt-row">
+        <button class="bt-p bt-hit" type="button"><span class="bt-i bt-i--sm">content_copy</span>10 Reg</button>
+        <button class="bt-p bt-p--ico bt-hit bt-ico" type="button" aria-label="Reset"><span class="bt-i">settings_backup_restore</span></button>
+        <button class="bt-p bt-hit" type="button" disabled>Average pairs</button>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">States</p>
+      <div class="bt-st">
+        <span class="bt-st-lab">rest</span><span><button class="bt-p bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">hover</span><span><button class="bt-p s-h bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">held</span><span><button class="bt-p s-p bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">focus</span><span><button class="bt-p s-f bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">chosen</span><span><button class="bt-p is-on bt-hit" type="button">Delete pairs</button></span>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Editable</p>
+      <div class="bt-stack">
+        <span class="bt-ed bt-p-ed" contenteditable="plaintext-only" spellcheck="false">Turn any page into a booking portal</span>
+        <span class="bt-ed bt-p-ed s-h" contenteditable="plaintext-only" spellcheck="false">Track a no-show without asking who joined</span>
+        <span class="bt-ed bt-p-ed" contenteditable="plaintext-only" spellcheck="false">Reassign a booking when someone calls out</span>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">In situ</p>
+      <div class="bt-situ">
+        <div class="bt-situ-head"><b>Headline</b><span>20 &le; char</span></div>
+        <span class="bt-ed bt-p-ed" contenteditable="plaintext-only" spellcheck="false">Ours. Always Cal Sans at Base.</span>
+        <div class="bt-situ-row">
+          <button class="bt-p bt-p--ico bt-hit bt-ico" type="button" aria-label="Align left"><span class="bt-i">format_align_left</span></button>
+          <button class="bt-p bt-p--ico bt-hit bt-ico" type="button" aria-label="Align centre"><span class="bt-i">format_align_center</span></button>
+          <button class="bt-p bt-p--ico bt-hit bt-ico" type="button" aria-label="Align right"><span class="bt-i">format_align_right</span></button>
+          <button class="bt-p bt-p--ico is-on bt-hit bt-ico" type="button" aria-label="Justify"><span class="bt-i">format_align_justify</span></button>
+          <span class="bt-sp"></span>
+          <span class="bt-seg">
+            <button class="bt-p is-on bt-hit" type="button">Rom</button>
+            <button class="bt-p bt-hit" type="button">Ital</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="bt-cost"><b>What it costs.</b> The corner law already records the fault, and this
+  family is built on the thing that has it: <b>an inset box-shadow follows
+  <code>border-radius</code> but not <code>corner-shape</code></b>, so every well and every
+  held plate paints a rounded rectangle inside a superellipse, visible at the corners. That
+  is not a bug to fix here &mdash; it is the engine &mdash; so choosing 04 means either
+  keeping the radius small enough to hide it or giving up the house corner on exactly the
+  controls that carry it most. It is also the only family that reads as a different decade.</p>
+</div>
+
+<!-- ═══ 05 ═══════════════════════════════════════════════════════════════ -->
+<div class="bt-fam">
+  <div class="bt-fam-head"><span class="bt-idx">05</span><h3 style="margin:0;font-size:1.125rem;font-weight:500">Bracket</h3></div>
+  <p class="bt-thesis"><b>Corner ticks that close on approach.</b> The box is there; only its
+  corners are inked. <code>--bt-tick</code> is how far the ink runs along each edge, and
+  hover animates it to 50% &mdash; at which point the four ticks meet and the enclosure
+  completes. The ticks are a real border under two intersected masks, so they carry the G2
+  curve rather than imitating it. Editable text keeps only the left and right pair:
+  brackets around the words, the way a field is marked on a drawing.</p>
+
+  <div class="bt-rack">
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Enclosure</p>
+      <div class="bt-row">
+        <button class="bt-b bt-hit" type="button">Kern lists</button>
+        <button class="bt-b bt-b--solid bt-hit" type="button">Link roman + italic</button>
+      </div>
+      <div class="bt-row">
+        <button class="bt-b bt-hit" type="button"><span class="bt-i bt-i--sm">content_copy</span>10 Reg</button>
+        <button class="bt-b bt-b--ico bt-hit bt-ico" type="button" aria-label="Reset"><span class="bt-i">settings_backup_restore</span></button>
+        <button class="bt-b bt-hit" type="button" disabled>Average pairs</button>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">States</p>
+      <div class="bt-st">
+        <span class="bt-st-lab">rest</span><span><button class="bt-b bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">hover</span><span><button class="bt-b s-h bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">held</span><span><button class="bt-b s-p bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">focus</span><span><button class="bt-b s-f bt-hit" type="button">Delete pairs</button></span>
+        <span class="bt-st-lab">chosen</span><span><button class="bt-b is-on bt-hit" type="button">Delete pairs</button></span>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Editable</p>
+      <div class="bt-stack">
+        <span class="bt-ed bt-b-ed" contenteditable="plaintext-only" spellcheck="false">Turn any page into a booking portal</span>
+        <span class="bt-ed bt-b-ed s-h" contenteditable="plaintext-only" spellcheck="false">Track a no-show without asking who joined</span>
+        <span class="bt-ed bt-b-ed" contenteditable="plaintext-only" spellcheck="false">Reassign a booking when someone calls out</span>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">In situ</p>
+      <div class="bt-situ">
+        <div class="bt-situ-head"><b>Headline</b><span>20 &le; char</span></div>
+        <span class="bt-ed bt-b-ed" contenteditable="plaintext-only" spellcheck="false">Ours. Always Cal Sans at Base.</span>
+        <div class="bt-situ-row">
+          <button class="bt-b bt-b--ico bt-hit bt-ico" type="button" aria-label="Align left"><span class="bt-i">format_align_left</span></button>
+          <button class="bt-b bt-b--ico bt-hit bt-ico" type="button" aria-label="Align centre"><span class="bt-i">format_align_center</span></button>
+          <button class="bt-b bt-b--ico bt-hit bt-ico" type="button" aria-label="Align right"><span class="bt-i">format_align_right</span></button>
+          <button class="bt-b bt-b--ico is-on bt-hit bt-ico" type="button" aria-label="Justify"><span class="bt-i">format_align_justify</span></button>
+          <span class="bt-sp"></span>
+          <span class="bt-seg">
+            <button class="bt-b is-on bt-hit" type="button">Rom</button>
+            <button class="bt-b bt-hit" type="button">Ital</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="bt-cost"><b>What it costs.</b> <code>mask-composite: intersect</code> is the
+  whole mechanism; where it is missing the mask collapses and the full border paints, which
+  is family 01 &mdash; a correct button, so the degradation is honest, but a family whose
+  fallback is another family is one design being maintained as two. At UI size the tick is
+  9px and four of them in a dense rail read as noise rather than as an edge. The transition
+  needs <code>--bt-tick</code> registered with <code>@property</code>, or the ticks snap.</p>
+</div>
+
+<!-- ═══ 06 ════════════════════════════════════════════════════════════════════ -->
+<div class="bt-fam">
+  <div class="bt-fam-head"><span class="bt-idx">06</span><h3 style="margin:0;font-size:1.125rem;font-weight:500">Rail</h3></div>
+  <p class="bt-thesis"><b>An enclosure means chosen, not pressable.</b> The inversion of the
+  five above, and the only one already running: this is font-proofer's rail. A row has no
+  edge at rest &mdash; a mark, a label, and the full width of the column as its target
+  &mdash; and the ground arrives when it is the one that is on. The editable mark is not a
+  proposal either: it is <code>.slider-number</code>, the rule the dial ships. <b>An
+  underline drawn on the text, not a border drawn on the box</b> &mdash; exactly as wide as
+  the value, at the baseline rather than under the descender, and focus takes the digits
+  and the rule together.</p>
+
+  <div class="bt-rack">
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Enclosure &mdash; the row is the button</p>
+      <div class="bt-f-rail">
+        <button class="bt-f-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
+        <button class="bt-f-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
+        <button class="bt-f-row is-on bt-hit" type="button"><span class="bt-i">format_paragraph</span>Paragraph<span class="bt-sp"></span><span class="bt-i bt-i--sm">discover_tune</span></button>
+        <button class="bt-f-row bt-hit" type="button"><span class="bt-i">text_fields</span>Type Scale</button>
+        <button class="bt-f-row bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button>
+      </div>
+      <div class="bt-row" style="margin-top:.875rem">
+        <button class="bt-f-ico bt-hit bt-ico" type="button" aria-label="Align left"><span class="bt-i">format_align_left</span></button>
+        <button class="bt-f-ico bt-hit bt-ico" type="button" aria-label="Align centre"><span class="bt-i">format_align_center</span></button>
+        <button class="bt-f-ico is-on bt-hit bt-ico" type="button" aria-label="Align right"><span class="bt-i">format_align_right</span></button>
+        <button class="bt-f-ico bt-hit bt-ico" type="button" aria-label="Reset"><span class="bt-i">settings_backup_restore</span></button>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">States</p>
+      <div class="bt-st">
+        <span class="bt-st-lab">rest</span><span><button class="bt-f-row bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button></span>
+        <span class="bt-st-lab">hover</span><span><button class="bt-f-row s-h bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button></span>
+        <span class="bt-st-lab">held</span><span><button class="bt-f-row s-p bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button></span>
+        <span class="bt-st-lab">focus</span><span><button class="bt-f-row s-f bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button></span>
+        <span class="bt-st-lab">chosen</span><span><button class="bt-f-row is-on bt-hit" type="button"><span class="bt-i">grid_view</span>Glyphs</button></span>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">Editable &mdash; the rule is the value&rsquo;s own width</p>
+      <div class="bt-stack" style="width:100%">
+        <div class="bt-f-field" style="width:100%">
+          <span class="bt-f-lab">measure</span>
+          <span class="bt-f-val"><span class="bt-ed bt-f-ed" contenteditable="plaintext-only" spellcheck="false">620</span><span class="bt-f-unit">px</span></span>
+        </div>
+        <div class="bt-f-field" style="width:100%">
+          <span class="bt-f-lab">size</span>
+          <span class="bt-f-val"><span class="bt-ed bt-f-ed s-h" contenteditable="plaintext-only" spellcheck="false">18</span></span>
+        </div>
+        <div class="bt-f-field" style="width:100%">
+          <span class="bt-f-lab">tracking</span>
+          <span class="bt-f-val"><span class="bt-ed bt-f-ed" contenteditable="plaintext-only" spellcheck="false">0.000</span></span>
+        </div>
+        <button class="bt-f-sel bt-hit" type="button">&mdash;<span class="bt-sp"></span><span class="bt-i bt-i--sm">keyboard_arrow_down</span></button>
+      </div>
+    </div>
+    <div class="bt-panel">
+      <p class="bt-panel-lab">In situ</p>
+      <div class="bt-situ">
+        <div class="bt-situ-head"><b>Headline</b><span>20 &le; char</span></div>
+        <span class="bt-ed bt-f-ed" contenteditable="plaintext-only" spellcheck="false">Ours. Always Cal Sans at Base.</span>
+        <div class="bt-situ-row">
+          <button class="bt-f-ico bt-hit bt-ico" type="button" aria-label="Align left"><span class="bt-i">format_align_left</span></button>
+          <button class="bt-f-ico bt-hit bt-ico" type="button" aria-label="Align centre"><span class="bt-i">format_align_center</span></button>
+          <button class="bt-f-ico bt-hit bt-ico" type="button" aria-label="Align right"><span class="bt-i">format_align_right</span></button>
+          <button class="bt-f-ico is-on bt-hit bt-ico" type="button" aria-label="Justify"><span class="bt-i">format_align_justify</span></button>
+        </div>
+        <div class="bt-f-seg" style="margin-top:.5rem">
+          <button class="is-on" type="button">Roman</button>
+          <button type="button">Italic</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="bt-cost"><b>What it costs.</b> A resting row states nothing on its own &mdash;
+  which is the brief&rsquo;s failure exactly, and the family survives it only on two
+  conditions it cannot enforce for itself: every row carries a <b>mark</b>, and every row is
+  the <b>full width</b> of its column. Strip either and this becomes the unformatted list.
+  It also needs somewhere to be a rail: the row shape wants 200px and a left edge to sit
+  against, so an action in the middle of a paragraph has to borrow another family. And
+  because the enclosure is spent on <i>chosen</i>, there is nothing left to spend on
+  <i>primary</i> &mdash; a destructive action here looks like every other row.</p>
+  <p class="bt-cost"><b>And it does not do prose.</b> Visible in the situ card above: the
+  rule is drawn on the text, so on a value it is four characters wide and on a wrapped
+  sentence it is two full lines of underline. <code>.slider-number</code> was written for a
+  number in a rail and it is right there. <b>The editable case in the brief is a headline,
+  not a value</b> &mdash; so if 06 wins the rail, something else still has to win the
+  paragraph, and the two have to look like one decision.</p>
+</div>
+
+<!-- ═══ verdict ══════════════════════════════════════════════════════════ -->
+<h2>Which one</h2>
+<p class="bt-lede">One column matters more than the others. <b>At rest</b> is whether the
+thing announces itself with nobody pointing at anything &mdash; which is the property the
+brief asks for, and the one a hover state cannot supply.</p>
+
+<div class="bt-tbl-wrap"><table class="bt-tbl">
+  <tr>
+    <th>family</th><th>at rest</th><th>icon-only</th><th>dense rail</th>
+    <th>44px</th><th>no corner-shape</th><th>editable mark</th>
+  </tr>
+  <tr>
+    <td>01 Keyline</td>
+    <td class="yes">states itself</td><td class="yes">yes</td><td class="yes">tight</td>
+    <td class="yes">padding</td><td class="yes">plain radius</td><td>one edge of the box</td>
+  </tr>
+  <tr>
+    <td>02 Lozenge</td>
+    <td class="yes">states itself</td><td class="yes">yes</td><td class="no">wide</td>
+    <td class="yes">native</td><td class="yes">pill is a pill</td><td>a wash at 5%</td>
+  </tr>
+  <tr>
+    <td>03 Rule</td>
+    <td class="no">only if nothing else is underlined</td><td class="no">none</td>
+    <td class="no">reads as prose</td><td class="no">invisible padding</td>
+    <td class="yes">unaffected</td><td>the same rule, dashed</td>
+  </tr>
+  <tr>
+    <td>04 Plate</td>
+    <td class="yes">strongest</td><td class="yes">yes</td><td class="yes">tight</td>
+    <td class="yes">padding</td><td class="no">shadow breaks the corner</td>
+    <td>a well: the hole</td>
+  </tr>
+  <tr>
+    <td>06 Rail</td>
+    <td class="no">nothing, unless the row keeps its mark and its width</td>
+    <td class="yes">bare mark</td><td class="yes">it IS the rail</td>
+    <td class="yes">row height</td><td class="yes">grounds, not corners</td>
+    <td class="yes">the rule the dial ships</td>
+  </tr>
+  <tr>
+    <td>05 Bracket</td>
+    <td>quiet but unmistakable</td><td class="yes">yes</td>
+    <td class="no">9px ticks read as noise</td><td class="yes">padding</td>
+    <td class="yes">degrades to 01</td><td>brackets around the words</td>
+  </tr>
+</table>
+
+<p class="bt-lede">Two of the six are already half-built. <b>06</b>&rsquo;s editable mark is
+not a candidate at all &mdash; it is <code>.slider-number</code>, shipping, in every dial in
+every app, and choosing anything else for editable text means the rail and the field
+disagree inside one panel. <b>01</b>&rsquo;s enclosure is <code>src/button.css</code>,
+likewise shipping. Those two fit together without being reconciled: 06 for the rail, where
+an enclosure means <i>chosen</i> and the row does the pointing, and 01 for everything
+outside it, where an enclosure means <i>pressable</i>. What that pairing has to survive is
+one panel holding both meanings of a box at once, which is a real risk and is the thing to
+test before it is adopted rather than after.</p>
+
+<p class="bt-lede"><b>02</b> keeps the two jobs it already has &mdash; the one primary
+action, and one-of-N &mdash; as a variant, not a rival. <b>04</b> is the strongest at rest
+and is blocked by the engine, not by taste. <b>05</b> is the one worth keeping drawn for a
+hero or an empty state, where a single button can afford nine pixels of ceremony. <b>03</b>
+is the one to reject on purpose rather than by omission: it is the most typographic answer
+here and it fails exactly where the brief says not to.</p>
+
+</div>
+
+<script>
+(function(){
+  var root = document.getElementById('bt-root');
+  if (!root) return;
+
+  // No section around this part means the file was opened on its own, and the gutter is
+  // ours to pay. Tested by id rather than by querySelector: the assembler rebinds every
+  // document.querySelector to the section root, so a look UP the tree with that would
+  // find nothing in either case and call both of them standalone. 's-controls' is
+  // stamped by the shell, not by this page, so it survives the id-prefixing pass.
+  if (!document.getElementById('s-controls')) root.classList.add('standalone');
+
+  // A phone should not have to find the toggle before the page is worth judging: a
+  // coarse pointer answers the touch-sizing question by arriving. The button still
+  // reads as pressed, so it can be turned back off to compare.
+  if (window.matchMedia && matchMedia('(pointer: coarse)').matches) {
+    root.classList.add('touch');
+    var tb = document.getElementById('bt-touch');
+    if (tb) tb.setAttribute('aria-pressed', 'true');
+  }
+
+  var toggles = { 'bt-touch': 'touch', 'bt-target': 'target' };
+  Object.keys(toggles).forEach(function(id){
+    var b = document.getElementById(id);
+    if (!b) return;
+    b.addEventListener('click', function(){
+      var on = b.getAttribute('aria-pressed') === 'true';
+      b.setAttribute('aria-pressed', String(!on));
+      root.classList.toggle(toggles[id], !on);
+    });
+  });
+})();
+</script>
