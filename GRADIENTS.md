@@ -179,157 +179,35 @@ flat, and add `.wm-dither` if the result bands.
 
 ---
 
-## Progressive blur: tiled bands, not a cumulative stack
+## Blur: one radius, not a ramp
 
-`blurLayers()` is variablur's effect as a stack of backdrop layers, because the web has no
-way to vary one filter's strength across an element.
+**Progressive blur is retired; `blurLayers()` and `ProgressiveBlur` are deprecated.** A stepless progressive blur over
+live DOM text is not achievable with `backdrop-filter`, and both constructions were built,
+shipped and rejected on sight:
 
-**The bands are geometry, not masks — and that is not a style choice.** Everyone publishes
-this technique with each layer filling the element and cut back to a band by `mask-image`.
-In this package's own system page that did not hold: a single layer masked to the top 25%
-blurred the *whole* panel, and six stacked took measured sharpness down the panel to a flat
-0.1 against 8.7–16.8 with the stack removed — a uniform smear, which is the one thing a
-progressive blur must not be. `mask-image`, `-webkit-mask-image`, the `mask` shorthand,
-`mask-mode: alpha` and `will-change: mask` all render identically.
+- **Hard-edged bands.** Every pixel sits under exactly one layer at alpha 1, so nothing
+  ghosts — but the radius jumps at each boundary and the staircase is plainly visible.
+- **Feathered bands.** No steps, but `backdrop-filter` at partial mask alpha composites the
+  blurred copy *over the still-sharp original*. Measured: a uniform mask alpha of 0.5 leaves
+  a peak edge of **108**, against **217** unblurred and **19** fully blurred. Exactly half
+  the sharp text survives, in every feather zone, which reads as a seam through the type.
 
-Read that as one document rather than as a rule about the platform. The same markup in a
-standalone page masks correctly, so it is not a syntax error and the compositing path is
-the obvious suspect, but the trigger was never isolated — the layers' computed styles are
-the same in both but for width. The conclusion drawn here is narrow and practical: a mask
-is not a dependable bound for a `backdrop-filter`, and a band positioned by `inset` blurs
-its own rows and nothing else in every document tested. Geometry costs nothing to prefer.
-Reducing the mask behaviour to a minimal repro is [NEXT.md](NEXT.md) D.
+There is no third option in CSS. A true per-pixel variable blur — what variablur does in
+Metal — needs the content rasterised to a canvas, and that costs the live text, the thing
+the effect exists to keep.
 
-The cost is the feather: a band's edge is a step in radius rather than a fade, so the seam
-is hidden by making the step small rather than by blending it.
+**Use instead:** `scrim()` or `maskRamp()` for a fade, which have no artifact at all and are
+what every shipping call site already uses; or a single uniform `backdrop-filter` with no
+mask, which has neither a partial alpha to ghost nor a second radius to step to.
 
-**What `layers` buys is fidelity to the easing, not smoothness.** Each band takes the radius
-at its FAR edge, so a coarse stack is systematically blurrier than the curve it samples,
-and a fine one tracks the curve more closely while sampling it into more steps. Judged
-headed at 2×, 8 and 16 and 32 are hard to tell apart; an earlier pass read 16 as visibly
-better than 12, but that was a 1:1 screenshot of a short strip and it does not survive a
-real display. The default is **8**. Each band is a separate backdrop rasterisation, so it
-remains the first number to lower under a scrolling list.
+The functions are kept rather than deleted so the finding stays next to the code. No call
+site in this package uses them.
 
-Worth knowing when you look at one over text: a heavily blurred line of type IS a
-horizontal bar, and nine lines are nine bars. Those are the lines, not seams between
-bands — which is why holding the first lines with `start` reads so much better than
-letting the ramp begin at the edge.
-
-**The obvious construction ghosts.** Have each layer reveal everything from its band onward
-and add a little more blur, so the strengths accumulate — it composes beautifully on paper.
-On screen, `backdrop-filter` blurs what is *behind* the layer, and wherever that layer's
-mask sits at partial alpha the compositor blends a blurred copy over the still-sharp
-original. Over live text that is a visible double image: two copies of the same line, one
-crisp and one smeared, through the whole run-in.
-
-It shipped that way and was spotted by eye. No measurement here would have caught it — the
-sharpness profile is monotonic either way, because the artefact is a *superposition*, not a
-failure to blur.
-
-**The feathers had this file's own bug in them.** A two-stop feather is a *linear* alpha
-ramp, so the blur profile it produces is piecewise linear and kinks at every band boundary —
-and a kink in the derivative is exactly the visible edge `scrim()` spends a paragraph on. It
-showed as a hard line across the second line of text. The windows are smoothstepped instead,
-C1 at both ends, so neighbouring bands hand over with no corner for the eye to find. Total
-coverage across the span runs `1.00 1.22 1.64 1.94 2.00 … 2.00 1.94 1.64 1.22 1.00` — never
-thinning to nothing, never cornering.
-
-**So each layer owns one band** at full opacity, feathered into its neighbours, carrying the
-absolute radius that band should read at. Every pixel is covered by exactly one layer at
-full strength, and the crossfades are between adjacent, similar radii rather than between
-sharp and fully blurred. The end bands do not feather off the edge — the first has nothing
-above it to hand to and the last nothing below, and a feather there leaves a strip no layer
-covers.
-
-**The quadrature went with it.** It existed to make accumulating layers land on the radius
-asked for — σ² = σ₁² + σ₂², so a band reading 12px on top of 9px took a 7.9px step. Tiled
-layers do not accumulate; each blurs the original, so it simply carries its band's radius.
-Correct arithmetic for a construction that turned out to be the wrong one.
-
-**Bands are evenly spaced; only the radius follows the curve.** Placing the bands by curve
-parameter as well — which the first version did — crowds `ease-in`'s bands into the last 5%
-of the span, and bunches `linear`'s at both ends, since `cubic-bezier(0,0,1,1)` swept by
-parameter is smoothstep. Position and strength are different questions and the curve answers
-only the second.
-
-At radius 28 over 6 layers the stack is `1.25 · 4.37 · 8.83 · 14.33 · 20.71 · 28`.
-
-### The default curve here is `ease-in-out`, not the clothoid
-
-A blur wants **both** ends eased, for two different reasons. *Hold the start*, because text
-stops being legible around 4px and a ramp that spends that in its first band has thrown the
-effect away before the eye has moved. Then *ease into the maximum*, so the blur arrives
-instead of hitting a ceiling — which is the clothoid's own argument about visible edges,
-applied at the other end.
-
-First-layer radius at 24px over six layers — the leftmost number is how blurred the top line
-of text is:
-
-| curve | | | | | | |
-|---|---|---|---|---|---|---|
-| **ease-in-out** | **1.35** | 5.56 | 12.00 | 18.44 | 22.65 | 24 |
-| ease-in | 1.07 | 3.75 | 7.57 | 12.28 | 17.75 | 24 |
-| linear | 4.00 | 8.00 | 12.00 | 16.00 | 20.00 | 24 |
-| clothoid | 6.16 | 11.86 | 16.83 | 20.71 | 23.17 | 24 |
-
-The clothoid puts 6.16px on the top band and `linear` 4px — both past the legibility cliff
-before the ramp has begun. `ease-in` holds the start too, but climbs to the ceiling without
-easing into it.
-
-### Limitations, all of them about live text
-
-**The text underneath is still live**, and that is a content decision rather than a rendering
-one. This blurs pixels; it does not redact. The words stay in the DOM — selectable, copyable,
-findable with the browser's own find, and read aloud in full by a screen reader, which sees
-no blur at all. Never use it to withhold anything: a paywall, a spoiler, a password. For
-those, do not send the text.
-
-**It does not reflow with the content.** The bands are fractions of the element, so the ramp
-lands where the box says and not on any particular line. A block that rewraps at a narrower
-width gets the same ramp over different words.
-
-**Over text the ramp should not start at the element's edge.** The smallest stop in a 24px
-stack is still 1.35px, and 1.35px at 0% lands inside the first line's *ascenders* — so the
-line the reader anchors on is damaged before the gradation has done anything. `start` holds
-a leading stretch untouched:
-
-```ts
-blurLayers({ start: 'calc(12px + 1lh)' })   // hold one line, ramp after it
-blurLayers({ start: 0.25 })                 // or a plain fraction of the element
-```
-
-Over a colour field there is no anchor and every part of the ramp is observable, which is
-why this defaults to `0` rather than to a line. Two things to know about `lh` here: it
-resolves against the line-height of the **stack** element, which inherits from its parent
-and need not match the paragraphs it covers (20.3px against the text's 21.75px, in one
-ordinary case); and it measures from the element's edge, so padding counts — hence the
-`12px +` above. Pass an explicit length when it has to be exact.
-
-The onset is feathered rather than cut. A hard start would be the same visible edge this
-file is about, landing directly under the line the offset exists to protect.
-
-**Keep the radius well under the span it ramps across** — a tenth is a safe ceiling. A blur
-samples a neighbourhood `radius` wide, and at the element's edge there is no neighbourhood,
-so the compositor clamps and smears. 28px inside an 86px box is a third of the height and
-comes out blotchy; the same 28px across 240px is clean. No number in the engine can fix
-this — it is a property of `backdrop-filter` and a sizing decision at the call site.
-
-**Ramp across the text, not along it.** Blurring left-to-right over left-to-right prose
-dissolves every line mid-word and reads as a bug. Running it down the block takes whole lines
-at a time; variablur's own list-edge example is vertical for the same reason.
-
-**Cost is one backdrop rasterisation per layer, per frame.** Six is affordable under a
-scrolling list; it is still the expensive number, and the first to cut.
-
-**On iOS Safari** a `backdrop-filter` inside a scroll container is sampled before the scroll
-offset is applied, so the blur lags the content. Position it against the viewport instead.
-
-`<ProgressiveBlur>` renders the stack. It is a lens, not a lid: `pointer-events: none`, its
-own stacking context, and no background of any kind — a background would be the thing you
-see instead of the blurred content behind it.
-
----
+**One thing worth keeping from the wreckage.** A non-round `corner-shape` on the element
+that *contains* a masked `backdrop-filter` layer silently drops the mask — only the host
+matters, not the layer. Page-wide `corner-shape: superellipse(1.2)` cost a full rewrite of
+`blurLayers` before the cause was found, because the symptom is indistinguishable from
+`mask-image` simply not working and nothing in the computed styles says otherwise.
 
 ## The controls
 

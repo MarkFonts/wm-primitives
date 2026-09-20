@@ -75,8 +75,7 @@ svg.chan .ln{stroke-width:2.5}
 .spec.tall{height:300px}
 .spec.tall p{margin:0 0 3px;font-size:11.5px;line-height:1.34}
 .spec .veil{position:absolute;inset:0;pointer-events:none}
-.stack{position:absolute;inset:0;pointer-events:none;isolation:isolate;overflow:hidden}
-.stack>div{position:absolute;inset:0}
+.lens{position:absolute;inset:0;pointer-events:none}
 </style>
 
 <h1>Ramps</h1>
@@ -115,18 +114,14 @@ svg.chan .ln{stroke-width:2.5}
 <div class="row"><figure><div class="band dither" style="background-image:linear-gradient(90deg, #1544c4, #3052b0, #4c609c, #676e88, #827b73, #9e895f, #b9974b, #d5a537, #f0b323)"></div><figcaption>none</figcaption></figure><figure><div class="band dither" style="background-image:linear-gradient(90deg, #1544c4, #1b52b0, #29609c, #3f6e88, #5a7b73, #7a895f, #9d974b, #c5a537, #f0b323)"></div><figcaption>R steered</figcaption></figure><figure><div class="band dither" style="background-image:linear-gradient(90deg, #1544c4, #3047b0, #4c4e9c, #675988, #826773, #9e775f, #b9894b, #d59d37, #f0b323)"></div><figcaption>G steered</figcaption></figure><figure><div class="band dither" style="background-image:linear-gradient(90deg, #1544c4, #3052c0, #4c60b5, #676ea5, #827b91, #9e897a, #b99760, #d5a543, #f0b323)"></div><figcaption>B steered</figcaption></figure></div>
 <div class="row" style="grid-template-columns:repeat(3,minmax(96px,150px));margin-top:14px"><figure><svg viewBox="-2 -6 104 92" class="chan"><rect class="f" x="0" y="0" width="100" height="80"/><line class="ln" x1="0" y1="2.8" x2="100" y2="64.9" stroke="#e05"/><circle cx="0" cy="2.8" r="2.6" fill="#e05"/><circle cx="100" cy="64.9" r="2.6" fill="#e05"/></svg><figcaption style="color:#e05">R 246 → 48</figcaption></figure><figure><svg viewBox="-2 -6 104 92" class="chan"><rect class="f" x="0" y="0" width="100" height="80"/><line class="ln" x1="0" y1="54.9" x2="100" y2="54.9" stroke="#0b6"/><circle cx="0" cy="54.9" r="2.6" fill="#0b6"/><circle cx="100" cy="54.9" r="2.6" fill="#0b6"/></svg><figcaption style="color:#0b6">G 80 → 80</figcaption></figure><figure><svg viewBox="-2 -6 104 92" class="chan"><rect class="f" x="0" y="0" width="100" height="80"/><line class="ln" x1="0" y1="64.9" x2="100" y2="2.8" stroke="#48f"/><circle cx="0" cy="64.9" r="2.6" fill="#48f"/><circle cx="100" cy="2.8" r="2.6" fill="#48f"/></svg><figcaption style="color:#48f">B 48 → 246</figcaption></figure></div>
 
-<h2>Progressive blur <span>1.35 &#183; 5.56 &#183; 12 &#183; 18.44 &#183; 22.65 &#183; 24 px</span></h2>
+<h2>The blur <span>one radius, not a ramp</span></h2>
 <p class="note">variablur's effect as a stack of backdrop layers, each owning <b>one band</b> at that band's absolute radius. Not a cumulative stack: that one <b>ghosts</b>. <code>backdrop-filter</code> blurs what is behind the layer, so at partial alpha the compositor blends a blurred copy over the still-sharp original and live text doubles. The bands are <b>geometry</b>, not masks, and that is not a style choice: everyone publishes this technique with each layer cut to a band by <code>mask-image</code>, and in this page one layer masked to the top quarter blurred the whole panel &#8212; six stacked took sharpness down the panel to a flat <b>0.1</b> against <b>8.7&#8211;16.8</b> with the stack removed, a uniform smear, the one thing a progressive blur must not be. A band placed by <code>inset</code> blurs its own rows and nothing else. The cost is the feather: a band's edge is a step in radius, so the seam is hidden by making the step small rather than by blending it, which is what <code>layers</code> buys. Only the radius follows the curve, and the default curve holds the start &#8212; text stops being legible around 4px, and the first band has to stay under that. The right-hand panel also holds the first lines with <code>start</code>: without it the smallest radius in the stack lands inside the first line's ascenders.</p>
-<div class="row" style="grid-template-columns:1fr 1fr">
-<figure><div class="spec"><p>Hamburgefonstiv — the tail of the work goes on</p><p>past the point where the reader can still be</p><p>sure of it, which is the whole affordance: a</p><p>hard cut reads as the end of the specimen</p><p>rather than the end of what has loaded so far.</p><p>The fade is not decoration. It is the signal</p><p>that there is more, and it has to arrive without</p><p>announcing itself, or it becomes a panel laid</p><p>over the text instead of the ink thinning out.</p><p>A flat swatch forgives any curve. Type will not.</p><div class="stack" data-stack="plain"><div style="inset:0% 0 87.5% 0;backdrop-filter:blur(0.75px);-webkit-backdrop-filter:blur(0.75px)"></div><div style="inset:12.5% 0 75% 0;backdrop-filter:blur(3.1px);-webkit-backdrop-filter:blur(3.1px)"></div><div style="inset:25% 0 62.5% 0;backdrop-filter:blur(7.03px);-webkit-backdrop-filter:blur(7.03px)"></div><div style="inset:37.5% 0 50% 0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)"></div><div style="inset:50% 0 37.5% 0;backdrop-filter:blur(16.97px);-webkit-backdrop-filter:blur(16.97px)"></div><div style="inset:62.5% 0 25% 0;backdrop-filter:blur(20.9px);-webkit-backdrop-filter:blur(20.9px)"></div><div style="inset:75% 0 12.5% 0;backdrop-filter:blur(23.25px);-webkit-backdrop-filter:blur(23.25px)"></div><div style="inset:87.5% 0 0% 0;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)"></div></div></div>
-<figcaption>start 0</figcaption></figure>
-<figure><div class="spec"><p>Hamburgefonstiv — the tail of the work goes on</p><p>past the point where the reader can still be</p><p>sure of it, which is the whole affordance: a</p><p>hard cut reads as the end of the specimen</p><p>rather than the end of what has loaded so far.</p><p>The fade is not decoration. It is the signal</p><p>that there is more, and it has to arrive without</p><p>announcing itself, or it becomes a panel laid</p><p>over the text instead of the ink thinning out.</p><p>A flat swatch forgives any curve. Type will not.</p><div class="stack" data-stack="held"><div style="inset:calc(calc(12px + 2lh) + (100% - calc(12px + 2lh)) * 0) 0 calc((100% - calc(12px + 2lh)) * 0.875) 0;backdrop-filter:blur(0.75px);-webkit-backdrop-filter:blur(0.75px)"></div><div style="inset:calc(calc(12px + 2lh) + (100% - calc(12px + 2lh)) * 0.125) 0 calc((100% - calc(12px + 2lh)) * 0.75) 0;backdrop-filter:blur(3.1px);-webkit-backdrop-filter:blur(3.1px)"></div><div style="inset:calc(calc(12px + 2lh) + (100% - calc(12px + 2lh)) * 0.25) 0 calc((100% - calc(12px + 2lh)) * 0.625) 0;backdrop-filter:blur(7.03px);-webkit-backdrop-filter:blur(7.03px)"></div><div style="inset:calc(calc(12px + 2lh) + (100% - calc(12px + 2lh)) * 0.375) 0 calc((100% - calc(12px + 2lh)) * 0.5) 0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)"></div><div style="inset:calc(calc(12px + 2lh) + (100% - calc(12px + 2lh)) * 0.5) 0 calc((100% - calc(12px + 2lh)) * 0.375) 0;backdrop-filter:blur(16.97px);-webkit-backdrop-filter:blur(16.97px)"></div><div style="inset:calc(calc(12px + 2lh) + (100% - calc(12px + 2lh)) * 0.625) 0 calc((100% - calc(12px + 2lh)) * 0.25) 0;backdrop-filter:blur(20.9px);-webkit-backdrop-filter:blur(20.9px)"></div><div style="inset:calc(calc(12px + 2lh) + (100% - calc(12px + 2lh)) * 0.75) 0 calc((100% - calc(12px + 2lh)) * 0.125) 0;backdrop-filter:blur(23.25px);-webkit-backdrop-filter:blur(23.25px)"></div><div style="inset:calc(calc(12px + 2lh) + (100% - calc(12px + 2lh)) * 0.875) 0 calc((100% - calc(12px + 2lh)) * 0) 0;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)"></div></div></div>
-<figcaption>start 'calc(12px + 2lh)' &#183; the first lines held</figcaption></figure>
+<div class="row" style="grid-template-columns:1fr">
+<figure><div class="spec"><p>Hamburgefonstiv — the tail of the work goes on</p><p>past the point where the reader can still be</p><p>sure of it, which is the whole affordance: a</p><p>hard cut reads as the end of the specimen</p><p>rather than the end of what has loaded so far.</p><p>The fade is not decoration. It is the signal</p><p>that there is more, and it has to arrive without</p><p>announcing itself, or it becomes a panel laid</p><p>over the text instead of the ink thinning out.</p><p>A flat swatch forgives any curve. Type will not.</p><div class="lens" style="backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)"></div></div>
+<figcaption>one uniform backdrop-filter &#183; nothing masked, so nothing to ghost or step</figcaption></figure>
 </div>
 <div class="ctls">
-<div class="ctl"><label>radius</label><input type="range" data-k="radius" min="4" max="48" step="1" value="24"><output>24</output></div>
-<div class="ctl"><label>layers</label><input type="range" data-k="layers" min="4" max="32" step="1" value="8"><output>8</output></div>
-<div class="ctl"><label>hold</label><input type="range" data-k="hold" min="0" max="40" step="1" value="0"><output>0</output></div>
+<div class="ctl"><label>radius</label><input type="range" data-k="radius" min="0" max="48" step="1" value="12"><output>12</output></div>
 </div>
 <p class="note" style="margin-top:14px">It blurs pixels. It does not redact. The words stay in the DOM &#8212; selectable, copyable, findable, and read aloud in full by a screen reader, which sees no blur. Never use it to withhold anything.</p>
 
@@ -341,28 +336,11 @@ ctl('stops', n => {
 
 /* c5 -- both stacks rebuild; only the right one takes the hold, so the pair keeps
    showing what the offset buys. */
-const paint = (sel, start) => {
-  const wrap = document.querySelector(sel)
-  if (!wrap) return
-  const radius = +document.querySelector('input[data-k="radius"]').value
-  const layers = +document.querySelector('input[data-k="layers"]').value
-  wrap.innerHTML = blurLayers({ radius, layers, start }).map(l =>
-    '<div style="inset:' + l.inset + ';backdrop-filter:' + l.backdropFilter +
-    ';-webkit-backdrop-filter:' + l.backdropFilter + '"></div>').join('')
-}
-const blur = () => {
-  const hold = +document.querySelector('input[data-k="hold"]').value / 100
-  paint('[data-stack="plain"]', 0)
-  /* At 0 the held panel keeps the line-based offset it is captioned with, rather than
-     becoming a second copy of the panel beside it. The first repaint used to overwrite
-     the static calc() with the slider's zero, so the pair rendered identically on load
-     and the hold appeared to do nothing until the slider was touched -- which read as a
-     dead control rather than as a default. */
-  paint('[data-stack="held"]', hold || 'calc(12px + 2lh)')
-}
-ctl('radius', v => { blur(); return v + 'px' })
-ctl('layers', v => { blur(); return v })
-ctl('hold',   v => { blur(); return v + '%' })
+ctl('radius', v => {
+  const lens = document.querySelector('.lens')
+  if (lens) { lens.style.backdropFilter = lens.style.webkitBackdropFilter = 'blur(' + v + 'px)' }
+  return v + 'px'
+})
 
 /* c6 -- the dither's own strength. At 0 the terraces come back, which is the point. */
 ctl('dither', v => {

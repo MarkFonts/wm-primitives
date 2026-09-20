@@ -195,10 +195,13 @@ const chan = (from, to, i, name, hue) => {
 const mdPlots = ['#e05', '#0b6', '#48f'].map((h, i) =>
   chan(MD_A, MD_B, i, ['R', 'G', 'B'][i], h)).join('')
 
-/* ── 05 · progressive blur, as static DOM ────────────────────────────────────────── */
-const blurStack = (radius, start) => g.blurLayers({ radius, start })
-  .map(l => `<div style="inset:${l.inset};backdrop-filter:${l.backdropFilter};` +
-             `-webkit-backdrop-filter:${l.backdropFilter}"></div>`).join('')
+/* ── 05 · the blur, as static DOM ───────────────────────────────────────────────── */
+/* ONE blur, not a stack. The progressive version is retired -- see GRADIENTS.md and
+   the note this chapter carries. A single uniform backdrop-filter has neither of the
+   artifacts that killed it: nothing is masked, so there is no partial alpha to ghost,
+   and there is one radius, so there is nothing to step between. */
+const flatBlur = radius => `<div class="lens" style="backdrop-filter:blur(${radius}px);` +
+  `-webkit-backdrop-filter:blur(${radius}px)"></div>`
 const LINES = ['Hamburgefonstiv — the tail of the work goes on', 'past the point where the reader can still be',
   'sure of it, which is the whole affordance: a', 'hard cut reads as the end of the specimen',
   'rather than the end of what has loaded so far.', 'The fade is not decoration. It is the signal',
@@ -209,6 +212,8 @@ const proseBlock = LINES.map(l => `<p>${l}</p>`).join('')
 const denseBlock = LINES.concat(LINES.slice(0, 6)).map(l => `<p>${l}</p>`).join('')
 /* The radius ladder the chapter quotes. Sampled at 6 for the table because 16 numbers
    is a list, not a figure -- the stack itself runs at the default. */
+/* The ladder the retired stack emitted. Kept only because the chapter's prose refers to
+   it when explaining what was wrong with a ramp of discrete radii. */
 const radii = g.blurLayers({ radius: 24, layers: 6 }).map(l => l.backdropFilter.slice(5, -3))
 
 /* ── 02 · the edge, and 06 · banding ─────────────────────────────────────────────── */
@@ -356,8 +361,7 @@ svg.chan .ln{stroke-width:2.5}
 .spec.tall{height:300px}
 .spec.tall p{margin:0 0 3px;font-size:11.5px;line-height:1.34}
 .spec .veil{position:absolute;inset:0;pointer-events:none}
-.stack{position:absolute;inset:0;pointer-events:none;isolation:isolate;overflow:hidden}
-.stack>div{position:absolute;inset:0}
+.lens{position:absolute;inset:0;pointer-events:none}
 </style>
 
 <h1>${COPY.title}</h1>
@@ -398,16 +402,12 @@ svg.chan .ln{stroke-width:2.5}
 
 <h2>${COPY.c5_title} <span>${COPY.c5_tag}</span></h2>
 <p class="note">${COPY.note5}</p>
-<div class="row" style="grid-template-columns:1fr 1fr">
-<figure><div class="spec">${proseBlock}<div class="stack" data-stack="plain">${blurStack(24, 0)}</div></div>
+<div class="row" style="grid-template-columns:1fr">
+<figure><div class="spec">${proseBlock}${flatBlur(12)}</div>
 <figcaption>${COPY.cap5}</figcaption></figure>
-<figure><div class="spec">${proseBlock}<div class="stack" data-stack="held">${blurStack(24, 'calc(12px + 2lh)')}</div></div>
-<figcaption>${COPY.cap6}</figcaption></figure>
 </div>
 <div class="ctls">
-<div class="ctl"><label>${COPY.ctl_radius}</label><input type="range" data-k="radius" min="4" max="48" step="1" value="24"><output>24</output></div>
-<div class="ctl"><label>${COPY.ctl_layers}</label><input type="range" data-k="layers" min="4" max="32" step="1" value="8"><output>8</output></div>
-<div class="ctl"><label>${COPY.ctl_hold}</label><input type="range" data-k="hold" min="0" max="40" step="1" value="0"><output>0</output></div>
+<div class="ctl"><label>${COPY.ctl_radius}</label><input type="range" data-k="radius" min="0" max="48" step="1" value="12"><output>12</output></div>
 </div>
 <p class="note" style="margin-top:14px">${COPY.note6}</p>
 
@@ -457,28 +457,11 @@ ctl('stops', n => {
 
 /* c5 -- both stacks rebuild; only the right one takes the hold, so the pair keeps
    showing what the offset buys. */
-const paint = (sel, start) => {
-  const wrap = document.querySelector(sel)
-  if (!wrap) return
-  const radius = +document.querySelector('input[data-k="radius"]').value
-  const layers = +document.querySelector('input[data-k="layers"]').value
-  wrap.innerHTML = blurLayers({ radius, layers, start }).map(l =>
-    '<div style="inset:' + l.inset + ';backdrop-filter:' + l.backdropFilter +
-    ';-webkit-backdrop-filter:' + l.backdropFilter + '"></div>').join('')
-}
-const blur = () => {
-  const hold = +document.querySelector('input[data-k="hold"]').value / 100
-  paint('[data-stack="plain"]', 0)
-  /* At 0 the held panel keeps the line-based offset it is captioned with, rather than
-     becoming a second copy of the panel beside it. The first repaint used to overwrite
-     the static calc() with the slider's zero, so the pair rendered identically on load
-     and the hold appeared to do nothing until the slider was touched -- which read as a
-     dead control rather than as a default. */
-  paint('[data-stack="held"]', hold || 'calc(12px + 2lh)')
-}
-ctl('radius', v => { blur(); return v + 'px' })
-ctl('layers', v => { blur(); return v })
-ctl('hold',   v => { blur(); return v + '%' })
+ctl('radius', v => {
+  const lens = document.querySelector('.lens')
+  if (lens) { lens.style.backdropFilter = lens.style.webkitBackdropFilter = 'blur(' + v + 'px)' }
+  return v + 'px'
+})
 
 /* c6 -- the dither's own strength. At 0 the terraces come back, which is the point. */
 ctl('dither', v => {

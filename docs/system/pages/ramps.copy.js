@@ -35,8 +35,8 @@ export const copy = v => ({
   c3_tag: `the midpoint, four spaces`,
   c4_title: `Steering a channel`,
   c4_tag: `Mass Driver's schema`,
-  c5_title: `Progressive blur`,
-  c5_tag: `${v.radii.join(' &#183; ')} px`,
+  c5_title: `The blur`,
+  c5_tag: `one radius, not a ramp`,
   c6_title: `Banding`,
   c6_tag: `8-bit, and what no curve can fix`,
 
@@ -65,8 +65,6 @@ export const copy = v => ({
 
   ctl_stops: `stops`,
   ctl_radius: `radius`,
-  ctl_layers: `layers`,
-  ctl_hold: `hold`,
   ctl_dither: `dither`,
 
   cap1: `alpha against position &#183; dots = the engine's stops`,
@@ -74,8 +72,7 @@ export const copy = v => ({
   cap3a: `no scrim &#183; the control`,
   cap3: `linear &#183; the line shows on row two`,
   cap4: `clothoid &#183; the default`,
-  cap5: `start 0`,
-  cap6: `start 'calc(12px + 2lh)' &#183; the first lines held`,
+  cap5: `one uniform backdrop-filter &#183; nothing masked, so nothing to ghost or step`,
   cap7a: `the control &#183; alpha 0 &#8594; 1 &#183; ${v.band.steepLevels} levels at ${v.band.steepPerLevel}px &#183; too dense to separate &#183; fuses`,
   cap7b: `the same endpoints as a <code>background-image</code> &#183; Skia dithers before it quantises &#183; the step itself halves, to ${v.band.jumpBg}`,
   cap7: `the dark fade as a mask over flat ground &#183; ${v.band.levels} levels at ${v.band.perLevel}px &#183; column step ${v.band.jumpMask} &#183; bands`,
