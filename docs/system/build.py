@@ -585,20 +585,40 @@ def face(name):
 
 LINKED = "--linked" in sys.argv
 
+# ---------------------------------------------------------------- the weight ranges
+# EACH RANGE IS THE FONT'S OWN, read from its fvar rather than copied between faces:
+#   CalSansVF.ttf        wght 400..700   (also ital 0..1, opsz 8..45, GEOM 0..100)
+#   CalSansSpecimen.ttf  wght 200..800   -- a DIFFERENT range, and the reason this is not
+#                                           one shared string
+#   PaperMono.woff2      STATIC, weight 400, no fvar -- so it gets NO range. Declaring one
+#                                           on a static face is how you invite the
+#                                           synthetic bold a range is supposed to prevent.
+# Chrome reaches the wght axis without these, which was verified on the published page
+# before they were added; they are here because an engine entitled to read the spec
+# strictly would clamp a rangeless variable face to 400, and the descriptor costs nothing.
+#
+# NOT DONE HERE, and it is the one that changes what renders: Cal Sans's italic is an axis,
+# and `font-style: italic` alone does not reach it -- the engine shears the roman instead.
+# The fix is a SECOND @font-face per family, same src, carrying
+# `font-style:italic;font-variation-settings:'ital' 1`. Measured on the published page:
+# font-style alone 337.88 (the roman's own width), the descriptor 337.11. Left out because
+# it changes every <i> and <em> in the assembled document and that is a typography decision,
+# not a build fix. docs/system/pages/buttons.html carries the worked example.
+
 if LINKED:
     FONTS = """
 @font-face{font-family:"Material Symbols Outlined";src:url(fonts/MaterialSymbolsOutlined.woff2) format("woff2");font-weight:100 700;font-style:normal;font-display:block}
-@font-face{font-family:"Face";src:url(fonts/CalSansVF.ttf) format("truetype");font-display:swap}
-@font-face{font-family:"CalSansVF";src:url(fonts/CalSansVF.ttf) format("truetype");font-display:swap}
-@font-face{font-family:"Specimen";src:url(fonts/CalSansSpecimen.ttf) format("truetype");font-display:swap}
+@font-face{font-family:"Face";src:url(fonts/CalSansVF.ttf) format("truetype");font-weight:400 700;font-style:normal;font-display:swap}
+@font-face{font-family:"CalSansVF";src:url(fonts/CalSansVF.ttf) format("truetype");font-weight:400 700;font-style:normal;font-display:swap}
+@font-face{font-family:"Specimen";src:url(fonts/CalSansSpecimen.ttf) format("truetype");font-weight:200 800;font-style:normal;font-display:swap}
 @font-face{font-family:"PaperMono";src:url(fonts/PaperMono.woff2) format("woff2");font-display:swap}
 """
 else:
     FACE, SPEC = face("CalSansVF.ttf"), face("CalSansSpecimen.ttf")
     FONTS = f"""
-@font-face{{font-family:"Face";src:url({FACE}) format("truetype");font-display:swap}}
-@font-face{{font-family:"CalSansVF";src:url({FACE}) format("truetype");font-display:swap}}
-@font-face{{font-family:"Specimen";src:url({SPEC}) format("truetype");font-display:swap}}
+@font-face{{font-family:"Face";src:url({FACE}) format("truetype");font-weight:400 700;font-style:normal;font-display:swap}}
+@font-face{{font-family:"CalSansVF";src:url({FACE}) format("truetype");font-weight:400 700;font-style:normal;font-display:swap}}
+@font-face{{font-family:"Specimen";src:url({SPEC}) format("truetype");font-weight:200 800;font-style:normal;font-display:swap}}
 """
 
 SHELL = """

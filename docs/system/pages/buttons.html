@@ -35,6 +35,20 @@
    range costs nothing, and the live system page carries the same omission in build.py. */
 @font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype");
   font-weight: 400 700; font-style: normal; font-display:swap; }
+/* THE ITALIC IS DECLARED, NOT APPLIED PER ELEMENT. Same file, same family, font-style:
+   italic -- and the part that actually does the work, `font-variation-settings: 'ital' 1`
+   as an @font-face DESCRIPTOR. Measured, because two of the three ways do not work:
+     font-style: italic alone, same src ............ 337.88  a sheared roman
+     + font-variation-settings:'ital' 1 descriptor . 337.11  the real italic
+     font-named-instance:'Italic' .................. 337.88  not implemented
+   With this here, <i> and <em> need no rule at all: font-style resolves to a real face.
+   Better than the per-element rule it replaces, because font-variation-settings is not
+   additive -- setting 'ital' on an element WIPES any inherited opsz or GEOM, so an italic
+   inside a sized context silently lost its optical size. A descriptor has no such problem,
+   and bold italic keeps its weight because wght stays on font-weight. */
+@font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype");
+  font-weight: 400 700; font-style: italic; font-variation-settings: 'ital' 1;
+  font-display:swap; }
 @font-face{ font-family:"Material Symbols Outlined"; src:url("../../fonts/MaterialSymbolsOutlined.woff2") format("woff2"); font-weight:100 700; font-display:block; }
 
 /* The tick length is a REGISTERED property because family 05 transitions it. An
@@ -139,16 +153,7 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
      italic is reached by axis below. Synthesis has nothing left to do except go wrong. */
   font-synthesis: none; }
 
-/* CAL SANS'S ITALIC IS AN AXIS, NOT A SECOND FILE. One face is declared, and it is the
-   roman, so `font-style: italic` had no italic to resolve to and every <i> on the page was
-   a SLANTED ROMAN the engine drew itself. On a page about this foundry's own type that is
-   the one thing that must not happen. This one was measured on the page itself and holds:
-   `font-style: italic` rendered at 337.88, the roman's own width to the hundredth, because
-   it WAS the roman; the axis renders 337.11.
-   font-variation-settings names only the axes it lists, so 'ital' alone leaves wght under
-   font-weight's control and a bold italic still gets its real weight. font-style goes back
-   to normal so nothing slants what the axis has already italicised. */
-.bt-page i, .bt-page em{ font-style: normal; font-variation-settings: 'ital' 1; }
+/* <i> and <em> carry no rule: the italic @font-face above resolves them. */
 /* A rule name or a token is one long unbreakable word at 360px. */
 .bt-lede, .bt-thesis, .bt-cost, .bt-laws td{ overflow-wrap: break-word; }
 
