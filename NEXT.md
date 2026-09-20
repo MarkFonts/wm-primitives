@@ -143,8 +143,11 @@ a task. Skip nothing above the line you are on; below it, pick.
 ## G · The enclosure language (one grammar for everything boxed)
 
 Opened 2026-09-20 from the six-family proposal on `docs/system/pages/buttons.html`
-(the "Button designs" session; not registered in `build.py` on purpose — it is a page to
-decide from). One family wins and becomes `src/button.css`. Until then this section is
+(the "Button designs" session). It stays out of `build.py`'s SECTIONS permanently, Mark's
+decision 2026-09-20: Pages serves it in place, so an edit is live in under a minute, and a
+page whose purpose is to be argued with must not need a rebuild of a 900KB artifact to be
+seen. The WIP chapter links it; it is never assembled. One family wins and becomes
+`src/button.css`. Until then this section is
 what the win changes; the family is **left blank**: ______.
 
 What a language is, as against the button we have: every boxed thing — button, field,
