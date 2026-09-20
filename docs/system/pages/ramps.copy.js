@@ -69,6 +69,8 @@ export const copy = v => ({
   cap4: `clothoid &#183; the default`,
   cap5: `start 0`,
   cap6: `start 'calc(12px + 2lh)' &#183; the first lines held`,
+  cap7amp: `the same band, contrast \u00d76 \u2014 the steps are real, the contrast is not`,
+  cap8amp: `dithered, amplified the same way \u2014 the terraces are gone`,
   cap7: `a narrow alpha range over a wide box &#183; no dither &#183; the terraces are the bug`,
   cap8: `the same ramp, the same levels, with .wm-dither on the wrapper`,
 })
