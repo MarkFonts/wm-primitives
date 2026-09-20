@@ -839,9 +839,10 @@ content, so the comparison is between designs and not between demos.</p>
     itself, and most labels never do: &ldquo;Kern lists&rdquo;, &ldquo;10 Reg&rdquo;,
     &ldquo;Average pairs&rdquo; and &ldquo;Next specimen&rdquo; name things no icon is
     about, and giving them one anyway is how a set ends up with marks that decorate instead
-    of identify. Every button below is therefore <b>text only</b>. Two exceptions, both deliberate: a <b>rail row</b>, where the mark is the
-    thing you scan and the name is the confirmation; and the <b>icon-only</b> button, which
-    is not a label with a mark but a target that is <i>only</i> a mark.</td></tr>
+    of identify. Every button below is therefore <b>text only</b>. Two exceptions, both deliberate: a <b>menu row</b>, where the items are
+    of equal weight and you are picking between them rather than reading them &mdash; so the
+    mark is what you scan and the name is the confirmation; and the <b>icon-only</b> button,
+    which is not a label with a mark but a target that is <i>only</i> a mark.</td></tr>
   </table>
 </div>
 
@@ -882,7 +883,7 @@ content, so the comparison is between designs and not between demos.</p>
       </div>
     </div>
     <div class="bt-panel">
-      <p class="bt-panel-lab">Rail</p>
+      <p class="bt-panel-lab">Menu</p>
       <div class="bt-rail-list">
         <button class="bt-k bt-as-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
         <button class="bt-k bt-as-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
@@ -968,7 +969,7 @@ content, so the comparison is between designs and not between demos.</p>
       </div>
     </div>
     <div class="bt-panel">
-      <p class="bt-panel-lab">Rail</p>
+      <p class="bt-panel-lab">Menu</p>
       <div class="bt-rail-list">
         <button class="bt-z bt-as-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
         <button class="bt-z bt-as-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
@@ -1056,7 +1057,7 @@ content, so the comparison is between designs and not between demos.</p>
       to draw it in. Those actions borrow 01.</p>
     </div>
     <div class="bt-panel">
-      <p class="bt-panel-lab">Rail</p>
+      <p class="bt-panel-lab">Menu</p>
       <div class="bt-rail-list">
         <button class="bt-r bt-as-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
         <button class="bt-r bt-as-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
@@ -1144,7 +1145,7 @@ content, so the comparison is between designs and not between demos.</p>
       </div>
     </div>
     <div class="bt-panel">
-      <p class="bt-panel-lab">Rail</p>
+      <p class="bt-panel-lab">Menu</p>
       <div class="bt-rail-list">
         <button class="bt-p bt-as-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
         <button class="bt-p bt-as-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
@@ -1232,7 +1233,7 @@ content, so the comparison is between designs and not between demos.</p>
       </div>
     </div>
     <div class="bt-panel">
-      <p class="bt-panel-lab">Rail</p>
+      <p class="bt-panel-lab">Menu</p>
       <div class="bt-rail-list">
         <button class="bt-b bt-as-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
         <button class="bt-b bt-as-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
@@ -1283,15 +1284,18 @@ content, so the comparison is between designs and not between demos.</p>
   whole mechanism; where it is missing the mask collapses and the full border paints, which
   is family 01 &mdash; a correct button, so the degradation is honest, but a family whose
   fallback is another family is one design being maintained as two. At UI size the tick is
-  9px and four of them in a dense rail read as noise rather than as an edge. The transition
+  9px and four of them in a dense menu read as noise rather than as an edge. The transition
   needs <code>--bt-tick</code> registered with <code>@property</code>, or the ticks snap.</p>
 </div>
 
 <!-- ═══ 06 ════════════════════════════════════════════════════════════════════ -->
 <div class="bt-fam">
-  <div class="bt-fam-head"><span class="bt-idx">06</span><h3 style="margin:0;font-size:1.125rem;font-weight:500">Rail</h3></div>
+  <div class="bt-fam-head"><span class="bt-idx">06</span><h3 style="margin:0;font-size:1.125rem;font-weight:500">Menu</h3></div>
   <p class="bt-thesis"><b>An enclosure means chosen, not pressable.</b> The inversion of the
-  five above, and the only one already running: this is font-proofer's rail. A row has no
+  five above, and the only one already running: it is what font-proofer's rail already
+  does, and what that is, is a <b>menu</b> &mdash; preview modes of equal weight, picked
+  between rather than read, which is the one place on this page where a mark earns its
+  space. A row has no
   edge at rest &mdash; a mark, a label, and the full width of the column as its target
   &mdash; and the ground arrives when it is the one that is on. The editable mark is not a
   proposal either: it is <code>.slider-number</code>, the rule the dial ships. <b>An
@@ -1324,7 +1328,7 @@ content, so the comparison is between designs and not between demos.</p>
       same ground. <b>There is no louder left to go.</b></p>
     </div>
     <div class="bt-panel">
-      <p class="bt-panel-lab">Rail</p>
+      <p class="bt-panel-lab">Menu</p>
       <div class="bt-f-rail">
         <button class="bt-f-row bt-hit" type="button"><span class="bt-i">calendar_month</span>booking events</button>
         <button class="bt-f-row bt-hit" type="button"><span class="bt-i">insert_text</span>Big Word</button>
@@ -1390,7 +1394,7 @@ content, so the comparison is between designs and not between demos.</p>
   which is the brief&rsquo;s failure exactly, and the family survives it only on two
   conditions it cannot enforce for itself: every row carries a <b>mark</b>, and every row is
   the <b>full width</b> of its column. Strip either and this becomes the unformatted list.
-  It also needs somewhere to be a rail: the row shape wants 200px and a left edge to sit
+  It also needs somewhere to be a menu: the row shape wants 200px and a left edge to sit
   against, so an action in the middle of a paragraph has to borrow another family. And
   because the enclosure is spent on <i>chosen</i>, there is nothing left to spend on
   <i>primary</i> &mdash; a destructive action here looks like every other row.</p>
@@ -1398,14 +1402,14 @@ content, so the comparison is between designs and not between demos.</p>
   rule is drawn on the text, so on a value it is four characters wide and on a wrapped
   sentence it is two full lines of underline. <code>.slider-number</code> was written for a
   number in a rail and it is right there. <b>The editable case in the brief is a headline,
-  not a value</b> &mdash; so if 06 wins the rail, something else still has to win the
+  not a value</b> &mdash; so if 06 wins the menu, something else still has to win the
   paragraph, and the two have to look like one decision.</p>
 </div>
 
 <!-- ═══ coverage ═════════════════════════════════════════════════ -->
 <h2>What each one demonstrates</h2>
 <p class="bt-lede">All six draw the <b>same six specimens, in the same order, on the same
-content</b> &mdash; screamer, buttons, rail, states, editable, in situ &mdash; so a column
+content</b> &mdash; screamer, buttons, menu, states, editable, in situ &mdash; so a column
 means one thing all the way down the page and a difference between two cells is a difference
 between designs. Where a cell is empty the family <i>cannot</i> do that thing, and that is the finding &mdash;
 not an omission.</p>
@@ -1413,7 +1417,7 @@ not an omission.</p>
 <div class="bt-tbl-wrap">
 <table class="bt-tbl">
   <tr>
-    <th>family</th><th>screamer</th><th>buttons</th><th>rail</th><th>5 states</th>
+    <th>family</th><th>screamer</th><th>buttons</th><th>menu</th><th>5 states</th>
     <th>editable</th><th>in situ</th><th>cannot do</th>
   </tr>
   <tr><td>01 Keyline</td>
@@ -1439,8 +1443,8 @@ not an omission.</p>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
     <td class="no">&mdash; (its cost is legibility: 9px ticks read as noise in a dense
-    rail, not as an edge)</td></tr>
-  <tr><td>06 Rail</td>
+    menu, not as an edge)</td></tr>
+  <tr><td>06 Menu</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
     <td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td>
     <td class="no">a primary louder than <i>chosen</i>, and an editable that is prose
@@ -1449,7 +1453,7 @@ not an omission.</p>
 </div>
 
 <p class="bt-lede"><b>The screamer is not the UI button made bigger</b>, and that is why it
-earns a row. The rail runs at <code>opsz 10</code>; Cal Sans's axis is <b>8&thinsp;&ndash;&thinsp;14&thinsp;&ndash;&thinsp;45</b>
+earns a row. The menu runs at <code>opsz 10</code>; Cal Sans's axis is <b>8&thinsp;&ndash;&thinsp;14&thinsp;&ndash;&thinsp;45</b>
 and a display line belongs at the top of it. Scaling a 13px button to 34px and leaving the
 optical size alone prints the <i>small</i> drawing large &mdash; thicker stems, looser
 fit &mdash; which is mis-drawn rather than merely big. Every screamer here runs
@@ -1578,7 +1582,7 @@ brief asks for, and the one a hover state cannot supply.</p>
 
 <div class="bt-tbl-wrap"><table class="bt-tbl">
   <tr>
-    <th>family</th><th>at rest</th><th>icon-only</th><th>dense rail</th>
+    <th>family</th><th>at rest</th><th>icon-only</th><th>dense menu</th>
     <th>44px</th><th>no corner-shape</th><th>editable mark</th>
   </tr>
   <tr>
@@ -1610,9 +1614,9 @@ brief asks for, and the one a hover state cannot supply.</p>
     <td class="yes">degrades to 01</td><td>brackets around the words</td>
   </tr>
   <tr>
-    <td>06 Rail</td>
+    <td>06 Menu</td>
     <td class="no">nothing, unless the row keeps its mark and its width</td>
-    <td class="yes">bare mark</td><td class="yes">it IS the rail</td>
+    <td class="yes">bare mark</td><td class="yes">it IS the menu</td>
     <td class="yes">row height</td><td class="yes">grounds, not corners</td>
     <td class="yes">the rule the dial ships</td>
   </tr>
@@ -1620,9 +1624,9 @@ brief asks for, and the one a hover state cannot supply.</p>
 
 <p class="bt-lede">Two of the six are already half-built. <b>06</b>&rsquo;s editable mark is
 not a candidate at all &mdash; it is <code>.slider-number</code>, shipping, in every dial in
-every app, and choosing anything else for editable text means the rail and the field
+every app, and choosing anything else for editable text means the menu and the field
 disagree inside one panel. <b>01</b>&rsquo;s enclosure is <code>src/button.css</code>,
-likewise shipping. Those two fit together without being reconciled: 06 for the rail, where
+likewise shipping. Those two fit together without being reconciled: 06 for the menu, where
 an enclosure means <i>chosen</i> and the row does the pointing, and 01 for everything
 outside it, where an enclosure means <i>pressable</i>. What that pairing has to survive is
 one panel holding both meanings of a box at once, which is a real risk and is the thing to
@@ -1631,7 +1635,7 @@ test before it is adopted rather than after.</p>
 <p class="bt-lede"><b>02</b> keeps the two jobs it already has &mdash; the one primary
 action, and one-of-N &mdash; as a variant, not a rival. <b>04</b> is the strongest at rest
 and is blocked by the engine, not by taste. <b>05</b> is the one worth keeping drawn for a
-hero or an empty state, where a single button can afford ceremony a dense rail cannot. <b>03</b>
+hero or an empty state, where a single button can afford ceremony a dense menu cannot. <b>03</b>
 is the one to reject on purpose rather than by omission: it is the most typographic answer
 here and it fails exactly where the brief says not to.</p>
 
