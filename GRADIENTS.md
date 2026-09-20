@@ -186,14 +186,19 @@ way to vary one filter's strength across an element.
 
 **The bands are geometry, not masks — and that is not a style choice.** Everyone publishes
 this technique with each layer filling the element and cut back to a band by `mask-image`.
-It does not survive contact. In this package's own system page a single layer masked to the
-top 25% blurred the *whole* panel, and six stacked took measured sharpness down the panel to
-a flat 0.1 against 8.7–16.8 with the stack removed: a uniform smear, which is the one thing
-a progressive blur must not be. `mask-image`, `-webkit-mask-image`, the `mask` shorthand,
-`mask-mode: alpha` and `will-change: mask` all render identically, and the same markup in a
-standalone page masks correctly — so it is a compositing-path difference, not a syntax
-error, and not something to depend on either way. A band positioned by `inset` blurs its own
-rows and nothing else, in every document tested.
+In this package's own system page that did not hold: a single layer masked to the top 25%
+blurred the *whole* panel, and six stacked took measured sharpness down the panel to a flat
+0.1 against 8.7–16.8 with the stack removed — a uniform smear, which is the one thing a
+progressive blur must not be. `mask-image`, `-webkit-mask-image`, the `mask` shorthand,
+`mask-mode: alpha` and `will-change: mask` all render identically.
+
+Read that as one document rather than as a rule about the platform. The same markup in a
+standalone page masks correctly, so it is not a syntax error and the compositing path is
+the obvious suspect, but the trigger was never isolated — the layers' computed styles are
+the same in both but for width. The conclusion drawn here is narrow and practical: a mask
+is not a dependable bound for a `backdrop-filter`, and a band positioned by `inset` blurs
+its own rows and nothing else in every document tested. Geometry costs nothing to prefer.
+Reducing the mask behaviour to a minimal repro is [NEXT.md](NEXT.md) D.
 
 The cost is the feather: a band's edge is a step in radius rather than a fade, so the seam
 is hidden by making the step small rather than by blending it. That is what `layers` buys.
