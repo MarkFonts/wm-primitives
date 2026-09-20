@@ -30,10 +30,19 @@ There is no third option in CSS. A true per-pixel variable blur — what variabl
 Metal — needs the content rasterised to a canvas, which costs the live text that the
 effect exists to preserve.
 
-**§05 is now "The blur": one uniform `backdrop-filter` and a radius slider.** Nothing is
-masked, so there is no partial alpha to ghost and no second radius to step to. Measured
-across the panel, the biggest row-to-row change in local sharpness is 0.002 at 12px and
-0.001 at 30px — flat, which is the whole point.
+**§05 is now "The blur": one uniform `backdrop-filter` and a radius slider,** shown
+against an untouched twin. Nothing is masked, so there is no partial alpha to ghost and
+no second radius to step to. Measured across the panel, the biggest row-to-row change in
+local sharpness is 0.002 at 12px and 0.001 at 30px — flat, which is the whole point.
+
+The twin is not decoration. A uniform blur has no sharp region of its own, so a lone
+panel at any useful radius is illegible end to end and reads as a broken figure rather
+than as an effect; the pair gives the eye its reference back without reintroducing a
+stack. For the same reason the default radius is **3px**, not the 12 it shipped at for
+an hour: this chapter's own prose says type stops being legible around 4px, and at 12
+the panel was a formless grey field you could not tell was text. At 3 it is plainly the
+same lines as the panel beside it. The slider tops out at 24 rather than 48 because the
+useful range is the first few pixels and the rest all looks identical.
 
 `blurLayers()` and `ProgressiveBlur` are deprecated rather than deleted, so the finding
 stays beside the code. No call site in this package used them; `SpecimenNav` uses
