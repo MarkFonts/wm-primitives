@@ -140,6 +140,61 @@ a task. Skip nothing above the line you are on; below it, pick.
       cannot prompt from a sandbox. The guarded-call habit and the API route stay until a
       hang is caught with `GIT_TRACE=1` attached.
 
+## G · The enclosure language (one grammar for everything boxed)
+
+Opened 2026-09-20 from the six-family proposal on `docs/system/pages/buttons.html`
+(the "Button designs" session; not registered in `build.py` on purpose — it is a page to
+decide from). One family wins and becomes `src/button.css`. Until then this section is
+what the win changes; the family is **left blank**: ______.
+
+What a language is, as against the button we have: every boxed thing — button, field,
+chip, tag, pill, the toggle group, the select, the dial's value field — is one shape
+grammar with named sizes and states, so a builder predicts the next box before reading
+its CSS, and the lint tells them when they have stepped off it (the test in the closing
+paragraph below).
+
+- [ ] **C · Buttons reopens as the language.** `.wm-btn` + `.active` + `--solid` +
+      `--quiet` becomes the family's own vocabulary; C3 (labels, tags, chips) folds into
+      it rather than being its own pass; CHROME.md's retirement lists are done once, in
+      the language, not per app. The mark-margin rule (2026-09-20, "the gap is for a
+      mark, not for text") moves into it.
+- [ ] **The corner law's "The button" chapter gets written** from the winning family:
+      the G2 corner, the space inside it at each size, the cap rule that keeps a small
+      radius from pinching. That chapter is the visual spec the family is judged against.
+- [ ] **B · Lint.** Enclosure pairs — radius with padding, size with type role — come
+      from the language's table or fail. Today the pad scale is linted and the cap rule is
+      "by eye".
+- [ ] **GESTURES gets a button table.** The button has no G-rows. The candidate names
+      five states — rest, hover, held, focus, chosen — and each is a promise to test.
+- [ ] **F · v0.2.0.** `.wm-btn` is in the v0.1.0 contract; reshaping or renaming it is
+      consumer-visible, so the language ships as a minor bump with the four apps migrated
+      in the same window.
+- [ ] **E · Kernpare again.** Its 28 buttons were put on the old button; they take the
+      language, with the two retired ones in font-proofer and ReCal.
+
+**What the Keyline candidate would change, on top of that** (read from its page, not
+decided): *a closed keyline means press; a bottom-only keyline means change.*
+
+- **Fields join the language for free.** The dial's value field already is the
+  bottom-only keyline — `.slider-number`'s underline that completes on focus — so the
+  candidate is honest with the dial as it stands, and the editable line in ReCal and
+  WORDMAKE is the same device. One rule covers three files today.
+- **It forbids a decorative rule.** The law holds only if no line under a heading is ever
+  decoration. The system page draws one under every section head (`.wm-sec-head`'s
+  border-top) and ReCal's panels draw several. Either those go, or they are demonstrably
+  not keylines (full-bleed, a different ink), or the family is dishonest on its own page.
+  That is a lint: a 1px line that is not an enclosure's edge fails.
+- **Tags and chips cannot be boxed.** A tag is not pressable, so under this law it may
+  not wear a closed keyline — it needs ground only, or caps, or nothing. C3 stops being
+  "normalise the tags" and becomes "unbox them". Untouched so far; this is the first
+  consequence to look at, because `.slider-tag`, `.tag` and the chips are the most
+  numerous boxes in the census.
+- **"chosen" replaces `.active`.** A rename, and the toggle group's `.ui-seg` selected
+  state is the same word. Part of the v0.2.0 bump above.
+- **Five states, one ink ladder.** rest → hover → held is the existing ink ladder; focus
+  is the accent ring; chosen is a ground change. Nothing new to invent, which is the
+  candidate's argument for itself ("the cheapest thing here").
+
 ---
 
 What makes a system world-class is not the count of components. It is that a builder can
