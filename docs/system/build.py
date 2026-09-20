@@ -246,6 +246,10 @@ def build_section(sid, label, path, kicker):
         js = js.replace(f"'{old}'", f"'{new}'").replace(f'"{old}"', f'"{new}"')
         css = css.replace(f"#{old}", f"#{new}")
 
+    # Commented-out markup is parked, not published: it does not render, and it must not
+    # reach the rail either, which the h2 scan below would otherwise do.
+    html = re.sub(r'<!--.*?-->', '', html, flags=re.S)
+
     # Chapters: every h2 the page already writes becomes an anchor in the floating
     # outline. Ids are assigned here so the outline and the document cannot drift apart.
     chapters = []
