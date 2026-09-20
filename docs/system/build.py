@@ -538,8 +538,9 @@ def build_readme():
 WIP = [
     ("system/pages/buttons.html", "Six ways to say press",
      "the button as six families -- Keyline, Lozenge, Rule, Plate, Bracket, Rail -- each drawing "
-     "the same six specimens, with a coverage table of what each cannot do. One wins and becomes "
-     "src/button.css (NEXT.md G)."),
+     "the same six specimens, with a coverage table of what each cannot do. Explorations: none "
+     "chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; "
+     "NEXT.md G says what a choice, if one is ever made, changes."),
 ]
 WIP_CSS = """
 .wip{max-width:72ch}
