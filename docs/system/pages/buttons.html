@@ -20,7 +20,12 @@
 /* Standalone only -- build.py strips every @font-face and declares the faces once for
    the whole document. Here so that opening this file directly renders in Cal Sans and
    draws real marks instead of printing "format_align_left" in words. */
-@font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype"); font-display:swap; }
+/* THE RANGE IS PART OF THE DECLARATION. Without `font-weight: 400 700` the engine treats
+   this variable face as a single 400 instance, so every font-weight: 500/600 on the page
+   was SYNTHETIC BOLD -- the browser smearing the roman -- rather than the wght axis the
+   face actually carries. 67 of them. Declaring the range hands those back to the font. */
+@font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype");
+  font-weight: 400 700; font-style: normal; font-display:swap; }
 @font-face{ font-family:"Material Symbols Outlined"; src:url("../../fonts/MaterialSymbolsOutlined.woff2") format("woff2"); font-weight:100 700; font-display:block; }
 
 /* The tick length is a REGISTERED property because family 05 transitions it. An
@@ -120,7 +125,20 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
   padding: 1.75rem 16px 4rem; }
 /* iOS inflates text in a column it thinks is too narrow, which would judge the type at a
    size nothing ships. */
-.bt-page{ -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+.bt-page{ -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  /* Nothing on this page may be faked. With the weight range declared above there is a
+     real wght axis to reach, and the italic is reached by axis below -- so synthesis has
+     nothing left to do except go wrong. */
+  font-synthesis: none; }
+
+/* CAL SANS'S ITALIC IS AN AXIS, NOT A SECOND FILE. One face is declared, and it is the
+   roman, so `font-style: italic` had no italic to resolve to and every <i> on the page was
+   a SLANTED ROMAN the engine drew itself. On a page about this foundry's own type that is
+   the one thing that must not happen.
+   font-variation-settings names only the axes it lists, so 'ital' alone leaves wght under
+   font-weight's control and a bold italic still gets its real weight. font-style goes back
+   to normal so nothing slants what the axis has already italicised. */
+.bt-page i, .bt-page em{ font-style: normal; font-variation-settings: 'ital' 1; }
 /* A rule name or a token is one long unbreakable word at 360px. */
 .bt-lede, .bt-thesis, .bt-cost, .bt-laws td{ overflow-wrap: break-word; }
 
