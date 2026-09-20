@@ -53,14 +53,14 @@ open a modal, with nothing on the page to say so.
 All six families draw the **same six specimens on the same content**, so a difference between
 two of them is a difference between designs and not between demos:
 
-| | buttons | rail | 5 states | editable | in situ | screamer |
+| | screamer | buttons | menu | 5 states | editable | in situ |
 | --- | --- | --- | --- | --- | --- | --- |
 | 01 Keyline | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | 02 Lozenge | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | 03 Rule | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | 04 Plate | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | 05 Bracket | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 06 Rail | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 06 Menu | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 ## 2 · The six, and the one thing each cannot do
 
@@ -72,8 +72,15 @@ The "cannot" column is the finding. None of these is an omission to be filled in
 | **02 Lozenge** | a ground, not an edge | — (wide; the 5% resting wash is near-invisible on `--surface`) |
 | **03 Rule** | the type is the control | **an icon-only button** — there is nothing to draw it in, so those actions borrow 01 |
 | **04 Plate** | hills and holes | **the house corner on its own wells** — inset shadow follows `border-radius`, not `corner-shape` |
-| **05 Bracket** | corner ticks that close on approach | **ticks at display size** — its screamer has to go solid, so the family never reaches its own primary |
-| **06 Rail** | an enclosure means *chosen*, not pressable | **a primary louder than chosen**, and **an editable that is prose rather than a value** |
+| **05 Bracket** | corner ticks that close on approach | — (its cost is legibility: 9px ticks read as noise in a dense menu, not as an edge) |
+| **06 Menu** | an enclosure means *chosen*, not pressable | **a primary louder than chosen**, and **an editable that is prose rather than a value** |
+
+**06 is called Menu in the display and `rail` in the code, deliberately.** The specimen is a
+list of preview modes of equal weight that you pick between rather than read — which is what
+a menu is, and which is also what earns the icons: the label law says a mark has to justify
+itself, and *"the items are of equal weight and you are scanning to choose"* is the
+justification. `rail` stays as the idiom in `src/`, in the class names, and wherever the
+prose means font-proofer's actual rail or the dial's.
 
 **03 is the one to reject on purpose rather than by omission.** It is the most typographic
 answer on the page and it fails exactly where the brief says not to: at the resting spec
@@ -91,7 +98,7 @@ cheaper to write down than to re-argue.
       brief with a shipped answer already in the building: `.slider-number` in
       `src/AxisSlider.css` — a 1px underline drawn on the **text** at offset 2, exactly as
       wide as the value, focus taking the digits and the rule together at 2px. Every dial in
-      every app wears it. Choosing anything else for editable text means the rail and the
+      every app wears it. Choosing anything else for editable text means the menu and the
       field disagree inside one panel.
 - [ ] **D2 · Resolve the prose gap that D1 leaves.** `.slider-number` was written for a
       number in a rail. On a wrapped headline the rule is two full lines of underline, and
@@ -100,9 +107,10 @@ cheaper to write down than to re-argue.
       generalised and the wrap is accepted. **This is the open question the page does not
       answer.** The untested candidate: a flat −L well plus 01's bottom keyline, giving
       04's hole/hill read without the shadow fault — not drawn yet.
-- [ ] **D3 · Choose the enclosure.** Current reading: **01 for everything outside a rail,
+- [ ] **D3 · Choose the enclosure.** Current reading: **01 for everything outside a menu,
       06 inside one.** Both are already half-built — 01's enclosure is `src/button.css`,
-      06 is font-proofer's rail — and they fit together without being reconciled.
+      06 is what font-proofer's rail already does — and they fit together without being
+      reconciled.
 - [ ] **D4 · Test D3's real risk before adopting it.** One panel would hold **both meanings
       of a box at once**: in 01 an enclosure means *pressable*, in 06 it means *chosen*.
       That is a genuine conflict, not a detail, and it should be tried in a real panel
@@ -118,10 +126,15 @@ Every number here came off the shipped face or the shipped CSS during the propos
 it is taste.
 
 - **Optical size is an axis, and a display CTA has to move on it.** Cal Sans `opsz` runs
-  **8 · 14 · 45**. The rail runs `opsz 10`. Scaling a 13px button to 34px without moving
+  **8 · 14 · 45**. The menu runs `opsz 10`. Scaling a 13px button to 34px without moving
   `opsz` prints the *small* drawing large — thicker stems, looser fit — which is mis-drawn
   rather than merely big. `wordmark.nyc`'s `.hero-pill` already runs `opsz 45, wght 700,
-  GEOM 50`; the screamers match it.
+  GEOM 50`; the screamers take its `opsz 45` and `GEOM 50` and **not** its weight. 700 is a
+  second emphasis stacked on whatever the enclosure is already doing — `icon.css`'s rule for
+  the mark, that *a heavier stroke on top is two emphases stacked*. A 2.5px keyline, a 0.1em
+  rule, 3px ticks and a raised plate are each loud alone, so those families set 400. **02
+  keeps 700**, for legibility rather than volume: it is the only screamer that inverts, dark
+  ink on a signal field, and weight holds the counters open against a flat colour.
 - **A display pill reads tight on top because the bottom carries space nothing occupies.**
   With `line-height: 1` this face's baseline sits **0.8275em** below the top of the line box,
   the cap top **0.1075em** down, and the descender falls **0.0650em *past*** the bottom. The
