@@ -846,7 +846,11 @@ html,body{margin:0;padding:0;background:var(--bg)}
    over the illustrations as skipped sections resolved at their placeholder height
    rather than their real one. The page IS ~59,000px and does want this, but it wants
    it on a wrapper that nothing is positioned against, not on the sections themselves. */
-.wm-sec{padding:0}
+/* A measure. The sections ran the full remaining width from the day the page was six
+   galleries; once two of them carried prose (the README prelude, the ramps notes) the
+   galleries beside them read as a page that had got wider. 1080px, Mark's number,
+   2026-09-20. The hero stays full-bleed: it is composed for the viewport, not a column. */
+.wm-sec{padding:0;max-width:1080px}
 .wm-sec-head{padding:64px 0 16px;border-top:1px solid var(--line);margin-top:56px}
 .wm-sec:first-of-type .wm-sec-head{border-top:none;margin-top:8px}
 .wm-n{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
