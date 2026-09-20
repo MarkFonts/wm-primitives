@@ -2,20 +2,27 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Six ways to say press</title>
-<!-- Rides INSIDE section 03 as an extra source (build.py SECTIONS, the same mechanism
-     that puts circles inside the corner law). Everything is scoped to `#s-controls
-     .part-N`, so every class here carries a bt- prefix and nothing reaches the dial
-     page's markup or is reached by it.
+<!-- DO NOT ADD THIS FILE TO build.py's SECTIONS. That is a decision, not an oversight
+     (Mark, 2026-09-20), and the reason is how it is worked on rather than where it sits.
 
-     SELF-CONTAINED ON PURPOSE. build.py strips a `../../src/` <link> from the SECTION's
-     first source only, not from an extra, so a link here would 404 in the assembled page
-     -- docs/../../src is outside what Pages serves. The five families are page-local CSS
-     anyway: they are five proposals, and only the one that wins becomes src/button.css.
+     Pages serves everything under docs/, so this file IS the published page: there is no
+     build step between editing it and seeing it, and a change is live in under a minute.
+     The WIP chapter LINKS to it in place for the same reason. Register it and that stops
+     -- its content would be assembled into docs/index.html, and every future change to a
+     page whose whole purpose is to be looked at and argued with would need a rebuild of a
+     900KB generated artifact first. Keep it edit-and-see.
 
-     NO COMMA MAY APPEAR INSIDE :is() / :not() / :where() ON THIS PAGE. The assembler
-     splits a selector prelude on top-level commas with a plain split(","), so
-     `.x:is(:hover, .s-h)` compiles to two half-selectors and the rule is lost, silently.
-     States are spelled as two comma-separated selectors instead. -->
+     It is written so it COULD be assembled, and those constraints are kept as cheap
+     insurance rather than as live requirements: every class carries a bt- prefix so
+     nothing could reach the dial page's markup or be reached by it; no `../../src/` link,
+     because the assembler strips those from a section's first source only and one here
+     would 404; and NO COMMA INSIDE :is() / :not() / :where(), because the assembler splits
+     a selector prelude on top-level commas with a plain split(",") and `.x:is(:hover,
+     .s-h)` would compile to two half-selectors and vanish silently. States are spelled as
+     two comma-separated selectors instead.
+
+     The six families are page-local CSS by design: they are six proposals, and only the
+     one that wins becomes src/button.css. -->
 <style>
 /* Standalone only -- build.py strips every @font-face and declares the faces once for
    the whole document. Here so that opening this file directly renders in Cal Sans and
