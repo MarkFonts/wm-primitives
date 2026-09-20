@@ -44,7 +44,7 @@ export const copy = v => ({
 
   note2: `A straight alpha ramp does not read as straight. Perceived lightness moves fastest at the transparent end, so a linear fade announces itself where it starts and then crawls; on live text that is a visible line across the second row of type, and it is the failure this curve was fitted to remove. The unveiled panel is the control: both scrims fade the same colour over the same text across the same distance, and only the curve differs.`,
 
-  note3: `The received wisdom is that oklab rescues a gradient from the grey sRGB puts at its midpoint. <b>It does not.</b> A straight line between opposite hues crosses the neutral axis in <b>any</b> rectangular space, because that is where the axis is; the four bands above show the same crossing in three of them. What oklab buys is even <b>lightness</b> &#8212; the red&#8594;green ramp no longer dips dark in the middle. Only <b>oklch</b> holds chroma, by treating hue as an angle and going around the axis instead of through it, and it pays with a hue nobody picked. The default stays oklab: it is the predictable one, and the first draft of this page had the claim the wrong way round.`,
+  note3: `The received wisdom is that oklab rescues a gradient from the grey sRGB puts at its midpoint. <b>It does not.</b> For the pair above, the midpoint's saturation is <b>${v.sat.srgb}%</b> in sRGB and <b>${v.sat.oklab}%</b> in oklab: a straight line between opposite hues crosses the neutral axis in <b>any</b> rectangular space, because that is where the axis is. What oklab buys is even <b>lightness</b> &#8212; the red&#8594;green midpoint sits at luma ${v.luma.oklab} against sRGB's ${v.luma.srgb}, so the ramp no longer dips dark in the middle. Only <b>oklch</b> holds chroma, <b>${v.sat.oklch}%</b> at the same midpoint, by treating hue as an angle and going around the axis instead of through it; it pays with a hue nobody picked. The default stays oklab, the predictable one. The first draft of this page had the claim the wrong way round.`,
 
   note4: `One curve on the interpolation re-spaces the stops <b>along</b> a fixed path through colour space. A curve <b>per channel</b> moves the path. Left: the same two colours with one channel steered at a time &#8212; the ramp leaves the straight line between its endpoints, which is how a ramp escapes sRGB's grey without changing space. Right: the three channels of <code>${v.MD_A}</code> &#8594; <code>${v.MD_B}</code>, each on its own axis. R falls, B rises, and <b>G does not move</b>. That flat channel is why the pair never greys, and why steering G on it does nothing at all. <code>channelBlend()</code> reproduces Mass Driver's published output byte for byte; the equality is a test.`,
 
@@ -52,9 +52,9 @@ export const copy = v => ({
 
   note6: `It blurs pixels. It does not redact. The words stay in the DOM &#8212; selectable, copyable, findable, and read aloud in full by a screen reader, which sees no blur. Never use it to withhold anything.`,
 
-  note7: `Eight bits give 256 levels of alpha, and a ramp that spends a few pixels on each one shows every step as a terrace. The eye finds those edges. <b>More stops cannot help</b>: an 8-stop ramp and a 2-stop ramp quantise to the same levels and band identically, and nothing in CSS asks for more output bits. Sub-level noise is the only control there is, and every band on this page carries it. The two bands below cross a narrow slice of the range at full width, so each level lands wide enough to point at &#8212; undithered first, dithered second.`,
+  note7: `Eight bits give 256 levels of alpha, and one step across mid-grey is under what a display resolves, so a ramp that spends a run of pixels on each level shows terraces the eye finds before it can name them. <b>More stops cannot help</b>: an 8-stop ramp and a 2-stop ramp quantise to the same levels and band identically, and nothing in CSS asks for more output bits. Sub-level noise is the only control there is, and every band on this page carries it. The band below crosses <b>${v.band.levels}</b> levels at full width, the widest terrace <b>${v.band.terrace}px</b>; dithered, the widest run collapses to <b>${v.band.dithered}px</b>. The right-hand column is the same pixels through <code>contrast(6)</code> &#8212; a magnifying glass on the left, not separate evidence.`,
 
-  note8: `Mostly you do not need it. Skia dithers a <code>background-image</code> gradient and very nearly does not dither a <code>mask-image</code>, so a scrim is dithered for you and a mask over a flat ground is not: that mask is the one place in this package that bands. <code>.wm-dither</code> has to sit <b>after</b> whatever quantises, on the wrapper, not inside the masked element &#8212; inside, the noise modulated the ink before the mask touched it and measurably did nothing. Judge this chapter on a real display at 100%: a downscaled screenshot averages the terraces away.`,
+  note8: `Mostly you do not need it. Skia dithers a <code>background-image</code> gradient and very nearly does not dither a <code>mask-image</code>: the same ramp measures a per-pixel deviation of <b>${v.dither.bg}</b> as a background against <b>${v.dither.mask}</b> as a mask. So a scrim is dithered for you and a mask over a flat ground is not, and that mask is the one place in this package that bands. <code>.wm-dither</code> has to sit <b>after</b> whatever quantises, on the wrapper, not inside the masked element &#8212; inside, the noise modulated the ink before the mask touched it and measurably did nothing. Judge this chapter on a real display at 100%: a downscaled screenshot averages the terraces away.`,
 
   ctl_stops: `stops`,
   ctl_radius: `radius`,
@@ -69,8 +69,8 @@ export const copy = v => ({
   cap4: `clothoid &#183; the default`,
   cap5: `start 0`,
   cap6: `start 'calc(12px + 2lh)' &#183; the first lines held`,
-  cap7amp: `the same band, contrast \u00d76 \u2014 the steps are real, the contrast is not`,
-  cap8amp: `dithered, amplified the same way \u2014 the terraces are gone`,
-  cap7: `a narrow alpha range over a wide box &#183; no dither &#183; the terraces are the bug`,
-  cap8: `the same ramp, the same levels, with .wm-dither on the wrapper`,
+  cap7amp: `the same pixels through contrast(6) &#183; the steps are real, the contrast is not`,
+  cap8amp: `dithered, amplified the same way &#183; the terraces are gone`,
+  cap7: `as it renders &#183; no dither &#183; ${v.band.levels} levels, widest terrace ${v.band.terrace}px`,
+  cap8: `the same ramp with .wm-dither on the wrapper &#183; widest run ${v.band.dithered}px`,
 })
