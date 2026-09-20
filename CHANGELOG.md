@@ -12,7 +12,7 @@ Newest first.
 
 ---
 
-## 2026-09-20 — a mask does not bound a backdrop-filter
+## 2026-09-20 — the blur bands stop relying on a mask
 
 **`blurLayers()` was building a uniform smear.** Measured down the system page's blur
 panel, sharpness was flat at 0.1 from the first line to the last, against 8.7–16.8 with
@@ -20,14 +20,19 @@ the layer stack removed. Not a tuning problem and not a small one: there was no
 progression at any radius, and at 4px every line was equally destroyed.
 
 Every version of the function had each layer fill the element and cut it back to a band
-with `mask-image` — which is how the technique is published everywhere, and which does
-not bound a `backdrop-filter`. In the assembled page one layer masked to the top 25%
-blurs the *whole* panel, and each further layer compounds: one measured 1.8, three 0.2,
+with `mask-image`, which is how the technique is published everywhere. In the assembled
+system page that mask does not constrain the filter: one layer masked to the top 25%
+blurs the *whole* panel, and each further layer compounds, one measured 1.8, three 0.2,
 six 0.1. `mask-image`, `-webkit-mask-image`, the `mask` shorthand, `mask-mode: alpha` and
-`will-change: mask` all render identically, and the same markup in a standalone page
-masks correctly — a compositing-path difference, not a syntax error. Which part of the
-assembly triggers it is still unknown; the layers' computed styles are identical in both
-documents but for width.
+`will-change: mask` all render identically.
+
+**How far that generalises is not established, and this entry should not be read as
+saying it does.** The same markup in a standalone page masks correctly, which rules out a
+syntax error and points at the compositing path — but the trigger was never isolated, the
+layers' computed styles are identical in both documents but for width, and the whole
+finding rests on one page in one browser. What is solid is the measurement and the
+remedy. Reducing it to a minimal repro is [NEXT.md](NEXT.md) D, and until that exists the
+general rule is not this package's to state.
 
 **So the bands are geometry.** Each layer states its own `inset` and blurs its own rows,
 which holds in every document tested. `BlurLayer` loses `maskImage`/`WebkitMaskImage` and

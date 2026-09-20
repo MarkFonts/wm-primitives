@@ -361,8 +361,8 @@ export function blurLayers(o: BlurOptions = {}): BlurLayer[] {
   const { dir = 'to bottom', radius = 24, layers = 16, ease = 'ease-in-out', start = 0 } = o
   const n = Math.max(1, Math.round(layers))
   /* GEOMETRY, NOT MASKS. Every earlier version of this made each layer fill the element
-     and cut it back to a band with mask-image. That is the technique everyone publishes
-     and it does not survive contact: in the assembled system page a single layer masked
+     and cut it back to a band with mask-image. That is the technique everyone publishes,
+     and in the assembled system page it does not hold: a single layer masked
      to the top 25% blurred the WHOLE panel, and six of them stacked took measured
      sharpness down the panel to a flat 0.1 against 8.7-16.8 with the stack removed. A
      uniform smear, which is the one thing a progressive blur must not be.
@@ -370,8 +370,12 @@ export function blurLayers(o: BlurOptions = {}): BlurLayer[] {
      mask-mode: alpha and will-change: mask all render identically, and the same markup
      in a standalone page masks correctly. So it is a compositing-path difference, not a
      syntax error, and not something to depend on either way.
-     Real geometry always bounds the filter. A band positioned at top/height blurs its
-     own rows and nothing else, in both documents, with no mask involved.
+     How far that generalises was never established -- the trigger is unisolated and the
+     computed styles match in both documents but for width -- so this is one page, not a
+     law about the platform (NEXT.md D holds the open item). It does not need to be a
+     law: geometry bounded the filter in
+     both documents, a band positioned at top/height blurs its own rows and nothing else,
+     and preferring it costs nothing but the feather below.
 
      The cost is the feather: a band's edge is now a step in radius rather than a fade,
      so the seam has to be hidden by making the step small instead of by blending it.
