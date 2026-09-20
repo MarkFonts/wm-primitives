@@ -394,7 +394,7 @@ svg.chan .ln{stroke-width:2.5}
 </div>
 <div class="ctls">
 <div class="ctl"><label>${COPY.ctl_radius}</label><input type="range" data-k="radius" min="4" max="48" step="1" value="24"><output>24</output></div>
-<div class="ctl"><label>${COPY.ctl_layers}</label><input type="range" data-k="layers" min="4" max="32" step="1" value="16"><output>16</output></div>
+<div class="ctl"><label>${COPY.ctl_layers}</label><input type="range" data-k="layers" min="4" max="32" step="1" value="8"><output>8</output></div>
 <div class="ctl"><label>${COPY.ctl_hold}</label><input type="range" data-k="hold" min="0" max="40" step="1" value="0"><output>0</output></div>
 </div>
 <p class="note" style="margin-top:14px">${COPY.note6}</p>

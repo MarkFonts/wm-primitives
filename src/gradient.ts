@@ -358,7 +358,7 @@ const feather = (
   `rgb(0 0 0 / ${amt(rising ? a : 1 - a)}) ${at(from + (to - from) * t)}`)
 
 export function blurLayers(o: BlurOptions = {}): BlurLayer[] {
-  const { dir = 'to bottom', radius = 24, layers = 16, ease = 'ease-in-out', start = 0 } = o
+  const { dir = 'to bottom', radius = 24, layers = 8, ease = 'ease-in-out', start = 0 } = o
   const n = Math.max(1, Math.round(layers))
   /* GEOMETRY, NOT MASKS. Every earlier version of this made each layer fill the element
      and cut it back to a band with mask-image. That is the technique everyone publishes,
@@ -379,10 +379,19 @@ export function blurLayers(o: BlurOptions = {}): BlurLayer[] {
 
      The cost is the feather: a band's edge is now a step in radius rather than a fade,
      so the seam has to be hidden by making the step small instead of by blending it.
-     That is what the layer count buys, and why the default moved from 6 to 16 -- at 12
-     the bands read as horizontal strips, at 16 they do not, and at 32 it is no better.
-     Each band is a separate backdrop rasterisation, so 16 is the number to lower first
-     if a stack has to sit under a scrolling list. */
+
+     What the count buys is FIDELITY TO THE EASING, not smoothness. Each band takes the
+     radius at its far edge, so a coarse stack is systematically blurrier than the curve
+     it samples and a fine one tracks the curve while sampling it into more steps.
+     It was briefly 16, chosen off a 1:1 screenshot of a 994x88 strip where 12 looked
+     like horizontal strips and 16 did not. Headed at 2x -- which is where most of this
+     is read -- 8, 16 and 32 are hard to tell apart and 8 arguably reads best, so that
+     was nearly triple the backdrop rasterisations for a difference visible only in the
+     harness that picked it. Each band is a separate rasterisation, so this is still the
+     first number to lower under a scrolling list.
+
+     One thing that looks like a defect and is not: over text, a heavily blurred line IS
+     a horizontal bar, and nine lines are nine bars. Those are the lines, not seams. */
   const horizontal = /right|left|^(90|270)deg/.test(dir)
   const reverse = /to left|to top|270deg/.test(dir)
   /* Every edge is a fraction of the RAMP, which may not be the whole element. With a

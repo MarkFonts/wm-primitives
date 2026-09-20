@@ -40,10 +40,21 @@ gains `inset`; `.wm-blur-layer` loses `inset: 0`, which would otherwise hand eve
 the whole element and restore the bug in silence.
 
 **What it cost:** the feather. A band edge is a step in radius now, not a fade, so the
-seam is hidden by making the step small rather than by blending it — which is what
-`layers` buys, and why the default moves 6 → 16. At 12 the bands read as horizontal
-strips, at 16 they do not, at 32 it is no better. Each band is a separate backdrop
-rasterisation, so it is the first number to lower under a scrolling list.
+seam is hidden by making the step small rather than by blending it. The default moves
+6 → 8.
+
+A first pass put it at 16, on the strength of a 1:1 screenshot of a 994×88 strip in
+which 12 appeared to show horizontal strips and 16 did not. Rendered headed at 2×, the
+condition most readers are actually in, 8 and 16 and 32 are hard to tell apart and 8
+arguably reads best — so 16 was nearly tripling the backdrop rasterisations for a
+difference visible only in the harness that chose it.
+
+What the count actually buys is fidelity to the easing, not smoothness. Each band takes
+the radius at its FAR edge, so a coarse stack is systematically blurrier than the curve
+it samples and a fine one tracks it more closely while sampling it into more steps.
+That is a real trade and a much weaker reason than the one first written here. Each band
+is a separate backdrop rasterisation, so this is still the first number to lower under a
+scrolling list — there is just less to lower now.
 
 The two unit tests that read mask stops were asserting the right properties through the
 wrong surface. Tiling is an identity now rather than a coverage integral — band *i*'s far
