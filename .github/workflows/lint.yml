@@ -27,6 +27,13 @@ jobs:
         with:
           node-version: 20
       - run: node scripts/lint-tokens.mjs
+      # The icon face is a subset; a name it cannot draw renders as glyph fragments that
+      # still look like an icon. Only a read of the font's GSUB catches it.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install fonttools brotli
+      - run: python3 scripts/lint-icons.py
 
   # A PR that changes what ships -- src/, index.ts, dist/ -- carries a CHANGELOG entry, or
   # it is red. The log went silent for a night once (CHANGELOG 2026-09-17: five inserts

@@ -46,10 +46,18 @@
    layers do not apply to it.
    The package ships the font in fonts/ beside Cal Sans, so a consumer gets the marks by
    importing this file and nothing else -- no <link> to remember, which is exactly the
-   thing that would have made ReCal render `format_align_left` as words. It also removes
-   the subsetting trap: a subset list that drifts from the code prints the missing
-   ligature as its own name, in plain text, in production. 3.9MB is the price of not
-   having that failure mode, and it is one file, cached, on a type tool.
+   thing that would have made ReCal render `format_align_left` as words.
+   IT IS A SUBSET: 24 ligatures, 16KB, not the 3.9MB face. This comment said the opposite
+   until 2026-09-20 -- that the full face shipped so a drifting subset could never fail --
+   and the artifact had been a subset all along. The failure a subset has is also not the
+   one that comment feared: a name outside it does not print as words, the ligature simply
+   never forms and the browser draws whatever component glyphs the font happens to hold,
+   so `undo` came out as two strokes and `arrow_outward` as a circle, and both passed as
+   icons in a screenshot. So the guard is a lint, not a bigger file: scripts/lint-icons.py
+   reads the GSUB and fails any name in the code the face cannot draw, here and in every
+   consumer CI builds. Growing the subset: pyftsubset from the full face,
+   --layout-features=liga, the union of every name in use; then both copies (fonts/ and
+   docs/fonts/, which build.py syncs).
    The path is relative to THIS stylesheet, so it resolves the same whether the file is
    read from src/ in the package or from shared/src/ in a consumer. */
 @font-face {

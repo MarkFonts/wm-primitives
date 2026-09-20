@@ -24,7 +24,8 @@ import type { CSSProperties } from 'react'
 import './icon.css'
 
 export interface IconProps {
-  /** Material Symbols ligature name — "format_align_left", "reset_settings". Not a path. */
+  /** Material Symbols ligature name — "format_align_left", "settings_backup_restore". Not a
+   *  path, and only a name the shipped subset draws: scripts/lint-icons.py fails any other. */
   name: string
   /** Ink and weight together. `off` is a control that cannot act right now, not one that
    *  is merely unselected: unselected is `rest`. */
