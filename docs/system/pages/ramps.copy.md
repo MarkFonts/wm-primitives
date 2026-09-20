@@ -16,16 +16,21 @@ Repo root, absolute:
 Everything below is relative to it.
 
 ```
-scripts/build-ramps.mjs              the COPY object — the only file you edit
+docs/system/pages/ramps.copy.js      THE ONLY FILE YOU EDIT — every string on the page
 docs/system/pages/ramps.copy.md      this brief
-docs/system/pages/ramps.html         the page it writes — generated, never hand-edit
+docs/system/pages/ramps.html         the page — generated, never hand-edit
 docs/index.html                      the assembled site — generated, never hand-edit
+scripts/build-ramps.mjs              machinery — DO NOT EDIT, another agent holds it
 ```
 
 ## how to edit
 
-- Everything you touch is the `COPY` object at the top of `scripts/build-ramps.mjs`.
-- Nothing else in that file is prose. You never touch markup.
+- Everything you touch is `docs/system/pages/ramps.copy.js` — one exported object of
+  strings, nothing else in it.
+- **Do not edit `scripts/build-ramps.mjs`.** It is machinery, another agent is working in
+  it, and a copy change never needs it.
+- `v.EASES` `v.radii` `v.worst` `v.rms` `v.MD_A` `v.MD_B` are the live values —
+  interpolate them, never retype what they hold.
 - Rebuild, from the repo root:
 
   ```
