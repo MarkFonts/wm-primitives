@@ -29,9 +29,14 @@ from fontTools.ttLib import TTFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONT = os.path.join(ROOT, 'fonts', 'MaterialSymbolsOutlined.woff2')
+# The system page draws from the full face (docs/fonts/…-full.woff2, see build.py FONTS),
+# and its pages are held to THAT file, so a rename of it or a name outside even the full
+# face fails here rather than as a stray letter on the published page.
+DOCS_FONT = os.path.join(ROOT, 'docs', 'fonts', 'MaterialSymbolsOutlined-full.woff2')
+DOCS_PAGES = os.path.join(ROOT, 'docs', 'system', 'pages')
 
-def shipped_names():
-    f = TTFont(FONT)
+def shipped_names(path=None):
+    f = TTFont(path or FONT)
     cmap = f.getBestCmap()
     glyph_to_char = {g: chr(c) for c, g in cmap.items()}
     names = set()
@@ -90,6 +95,14 @@ def main():
         problems.setdefault(name, []).append(where)
     used = sorted({n for n, _, _ in found if n in have})
     print(f'lint-icons: face ships {len(have)} ligatures; code uses {len(used)} of them')
+    if os.path.exists(DOCS_FONT) and os.path.isdir(DOCS_PAGES):
+        docs_have = shipped_names(DOCS_FONT)
+        docs_found = sites([('docs', DOCS_PAGES)])
+        for name, where, sure in docs_found:
+            if name in docs_have: continue
+            if not sure and not re.fullmatch(r'[a-z]+(_[a-z0-9]+)+', name): continue
+            problems.setdefault(name, []).append(where)
+        print(f'lint-icons: the system page draws from the full face ({len(docs_have)} ligatures); its pages use {len({n for n, _, _ in docs_found if n in docs_have})}')
     if problems:
         print(f'\nlint-icons: {len(problems)} name(s) the shipped face cannot draw\n')
         for name, wheres in sorted(problems.items()):

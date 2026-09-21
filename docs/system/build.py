@@ -232,13 +232,17 @@ def build_section(sid, label, path, kicker):
     # corner law -- the G2 corner, and the pad scale for the space inside the shape. The
     # heading is real so the rail lists it; the body says it is not written yet.
     if sid == "corners":
+        # Hatched like the WIP chapter, because it IS work in progress, and it links the
+        # page the decision will be made from.
         html += ('<h2>The button <span>placeholder &#8212; the G2 corner and the space inside it</span></h2>'
-                 '<p class="wm-placeholder">Not written yet. The house button (<code>.wm-btn</code>, '
+                 '<a class="wm-placeholder" href="system/pages/buttons.html"><u>undecided</u>'
+                 '<p>Not written yet. The house button (<code>.wm-btn</code>, '
                  '<code>src/button.css</code>) is the corner law applied to a control: the G2 '
                  'superellipse on its corners, the pad scale for the space between the shape and '
                  'its label, and the cap rule (<code>padding-x &#8805; 0.6 &#215; radius</code>) that '
                  'keeps a small radius from pinching. This chapter will draw it at every size on the '
-                 'ladder and show where the label sits inside each.</p>')
+                 'ladder and show where the label sits inside each &#8212; once one of the six '
+                 'families on <b>Six ways to say press</b> is chosen. None is yet.</p></a>')
 
     # ids are document-global: prefix them, and every reference to them.
     ids = set(re.findall(r'\bid="([^"]+)"', html))
@@ -605,9 +609,17 @@ LINKED = "--linked" in sys.argv
 # it changes every <i> and <em> in the assembled document and that is a typography decision,
 # not a build fix. docs/system/pages/buttons.html carries the worked example.
 
+# THE SYSTEM PAGE DRAWS FROM THE FULL FACE. The package ships a 24-ligature subset of
+# Material Symbols (icon.css says so; scripts/lint-icons.py holds the apps to it), and this
+# page draws marks the apps never do -- fit_width, format_line_spacing, line_weight -- which
+# came out as the letters F, L and M with the subset (2026-09-21). So docs/fonts/ carries the
+# complete variable face beside the synced subset: 3.98MB, 4284 ligatures, Google's own
+# woff2 (gstatic v373), NOT in SYNCED_FACES because nothing in fonts/ is its source. The
+# apps keep the subset and the lint; a page about the icons is the one place the whole
+# vocabulary belongs. The self-contained build below keeps no icon face at all, as before.
 if LINKED:
     FONTS = """
-@font-face{font-family:"Material Symbols Outlined";src:url(fonts/MaterialSymbolsOutlined.woff2) format("woff2");font-weight:100 700;font-style:normal;font-display:block}
+@font-face{font-family:"Material Symbols Outlined";src:url(fonts/MaterialSymbolsOutlined-full.woff2) format("woff2");font-weight:100 700;font-style:normal;font-display:block}
 @font-face{font-family:"Face";src:url(fonts/CalSansVF.ttf) format("truetype");font-weight:400 700;font-style:normal;font-display:swap}
 @font-face{font-family:"CalSansVF";src:url(fonts/CalSansVF.ttf) format("truetype");font-weight:400 700;font-style:normal;font-display:swap}
 @font-face{font-family:"Specimen";src:url(fonts/CalSansSpecimen.ttf) format("truetype");font-weight:200 800;font-style:normal;font-display:swap}
@@ -1085,7 +1097,14 @@ resets = "\n".join(
 # width. Release that one too, so all six share the shell's column rather than stacking
 # six different measures down the page.
 resets += "\n#s-type>.wrap{max-width:none;margin:0;padding:0;width:auto}"
-resets += "\n.wm-placeholder{max-width:64ch;color:var(--ink-2);border:1px dashed var(--line);border-radius:12px;padding:16px 20px;margin:8px 0 40px}"
+resets += ("\n.wm-placeholder{display:block;position:relative;max-width:64ch;color:var(--ink-2);text-decoration:none;"
+           "border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));"
+           "padding:22px 24px;margin:8px 0 40px;"
+           "background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);"
+           "transition:border-color .15s}"
+           "\n.wm-placeholder:hover{border-color:var(--ink-3)}"
+           "\n.wm-placeholder p{margin:0}.wm-placeholder b{color:var(--ink);font-weight:600}"
+           "\n.wm-placeholder u{display:block;margin:0 0 10px;text-decoration:none;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}")
 resets += ("\n#s-corners .grid.g3,#s-circles .grid.g3,#s-space .grid.g3{grid-template-columns:repeat(auto-fit,minmax(430px,1fr))}")
 
 css_parts = "\n".join(f"/* ===== {s['sid']} ===== */\n{s['css']}" for s in secs) + \
@@ -1715,9 +1734,9 @@ HEAD = ("" if not LINKED else
   '<meta property="og:type" content="website">\n'
   '<meta property="og:url" content="https://markfonts.github.io/wm-primitives/">\n'
   '<meta name="twitter:card" content="summary_large_image">\n'
-  # No Material Symbols <link>: icon.css carries its own @font-face and build.py syncs the
-  # woff2 into docs/fonts/, so the page serves the same file the package ships rather than
-  # a CDN's, and cannot drift from it.
+  # No Material Symbols <link>: the page self-hosts the FULL face from docs/fonts/ (see
+  # FONTS above), so nothing here depends on a CDN, and the apps' subset is not asked to
+  # draw names it does not hold.
   )
 TAIL = ("" if not LINKED else "\n</body></html>")
 

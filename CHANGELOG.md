@@ -12,6 +12,23 @@ Newest first.
 
 ---
 
+## 2026-09-21 — the system page draws from the full icon face
+
+**The page about the marks was drawing marks the subset does not hold.** `fit_width`,
+`format_line_spacing` and `line_weight` came out as the letters F, L and M in the
+"Value in the handle" panel: the ligature never forms and the letters that spell it stay.
+`lint-icons.py` had not looked at `docs/`, and the apps never use those names, so nothing
+red. The system page now self-hosts the complete variable face
+(`docs/fonts/MaterialSymbolsOutlined-full.woff2`, 3.98MB, 4,284 ligatures, Google's own
+woff2) beside the synced 24-ligature subset the apps keep, and the lint holds
+`docs/system/pages/` to that file. The self-contained build is unchanged.
+
+**And the corner law's button placeholder is hatched and linked.** It was a dashed box
+with no way through; it is the WIP hatch now and opens "Six ways to say press", tagged
+undecided.
+
+---
+
 ## 2026-09-20 — progressive blur is retired; one blur, with a radius
 
 **It could not be made to work, and three attempts is enough.** A stepless progressive
