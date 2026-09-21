@@ -9,7 +9,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <title>wm-primitives &mdash; the system</title>
 <style>
-@font-face{font-family:"Material Symbols Outlined";src:url(fonts/MaterialSymbolsOutlined.woff2) format("woff2");font-weight:100 700;font-style:normal;font-display:block}
+@font-face{font-family:"Material Symbols Outlined";src:url(fonts/MaterialSymbolsOutlined-full.woff2) format("woff2");font-weight:100 700;font-style:normal;font-display:block}
 @font-face{font-family:"Face";src:url(fonts/CalSansVF.ttf) format("truetype");font-weight:400 700;font-style:normal;font-display:swap}
 @font-face{font-family:"CalSansVF";src:url(fonts/CalSansVF.ttf) format("truetype");font-weight:400 700;font-style:normal;font-display:swap}
 @font-face{font-family:"Specimen";src:url(fonts/CalSansSpecimen.ttf) format("truetype");font-weight:200 800;font-style:normal;font-display:swap}
@@ -4434,7 +4434,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
 #s-color{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
 #s-usage{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
 #s-type>.wrap{max-width:none;margin:0;padding:0;width:auto}
-.wm-placeholder{max-width:64ch;color:var(--ink-2);border:1px dashed var(--line);border-radius:12px;padding:16px 20px;margin:8px 0 40px}
+.wm-placeholder{display:block;position:relative;max-width:64ch;color:var(--ink-2);text-decoration:none;border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));padding:22px 24px;margin:8px 0 40px;background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);transition:border-color .15s}
+.wm-placeholder:hover{border-color:var(--ink-3)}
+.wm-placeholder p{margin:0}.wm-placeholder b{color:var(--ink);font-weight:600}
+.wm-placeholder u{display:block;margin:0 0 10px;text-decoration:none;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 #s-corners .grid.g3,#s-circles .grid.g3,#s-space .grid.g3{grid-template-columns:repeat(auto-fit,minmax(430px,1fr))}
 </style>
 <div class="wm">
@@ -5295,7 +5298,7 @@ of 168 corners, <b>87</b> take the law, 13 are circles carved out, and 32 sit in
       <div class="pr"><span class="tag">2:1</span><div class="pb r21"><button class="preview-reset">Reset</button></div></div></div><div class="c"><div class="c-name">pill-reset-btn<span class="c-src" style="margin-left:8px">App.css</span></div>
       <div class="pr"><span class="tag">today</span><div class="pb"><button style="border-radius:999px;border:1px solid #333;background:none;color:#999;padding:5px 12px;font:inherit;font-size:11px">Reset</button></div></div>
       <div class="pr"><span class="tag">2:1</span><div class="pb r21"><button style="border-radius:999px;border:1px solid #333;background:none;color:#999;padding:5px 12px;font:inherit;font-size:11px">Reset</button></div></div></div></div>
-</div><h2 id="corners-c6">The button <span>placeholder &#8212; the G2 corner and the space inside it</span></h2><p class="wm-placeholder">Not written yet. The house button (<code>.wm-btn</code>, <code>src/button.css</code>) is the corner law applied to a control: the G2 superellipse on its corners, the pad scale for the space between the shape and its label, and the cap rule (<code>padding-x &#8805; 0.6 &#215; radius</code>) that keeps a small radius from pinching. This chapter will draw it at every size on the ladder and show where the label sits inside each.</p></div>
+</div><h2 id="corners-c6">The button <span>placeholder &#8212; the G2 corner and the space inside it</span></h2><a class="wm-placeholder" href="system/pages/buttons.html"><u>undecided</u><p>Not written yet. The house button (<code>.wm-btn</code>, <code>src/button.css</code>) is the corner law applied to a control: the G2 superellipse on its corners, the pad scale for the space between the shape and its label, and the cap rule (<code>padding-x &#8805; 0.6 &#215; radius</code>) that keeps a small radius from pinching. This chapter will draw it at every size on the ladder and show where the label sits inside each &#8212; once one of the six families on <b>Six ways to say press</b> is chosen. None is yet.</p></a></div>
 </section>
 <section class="wm-sec">
   <div class="wm-sec-head"><div class="wm-n">03 &middot; Interface</div></div>
