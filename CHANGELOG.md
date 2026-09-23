@@ -18,7 +18,10 @@ Newest first.
 branch was two commits and 75 behind; nothing on main had moved under it except the
 changelog. `StopSlider` is the named-stops control WORDMAKE's GEOM rail imports, and
 `measurerFrom` is what lets its render workers break copy with no DOM. Both exported
-from the barrel; `SLIDERS.md` row 13 is ✅.
+from the barrel (its `Stop` type as `NamedStop`, since gradient.ts already owns `Stop`);
+`SLIDERS.md` row 13 is ✅. Its CSS moved onto the duration tokens the linter now asks for,
+and the knob's x is an inline transform rather than a new runtime token, because the
+consumers that lint `shared/src` each carry their own copy of that list.
 
 **WORDMAKE is a `check` leg in `consumers.yml`,** built the same way the other three are:
 `wordmarktools` checked out, `wordmake/shared` pointed at the commit under test, token

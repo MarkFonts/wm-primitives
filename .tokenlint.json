@@ -56,8 +56,7 @@
     "--gp-fvs",
     "--gp-opsz",
     "--locked-pct",
-    "--pct",
-    "--stops-x"
+    "--pct"
   ],
   "_hostTokenDocs": "Prose twin of hostTokens, one line each: [what it is, what happens without it]. gen-index.mjs renders HOST-CONTRACT.md from this; lint-tokens fails a hostToken with no entry.",
   "hostTokenDocs": {

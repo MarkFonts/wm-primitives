@@ -10,7 +10,9 @@
  * the gutter and the grip parks on top of the last stop; speed the curve and the grip
  * stops reading as the same object that becomes the thumb.
  *
- * --stops-x is set by StopSlider.tsx on the knob (a runtime token, .tokenlint.json).
+ * The knob's x is an inline transform from StopSlider.tsx, not a custom property: every
+ * consumer that lints shared/src keeps its own copy of the runtime-token list, and a new
+ * name here would fail three of them for a value that is only ever set from JS anyway.
  */
 .wm-stops { display: flex; flex-direction: column; gap: var(--spacing-02, 6px); }
 
@@ -66,7 +68,7 @@
   position: absolute; top: 50%; left: 0;
   width: 6px; height: 16px; border-radius: 3px;
   background: var(--text-muted, rgba(232, 232, 232, .62));
-  transform: translate(var(--stops-x, 0px), -50%);
+  transform: translate(0, -50%); /* overridden inline by the knob's x */
   cursor: pointer; z-index: 2; touch-action: pan-y;
   transition: width var(--dur-layout, .28s) cubic-bezier(.2,.7,.3,1),
               height var(--dur-layout, .28s) cubic-bezier(.2,.7,.3,1),

@@ -155,7 +155,7 @@ export function StopSlider({
           aria-valuenow={value}
           aria-valuemin={min}
           aria-valuemax={max}
-          style={{ '--stops-x': `${x}px` } as React.CSSProperties}
+          style={{ transform: `translate(${x}px, -50%)` }}
           // Parked, a click unlocks. Unlocked, a pointerdown starts the drag — the same
           // gesture as the Framer original, where the grip is the way in.
           onClick={() => { if (!free) setFree(true) }}
