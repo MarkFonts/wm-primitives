@@ -85,15 +85,16 @@ a task. Skip nothing above the line you are on; below it, pick.
 
 ## E · Getting it into more hands
 
-- [ ] **WORDMAKE joins.** Found 2026-09-19: it already builds on the primitives — six
+- [x] **WORDMAKE joins.** Found 2026-09-19: it already builds on the primitives — six
       token sheets, `AxisSlider`, `Icon`, `Collapse`, `EditableTextBlock` — through a
       `shared` that is a *symlink* to the laptop's wm-primitives checkout, and it imports
-      `StopSlider` and `StyleScopeDropdown`, which live on the `flattersatz-headless`
-      branch (2 ahead, 25 behind main), not on main. Three steps, in order: merge that
-      branch (or lift the two files); symlink → submodule; a `wordmake` leg in
-      `consumers.yml`. Then the spec-fidelity book (tests/spec-fidelity/RUNBOOK.md)
-      against the port. Step one is a decision, not a chore: the branch is somebody's
-      work in progress.
+      `StopSlider`, which lived on the `flattersatz-headless` branch, not on main. Done
+      2026-09-23, in the order written: the branch merged (two commits, no conflict but
+      the changelog); symlink → submodule in wordmarktools; a `wordmake` leg in
+      `consumers.yml` (lint, `npm ci`, `vite build`), and the icon lint holds it to the
+      full face it ships rather than the subset. Still open from this item: the
+      spec-fidelity book (tests/spec-fidelity/RUNBOOK.md) against the port, and
+      `src/app/rails/Control 2.jsx`, a stray copy of `Control.jsx` that the lint now reads.
 - [ ] **Kernpare and geist-serif-morf as "usable by others".** Product work, not system
       work. Done, proposed 2026-09-19 — strike what is wrong:
       - *Kernpare:* a stranger with a `.glyphspackage` runs `pack.py` then `serve.py`

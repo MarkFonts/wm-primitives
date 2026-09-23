@@ -53,14 +53,19 @@ jobs:
           # Kernpare and WORDMAKE are local apps with no build. Kernpare joins here for
           # its lint only (NEXT.md E): one index.html, its CSS read through the markup,
           # the analysis UI fenced off on purpose. Its rendering and gestures are in the
-          # browser job. WORDMAKE builds against wm-primitives through a symlinked
-          # shared/ and imports StopSlider and StyleScopeDropdown, which live on the
-          # flattersatz-headless branch, not main -- it joins the day that lands.
+          # browser job. WORDMAKE (NEXT.md E1, 2026-09-23) is a Vite app in the same
+          # repo: lint, `npm ci`, `vite build`, no deploy -- it ships as a prebuilt kit
+          # from a laptop (scripts/pack.mjs), so the build here IS its whole check.
           - name: kernpare
             repo: MarkFonts/wordmarktools
             shared: kernpare/shared
             kind: html
             workdir: kernpare
+          - name: wordmake
+            repo: MarkFonts/wordmarktools
+            shared: wordmake/shared
+            kind: node
+            workdir: wordmake
           - name: font-proofer
             repo: MarkFonts/font-proofer
             shared: shared
@@ -87,7 +92,10 @@ jobs:
 
       # The submodule directory is left empty above and THIS commit is put in its place --
       # not `--remote` (that is main, which for a PR is not the thing under test) and not
-      # the consumer's pin (that is the past).
+      # the consumer's pin (that is the past). Cleared first: a gitlink checks out as an
+      # empty directory, but anything else in that path (WORDMAKE's shared/ was a symlink
+      # until 2026-09-23) would make the checkout below land beside it, not in it.
+      - run: rm -rf ${{ matrix.shared }}
       - name: Point ${{ matrix.shared }} at this commit
         uses: actions/checkout@v5
         with:
@@ -106,9 +114,11 @@ jobs:
         run: node shared/scripts/lint-tokens.mjs
 
       - if: matrix.kind == 'node'
+        working-directory: ${{ matrix.workdir || '.' }}
         run: npm ci
       - if: matrix.kind == 'node'
         name: Build (tsc where the consumer runs it)
+        working-directory: ${{ matrix.workdir || '.' }}
         run: npm run build
 
       - if: matrix.kind == 'python'
@@ -181,11 +191,13 @@ jobs:
       # the package's own names are checked in lint.yml, this is the consumers').
       - name: Icon names the face can draw
         env:
-          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html
+          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html,WORDMAKE=hosts/wordmarktools/wordmake/src
+          # WORDMAKE loads the full face, not the subset; it is held to the file it ships.
+          WM_CONSUMER_FACES: WORDMAKE=hosts/wordmarktools/wordmake/fonts/MaterialSymbolsOutlined-full.woff2
         run: python3 scripts/lint-icons.py
       - name: COMPONENTS.md and HOST-CONTRACT.md must match their inputs
         env:
-          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html
+          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html,WORDMAKE=hosts/wordmarktools/wordmake/src
         run: |
           node scripts/gen-index.mjs
           if ! git diff --quiet -- COMPONENTS.md HOST-CONTRACT.md; then

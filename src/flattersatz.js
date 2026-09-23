@@ -269,6 +269,45 @@ function makeMeasurer(reference, runStyles) {
            space: measure(' '), em: parseFloat(getComputedStyle(reference).fontSize) || 16 }
 }
 
+/**
+ * A MEASURER THE CALLER SUPPLIES, for a column that is not a DOM element.
+ *
+ * The probe above is the right way to measure text that is going to be drawn by the
+ * browser -- it inherits the axes, the features and the optical size, and a canvas 2d
+ * context silently ignores font-variation-settings in Chrome, so there is no shortcut.
+ * But it is the ONLY thing in this file that needs a document. Everything downstream --
+ * the greedy walk, the Knuth-Plass composer, hyphenation, protrusion, the widow killer --
+ * works on `{ measure, space, em }` and never touches the DOM.
+ *
+ * So a caller that already shapes its own text can hand that in instead. WORDMAKE does:
+ * its preview, its node export and its seven render workers all break the same copy, and
+ * two of those three have no document to measure in -- but all three can hand over
+ * `advance(coord, text, size)` from the shaper they already agree on. Same breaker, same
+ * rag, in a browser and in a worker.
+ *
+ * Pass `{ width, measure(text, type) }` where a reference element would go. The optional
+ * extras are for callers that can do more:
+ *
+ *   measureAt(axisValue, text, type)  re-measure along `wdth`. Without it the expansion
+ *                                     stage finds no axis and leaves the type alone --
+ *                                     which is the honest answer for a measurer that
+ *                                     cannot move one, and not a silent scaleX.
+ *   space, em                         defaults: the width of ' ', and 16.
+ */
+export function measurerFrom(spec) {
+  if (!spec || typeof spec.measure !== 'function') return null
+  const measure = (s, type) => spec.measure(s, type) || 0
+  return {
+    measure,
+    measureAt: typeof spec.measureAt === 'function'
+      ? spec.measureAt
+      : (_value, s, type) => measure(s, type),
+    fvsAt: typeof spec.fvsAt === 'function' ? spec.fvsAt : () => '',
+    space: spec.space ?? measure(' '),
+    em: spec.em ?? 16,
+  }
+}
+
 /** The same measurer with the DESIRED spacing folded in. Same shape, so everything
  *  downstream is unchanged; `base` is the natural one underneath. */
 function withDesired(m, B) {
@@ -836,13 +875,16 @@ export function layoutParagraph(input, reference, opts, indentPx = 0) {
   if (mode === 'off' || !reference) return null
   const runs = toRuns(input)
   if (!runs.some(r => r.text.trim())) return null
-  const columnWidth = reference.clientWidth
+  // `reference` is a DOM element, or a measurer the caller supplied -- see measurerFrom.
+  // The second one carries its own column width, because there is no element to ask.
+  const injected = measurerFrom(reference)
+  const columnWidth = injected ? reference.width : reference.clientWidth
   if (!columnWidth) return null
 
   // Desired is a baseline, not a spend: it shifts every width the breaker sees, so the
   // paragraph is composed as it will actually be set. The natural measurer stays
   // reachable as `.base`, which is what px conversions and the axis work use.
-  const m = withDesired(makeMeasurer(reference, opts.runStyles), budgetsOf(opts))
+  const m = withDesired(injected ?? makeMeasurer(reference, opts.runStyles), budgetsOf(opts))
   const items = buildItems(runs, m, opts)
   if (!items.length) return null
 

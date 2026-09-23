@@ -12,6 +12,25 @@ Newest first.
 
 ---
 
+## 2026-09-23 — WORDMAKE joins CI (NEXT.md E1)
+
+**`flattersatz-headless` lands: `StopSlider`, and a measurer without a document.** The
+branch was two commits and 75 behind; nothing on main had moved under it except the
+changelog. `StopSlider` is the named-stops control WORDMAKE's GEOM rail imports, and
+`measurerFrom` is what lets its render workers break copy with no DOM. Both exported
+from the barrel; `SLIDERS.md` row 13 is ✅.
+
+**WORDMAKE is a `check` leg in `consumers.yml`,** built the same way the other three are:
+`wordmarktools` checked out, `wordmake/shared` pointed at the commit under test, token
+lint, `npm ci`, `vite build`. In wordmarktools the `shared` under it is a submodule now,
+not a symlink to one laptop's checkout, so a runner can build it at all. It is also a
+consumer in `COMPONENTS.md` and the icon lint -- against its own face: it ships the
+full Material Symbols file and draws `crop`, `blur_on`, `queue_play_next` and four more
+the 24-name subset never held, so `WM_CONSUMER_FACES` names the woff2 it actually loads
+and the lint holds it to that.
+
+---
+
 ## 2026-09-21 — the system page draws from the full icon face
 
 **The page about the marks was drawing marks the subset does not hold.** `fit_width`,
@@ -526,6 +545,33 @@ already captured, made Chromium fire `lostpointercapture` for the hand-over, and
 From the phone: typing toward 1660 had the proof jump to 16, then 166, and a host that
 clamps wrote its answer back into the field mid-word. Draft only now; a tap selects the
 digits; only an arrow abandons the draft.
+
+---
+
+## 2026-09-13 — flattersatz without a document
+
+**An injected measurer.** `measurerFrom(spec)`, and `layoutParagraph` now takes either a
+DOM element or `{ width, measure(text, type) }` where the element used to go.
+
+The probe was the only thing in the file that needed a document, and it is still the right
+way to measure text the browser is going to draw — it inherits the axes, the features and
+the optical size, and a canvas 2d context silently ignores `font-variation-settings` in
+Chrome, so there is no shortcut. But everything downstream of it — the greedy walk, the
+Knuth-Plass composer, hyphenation by rule, protrusion, the widow killer — only ever asked
+the measurer for `measure`, `space` and `em`. None of it ever touched the DOM.
+
+So a caller that already shapes its own text can hand that in. WORDMAKE is the one that
+asked: its preview, its node export and its seven render workers all break the same copy,
+and two of those three have no document — but all three can pass `advance(coord, text,
+size)` from the shaper they already agree on. Same breaker, same rag, in a browser and in
+a worker.
+
+`measureAt` stays optional. Without it `widthAxis()` measures no axis and the expansion
+stage leaves the type alone, which is the honest answer for a measurer that cannot move
+one — and not a silent scaleX.
+
+The DOM path is byte-for-byte unchanged: `measurerFrom` returns null for anything that is
+not a spec, which is how `layoutParagraph` tells an element from one.
 
 ---
 
