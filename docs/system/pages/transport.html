@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Six ways to build the bar</title>
+<!-- Standalone page, served by Pages in place and never assembled by build.py -- like
+     buttons.html, a page to decide from. Fonts are the repo's own: Cal Sans from
+     docs/fonts, and the FULL Material face rather than the shipped 24-ligature subset,
+     because play_arrow and pause are not in the subset yet. Growing it is the
+     primitive's move once a schema is chosen; until then the apps draw these two marks
+     as Cal Sans glyphs (U+25B6 / U+2016). -->
+<style>
+@font-face{ font-family:"Cal"; src:url("../../fonts/CalSansVF.ttf") format("truetype"); font-display:swap; }
+@font-face{ font-family:"Material Symbols Outlined"; src:url("../../fonts/MaterialSymbolsOutlined-full.woff2") format("woff2"); font-weight:100 700; font-display:block; }
+</style>
+<style>
+:root{
+  --bg:#0f0f0f; --surface:#1a1a1a; --surface-hi:#252525; --stage:#000; --text:#e8e8e8; --text-rgb:232,232,232;
+  --ink-quiet:.62; --ink-faint:.38; --a-line:.14;
+  --text-muted:rgba(var(--text-rgb),var(--ink-quiet)); --text-dim:rgba(var(--text-rgb),var(--ink-faint)); --border:rgba(var(--text-rgb),var(--a-line));
+  --signal:#eeff41; --radius:6px; --corner-k:1.2; --dur-fast:140ms; --dur-med:240ms; --ease:cubic-bezier(.2,0,0,1);
+  --sp1:4px; --sp2:6px; --sp3:8px; --sp4:12px; --sp5:16px; --sp6:24px;
+  --micro:.5625rem; --ui:.75rem; --body:1rem; --lede:1.125rem; --title:1.625rem; --track-caps:.12em;
+  --ui-font:"Cal",system-ui,sans-serif;
+}
+*,*::before,*::after{ box-sizing:border-box; corner-shape:superellipse(var(--corner-k)); }
+html,body{ margin:0; background:var(--bg); color:var(--text); font:var(--body)/1.55 var(--ui-font); font-variation-settings:"GEOM" 25; }
+body{ padding:clamp(20px,4vw,56px) clamp(16px,4vw,64px) 96px; }
+button{ font:inherit; color:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+button:focus{ outline:none; } :focus-visible{ outline:2px solid var(--signal); outline-offset:2px; }
+.tnum{ font-variant-numeric:tabular-nums; }
+.caps{ font-size:var(--micro); letter-spacing:var(--track-caps); text-transform:uppercase; }
+
+.head{ max-width:56em; margin-bottom:40px; }
+.eyebrow{ font-size:var(--micro); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); margin:0 0 10px; }
+h1{ font-size:var(--title); line-height:1.2; margin:0 0 12px; font-weight:400; }
+.lede{ color:var(--text-muted); max-width:46em; margin:0 0 20px; } .lede b{ color:var(--text); font-weight:400; }
+.laws{ border:1px solid var(--border); border-radius:var(--radius); padding:14px 18px 16px; max-width:52em; background:repeating-linear-gradient(135deg,transparent 0 7px,rgba(var(--text-rgb),.035) 7px 8px); }
+.laws h2{ font-size:var(--micro); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); margin:0 0 10px; font-weight:400; }
+.laws dl{ display:grid; grid-template-columns:8em 1fr; gap:6px 16px; margin:0; font-size:var(--ui); line-height:1.5; }
+.laws dt,.laws dd{ margin:0; color:var(--text-muted); } .laws dd b{ color:var(--text); font-weight:400; } .laws code{ font-family:ui-monospace,Menlo,monospace; font-size:.92em; color:var(--text); }
+.tag{ float:right; font-size:var(--micro); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); }
+.tools{ display:flex; gap:var(--sp2); margin:18px 0 0; }
+.tb{ padding:var(--sp2) var(--sp3); font-size:var(--ui); color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); transition:color var(--dur-fast),border-color var(--dur-fast),background var(--dur-fast); }
+.tb:hover{ color:var(--text); border-color:var(--text-dim); } .tb[aria-pressed="true"]{ color:var(--text); background:var(--surface-hi); border-color:var(--text-dim); }
+
+.cards{ display:flex; flex-direction:column; gap:var(--sp6); }
+.card{ background:var(--surface); border-radius:var(--radius); padding:18px 20px 20px; }
+.card-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:6px; }
+.card-head .n{ font-size:var(--micro); letter-spacing:var(--track-caps); color:var(--text-dim); } .card-head h3{ margin:0; font-size:var(--lede); font-weight:400; }
+.card-head .fam{ margin-left:auto; font-size:var(--micro); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); }
+.thesis{ font-size:var(--ui); line-height:1.5; color:var(--text-muted); margin:0 0 14px; max-width:70em; } .thesis b{ color:var(--text); font-weight:400; }
+.regs{ display:grid; grid-template-columns:1fr; gap:var(--sp4); }
+@media (min-width:1180px){ .regs{ grid-template-columns:1fr 1fr; } }
+.reg{ min-width:0; }
+.reg .who{ display:flex; justify-content:space-between; font-size:var(--micro); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); margin-bottom:6px; }
+.frame{ background:var(--stage); border-radius:var(--radius); overflow:hidden; position:relative; }
+.stagelet{ height:72px; display:grid; place-items:center; color:var(--text-dim); font-size:var(--micro); letter-spacing:var(--track-caps); text-transform:uppercase; border-bottom:1px solid var(--border); }
+.stagelet.tall{ height:150px; border-bottom:0; }
+.stagelet .spec{ font-family:"Cal"; font-size:34px; letter-spacing:0; text-transform:none; color:var(--text-muted); font-variation-settings:"GEOM" var(--geom,25); }
+.cost{ font-size:var(--ui); line-height:1.5; color:var(--text-muted); margin:14px 0 0; padding-top:10px; border-top:1px solid var(--border); max-width:70em; } .cost b{ color:var(--text); font-weight:400; }
+
+/* the mark */
+.mk{ font-family:'Material Symbols Outlined'; font-weight:normal; line-height:1; letter-spacing:normal; text-transform:none; white-space:nowrap; font-feature-settings:'liga'; -webkit-font-smoothing:antialiased; display:inline-flex; align-items:center; justify-content:center; user-select:none;
+  --fill:1; --wght:300; --grad:50; --opsz:20; font-size:20px; font-variation-settings:'FILL' var(--fill),'wght' var(--wght),'GRAD' var(--grad),'opsz' var(--opsz); transition:font-variation-settings var(--dur-fast) var(--ease),color var(--dur-fast); }
+[aria-pressed="true"] > .mk{ --wght:400; }
+
+/* every transport root */
+.bar{ display:flex; align-items:center; gap:var(--sp4); padding:0 var(--sp4); height:44px; background:var(--surface); color:var(--text-muted); position:relative; user-select:none; }
+.bar .btn{ min-width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; background:none; border:0; padding:0; color:var(--text-muted); transition:color var(--dur-fast); }
+.bar .btn:hover{ color:var(--text); }
+.bar .ro{ font-size:var(--ui); white-space:nowrap; color:var(--text); } .bar .ro.q{ color:var(--text-dim); }
+.bar .sw{ font-size:var(--ui); padding:0 var(--sp3); height:24px; display:inline-flex; align-items:center; border:1px solid var(--border); border-radius:999px; background:none; color:var(--text-dim); transition:color var(--dur-fast),border-color var(--dur-fast); }
+.bar .sw:hover{ color:var(--text); } .bar .sw[aria-pressed="true"]{ color:var(--text); border-color:var(--text-dim); }
+.bar .sel{ font-size:var(--ui); color:var(--text-muted); display:inline-flex; align-items:center; gap:2px; }
+.bar .sel .mk{ font-size:16px; --fill:0; }
+/* the generic hairline track */
+.trk{ position:relative; flex:1; height:44px; cursor:ew-resize; touch-action:none; }
+.trk::before{ content:""; position:absolute; left:0; right:0; top:50%; height:1px; background:var(--border); transform:translateY(-.5px); }
+.trk .done{ position:absolute; left:0; top:50%; height:1px; width:calc(var(--p,0)*100%); background:var(--text-muted); transform:translateY(-.5px); }
+.trk .hd{ position:absolute; top:50%; left:calc(var(--p,0)*100%); width:2px; height:12px; background:var(--text); transform:translate(-1px,-6px); transition:height var(--dur-fast); }
+.trk:hover .hd{ height:16px; transform:translate(-1px,-8px); } .trk:active .hd{ width:3px; transform:translate(-1.5px,-8px); }
+.trk .tk{ position:absolute; top:50%; width:1px; height:6px; background:var(--text-dim); transform:translate(-.5px,-3px); }
+.trk .ends{ position:absolute; left:0; right:0; bottom:1px; display:flex; justify-content:space-between; font-size:var(--micro); color:var(--text-dim); pointer-events:none; }
+
+/* 01 deck: the current arrangement, disciplined */
+.s1 .btn.play{ background:var(--surface-hi); border-radius:var(--radius); height:32px; min-width:44px; color:var(--text); }
+
+/* 02 slate: the readout is the object */
+.s2{ height:64px; align-items:stretch; padding:0; }
+.s2 .btn{ align-self:center; }
+.s2 .body{ flex:1; position:relative; display:flex; flex-direction:column; justify-content:center; padding:0 var(--sp4) 0 0; min-width:0; }
+.s2 .big{ font-size:22px; line-height:1; color:var(--text); }
+.s2 .big .of{ color:var(--text-dim); }
+.s2 .sub{ font-size:var(--ui); color:var(--text-dim); margin-top:3px; }
+.s2 .trk{ position:absolute; left:0; right:var(--sp4); bottom:6px; height:12px; }
+.s2 .trk .hd{ height:8px; transform:translate(-1px,-4px); }
+.s2 .side{ align-self:center; display:flex; gap:var(--sp4); align-items:center; padding-right:var(--sp4); }
+
+/* 03 ruler */
+.s3{ height:68px; gap:0; padding:0 var(--sp4) 0 0; }
+.s3 .btn.play{ height:68px; min-width:56px; border-right:1px solid var(--border); color:var(--text); }
+.s3 .ruler{ flex:1; position:relative; height:68px; cursor:ew-resize; touch-action:none; margin:0 var(--sp4); }
+.s3 .ruler .tk{ position:absolute; bottom:28px; width:1px; height:8px; background:var(--text-dim); transform:translateX(-.5px); }
+.s3 .ruler .tk.mi{ height:4px; opacity:.6; } .s3 .ruler .tk.on{ background:var(--text-muted); }
+.s3 .ruler .lb{ position:absolute; bottom:15px; transform:translateX(-50%); font-size:var(--micro); color:var(--text-dim); white-space:nowrap; }
+.s3 .ruler .lb.alt{ bottom:3px; }
+.s3 .ruler .hd{ position:absolute; top:6px; bottom:26px; left:calc(var(--p,0)*100%); width:1px; background:var(--text); transform:translateX(-.5px); }
+.s3 .ruler .flag{ position:absolute; top:4px; left:calc(var(--p,0)*100%); transform:translateX(-50%); font-size:var(--ui); color:var(--text); background:var(--surface); padding:0 6px; white-space:nowrap; line-height:16px; }
+.s3 .ruler:hover .hd{ width:2px; transform:translateX(-1px); }
+.s3 .side{ display:flex; gap:var(--sp4); align-items:center; }
+
+/* 04 strip: the footer is the scrubber */
+.s4{ background:linear-gradient(90deg,var(--surface-hi) calc(var(--p,0)*100%),var(--surface) calc(var(--p,0)*100%)); cursor:ew-resize; touch-action:none; }
+.s4 .btn,.s4 .sw,.s4 .sel{ cursor:pointer; position:relative; z-index:1; }
+.s4 .spacer{ flex:1; height:44px; }
+.s4 .tk{ position:absolute; top:0; bottom:0; width:1px; background:rgba(var(--text-rgb),.08); pointer-events:none; }
+.s4 .hd{ position:absolute; top:0; bottom:0; left:calc(var(--p,0)*100%); width:1px; background:var(--text); pointer-events:none; }
+.s4:hover .hd{ width:2px; }
+
+/* 05 cells */
+.s5 .cells{ flex:1; display:grid; gap:2px; height:20px; position:relative; }
+.s5 .cells.loop{ margin-right:20px; }
+.s5 .cell{ background:rgba(var(--text-rgb),.08); border-radius:2px; cursor:pointer; position:relative; transition:background var(--dur-fast); }
+.s5 .cell:hover{ background:rgba(var(--text-rgb),.2); }
+.s5 .cell.done{ background:rgba(var(--text-rgb),.28); } .s5 .cell.on{ background:var(--text); }
+.s5 .cell.on::after{ content:attr(data-lb); position:absolute; left:50%; bottom:calc(100% + 6px); transform:translateX(-50%); font-size:var(--micro); color:var(--text); white-space:nowrap; letter-spacing:0; }
+.s5 .cells.loop::before{ content:"repeat"; font-family:'Material Symbols Outlined'; font-size:14px; position:absolute; right:-18px; top:2px; color:var(--text-dim); }
+.s5{ height:64px; padding-top:14px; }
+
+/* 06 overlay: the bar lies on the stage and hides while playing */
+.s6wrap{ position:relative; }
+.s6wrap .stagelet{ height:190px; border:0; }
+.s6{ position:absolute; left:0; right:0; bottom:0; background:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,.55) 70%,transparent); height:56px; padding-bottom:6px; align-items:flex-end; transition:opacity var(--dur-med) var(--ease),transform var(--dur-med) var(--ease); }
+.s6.hide{ opacity:0; transform:translateY(8px); pointer-events:none; }
+.s6wrap:hover .s6, .s6wrap:focus-within .s6{ opacity:1; transform:none; pointer-events:auto; }
+.s6 .trk{ position:absolute; left:var(--sp4); right:var(--sp4); top:0; height:14px; }
+.s6 .trk::before{ background:rgba(var(--text-rgb),.22); } .s6 .trk .done{ background:var(--text); } .s6 .trk .hd{ height:0; } .s6 .trk:hover .hd{ height:10px; transform:translate(-1px,-5px); }
+.s6 .live{ display:inline-flex; align-items:center; gap:6px; font-size:var(--micro); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-muted); }
+.s6 .live i{ width:6px; height:6px; border-radius:50%; corner-shape:round; background:var(--text-dim); } .s6 .live.on i{ background:var(--text); }
+.s6 .fpsm{ font-size:var(--ui); color:var(--text-muted); min-width:5.5em; text-align:right; }
+
+@media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+
+<header class="head">
+  <p class="eyebrow">WIP primitives · pages to decide from</p>
+  <h1>Six ways to build the bar</h1>
+  <p class="lede">The most important interface in both tools is the transport, and there is to be one of it. <b>WORDMAKE</b> plays a clip: autoplaying, looping, technical — a frame counter, a clock, a rate, the frame as the unit a designer argues about. <b>Morf</b> plays a font's history: eleven builds of Geist Serif, evenly by beat, eased from one to the next with a hold, the build as the unit. Same bones, two registers, so every schema below is drawn twice on the same live clocks. Nothing on the stage is clickable any more; the bar is the whole instrument.</p>
+  <div class="laws"><span class="tag">undecided</span>
+    <h2>What all six obey</h2>
+    <dl>
+      <dt>one primitive</dt><dd><b>play · scrubber · readouts slot.</b> WORDMAKE mounts step / play / frames / clock / loop / rate. Morf mounts tune / play / builds / labels. Nothing is a per-app fork.</dd>
+      <dt>the unit</dt><dd>WORDMAKE's scrubber is in <b>frames</b>, never seconds. Morf's is in <b>builds</b>, spaced evenly by index — dates are labels, not distances.</dd>
+      <dt>scrubbing pauses</dt><dd>A head that runs away from the hand dragging it is the one thing a transport must never do. Every schema pauses on pointerdown and stays paused.</dd>
+      <dt>readouts</dt><dd>Tabular figures, one ink each: the counter full, the clock quiet. Loop is a state, not a colour. The rate is a select, and it says <code>23.976</code>, never a fraction.</dd>
+      <dt>keys</dt><dd>Space toggles. ←/→ step one unit; shift × 10 in WORDMAKE. Every bar is focusable and the ring is never removed.</dd>
+      <dt>the mark</dt><dd>Material <code>play_arrow</code> / <code>pause</code>, FILL 1, wght 300 → 400 when on. Both apps draw these as Cal Sans glyphs today because the shipped subset lacks them; growing it is the primitive's move.</dd>
+      <dt>target</dt><dd>44px, as padding. The bar is 44px tall where it is a bar; where a schema is taller, the extra height is readout, not target.</dd>
+      <dt>no acid</dt><dd><code>--signal</code> is not spent here. WORDMAKE's export button already wears it once per screen; a transport that glows would compete with it.</dd>
+    </dl>
+  </div>
+  <div class="tools">
+    <button class="tb" id="all" aria-pressed="false">Play all</button>
+    <button class="tb" id="rs">Reset</button>
+  </div>
+</header>
+
+<main class="cards">
+
+<!-- ═══ 01 DECK ═══ -->
+<section class="card">
+  <div class="card-head"><span class="n">01</span><h3>Deck</h3><span class="fam">controls · track · readouts</span></div>
+  <p class="thesis"><b>What both apps have now, made one thing.</b> Controls left, the track in the middle taking all the width there is, the numbers and options right. The only decisions are the ones the button page already made: one radius, one ink ladder, 44px bought as padding, the head a 2px hairline that grows under the pointer and thickens held. Boring on purpose — this is the control group.</p>
+  <div class="regs">
+    <div class="reg"><div class="who"><span>WORDMAKE · 24.00s · 60 fps · loop</span><span>frames</span></div>
+      <div class="frame"><div class="stagelet">clip</div>
+      <div class="bar s1" data-reg="wm" tabindex="0">
+        <button class="btn" data-step="-1" aria-label="previous frame"><span class="mk">skip_previous</span></button>
+        <button class="btn play" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <button class="btn" data-step="1" aria-label="next frame"><span class="mk">skip_next</span></button>
+        <div class="trk" data-track><div class="done" data-p></div><div class="hd" data-p></div></div>
+        <span class="ro tnum" data-counter>001 / 1440</span><span class="ro q tnum" data-clock>0.00s of 24.00s</span>
+        <button class="sw" data-loop aria-pressed="true">Loop</button>
+        <span class="sel" data-fps>60 fps <span class="mk">keyboard_arrow_down</span></span>
+      </div></div></div>
+    <div class="reg"><div class="who"><span>MORF · Geist Serif · 11 builds</span><span>builds</span></div>
+      <div class="frame"><div class="stagelet"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
+      <div class="bar s1" data-reg="morf" tabindex="0">
+        <button class="btn" data-tune aria-pressed="false" aria-label="choose builds"><span class="mk" style="--fill:0">discover_tune</span></button>
+        <button class="btn play" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <div class="trk" data-track data-ticks><div class="done" data-p></div><div class="hd" data-p></div><div class="ends"><span data-first></span><span data-last></span></div></div>
+        <span class="ro tnum" data-label>v0.2 · Aug 17</span>
+      </div></div></div>
+  </div>
+  <p class="cost"><b>What it costs.</b> Nothing is wrong with it and nothing is learned from it. Loop and rate sit as furniture at the end of every bar whether or not anyone is about to change them, and the frame counter has to be read from two numbers and a slash.</p>
+</section>
+
+<!-- ═══ 02 SLATE ═══ -->
+<section class="card">
+  <div class="card-head"><span class="n">02</span><h3>Slate</h3><span class="fam">readout-first</span></div>
+  <p class="thesis"><b>The number is the object.</b> A broadcast slate: the frame count at 22px, tabular, is what the bar is <i>for</i>, and the track is a hairline underneath it that the head rides at 8px. The clock sits under the count as a caption. Play is a mark at the left; loop and rate recede to quiet caps at the right, one line, because they are settings and not readings. Morf turns the same slate to the build's own name — <i>#4 · Aug 27</i> — with <i>build 5 of 11</i> as its caption.</p>
+  <div class="regs">
+    <div class="reg"><div class="who"><span>WORDMAKE</span><span>frames</span></div>
+      <div class="frame"><div class="stagelet">clip</div>
+      <div class="bar s2" data-reg="wm" tabindex="0">
+        <button class="btn" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <div class="body"><div class="big tnum"><span data-counter-n>001</span><span class="of"> / 1440</span></div><div class="sub tnum" data-clock>0.00s of 24.00s</div>
+          <div class="trk" data-track><div class="done" data-p></div><div class="hd" data-p></div></div></div>
+        <div class="side"><button class="sw" data-loop aria-pressed="true">Loop</button><span class="sel" data-fps>60 fps <span class="mk">keyboard_arrow_down</span></span></div>
+      </div></div></div>
+    <div class="reg"><div class="who"><span>MORF</span><span>builds</span></div>
+      <div class="frame"><div class="stagelet"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
+      <div class="bar s2" data-reg="morf" tabindex="0">
+        <button class="btn" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <div class="body"><div class="big tnum" data-label>v0.2 · Aug 17</div><div class="sub tnum" data-of>build 1 of 11</div>
+          <div class="trk" data-track data-ticks><div class="done" data-p></div><div class="hd" data-p></div></div></div>
+        <div class="side"><button class="btn" data-tune aria-pressed="false" aria-label="choose builds"><span class="mk" style="--fill:0">discover_tune</span></button></div>
+      </div></div></div>
+  </div>
+  <p class="cost"><b>What it costs.</b> Height — 64px, and the track is small enough that scrubbing is a precision act. The counter changes sixty times a second at 22px, which is a lot of moving ink in the corner of the eye; it wants the imperative write WORDMAKE already does, not a re-render.</p>
+</section>
+
+<!-- ═══ 03 RULER ═══ -->
+<section class="card">
+  <div class="card-head"><span class="n">03</span><h3>Ruler</h3><span class="fam">the track is a timeline</span></div>
+  <p class="thesis"><b>The track is graduated.</b> WORDMAKE's has a tick every second, a minor every half, and the seconds numbered along the bottom — the clip is 24 seconds and you can see all of them. The head is a full-height hairline with a flag riding it that carries the frame and the time together. Morf's ruler has one tick per build with every label written under it, alternating baselines so eleven names fit; the head's flag says which build. Play is set into the ruler's left cap as its origin.</p>
+  <div class="regs">
+    <div class="reg"><div class="who"><span>WORDMAKE</span><span>frames</span></div>
+      <div class="frame"><div class="stagelet">clip</div>
+      <div class="bar s3" data-reg="wm" tabindex="0">
+        <button class="btn play" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <div class="ruler" data-track data-ruler></div>
+        <div class="side"><button class="sw" data-loop aria-pressed="true">Loop</button><span class="sel" data-fps>60 fps <span class="mk">keyboard_arrow_down</span></span></div>
+      </div></div></div>
+    <div class="reg"><div class="who"><span>MORF</span><span>builds</span></div>
+      <div class="frame"><div class="stagelet"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
+      <div class="bar s3" data-reg="morf" tabindex="0">
+        <button class="btn play" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <div class="ruler" data-track data-ruler></div>
+        <div class="side"><button class="btn" data-tune aria-pressed="false" aria-label="choose builds"><span class="mk" style="--fill:0">discover_tune</span></button></div>
+      </div></div></div>
+  </div>
+  <p class="cost"><b>What it costs.</b> Width, and it does not degrade — at 600px the second-labels collide and Morf's eleven names stack into a third row. It also decides the visual scale of the whole footer: a ruler is loud, and both apps' floors are meant to be quieter than what is above them.</p>
+</section>
+
+<!-- ═══ 04 STRIP ═══ -->
+<section class="card">
+  <div class="card-head"><span class="n">04</span><h3>Strip</h3><span class="fam">the bar is the scrubber</span></div>
+  <p class="thesis"><b>The footer itself is the track.</b> There is no track element: elapsed fills the whole 44px strip from the left as a lighter surface, the head is a hairline the full height, and pressing anywhere on the strip that is not a control seeks there. The controls sit <i>on</i> the fill. In Morf the fill steps — it jumps a build's width at each beat and the hairlines between beats show as seams — so the strip reads as a stack of eleven panels, one per drawing.</p>
+  <div class="regs">
+    <div class="reg"><div class="who"><span>WORDMAKE</span><span>frames</span></div>
+      <div class="frame"><div class="stagelet">clip</div>
+      <div class="bar s4" data-reg="wm" tabindex="0" data-track data-p>
+        <div class="hd" data-p></div>
+        <button class="btn" data-step="-1" aria-label="previous frame"><span class="mk">skip_previous</span></button>
+        <button class="btn" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <button class="btn" data-step="1" aria-label="next frame"><span class="mk">skip_next</span></button>
+        <div class="spacer"></div>
+        <span class="ro tnum" data-counter>001 / 1440</span><span class="ro q tnum" data-clock>0.00s of 24.00s</span>
+        <button class="sw" data-loop aria-pressed="true">Loop</button>
+        <span class="sel" data-fps>60 fps <span class="mk">keyboard_arrow_down</span></span>
+      </div></div></div>
+    <div class="reg"><div class="who"><span>MORF</span><span>builds</span></div>
+      <div class="frame"><div class="stagelet"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
+      <div class="bar s4" data-reg="morf" tabindex="0" data-track data-p data-stepfill data-seams>
+        <div class="hd" data-p></div>
+        <button class="btn" data-tune aria-pressed="false" aria-label="choose builds"><span class="mk" style="--fill:0">discover_tune</span></button>
+        <button class="btn" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <div class="spacer"></div>
+        <span class="ro tnum" data-label>v0.2 · Aug 17</span>
+      </div></div></div>
+  </div>
+  <p class="cost"><b>What it costs.</b> The controls sit on a surface that is also a target, so a miss on the play button is a seek — the hit areas have to be exact and the gutters between them can't be track. And the fill is the same surface-hi the pressed button uses, so "playing" and "held" share a colour.</p>
+</section>
+
+<!-- ═══ 05 CELLS ═══ -->
+<section class="card">
+  <div class="card-head"><span class="n">05</span><h3>Cells</h3><span class="fam">discrete</span></div>
+  <p class="thesis"><b>The unit made visible.</b> WORDMAKE's bar is twenty-four cells — one per second — that fill as they play, the current one in full ink; the frame count stays as a number because a cell per frame would be 1440 of them. Morf's bar is eleven cells, one per build, which is the honest picture: a beat is a discrete thing, and this is the only schema where the scrubber has the same grain as the content. The current cell wears its label above it. Loop is not a button: when it is on, a <i>repeat</i> mark closes the row.</p>
+  <div class="regs">
+    <div class="reg"><div class="who"><span>WORDMAKE</span><span>seconds → frames</span></div>
+      <div class="frame"><div class="stagelet">clip</div>
+      <div class="bar s5" data-reg="wm" tabindex="0">
+        <button class="btn" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <div class="cells loop" data-cells="24"></div>
+        <span class="ro tnum" data-counter>001 / 1440</span>
+        <button class="sw" data-loop aria-pressed="true">Loop</button>
+        <span class="sel" data-fps>60 fps <span class="mk">keyboard_arrow_down</span></span>
+      </div></div></div>
+    <div class="reg"><div class="who"><span>MORF</span><span>builds</span></div>
+      <div class="frame"><div class="stagelet"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
+      <div class="bar s5" data-reg="morf" tabindex="0">
+        <button class="btn" data-tune aria-pressed="false" aria-label="choose builds"><span class="mk" style="--fill:0">discover_tune</span></button>
+        <button class="btn" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <div class="cells" data-cells="11" data-cell-labels></div>
+      </div></div></div>
+  </div>
+  <p class="cost"><b>What it costs.</b> WORDMAKE loses the frame as a scrub target — a cell is a second, sixty frames, and the fine seek moves to the arrow keys. In Morf the eleven cells only stay legible up to about thirty builds; a font with a year of beats needs the log, not the bar.</p>
+</section>
+
+<!-- ═══ 06 OVERLAY ═══ -->
+<section class="card">
+  <div class="card-head"><span class="n">06</span><h3>Overlay</h3><span class="fam">broadcast</span></div>
+  <p class="thesis"><b>The bar is on the picture, and it gets out of the way.</b> The live-broadcast register: a translucent strip over the bottom edge of the stage that shows on hover or focus and sinks away a moment after play begins, so the clip is seen the size it will ship at. It carries a LIVE dot that is lit while playing, a measured frame rate — the actual number the engine is achieving, not the one selected — and the progress as a full-ink line along the top edge that grows a head only under the pointer. For Morf the same strip lies over the specimen, with the build's name where the counter was.</p>
+  <div class="regs">
+    <div class="reg"><div class="who"><span>WORDMAKE</span><span>frames · measured fps</span></div>
+      <div class="frame s6wrap"><div class="stagelet tall">clip · hover to reveal</div>
+      <div class="bar s6" data-reg="wm" tabindex="0" data-autohide>
+        <div class="trk" data-track><div class="done" data-p></div><div class="hd" data-p></div></div>
+        <button class="btn" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <span class="live" data-live><i></i>live</span>
+        <span class="ro tnum" data-counter>001 / 1440</span><span class="ro q tnum" data-clock>0.00s of 24.00s</span>
+        <span style="flex:1"></span>
+        <span class="fpsm tnum" data-fpsm>— fps</span>
+        <button class="sw" data-loop aria-pressed="true">Loop</button>
+      </div></div></div>
+    <div class="reg"><div class="who"><span>MORF</span><span>builds</span></div>
+      <div class="frame s6wrap"><div class="stagelet tall"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
+      <div class="bar s6" data-reg="morf" tabindex="0" data-autohide>
+        <div class="trk" data-track data-ticks><div class="done" data-p></div><div class="hd" data-p></div></div>
+        <button class="btn" data-tune aria-pressed="false" aria-label="choose builds"><span class="mk" style="--fill:0">discover_tune</span></button>
+        <button class="btn" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
+        <span class="ro tnum" data-label>v0.2 · Aug 17</span>
+        <span style="flex:1"></span>
+        <span class="ro q tnum" data-of>1 of 11</span>
+      </div></div></div>
+  </div>
+  <p class="cost"><b>What it costs.</b> Discoverability, and a fixed relationship to the stage: it only works where the bar can lie on the picture, which in both apps means giving up the floor as a floor. The measured-fps readout is the one honest broadcast affordance here, and it is also the one that will read 58.9 on a laptop on battery and start a conversation nobody wants.</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+  const STOPS = [[0,"v0.2 · Aug 17"],[1,"working · Aug 18"],[2,"#2 · Aug 18"],[3,"#3 · Aug 20"],[4,"#4 · Aug 27"],[5,"#5 · Aug 27"],[6,"#6 · Aug 28"],[7,"#7 · Sep 2"],[8,"#8 · Sep 12"],[9,"#9 · Sep 14"],[10,"#10 · Sep 20"]];
+  const easeK = x => { const k=.5; /* house ease 50: symmetric cubic, close enough */ return x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2; };
+
+  function wm(){ return { kind:'wm', fps:60, dur:24, frames:1440, f:0, acc:0, playing:false, loop:true,
+    frac(){ return this.f/(this.frames-1); }, seek(p){ this.f=Math.round(Math.max(0,Math.min(1,p))*(this.frames-1)); },
+    step(n){ this.f=((this.f+n)%this.frames+this.frames)%this.frames; },
+    tick(dt){ if(!this.playing) return; this.acc+=dt*this.fps; const n=Math.floor(this.acc); if(!n) return; this.acc-=n; this.f+=n;
+      if(this.f>=this.frames){ if(this.loop) this.f%=this.frames; else { this.f=this.frames-1; this.playing=false; } } },
+    counter(){ return String(this.f+1).padStart(3,'0')+' / '+this.frames; }, counterN(){ return String(this.f+1).padStart(3,'0'); },
+    clock(){ return (this.dur*this.f/this.frames).toFixed(2)+'s of '+this.dur.toFixed(2)+'s'; } }; }
+
+  function morf(){ const SEG=.9, HOLD=.42; return { kind:'morf', v:0, n:10, c:0, playing:false,
+    frac(){ return this.v/this.n; }, seek(p){ this.v=Math.max(0,Math.min(1,p))*this.n; this.c=Math.floor(this.v)*(SEG+HOLD); },
+    step(n){ this.v=Math.max(0,Math.min(this.n,Math.round(this.v)+n)); this.c=this.v*(SEG+HOLD); },
+    start(){ if(this.v>=this.n-.01) this.v=0; this.c=Math.floor(this.v)*(SEG+HOLD); },
+    tick(dt){ if(!this.playing) return; this.c+=dt; const seg=Math.floor(this.c/(SEG+HOLD)); if(seg>=this.n){ this.v=this.n; this.playing=false; return; }
+      const within=this.c-seg*(SEG+HOLD); const p=Math.min(1,within/SEG); this.v=seg+easeK(p); },
+    cur(){ return Math.round(this.v); }, label(){ return STOPS[this.cur()][1]; }, of(){ return (this.cur()+1)+' of 11'; } }; }
+
+  // fps meter for 06
+  let fpsm = 60, fl = performance.now(), fc = 0;
+
+  const bars = [...document.querySelectorAll('.bar')].map(root => {
+    const m = root.dataset.reg==='wm' ? wm() : morf();
+    const q = s => root.querySelector(s), qa = s => [...root.querySelectorAll(s)];
+    const spec = root.closest('.frame')?.querySelector('[data-spec]');
+    // build ticks / rulers / cells
+    qa('[data-ticks]').forEach(t => STOPS.forEach(([a]) => { const i=document.createElement('i'); i.className='tk'; i.style.left=(a/10*100)+'%'; t.appendChild(i); }));
+    const ruler = q('[data-ruler]');
+    if(ruler){
+      if(m.kind==='wm'){ for(let s=0;s<=24;s++){ const i=document.createElement('i'); i.className='tk'; i.style.left=(s/24*100)+'%'; ruler.appendChild(i); if(s%2===0){ const l=document.createElement('span'); l.className='lb'; l.style.left=(s/24*100)+'%'; l.textContent=s; ruler.appendChild(l);} if(s<24){ const h=document.createElement('i'); h.className='tk mi'; h.style.left=((s+.5)/24*100)+'%'; ruler.appendChild(h);} } }
+      else STOPS.forEach(([a,lb],i)=>{ const t=document.createElement('i'); t.className='tk'; t.style.left=(a/10*100)+'%'; ruler.appendChild(t); const l=document.createElement('span'); l.className='lb'+(i%2?' alt':''); l.style.left=(a/10*100)+'%'; l.textContent=lb; ruler.appendChild(l); });
+      const hd=document.createElement('div'); hd.className='hd'; hd.dataset.p=''; ruler.appendChild(hd);
+      const fl=document.createElement('div'); fl.className='flag'; fl.dataset.flag=''; ruler.appendChild(fl);
+    }
+    const cells = q('[data-cells]');
+    if(cells){ const n=+cells.dataset.cells; cells.style.gridTemplateColumns=`repeat(${n},1fr)`; for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='cell'; if(m.kind==='morf') c.dataset.lb=STOPS[i][1]; else c.dataset.lb=''; c.addEventListener('click',()=>{ m.playing=false; if(m.kind==='wm') m.seek(i/(n-1)); else m.seek(i/(n-1)); render(); }); cells.appendChild(c);} }
+    if(root.hasAttribute('data-seams')) STOPS.forEach(([a])=>{ if(a===0) return; const i=document.createElement('i'); i.className='tk'; i.style.left=(a/10*100)+'%'; root.appendChild(i); });
+    const first=q('[data-first]'), last=q('[data-last]'); if(first){ first.textContent=STOPS[0][1]; last.textContent=STOPS[10][1]; }
+
+    let hideT=null;
+    function render(){
+      const p = m.frac();
+      // 04's strip in Morf fills by whole build
+      const pf = root.hasAttribute('data-stepfill') ? Math.floor(m.v+1e-6)/m.n : p;
+      qa('[data-p]').forEach(e=>e.style.setProperty('--p', (e===root?pf:p).toFixed(5)));
+      if(root.hasAttribute('data-p')) root.style.setProperty('--p', pf.toFixed(5));
+      const play=q('[data-play]'); play.setAttribute('aria-pressed', m.playing); play.setAttribute('aria-label', m.playing?'Pause':'Play');
+      const mk=q('[data-mk]'); if(mk) mk.textContent=m.playing?'pause':'play_arrow';
+      if(m.kind==='wm'){
+        qa('[data-counter]').forEach(e=>e.textContent=m.counter()); qa('[data-counter-n]').forEach(e=>e.textContent=m.counterN()); qa('[data-clock]').forEach(e=>e.textContent=m.clock());
+        qa('[data-loop]').forEach(e=>e.setAttribute('aria-pressed', m.loop)); if(cells) cells.classList.toggle('loop', m.loop);
+        const fl=q('[data-flag]'); if(fl) fl.textContent=m.counterN()+' · '+(m.dur*m.f/m.frames).toFixed(2)+'s';
+        const lv=q('[data-live]'); if(lv) lv.classList.toggle('on', m.playing);
+        const fm=q('[data-fpsm]'); if(fm) fm.textContent=(m.playing?fpsm.toFixed(1):'—')+' fps';
+      } else {
+        qa('[data-label]').forEach(e=>e.textContent=m.label()); qa('[data-of]').forEach(e=>e.textContent=(q('.s2')||root.classList.contains('s2'))?'build '+m.of():m.of());
+        const fl=q('[data-flag]'); if(fl) fl.textContent=m.label();
+        if(ruler) qa('.ruler .tk').forEach((t,i)=>t.classList.toggle('on', i<=m.cur()));
+        if(spec) spec.style.setProperty('--geom', (25+ (m.v/m.n)*60).toFixed(1)); // a fake "the font changes" cue
+      }
+      if(cells){ const n=+cells.dataset.cells; const cur = m.kind==='wm' ? Math.min(n-1, Math.floor(m.f/m.frames*n)) : m.cur(); [...cells.children].forEach((c,i)=>{ c.classList.toggle('done', i<cur); c.classList.toggle('on', i===cur); if(m.kind==='wm') c.dataset.lb = i===cur ? m.counterN() : ''; }); }
+    }
+    const wake = () => { if(!root.hasAttribute('data-autohide')) return; clearTimeout(hideT); root.classList.remove('hide'); if(m.playing) hideT=setTimeout(()=>root.classList.add('hide'), 1600); };
+    const toggle = () => { m.playing=!m.playing; if(m.playing && m.start) m.start(); render(); wake(); };
+    root.addEventListener('pointerdown', wake); root.addEventListener('keydown', wake);
+    q('[data-play]').addEventListener('click', toggle);
+    qa('[data-step]').forEach(b=>b.addEventListener('click', e=>{ m.playing=false; m.step(+b.dataset.step); render(); }));
+    qa('[data-loop]').forEach(b=>b.addEventListener('click', ()=>{ m.loop=!m.loop; render(); }));
+    qa('[data-tune]').forEach(b=>b.addEventListener('click', ()=>b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')!=='true')));
+    // scrubbing pauses, and stays paused
+    qa('[data-track]').forEach(t=>{
+      const at = e => { const r=t.getBoundingClientRect(); return (e.clientX-r.left)/r.width; };
+      let down=false;
+      t.addEventListener('pointerdown', e=>{ if(e.target.closest('button,.sel,.sw')) return; down=true; t.setPointerCapture(e.pointerId); m.playing=false; m.seek(at(e)); render(); });
+      t.addEventListener('pointermove', e=>{ if(!down) return; m.seek(at(e)); render(); });
+      t.addEventListener('pointerup', ()=>down=false); t.addEventListener('pointercancel', ()=>down=false);
+    });
+    root.addEventListener('keydown', e=>{
+      if(e.target.matches('select,input')) return;
+      if(e.code==='Space'){ e.preventDefault(); toggle(); }
+      else if(e.key==='ArrowRight'){ e.preventDefault(); m.playing=false; m.step(e.shiftKey&&m.kind==='wm'?10:1); render(); }
+      else if(e.key==='ArrowLeft'){ e.preventDefault(); m.playing=false; m.step(e.shiftKey&&m.kind==='wm'?-10:-1); render(); }
+    });
+    render();
+    return { m, render, toggle };
+  });
+
+  let prev=performance.now();
+  function tick(now){ const dt=(now-prev)/1000; prev=now; fc++; if(now-fl>=500){ fpsm=fc*1000/(now-fl); fc=0; fl=now; }
+    for(const b of bars){ if(b.m.playing){ b.m.tick(dt); b.render(); } } requestAnimationFrame(tick); }
+  requestAnimationFrame(tick);
+
+  const q = new URLSearchParams(location.search);
+  if(q.has('playing')){ bars.forEach(b=>{ if(b.m.kind==='wm'){ b.m.f=199; } else { b.m.v=4.4; } b.m.playing=true; if(b.m.start && b.m.kind==='morf'){ b.m.c=4*(0.9+0.42)+0.3; } b.render(); }); }
+
+  const all=document.getElementById('all'), rs=document.getElementById('rs');
+  all.addEventListener('click', ()=>{ const on=all.getAttribute('aria-pressed')!=='true'; all.setAttribute('aria-pressed',on); all.textContent=on?'Pause all':'Play all'; bars.forEach(b=>{ if(b.m.playing!==on) b.toggle(); }); });
+  rs.addEventListener('click', ()=>{ bars.forEach(b=>{ b.m.playing=false; if(b.m.kind==='wm') b.m.f=0; else b.m.seek(0); b.render(); }); all.setAttribute('aria-pressed','false'); all.textContent='Play all'; });
+})();
+</script>
+</html>

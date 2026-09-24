@@ -549,6 +549,17 @@ WIP = [
      "the same six specimens, with a coverage table of what each cannot do. Explorations: none "
      "chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; "
      "NEXT.md G says what a choice, if one is ever made, changes."),
+    ("system/pages/play.html", "Seven ways to say play",
+     "the one control where a press does two things, drawn seven ways by what carries the "
+     "difference: the mark, the ring, the word, the ground, the enclosure, the elevation, the "
+     "surface. All live on one fake ninety-second clip. Superseded in scope by the transport "
+     "page below — the bar, not the button, is the instrument — and kept as the record of the "
+     "button question. TRANSPORT.md."),
+    ("system/pages/transport.html", "Six ways to build the bar",
+     "one transport primitive — play, scrubber, readouts slot — in two registers, WORDMAKE's "
+     "frames and Morf's builds, each schema drawn twice on the same live clocks: Deck, Slate, "
+     "Ruler, Strip, Cells, Overlay. Decided: one primitive; no stage click; Morf's stops evenly "
+     "by beat. Undecided: the schema. TRANSPORT.md has the coverage and what none has had."),
 ]
 WIP_CSS = """
 .wip{max-width:72ch}

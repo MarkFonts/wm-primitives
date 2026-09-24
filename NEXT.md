@@ -140,6 +140,15 @@ a task. Skip nothing above the line you are on; below it, pick.
       cannot prompt from a sandbox. The guarded-call habit and the API route stay until a
       hang is caught with `GIT_TRACE=1` attached.
 
+## H · The transport (one bar for WORDMAKE and Morf)
+
+Opened 2026-09-23. Six bar schemas in two registers on `docs/system/pages/transport.html`,
+preceded by the play-button question on `play.html`; both stay out of SECTIONS for the
+reason G gives. Decided already: one primitive with a readouts slot; no stage click; Morf's
+stops evenly by beat. The schema is **left blank**: ______. [TRANSPORT.md](TRANSPORT.md) holds
+the coverage, what none has had, and the order — schema, slot contract, subset, WORDMAKE
+first.
+
 ## G · The enclosure language (one grammar for everything boxed)
 
 Opened 2026-09-20 from the six-family proposal on `docs/system/pages/buttons.html`

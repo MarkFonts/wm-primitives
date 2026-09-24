@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seven ways to say play</title>
+<!-- Standalone page, served by Pages in place and never assembled by build.py -- like
+     buttons.html, a page to decide from. Fonts are the repo's own: Cal Sans from
+     docs/fonts, and the FULL Material face rather than the shipped 24-ligature subset,
+     because play_arrow and pause are not in the subset yet. Growing it is the
+     primitive's move once a schema is chosen; until then the apps draw these two marks
+     as Cal Sans glyphs (U+25B6 / U+2016). -->
+<style>
+@font-face{ font-family:"Cal"; src:url("../../fonts/CalSansVF.ttf") format("truetype"); font-display:swap; }
+@font-face{ font-family:"Material Symbols Outlined"; src:url("../../fonts/MaterialSymbolsOutlined-full.woff2") format("woff2"); font-weight:100 700; font-display:block; }
+</style>
+<style>
+
+/* ── the house, restated with fallbacks so this page stands alone ───────────── */
+:root{
+  --bg:#0f0f0f; --surface:#1a1a1a; --surface-hi:#252525; --text:#e8e8e8; --text-rgb:232,232,232;
+  --ink-full:1; --ink-quiet:.62; --ink-faint:.38; --a-line:.14;
+  --text-muted:rgba(var(--text-rgb),var(--ink-quiet)); --text-dim:rgba(var(--text-rgb),var(--ink-faint));
+  --border:rgba(var(--text-rgb),var(--a-line));
+  --signal:#eeff41;
+  --radius:6px; --corner-k:1.2;
+  --stroke-hover:1.2px; --stroke-press:1.8px;
+  --dur-fast:140ms; --dur-med:240ms; --dur-layout:300ms; --dur-slow:400ms;
+  --ease:cubic-bezier(.2,0,0,1);
+  --spacing-01:4px; --spacing-02:6px; --spacing-03:8px; --spacing-04:12px; --spacing-05:16px; --spacing-06:24px; --spacing-07:32px;
+  --type-micro-size:.5625rem; --type-label-size:.75rem; --type-ui-size:.75rem; --type-body-size:1rem; --type-lede-size:1.125rem; --type-title-size:1.625rem;
+  --track-caps:.12em;
+  --ui-font:"Cal",system-ui,sans-serif;
+}
+*,*::before,*::after{ box-sizing:border-box; corner-shape:superellipse(var(--corner-k)); }
+html,body{ margin:0; background:var(--bg); color:var(--text); font:var(--type-body-size)/1.55 var(--ui-font); font-variation-settings:"GEOM" 25; }
+body{ padding:clamp(20px,4vw,56px) clamp(16px,4vw,64px) 96px; }
+a{ color:inherit; }
+button{ font:inherit; color:inherit; }
+button:focus{ outline:none; }
+button:focus-visible, [tabindex]:focus-visible{ outline:2px solid var(--signal); outline-offset:2px; }
+
+/* ── head: the WIP register, hatched, because nothing here ships ────────────── */
+.head{ max-width:56em; margin-bottom:40px; }
+.eyebrow{ font-size:var(--type-micro-size); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); margin:0 0 10px; }
+h1{ font-size:var(--type-title-size); line-height:1.2; margin:0 0 12px; font-weight:400; }
+.lede{ color:var(--text-muted); max-width:46em; margin:0 0 20px; }
+.laws{ border:1px solid var(--border); border-radius:var(--radius); padding:14px 18px 16px; max-width:52em;
+  background:repeating-linear-gradient(135deg, transparent 0 7px, rgba(var(--text-rgb),.035) 7px 8px); }
+.laws h2{ font-size:var(--type-micro-size); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); margin:0 0 10px; font-weight:400; }
+.laws dl{ display:grid; grid-template-columns:8em 1fr; gap:6px 16px; margin:0; font-size:var(--type-ui-size); line-height:1.5; }
+.laws dt{ color:var(--text-muted); } .laws dd{ margin:0; color:var(--text-muted); } .laws dd b{ color:var(--text); font-weight:400; }
+.laws code{ font-family:ui-monospace,Menlo,monospace; font-size:.92em; color:var(--text); }
+.tag{ float:right; font-size:var(--type-micro-size); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); }
+
+.tools{ display:flex; gap:var(--spacing-02); flex-wrap:wrap; margin:18px 0 0; }
+.tb{ padding:var(--spacing-02) var(--spacing-03); font-size:var(--type-ui-size); color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); cursor:pointer;
+  transition:color var(--dur-fast),border-color var(--dur-fast),background var(--dur-fast); }
+.tb:hover{ color:var(--text); border-color:var(--text-dim); } .tb[aria-pressed="true"]{ color:var(--text); background:var(--surface-hi); border-color:var(--text-dim); }
+
+/* ── the grid ───────────────────────────────────────────────────────────────── */
+.grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(21rem,1fr)); gap:var(--spacing-05); }
+.card{ background:var(--surface); border-radius:var(--radius); padding:18px 20px 20px; display:flex; flex-direction:column; min-width:0; }
+.card-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:6px; }
+.card-head .n{ font-size:var(--type-micro-size); letter-spacing:var(--track-caps); color:var(--text-dim); }
+.card-head h3{ margin:0; font-size:var(--type-lede-size); font-weight:400; }
+.card-head .fam{ margin-left:auto; font-size:var(--type-micro-size); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); white-space:nowrap; }
+.thesis{ font-size:var(--type-ui-size); line-height:1.5; color:var(--text-muted); margin:0 0 14px; }
+.thesis b{ color:var(--text); font-weight:400; }
+.stage{ position:relative; background:var(--bg); border-radius:var(--radius); min-height:168px; display:grid; place-items:center; padding:24px; margin-bottom:12px; overflow:hidden; }
+.stage.show-target .target{ outline:1px dashed rgba(var(--text-rgb),.28); outline-offset:0; }
+.readout{ display:flex; justify-content:space-between; font-size:var(--type-micro-size); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); margin-bottom:10px; }
+.readout b{ font-weight:400; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+.cost{ font-size:var(--type-ui-size); line-height:1.5; color:var(--text-muted); margin:0; padding-top:10px; border-top:1px solid var(--border); }
+.cost b{ color:var(--text); font-weight:400; }
+
+/* the mark: Material Symbols on the icon.css axes */
+.mk{ font-family:'Material Symbols Outlined'; font-weight:normal; line-height:1; letter-spacing:normal; text-transform:none; white-space:nowrap; direction:ltr;
+  font-feature-settings:'liga'; -webkit-font-smoothing:antialiased; display:inline-flex; align-items:center; justify-content:center; user-select:none;
+  --fill:0; --wght:300; --grad:50; --opsz:24; font-variation-settings:'FILL' var(--fill),'wght' var(--wght),'GRAD' var(--grad),'opsz' var(--opsz);
+  transition:font-variation-settings var(--dur-fast) var(--ease), color var(--dur-fast); }
+
+/* every control: 44px target bought as padding, invisible */
+.target{ min-width:44px; min-height:44px; display:inline-flex; align-items:center; justify-content:center; background:none; border:0; padding:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+
+/* ═══ 01 MORPH — the mark is the state ═════════════════════════════════════ */
+.s1{ position:relative; width:64px; height:64px; color:var(--text-muted); transition:color var(--dur-fast); }
+.s1:hover{ color:var(--text); }
+.s1 .half{ position:absolute; inset:18px; background:currentColor; transition:clip-path var(--dur-med) var(--ease), transform var(--dur-fast) var(--ease); }
+/* two halves of a triangle; each becomes a bar */
+.s1 .l{ clip-path:polygon(0 0, 50% 25%, 50% 75%, 0 100%); }
+.s1 .r{ clip-path:polygon(50% 25%, 100% 50%, 100% 50%, 50% 75%); }
+.s1[aria-pressed="true"] .l{ clip-path:polygon(0 0, 36% 0, 36% 100%, 0 100%); }
+.s1[aria-pressed="true"] .r{ clip-path:polygon(64% 0, 100% 0, 100% 100%, 64% 100%); }
+.s1:active .half{ transform:scale(.92); }
+/* the press law without a box: the halves take 1px more ink each side under the pointer */
+.s1:hover .half{ inset:17px; }
+
+/* ═══ 02 RING — progress is the enclosure ═══════════════════════════════════ */
+.s2{ position:relative; width:72px; height:72px; border-radius:50%; corner-shape:round; color:var(--text-muted); transition:color var(--dur-fast); }
+.s2 svg{ position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }
+.s2 circle{ fill:none; stroke-width:1; transition:stroke-width var(--dur-fast), stroke var(--dur-fast); }
+.s2 .track{ stroke:var(--border); }
+.s2 .arc{ stroke:currentColor; stroke-linecap:butt; stroke-dasharray:var(--c) var(--c); stroke-dashoffset:calc(var(--c) * (1 - var(--p,0))); transition:stroke-dashoffset .5s linear, stroke-width var(--dur-fast), stroke var(--dur-fast); }
+.s2:hover{ color:var(--text); } .s2:hover circle{ stroke-width:1.2; } .s2:active circle{ stroke-width:1.8; }
+.s2[aria-pressed="true"] .arc{ stroke:var(--text); }
+.s2 .mk{ font-size:28px; color:inherit; --fill:1; }
+.s2[aria-pressed="true"] .mk{ --wght:400; }
+
+/* ═══ 03 WORD — the type is the control (Rule family) ══════════════════════ */
+.s3{ display:inline-flex; align-items:baseline; gap:.5em; padding:10px 2px; font-size:var(--type-lede-size); line-height:1.2; color:var(--text-muted); text-decoration:none; position:relative; transition:color var(--dur-fast); }
+.s3::after{ content:""; position:absolute; left:2px; right:2px; bottom:8px; height:1px; background:currentColor; transition:height var(--dur-fast); }
+.s3:hover{ color:var(--text); } .s3:hover::after{ height:1.2px; } .s3:active::after{ height:1.8px; }
+.s3 .roll{ position:relative; display:inline-block; height:1.2em; overflow:hidden; text-align:left; width:3.1em; vertical-align:baseline; }
+.s3 .roll span{ display:block; height:1.2em; transition:transform var(--dur-med) var(--ease); }
+.s3[aria-pressed="true"] .roll span{ transform:translateY(-1.2em); }
+.s3 .t{ font-size:var(--type-ui-size); color:var(--text-dim); font-variant-numeric:tabular-nums; opacity:0; transform:translateX(-4px); transition:opacity var(--dur-med), transform var(--dur-med) var(--ease); }
+.s3[aria-pressed="true"] .t{ opacity:1; transform:none; }
+
+/* ═══ 04 LOZENGE — the pill is the timeline ════════════════════════════════ */
+.s4{ --p:0; position:relative; display:flex; align-items:center; gap:10px; height:34px; padding:0 14px 0 10px; border-radius:999px; corner-shape:round; border:0;
+  color:var(--text-muted); background:linear-gradient(90deg, rgba(var(--text-rgb),.16) calc(var(--p)*100%), rgba(var(--text-rgb),.06) calc(var(--p)*100%)); width:220px; cursor:pointer; touch-action:none;
+  transition:color var(--dur-fast); }
+.s4:hover{ color:var(--text); background:linear-gradient(90deg, rgba(var(--text-rgb),.22) calc(var(--p)*100%), rgba(var(--text-rgb),.1) calc(var(--p)*100%)); }
+.s4:active{ background:linear-gradient(90deg, rgba(var(--text-rgb),.3) calc(var(--p)*100%), rgba(var(--text-rgb),.12) calc(var(--p)*100%)); }
+.s4 .mk{ font-size:20px; --fill:1; } .s4[aria-pressed="true"] .mk{ --wght:400; }
+.s4 .t{ margin-left:auto; font-size:var(--type-ui-size); font-variant-numeric:tabular-nums; color:inherit; }
+.s4 .rem{ color:var(--text-dim); }
+.s4.scrubbing{ cursor:ew-resize; }
+
+/* ═══ 05 BRACKET — the enclosure becomes the mark ═══════════════════════════ */
+.s5{ position:relative; width:64px; height:64px; color:var(--text-muted); transition:color var(--dur-fast); }
+.s5:hover{ color:var(--text); }
+.s5 .tri{ position:absolute; inset:18px; background:currentColor; clip-path:polygon(0 0, 100% 50%, 0 100%); transition:opacity var(--dur-med), transform var(--dur-med) var(--ease); }
+.s5 i{ position:absolute; display:block; background:currentColor; transition:all var(--dur-med) var(--ease); }
+/* corner ticks: 4 verticals + 4 horizontals, --tk is how far ink runs along each edge */
+.s5{ --tk:10px; --w:1px; --box:52px; }
+.s5:hover{ --tk:14px; --w:1.2px; } .s5:active{ --w:1.8px; }
+.s5 .v{ width:var(--w); height:var(--tk); top:6px; } .s5 .v.b{ top:auto; bottom:6px; }
+.s5 .v.l{ left:6px; } .s5 .v.r{ right:6px; }
+.s5 .h{ height:var(--w); width:var(--tk); left:6px; } .s5 .h.r{ left:auto; right:6px; } .s5 .h.b{ top:auto; bottom:6px; } .s5 .h.t{ top:6px; }
+/* playing: the two vertical pairs grow to full height and thicken -> the two bars ARE the enclosure */
+.s5[aria-pressed="true"] .tri{ opacity:0; transform:scale(.6); }
+.s5[aria-pressed="true"] .v{ height:calc(var(--box) - 12px); width:7px; }
+.s5[aria-pressed="true"] .v.l{ left:20px; } .s5[aria-pressed="true"] .v.r{ right:20px; }
+.s5[aria-pressed="true"] .h{ width:0; opacity:0; }
+
+/* ═══ 06 PLATE — state is elevation (a latching key) ════════════════════════ */
+.s6{ width:56px; height:56px; border-radius:var(--radius); background:var(--surface-hi); color:var(--text-muted); border:0; position:relative;
+  box-shadow:0 1px 0 rgba(var(--text-rgb),.12) inset, 0 2px 0 rgba(0,0,0,.6), 0 3px 6px rgba(0,0,0,.35); transform:translateY(0);
+  transition:transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), color var(--dur-fast), background var(--dur-fast); }
+.s6:hover{ color:var(--text); }
+.s6:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(var(--text-rgb),.06) inset, 0 0 0 rgba(0,0,0,.6), 0 1px 2px rgba(0,0,0,.35); }
+.s6[aria-pressed="true"]{ transform:translateY(2px); background:#141414;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.7), inset 0 1px 0 rgba(0,0,0,.9), 0 0 0 1px rgba(var(--text-rgb),.06); }
+.s6 .mk{ font-size:22px; --fill:1; } .s6[aria-pressed="true"] .mk{ --wght:400; color:var(--text); }
+/* the key's label, engraved underneath */
+.s6-cap{ position:absolute; left:0; right:0; bottom:10px; text-align:center; font-size:var(--type-micro-size); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); pointer-events:none; }
+
+/* ═══ 07 STAGE — the surface is the button ══════════════════════════════════ */
+.s7{ position:relative; width:100%; aspect-ratio:16/9; border-radius:var(--radius); background:#000 radial-gradient(60% 80% at 50% 40%, #1d1d1d, #000); border:0; padding:0; cursor:pointer; overflow:hidden; display:block; }
+.s7 .ghost{ position:absolute; left:50%; top:50%; translate:-50% -50%; font-size:64px; color:rgba(var(--text-rgb),.85); --fill:1; opacity:0; transform:scale(.7); pointer-events:none; }
+.s7 .ghost.go{ animation:bloom var(--dur-slow) var(--ease) forwards; }
+@keyframes bloom{ 0%{ opacity:.85; transform:scale(.7);} 100%{ opacity:0; transform:scale(1.3);} }
+.s7 .bar{ position:absolute; left:0; right:0; bottom:0; height:2px; background:rgba(var(--text-rgb),.12); }
+.s7 .bar i{ display:block; height:100%; width:calc(var(--p,0)*100%); background:var(--text); transition:width .5s linear; }
+.s7:hover .bar{ height:3px; }
+.s7 .status{ position:absolute; left:10px; bottom:10px; display:flex; align-items:center; gap:6px; font-size:var(--type-micro-size); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); pointer-events:none; }
+.s7 .status .mk{ font-size:14px; --fill:1; color:var(--text-muted); }
+.s7 .status .t{ font-variant-numeric:tabular-nums; letter-spacing:0; }
+.s7:hover .status{ color:var(--text-muted); }
+.s7 .hint{ position:absolute; right:10px; bottom:10px; font-size:var(--type-micro-size); letter-spacing:var(--track-caps); text-transform:uppercase; color:var(--text-dim); opacity:0; transition:opacity var(--dur-fast); pointer-events:none; }
+.s7:hover .hint{ opacity:1; }
+
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{ transition:none !important; animation:none !important; } }
+@media (pointer: coarse){ .target{ min-width:44px; min-height:44px; } }
+</style>
+
+<header class="head">
+  <p class="eyebrow">WIP primitives · pages to decide from</p>
+  <h1>Seven ways to say play</h1>
+  <p class="lede">The button page decided how a thing looks when pressing it does something. This is the one control where pressing it does <b>two</b> things, and the whole design question is what carries the difference. Seven answers, one per carrier — the mark, the ring, the word, the ground, the enclosure, the elevation, the surface — each drawn once, live, on the same fake ninety-second clip. As different from each other as the brief allows, and none of them a copy of the one everyone knows; what that one gets right is listed below, and every family here has to get it right in its own language.</p>
+  <div class="laws"><span class="tag">undecided</span>
+    <h2>What all seven obey</h2>
+    <dl>
+      <dt>state</dt><dd><b>Both states legible at rest</b>, not only in the moment of the toggle. A paused control must look paused to someone who did not see it pause.</dd>
+      <dt>target</dt><dd>44px, bought as padding, never as size. The mark is 20–28px; the target is not.</dd>
+      <dt>press</dt><dd>Stroke before fill: 1.2px under the pointer, 1.8px held. Where there is no stroke, the family names its own equivalent.</dd>
+      <dt>ink</dt><dd>faint / quiet / full. Hover and pressed never share one; paused and playing never share one either.</dd>
+      <dt>keys</dt><dd>Every control is a <code>&lt;button aria-pressed&gt;</code>. Space and Enter toggle; the focus ring is 2px on the signal, offset 2, and it is never removed.</dd>
+      <dt>mark</dt><dd>Material Symbols, wght 300, FILL 1 for the two glyphs that have a filled form. Emphasis rides GRAD and one weight step, never a second drawing.</dd>
+      <dt>time</dt><dd>Where a family shows elapsed time it is tabular, and it is the only number on the control.</dd>
+      <dt>motion</dt><dd>The toggle is 240ms on the house curve. Progress advances linearly. Nothing loops.</dd>
+    </dl>
+  </div>
+  <div class="tools">
+    <button class="tb" id="all" aria-pressed="false">Play all</button>
+    <button class="tb" id="tg" aria-pressed="false">Show targets</button>
+    <button class="tb" id="rs">Reset clocks</button>
+  </div>
+</header>
+
+<main class="grid" id="grid">
+
+  <section class="card" data-clock>
+    <div class="card-head"><span class="n">01</span><h3>Morph</h3><span class="fam">mark</span></div>
+    <p class="thesis"><b>The mark is the state.</b> One filled shape, two halves, and the triangle becomes two bars by each half becoming one. No box, no ring, no word — the same object is read twice. The press law without a stroke: under the pointer the halves take one more pixel of ink each way.</p>
+    <div class="readout"><span>elapsed</span><b data-t>0:00</b></div>
+    <div class="stage"><button class="target s1" aria-pressed="false" aria-label="Play"><span class="half l"></span><span class="half r"></span></button></div>
+    <p class="cost"><b>What it costs.</b> Everything rides on the morph reading as one object; at 20px the halves are 6px bars and the join shows in the middle frame. And it says nothing about <i>where</i> you are — it is the only family here with no clock in it.</p>
+  </section>
+
+  <section class="card" data-clock>
+    <div class="card-head"><span class="n">02</span><h3>Ring</h3><span class="fam">enclosure</span></div>
+    <p class="thesis"><b>Progress is the enclosure.</b> The circle is the corner law's one permitted circle, and its stroke is the clip: elapsed in full ink, remaining as the hairline. The stroke obeys the press law directly — 1 at rest, 1.2 under the pointer, 1.8 held — so the ring is the button, and the mark inside only names the state.</p>
+    <div class="readout"><span>elapsed</span><b data-t>0:00</b></div>
+    <div class="stage"><button class="target s2" aria-pressed="false" aria-label="Play" style="--c:213.6">
+      <svg viewBox="0 0 72 72"><circle class="track" cx="36" cy="36" r="34"/><circle class="arc" cx="36" cy="36" r="34"/></svg>
+      <span class="mk" data-mk>play_arrow</span></button></div>
+    <p class="cost"><b>What it costs.</b> A ring cannot be scrubbed with any honesty, and it wants room: at 72px it is the biggest control here for the least information. The full-ink arc also competes with the mark for "chosen", so the mark has to stay quiet until playing.</p>
+  </section>
+
+  <section class="card" data-clock>
+    <div class="card-head"><span class="n">03</span><h3>Word</h3><span class="fam">rule</span></div>
+    <p class="thesis"><b>The type is the control.</b> The button page's own argument, taken at its word: no mark at all. "Play" rolls up to "Pause" the way a departures board turns, and the solid rule thickens by the press law. Playing, the elapsed time arrives after the word — the only number, tabular.</p>
+    <div class="readout"><span>elapsed</span><b data-t>0:00</b></div>
+    <div class="stage"><button class="target s3" aria-pressed="false" aria-label="Play"><span class="roll"><span>Play</span><span>Pause</span></span><span class="t" data-t>0:00</span></button></div>
+    <p class="cost"><b>What it costs.</b> It is words, so it is a language. And it depends on the rule family's absolute condition: nothing else on the page may be underlined. It also cannot shrink — at micro size the roll is a flicker.</p>
+  </section>
+
+  <section class="card" data-clock>
+    <div class="card-head"><span class="n">04</span><h3>Lozenge</h3><span class="fam">ground</span></div>
+    <p class="thesis"><b>The pill is the timeline.</b> The wash is the ground and the ground is the clock: elapsed fills from the left at 16%, the rest sits at 6%. Tap anywhere on it to toggle; drag along it to scrub. Mark left, time right, and the whole thing is one target, which is the one thing a row of separate controls never is.</p>
+    <div class="readout"><span>elapsed · remaining</span><b data-t>0:00</b></div>
+    <div class="stage"><button class="target s4" aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span><span class="t"><span data-t>0:00</span> <span class="rem" data-rem>−1:30</span></span></button></div>
+    <p class="cost"><b>What it costs.</b> Two gestures on one surface, so the tap has to be distinguished from the drag's first pixel. The 6% resting wash is the lozenge family's known risk — on --surface it is nearly gone. Width: it earns its pill by being wide.</p>
+  </section>
+
+  <section class="card" data-clock>
+    <div class="card-head"><span class="n">05</span><h3>Bracket</h3><span class="fam">enclosure</span></div>
+    <p class="thesis"><b>The enclosure becomes the mark.</b> Corner ticks around a triangle, closing on approach as the bracket family does. Press play and the two vertical pairs run to full height and thicken until they <i>are</i> the two bars — the frame that meant "press me" turns into the glyph that means "playing". The triangle leaves; nothing is added.</p>
+    <div class="readout"><span>elapsed</span><b data-t>0:00</b></div>
+    <div class="stage"><button class="target s5" aria-pressed="false" aria-label="Play"><span class="tri"></span><i class="v l"></i><i class="v r"></i><i class="v l b"></i><i class="v r b"></i><i class="h t"></i><i class="h t r"></i><i class="h b"></i><i class="h b r"></i></button></div>
+    <p class="cost"><b>What it costs.</b> The cleverest and the least self-evident: paused, it is a bracketed triangle, and a bracket already means "field" on the button page. Two meanings on one device, and the morph needs the full 240ms to be read as a transformation rather than a swap.</p>
+  </section>
+
+  <section class="card" data-clock>
+    <div class="card-head"><span class="n">06</span><h3>Plate</h3><span class="fam">elevation</span></div>
+    <p class="thesis"><b>State is elevation.</b> A latching key. Paused is raised; playing is pressed into the ground and stays there, the way a tape deck's play key stays down. The mark barely changes — the hill and the hole do the talking, and pressing a key that is already down is the most familiar gesture on this page.</p>
+    <div class="readout"><span>elapsed</span><b data-t>0:00</b></div>
+    <div class="stage"><button class="target s6" aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button><span class="s6-cap">latching</span></div>
+    <p class="cost"><b>What it costs.</b> The plate family's fault, inherited whole: an inset shadow follows the radius but not the corner-shape, so the well is a rounded rectangle inside a superellipse. And a down key reads as "on" only if there are no other keys nearby that are simply flat.</p>
+  </section>
+
+  <section class="card" data-clock>
+    <div class="card-head"><span class="n">07</span><h3>Stage</h3><span class="fam">surface</span></div>
+    <p class="thesis"><b>The surface is the button.</b> There is no control to find: the whole stage toggles, and the confirmation is a large ghost of the new state that blooms and fades at the centre — feedback for a change you might not otherwise see. What persists is small and in the corner: the state mark, the time, a hairline of progress along the bottom edge that thickens under the pointer.</p>
+    <div class="readout"><span>elapsed</span><b data-t>0:00</b></div>
+    <div class="stage" style="padding:0;background:none;min-height:0"><button class="target s7" aria-pressed="false" aria-label="Play"><span class="mk ghost" data-ghost>play_arrow</span><span class="status"><span class="mk" data-mk>play_arrow</span><span class="t" data-t>0:00</span></span><span class="hint">click · space · k</span><span class="bar"><i></i></span></button></div>
+    <p class="cost"><b>What it costs.</b> The largest target and the least discoverable: there is nothing to see until you touch it, so the corner status has to carry the resting state alone. It is also the only family that is a <i>behaviour</i> more than a control — it wants keyboard and a hover reveal to be complete.</p>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  const DUR = 90; // fake clip, seconds
+  const fmt = s => { s=Math.max(0,Math.min(DUR,s)); const m=Math.floor(s/60), r=Math.floor(s%60); return m+':'+String(r).padStart(2,'0'); };
+  const cards = [...document.querySelectorAll('[data-clock]')];
+  const clocks = cards.map(card => {
+    const btn = card.querySelector('button.target');
+    const ts = [...card.querySelectorAll('[data-t]')];
+    const rem = card.querySelector('[data-rem]');
+    const mk = card.querySelector('[data-mk]');
+    const ghost = card.querySelector('[data-ghost]');
+    const c = { card, btn, t:0, on:false, last:0,
+      render(){
+        const p = this.t/DUR;
+        ts.forEach(e=>e.textContent=fmt(this.t));
+        if(rem) rem.textContent='−'+fmt(DUR-this.t);
+        btn.style.setProperty('--p', p.toFixed(4));
+        card.querySelector('.stage').style.setProperty('--p', p.toFixed(4));
+        if(mk) mk.textContent = this.on ? 'pause' : 'play_arrow';
+        btn.setAttribute('aria-pressed', this.on ? 'true' : 'false');
+        btn.setAttribute('aria-label', this.on ? 'Pause' : 'Play');
+      },
+      toggle(){
+        this.on = !this.on; this.last = performance.now();
+        if(ghost){ ghost.textContent = this.on ? 'pause' : 'play_arrow'; ghost.classList.remove('go'); void ghost.offsetWidth; ghost.classList.add('go'); }
+        this.render();
+      }
+    };
+    return c;
+  });
+
+  // one shared tick; each clock advances only while it is on
+  let prev = performance.now();
+  function tick(now){
+    const dt = (now-prev)/1000; prev = now;
+    for(const c of clocks){ if(c.on){ c.t += dt; if(c.t>=DUR){ c.t=DUR; c.on=false; } c.render(); } }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  // ?playing=37 opens every clock running from that second -- for a capture of the on state
+  const q = new URLSearchParams(location.search).get('playing');
+  if(q!==null){ clocks.forEach(c=>{ c.t=Number(q)||0; c.on=true; }); }
+  clocks.forEach(c=>c.render());
+
+  // 04: tap toggles, drag scrubs. The first 4px decide which.
+  const s4 = clocks.find(c=>c.btn.classList.contains('s4'));
+  if(s4){
+    const b=s4.btn; let down=null, moved=false;
+    const at = e => { const r=b.getBoundingClientRect(); return Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)); };
+    b.addEventListener('pointerdown', e=>{ down={x:e.clientX}; moved=false; b.setPointerCapture(e.pointerId); });
+    b.addEventListener('pointermove', e=>{ if(!down) return; if(!moved && Math.abs(e.clientX-down.x)<4) return; moved=true; b.classList.add('scrubbing'); s4.t=at(e)*DUR; s4.render(); });
+    b.addEventListener('pointerup', e=>{ b.classList.remove('scrubbing'); if(down && !moved) s4.toggle(); down=null; });
+    b.addEventListener('pointercancel', ()=>{ down=null; b.classList.remove('scrubbing'); });
+    b.addEventListener('click', e=>{ e.preventDefault(); }); // handled on pointerup
+    b.addEventListener('keydown', e=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); s4.toggle(); } if(e.key==='ArrowRight'){ s4.t=Math.min(DUR,s4.t+5); s4.render(); } if(e.key==='ArrowLeft'){ s4.t=Math.max(0,s4.t-5); s4.render(); } });
+  }
+  clocks.forEach(c=>{ if(c!==s4) c.btn.addEventListener('click', ()=>c.toggle()); });
+
+  // 07 also answers k, the way the one everyone knows does -- when the stage is focused
+  const s7 = clocks.find(c=>c.btn.classList.contains('s7'));
+  if(s7) s7.btn.addEventListener('keydown', e=>{ if(e.key.toLowerCase()==='k'){ e.preventDefault(); s7.toggle(); } });
+
+  // tools
+  const all=document.getElementById('all'), tg=document.getElementById('tg'), rs=document.getElementById('rs');
+  all.addEventListener('click', ()=>{ const on = all.getAttribute('aria-pressed')!=='true'; all.setAttribute('aria-pressed', on); all.textContent = on?'Pause all':'Play all'; clocks.forEach(c=>{ if(c.on!==on) c.toggle(); }); });
+  tg.addEventListener('click', ()=>{ const on = tg.getAttribute('aria-pressed')!=='true'; tg.setAttribute('aria-pressed', on); document.querySelectorAll('.stage').forEach(s=>s.classList.toggle('show-target', on)); });
+  rs.addEventListener('click', ()=>{ clocks.forEach(c=>{ c.t=0; if(c.on) c.on=false; c.render(); }); all.setAttribute('aria-pressed','false'); all.textContent='Play all'; });
+})();
+</script>
+</html>
