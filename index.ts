@@ -36,6 +36,13 @@ export type { AxisSliderProps } from './src/AxisSlider'
 export { AxisTriplet } from './src/AxisTriplet'
 export type { AxisTripletProps, Band } from './src/AxisTriplet'
 
+// Named stops with a thumb that travels between them -- a different control from the
+// dial, not a variant of it. Extracted from docs card 04 (SLIDERS.md, row 13) for
+// WORDMAKE's GEOM rail; it takes its stops as a prop and names none of them.
+export { StopSlider } from './src/StopSlider'
+// `Stop` is also gradient.ts's ramp stop (line ~173); this one is the named kind.
+export type { StopSliderProps, Stop as NamedStop } from './src/StopSlider'
+
 // The one chevron, at the house angle, with a stroke derived from its width.
 export { Chevron } from './src/Chevron'
 export type { ChevronProps } from './src/Chevron'

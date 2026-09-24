@@ -1,0 +1,110 @@
+/* StopSlider — the toggle that becomes the slider.
+ *
+ * Every token carries a literal fallback, as in toggleGroup.css and for the same reason:
+ * this renders in roots that never import space.css or color.css, where a bare var()
+ * collapses a padding to zero or leaves a colour inherited from whatever it sits in.
+ *
+ * The geometry is the docs card's and is not free to drift: a 34px gutter, a 6x16 grip, a
+ * 20x20 thumb, and --dur-layout with cubic-bezier(.2,.7,.3,1) on everything that travels
+ * (.28s where the host defines no motion tokens). Those numbers are the control -- shrink
+ * the gutter and the grip parks on top of the last stop; speed the curve and the grip
+ * stops reading as the same object that becomes the thumb.
+ *
+ * The knob's x is an inline transform from StopSlider.tsx, not a custom property: every
+ * consumer that lints shared/src keeps its own copy of the runtime-token list, and a new
+ * name here would fail three of them for a value that is only ever set from JS anyway.
+ */
+.wm-stops { display: flex; flex-direction: column; gap: var(--spacing-02, 6px); }
+
+.wm-stops-head { display: flex; align-items: baseline; gap: var(--spacing-03, 8px); }
+.wm-stops-label { flex: 1; min-width: 0; }
+.wm-stops-value { font-variant-numeric: tabular-nums; }
+
+.wm-stops-area { position: relative; height: 30px; }
+
+/* The stops stop short of the right edge. That gutter is where the grip parks, and then
+   where the reset stands once the grip has left -- one slot, used in both states, so the
+   control never grows a row to hold a button that is only sometimes relevant. */
+.wm-stops-row {
+  position: absolute; inset: 0 34px 0 0;
+  display: flex; gap: 2px; padding: 2px;
+  border: 1px solid var(--border, rgba(232, 232, 232, .14));
+  border-radius: var(--radius-sm, 6px);
+  corner-shape: superellipse(var(--corner-k, 1.2));
+  background: var(--bg, #0f0f0f);
+  transition: opacity var(--dur-med, .22s);
+}
+.wm-stops.is-free .wm-stops-row { opacity: 0; pointer-events: none; }
+
+.wm-stops-row button {
+  flex: 1; min-width: 0; border: 0; background: none; font: inherit;
+  font-size: var(--type-ui-size, .75rem);
+  color: var(--text-muted, rgba(232, 232, 232, .62));
+  border-radius: var(--radius-sm, 6px);
+  corner-shape: superellipse(var(--corner-k, 1.2));
+  cursor: pointer; white-space: nowrap;
+  transition: background var(--dur-fast, .12s), color var(--dur-fast, .12s);
+}
+.wm-stops-row button:hover { color: var(--text, #e8e8e8); }
+.wm-stops-row button[aria-pressed="true"] {
+  background: var(--text, #e8e8e8);
+  color: var(--bg, #0f0f0f);
+}
+.wm-stops-row button:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 1px; }
+
+/* The rail grows out of the right-hand edge, where the grip is parked. */
+.wm-stops-rail {
+  position: absolute; top: 50%; left: 0; height: 2px; width: 0;
+  background: var(--border, rgba(232, 232, 232, .14)); border-radius: 1px; opacity: 0;
+  transform: translate(calc(100% + 12px), -50%);
+  transition: width var(--dur-layout, .28s) cubic-bezier(.2,.7,.3,1), opacity var(--dur-med, .2s),
+              transform var(--dur-layout, .28s) cubic-bezier(.2,.7,.3,1);
+}
+.wm-stops.is-free .wm-stops-rail { width: calc(100% - 34px); opacity: 1; transform: translate(0, -50%); }
+
+/* ONE element. Parked it is a 6x16 grip; unlocked it is the 20x20 thumb. It travels onto
+   the rail rather than a second control appearing under the first. */
+.wm-stops-knob {
+  position: absolute; top: 50%; left: 0;
+  width: 6px; height: 16px; border-radius: 3px;
+  background: var(--text-muted, rgba(232, 232, 232, .62));
+  transform: translate(0, -50%); /* overridden inline by the knob's x */
+  cursor: pointer; z-index: 2; touch-action: pan-y;
+  transition: width var(--dur-layout, .28s) cubic-bezier(.2,.7,.3,1),
+              height var(--dur-layout, .28s) cubic-bezier(.2,.7,.3,1),
+              border-radius var(--dur-layout, .28s), background var(--dur-layout, .28s),
+              transform var(--dur-layout, .28s) cubic-bezier(.2,.7,.3,1);
+}
+.wm-stops.is-free .wm-stops-knob {
+  width: 20px; height: 20px; border-radius: 10px;
+  background: var(--text, #e8e8e8); cursor: ew-resize;
+}
+/* No transition while a pointer is driving it: the thumb must track the finger, not chase
+   it a third of a second behind. */
+.wm-stops.is-drag .wm-stops-knob, .wm-stops.is-drag .wm-stops-rail { transition: none; }
+.wm-stops-knob:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 3px; }
+
+/* The two dashes that say drag me, gone once it is a thumb. */
+.wm-stops-knob::before, .wm-stops-knob::after {
+  content: ''; position: absolute; top: 50%; width: 5px; height: 1.5px;
+  background: var(--text-muted, rgba(232, 232, 232, .62)); border-radius: 1px;
+  opacity: 1; transform: translateY(-50%); transition: opacity var(--dur-fast, .18s);
+}
+.wm-stops-knob::before { left: -7px; }
+.wm-stops-knob::after { right: -7px; }
+.wm-stops.is-free .wm-stops-knob::before, .wm-stops.is-free .wm-stops-knob::after { opacity: 0; }
+
+/* Invisible until it applies, half-strength when it does, full on hover, and it spins as
+   it acts. It lives in the gutter the grip left. */
+.wm-stops-reset {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 26px; padding: 0;
+  background: none; border: 0; cursor: pointer;
+  color: var(--text-muted, rgba(232, 232, 232, .62));
+  display: inline-flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity var(--dur-med, .2s), transform var(--dur-slow, .5s);
+}
+.wm-stops.is-free .wm-stops-reset { opacity: .5; pointer-events: auto; }
+.wm-stops.is-free .wm-stops-reset:hover { opacity: 1; }
+.wm-stops-reset.is-spin { transform: translateY(-50%) rotate(-360deg); }
+.wm-stops-reset:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; opacity: 1; }

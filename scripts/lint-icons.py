@@ -12,7 +12,10 @@ what a font contains. This does.
 What it reads:
   - the font's GSUB ligatures, mapped back through the cmap to the names they spell
   - every `<Icon ... name="x">` in src/ (and in each consumer given by WM_CONSUMERS,
-    name=dir pairs as gen-index.mjs takes them)
+    name=dir pairs as gen-index.mjs takes them). A consumer that loads its own face
+    rather than the subset names it in WM_CONSUMER_FACES (name=woff2 pairs) and is held
+    to that file instead -- WORDMAKE ships the full face and draws `crop` and `blur_on`,
+    which the subset never held and never needs to.
   - every snake_case string literal in a file that mentions `<Icon` -- the way
     ThemeSwitch keeps its three marks in a table -- so a name that reaches Icon through a
     variable is not invisible to this
@@ -84,17 +87,23 @@ def main():
         print(f'lint-icons: {FONT} is missing'); return 2
     have = shipped_names()
     dirs = [('wm-primitives', os.path.join(ROOT, 'src'))]
+    faces = {}
+    for pair in filter(None, os.environ.get('WM_CONSUMER_FACES', '').split(',')):
+        name, f = pair.split('=', 1); faces[name] = shipped_names(f)
     for pair in filter(None, os.environ.get('WM_CONSUMERS', '').split(',')):
         name, d = pair.split('=', 1); dirs.append((name, d))
     found = sites(dirs)
     problems = {}
     for name, where, sure in found:
-        if name in have: continue
+        own = faces.get(where.split(':', 1)[0])
+        if name in (own if own is not None else have): continue
         # an unsure literal only counts if it LOOKS like a Material name: two+ words, all known letters
         if not sure and not re.fullmatch(r'[a-z]+(_[a-z0-9]+)+', name): continue
         problems.setdefault(name, []).append(where)
-    used = sorted({n for n, _, _ in found if n in have})
+    used = sorted({n for n, w, _ in found if n in have and w.split(':', 1)[0] not in faces})
     print(f'lint-icons: face ships {len(have)} ligatures; code uses {len(used)} of them')
+    for label, own in faces.items():
+        print(f'lint-icons: {label} draws from its own face ({len(own)} ligatures); it uses {len({n for n, w, _ in found if w.split(":", 1)[0] == label and n in own})}')
     if os.path.exists(DOCS_FONT) and os.path.isdir(DOCS_PAGES):
         docs_have = shipped_names(DOCS_FONT)
         docs_found = sites([('docs', DOCS_PAGES)])

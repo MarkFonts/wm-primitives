@@ -22,7 +22,7 @@ Counted 2026-09-07 across wm-primitives, font-proofer, ReCal, opsz-proofer and k
 | 10 | width `wdth` | wm-primitives | docs · controls 01–04 |  | AxisSlider | ✅ |
 | 11 | leading | wm-primitives | docs · controls 01–04 | `<span class="material-symbols-outlined">format_line_spacing</span>` | AxisSlider | ✅ |
 | 12 | optical size `opsz` | wm-primitives | docs · controls 01–04 | `<span class="material-symbols-outlined">mystery</span>` | AxisSlider, `auto` | ✅ |
-| 13 | geometric form `GEOM` | wm-primitives | docs · controls 04 (stops) |  | page-built | ❌ |
+| 13 | geometric form `GEOM` | wm-primitives | docs · controls 04 (stops) |  | `StopSlider` | ✅ |
 | 14 | word space | wm-primitives | docs · controls 05 |  | AxisTriplet | ✅ |
 | 15 | letter space | wm-primitives | docs · controls 05 |  | AxisTriplet | ✅ |
 | 16 | flex `x-scale` | wm-primitives | docs · controls 05 |  | AxisTriplet | ✅ |
@@ -97,9 +97,17 @@ drifted the first time `AxisSlider.tsx` changed structure. It now mounts the com
 itself from `dist/dial.js` (HOWTO, "A page without React"); the parity report had
 already been watching the copy for exactly that drift.
 
-**Card 04's stop slider (13) is a genuine exception** — it is a different control
-(named stops with a thumb that travels between them), not a copy of this one. It is on
-the list to be demoted to a still, not converted.
+**Card 04's stop slider (13) was a genuine exception** — a different control (named
+stops with a thumb that travels between them), not a copy of this one, and so never a
+candidate for conversion INTO this one. It is now `StopSlider`, extracted 2026-09-14
+with the card's own geometry intact: a 34px gutter, a 6×16 grip that becomes a 20×20
+thumb, and `.28s cubic-bezier(.2,.7,.3,1)` on everything that travels. The card stays as
+the page's demonstration of it.
+
+The control takes its stops as a prop and names none of them, which is deliberate: the
+house currently disagrees with itself about where GEOM's `Base` sits — ReCal's instrument
+rail says 50, this repo's own controls card says 60 — and extracting the control is not
+the same as settling that. 50 is the one, per the owner.
 
 **The same parameter is spelled four ways.** Weight is `wght` in ReCal's preview bar,
 **Weight** in its matrix pins, its compare rail and font-proofer's axis rail, and `wght`
