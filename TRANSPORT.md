@@ -38,7 +38,7 @@ Four answers, Mark's, that the pages are built to:
 | scrubbing pauses | pointerdown on any track pauses and stays paused. A head that runs away from the hand dragging it is the one thing a transport must never do. |
 | readouts | tabular figures, one ink each: counter full, clock quiet. Loop is a state, not a colour. The rate is a select and says `23.976`, never a fraction. |
 | keys | Space toggles. ←/→ step one unit; shift × 10 in WORDMAKE. Every bar is focusable; the ring is never removed. |
-| the mark | Material `play_arrow` / `pause`, FILL 1, wght 300 → 400 when on. |
+| the mark | Material, from the full face: `play_arrow` / `pause` FILL 1, wght 300 → 400 when on; `repeat` for loop, filled when on; **the rate as its own ligature** — `24fps_select` / `30fps_select` / `60fps_select` / `autofps_select` (25 and 23.976 have none and fall back to text). The page's § 00 shows the whole media vocabulary on the axes. |
 | target | 44px, as padding. Where a schema is taller than 44px the extra height is readout, not target. |
 | no acid | `--signal` is not spent on the transport. WORDMAKE's export button already wears it once per screen. |
 
@@ -67,7 +67,8 @@ cell is discrete.
 - [ ] **No narrow width.** Both registers were drawn for a footer of 600–900px. Below 600 the
       WORDMAKE readouts collide in every schema but 05 and 06.
 - [ ] **The marks are not in the subset.** `fonts/MaterialSymbolsOutlined.woff2` has 24
-      ligatures and neither `play_arrow` nor `pause`; the pages draw from the full face in
+      ligatures and none of the transport's — not `play_arrow`, `pause`, `repeat`, nor any
+      `*fps_select`; the pages draw from the full face in
       `docs/fonts/`. Both apps draw the marks as Cal Sans glyphs today. Growing the subset is
       the first commit of whichever schema wins — see `icon.css` and `scripts/lint-icons.py`.
 - [ ] **Not written against the engines.** The pages run fake clocks. WORDMAKE's readout is
@@ -81,6 +82,7 @@ cell is discrete.
    shared bones are the slot contract. Nothing below can start first.
 2. **The slot contract** — what the primitive owns (play, track, head, keys, pause-on-scrub)
    and what the app supplies (readouts, options, the clock).
-3. **The subset** — add the two ligatures, both copies, lint clean in every consumer.
+3. **The subset** — add the marks the chosen schema spends (play, pause, repeat, the fps
+   ligatures it needs), both copies, lint clean in every consumer.
 4. **WORDMAKE first** — it has the harder clock (frames, loop, rate) and the imperative
    readout; if the primitive survives it, Morf is a second mount, not a second design.

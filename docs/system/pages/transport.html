@@ -140,6 +140,27 @@ h1{ font-size:var(--title); line-height:1.2; margin:0 0 12px; font-weight:400; }
 .s6 .live i{ width:6px; height:6px; border-radius:50%; corner-shape:round; background:var(--text-dim); } .s6 .live.on i{ background:var(--text); }
 .s6 .fpsm{ font-size:var(--ui); color:var(--text-muted); min-width:5.5em; text-align:right; }
 
+/* the rate is a MARK: the full face carries 24fps_select / 30fps_select / 60fps_select and
+   autofps_select as ligatures, so the number a designer picks is the glyph that shows it.
+   25 and 23.976 have no ligature and fall back to the number in text. */
+.bar .rate{ display:inline-flex; align-items:center; gap:4px; min-width:44px; height:44px; padding:0 2px; border:0; background:none; color:var(--text-muted); transition:color var(--dur-fast); }
+.bar .rate:hover{ color:var(--text); } .bar .rate .mk{ font-size:24px; --fill:0; } .bar .rate:hover .mk{ --fill:1; }
+.bar .rate .txt{ font-size:var(--ui); font-variant-numeric:tabular-nums; }
+/* loop is repeat, filled when on -- the state is in the fill, not a colour */
+.bar .loop{ min-width:44px; height:44px; border:0; background:none; padding:0; color:var(--text-dim); display:inline-flex; align-items:center; justify-content:center; transition:color var(--dur-fast); }
+.bar .loop .mk{ font-size:20px; --fill:0; } .bar .loop[aria-pressed="true"]{ color:var(--text); } .bar .loop[aria-pressed="true"] .mk{ --fill:1; --wght:400; } .bar .loop:hover{ color:var(--text); }
+
+/* the marks strip */
+.marks{ background:var(--surface); border-radius:var(--radius); padding:18px 20px 20px; margin-bottom:var(--sp6); }
+.marks h3{ margin:0 0 6px; font-size:var(--lede); font-weight:400; }
+.marks .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:var(--sp3); margin-top:14px; }
+.marks .m{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 4px 8px; background:var(--bg); border-radius:var(--radius); }
+.marks .m .row{ display:flex; gap:10px; align-items:center; }
+.marks .m .mk{ font-size:22px; color:var(--text-muted); }
+.marks .m .mk.a{ --fill:0; --wght:300; --grad:0; } .marks .m .mk.b{ --fill:1; --wght:400; --grad:0; color:var(--text); } .marks .m .mk.c{ --fill:1; --wght:300; --grad:200; }
+.marks .m span{ font-size:var(--micro); color:var(--text-dim); text-align:center; word-break:break-all; letter-spacing:0; }
+.marks .note{ font-size:var(--ui); line-height:1.5; color:var(--text-muted); margin:12px 0 0; max-width:70em; } .marks .note b{ color:var(--text); font-weight:400; }
+
 @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
 </style>
 
@@ -155,7 +176,7 @@ h1{ font-size:var(--title); line-height:1.2; margin:0 0 12px; font-weight:400; }
       <dt>scrubbing pauses</dt><dd>A head that runs away from the hand dragging it is the one thing a transport must never do. Every schema pauses on pointerdown and stays paused.</dd>
       <dt>readouts</dt><dd>Tabular figures, one ink each: the counter full, the clock quiet. Loop is a state, not a colour. The rate is a select, and it says <code>23.976</code>, never a fraction.</dd>
       <dt>keys</dt><dd>Space toggles. ←/→ step one unit; shift × 10 in WORDMAKE. Every bar is focusable and the ring is never removed.</dd>
-      <dt>the mark</dt><dd>Material <code>play_arrow</code> / <code>pause</code>, FILL 1, wght 300 → 400 when on. Both apps draw these as Cal Sans glyphs today because the shipped subset lacks them; growing it is the primitive's move.</dd>
+      <dt>the mark</dt><dd>Material, from the full face: <code>play_arrow</code> / <code>pause</code> FILL 1, wght 300 → 400 when on; <code>repeat</code> for loop, filled when on; the rate as its own ligature, <code>60fps_select</code>. The shipped subset has none of these yet — both apps draw play and pause as Cal Sans glyphs today.</dd>
       <dt>target</dt><dd>44px, as padding. The bar is 44px tall where it is a bar; where a schema is taller, the extra height is readout, not target.</dd>
       <dt>no acid</dt><dd><code>--signal</code> is not spent here. WORDMAKE's export button already wears it once per screen; a transport that glows would compete with it.</dd>
     </dl>
@@ -165,6 +186,14 @@ h1{ font-size:var(--title); line-height:1.2; margin:0 0 12px; font-weight:400; }
     <button class="tb" id="rs">Reset</button>
   </div>
 </header>
+
+
+<section class="marks">
+  <div class="card-head"><span class="n">00</span><h3>The marks</h3><span class="fam">full face · FILL · wght · GRAD</span></div>
+  <p class="thesis"><b>The transport's vocabulary is already drawn.</b> The full Material face in <code>docs/fonts</code> carries a media set the 24-ligature subset does not: play and pause in three forms, a combined <code>play_pause</code>, the steps, the seeks, <code>repeat</code>, and — the ones the bars had been faking with text — the frame rates as glyphs: <code>24fps_select</code>, <code>30fps_select</code>, <code>60fps_select</code>, <code>autofps_select</code>, plus <code>30fps</code> and <code>60fps</code> without the select frame. Each is shown three ways on icon.css's axes: rest (FILL 0 · wght 300), on (FILL 1 · wght 400), and the dark-ground correction (GRAD 200). Every bar below now spends the rate ligature for its rate and <code>repeat</code> for loop; click a rate to cycle 60 → 30 → 25 → 24 → 23.976.</p>
+  <div class="grid"><div class="m"><div class="row"><span class="mk a">play_arrow</span><span class="mk b">play_arrow</span><span class="mk c">play_arrow</span></div><span>play_arrow</span></div><div class="m"><div class="row"><span class="mk a">pause</span><span class="mk b">pause</span><span class="mk c">pause</span></div><span>pause</span></div><div class="m"><div class="row"><span class="mk a">play_pause</span><span class="mk b">play_pause</span><span class="mk c">play_pause</span></div><span>play_pause</span></div><div class="m"><div class="row"><span class="mk a">play_circle</span><span class="mk b">play_circle</span><span class="mk c">play_circle</span></div><span>play_circle</span></div><div class="m"><div class="row"><span class="mk a">pause_circle</span><span class="mk b">pause_circle</span><span class="mk c">pause_circle</span></div><span>pause_circle</span></div><div class="m"><div class="row"><span class="mk a">stop</span><span class="mk b">stop</span><span class="mk c">stop</span></div><span>stop</span></div><div class="m"><div class="row"><span class="mk a">skip_previous</span><span class="mk b">skip_previous</span><span class="mk c">skip_previous</span></div><span>skip_previous</span></div><div class="m"><div class="row"><span class="mk a">skip_next</span><span class="mk b">skip_next</span><span class="mk c">skip_next</span></div><span>skip_next</span></div><div class="m"><div class="row"><span class="mk a">fast_rewind</span><span class="mk b">fast_rewind</span><span class="mk c">fast_rewind</span></div><span>fast_rewind</span></div><div class="m"><div class="row"><span class="mk a">fast_forward</span><span class="mk b">fast_forward</span><span class="mk c">fast_forward</span></div><span>fast_forward</span></div><div class="m"><div class="row"><span class="mk a">replay_5</span><span class="mk b">replay_5</span><span class="mk c">replay_5</span></div><span>replay_5</span></div><div class="m"><div class="row"><span class="mk a">forward_5</span><span class="mk b">forward_5</span><span class="mk c">forward_5</span></div><span>forward_5</span></div><div class="m"><div class="row"><span class="mk a">repeat</span><span class="mk b">repeat</span><span class="mk c">repeat</span></div><span>repeat</span></div><div class="m"><div class="row"><span class="mk a">repeat_one</span><span class="mk b">repeat_one</span><span class="mk c">repeat_one</span></div><span>repeat_one</span></div><div class="m"><div class="row"><span class="mk a">24fps_select</span><span class="mk b">24fps_select</span><span class="mk c">24fps_select</span></div><span>24fps_select</span></div><div class="m"><div class="row"><span class="mk a">30fps_select</span><span class="mk b">30fps_select</span><span class="mk c">30fps_select</span></div><span>30fps_select</span></div><div class="m"><div class="row"><span class="mk a">60fps_select</span><span class="mk b">60fps_select</span><span class="mk c">60fps_select</span></div><span>60fps_select</span></div><div class="m"><div class="row"><span class="mk a">autofps_select</span><span class="mk b">autofps_select</span><span class="mk c">autofps_select</span></div><span>autofps_select</span></div><div class="m"><div class="row"><span class="mk a">30fps</span><span class="mk b">30fps</span><span class="mk c">30fps</span></div><span>30fps</span></div><div class="m"><div class="row"><span class="mk a">60fps</span><span class="mk b">60fps</span><span class="mk c">60fps</span></div><span>60fps</span></div><div class="m"><div class="row"><span class="mk a">discover_tune</span><span class="mk b">discover_tune</span><span class="mk c">discover_tune</span></div><span>discover_tune</span></div><div class="m"><div class="row"><span class="mk a">speed</span><span class="mk b">speed</span><span class="mk c">speed</span></div><span>speed</span></div><div class="m"><div class="row"><span class="mk a">shutter_speed</span><span class="mk b">shutter_speed</span><span class="mk c">shutter_speed</span></div><span>shutter_speed</span></div><div class="m"><div class="row"><span class="mk a">frame_inspect</span><span class="mk b">frame_inspect</span><span class="mk c">frame_inspect</span></div><span>frame_inspect</span></div></div>
+  <p class="note"><b>Two gaps.</b> There is no ligature for 25 or 23.976 — the DOOH rates — so the rate mark falls back to the number in text for those two, which is a second grammar on one control and a reason the select may stay a select. And none of these is in the shipped subset: choosing a schema means adding its marks to <code>fonts/MaterialSymbolsOutlined.woff2</code>, both copies, and <code>lint-icons.py</code> will hold every consumer to it.</p>
+</section>
 
 <main class="cards">
 
@@ -181,8 +210,8 @@ h1{ font-size:var(--title); line-height:1.2; margin:0 0 12px; font-weight:400; }
         <button class="btn" data-step="1" aria-label="next frame"><span class="mk">skip_next</span></button>
         <div class="trk" data-track><div class="done" data-p></div><div class="hd" data-p></div></div>
         <span class="ro tnum" data-counter>001 / 1440</span><span class="ro q tnum" data-clock>0.00s of 24.00s</span>
-        <button class="sw" data-loop aria-pressed="true">Loop</button>
-        <span class="sel" data-fps>60 fps <span class="mk">keyboard_arrow_down</span></span>
+        <button class="loop" data-loop aria-pressed="true" aria-label="Loop"><span class="mk">repeat</span></button>
+        <button class="rate" data-rate aria-label="frame rate, 60 fps" title="frame rate"><span class="mk" data-rate-mk>60fps_select</span><span class="txt" data-rate-txt hidden></span></button>
       </div></div></div>
     <div class="reg"><div class="who"><span>MORF · Geist Serif · 11 builds</span><span>builds</span></div>
       <div class="frame"><div class="stagelet"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
@@ -207,7 +236,7 @@ h1{ font-size:var(--title); line-height:1.2; margin:0 0 12px; font-weight:400; }
         <button class="btn" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
         <div class="body"><div class="big tnum"><span data-counter-n>001</span><span class="of"> / 1440</span></div><div class="sub tnum" data-clock>0.00s of 24.00s</div>
           <div class="trk" data-track><div class="done" data-p></div><div class="hd" data-p></div></div></div>
-        <div class="side"><button class="sw" data-loop aria-pressed="true">Loop</button><span class="sel" data-fps>60 fps <span class="mk">keyboard_arrow_down</span></span></div>
+        <div class="side"><button class="loop" data-loop aria-pressed="true" aria-label="Loop"><span class="mk">repeat</span></button><button class="rate" data-rate aria-label="frame rate, 60 fps" title="frame rate"><span class="mk" data-rate-mk>60fps_select</span><span class="txt" data-rate-txt hidden></span></button></div>
       </div></div></div>
     <div class="reg"><div class="who"><span>MORF</span><span>builds</span></div>
       <div class="frame"><div class="stagelet"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
@@ -231,7 +260,7 @@ h1{ font-size:var(--title); line-height:1.2; margin:0 0 12px; font-weight:400; }
       <div class="bar s3" data-reg="wm" tabindex="0">
         <button class="btn play" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
         <div class="ruler" data-track data-ruler></div>
-        <div class="side"><button class="sw" data-loop aria-pressed="true">Loop</button><span class="sel" data-fps>60 fps <span class="mk">keyboard_arrow_down</span></span></div>
+        <div class="side"><button class="loop" data-loop aria-pressed="true" aria-label="Loop"><span class="mk">repeat</span></button><button class="rate" data-rate aria-label="frame rate, 60 fps" title="frame rate"><span class="mk" data-rate-mk>60fps_select</span><span class="txt" data-rate-txt hidden></span></button></div>
       </div></div></div>
     <div class="reg"><div class="who"><span>MORF</span><span>builds</span></div>
       <div class="frame"><div class="stagelet"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
@@ -258,8 +287,8 @@ h1{ font-size:var(--title); line-height:1.2; margin:0 0 12px; font-weight:400; }
         <button class="btn" data-step="1" aria-label="next frame"><span class="mk">skip_next</span></button>
         <div class="spacer"></div>
         <span class="ro tnum" data-counter>001 / 1440</span><span class="ro q tnum" data-clock>0.00s of 24.00s</span>
-        <button class="sw" data-loop aria-pressed="true">Loop</button>
-        <span class="sel" data-fps>60 fps <span class="mk">keyboard_arrow_down</span></span>
+        <button class="loop" data-loop aria-pressed="true" aria-label="Loop"><span class="mk">repeat</span></button>
+        <button class="rate" data-rate aria-label="frame rate, 60 fps" title="frame rate"><span class="mk" data-rate-mk>60fps_select</span><span class="txt" data-rate-txt hidden></span></button>
       </div></div></div>
     <div class="reg"><div class="who"><span>MORF</span><span>builds</span></div>
       <div class="frame"><div class="stagelet"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
@@ -285,8 +314,8 @@ h1{ font-size:var(--title); line-height:1.2; margin:0 0 12px; font-weight:400; }
         <button class="btn" data-play aria-pressed="false" aria-label="Play"><span class="mk" data-mk>play_arrow</span></button>
         <div class="cells loop" data-cells="24"></div>
         <span class="ro tnum" data-counter>001 / 1440</span>
-        <button class="sw" data-loop aria-pressed="true">Loop</button>
-        <span class="sel" data-fps>60 fps <span class="mk">keyboard_arrow_down</span></span>
+        <button class="loop" data-loop aria-pressed="true" aria-label="Loop"><span class="mk">repeat</span></button>
+        <button class="rate" data-rate aria-label="frame rate, 60 fps" title="frame rate"><span class="mk" data-rate-mk>60fps_select</span><span class="txt" data-rate-txt hidden></span></button>
       </div></div></div>
     <div class="reg"><div class="who"><span>MORF</span><span>builds</span></div>
       <div class="frame"><div class="stagelet"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
@@ -313,7 +342,7 @@ h1{ font-size:var(--title); line-height:1.2; margin:0 0 12px; font-weight:400; }
         <span class="ro tnum" data-counter>001 / 1440</span><span class="ro q tnum" data-clock>0.00s of 24.00s</span>
         <span style="flex:1"></span>
         <span class="fpsm tnum" data-fpsm>— fps</span>
-        <button class="sw" data-loop aria-pressed="true">Loop</button>
+        <button class="loop" data-loop aria-pressed="true" aria-label="Loop"><span class="mk">repeat</span></button>
       </div></div></div>
     <div class="reg"><div class="who"><span>MORF</span><span>builds</span></div>
       <div class="frame s6wrap"><div class="stagelet tall"><span class="spec" data-spec>ABCDEFGHIJKLM</span></div>
@@ -402,6 +431,15 @@ h1{ font-size:var(--title); line-height:1.2; margin:0 0 12px; font-weight:400; }
     q('[data-play]').addEventListener('click', toggle);
     qa('[data-step]').forEach(b=>b.addEventListener('click', e=>{ m.playing=false; m.step(+b.dataset.step); render(); }));
     qa('[data-loop]').forEach(b=>b.addEventListener('click', ()=>{ m.loop=!m.loop; render(); }));
+    // the rate: 60 -> 30 -> 25 -> 24 -> 23.976 -> 60. A ligature where one exists, the number where not.
+    const RATES=['60','30','25','24','23.976'], LIG={ '60':'60fps_select','30':'30fps_select','24':'24fps_select' };
+    qa('[data-rate]').forEach(b=>{
+      const draw=()=>{ const r=m.rate||'60'; const mk=b.querySelector('[data-rate-mk]'), tx=b.querySelector('[data-rate-txt]');
+        if(LIG[r]){ mk.textContent=LIG[r]; mk.style.opacity=''; tx.hidden=true; } else { mk.textContent='autofps_select'; mk.style.opacity=.35; tx.hidden=false; tx.textContent=r; }
+        b.setAttribute('aria-label','frame rate, '+r+' fps'); };
+      b.addEventListener('click', ()=>{ const i=RATES.indexOf(m.rate||'60'); m.rate=RATES[(i+1)%RATES.length]; m.fps=parseFloat(m.rate); draw(); });
+      draw();
+    });
     qa('[data-tune]').forEach(b=>b.addEventListener('click', ()=>b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')!=='true')));
     // scrubbing pauses, and stays paused
     qa('[data-track]').forEach(t=>{
