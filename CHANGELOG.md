@@ -12,6 +12,22 @@ Newest first.
 
 ---
 
+## 2026-09-24 — margin is the other half of the box
+
+**The lint held padding and gap to the scale and never read margin.** Asked whether
+font-proofer and ReCal had been policed for spacing: half. Counted with the new check:
+5 sites in this package (two are dial geometry, the thumb and the stock mark centring
+themselves with `-5px`; three are spacing in `GlyphPicker.css` and `AxisTriplet.css`),
+9 in font-proofer, 11 in ReCal outside its exempt `App.css` and 34 inside it, 2 in
+Kernpare's chrome, none in WORDMAKE.
+
+**It reports, for now.** Same `STEPS`, negatives of a step allowed (a `-1px` hairline
+pull is the scale mirrored), 0 and auto not judged; `MARGIN_GATES` is `false` and the
+sites print as a note under every run. A rule that turned five consumer legs red on the
+day it landed would be reverted, not obeyed. The flip is one line, after the sites move.
+
+---
+
 ## 2026-09-23 — WORDMAKE joins CI (NEXT.md E1)
 
 **`flattersatz-headless` lands: `StopSlider`, and a measurer without a document.** The

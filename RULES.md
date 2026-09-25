@@ -37,6 +37,7 @@ Every numbered promise has a test or says it does not: G1–G5, G8, G9, G11–13
 | I · compensations are free, signals budgeted (six signals) | *by eye* — the budget is a review rule, and stays one |
 | Tracking only positive, only on capitals | **lint** partly (`--track-caps` is the only tracking token); a negative literal is not caught → **TODO** |
 | Space: the `--spacing-*` scale, no literal padding/gap off it | **lint** — `STEPS`, padding *and* gap |
+| Space: margin on the same scale, a negative step allowed | **report** (2026-09-24) — `MARGIN_GATES` flips it to a lint once the 27 sites are moved |
 | The cap rule `padding-x ≥ 0.6 × radius` | *by eye* (needs computed values; a render-time assertion is possible) |
 | Height follows the type, never a fixed number | *by eye*; `Collapse` exists for exactly this |
 | II · three inks, relative not ranked; hue is not an ink | **lint** (the `--ink-*` tokens; colour literals) |
