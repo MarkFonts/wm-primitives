@@ -33,9 +33,9 @@
    parameters do not. Tighter within, looser between. */
 /* A row whose label carries a chip needs room for it underneath, since the chip no longer
    takes any of its own. */
-.triplet-row + .triplet-row { margin-top: 10px; }
+.triplet-row + .triplet-row { margin-top: 12px; }
 /* A chip row needs a little under it -- the chip hangs out of flow at top:100% and would
-   otherwise sit in the next row's gap. 2px on top of the 10px is enough for a mark that
+   otherwise sit in the next row's gap. 2px on top of the 12px is enough for a mark that
    is .85 of micro type; a full step read as a blank line between every parameter. */
 .triplet-row:has(.triplet-chip) { margin-bottom: 2px; }
 

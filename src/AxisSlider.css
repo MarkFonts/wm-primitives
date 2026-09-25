@@ -482,7 +482,9 @@
     background: var(--marker-default, var(--accent, var(--text)));
     transform: rotate(45deg);
     box-shadow: 0 0 0 1px var(--bg);
-    margin-top: -5px;
+    /* Centred on the 2px track the same way the round thumb is (above): half the
+       difference, derived, not a spacing value. */
+    margin-top: calc((2px - 12px) / 2);
   }
   .slider-row--diamond input[type="range"]::-moz-range-thumb {
     width: 12px; height: 12px; border-radius: 2px;
@@ -722,8 +724,10 @@
     /* Clamped inward at the ends. At stock = axis floor the mark sat at left:0 with a
        negative margin, hanging off the bar's rounded corner -- as a triangle it read as a
        speech-bubble tail, and any shape reads as damage out there. Half its own width of
-       inset keeps the mark ON the bar at both extremes. */
-    margin-left: -5px;
+       inset keeps the mark ON the bar at both extremes -- its width, once, and the
+       borders and the inset both derive from it. */
+    --ref-w: 10px;
+    margin-left: calc(var(--ref-w) / -2);
     border-radius: 0;
     /* transform: none is LOAD-BEARING. The base rule carries translateY(-50%) rotate(45deg)
        to mirror the diamond thumb; anything here that does not clear it inherits a mark
@@ -732,9 +736,9 @@
     background: none;
     /* Points UP, into the bar. Built from borders rather than a rotated box so the apex is
        real geometry -- there is no transform to fight and nothing to re-clear later. */
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 5px solid rgba(var(--text-rgb, 232, 232, 232), .55);
+    border-left: calc(var(--ref-w) / 2) solid transparent;
+    border-right: calc(var(--ref-w) / 2) solid transparent;
+    border-bottom: calc(var(--ref-w) / 2) solid rgba(var(--text-rgb, 232, 232, 232), .55);
     border-top: 0;
     opacity: 1;
   }

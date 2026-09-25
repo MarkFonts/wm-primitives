@@ -12,6 +12,19 @@ Newest first.
 
 ---
 
+## 2026-09-24 — the package's own margins are on the scale
+
+**Five sites, two kinds.** The margin note from the morning named five in `src/`. Two were
+never spacing: the diamond thumb's `-5px` is half the difference between a 12px thumb and
+the 2px track, and the stock mark's `-5px` is half its own width. Both are written as
+what they are now, `calc()` from the sizes beside them, the way the round thumb already
+was -- same pixels, no number that looks like a step and is not one. The other three
+were spacing off the scale: the triplet's 10px between rows is 12 (the comment already
+said "looser between"), and GlyphPicker's 26 under a group and 10 under its label are
+24 and 8. No render baseline covers either, so nothing is re-cut. `dist/dial.css` rebuilt.
+
+---
+
 ## 2026-09-24 — margin is the other half of the box
 
 **The lint held padding and gap to the scale and never read margin.** Asked whether

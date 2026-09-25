@@ -157,13 +157,13 @@
   min-width: 0;
   overflow-y: auto;
 }
-.gp-group { margin-bottom: 26px; }
+.gp-group { margin-bottom: 24px; }
 .gp-group-label {
   font-size: var(--type-micro-size);
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--text-dim);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .gp-grid {
   display: grid;
