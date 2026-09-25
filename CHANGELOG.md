@@ -12,6 +12,16 @@ Newest first.
 
 ---
 
+## 2026-09-25 — margin is a gate
+
+**The 27 sites moved in a day, so the note becomes a failure.** wm-primitives (5), font-proofer
+(9), ReCal (11) and Kernpare (2), each in its own PR, each either a step or a derivation
+from the size beside it -- half a thumb, a chip's own padding, a grabber's own width.
+`MARGIN_GATES` is `true`; margin fails like padding and gap do. ReCal's `App.css` stays
+exempt, with its 34 margins, 30 durations and 7 sizes for one later pass.
+
+---
+
 ## 2026-09-24 — the package's own margins are on the scale
 
 **Five sites, two kinds.** The margin note from the morning named five in `src/`. Two were

@@ -43,8 +43,9 @@ if (cfg.hostTokenDocs) {
 
 /* The scale, and the only padding values allowed to appear as literals. 0 is always fine. */
 const STEPS = new Set([0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64])
-/* margin: report only until the consumers are on the scale, then a gate. See the check. */
-const MARGIN_GATES = false
+/* margin: reported from 2026-09-24 until every consumer was on the scale; a gate since
+   2026-09-25, the same as padding and gap. See the check. */
+const MARGIN_GATES = true
 const margins = []
 
 /* font-size may be a token, or a unit that is doing something px cannot: container-query
@@ -169,9 +170,10 @@ for (const root of cfg.roots ?? ['src']) {
          27 off the scale across this package and four consumers, and 34 more inside
          ReCal's exempt App.css (counted 2026-09-24). Same steps, and a negative step
          is fine -- a -1px hairline pull or a -8px optical hang is the scale, mirrored.
-         0 and auto are not judged. This REPORTS until every consumer is on the scale,
-         then MARGIN_GATES flips and it fails like padding does; a rule that turned five
-         consumer legs red on the day it landed would be reverted, not obeyed. */
+         0 and auto are not judged. It REPORTED for a day while the 27 sites moved (this
+         package, font-proofer, ReCal, Kernpare -- 2026-09-24/25), then MARGIN_GATES
+         flipped and it fails like padding does. A rule that turned five consumer legs
+         red on the day it landed would have been reverted, not obeyed. */
       for (const m of line.matchAll(/(?<![-\w])(margin(?:-(?:top|right|bottom|left|inline|block)(?:-(?:start|end))?)?)\s*:\s*([^;}]+)/g)) {
         for (const px of stripFallbacks(m[2]).matchAll(/(-?\d*\.?\d+)px/g)) {
           const n = Math.abs(Number(px[1]))
@@ -411,7 +413,7 @@ if (!wantsRefs) notes.push('reference check off -- add tokenSources/hostTokens t
 if (bare) notes.push(`${bare} host-token read${bare > 1 ? 's' : ''} with no fallback (README: var(--surface-2, var(--bg-elevated)))`)
 const stale = [...contracted].filter(t => !used.has(t))
 if (stale.length) notes.push(`contract lists ${stale.length} token${stale.length > 1 ? 's' : ''} nothing reads: ${stale.join(' ')}`)
-if (margins.length) notes.push(`${margins.length} margin${margins.length > 1 ? 's' : ''} off the scale (not yet a failure -- MARGIN_GATES):\n${margins.map(m => '        ' + m).join('\n')}`)
+if (margins.length) notes.push(`${margins.length} margin${margins.length > 1 ? 's' : ''} off the scale (MARGIN_GATES is off):\n${margins.map(m => '        ' + m).join('\n')}`)
 
 if (problems.length) {
   console.error(`\nlint-tokens: ${problems.length} problem${problems.length > 1 ? 's' : ''}\n`)
