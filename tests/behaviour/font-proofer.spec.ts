@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 import { fileURLToPath } from 'node:url'
+import { readFileSync } from 'node:fs'
 import { sealed, settle } from '../render/hosts'
 
 /* font-proofer's OWN behaviour, not the primitive's. The dial, triplet, theme and icon
@@ -125,6 +126,36 @@ test.describe('font-proofer · the app around the primitive', () => {
     await expect(field).toHaveValue('auto')
     await expect(reset).toHaveClass(/reset-clean/)
 
+    expect(errors, errors.join('\n')).toEqual([])
+  })
+
+  test('a pair is a pair because the fonts say so; two strangers load the last one alone', async ({ page }) => {
+    await sealed(page)
+    const errors = watch(page)
+    await page.goto('/font-proofer/')
+    await settle(page)
+    const input = page.locator('input[type="file"]')
+    const registered = () => page.evaluate(() =>
+      [...document.fonts].filter(f => f.family.endsWith('Preview')).map(f => `${f.family}:${f.style}`))
+
+    /* Unrelated: DM Sans and Google Sans Flex. Not a pair, so the LAST file is the face
+       and nothing else is loaded -- no italic companion, no toggle (font-proofer#38). */
+    await input.setInputFiles([ROMAN, FLEX])
+    await expect(page.locator('.upload-name')).toHaveText(/GoogleSansFlex/)
+    await settle(page)
+    expect(await registered()).toEqual(['GoogleSansFlexPreview:normal'])
+    await expect(page.locator('.roman-italic-toggle')).toHaveCount(0)
+
+    /* The same DM Sans pair under names that say nothing -- the fonts' own family name and
+       italic flag pair them, in either order. */
+    await input.setInputFiles([
+      { name: 'b.ttf', mimeType: 'font/ttf', buffer: readFileSync(ITALIC) },
+      { name: 'a.ttf', mimeType: 'font/ttf', buffer: readFileSync(ROMAN) },
+    ])
+    await expect(page.locator('.upload-name')).toHaveText(/^a$/)
+    await settle(page)
+    expect((await registered()).filter(x => x.startsWith('aPreview')).sort()).toEqual(['aPreview:italic', 'aPreview:normal'])
+    await expect(page.locator('.roman-italic-toggle')).toBeVisible()
     expect(errors, errors.join('\n')).toEqual([])
   })
 

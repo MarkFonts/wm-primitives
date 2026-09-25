@@ -12,6 +12,16 @@ Newest first.
 
 ---
 
+## 2026-09-25 — the pair test knows a pair from two strangers
+
+**One more font-proofer test.** Two unrelated fonts dropped together load the last one
+alone with no italic companion and no toggle; the DM Sans pair handed over as `a.ttf`
+and `b.ttf`, in the wrong order, still pairs, because the app reads the family name
+and the italic flag out of the fonts (font-proofer#38), not the filenames. Red against
+font-proofer's main until #38 lands.
+
+---
+
 ## 2026-09-25 — font-proofer gets tested as an app
 
 **Four tests, two fixtures.** Everything that ran against font-proofer tested the primitive
