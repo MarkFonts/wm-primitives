@@ -12,6 +12,24 @@ Newest first.
 
 ---
 
+## 2026-09-25 — alignment is tested, and ReCal and Kernpare are tested as apps
+
+**Alignment is a rendered fact.** The lint holds every padding, gap and margin to the
+scale and none of that says two labels sit on one line -- that is a sum typed by hand in
+two places. `tests/behaviour/alignment.spec.ts` reads the page instead: for font-proofer
+and ReCal, the left edge of every named label's text must land on one of the region's
+named lines in `alignment-lines.json`, each with its arithmetic. Two disagreements are
+recorded as `open` lines rather than approved: font-proofer's mode buttons inset 8 where
+its fields inset 12, and ReCal's matrix title 6px right of every other rail label.
+Baselines are the next half.
+
+**ReCal and Kernpare as apps.** `recal.spec.ts`: modes, the rail's three panels and back,
+the type panel's picker moving the readout, Paragraph swapping its specimen.
+`kernpare-smoke.spec.ts`: the fixture opens with twelve pairs, an edit lands and counts,
+Revert all puts it back. Eight tests, all green against the builds the browser job makes.
+
+---
+
 ## 2026-09-25 — the pair test knows a pair from two strangers
 
 **One more font-proofer test.** Two unrelated fonts dropped together load the last one
