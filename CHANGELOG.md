@@ -12,6 +12,21 @@ Newest first.
 
 ---
 
+## 2026-09-25 — font-proofer gets tested as an app
+
+**Four tests, two fixtures.** Everything that ran against font-proofer tested the primitive
+inside it; nothing tested the app. Now `tests/behaviour/font-proofer.spec.ts`: every mode
+opens without an error; a dropped roman + italic pair (the two files Google Fonts ships)
+registers as one family, the rail starts on `auto`, and reset returns to it; the UI board
+is set in the uploaded face and the chrome outside it is not; a six-axis face makes six
+rows named from its own name table. The fixtures are OFL from google/fonts, subset in
+`tests/fixtures/`: the DM Sans pair (Latin, ~160KB each) and Google Sans Flex (29 glyphs,
+389KB, because six axes of gvar is the weight). Not Cal Sans, because the two board bugs
+this guards (font-proofer#33) only show with a face that is not the app's own, and the
+pair test is red against font-proofer's main until #34 lands.
+
+---
+
 ## 2026-09-25 — margin is a gate
 
 **The 27 sites moved in a day, so the note becomes a failure.** wm-primitives (5), font-proofer

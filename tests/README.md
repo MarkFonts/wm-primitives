@@ -47,3 +47,13 @@ git -C ../font-proofer/shared fetch ../../wm-primitives <branch> && git -C ../fo
 ```
 
 and rebuild the host. CI does this for you.
+
+## font-proofer's own behaviour
+
+`tests/behaviour/font-proofer.spec.ts` (2026-09-25) is the app around the primitive: every
+mode opens clean; a dropped roman + italic pair is one family with the rail on `auto`
+and reset returning to it; the UI board is set in the uploaded face; six axes make six
+rows. Its fixtures are two OFL faces from google/fonts, subset in `tests/fixtures/`: the
+DM Sans pair as Google Fonts ships it, and Google Sans Flex cut to a pangram for its six
+axes. Not Cal Sans on purpose -- the board and reset bugs it guards only show with a
+face that is not the app's own.
