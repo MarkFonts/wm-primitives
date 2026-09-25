@@ -1,0 +1,43 @@
+{
+  "_": "The vertical lines each host's text sits on, by name, with the arithmetic that puts it there. alignment.spec.ts measures the LEFT EDGE OF THE TEXT (a Range over the element's contents, not the box) of every element the selectors find, at 1500px wide, and fails any that is more than `tolerance` from every named line. A line with an `open` note is a disagreement recorded, not approved: it is listed so the spec is green today and so the day it is fixed the entry is deleted, like parity-allow.json. Add a line only with its sum.",
+  "tolerance": 0.5,
+  "hosts": {
+    "font-proofer": {
+      "url": "/font-proofer/",
+      "regions": {
+        "rail": {
+          "where": "text left edge under 300px",
+          "selectors": [".section-label", ".slider-label-name", ".upload-btn", ".mode-btn"],
+          "lines": {
+            "box": { "x": 16, "why": "the rail's padding; section labels and any control's box edge" },
+            "inset": { "x": 29, "why": "box 16 + 1px border + 12px field padding; the text inside every field and the upload button" },
+            "mode-buttons": { "x": 24, "why": "box 16 + the mode button's 8px padding", "open": "a third column: buttons inset 8 where fields inset 12. Either the buttons take the field's 12 or the fields the button's 8 -- decide, then delete this line (2026-09-25)" }
+          }
+        }
+      }
+    },
+    "ReCal": {
+      "url": "/recalsans/",
+      "regions": {
+        "rail": {
+          "where": "text left edge under 264px",
+          "selectors": [".rail-title", ".rail-sub", ".rail-group-label", ".slider-label-name", ".rail-group .zone-chip:first-child", ".matrix-title"],
+          "lines": {
+            "box": { "x": 16, "why": "the rail's padding; the title, its caption, every group label" },
+            "inset": { "x": 29, "why": "box 16 + 1px border + 12px field padding; the label inside every dial row" },
+            "chip": { "x": 28, "why": "box 16 + the zone chip's 12px padding, no border" },
+            "matrix": { "x": 22, "why": "box 16 + the matrix block's 6px padding", "open": "the Type Matrix's own title sits 6px right of every other rail label (2026-09-24). Either the 6px goes, or it is the rows' and not the title's -- decide, then delete this line" }
+          }
+        },
+        "canvas": {
+          "where": "text left edge from 264px",
+          "selectors": [".canvas-bar .mode-btn:first-child", ".mode-row .mode-label", ".mode-row .drawer-label", ".mode-row .text-tab:first-child"],
+          "lines": {
+            "tabs": { "x": 296, "why": "canvas 264 + bar padding 24 + tab button padding 8; Words, and the mode label under it (shell.css: 32px = 24 + 8)" },
+            "submenu": { "x": 458, "why": "tabs 296 + the mode label's fixed 154px box + 8px, so the submenu sits under the Scale tab" }
+          }
+        }
+      }
+    }
+  }
+}
