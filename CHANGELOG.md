@@ -12,6 +12,17 @@ Newest first.
 
 ---
 
+## 2026-09-26 — `layers` joins the face; GliffDiff draws four marks
+
+GliffDiff's Preview mode list gives each view a mark, font-proofer's way. Three of its four
+were already cut in and waiting for a use: `format_shapes` (characters), `match_word`
+(spacing) and `mystery` (metrics, sharing the v3 dial's mark). They move up to "Drawn
+today". The fourth, `layers` (overlay), was only in the full face, so it is cut in with
+`scripts/cut-icon-subset.py layers`. That makes 76 names and 110 glyphs, and the face grows
+by 464 bytes. `format_paragraph` and `text_fields` gain GliffDiff as a second drawer.
+
+---
+
 ## 2026-09-26 — one icon face, and the marks grid is the census
 
 **The shipped subset is 75 names now, and there is a script for that.** It was 24. Kernpare
