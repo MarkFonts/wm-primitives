@@ -12,6 +12,44 @@ Newest first.
 
 ---
 
+## 2026-09-26 — one icon face, and the marks grid is the census
+
+**The shipped subset is 75 names now, and there is a script for that.** It was 24. Kernpare
+wanted `warning` where it drew a ⚠ character; the index of every mark every app calls upon
+found 16 more the full face alone held (WORDMAKE's twelve, the v3 dial's four); and the
+type tools' vocabulary was chosen — glyphs, specimen, family, serif, script, slab, the edit
+and match marks, the six books, HDR's five states, undo and redo — 34 names cut in before
+any app draws them, so a proofer can reach for one without a font rebuild. Growing the
+subset turned out not to be `pyftsubset --text`: the face keeps its icons under `rlig`, and
+a cut that keeps rlig keeps every icon spellable from the letters asked for — 3,954 of
+them, 3MB, on the first try. `scripts/cut-icon-subset.py` prunes the ligature table to the
+wanted names first, then cuts. Both copies written (fonts/ and docs/fonts/).
+
+**The system page's marks grid is the census.** Two grids: the 39 drawn today, each with
+what it means and who draws it; the 34 waiting for a use. The stepper's arrows left the
+grid: a stepper is the house chevron, not a Material mark, and the two arrow names stay in
+the face only because a dropdown and a fold-away draw them.
+
+---
+
+## 2026-09-25 — alignment is tested, and ReCal and Kernpare are tested as apps
+
+**Alignment is a rendered fact.** The lint holds every padding, gap and margin to the
+scale and none of that says two labels sit on one line -- that is a sum typed by hand in
+two places. `tests/behaviour/alignment.spec.ts` reads the page instead: for font-proofer
+and ReCal, the left edge of every named label's text must land on one of the region's
+named lines in `alignment-lines.json`, each with its arithmetic. Two disagreements are
+recorded as `open` lines rather than approved: font-proofer's mode buttons inset 8 where
+its fields inset 12, and ReCal's matrix title 6px right of every other rail label.
+Baselines are the next half.
+
+**ReCal and Kernpare as apps.** `recal.spec.ts`: modes, the rail's three panels and back,
+the type panel's picker moving the readout, Paragraph swapping its specimen.
+`kernpare-smoke.spec.ts`: the fixture opens with twelve pairs, an edit lands and counts,
+Revert all puts it back. Eight tests, all green against the builds the browser job makes.
+
+---
+
 ## 2026-09-25 — the pair test knows a pair from two strangers
 
 **One more font-proofer test.** Two unrelated fonts dropped together load the last one
