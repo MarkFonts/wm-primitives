@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """lint-icons -- every icon name in the code is one the shipped face can draw.
 
-fonts/MaterialSymbolsOutlined.woff2 is a SUBSET of Material Symbols (25 ligatures, 16KB; scripts/cut-icon-subset.py grows it),
+fonts/MaterialSymbolsOutlined.woff2 is a SUBSET of Material Symbols (75 ligatures; scripts/cut-icon-subset.py grows it),
 not the full face, whatever icon.css used to say. A name outside the subset does not print
 as words: the ligature never forms and the browser draws whichever component glyphs happen
 to be in the font -- `undo` came out as two strokes, `arrow_outward` as a circle -- and

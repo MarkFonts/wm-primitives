@@ -718,15 +718,18 @@ its own metrics. <b>The house chevron</b> for every chevron, because Material&rs
 a glyph drawn for 20px used at 6 is the 20px drawing scaled down, stroke and all. A stroked
 path has no floor.</p>
 
-<h3 class="marks-h3">In the shipped face</h3>
-<p class="lede">The 25-name subset in <code>fonts/</code>, 16KB, that font-proofer, ReCal, Kernpare and
-opsz-proofer load. Under each mark: what it means, and who draws it. <code>lint-icons.py</code>
-fails any of those apps on a name outside this grid.</p>
+<h3 class="marks-h3">Drawn today</h3>
+<p class="lede">Every Material name any app calls upon &mdash; wm-primitives, font-proofer, ReCal, Kernpare,
+opsz-proofer, WORDMAKE and this page &mdash; with what it means and who draws it. All of them
+are in the one shipped face: a 75-name subset in <code>fonts/</code>, cut by
+<code>scripts/cut-icon-subset.py</code>, and <code>lint-icons.py</code> fails an app on a name
+outside it. (WORDMAKE still ships the whole family for itself.) The stepper&rsquo;s arrows are
+not here: a stepper is the house chevron, not a Material mark.</p>
 <div class="marks" id="m-icons"></div>
 
-<h3 class="marks-h3">In the full face only</h3>
-<p class="lede">Names an app draws from the whole family &mdash; WORDMAKE ships the 4MB face itself,
-and this page draws from it. Not in the subset, and not needed there.</p>
+<h3 class="marks-h3">In the face, waiting for a use</h3>
+<p class="lede">The type tools&rsquo; vocabulary, cut into the face 2026-09-26 so a proofer or a
+specimen page can reach for one without a font rebuild. Each moves up the day an app draws it.</p>
 <div class="marks" id="m-icons-full"></div>
 
 <h3 class="marks-h3">Chevrons</h3>
@@ -1532,64 +1535,79 @@ toggle('t-arrows', 'always-arrows', false);
    the whole family, which WORDMAKE ships itself and this page draws from.
    Indexed 2026-09-26 across every app; lint-icons.py holds the apps to the subset. */
 const MDS = [
-  // [name, what it means, apps that draw it, in the shipped subset]
-  ['format_align_left','align left',       ['wm-primitives','WORDMAKE'], true],
-  ['format_align_center','align center',   ['wm-primitives','WORDMAKE'], true],
-  ['format_align_right','align right',     ['wm-primitives','WORDMAKE'], true],
-  ['format_align_justify','justify',       ['wm-primitives','WORDMAKE'], true],
-  ['format_h1','heading 1',                ['wm-primitives','font-proofer'], true],
-  ['format_h2','heading 2',                ['wm-primitives','font-proofer'], true],
-  ['format_h3','heading 3',                ['wm-primitives','font-proofer'], true],
-  ['format_paragraph','paragraph',         ['wm-primitives','font-proofer'], true],
-  ['format_bold','bold',                   ['wm-primitives'], true],
-  ['format_italic','italic',               ['wm-primitives'], true],
-  ['settings_backup_restore','reset',      ['font-proofer','WORDMAKE'], true],
-  ['discover_tune','settings flyout',      ['font-proofer'], true],
-  ['forms_add_on','multi-select',          ['font-proofer'], true],
-  ['content_copy','copy',                  ['wm-primitives'], true],
-  ['check','copied',                       ['wm-primitives'], true],
-  ['calendar_month','cal.com',             ['font-proofer'], true],
-  ['insert_text','big word',               ['font-proofer'], true],
-  ['text_fields','type scale',             ['font-proofer'], true],
-  ['grid_view','glyphs',                   ['font-proofer'], true],
-  ['brightness_auto','theme auto',         ['wm-primitives','font-proofer'], true],
-  ['light_mode','theme light',             ['wm-primitives','font-proofer'], true],
-  ['dark_mode','theme dark',               ['wm-primitives','font-proofer'], true],
-  ['keyboard_arrow_up','stepper up',       ['font-proofer','WORDMAKE'], true],
-  ['keyboard_arrow_down','stepper down',   ['wm-primitives','WORDMAKE'], true],
-  ['warning','save state',                 ['Kernpare'], true],
-  // full face only
-  ['add','add a line',                     ['WORDMAKE'], false],
-  ['add_photo_alternate','add an image',   ['WORDMAKE'], false],
-  ['blur_on','blur',                       ['WORDMAKE'], false],
-  ['close','close',                        ['WORDMAKE'], false],
-  ['crop','crop',                          ['WORDMAKE'], false],
-  ['delete','delete',                      ['WORDMAKE'], false],
-  ['queue_play_next','queue next',         ['WORDMAKE'], false],
-  ['fit_page_width','fit width',           ['WORDMAKE'], false],
-  ['fit_page_height','fit height',         ['WORDMAKE'], false],
-  ['text_rotation_none','no rotation',     ['WORDMAKE'], false],
-  ['text_select_start','select start',     ['WORDMAKE'], false],
-  ['align_horizontal_center','centre',     ['WORDMAKE'], false],
-  ['fit_width','fit width (v3 dial)',      ['system page'], false],
-  ['line_weight','weight (v3 dial)',       ['system page'], false],
-  ['format_line_spacing','leading (v3 dial)', ['system page'], false],
-  ['mystery','opsz auto (v3 dial)',        ['system page'], false],
+  // [name, what it means, apps that draw it]  -- every one is in the shipped face
+  ['format_align_left','align left',       ['wm-primitives','WORDMAKE']],
+  ['format_align_center','align center',   ['wm-primitives','WORDMAKE']],
+  ['format_align_right','align right',     ['wm-primitives','WORDMAKE']],
+  ['format_align_justify','justify',       ['wm-primitives','WORDMAKE']],
+  ['format_h1','heading 1',                ['wm-primitives','font-proofer']],
+  ['format_h2','heading 2',                ['wm-primitives','font-proofer']],
+  ['format_h3','heading 3',                ['wm-primitives','font-proofer']],
+  ['format_paragraph','paragraph',         ['wm-primitives','font-proofer']],
+  ['format_bold','bold',                   ['wm-primitives']],
+  ['format_italic','italic',               ['wm-primitives']],
+  ['settings_backup_restore','reset',      ['font-proofer','WORDMAKE']],
+  ['discover_tune','settings flyout',      ['font-proofer']],
+  ['forms_add_on','multi-select',          ['font-proofer']],
+  ['content_copy','copy',                  ['wm-primitives']],
+  ['check','copied',                       ['wm-primitives']],
+  ['calendar_month','cal.com',             ['font-proofer']],
+  ['insert_text','big word',               ['font-proofer']],
+  ['text_fields','type scale',             ['font-proofer']],
+  ['grid_view','glyphs',                   ['font-proofer']],
+  ['brightness_auto','theme auto',         ['wm-primitives','font-proofer']],
+  ['light_mode','theme light',             ['wm-primitives','font-proofer']],
+  ['dark_mode','theme dark',               ['wm-primitives','font-proofer']],
+  ['warning','save state',                 ['Kernpare']],
+  ['add','add a line',                     ['WORDMAKE']],
+  ['add_photo_alternate','add an image',   ['WORDMAKE']],
+  ['blur_on','blur',                       ['WORDMAKE']],
+  ['close','close',                        ['WORDMAKE']],
+  ['crop','crop',                          ['WORDMAKE']],
+  ['delete','delete',                      ['WORDMAKE']],
+  ['queue_play_next','queue next',         ['WORDMAKE']],
+  ['fit_page_width','fit width',           ['WORDMAKE']],
+  ['fit_page_height','fit height',         ['WORDMAKE']],
+  ['text_rotation_none','no rotation',     ['WORDMAKE']],
+  ['text_select_start','select start',     ['WORDMAKE']],
+  ['align_horizontal_center','centre',     ['WORDMAKE']],
+  ['fit_width','fit width (v3 dial)',      ['system page']],
+  ['line_weight','weight (v3 dial)',       ['system page']],
+  ['format_line_spacing','leading (v3 dial)', ['system page']],
+  ['mystery','opsz auto (v3 dial)',        ['system page']],
+];
+/* In the face, waiting for a use: the type tools' vocabulary, chosen 2026-09-26. Each one
+   moves to the grid above the day an app draws it. */
+const READY = [
+  ['glyphs','glyphs'], ['emoji_symbols','symbols'], ['type_specimen','specimen'],
+  ['brand_family','family'], ['font_download','font file'], ['serif','serif'],
+  ['script','script'], ['slab_serif','slab'], ['edit','edit'], ['edit_document','edit document'],
+  ['edit_note','edit note'], ['format_shapes','shapes'], ['format_quote','quote'],
+  ['hdr_auto','HDR auto'], ['hdr_auto_select','HDR auto select'], ['hdr_enhanced_select','HDR enhanced'],
+  ['hdr_off','HDR off'], ['hdr_off_select','HDR off select'], ['hdr_on_select','HDR on select'],
+  ['match_case','match case'], ['match_case_off','match case off'], ['match_word','match word'],
+  ['subscript','subscript'], ['superscript','superscript'],
+  ['book','book'], ['book_2','book 2'], ['book_3','book 3'], ['book_4','book 4'], ['book_5','book 5'],
+  ['book_6','book 6'], ['book_ribbon','book ribbon'],
+  ['restart_alt','restart'], ['undo','undo'], ['redo','redo'],
 ];
 (() => {
   const host = document.getElementById('m-icons');
-  const full = document.getElementById('m-icons-full');
-  for (const [name, use, apps, inSubset] of MDS) {
-    const cell = mk('figure', 'mark');
+  const ready = document.getElementById('m-icons-full');
+  const cell = (name, use, apps) => {
+    const c = mk('figure', 'mark');
     const m = mk('span', 'wm-icon material-symbols-outlined');
     m.textContent = name; m.setAttribute('translate', 'no');
     m.style.fontSize = '24px';
     m.style.setProperty('--icon-opsz', '24');
     const n = mk('figcaption', 'mark-name'); n.textContent = name;
     const u = mk('span', 'mark-use'); u.textContent = use;
-    const a = mk('span', 'mark-apps'); a.textContent = apps.join(' · ');
-    cell.append(m, n, u, a); (inSubset ? host : full).appendChild(cell);
-  }
+    c.append(m, n, u);
+    if (apps) { const a = mk('span', 'mark-apps'); a.textContent = apps.join(' · '); c.append(a); }
+    return c;
+  };
+  for (const [name, use, apps] of MDS) host.appendChild(cell(name, use, apps));
+  for (const [name, use] of READY) ready.appendChild(cell(name, use, null));
 })();
 
 /* The three chevrons that actually ship, at the sizes they ship at. Named by size rather

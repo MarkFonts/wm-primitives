@@ -17,7 +17,7 @@ pixel baselines per host and the cross-host parity gate · **gesture**: `tests/b
 | R2 tags share one x | *by eye* → **TODO**, same measurement |
 | R3 the name is never clipped; `--axis-label-w` is a floor | *by eye* |
 | R4 nothing shifts when the arrows appear | *by eye* |
-| Every icon name is one the shipped face draws (the face is a 25-ligature subset, cut by `scripts/cut-icon-subset.py`) | **lint** — `scripts/lint-icons.py` reads the GSUB; package in `lint.yml`, consumers in `consumers.yml`. First catch: the JSDoc example in `Icon.tsx` |
+| Every icon name is one the shipped face draws (the face is a 75-ligature subset, cut by `scripts/cut-icon-subset.py`) | **lint** — `scripts/lint-icons.py` reads the GSUB; package in `lint.yml`, consumers in `consumers.yml`. First catch: the JSDoc example in `Icon.tsx` |
 | §3 one field, and it is text (a real minus) | **gesture** G19–G23; `nbMinus` |
 | §4 `auto` is named on screen, not only a key | **gesture** G25, G35 |
 | §5 the rail supplies the column width | *by eye* |

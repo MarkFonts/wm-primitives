@@ -12,21 +12,23 @@ Newest first.
 
 ---
 
-## 2026-09-26 — the icon subset grows by one, and there is a script for that
+## 2026-09-26 — one icon face, and the marks grid is the census
 
-**`warning` joins the shipped face**, for Kernpare's save-state line, which drew a ⚠
-character where every other mark is Material. Growing the subset turned out not to be
-`pyftsubset --text`: the face keeps its icons under `rlig`, and a cut that keeps rlig
-keeps every icon spellable from the letters you asked for — 3,954 of them, 3MB, on the
-first try. `scripts/cut-icon-subset.py` prunes the ligature table to the wanted names
-first, then cuts: 25 names, 54 glyphs, 16KB, both copies written (fonts/ and docs/fonts/).
+**The shipped subset is 75 names now, and there is a script for that.** It was 24. Kernpare
+wanted `warning` where it drew a ⚠ character; the index of every mark every app calls upon
+found 16 more the full face alone held (WORDMAKE's twelve, the v3 dial's four); and the
+type tools' vocabulary was chosen — glyphs, specimen, family, serif, script, slab, the edit
+and match marks, the six books, HDR's five states, undo and redo — 34 names cut in before
+any app draws them, so a proofer can reach for one without a font rebuild. Growing the
+subset turned out not to be `pyftsubset --text`: the face keeps its icons under `rlig`, and
+a cut that keeps rlig keeps every icon spellable from the letters asked for — 3,954 of
+them, 3MB, on the first try. `scripts/cut-icon-subset.py` prunes the ligature table to the
+wanted names first, then cuts. Both copies written (fonts/ and docs/fonts/).
 
-**And the system page indexes every mark every app calls upon.** The marks grid in
-Interface was the 24 the subset held. It is now the full census, 41 names across
-wm-primitives, font-proofer, ReCal, Kernpare, opsz-proofer, WORDMAKE and the page itself,
-each with what it means and who draws it, in two grids: the 25 in the shipped face, and
-the 16 only the full face holds (WORDMAKE's twelve, the v3 dial's four). The page draws
-from the full face, so it can show all of them.
+**The system page's marks grid is the census.** Two grids: the 39 drawn today, each with
+what it means and who draws it; the 34 waiting for a use. The stepper's arrows left the
+grid: a stepper is the house chevron, not a Material mark, and the two arrow names stay in
+the face only because a dropdown and a fold-away draw them.
 
 ---
 

@@ -620,7 +620,7 @@ LINKED = "--linked" in sys.argv
 # it changes every <i> and <em> in the assembled document and that is a typography decision,
 # not a build fix. docs/system/pages/buttons.html carries the worked example.
 
-# THE SYSTEM PAGE DRAWS FROM THE FULL FACE. The package ships a 25-ligature subset of
+# THE SYSTEM PAGE DRAWS FROM THE FULL FACE. The package ships a 75-ligature subset of
 # Material Symbols (icon.css says so; scripts/lint-icons.py holds the apps to it), and this
 # page draws marks the apps never do -- fit_width, format_line_spacing, line_weight -- which
 # came out as the letters F, L and M with the subset (2026-09-21). So docs/fonts/ carries the

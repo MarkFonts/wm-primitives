@@ -25,7 +25,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FULL = os.path.join(ROOT, 'docs', 'fonts', 'MaterialSymbolsOutlined-full.woff2')
 OUT = [os.path.join(ROOT, 'fonts', 'MaterialSymbolsOutlined.woff2'), os.path.join(ROOT, 'docs', 'fonts', 'MaterialSymbolsOutlined.woff2')]
 
-want = li.shipped_names() | set(sys.argv[1:])
+want = li.shipped_names() | {n for arg in sys.argv[1:] for n in arg.split()}   # names, however the shell grouped them
 full = TTFont(FULL)
 cmap = full.getBestCmap(); g2c = {g: chr(c) for c, g in cmap.items()}
 kept = set()
