@@ -26,4 +26,37 @@ test.describe('kernpare', () => {
     await btn.screenshot({ path: info.outputPath('kernpare-wm-btn-shot.png'), scale: 'css' })
     await expect(btn).toHaveScreenshot('kernpare-wm-btn.png')
   })
+
+  /* THE INTERFACE, not the primitives inside it (2026-09-25). The page against the
+     12-pair fixture in both themes, and the three regions that carry the look: the
+     graph, the pair table, the actions rail. A report, never a gate, like every render
+     row. The analysis modal is the fenced exception and opens on demand, so it never
+     appears here. Every shot lands in the report as its own file, CSS pixels, so a
+     baseline is cut from CI's artifact and never from a laptop. */
+  for (const theme of ['dark', 'light'] as const) {
+    test(`the interface · ${theme}`, async ({ page }, info) => {
+      await sealed(page)
+      await page.goto('/kernpare/')
+      await settle(page)
+      await page.locator(`#theme-toggle [data-mode="${theme}"]`).click()
+      await settle(page)
+      await page.mouse.move(0, 0)   // no hover state on a row or a node
+      const shots: [string, ReturnType<typeof page.locator> | null][] = [
+        ['page', null], ['graph', page.locator('#graphWrap')], ['table', page.locator('#list')], ['actions', page.locator('#actions')],
+      ]
+      for (const [part, loc] of shots) {
+        const name = `kernpare-${theme}-${part}.png`
+        if (loc) {
+          /* The phone layout folds the table and the rail away; a region that is not on
+             screen is not a row, not a failure. */
+          if (!(await loc.isVisible())) continue
+          await loc.screenshot({ path: info.outputPath(name.replace('.png', '-shot.png')), scale: 'css' })
+          await expect.soft(loc).toHaveScreenshot(name)
+        } else {
+          await page.screenshot({ path: info.outputPath(name.replace('.png', '-shot.png')), scale: 'css' })
+          await expect.soft(page).toHaveScreenshot(name)
+        }
+      }
+    })
+  }
 })
