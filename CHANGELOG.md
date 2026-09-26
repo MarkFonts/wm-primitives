@@ -33,6 +33,11 @@ the face only because a dropdown and a fold-away draw them.
 **COMPONENTS.md regenerated** once Kernpare drew `warning` (wordmarktools#9): the marks table
 is read from the consumers' mains, and the browser job holds the committed copy to it.
 
+**Baselines re-cut** from the first main run with Kernpare on the house face (run 36264533330):
+Kernpare's button, page, graph, table and rail in both themes; the theme marks on the phone
+(the re-cut face); and three dial rows whose numerals moved under them when calbuild
+published new Cal Sans -- opsz-proofer's weight rows and one font-proofer tracking row.
+
 ---
 
 ## 2026-09-25 — alignment is tested, and ReCal and Kernpare are tested as apps
