@@ -30,6 +30,9 @@ what it means and who draws it; the 34 waiting for a use. The stepper's arrows l
 grid: a stepper is the house chevron, not a Material mark, and the two arrow names stay in
 the face only because a dropdown and a fold-away draw them.
 
+**COMPONENTS.md regenerated** once Kernpare drew `warning` (wordmarktools#9): the marks table
+is read from the consumers' mains, and the browser job holds the committed copy to it.
+
 ---
 
 ## 2026-09-25 — alignment is tested, and ReCal and Kernpare are tested as apps
