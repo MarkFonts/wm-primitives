@@ -677,6 +677,12 @@
   font-size: var(--type-micro-size, 10px);
   color: var(--text-dim);
 }
+.mark-apps {
+  font-size: var(--type-micro-size, 10px);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
 </style>
 
 <h1>Five ways to draw one dial</h1>
@@ -712,7 +718,19 @@ its own metrics. <b>The house chevron</b> for every chevron, because Material&rs
 a glyph drawn for 20px used at 6 is the 20px drawing scaled down, stroke and all. A stroked
 path has no floor.</p>
 
+<h3 class="marks-h3">Drawn today</h3>
+<p class="lede">Every Material name any app calls upon &mdash; wm-primitives, font-proofer, ReCal, Kernpare,
+opsz-proofer, WORDMAKE and this page &mdash; with what it means and who draws it. All of them
+are in the one shipped face: a 75-name subset in <code>fonts/</code>, cut by
+<code>scripts/cut-icon-subset.py</code>, and <code>lint-icons.py</code> fails an app on a name
+outside it. (WORDMAKE still ships the whole family for itself.) The stepper&rsquo;s arrows are
+not here: a stepper is the house chevron, not a Material mark.</p>
 <div class="marks" id="m-icons"></div>
+
+<h3 class="marks-h3">In the face, waiting for a use</h3>
+<p class="lede">The type tools&rsquo; vocabulary, cut into the face 2026-09-26 so a proofer or a
+specimen page can reach for one without a font rebuild. Each moves up the day an app draws it.</p>
+<div class="marks" id="m-icons-full"></div>
 
 <h3 class="marks-h3">Chevrons</h3>
 <p class="lede">One drawing, one angle (34.6&deg;), three sizes. The stroke is derived from the
@@ -1511,30 +1529,85 @@ toggle('t-arrows', 'always-arrows', false);
 
 /* ── the marks grid ────────────────────────────────────────
    Rendered from the same component contract the apps use -- .wm-icon carries the axes
-   and the ink, so this page cannot show a mark the package does not ship. */
+   and the ink. The page draws from the FULL face (build.py), so it can show every mark
+   any app calls upon, and says which face each one ships in: `subset` is the 25-name
+   face in fonts/ that font-proofer, ReCal, Kernpare and opsz-proofer load; `full` is
+   the whole family, which WORDMAKE ships itself and this page draws from.
+   Indexed 2026-09-26 across every app; lint-icons.py holds the apps to the subset. */
 const MDS = [
-  ['format_align_left','align left'], ['format_align_center','align center'],
-  ['format_align_right','align right'], ['format_align_justify','justify'],
-  ['format_h1','heading 1'], ['format_h2','heading 2'], ['format_h3','heading 3'],
-  ['format_paragraph','paragraph'], ['format_bold','bold'], ['format_italic','italic'],
-  ['settings_backup_restore','reset'], ['discover_tune','settings flyout'],
-  ['forms_add_on','multi-select'], ['content_copy','copy'], ['check','copied'],
-  ['calendar_month','cal.com'], ['insert_text','big word'], ['text_fields','type scale'],
-  ['grid_view','glyphs'], ['brightness_auto','theme auto'], ['light_mode','theme light'],
-  ['dark_mode','theme dark'], ['keyboard_arrow_up','stepper up'], ['keyboard_arrow_down','stepper down'],
+  // [name, what it means, apps that draw it]  -- every one is in the shipped face
+  ['format_align_left','align left',       ['wm-primitives','WORDMAKE']],
+  ['format_align_center','align center',   ['wm-primitives','WORDMAKE']],
+  ['format_align_right','align right',     ['wm-primitives','WORDMAKE']],
+  ['format_align_justify','justify',       ['wm-primitives','WORDMAKE']],
+  ['format_h1','heading 1',                ['wm-primitives','font-proofer']],
+  ['format_h2','heading 2',                ['wm-primitives','font-proofer']],
+  ['format_h3','heading 3',                ['wm-primitives','font-proofer']],
+  ['format_paragraph','paragraph',         ['wm-primitives','font-proofer']],
+  ['format_bold','bold',                   ['wm-primitives']],
+  ['format_italic','italic',               ['wm-primitives']],
+  ['settings_backup_restore','reset',      ['font-proofer','WORDMAKE']],
+  ['discover_tune','settings flyout',      ['font-proofer']],
+  ['forms_add_on','multi-select',          ['font-proofer']],
+  ['content_copy','copy',                  ['wm-primitives']],
+  ['check','copied',                       ['wm-primitives']],
+  ['calendar_month','cal.com',             ['font-proofer']],
+  ['insert_text','big word',               ['font-proofer']],
+  ['text_fields','type scale',             ['font-proofer']],
+  ['grid_view','glyphs',                   ['font-proofer']],
+  ['brightness_auto','theme auto',         ['wm-primitives','font-proofer']],
+  ['light_mode','theme light',             ['wm-primitives','font-proofer']],
+  ['dark_mode','theme dark',               ['wm-primitives','font-proofer']],
+  ['warning','save state',                 ['Kernpare']],
+  ['add','add a line',                     ['WORDMAKE']],
+  ['add_photo_alternate','add an image',   ['WORDMAKE']],
+  ['blur_on','blur',                       ['WORDMAKE']],
+  ['close','close',                        ['WORDMAKE']],
+  ['crop','crop',                          ['WORDMAKE']],
+  ['delete','delete',                      ['WORDMAKE']],
+  ['queue_play_next','queue next',         ['WORDMAKE']],
+  ['fit_page_width','fit width',           ['WORDMAKE']],
+  ['fit_page_height','fit height',         ['WORDMAKE']],
+  ['text_rotation_none','no rotation',     ['WORDMAKE']],
+  ['text_select_start','select start',     ['WORDMAKE']],
+  ['align_horizontal_center','centre',     ['WORDMAKE']],
+  ['fit_width','fit width (v3 dial)',      ['system page']],
+  ['line_weight','weight (v3 dial)',       ['system page']],
+  ['format_line_spacing','leading (v3 dial)', ['system page']],
+  ['mystery','opsz auto (v3 dial)',        ['system page']],
+];
+/* In the face, waiting for a use: the type tools' vocabulary, chosen 2026-09-26. Each one
+   moves to the grid above the day an app draws it. */
+const READY = [
+  ['glyphs','glyphs'], ['emoji_symbols','symbols'], ['type_specimen','specimen'],
+  ['brand_family','family'], ['font_download','font file'], ['serif','serif'],
+  ['script','script'], ['slab_serif','slab'], ['edit','edit'], ['edit_document','edit document'],
+  ['edit_note','edit note'], ['format_shapes','shapes'], ['format_quote','quote'],
+  ['hdr_auto','HDR auto'], ['hdr_auto_select','HDR auto select'], ['hdr_enhanced_select','HDR enhanced'],
+  ['hdr_off','HDR off'], ['hdr_off_select','HDR off select'], ['hdr_on_select','HDR on select'],
+  ['match_case','match case'], ['match_case_off','match case off'], ['match_word','match word'],
+  ['subscript','subscript'], ['superscript','superscript'],
+  ['book','book'], ['book_2','book 2'], ['book_3','book 3'], ['book_4','book 4'], ['book_5','book 5'],
+  ['book_6','book 6'], ['book_ribbon','book ribbon'],
+  ['restart_alt','restart'], ['undo','undo'], ['redo','redo'],
 ];
 (() => {
   const host = document.getElementById('m-icons');
-  for (const [name, use] of MDS) {
-    const cell = mk('figure', 'mark');
+  const ready = document.getElementById('m-icons-full');
+  const cell = (name, use, apps) => {
+    const c = mk('figure', 'mark');
     const m = mk('span', 'wm-icon material-symbols-outlined');
     m.textContent = name; m.setAttribute('translate', 'no');
     m.style.fontSize = '24px';
     m.style.setProperty('--icon-opsz', '24');
     const n = mk('figcaption', 'mark-name'); n.textContent = name;
     const u = mk('span', 'mark-use'); u.textContent = use;
-    cell.append(m, n, u); host.appendChild(cell);
-  }
+    c.append(m, n, u);
+    if (apps) { const a = mk('span', 'mark-apps'); a.textContent = apps.join(' · '); c.append(a); }
+    return c;
+  };
+  for (const [name, use, apps] of MDS) host.appendChild(cell(name, use, apps));
+  for (const [name, use] of READY) ready.appendChild(cell(name, use, null));
 })();
 
 /* The three chevrons that actually ship, at the sizes they ship at. Named by size rather
