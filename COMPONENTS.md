@@ -60,3 +60,4 @@ Material Symbols names each consumer draws (`<Icon name>` and raw ligatures), so
 | `queue_play_next` | WORDMAKE |
 | `settings_backup_restore` | font-proofer, WORDMAKE |
 | `text_fields` | font-proofer |
+| `warning` | Kernpare |

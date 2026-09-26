@@ -620,7 +620,7 @@ LINKED = "--linked" in sys.argv
 # it changes every <i> and <em> in the assembled document and that is a typography decision,
 # not a build fix. docs/system/pages/buttons.html carries the worked example.
 
-# THE SYSTEM PAGE DRAWS FROM THE FULL FACE. The package ships a 24-ligature subset of
+# THE SYSTEM PAGE DRAWS FROM THE FULL FACE. The package ships a 75-ligature subset of
 # Material Symbols (icon.css says so; scripts/lint-icons.py holds the apps to it), and this
 # page draws marks the apps never do -- fit_width, format_line_spacing, line_weight -- which
 # came out as the letters F, L and M with the subset (2026-09-21). So docs/fonts/ carries the
@@ -846,8 +846,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-stat i{display:block;font-style:normal;font-size:12px;color:var(--ink-3);margin-top:9px}
 /* The one button on the poster, and it is not a law: the door to the pages still being
    decided. Hatched, not filled -- extremely thin 45-degree hairlines -- so a work-in-progress
-   surface reads as one at a glance. */
-.wm-wip{display:inline-flex;align-items:baseline;gap:12px;align-self:center;margin-left:auto;padding:12px 18px;text-decoration:none;color:var(--ink);
+   surface reads as one at a glance. It sits in the counts' row as a fifth item, at the
+   counts' own gutter; an auto margin used to push it to the row's far end, which on a
+   wide screen is under the drawing (2026-09-26). */
+.wm-wip{display:inline-flex;align-items:baseline;gap:12px;align-self:center;margin-left:26px;padding:12px 18px;text-decoration:none;color:var(--ink);
   border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
   font-size:13px;font-weight:600;letter-spacing:.02em;transition:border-color .15s}
