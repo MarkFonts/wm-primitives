@@ -57,3 +57,23 @@ rows. Its fixtures are two OFL faces from google/fonts, subset in `tests/fixture
 DM Sans pair as Google Fonts ships it, and Google Sans Flex cut to a pangram for its six
 axes. Not Cal Sans on purpose -- the board and reset bugs it guards only show with a
 face that is not the app's own.
+
+## The hosts as apps, and where their labels sit
+
+Three more behaviour suites (2026-09-25), all against the builds the browser job already
+makes:
+
+- `alignment.spec.ts` + `alignment-lines.json` -- alignment is a rendered fact, not a CSS
+  literal. For font-proofer and ReCal, at 1500px, the left edge of the TEXT of every
+  label the JSON names must land on one of that region's named lines, each line with
+  the sum that puts it there (rail 16 + border 1 + padding 12 = 29). A line marked
+  `open` is a disagreement recorded so the suite is green today and deleted when it is
+  fixed, like `parity-allow.json`: today font-proofer's mode buttons at 24 and ReCal's
+  matrix title at 22. Baselines are the next half.
+- `recal.spec.ts` -- ReCal as an instrument: every mode opens clean, the rail walks its
+  three panels and back, the type panel's picker changes the readout, Paragraph swaps
+  its specimen. (The pyodide export engine's CDN failure under `sealed()` is filtered;
+  it is not the instrument.)
+- `kernpare-smoke.spec.ts` -- against the 12-pair fixture: it opens, lists twelve
+  pairs, takes an edit (click, type, Enter), counts it, and reverts it. The fenced
+  analysis UI is not touched.
