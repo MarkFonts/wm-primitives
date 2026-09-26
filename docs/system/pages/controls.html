@@ -677,6 +677,12 @@
   font-size: var(--type-micro-size, 10px);
   color: var(--text-dim);
 }
+.mark-apps {
+  font-size: var(--type-micro-size, 10px);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
 </style>
 
 <h1>Five ways to draw one dial</h1>
@@ -712,7 +718,16 @@ its own metrics. <b>The house chevron</b> for every chevron, because Material&rs
 a glyph drawn for 20px used at 6 is the 20px drawing scaled down, stroke and all. A stroked
 path has no floor.</p>
 
+<h3 class="marks-h3">In the shipped face</h3>
+<p class="lede">The 25-name subset in <code>fonts/</code>, 16KB, that font-proofer, ReCal, Kernpare and
+opsz-proofer load. Under each mark: what it means, and who draws it. <code>lint-icons.py</code>
+fails any of those apps on a name outside this grid.</p>
 <div class="marks" id="m-icons"></div>
+
+<h3 class="marks-h3">In the full face only</h3>
+<p class="lede">Names an app draws from the whole family &mdash; WORDMAKE ships the 4MB face itself,
+and this page draws from it. Not in the subset, and not needed there.</p>
+<div class="marks" id="m-icons-full"></div>
 
 <h3 class="marks-h3">Chevrons</h3>
 <p class="lede">One drawing, one angle (34.6&deg;), three sizes. The stroke is derived from the
@@ -1511,21 +1526,60 @@ toggle('t-arrows', 'always-arrows', false);
 
 /* ── the marks grid ────────────────────────────────────────
    Rendered from the same component contract the apps use -- .wm-icon carries the axes
-   and the ink, so this page cannot show a mark the package does not ship. */
+   and the ink. The page draws from the FULL face (build.py), so it can show every mark
+   any app calls upon, and says which face each one ships in: `subset` is the 25-name
+   face in fonts/ that font-proofer, ReCal, Kernpare and opsz-proofer load; `full` is
+   the whole family, which WORDMAKE ships itself and this page draws from.
+   Indexed 2026-09-26 across every app; lint-icons.py holds the apps to the subset. */
 const MDS = [
-  ['format_align_left','align left'], ['format_align_center','align center'],
-  ['format_align_right','align right'], ['format_align_justify','justify'],
-  ['format_h1','heading 1'], ['format_h2','heading 2'], ['format_h3','heading 3'],
-  ['format_paragraph','paragraph'], ['format_bold','bold'], ['format_italic','italic'],
-  ['settings_backup_restore','reset'], ['discover_tune','settings flyout'],
-  ['forms_add_on','multi-select'], ['content_copy','copy'], ['check','copied'],
-  ['calendar_month','cal.com'], ['insert_text','big word'], ['text_fields','type scale'],
-  ['grid_view','glyphs'], ['brightness_auto','theme auto'], ['light_mode','theme light'],
-  ['dark_mode','theme dark'], ['keyboard_arrow_up','stepper up'], ['keyboard_arrow_down','stepper down'],
+  // [name, what it means, apps that draw it, in the shipped subset]
+  ['format_align_left','align left',       ['wm-primitives','WORDMAKE'], true],
+  ['format_align_center','align center',   ['wm-primitives','WORDMAKE'], true],
+  ['format_align_right','align right',     ['wm-primitives','WORDMAKE'], true],
+  ['format_align_justify','justify',       ['wm-primitives','WORDMAKE'], true],
+  ['format_h1','heading 1',                ['wm-primitives','font-proofer'], true],
+  ['format_h2','heading 2',                ['wm-primitives','font-proofer'], true],
+  ['format_h3','heading 3',                ['wm-primitives','font-proofer'], true],
+  ['format_paragraph','paragraph',         ['wm-primitives','font-proofer'], true],
+  ['format_bold','bold',                   ['wm-primitives'], true],
+  ['format_italic','italic',               ['wm-primitives'], true],
+  ['settings_backup_restore','reset',      ['font-proofer','WORDMAKE'], true],
+  ['discover_tune','settings flyout',      ['font-proofer'], true],
+  ['forms_add_on','multi-select',          ['font-proofer'], true],
+  ['content_copy','copy',                  ['wm-primitives'], true],
+  ['check','copied',                       ['wm-primitives'], true],
+  ['calendar_month','cal.com',             ['font-proofer'], true],
+  ['insert_text','big word',               ['font-proofer'], true],
+  ['text_fields','type scale',             ['font-proofer'], true],
+  ['grid_view','glyphs',                   ['font-proofer'], true],
+  ['brightness_auto','theme auto',         ['wm-primitives','font-proofer'], true],
+  ['light_mode','theme light',             ['wm-primitives','font-proofer'], true],
+  ['dark_mode','theme dark',               ['wm-primitives','font-proofer'], true],
+  ['keyboard_arrow_up','stepper up',       ['font-proofer','WORDMAKE'], true],
+  ['keyboard_arrow_down','stepper down',   ['wm-primitives','WORDMAKE'], true],
+  ['warning','save state',                 ['Kernpare'], true],
+  // full face only
+  ['add','add a line',                     ['WORDMAKE'], false],
+  ['add_photo_alternate','add an image',   ['WORDMAKE'], false],
+  ['blur_on','blur',                       ['WORDMAKE'], false],
+  ['close','close',                        ['WORDMAKE'], false],
+  ['crop','crop',                          ['WORDMAKE'], false],
+  ['delete','delete',                      ['WORDMAKE'], false],
+  ['queue_play_next','queue next',         ['WORDMAKE'], false],
+  ['fit_page_width','fit width',           ['WORDMAKE'], false],
+  ['fit_page_height','fit height',         ['WORDMAKE'], false],
+  ['text_rotation_none','no rotation',     ['WORDMAKE'], false],
+  ['text_select_start','select start',     ['WORDMAKE'], false],
+  ['align_horizontal_center','centre',     ['WORDMAKE'], false],
+  ['fit_width','fit width (v3 dial)',      ['system page'], false],
+  ['line_weight','weight (v3 dial)',       ['system page'], false],
+  ['format_line_spacing','leading (v3 dial)', ['system page'], false],
+  ['mystery','opsz auto (v3 dial)',        ['system page'], false],
 ];
 (() => {
   const host = document.getElementById('m-icons');
-  for (const [name, use] of MDS) {
+  const full = document.getElementById('m-icons-full');
+  for (const [name, use, apps, inSubset] of MDS) {
     const cell = mk('figure', 'mark');
     const m = mk('span', 'wm-icon material-symbols-outlined');
     m.textContent = name; m.setAttribute('translate', 'no');
@@ -1533,7 +1587,8 @@ const MDS = [
     m.style.setProperty('--icon-opsz', '24');
     const n = mk('figcaption', 'mark-name'); n.textContent = name;
     const u = mk('span', 'mark-use'); u.textContent = use;
-    cell.append(m, n, u); host.appendChild(cell);
+    const a = mk('span', 'mark-apps'); a.textContent = apps.join(' · ');
+    cell.append(m, n, u, a); (inSubset ? host : full).appendChild(cell);
   }
 })();
 

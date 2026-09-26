@@ -21,6 +21,13 @@ keeps every icon spellable from the letters you asked for — 3,954 of them, 3MB
 first try. `scripts/cut-icon-subset.py` prunes the ligature table to the wanted names
 first, then cuts: 25 names, 54 glyphs, 16KB, both copies written (fonts/ and docs/fonts/).
 
+**And the system page indexes every mark every app calls upon.** The marks grid in
+Interface was the 24 the subset held. It is now the full census, 41 names across
+wm-primitives, font-proofer, ReCal, Kernpare, opsz-proofer, WORDMAKE and the page itself,
+each with what it means and who draws it, in two grids: the 25 in the shipped face, and
+the 16 only the full face holds (WORDMAKE's twelve, the v3 dial's four). The page draws
+from the full face, so it can show all of them.
+
 ---
 
 ## 2026-09-25 — alignment is tested, and ReCal and Kernpare are tested as apps
