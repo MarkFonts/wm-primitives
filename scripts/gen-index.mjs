@@ -22,6 +22,7 @@ const DEFAULT = {
   'opsz-proofer': '../wordmarktools/opsz-proofer',
   'Kernpare': '../wordmarktools/kernpare/index.html',
   'WORDMAKE': '../wordmarktools/wordmake/src',
+  'GliffDiff': '../wordmarktools/gliffdiff/src',
 }
 const spec = process.env.WM_CONSUMERS
   ? Object.fromEntries(process.env.WM_CONSUMERS.split(',').map(p => p.split('=')))
