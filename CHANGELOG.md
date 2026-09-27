@@ -12,6 +12,23 @@ Newest first.
 
 ---
 
+## 2026-09-26 — favicons for the apps, and the script that makes them
+
+**Seven icons, one construction.** Mark's drawn WM over each app's two letters in WM Mono,
+the 2x2 grid font-proofer's and ReCal's icons use, each letter widened to its cell:
+WMPR (this page, ss01), WMFP (font-proofer, P.ss01), WMGD (GliffDiff, ss01), WMOP (opsz-proofer, ss01), WMKP (Kernpare,
+P.ss01), WMMF (Morf), WMWM (WORDMAKE, W + M.ss05). `docs/favicons/` holds all of them in
+three colourways -- ink (black, white under a dark scheme; the one a page links), light
+and dark (fixed) -- with `recipe.json` saying how each was built.
+
+`scripts/make-favicon.py CODE [--ssNN] [--alt X=glyph] [--fill] [--colorway=...]` builds
+any of them. W and M are always the drawn glyphs, copied verbatim from font-proofer's icon
+(`scripts/wm-top.txt`); every other letter comes from WM Mono, which is Mark's and not in
+this repo (`WM_MONO`). A bottom row whose letters dip below the baseline lifts by the
+deepest overshoot, so nothing is cut at the square's edge.
+
+---
+
 ## 2026-09-26 — `layers` joins the face; GliffDiff draws four marks
 
 GliffDiff's Preview mode list gives each view a mark, font-proofer's way. Three of its four
