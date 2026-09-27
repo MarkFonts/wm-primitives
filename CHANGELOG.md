@@ -12,6 +12,29 @@ Newest first.
 
 ---
 
+## 2026-09-26 — the system page has a favicon
+
+**WMPR.** Mark's drawn WM over P and R set in WM Mono, the construction font-proofer's and
+ReCal's icons use: a 2x2 grid on a 1485 square, one uniform scale, black with a white
+override under a dark scheme. `scripts/make-favicon.py CODE` builds any of them, reusing
+the top row's polygons verbatim from font-proofer's icon (`scripts/wm-top.txt`) and taking
+the bottom pair from the font, which is Mark's and not in this repo (`WM_MONO`).
+
+---
+
+## 2026-09-26 — the alignment spec checks baselines too
+
+**Left edges had a spec; baselines did not.** `alignment-lines.json` gains `baselines`:
+groups of labels that must share one, each with a tolerance and a reason, repeated per
+mode where the row changes with the mode. ReCal's mode row, in all six modes, spreads
+0px, and the row itself must not move between modes. Its second header row (the rail's
+caption against the canvas's EDIT label) is within the 1px Mark accepted. Its first
+header row is 2px out -- the title against the Words tab -- and is recorded `open`: it
+passes while it disagrees and fails the day it doesn't, so fixing it means deleting the
+note. Proved against a ReCal rebuilt with the old centred mode row: red.
+
+---
+
 ## 2026-09-26 — one icon face, and the marks grid is the census
 
 **The shipped subset is 75 names now, and there is a script for that.** It was 24. Kernpare

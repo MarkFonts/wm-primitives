@@ -1747,6 +1747,9 @@ HEAD = ("" if not LINKED else
   '<meta property="og:type" content="website">\n'
   '<meta property="og:url" content="https://markfonts.github.io/wm-primitives/">\n'
   '<meta name="twitter:card" content="summary_large_image">\n'
+  # WMPR: Mark's drawn WM over P and R in WM Mono, black, white under a dark scheme
+  # (scripts/make-favicon.py). Relative, so it resolves under /wm-primitives/.
+  '<link rel="icon" type="image/svg+xml" href="favicon.svg">\n'
   # No Material Symbols <link>: the page self-hosts the FULL face from docs/fonts/ (see
   # FONTS above), so nothing here depends on a CDN, and the apps' subset is not asked to
   # draw names it does not hold.
