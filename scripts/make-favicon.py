@@ -83,7 +83,38 @@ def build(code, sets=(), pick=None, fill=False, colorway='ink'):
             '  <style>\n' + style + '  </style>\n'
             + '\n'.join(shapes) + '\n</svg>\n')
 
+def specimen(tag='ss01', per_letter=None, out=None):
+    """The 26 capitals for the system page (docs/favicons/<tag>-uppercase.json): each in `tag`
+    where the font has it, in the set `per_letter` names for that letter (M and W come from
+    ss06, the drawn WM), and the default otherwise. Font units, y flipped, baseline 0, cap
+    -700. The page cannot read the font -- it is Mark's and not in this repo -- so it draws these."""
+    import json
+    per_letter = {'M': 'ss06', 'W': 'ss06'} if per_letter is None else per_letter
+    f = TTFont(FONT); gs = f.getGlyphSet(); cmap = f.getBestCmap(); maps = {}
+    for fr in f['GSUB'].table.FeatureList.FeatureRecord:
+        if not fr.FeatureTag.startswith('ss'): continue
+        for li in fr.Feature.LookupListIndex:
+            for st in f['GSUB'].table.LookupList.Lookup[li].SubTable:
+                maps.setdefault(fr.FeatureTag, {}).update(getattr(getattr(st, 'ExtSubTable', st), 'mapping', {}) or {})
+    glyphs = []
+    for ch in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+        base = cmap[ord(ch)]; want = per_letter.get(ch, tag)
+        g = maps.get(want, {}).get(base)
+        used = want if g else None
+        g = g or base
+        pen = SVGPathPen(gs); gs[g].draw(TransformPen(pen, (1, 0, 0, -1, 0, 0)))
+        glyphs.append({'char': ch, 'glyph': g, 'set': used, 'advance': gs[g].width, 'd': pen.getCommands()})
+    data = {'_': f'WM Mono capitals: {tag} where the font has it, ' + ', '.join(f'{k} from {v}' for k, v in per_letter.items())
+                 + ', the default otherwise. Outlines in font units, y flipped (baseline 0, cap -700). Exported by '
+                 "scripts/make-favicon.py --specimen from Mark's font, which is not in this repo; build.py draws it in the page ink.",
+            'font': os.path.basename(FONT), 'upm': f['head'].unitsPerEm, 'cap': CAP, 'glyphs': glyphs}
+    out = out or os.path.join(HERE, '..', 'docs', 'favicons', f'{tag}-uppercase.json')
+    json.dump(data, open(out, 'w'), separators=(',', ':')); return out
+
 if __name__ == '__main__':
+    if '--specimen' in sys.argv:
+        tag = next((a[2:] for a in sys.argv[1:] if a.startswith('--ss')), 'ss01')
+        print(specimen(tag)); sys.exit()
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     sets = [a[2:] for a in sys.argv[1:] if a.startswith('--ss')]
     pick = dict(a[6:].split('=', 1) for a in sys.argv[1:] if a.startswith('--alt='))
