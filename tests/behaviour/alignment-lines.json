@@ -7,11 +7,26 @@
       "regions": {
         "rail": {
           "where": "text left edge under 300px",
-          "selectors": [".section-label", ".slider-label-name", ".upload-btn", ".mode-btn"],
+          "selectors": [
+            ".section-label",
+            ".slider-label-name",
+            ".upload-btn",
+            ".mode-btn"
+          ],
           "lines": {
-            "box": { "x": 16, "why": "the rail's padding; section labels and any control's box edge" },
-            "inset": { "x": 29, "why": "box 16 + 1px border + 12px field padding; the text inside every field and the upload button" },
-            "mode-buttons": { "x": 24, "why": "box 16 + the mode button's 8px padding", "open": "a third column: buttons inset 8 where fields inset 12. Either the buttons take the field's 12 or the fields the button's 8 -- decide, then delete this line (2026-09-25)" }
+            "box": {
+              "x": 16,
+              "why": "the rail's padding; section labels and any control's box edge"
+            },
+            "inset": {
+              "x": 29,
+              "why": "box 16 + 1px border + 12px field padding; the text inside every field and the upload button"
+            },
+            "mode-buttons": {
+              "x": 24,
+              "why": "box 16 + the mode button's 8px padding",
+              "open": "a third column: buttons inset 8 where fields inset 12. Either the buttons take the field's 12 or the fields the button's 8 -- decide, then delete this line (2026-09-25)"
+            }
           }
         }
       }
@@ -21,23 +36,99 @@
       "regions": {
         "rail": {
           "where": "text left edge under 264px",
-          "selectors": [".rail-title", ".rail-sub", ".rail-group-label", ".slider-label-name", ".rail-group .zone-chip:first-child", ".matrix-title"],
+          "selectors": [
+            ".rail-title",
+            ".rail-sub",
+            ".rail-group-label",
+            ".slider-label-name",
+            ".rail-group .zone-chip:first-child",
+            ".matrix-title"
+          ],
           "lines": {
-            "box": { "x": 16, "why": "the rail's padding; the title, its caption, every group label" },
-            "inset": { "x": 29, "why": "box 16 + 1px border + 12px field padding; the label inside every dial row" },
-            "chip": { "x": 28, "why": "box 16 + the zone chip's 12px padding, no border" },
-            "matrix": { "x": 22, "why": "box 16 + the matrix block's 6px padding", "open": "the Type Matrix's own title sits 6px right of every other rail label (2026-09-24). Either the 6px goes, or it is the rows' and not the title's -- decide, then delete this line" }
+            "box": {
+              "x": 16,
+              "why": "the rail's padding; the title, its caption, every group label"
+            },
+            "inset": {
+              "x": 29,
+              "why": "box 16 + 1px border + 12px field padding; the label inside every dial row"
+            },
+            "chip": {
+              "x": 28,
+              "why": "box 16 + the zone chip's 12px padding, no border"
+            },
+            "matrix": {
+              "x": 22,
+              "why": "box 16 + the matrix block's 6px padding",
+              "open": "the Type Matrix's own title sits 6px right of every other rail label (2026-09-24). Either the 6px goes, or it is the rows' and not the title's -- decide, then delete this line"
+            }
           }
         },
         "canvas": {
           "where": "text left edge from 264px",
-          "selectors": [".canvas-bar .mode-btn:first-child", ".mode-row .mode-label", ".mode-row .drawer-label", ".mode-row .text-tab:first-child"],
+          "selectors": [
+            ".canvas-bar .mode-btn:first-child",
+            ".mode-row .mode-label",
+            ".mode-row .drawer-label",
+            ".mode-row .text-tab:first-child"
+          ],
           "lines": {
-            "tabs": { "x": 296, "why": "canvas 264 + bar padding 24 + tab button padding 8; Words, and the mode label under it (shell.css: 32px = 24 + 8)" },
-            "submenu": { "x": 458, "why": "tabs 296 + the mode label's fixed 154px box + 8px, so the submenu sits under the Scale tab" }
+            "tabs": {
+              "x": 296,
+              "why": "canvas 264 + bar padding 24 + tab button padding 8; Words, and the mode label under it (shell.css: 32px = 24 + 8)"
+            },
+            "submenu": {
+              "x": 458,
+              "why": "tabs 296 + the mode label's fixed 154px box + 8px, so the submenu sits under the Scale tab"
+            }
           }
         }
-      }
+      },
+      "modeButton": ".canvas-bar .mode-btn",
+      "baselines": [
+        {
+          "name": "mode row",
+          "modes": [
+            "Words",
+            "Paragraph",
+            "Scale",
+            "Glyphs",
+            "UI",
+            "Info"
+          ],
+          "selectors": [
+            ".mode-row .mode-label",
+            ".mode-row .text-tab",
+            ".mode-row .drawer-label",
+            ".mode-row button:not(.mode-label *)",
+            ".mode-row .scene-bar span",
+            ".mode-row .scene-bar p",
+            ".mode-row .scene-bar a"
+          ],
+          "tolerance": 0.5,
+          "why": "the label and whatever submenu the mode shows are one row (shell.css .mode-row, align-items: baseline). Guards the 4px drop the row had on Paragraph only until 2026-09-25."
+        },
+        {
+          "name": "second header row",
+          "selectors": [
+            ".rail-sub",
+            ".mode-row .mode-label"
+          ],
+          "tolerance": 1,
+          "why": "the rail's caption and the canvas's mode label read as one two-line block across the split (Mark, 2026-09-25). 12px regular against 16px bold italic in separate containers; within a pixel is the promise."
+        },
+        {
+          "name": "first header row",
+          "selectors": [
+            ".rail-title",
+            ".canvas-bar .mode-btn"
+          ],
+          "tolerance": 0.5,
+          "why": "ReCal Builder and the scene tabs are the top line of both columns.",
+          "open": "2px apart (title 33, Words 31 at 1500px, 2026-09-26): a 16px title centred beside the 24px Reset button against a 12px tab centred in a 30px row. Aligning them is baseline arithmetic across two containers -- decide, then delete this note."
+        }
+      ]
     }
-  }
+  },
+  "_baselines": "Horizontal half, added 2026-09-26. A group is a set of labels that must share a baseline: each selector's visible text elements are measured (the Range box split by the font's ascent and descent) and every one must sit within the group's tolerance of the group's first. `modes` repeats the group in each named mode. An `open` group is a disagreement recorded, not approved: it prints and passes, and FAILS the day it comes within tolerance, so the fix deletes the note instead of leaving it to rot."
 }

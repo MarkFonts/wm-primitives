@@ -69,7 +69,11 @@ makes:
   the sum that puts it there (rail 16 + border 1 + padding 12 = 29). A line marked
   `open` is a disagreement recorded so the suite is green today and deleted when it is
   fixed, like `parity-allow.json`: today font-proofer's mode buttons at 24 and ReCal's
-  matrix title at 22. Baselines are the next half.
+  matrix title at 22. Baselines (2026-09-26): groups of labels that must share one,
+  each with a tolerance and a reason -- ReCal's mode row in all six modes (and the row
+  must not move between them), and its two header rows across the rail/canvas split. An
+  `open` group passes while it disagrees and FAILS the day it stops, so a fix deletes
+  its note: ReCal's title sits 2px below the Words tab today.
 - `recal.spec.ts` -- ReCal as an instrument: every mode opens clean, the rail walks its
   three panels and back, the type panel's picker changes the readout, Paragraph swaps
   its specimen. (The pyodide export engine's CDN failure under `sealed()` is filtered;
