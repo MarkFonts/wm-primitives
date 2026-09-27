@@ -16,9 +16,11 @@ Newest first.
 
 **WMPR.** Mark's drawn WM over P and R set in WM Mono, the construction font-proofer's and
 ReCal's icons use: a 2x2 grid on a 1485 square, one uniform scale, black with a white
-override under a dark scheme. `scripts/make-favicon.py CODE` builds any of them, reusing
-the top row's polygons verbatim from font-proofer's icon (`scripts/wm-top.txt`) and taking
-the bottom pair from the font, which is Mark's and not in this repo (`WM_MONO`).
+override under a dark scheme. `scripts/make-favicon.py CODE` builds any of them. W and M are
+always Mark's drawn glyphs, taken verbatim from font-proofer's icon (`scripts/wm-top.txt`)
+and moved to whatever cell they sit in -- they are custom for the few pixels a favicon has,
+the font's are not. Every other letter comes from WM Mono, which is Mark's and not in this
+repo (`WM_MONO`); `--ssNN` or `--alt G=G.ss02` picks the font's alternates.
 
 ---
 
