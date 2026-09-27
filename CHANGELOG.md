@@ -12,6 +12,13 @@ Newest first.
 
 ---
 
+## 2026-09-27 — ReCal's icon joins the family
+
+**WMCS, set 1, widened.** C.ss01 and S.ss01 under the drawn WM, in the three colourways,
+now in `docs/favicons/` beside the other seven and live on ReCal (MarkFonts/ReCal, same day).
+
+---
+
 ## 2026-09-26 — favicons for the apps, and the script that makes them
 
 **Seven icons, one construction.** Mark's drawn WM over each app's two letters in WM Mono,
