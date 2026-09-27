@@ -17,6 +17,7 @@ Newest first.
 WM Mono's new cut redrew P.ss01, so WMFP, WMOP, WMPR and WMKP are rebuilt from it (same
 recipes, three colourways each), shipped to font-proofer, opsz-proofer, Kernpare and this
 page. WMPR's R moves to set 6, matching the Type chapter's capitals.
+WMKP's K moves to set 6 as well.
 
 ---
 
