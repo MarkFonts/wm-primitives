@@ -12,6 +12,14 @@ Newest first.
 
 ---
 
+## 2026-09-27 — four icons take the redrawn P, and WMPR the set-6 R
+
+WM Mono's new cut redrew P.ss01, so WMFP, WMOP, WMPR and WMKP are rebuilt from it (same
+recipes, three colourways each), shipped to font-proofer, opsz-proofer, Kernpare and this
+page. WMPR's R moves to set 6, matching the Type chapter's capitals.
+
+---
+
 ## 2026-09-27 — the capitals take set 6 for K N R V X, from a new cut of WM Mono
 
 **Mark's picks.** The Type chapter's capitals are set 6 for K, M, N, R, V, W and X (M and W
