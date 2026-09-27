@@ -14,9 +14,9 @@ Newest first.
 
 ## 2026-09-26 — favicons for the apps, and the script that makes them
 
-**Six icons, one construction.** Mark's drawn WM over each app's two letters in WM Mono,
+**Seven icons, one construction.** Mark's drawn WM over each app's two letters in WM Mono,
 the 2x2 grid font-proofer's and ReCal's icons use, each letter widened to its cell:
-WMPR (this page, ss01), WMGD (GliffDiff, ss01), WMOP (opsz-proofer, ss01), WMKP (Kernpare,
+WMPR (this page, ss01), WMFP (font-proofer, P.ss01), WMGD (GliffDiff, ss01), WMOP (opsz-proofer, ss01), WMKP (Kernpare,
 P.ss01), WMMF (Morf), WMWM (WORDMAKE, W + M.ss05). `docs/favicons/` holds all of them in
 three colourways -- ink (black, white under a dark scheme; the one a page links), light
 and dark (fixed) -- with `recipe.json` saying how each was built.
