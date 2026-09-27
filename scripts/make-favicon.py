@@ -18,7 +18,7 @@ from fontTools.pens.transformPen import TransformPen
 from fontTools.pens.boundsPen import BoundsPen
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FONT = os.environ.get('WM_MONO', '/Users/Mark/Dropbox (Personal)/_WS Mono/WMMono-Regular.otf')   # Mark's font, not in this repo
+FONT = os.environ.get('WM_MONO', '/Users/Mark/Dropbox (Personal)/_WS Mono/WMMono-Regular.ttf')   # Mark's font, not in this repo
 SIZE, CELL_W, CELL_H, CAP = 1485, 704, 714, 700
 CELLS = [(0, 0), (SIZE - CELL_W, 0), (0, SIZE - CELL_H), (SIZE - CELL_W, SIZE - CELL_H)]
 DRAWN = dict(zip('WM', open(os.path.join(HERE, 'wm-top.txt')).read().split('\n')))   # W at cell 0, M at cell 1
