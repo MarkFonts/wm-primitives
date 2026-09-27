@@ -12,6 +12,20 @@ Newest first.
 
 ---
 
+## 2026-09-27 — Type ends with the favicons
+
+**A chapter at the end of 01 Type: the WM Mono capitals, then the lockups.** All 26
+capitals as the icons use them -- set 1 where the font has it (12), M and W from set 6
+(the drawn WM), the default for the rest -- each labelled with its source and drawn in
+the page ink, so it follows the theme. Then the six shipped icons (WMFP, WMGD, WMOP,
+WMPR, WMWM, WMCS), each in its light and dark colourway on the ground it is for. The
+font is Mark's and not in this repo, so `scripts/make-favicon.py --specimen` exports the
+outlines to `docs/favicons/ss01-uppercase.json` and the builder draws those; the icons
+are inlined as data: images so the self-contained build carries them and their own
+`<style>` cannot reach the page.
+
+---
+
 ## 2026-09-27 — ReCal's icon joins the family
 
 **WMCS, set 1, widened.** C.ss01 and S.ss01 under the drawn WM, in the three colourways,

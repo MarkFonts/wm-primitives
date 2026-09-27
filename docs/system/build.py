@@ -224,6 +224,10 @@ def build_section(sid, label, path, kicker):
         js  += "\n" + ex_js
 
 
+    if sid == "type":
+        html += favicons_html()
+        css += scope_css(FAV_CSS, root)
+
     if sid == "controls":
         html += wip_html()
         css += scope_css(WIP_CSS, root)
@@ -575,6 +579,79 @@ WIP_CSS = """
 .wip-card i{display:block;font-style:normal;font-size:var(--type-ui-size,.75rem);line-height:1.5;color:var(--ink-2);max-width:56ch}
 .wip-card u{position:absolute;top:18px;right:20px;text-decoration:none;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 """
+# The last chapter of Type (01): the app favicons, each in its two fixed colourways on the
+# ground it is for. The files are docs/favicons/ (scripts/make-favicon.py); they are
+# inlined as data: images so the self-contained build carries them too, and so each SVG's
+# own <style> (a bare `path, polygon` rule) cannot reach the page.
+FAVICONS = [  # (file stem, app, how its two letters were set)
+    ("wmfp", "font-proofer",  "F, P.ss01"),
+    ("wmgd", "GliffDiff",     "G.ss01, D.ss01"),
+    ("wmop", "opsz-proofer",  "O.ss01, P.ss01"),
+    ("wmpr", "wm-primitives", "P.ss01, R.ss01"),
+    ("wmwm", "WORDMAKE",      "W, M.ss05"),
+    ("wmcs", "ReCal",         "C.ss01, S.ss01"),
+]
+FAV_CSS = """
+.fav{max-width:1080px}
+.fav>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2);max-width:72ch}
+.fav>p b{color:var(--ink);font-weight:600}
+.fav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:24px;margin:0;padding:0;list-style:none}
+.fav-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* The grounds are fixed on purpose: each colourway is shown on the surface it is FOR,
+   whatever theme the page is in. */
+.fav-tile{display:grid;place-items:center;aspect-ratio:1;border-radius:var(--radius,8px);border:1px solid var(--line)}
+.fav-tile--light{background:#fff}
+.fav-tile--dark{background:#0f0f0f}
+.fav-tile img{width:58%;height:auto;display:block}
+.fav-cap{margin-top:10px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.fav-cap b{font-size:var(--type-ui-size,.75rem);font-weight:600;letter-spacing:var(--track-caps,.12em);color:var(--ink)}
+.fav-cap i{font-style:normal;font-size:var(--type-ui-size,.75rem);color:var(--ink-2)}
+.fav-cap u{text-decoration:none;font-size:var(--type-micro-size,.5625rem);color:var(--ink-3);width:100%}
+.fav-tag{display:flex;justify-content:space-between;margin-top:6px;font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}
+.fav-h span{display:block;margin-top:6px;font-size:var(--type-ui-size,.75rem);font-weight:400;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}
+.fav>p.fav-sub{margin:48px 0 16px;line-height:1.4;max-width:none;font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}
+/* The specimen is drawn in the page ink (currentColor), so it follows the theme; the set's
+   alternates are the letters with the accent rule under them. */
+.fav-caps{display:grid;grid-template-columns:repeat(13,1fr);gap:18px 10px;margin:0;padding:0;list-style:none;color:var(--ink)}
+.fav-caps li{display:flex;flex-direction:column;align-items:center;gap:8px}
+.fav-caps svg{width:100%;height:auto;display:block;fill:currentColor;overflow:visible}
+.fav-caps u{text-decoration:none;font-size:var(--type-micro-size,.5625rem);color:var(--ink-3);border-top:2px solid transparent;padding-top:4px;min-width:18px;text-align:center}
+.fav-caps .alt u{border-top-color:var(--accent,currentColor);color:var(--ink-2)}
+.fav-caps i{font-style:normal;font-size:var(--type-micro-size,.5625rem);color:var(--ink-3);margin-top:-4px}
+@media (max-width:720px){.fav-caps{grid-template-columns:repeat(7,1fr)}}
+"""
+
+def favicons_html():
+    import base64
+    uri = lambda stem, cw: "data:image/svg+xml;base64," + base64.b64encode((DOCS/"favicons"/f"{stem}-{cw}.svg").read_bytes()).decode()
+    cards = "".join(
+        f'<li><div class="fav-pair">'
+        f'<div class="fav-tile fav-tile--light"><img alt="{stem.upper()}, light" src="{uri(stem, "light")}"></div>'
+        f'<div class="fav-tile fav-tile--dark"><img alt="{stem.upper()}, dark" src="{uri(stem, "dark")}"></div></div>'
+        f'<div class="fav-tag"><span>light</span><span>dark</span></div>'
+        f'<div class="fav-cap"><b>{stem.upper()}</b><i>{app}</i><u>{how}</u></div></li>'
+        for stem, app, how in FAVICONS)
+    import json
+    spec = json.loads((DOCS/"favicons"/"ss01-uppercase.json").read_text())
+    n1 = sum(1 for g in spec["glyphs"] if g["set"] == "ss01")
+    caps = "".join(
+        f'<li class="{"alt" if g["set"] else ""}"><svg viewBox="0 -780 {g["advance"]} 860" aria-label="{g["glyph"]}">'
+        f'<path d="{g["d"]}"/></svg><u>{g["char"]}</u><i>{(g["set"] or "default").replace("ss0", "set ")}</i></li>'
+        for g in spec["glyphs"])
+    return ('<h2 class="fav-h">The favicons <span>WM Mono, light and dark</span></h2>'
+            '<div class="fav" id="favicons"><p><b>Four letters, two of them always the same.</b> Every app&#8217;s '
+            'icon is the drawn WM over its own two letters set in WM Mono, one scale, each letter widened to its '
+            'cell &#8212; and almost always in stylistic set 1, the square set, which is where the letters below '
+            'come from.</p>'
+            f'<p class="fav-sub">WM Mono capitals as the lockups use them &#183; set 1 where the font has it ({n1}), '
+            f'M and W from set 6 (the drawn WM), the rest default</p>'
+            f'<ul class="fav-caps">{caps}</ul>'
+            '<p class="fav-sub">The lockups &#183; light and dark</p>'
+            '<p>A page links the ink file, which turns itself white under a dark scheme; these are the two fixed '
+            'colourways, each on the ground it is for. All of them, ink included, are in <code>favicons/</code>, and '
+            '<code>scripts/make-favicon.py</code> builds another.</p>'
+            f'<ul class="fav-grid">{cards}</ul></div>')
+
 def wip_html():
     """The last chapter of Interface (03): the controls still being decided. Its own id, `wip`,
     which the assembler prefixes to `controls-wip`; the poster's button points there."""
