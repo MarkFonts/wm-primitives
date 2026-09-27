@@ -27,6 +27,8 @@ DRAWN_AT = {'W': CELLS[0], 'M': CELLS[1]}
 def moved(ch, cell):
     """The drawn polygon for ch, moved from its home cell to `cell`."""
     (hx, hy), (cx, cy) = DRAWN_AT[ch], cell
+    if (hx, hy) == (cx, cy):                     # in its own cell: the drawing, byte for byte
+        return f'  <polygon points="{DRAWN[ch]}"/>'
     nums = [float(n) for n in DRAWN[ch].split()]
     pts = [(nums[i] + cx - hx, nums[i + 1] + cy - hy) for i in range(0, len(nums), 2)]
     return f'  <polygon points="{" ".join(f"{x:.3f} {y:.3f}" for x, y in pts)}"/>'
