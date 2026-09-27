@@ -12,15 +12,20 @@ Newest first.
 
 ---
 
-## 2026-09-26 — the system page has a favicon
+## 2026-09-26 — favicons for the apps, and the script that makes them
 
-**WMPR.** Mark's drawn WM over P and R set in WM Mono, the construction font-proofer's and
-ReCal's icons use: a 2x2 grid on a 1485 square, one uniform scale, black with a white
-override under a dark scheme. `scripts/make-favicon.py CODE` builds any of them. W and M are
-always Mark's drawn glyphs, taken verbatim from font-proofer's icon (`scripts/wm-top.txt`)
-and moved to whatever cell they sit in -- they are custom for the few pixels a favicon has,
-the font's are not. Every other letter comes from WM Mono, which is Mark's and not in this
-repo (`WM_MONO`); `--ssNN` or `--alt G=G.ss02` picks the font's alternates.
+**Six icons, one construction.** Mark's drawn WM over each app's two letters in WM Mono,
+the 2x2 grid font-proofer's and ReCal's icons use, each letter widened to its cell:
+WMPR (this page, ss01), WMGD (GliffDiff, ss01), WMOP (opsz-proofer, ss01), WMKP (Kernpare,
+P.ss01), WMMF (Morf), WMWM (WORDMAKE, W + M.ss05). `docs/favicons/` holds all of them in
+three colourways -- ink (black, white under a dark scheme; the one a page links), light
+and dark (fixed) -- with `recipe.json` saying how each was built.
+
+`scripts/make-favicon.py CODE [--ssNN] [--alt X=glyph] [--fill] [--colorway=...]` builds
+any of them. W and M are always the drawn glyphs, copied verbatim from font-proofer's icon
+(`scripts/wm-top.txt`); every other letter comes from WM Mono, which is Mark's and not in
+this repo (`WM_MONO`). A bottom row whose letters dip below the baseline lifts by the
+deepest overshoot, so nothing is cut at the square's edge.
 
 ---
 

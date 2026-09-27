@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""make-favicon.py CODE [--ssNN ...] [--alt X=glyph ...] [out.svg]
+"""make-favicon.py CODE [--ssNN ...] [--alt X=glyph ...] [--fill] [--colorway=ink|light|dark] [out.svg]
 A WORDMARK app favicon: Mark's drawn WM over the app's two letters.
 
 Four letters in a 2x2 grid on a 1485 square, the construction font-proofer's and ReCal's
@@ -33,7 +33,7 @@ def moved(ch, cell):
     pts = [(nums[i] + cx - hx, nums[i + 1] + cy - hy) for i in range(0, len(nums), 2)]
     return f'  <polygon points="{" ".join(f"{x:.3f} {y:.3f}" for x, y in pts)}"/>'
 
-def build(code, sets=(), pick=None):
+def build(code, sets=(), pick=None, fill=False, colorway='ink'):
     code = code.upper()
     if len(code) == 4:
         assert code[:2] == 'WM', 'the top row is always the drawn WM'
@@ -49,25 +49,46 @@ def build(code, sets=(), pick=None):
                 for st in f['GSUB'].table.LookupList.Lookup[li].SubTable:
                     sub.update(getattr(getattr(st, 'ExtSubTable', st), 'mapping', {}) or {})
     shapes = [moved('W', CELLS[0]), moved('M', CELLS[1])]
+    # A round or pointed letter reaches below the baseline (G.ss02 by 36 units), and the
+    # bottom row's baseline IS the square's edge, so it would be cut. The row lifts by the
+    # deepest letter's overshoot -- both letters together, so their baselines still agree.
+    k = CELL_H / CAP
+    def glyph_for(ch):
+        return None if (ch in DRAWN and ch not in pick and not sets) else (pick.get(ch) or sub.get(cmap[ord(ch)], cmap[ord(ch)]))
+    lows = []
+    for ch in code:
+        g = glyph_for(ch)
+        if g: bp = BoundsPen(gs); gs[g].draw(bp); lows.append(bp.bounds[1])
+    lift = max(0, -min(lows, default=0)) * k
     for ch, cell in zip(code, CELLS[2:]):
-        if ch in DRAWN and ch not in pick:
+        if ch in DRAWN and ch not in pick and not sets:
             shapes.append(moved(ch, cell)); continue
         g = pick.get(ch) or sub.get(cmap[ord(ch)], cmap[ord(ch)])
         bp = BoundsPen(gs); gs[g].draw(bp); x0, _, x1, _ = bp.bounds
         k = CELL_H / CAP                                   # one scale, both axes
+        # fill=True widens the ink to the cell, as the drawn WM fills it: for letters that
+        # sit beside or under the WM and would otherwise read narrower (WORDMAKE's W M).
+        kx = CELL_W / (x1 - x0) if fill else k
         cx, cy = cell
-        tx = -x0 * k if cx == 0 else SIZE - x1 * k         # flush to the square's edge
+        tx = -x0 * kx if cx == 0 else SIZE - x1 * kx       # flush to the square's edge
         pen = SVGPathPen(gs)
-        gs[g].draw(TransformPen(pen, (k, 0, 0, -k, tx, cy + CAP * k)))
+        gs[g].draw(TransformPen(pen, (kx, 0, 0, -k, tx, cy + CAP * k - lift)))
         shapes.append(f'  <path d="{pen.getCommands()}"/>')
+    # ink: black, white under a dark scheme -- the one a page links. light / dark: fixed,
+    # for a surface whose colour is known (a dock, a README, a slide).
+    style = {'ink': '    path, polygon { fill: #000; }\n    @media (prefers-color-scheme: dark) { path, polygon { fill: #fff; } }\n',
+             'light': '    path, polygon { fill: #000; }\n',
+             'dark': '    path, polygon { fill: #fff; }\n'}[colorway]
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {SIZE} {SIZE}">\n'
-            '  <style>\n    path, polygon { fill: #000; }\n    @media (prefers-color-scheme: dark) { path, polygon { fill: #fff; } }\n  </style>\n'
+            '  <style>\n' + style + '  </style>\n'
             + '\n'.join(shapes) + '\n</svg>\n')
 
 if __name__ == '__main__':
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     sets = [a[2:] for a in sys.argv[1:] if a.startswith('--ss')]
     pick = dict(a[6:].split('=', 1) for a in sys.argv[1:] if a.startswith('--alt='))
+    fill = '--fill' in sys.argv
+    colorway = next((a.split('=', 1)[1] for a in sys.argv[1:] if a.startswith('--colorway=')), 'ink')
     code = args[0]
     out = args[1] if len(args) > 1 else f'{code.lower()}.svg'
-    open(out, 'w').write(build(code, sets, pick)); print(out)
+    open(out, 'w').write(build(code, sets, pick, fill, colorway)); print(out)
