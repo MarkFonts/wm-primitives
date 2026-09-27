@@ -12,6 +12,14 @@ Newest first.
 
 ---
 
+## 2026-09-27 — the capitals take set 6 for K N R V X, from a new cut of WM Mono
+
+**Mark's picks.** The Type chapter's capitals are set 6 for K, M, N, R, V, W and X (M and W
+are the drawn WM), set 1 for eleven, default for the rest, re-exported from the new cut
+with its redrawn set-1 A and B (`make-favicon.py --specimen`).
+
+---
+
 ## 2026-09-27 — Type ends with the favicons
 
 **A chapter at the end of 01 Type: the WM Mono capitals, then the lockups.** All 26
