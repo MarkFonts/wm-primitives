@@ -79,6 +79,13 @@ jobs:
             shared: opsz-proofer/shared
             kind: python
             workdir: opsz-proofer
+          # GliffDiff (a fork of bghryct/GliffDiff) is a Vite + React app beside Morf in
+          # wordmarktools: lint, `npm ci`, `tsc && vite build`.
+          - name: gliffdiff
+            repo: MarkFonts/wordmarktools
+            shared: gliffdiff/shared
+            kind: node
+            workdir: gliffdiff
     steps:
       # wordmarktools is private, so this is also the proof that the token can READ the
       # consumers, not only dispatch to them. The two public legs fall back to the job
@@ -191,13 +198,13 @@ jobs:
       # the package's own names are checked in lint.yml, this is the consumers').
       - name: Icon names the face can draw
         env:
-          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html,WORDMAKE=hosts/wordmarktools/wordmake/src
+          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html,WORDMAKE=hosts/wordmarktools/wordmake/src,GliffDiff=hosts/wordmarktools/gliffdiff/src
           # WORDMAKE loads the full face, not the subset; it is held to the file it ships.
           WM_CONSUMER_FACES: WORDMAKE=hosts/wordmarktools/wordmake/fonts/MaterialSymbolsOutlined-full.woff2
         run: python3 scripts/lint-icons.py
       - name: COMPONENTS.md and HOST-CONTRACT.md must match their inputs
         env:
-          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html,WORDMAKE=hosts/wordmarktools/wordmake/src
+          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html,WORDMAKE=hosts/wordmarktools/wordmake/src,GliffDiff=hosts/wordmarktools/gliffdiff/src
         run: |
           node scripts/gen-index.mjs
           if ! git diff --quiet -- COMPONENTS.md HOST-CONTRACT.md; then
