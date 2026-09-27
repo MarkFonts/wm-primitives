@@ -595,7 +595,10 @@ FAV_CSS = """
 .fav{max-width:1080px}
 .fav>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2);max-width:72ch}
 .fav>p b{color:var(--ink);font-weight:600}
-.fav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:24px;margin:0;padding:0;list-style:none}
+.fav-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:0;padding:0;list-style:none}
+/* Six lockups: three and three, then two by three, then one column -- never four and two. */
+@media (max-width:900px){.fav-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.fav-grid{grid-template-columns:1fr}}
 .fav-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 /* The grounds are fixed on purpose: each colourway is shown on the surface it is FOR,
    whatever theme the page is in. */

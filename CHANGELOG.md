@@ -17,6 +17,8 @@ Newest first.
 **Mark's picks.** The Type chapter's capitals are set 6 for K, M, N, R, V, W and X (M and W
 are the drawn WM), set 1 for eleven, default for the rest, re-exported from the new cut
 with its redrawn set-1 A and B (`make-favicon.py --specimen`).
+The six lockups sit three and three (two by three on a tablet, one column on a phone)
+instead of four and two.
 
 ---
 
