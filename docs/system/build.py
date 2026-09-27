@@ -587,7 +587,7 @@ FAVICONS = [  # (file stem, app, how its two letters were set)
     ("wmfp", "font-proofer",  "F, P.ss01"),
     ("wmgd", "GliffDiff",     "G.ss01, D.ss01"),
     ("wmop", "opsz-proofer",  "O.ss01, P.ss01"),
-    ("wmpr", "wm-primitives", "P.ss01, R.ss01"),
+    ("wmpr", "wm-primitives", "P.ss01, R.ss06"),
     ("wmwm", "WORDMAKE",      "W, M.ss05"),
     ("wmcs", "ReCal",         "C.ss01, S.ss01"),
 ]
