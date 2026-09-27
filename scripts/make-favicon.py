@@ -89,7 +89,8 @@ def specimen(tag='ss01', per_letter=None, out=None):
     ss06, the drawn WM), and the default otherwise. Font units, y flipped, baseline 0, cap
     -700. The page cannot read the font -- it is Mark's and not in this repo -- so it draws these."""
     import json
-    per_letter = {'M': 'ss06', 'W': 'ss06'} if per_letter is None else per_letter
+    # Mark's picks (2026-09-27): set 6 for K M N R V W X, set 1 wherever else the font has it.
+    per_letter = {c: 'ss06' for c in 'KMNRVWX'} if per_letter is None else per_letter
     f = TTFont(FONT); gs = f.getGlyphSet(); cmap = f.getBestCmap(); maps = {}
     for fr in f['GSUB'].table.FeatureList.FeatureRecord:
         if not fr.FeatureTag.startswith('ss'): continue

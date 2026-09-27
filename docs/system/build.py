@@ -634,6 +634,7 @@ def favicons_html():
     import json
     spec = json.loads((DOCS/"favicons"/"ss01-uppercase.json").read_text())
     n1 = sum(1 for g in spec["glyphs"] if g["set"] == "ss01")
+    n6 = sum(1 for g in spec["glyphs"] if g["set"] == "ss06")
     caps = "".join(
         f'<li class="{"alt" if g["set"] else ""}"><svg viewBox="0 -780 {g["advance"]} 860" aria-label="{g["glyph"]}">'
         f'<path d="{g["d"]}"/></svg><u>{g["char"]}</u><i>{(g["set"] or "default").replace("ss0", "set ")}</i></li>'
@@ -641,10 +642,9 @@ def favicons_html():
     return ('<h2 class="fav-h">The favicons <span>WM Mono, light and dark</span></h2>'
             '<div class="fav" id="favicons"><p><b>Four letters, two of them always the same.</b> Every app&#8217;s '
             'icon is the drawn WM over its own two letters set in WM Mono, one scale, each letter widened to its '
-            'cell &#8212; and almost always in stylistic set 1, the square set, which is where the letters below '
-            'come from.</p>'
-            f'<p class="fav-sub">WM Mono capitals as the lockups use them &#183; set 1 where the font has it ({n1}), '
-            f'M and W from set 6 (the drawn WM), the rest default</p>'
+            'cell &#8212; mostly the square set 1. The capitals below are the house pick of the font&#8217;s sets.</p>'
+            f'<p class="fav-sub">WM Mono capitals &#183; set 6 for {n6} ({"".join(g["char"] for g in spec["glyphs"] if g["set"] == "ss06")}; '
+            f'its M and W are the drawn WM), set 1 for {n1}, the rest default</p>'
             f'<ul class="fav-caps">{caps}</ul>'
             '<p class="fav-sub">The lockups &#183; light and dark</p>'
             '<p>A page links the ink file, which turns itself white under a dark scheme; these are the two fixed '
