@@ -29,16 +29,14 @@ deepest overshoot, so nothing is cut at the square's edge.
 
 ---
 
-## 2026-09-26 — the alignment spec checks baselines too
+## 2026-09-26 — `layers` joins the face; GliffDiff draws four marks
 
-**Left edges had a spec; baselines did not.** `alignment-lines.json` gains `baselines`:
-groups of labels that must share one, each with a tolerance and a reason, repeated per
-mode where the row changes with the mode. ReCal's mode row, in all six modes, spreads
-0px, and the row itself must not move between modes. Its second header row (the rail's
-caption against the canvas's EDIT label) is within the 1px Mark accepted. Its first
-header row is 2px out -- the title against the Words tab -- and is recorded `open`: it
-passes while it disagrees and fails the day it doesn't, so fixing it means deleting the
-note. Proved against a ReCal rebuilt with the old centred mode row: red.
+GliffDiff's Preview mode list gives each view a mark, font-proofer's way. Three of its four
+were already cut in and waiting for a use: `format_shapes` (characters), `match_word`
+(spacing) and `mystery` (metrics, sharing the v3 dial's mark). They move up to "Drawn
+today". The fourth, `layers` (overlay), was only in the full face, so it is cut in with
+`scripts/cut-icon-subset.py layers`. That makes 76 names and 110 glyphs, and the face grows
+by 464 bytes. `format_paragraph` and `text_fields` gain GliffDiff as a second drawer.
 
 ---
 
