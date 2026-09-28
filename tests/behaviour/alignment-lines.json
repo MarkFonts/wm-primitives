@@ -90,10 +90,15 @@
      },
      {
       "a": ".mode-row .mode-label",
-      "b": ".mode-row .scene-bar",
-      "why": "the mode label and its submenu, on one baseline in every mode"
+      "b": ".mode-row .text-tab, .mode-row .drawer-label, .mode-row button:not(.mode-label *), .mode-row .scene-bar span, .mode-row .scene-bar p, .mode-row .scene-bar a",
+      "every": true,
+      "why": "the label and every item of the submenu the mode shows are one row (shell.css .mode-row, align-items: baseline)"
      }
-    ]
+    ],
+    "steady": {
+     "selector": ".mode-row .mode-label",
+     "why": "the row holds still between modes -- it dropped 4px on Paragraph only until 2026-09-25"
+    }
    }
   }
  }

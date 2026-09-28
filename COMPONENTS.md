@@ -14,7 +14,7 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `AxisTriplet` | min / desired / max as ONE control. Extracted from ReCal's H&J rail, which had the right layout on native number inputs -- platform steppers that cannot be themed and a hyphen where a minus belongs. | — | GESTURES.md §9 |
 | `StopSlider` | Named stops with a thumb that travels between them -- a different control from the dial, not a variant of it. Extracted from docs card 04 (SLIDERS.md, row 13) for WORDMAKE's GEOM rail; it takes its stops as a prop and na… | WORDMAKE | DIAL.md §7 |
 | `Chevron` | The one chevron, at the house angle, with a stroke derived from its width. | font-proofer, ReCal, GliffDiff | SLIDERS.md (icon census) |
-| `Icon` | Icon — a Material Symbols mark on the same axes as the type beside it. The HOST loads the font (see Icon.tsx for the link tag and its four axes); this exports the component and the ink/weight contract only. | font-proofer, WORDMAKE, GliffDiff | GESTURES.md §10 |
+| `Icon` | Icon — a Material Symbols mark on the same axes as the type beside it. The HOST loads the font (see Icon.tsx for the link tag and its four axes); this exports the component and the ink/weight contract only. | font-proofer, ReCal, WORDMAKE, GliffDiff | GESTURES.md §10 |
 | `ThemeSwitch` | ThemeSwitch -- Auto / Light / Dark, both looks (marks, words) over one engine. The engine is plain JS so a page without React (Kernpare) drives the same control with mountThemeSwitch(); the head-script stamp before first… | font-proofer, GliffDiff | GESTURES.md §8 |
 | `THEMES` `THEME_KEY` `readTheme` `applyTheme` `bootTheme` `mountThemeSwitch` | The theme engine itself, for a page without React (bootTheme in a head script). | Kernpare | GESTURES.md §8 |
 | `BlockStyleRail` | BlockStyleRail — h1/h2/h3/¶ stacked in the margin of the block being edited, at the bottom of the ink ladder until you reach for them. | font-proofer | — |
@@ -59,5 +59,6 @@ Material Symbols names each consumer draws (`<Icon name>` and raw ligatures), so
 | `light_mode` | ThemeSwitch (every host that mounts it) |
 | `queue_play_next` | WORDMAKE |
 | `settings_backup_restore` | font-proofer, WORDMAKE |
+| `sync_alt` | ReCal, Kernpare |
 | `text_fields` | font-proofer |
 | `warning` | Kernpare |

@@ -24,8 +24,8 @@ import { sealed, settle } from '../render/hosts'
 
 type Line = { x: number; why: string; open?: string }
 type Region = { where: string; selectors: string[]; lines: Record<string, Line> }
-type Pair = { a: string; b: string; why: string }
-type Host = { url: string; regions: Record<string, Region>; baselines?: { modes?: string; pairs: Pair[] } }
+type Pair = { a: string; b: string; why: string; every?: boolean }
+type Host = { url: string; regions: Record<string, Region>; baselines?: { modes?: string; pairs: Pair[]; steady?: { selector: string; why: string } } }
 const SPEC = JSON.parse(readFileSync(fileURLToPath(new URL('alignment-lines.json', import.meta.url)), 'utf8')) as {
   tolerance: number; hosts: Record<string, Host>
 }
@@ -76,19 +76,24 @@ for (const [host, h] of Object.entries(SPEC.hosts)) {
   })
 }
 
-const firstBaseline = (sel: string) => {
-  const e = document.querySelector(sel)
-  if (!e) return null
-  const w = document.createTreeWalker(e, NodeFilter.SHOW_TEXT, { acceptNode: n => n.textContent!.trim() ? 1 : 3 })
-  const t = w.nextNode()
-  if (!t) return null
-  const wrap = document.createElement('span'); t.parentNode!.insertBefore(wrap, t); wrap.appendChild(t)
-  const probe = document.createElement('span')
-  probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline'
-  wrap.prepend(probe)
-  const y = probe.getBoundingClientRect().top
-  wrap.replaceWith(t)
-  return +y.toFixed(1)
+/* Every visible element the selector finds, each measured at its first text line.
+   One function, stringified into the page, so the probe is the same everywhere. */
+const baselines = (sel: string) => {
+  const out: number[] = []
+  for (const e of document.querySelectorAll(sel)) {
+    const box = e.getBoundingClientRect()
+    if (!box.width || !box.height) continue
+    const w = document.createTreeWalker(e, NodeFilter.SHOW_TEXT, { acceptNode: n => n.textContent!.trim() ? 1 : 3 })
+    const t = w.nextNode()
+    if (!t) continue
+    const wrap = document.createElement('span'); t.parentNode!.insertBefore(wrap, t); wrap.appendChild(t)
+    const probe = document.createElement('span')
+    probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline'
+    wrap.prepend(probe)
+    out.push(+probe.getBoundingClientRect().top.toFixed(1))
+    wrap.replaceWith(t)
+  }
+  return out
 }
 
 for (const [host, h] of Object.entries(SPEC.hosts)) {
@@ -105,6 +110,7 @@ for (const [host, h] of Object.entries(SPEC.hosts)) {
 
       const modes = bl.modes ? await page.locator(bl.modes).count() : 1
       const problems: string[] = []
+      const steady: [string, number][] = []
       for (let i = 0; i < modes; i++) {
         let mode = '(page)'
         if (bl.modes) {
@@ -113,15 +119,27 @@ for (const [host, h] of Object.entries(SPEC.hosts)) {
           await tab.click()
           await page.waitForTimeout(300)
         }
+        const measure = (sel: string) => page.evaluate(([fn, s]) => new Function('return ' + fn)()(s), [baselines.toString(), sel] as const) as Promise<number[]>
         for (const pr of bl.pairs) {
-          const [a, b] = await page.evaluate(([fn, a, b]) => {
-            const f = new Function('return ' + fn)()
-            return [f(a), f(b)]
-          }, [firstBaseline.toString(), pr.a, pr.b] as const)
-          if (a === null || b === null) continue          // a submenu that this mode does not draw
-          if (Math.abs(a - b) > SPEC.tolerance)
-            problems.push(`${host} ${mode}: ${pr.a} at ${a} vs ${pr.b} at ${b} (${(b - a).toFixed(1)}px) -- ${pr.why}`)
+          const [a] = await measure(pr.a)
+          // `every`: each element b finds must sit on a's line, not just the first
+          const bs = pr.every ? await measure(pr.b) : (await measure(pr.b)).slice(0, 1)
+          if (a === undefined || !bs.length) continue     // a submenu that this mode does not draw
+          for (const b of bs)
+            if (Math.abs(a - b) > SPEC.tolerance)
+              problems.push(`${host} ${mode}: ${pr.a} at ${a} vs ${pr.b} at ${b} (${(b - a).toFixed(1)}px) -- ${pr.why}`)
         }
+        if (bl.steady) {
+          const [y] = await measure(bl.steady.selector)
+          if (y !== undefined) steady.push([mode, y])
+        }
+      }
+      // `steady`: the row may not move as the modes change what it holds
+      if (bl.steady && steady.length) {
+        const [m0, y0] = steady[0]
+        for (const [m, y] of steady.slice(1))
+          if (Math.abs(y - y0) > SPEC.tolerance)
+            problems.push(`${host}: ${bl.steady.selector} at ${y} on ${m} vs ${y0} on ${m0} -- ${bl.steady.why}`)
       }
       expect(problems, problems.join('\n')).toEqual([])
     })
