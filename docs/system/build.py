@@ -591,17 +591,19 @@ FAVICONS = [  # (file stem, app, how its two letters were set)
     ("wmwm", "WORDMAKE",      "W, M.ss05"),
     ("wmcs", "ReCal",         "C.ss01, S.ss01"),
 ]
+# Comments stay out of FAV_CSS: the chapter scoper splits on "}" and prefixes #s-type, so a
+# comment in front of an @media eats the prefix and the rule inside loses on specificity.
+# The grid runs three and three, then two by three, then one column -- never four and two.
+# The tile grounds are fixed on purpose: each colourway is shown on the surface it is FOR.
+# The specimen is drawn in currentColor, so it follows the theme; alternates carry the accent rule.
 FAV_CSS = """
 .fav{max-width:1080px}
 .fav>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2);max-width:72ch}
 .fav>p b{color:var(--ink);font-weight:600}
 .fav-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:0;padding:0;list-style:none}
-/* Six lockups: three and three, then two by three, then one column -- never four and two. */
 @media (max-width:900px){.fav-grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:520px){.fav-grid{grid-template-columns:1fr}}
 .fav-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-/* The grounds are fixed on purpose: each colourway is shown on the surface it is FOR,
-   whatever theme the page is in. */
 .fav-tile{display:grid;place-items:center;aspect-ratio:1;border-radius:var(--radius,8px);border:1px solid var(--line)}
 .fav-tile--light{background:#fff}
 .fav-tile--dark{background:#0f0f0f}
@@ -613,8 +615,6 @@ FAV_CSS = """
 .fav-tag{display:flex;justify-content:space-between;margin-top:6px;font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}
 .fav-h span{display:block;margin-top:6px;font-size:var(--type-ui-size,.75rem);font-weight:400;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}
 .fav>p.fav-sub{margin:48px 0 16px;line-height:1.4;max-width:none;font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}
-/* The specimen is drawn in the page ink (currentColor), so it follows the theme; the set's
-   alternates are the letters with the accent rule under them. */
 .fav-caps{display:grid;grid-template-columns:repeat(13,1fr);gap:18px 10px;margin:0;padding:0;list-style:none;color:var(--ink)}
 .fav-caps li{display:flex;flex-direction:column;align-items:center;gap:8px}
 .fav-caps svg{width:100%;height:auto;display:block;fill:currentColor;overflow:visible}
