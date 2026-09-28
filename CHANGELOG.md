@@ -12,6 +12,12 @@ Newest first.
 
 ---
 
+## 2026-09-27 — sync_alt joins the icon face
+
+77 names. Kernpare's context `rev` switch and ReCal's landing-page compare button (`(Geist ⇄)`,
+a text arrow until now) both draw it. Listed in the marks census under Drawn today; the face
+was re-cut with `scripts/cut-icon-subset.py sync_alt`.
+
 ## 2026-09-27 — four icons take the redrawn P, and WMPR the set-6 R
 
 WM Mono's new cut redrew P.ss01, so WMFP, WMOP, WMPR and WMKP are rebuilt from it (same
