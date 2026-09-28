@@ -59,6 +59,6 @@ Material Symbols names each consumer draws (`<Icon name>` and raw ligatures), so
 | `light_mode` | ThemeSwitch (every host that mounts it) |
 | `queue_play_next` | WORDMAKE |
 | `settings_backup_restore` | font-proofer, WORDMAKE |
-| `sync_alt` | ReCal |
+| `sync_alt` | ReCal, Kernpare |
 | `text_fields` | font-proofer |
 | `warning` | Kernpare |
