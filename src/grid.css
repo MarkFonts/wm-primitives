@@ -1,0 +1,102 @@
+/* grid.css -- the house grid: 24 columns, a 3px line, one margin for every page.
+ *
+ * COLUMNS. 24 on a desktop, 12 below 1024px -- 12 divides 24, so a half is still a half
+ * and a third still a third on a phone. 30 was considered and lost to the pages it is for:
+ * calsans splits its sections 5:7 three times, which is 10 | 14 here and 12.5 | 17.5 on 30.
+ * The gutter is the pad scale's 24px (12 on a phone). The margin is the case study's own --
+ * clamp(20px, 5vw, 40px) on a phone, clamp(32px, 7vw, 112px) from 681px -- and it is the
+ * SAME for every project: page padding belongs to the grid, not to the page.
+ *
+ * LINES. A 3px unit: the leading subdivided, the way 12/15 sits on a 3pt grid. Body is
+ * 16/24. A leading is a whole number of units -- for fluid type, round(nearest, Nem,
+ * var(--bl)) gives that at every size the clamp() produces -- and so is the vertical space
+ * between text blocks in a column, because that decides where the next baseline lands.
+ * The pad scale is NOT on the line and need not be: a component's insides are its own.
+ * What carries text in the flow (a pill, a chip, a button) is the exception: its HEIGHT is
+ * in units, so a row of them is a line of type and nothing below it is knocked off.
+ *
+ * CARDS (rule A, Mark 2026-10-01). A card is a box on the grid; its contents step in one
+ * column + one gutter, so they land on the next column line.
+ *
+ *   .wm-grid            columns + the page margin (a whole page or section)
+ *   .wm-cols            the same columns, no margin -- inside a wrapper that has it
+ *   --span / --start    a child's columns on the 24 (default: all of them)
+ *   --span-md / --start-md   the same below 1024px (default: all 12)
+ *   .wm-card            a box whose contents start one column + one gutter in
+ *   --grid-col          one column's width, as a length, inside either container
+ *   --bl                the line; .wm-lines puts text's baselines on it (below)
+ *   --snap              the remainder a builder or gridSnap.js measured (below) */
+@layer wm.grid {
+  :root {
+    --grid-cols: 24;
+    --grid-gutter: 24px;
+    --grid-margin: clamp(20px, 5vw, 40px);
+    --bl: 3px;
+  }
+  @media (min-width: 681px)  { :root { --grid-margin: clamp(32px, 7vw, 112px); } }
+  @media (max-width: 1023px) { :root { --grid-cols: 12; } }
+  @media (max-width: 599px)  { :root { --grid-gutter: 12px; } }
+
+  .wm-grid, .wm-cols {
+    /* A container, so anything inside can measure a column in cqw without JS. */
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+  }
+  .wm-grid { padding-inline: var(--grid-margin); --_m: var(--grid-margin); }
+  .wm-cols { --_m: 0px; }
+  :is(.wm-grid, .wm-cols) > * {
+    /* Declared and unset (`initial`), so the fallbacks apply until a host sets them on the
+       child -- the same move as chip.css's --chip-color. */
+    --span: initial; --start: initial; --span-md: initial; --start-md: initial;
+    min-width: 0;
+    grid-column: var(--start, auto) / span var(--span, 24);
+    /* One column, as a length. 100cqw is the container's own width, margins included. */
+    --grid-col: calc((100cqw - 2 * var(--_m) - (var(--grid-cols) - 1) * var(--grid-gutter)) / var(--grid-cols));
+  }
+  @media (max-width: 1023px) {
+    :is(.wm-grid, .wm-cols) > * { grid-column: var(--start-md, auto) / span var(--span-md, 12); }
+  }
+  .wm-card { padding: var(--grid-gutter) calc(var(--grid-col) + var(--grid-gutter)); }
+}
+
+/* BASELINES ON THE LINE -- UNLAYERED, on purpose. type.css's .t-* classes are unlayered (they
+   are its API, not a default), and an unlayered rule beats any layered one however specific:
+   inside a layer, .wm-lines .t-ui lost to .t-ui and ui sat at 16.8 instead of 15. Out here,
+   specificity decides, and .wm-lines X outranks X.
+
+   Inside .wm-lines a text block's leading is --lh, a whole number of units, and its box
+   starts on a line. That does not yet put its BASELINES there: a baseline sits the
+   half-leading plus the ascent below the top of its line box, and that depends on the face.
+   So each block is nudged down by however far that lands short of the next line -- under
+   one unit, by `top`, which moves the glyphs and not the layout. The browser rounds ascent
+   and descent to whole pixels at each size and floors an odd half-leading (lede: 27 - 20 = 7,
+   so 3 above, not 3.5), and so does this. Cal Sans's hhea is 1800 / -490 on 2000; a page on
+   another face sets --font-asc / --font-desc from its own (or typo, if USE_TYPO_METRICS).
+   A page sets --lh wherever it sets a leading; nothing here touches margins. */
+.wm-lines {
+  --font-asc: 0.9; --font-desc: 0.245;
+  --lead-micro: 12px; --lead-ui: 15px; --lead-body: 24px; --lead-lede: 27px; --lead-title: 30px;
+  --lh: var(--lead-body);
+}
+/* :where, so any rule that sets --lh outranks it, whatever selector it is written with. */
+.wm-lines :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line]) {
+  line-height: var(--lh);
+  position: relative;
+  /* unset until a builder or gridSnap.js writes it ON the element (inline wins); declared
+     here, not listed as a runtime token, so consumers' own token lists don't fail on it */
+  --snap: initial;
+  --asc: round(calc(var(--font-asc) * 1em), 1px);
+  --desc: round(calc(var(--font-desc) * 1em), 1px);
+  top: calc(mod(calc(var(--bl) - mod(calc(round(down, (var(--lh) - var(--asc) - var(--desc)) / 2, 1px) + var(--asc)), var(--bl))), var(--bl)) + var(--snap, 0px));
+}
+/* --snap: what CSS cannot know. The nudge above is exact for a block whose BOX starts on a
+   line; a block below an image, an embed or a 1px rule starts wherever those end. A builder
+   (or src/gridSnap.js, after layout) measures the rendered baseline and sets --snap to the
+   remainder -- under one unit, glyphs only, never the layout. */
+.wm-lines .t-lede { --lh: var(--lead-lede); }
+.wm-lines .t-title { --lh: var(--lead-title); }
+.wm-lines :is(.t-ui, .t-label) { --lh: var(--lead-ui); }
+.wm-lines .t-micro { --lh: var(--lead-micro); }
+.wm-lines .t-display { --lh: round(nearest, 1.1em, var(--bl)); }

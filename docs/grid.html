@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WM Grid</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+/* ── color: the ramp, as package defaults ─────────────────────────────────────
+ *
+ * Additive, like type.css and motion.css: it declares tokens and styles no element,
+ * so importing it cannot reach existing markup. Apps import it from their entry
+ * stylesheet and override whatever they want.
+ *
+ * A theme is not a second palette. It is where each role sits on ONE lightness ramp,
+ * plus how hard the three inks press -- seven numbers. The role lines below are written
+ * once and never change between themes; only the numbers above them move.
+ *
+ * WHY THIS FILE EXISTS
+ * Before it, the package answered "what if the host never defined this token?" two
+ * contradictory ways: 119 reads carried a hardcoded dark literal (var(--surface, #2e2e2e)),
+ * and 150 carried nothing at all. The first gives a light-mode app dark-on-light. The
+ * second is worse -- an undefined custom property is invalid at computed-value time, so
+ * var(--text) does not fall back, it INHERITS, and the text quietly takes the colour of
+ * whatever it sits in. Neither raises anything. With a real default under them, both stop
+ * being bugs without editing 269 call sites.
+ *
+ * These are DEFAULTS, not the contract. --bg/--text/etc. are still the app's to define;
+ * this only decides what happens when it hasn't yet.
+ *
+ * @layer, deliberately: an unlayered rule beats any layered one regardless of order, so
+ * an app's plain :root always wins without caring whether its stylesheet is imported
+ * before or after this file. Same specificity in two files is otherwise decided by load
+ * order, which nobody remembers and a bundler is free to change.
+ *
+ * EVERY TOKEN IS WRITTEN TWICE, sRGB then OKLCH. An engine without oklch() drops the
+ * second declaration at parse time and keeps the first. The hex is not decoration: it is
+ * the same colour, computed from the same L (16.84% -> #0f0f0f, 93.10% -> #e8e8e8), and
+ * each theme carries its own pair. Declaring only the OKLCH half per theme is how the
+ * docs page ended up rendering light mode dark on a legacy engine.
+ *
+ * IF YOU READ THESE FROM JS, resolve them with the engine, not a regex. getComputedStyle
+ * returns the winning declaration -- today that is `oklch(93.1% 0 0)`, not a hex. A number
+ * sweep reads L, C, H as R, G, B and paints 93.1% grey as rgb(93, 0, 0); that is exactly
+ * how the colophon wordmark turned dark red. src/letterbox.js resolves colour through a
+ * 1x1 canvas for this reason.
+ *
+ * SCOPE: the seven tokens below are the ones the package reads unguarded -- --text (51
+ * reads), --border (39), --text-muted (32), --text-dim (15), --bg (9), --surface (3),
+ * --surface-hi (1). Still undefaulted, and still the app's job: --accent, --err, --ok,
+ * --warn, --muted, --bg-elevated, --bg-hover, --border-subtle, --surface-2,
+ * --marker-default, --track-empty, --scrollbar-thumb*, --edit-rail*.
+ *
+ * --line is gone from the contract. It only ever appeared as --border's fallback
+ * (var(--border, var(--line, #2a2a2a))), and no consumer has ever defined it, so the
+ * chain was two names for one thing with the second unreachable.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+@layer wm.color {
+  :root {
+    /* ---- the seven numbers. Dark. ---- */
+    --l-ground: 16.84%;  --l-surface: 21.78%;  --l-surface-hi: 26.45%;  --l-ink: 93.10%;
+    --a-2: .62;  --a-3: .38;  --a-line: .14;
+
+    /* ---- the roles. These lines are identical in every theme. ---- */
+    --bg:         #0f0f0f;  --bg:         oklch(var(--l-ground) 0 0);
+    --surface:    #1a1a1a;  --surface:    oklch(var(--l-surface) 0 0);
+    --surface-hi: #252525;  --surface-hi: oklch(var(--l-surface-hi) 0 0);
+    --text:       #e8e8e8;  --text:       oklch(var(--l-ink) 0 0);
+
+    /* Ink pressure, not separate greys: muted and dim are --text held back, so they
+       track it through a retheme instead of drifting off it. --a-2 / --a-3 are the same
+       numbers as type.css's --ink-quiet / --ink-faint on purpose -- one system, two
+       spellings, and they must not disagree. */
+    --text-muted: rgba(232, 232, 232, .62);  --text-muted: oklch(from var(--text) l c h / var(--a-2));
+    --text-dim:   rgba(232, 232, 232, .38);  --text-dim:   oklch(from var(--text) l c h / var(--a-3));
+    --border:     rgba(232, 232, 232, .14);  --border:     oklch(from var(--text) l c h / var(--a-line));
+  }
+
+  /* Light. Seven numbers and seven hexes -- the hex half moves too, or a legacy engine
+     gets the dark palette on a light ground. */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --l-ground: 96.66%;  --l-surface: 100%;  --l-surface-hi: 93.92%;  --l-ink: 20.02%;
+      --a-2: .66;  --a-3: .42;  --a-line: .16;
+      --bg: #f4f4f4;  --surface: #ffffff;  --surface-hi: #ebebeb;  --text: #161616;
+      --text-muted: rgba(22, 22, 22, .66);
+      --text-dim:   rgba(22, 22, 22, .42);
+      --border:     rgba(22, 22, 22, .16);
+      --bg:         oklch(var(--l-ground) 0 0);
+      --surface:    oklch(var(--l-surface) 0 0);
+      --surface-hi: oklch(var(--l-surface-hi) 0 0);
+      --text:       oklch(var(--l-ink) 0 0);
+      --text-muted: oklch(from var(--text) l c h / var(--a-2));
+      --text-dim:   oklch(from var(--text) l c h / var(--a-3));
+      --border:     oklch(from var(--text) l c h / var(--a-line));
+    }
+  }
+
+  /* An explicit choice beats the OS preference in both directions, so each theme is
+     spelled out rather than one of them relying on the media query not matching. */
+  :root[data-theme="dark"] {
+    --l-ground: 16.84%;  --l-surface: 21.78%;  --l-surface-hi: 26.45%;  --l-ink: 93.10%;
+    --a-2: .62;  --a-3: .38;  --a-line: .14;
+    --bg: #0f0f0f;  --surface: #1a1a1a;  --surface-hi: #252525;  --text: #e8e8e8;
+    --text-muted: rgba(232, 232, 232, .62);
+    --text-dim:   rgba(232, 232, 232, .38);
+    --border:     rgba(232, 232, 232, .14);
+    --bg:         oklch(var(--l-ground) 0 0);
+    --surface:    oklch(var(--l-surface) 0 0);
+    --surface-hi: oklch(var(--l-surface-hi) 0 0);
+    --text:       oklch(var(--l-ink) 0 0);
+    --text-muted: oklch(from var(--text) l c h / var(--a-2));
+    --text-dim:   oklch(from var(--text) l c h / var(--a-3));
+    --border:     oklch(from var(--text) l c h / var(--a-line));
+  }
+
+  :root[data-theme="light"] {
+    --l-ground: 96.66%;  --l-surface: 100%;  --l-surface-hi: 93.92%;  --l-ink: 20.02%;
+    --a-2: .66;  --a-3: .42;  --a-line: .16;
+    --bg: #f4f4f4;  --surface: #ffffff;  --surface-hi: #ebebeb;  --text: #161616;
+    --text-muted: rgba(22, 22, 22, .66);
+    --text-dim:   rgba(22, 22, 22, .42);
+    --border:     rgba(22, 22, 22, .16);
+    --bg:         oklch(var(--l-ground) 0 0);
+    --surface:    oklch(var(--l-surface) 0 0);
+    --surface-hi: oklch(var(--l-surface-hi) 0 0);
+    --text:       oklch(var(--l-ink) 0 0);
+    --text-muted: oklch(from var(--text) l c h / var(--a-2));
+    --text-dim:   oklch(from var(--text) l c h / var(--a-3));
+    --border:     oklch(from var(--text) l c h / var(--a-line));
+  }
+}
+
+</style>
+<style>
+/* type.css — the WORDMARK type tokens. See TYPOGRAPHY.md for the reasoning.
+ *
+ * Purely additive: importing this file changes nothing on its own. Nothing here styles an
+ * element type or a bare selector, so it cannot reach existing markup by accident — you opt
+ * in per element by adding a `t-*` class.
+ *
+ * Sizes are declared in rem against a 16px root so they follow the reader's own text size.
+ * We talk about them in px because that is how type is discussed.
+ *
+ * Two things the host app must provide, because they are the app's, not ours:
+ *   --ui-font   the chrome face
+ *   --text-rgb  the text color as "R, G, B" — COMMA-separated, because ink is written
+ *               rgba(var(--text-rgb), α). The rgb(… / α) slash form silently fails here.
+ * Both have fallbacks below so a missing one degrades rather than breaks, but an app that
+ * relies on the fallback is not on the system.
+ */
+
+/* Layered, so an app's own :root always wins. These are FALLBACKS -- the header above
+   says an app on the system overrides them -- but until now that only held if the app's
+   stylesheet happened to load after this one. :root and [data-theme="light"] are the
+   same specificity (0,1,0), so with type.css imported last, this block quietly beat the
+   app's light-theme --text-rgb: font-proofer's ink levels resolved to 232,232,232 in
+   every theme, which is light grey text on a light ground. A layer decides it by rule
+   instead of by import order. The t-* classes below stay unlayered: they are the API,
+   not a default. */
+@layer wm.type {
+  :root {
+    /* ---- roles: each spends SIZE and nothing else ----
+       micro is the ANNOTATION size: metric-rule labels, axis tags, slider end-markers,
+       group labels, glyph captions. Things pinned to something else that name it. It sat at
+       8px, where exactly one declaration used it, while the real annotations were at 9 and
+       10 — so 9 is where they actually live, and 8 was a size we were not using. ---- */
+    --type-micro-size: 0.5625rem;   --type-micro-lead: 1.2;    /*   9px */
+    --type-label-size: 0.75rem;     --type-label-lead: 1.3;    /*  12px */
+    --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       /*  12px */
+    --type-body-size: 1rem;         --type-body-lead: 1.55;    /*  16px */
+    --type-lede-size: 1.125rem;     --type-lede-lead: 1.5;     /*  18px */
+    --type-title-size: 1.625rem;    --type-title-lead: 1.2;    /*  26px */
+    --type-display-size: 2.8125rem; --type-display-lead: 1.1;  /*  45px */
+
+    /* ---- poster: the monster scale, ratio root-2 so every second step doubles.
+       Sets size and leading only — never an axis — so it serves any face. ---- */
+    --poster-1: 3rem;    --poster-2: 4.25rem;  --poster-3: 6rem;   /*  48 /  68 /  96px */
+    --poster-4: 8.5rem;  --poster-5: 12rem;                        /* 136 / 192px */
+
+    /* ---- ink: opacity on the text color. Three levels, never four. ---- */
+    --ink-full: 1;  --ink-quiet: .62;  --ink-faint: .38;
+
+    /* ---- the ONLY tracking value in the system. Capitals must be letterspaced and
+       nothing else may be: tracking by size is opsz's job, and doing it by hand
+       double-counts the axis. There is deliberately no negative value here. ---- */
+    --track-caps: .12em;
+
+    /* Fallbacks. An app on the system overrides both. */
+    --text-rgb: 232, 232, 232;
+  }
+}
+
+/* ---- the API ---- */
+.t-micro, .t-label, .t-ui, .t-body, .t-lede, .t-title, .t-display {
+  font-family: var(--ui-font, system-ui, sans-serif);
+  font-variation-settings: var(--ui-fvs, normal);
+}
+/* opsz tracks the size. Every role, no exceptions.
+   The chrome roles used to pin opsz 10 so labels would not "drift" from content. That threw
+   away the two things the axis is for:
+     — SIDEBEARINGS. Every glyph gains letterfit between opsz 10 and 8. This is the whole
+       point of the axis and it applies to all text, not to special characters: at 200px the
+       same string measures 657.4 at opsz 8 against 646.2 at opsz 10.
+     — the a, which swaps at opsz 8 (a and its accented forms). Only the a. The serifed I
+       and l are A11y-landing forms and need low GEOM as well, so they are a separate thing.
+   Small type needs the extra fit more than large type needs anything, so the role that most
+   needed the axis was the one we froze.
+   Pin opsz only to override spacing deliberately, or to make a cvXX choice on purpose —
+   never as a default. */
+.t-micro, .t-label, .t-ui, .t-body, .t-lede, .t-title, .t-display { font-optical-sizing: auto; }
+
+.t-micro   { font-size: var(--type-micro-size);   line-height: var(--type-micro-lead); }
+.t-ui      { font-size: var(--type-ui-size);      line-height: var(--type-ui-lead); }
+.t-body    { font-size: var(--type-body-size);    line-height: var(--type-body-lead); }
+.t-lede    { font-size: var(--type-lede-size);    line-height: var(--type-lede-lead); }
+.t-title   { font-size: var(--type-title-size);   line-height: var(--type-title-lead); }
+.t-display { font-size: var(--type-display-size); line-height: var(--type-display-lead); }
+
+/* label is the one role that spends CASE rather than size — it sits at chrome size in
+   full ink and is distinguished by being capitalised. Small + caps + muted + heavy is
+   four signals for one idea, and is the habit this role exists to replace. */
+.t-label {
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lead);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+}
+
+.p1, .p2, .p3, .p4, .p5 {
+  font-family: var(--ui-font, system-ui, sans-serif);
+  font-variation-settings: var(--ui-fvs, normal);
+  font-optical-sizing: auto;
+}
+.p1 { font-size: var(--poster-1); line-height: 1.05; }
+.p2 { font-size: var(--poster-2); line-height: 1.02; }
+.p3 { font-size: var(--poster-3); line-height: 1.00; }
+.p4 { font-size: var(--poster-4); line-height: .98; }
+.p5 { font-size: var(--poster-5); line-height: .96; }
+
+.ink-full  { color: rgba(var(--text-rgb), var(--ink-full)); }
+.ink-quiet { color: rgba(var(--text-rgb), var(--ink-quiet)); }
+.ink-faint { color: rgba(var(--text-rgb), var(--ink-faint)); }
+
+/* rule — the quietest signal there is. Same size, weight, color and case; only a
+   hairline under the words. */
+.sig-rule {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .28em;
+}
+
+</style>
+<style>
+/* chip.css -- the house CHIP: one of a set, every option visible, the chosen one filled.
+ *
+ * Three apps drew it three ways. ReCal's GEOM zone chips (an outline in the zone's hue,
+ * the chosen one filled), font-proofer's preset bar (bare words, the chosen one boxed)
+ * and Kernpare's context dial (radios, then outlined chips). Mark's brief for this one
+ * (2026-09-27): ReCal's grammar -- colour and outline say what is chosen and what is not --
+ * at the preset bar's size, and FORWARD-VIEW: every option and its state reads at rest.
+ * Nothing is discovered by rolling over it. Hover brightens; it never reveals.
+ *
+ * A chip is not .ui-seg. The segment is one control with a sliding thumb; a chip row is
+ * N buttons, each its own target, and a chip can carry its own hue. It is not .wm-btn
+ * either: a button does something, a chip chooses something.
+ *
+ *   .wm-chip-row           the set: a wrapping row, 4px apart
+ *   .wm-chip               outlined at rest; .on / [aria-pressed=true] / a checked input
+ *                          inside it = chosen, filled
+ *   .wm-chip--small        the micro size, for a lens over a canvas (Kernpare's dial)
+ *   .wm-chip--switch       a MODIFIER beside a set, not one more option in it: dashed at
+ *                          rest, the secondary fill when on -- a step below a chosen chip,
+ *                          so the two never read alike (Kernpare's rev)
+ *   --chip-color           give a chip its own hue: outline + label at rest, the fill when
+ *                          chosen (ReCal's zone colours). Unset, a chip is neutral ink.
+ *
+ * WEIGHT WITHOUT REFLOW, from ReCal: a chosen chip is heavier, and a heavier label is
+ * wider. Give the chip data-label="<its text>" and it reserves the bold width under the
+ * label, so choosing never shifts the row. Without data-label the weight stays put.
+ *
+ * A RADIO OR CHECKBOX MAY LIVE INSIDE. Wrap it in the chip (<label class="wm-chip">
+ * <input type=radio>...); the input is hidden but stays focusable, so Tab, arrows and
+ * the form state all work, and :has(input:checked) is the chosen state.
+ *
+ * Tokens with fallbacks throughout, in @layer wm.controls like button.css, so a host can
+ * override any line with an unlayered rule -- or bridge its own ink names on the row. */
+@layer wm.controls {
+  .wm-chip-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-01, 4px); }
+
+  .wm-chip {
+    /* Declared, and unset: `initial` is the guaranteed-invalid value, so every
+       var(--chip-color, ...) below takes its fallback until a host sets it ON THE CHIP
+       (inline, or an unlayered rule -- either beats this layer). Declared here rather than
+       listed as a runtime token because three consumers lint shared/src with their own
+       token lists, and a new runtime token fails all three. */
+    --chip-color: initial;
+    /* The rest and chosen inks, neutral unless --chip-color names a hue. */
+    --chip-ink: var(--chip-color, var(--text-muted, rgba(232, 232, 232, .62)));
+    --chip-line: var(--chip-color, var(--text-dim, rgba(232, 232, 232, .38)));
+    --chip-fill: var(--chip-color, var(--text, #e8e8e8));
+    --chip-on-ink: var(--bg, #111);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-01, 4px) var(--spacing-04, 12px);
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 1.4);
+    font-weight: 400;
+    color: var(--chip-ink);
+    background: transparent;
+    border: 1px solid var(--chip-line);
+    border-radius: 999px;
+    corner-shape: superellipse(var(--corner-k, 1.2));
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--dur-fast, 140ms) ease, border-color var(--dur-fast, 140ms) ease, background var(--dur-fast, 140ms) ease;
+  }
+  /* A MARK IN A CHIP IS PART OF ITS LABEL, so it takes the label's ink: dark on a filled
+     chip, the hue on an outlined one. That rules out .wm-icon, whose colour lives in
+     @layer wm.icon -- declared after wm.controls, so nothing here can reach it -- and is
+     a fixed light ink. A chip's mark is the same Material face flagged data-mark
+     (<span class="material-symbols-outlined" data-mark>sync_alt</span>), the flag
+     button.css already reads, drawn here in currentColor. Its own margin, no gap, so a
+     label written with inline markup never comes apart. */
+  .wm-chip > [data-mark] {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1.35em;
+    line-height: 1;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+    font-feature-settings: 'liga';
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    color: inherit;
+  }
+  .wm-chip > [data-mark]:not(:last-child) { margin-right: 2px; }
+  /* The bold width, reserved: the label and a zero-height copy of it at the chosen weight
+     stack in a column, so the chip is always as wide as its heavier self. Text only --
+     a data-label chip carries no mark. */
+  .wm-chip[data-label] { flex-direction: column; }
+  .wm-chip[data-label]::after {
+    content: attr(data-label);
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+    font-weight: 600;
+  }
+  .wm-chip > input {
+    position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none;
+  }
+
+  .wm-chip:hover { color: var(--text, #e8e8e8); border-color: var(--chip-color, var(--text-muted, currentColor)); }
+  .wm-chip:is(.on, [aria-pressed="true"], :has(> input:checked)) {
+    color: var(--chip-on-ink);
+    background: var(--chip-fill);
+    border-color: var(--chip-fill);
+    font-weight: 600;
+  }
+
+  .wm-chip--small {
+    /* 1px, not var(--hair): the hosts disagree on what --hair is (Kernpare's is a length,
+       the system page's a colour), and a colour there voids the whole padding. */
+    padding: 1px var(--spacing-03, 8px);
+    font-size: var(--type-micro-size, 0.5625rem);
+  }
+
+  /* A modifier, not an option: it stays on across the set, so it wears the secondary
+     fill (--text-muted under --bg ink), a step below the chosen chip's --text. */
+  .wm-chip--switch { border-style: dashed; }
+  .wm-chip--switch:is(.on, [aria-pressed="true"], :has(> input:checked)) {
+    --chip-fill: var(--chip-color, var(--text-muted, #a8a8a8));
+    border-style: solid;
+    font-weight: 400;
+  }
+
+  .wm-chip:focus { outline: none; }
+  .wm-chip:is(:focus-visible, :has(> input:focus-visible)) { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+  .wm-chip:is(:disabled, [aria-disabled="true"]) { opacity: .4; cursor: default; }
+
+  @media (pointer: coarse) {
+    .wm-chip { min-height: 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wm-chip { transition: none; }
+  }
+}
+
+</style>
+<style>
+/* grid.css -- the house grid: 24 columns, a 3px line, one margin for every page.
+ *
+ * COLUMNS. 24 on a desktop, 12 below 1024px -- 12 divides 24, so a half is still a half
+ * and a third still a third on a phone. 30 was considered and lost to the pages it is for:
+ * calsans splits its sections 5:7 three times, which is 10 | 14 here and 12.5 | 17.5 on 30.
+ * The gutter is the pad scale's 24px (12 on a phone). The margin is the case study's own --
+ * clamp(20px, 5vw, 40px) on a phone, clamp(32px, 7vw, 112px) from 681px -- and it is the
+ * SAME for every project: page padding belongs to the grid, not to the page.
+ *
+ * LINES. A 3px unit: the leading subdivided, the way 12/15 sits on a 3pt grid. Body is
+ * 16/24. A leading is a whole number of units -- for fluid type, round(nearest, Nem,
+ * var(--bl)) gives that at every size the clamp() produces -- and so is the vertical space
+ * between text blocks in a column, because that decides where the next baseline lands.
+ * The pad scale is NOT on the line and need not be: a component's insides are its own.
+ * What carries text in the flow (a pill, a chip, a button) is the exception: its HEIGHT is
+ * in units, so a row of them is a line of type and nothing below it is knocked off.
+ *
+ * CARDS (rule A, Mark 2026-10-01). A card is a box on the grid; its contents step in one
+ * column + one gutter, so they land on the next column line.
+ *
+ *   .wm-grid            columns + the page margin (a whole page or section)
+ *   .wm-cols            the same columns, no margin -- inside a wrapper that has it
+ *   --span / --start    a child's columns on the 24 (default: all of them)
+ *   --span-md / --start-md   the same below 1024px (default: all 12)
+ *   .wm-card            a box whose contents start one column + one gutter in
+ *   --grid-col          one column's width, as a length, inside either container
+ *   --bl                the line; .wm-lines puts text's baselines on it (below)
+ *   --snap              the remainder a builder or gridSnap.js measured (below) */
+@layer wm.grid {
+  :root {
+    --grid-cols: 24;
+    --grid-gutter: 24px;
+    --grid-margin: clamp(20px, 5vw, 40px);
+    --bl: 3px;
+  }
+  @media (min-width: 681px)  { :root { --grid-margin: clamp(32px, 7vw, 112px); } }
+  @media (max-width: 1023px) { :root { --grid-cols: 12; } }
+  @media (max-width: 599px)  { :root { --grid-gutter: 12px; } }
+
+  .wm-grid, .wm-cols {
+    /* A container, so anything inside can measure a column in cqw without JS. */
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+  }
+  .wm-grid { padding-inline: var(--grid-margin); --_m: var(--grid-margin); }
+  .wm-cols { --_m: 0px; }
+  :is(.wm-grid, .wm-cols) > * {
+    /* Declared and unset (`initial`), so the fallbacks apply until a host sets them on the
+       child -- the same move as chip.css's --chip-color. */
+    --span: initial; --start: initial; --span-md: initial; --start-md: initial;
+    min-width: 0;
+    grid-column: var(--start, auto) / span var(--span, 24);
+    /* One column, as a length. 100cqw is the container's own width, margins included. */
+    --grid-col: calc((100cqw - 2 * var(--_m) - (var(--grid-cols) - 1) * var(--grid-gutter)) / var(--grid-cols));
+  }
+  @media (max-width: 1023px) {
+    :is(.wm-grid, .wm-cols) > * { grid-column: var(--start-md, auto) / span var(--span-md, 12); }
+  }
+  .wm-card { padding: var(--grid-gutter) calc(var(--grid-col) + var(--grid-gutter)); }
+}
+
+/* BASELINES ON THE LINE -- UNLAYERED, on purpose. type.css's .t-* classes are unlayered (they
+   are its API, not a default), and an unlayered rule beats any layered one however specific:
+   inside a layer, .wm-lines .t-ui lost to .t-ui and ui sat at 16.8 instead of 15. Out here,
+   specificity decides, and .wm-lines X outranks X.
+
+   Inside .wm-lines a text block's leading is --lh, a whole number of units, and its box
+   starts on a line. That does not yet put its BASELINES there: a baseline sits the
+   half-leading plus the ascent below the top of its line box, and that depends on the face.
+   So each block is nudged down by however far that lands short of the next line -- under
+   one unit, by `top`, which moves the glyphs and not the layout. The browser rounds ascent
+   and descent to whole pixels at each size and floors an odd half-leading (lede: 27 - 20 = 7,
+   so 3 above, not 3.5), and so does this. Cal Sans's hhea is 1800 / -490 on 2000; a page on
+   another face sets --font-asc / --font-desc from its own (or typo, if USE_TYPO_METRICS).
+   A page sets --lh wherever it sets a leading; nothing here touches margins. */
+.wm-lines {
+  --font-asc: 0.9; --font-desc: 0.245;
+  --lead-micro: 12px; --lead-ui: 15px; --lead-body: 24px; --lead-lede: 27px; --lead-title: 30px;
+  --lh: var(--lead-body);
+}
+/* :where, so any rule that sets --lh outranks it, whatever selector it is written with. */
+.wm-lines :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line]) {
+  line-height: var(--lh);
+  position: relative;
+  /* unset until a builder or gridSnap.js writes it ON the element (inline wins); declared
+     here, not listed as a runtime token, so consumers' own token lists don't fail on it */
+  --snap: initial;
+  --asc: round(calc(var(--font-asc) * 1em), 1px);
+  --desc: round(calc(var(--font-desc) * 1em), 1px);
+  top: calc(mod(calc(var(--bl) - mod(calc(round(down, (var(--lh) - var(--asc) - var(--desc)) / 2, 1px) + var(--asc)), var(--bl))), var(--bl)) + var(--snap, 0px));
+}
+/* --snap: what CSS cannot know. The nudge above is exact for a block whose BOX starts on a
+   line; a block below an image, an embed or a 1px rule starts wherever those end. A builder
+   (or src/gridSnap.js, after layout) measures the rendered baseline and sets --snap to the
+   remainder -- under one unit, glyphs only, never the layout. */
+.wm-lines .t-lede { --lh: var(--lead-lede); }
+.wm-lines .t-title { --lh: var(--lead-title); }
+.wm-lines :is(.t-ui, .t-label) { --lh: var(--lead-ui); }
+.wm-lines .t-micro { --lh: var(--lead-micro); }
+.wm-lines .t-display { --lh: round(nearest, 1.1em, var(--bl)); }
+
+</style>
+<style>
+@font-face{font-family:"Face";src:url(fonts/CalSansVF.ttf) format("truetype");font-weight:400 700;font-style:normal;font-display:swap}
+@font-face{font-family:"Material Symbols Outlined";src:url(fonts/MaterialSymbolsOutlined-full.woff2) format("woff2");font-weight:100 700;font-display:block}
+:root{--ui-font:"Face",system-ui,sans-serif;--ov-col:rgba(255,40,140,.07);--ov-col-line:rgba(255,40,140,.42);--ov-bl:rgba(40,120,255,.16);--ov-bl-strong:rgba(40,120,255,.5)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg,#0f0f0f);color:var(--text,#e8e8e8);font-family:var(--ui-font);font-size:16px;font-variation-settings:'opsz' 16}
+a{color:inherit}
+/* leading 1: a second face's taller metrics would otherwise stretch the line box past its 24 */
+code{font-family:ui-monospace,Menlo,monospace;font-size:.85em;line-height:1}
+
+/* chrome bar -- outside the lines, so it may be any height */
+.bar{position:sticky;top:0;z-index:20;background:color-mix(in oklab,var(--bg,#0f0f0f) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--border,rgba(232,232,232,.14))}
+.bar .wm-grid{padding-block:12px;align-items:center}
+.bar b{font-weight:700;letter-spacing:var(--track-caps,.12em);font-size:var(--type-micro-size,.5625rem);text-transform:uppercase}
+.bar .wm-chip-row{justify-content:flex-end}
+.bar .k{font-size:var(--type-micro-size,.5625rem);color:var(--text-dim);margin-left:4px}
+
+/* page */
+main.wm-lines{padding-top:72px;padding-bottom:96px;position:relative}
+/* this page's own text rhythm: a body line under every paragraph, titles on 30 */
+main.wm-lines :where(p, li){margin:0 0 24px}
+main.wm-lines h2, main.wm-lines h3{--lh:30px}
+.eyebrow{font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--text-muted)}
+h1.t-display{font-size:clamp(2.75rem,6vw,6rem);font-weight:700;margin:0;font-variation-settings:'opsz' 45}
+h2{font-size:var(--type-title-size,1.625rem);font-weight:700;margin:0 0 24px;font-variation-settings:'opsz' 26}
+.t-lede{font-size:var(--type-lede-size,1.125rem);color:var(--text)}
+p{font-size:var(--type-body-size,1rem);color:var(--text-muted)}
+p b{color:var(--text);font-weight:600}
+.t-ui{font-size:var(--type-ui-size,.75rem);color:var(--text-muted);margin:0}
+.t-micro{font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--text-dim);margin:0}
+section{margin-top:96px}
+.rule{grid-column:1 / -1;height:1px;background:var(--border);margin:0 0 47px}
+.card{background:var(--surface,#1a1a1a);border-radius:var(--radius,12px);margin-bottom:24px}
+.card :last-child{margin-bottom:0}
+.card h3{font-size:var(--type-title-size,1.625rem);font-weight:700;margin:0 0 24px;--lh:var(--lead-title)}
+.colnum{font-size:var(--type-micro-size,.5625rem);color:var(--text-dim);margin:0 0 12px;letter-spacing:var(--track-caps,.12em);text-transform:uppercase}
+.spec{display:grid;grid-template-columns:subgrid}
+.spec .lbl{grid-column:1 / span 4}
+.spec .smp{grid-column:5 / -1}
+@media (max-width:1023px){.spec .lbl{grid-column:1 / -1}.spec .smp{grid-column:1 / -1}}
+.spec .lbl p{margin:0}
+.spec .row{display:contents}
+.spec .gap{grid-column:1/-1;height:24px}
+table{border-collapse:collapse;width:100%}
+/* rows are one body line each; the rule is a shadow, so it takes no height and the table stays on the lines */
+tr{height:24px}
+td,th{text-align:left;padding:0;font-size:var(--type-ui-size,.75rem);line-height:24px;color:var(--text-muted);box-shadow:inset 0 -1px 0 var(--border);vertical-align:middle}
+th{color:var(--text-dim);font-weight:400}
+
+/* overlays */
+#cols{position:fixed;inset:0;z-index:15;pointer-events:none;display:none}
+#cols .wm-grid{height:100%}
+#cols .wm-grid > div{background:var(--ov-col);border-inline:1px solid var(--ov-col-line);position:relative}
+#cols .wm-grid > div span{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:9px;color:var(--ov-col-line)}
+html.show-cols #cols{display:block}
+html.show-cols #cols .wm-grid > div{--span:1;--span-md:1}
+/* lines: drawn on a canvas at the screen's own pixel density (see the script), not a CSS
+   gradient -- a 3px gradient at a fractional zoom is resampled into smeared, unevenly spaced
+   lines, which read as the type being off when it is the drawing that is. */
+#lines{position:absolute;left:0;top:0;pointer-events:none;z-index:0;display:none}
+html.show-lines #lines{display:block}
+main.wm-lines > *{position:relative;z-index:1}
+html.off-grid .wm-lines{--lead-body:24.8px}
+</style>
+</head>
+<body>
+<div class="bar"><div class="wm-grid">
+  <div style="--span:6;--span-md:12"><b>WM Grid</b> <span class="k">draft · on trial</span></div>
+  <div class="wm-chip-row" style="--span:18;--span-md:12">
+    <button class="wm-chip wm-chip--small wm-chip--switch" id="tCols" title="G"><span class="material-symbols-outlined" data-mark aria-hidden="true">view_column</span>columns</button>
+    <button class="wm-chip wm-chip--small wm-chip--switch" id="tLines" title="L"><span class="material-symbols-outlined" data-mark aria-hidden="true">format_line_spacing</span>lines</button>
+    <span class="k" style="margin-left:12px">body</span>
+    <button class="wm-chip wm-chip--small on" data-lead="24" title="B">16/24 · on the grid</button>
+    <button class="wm-chip wm-chip--small" data-lead="24.8" title="B">16/24.8 · today</button>
+  </div>
+</div></div>
+
+<div id="cols"><div class="wm-grid"></div></div>
+
+<main class="wm-lines">
+  <canvas id="lines" aria-hidden="true"></canvas>
+  <div class="wm-grid">
+    <p class="eyebrow t-micro" style="--span:24;margin-bottom:24px">WM Primitives · the grid</p>
+    <h1 class="t-display" style="--span:20;--span-md:12;margin-bottom:48px">Twenty-four columns, three-pixel lines</h1>
+    <div style="--span:13;--span-md:12">
+      <p class="t-lede">One margin, one gutter and one set of columns for every WORDMARK page, and a baseline cut from the leading the way 12/15 type sits on a 3pt grid. Turn on the columns (G) and the lines (L), then flip the body leading (B) to see why 24.8 cannot stay.</p>
+    </div>
+    <div style="--start:15;--span:10;--span-md:12">
+      <p><b>13 | skip | 10.</b> The hero is calsans's: thirteen columns of lede, one empty column, ten of notes. The empty column and two gutters make the 77px gap the page had chosen by eye (72).</p>
+      <p class="t-ui">grid-column: 15 / span 10</p>
+    </div>
+  </div>
+
+  <section class="wm-grid">
+    <div class="rule"></div>
+    <h2 style="--span:24">The columns</h2>
+    <p class="colnum" style="--span:24">10 | 14 &mdash; calsans's 5:7 split &middot; cards inset one column + one gutter (rule A)</p>
+    <div class="card wm-card" style="--span:10;--span-md:12">
+      <h3>Cal.com</h3>
+      <p>The card sits on the grid. Its text starts one column and one gutter in, so it lands on the next column line, not on a padding that happened to look right.</p>
+    </div>
+    <div class="card wm-card" style="--span:14;--span-md:12">
+      <h3>Geometry</h3>
+      <p>Fourteen columns. On a phone both cards take all twelve, and the inset stays one column + one gutter: 30px at 390.</p>
+    </div>
+    <p class="colnum" style="--span:24">8 · 8 · 8 &mdash; thirds &middot; 4 · 4 · 4 below 1024</p>
+    <div class="card wm-card" style="--span:8;--span-md:4"><p class="t-ui">eight</p></div>
+    <div class="card wm-card" style="--span:8;--span-md:4"><p class="t-ui">eight</p></div>
+    <div class="card wm-card" style="--span:8;--span-md:4"><p class="t-ui">eight</p></div>
+    <p class="colnum" style="--span:24">6 · 6 · 6 · 6 &mdash; quarters, which 30 columns could not do &middot; 6 · 6 below 1024</p>
+    <div class="card wm-card" style="--span:6;--span-md:6"><p class="t-ui">six</p></div>
+    <div class="card wm-card" style="--span:6;--span-md:6"><p class="t-ui">six</p></div>
+    <div class="card wm-card" style="--span:6;--span-md:6"><p class="t-ui">six</p></div>
+    <div class="card wm-card" style="--span:6;--span-md:6"><p class="t-ui">six</p></div>
+  </section>
+
+  <section class="wm-grid">
+    <div class="rule"></div>
+    <h2 style="--span:24">The lines</h2>
+    <div class="spec" style="--span:24;--span-md:12">
+      <div class="lbl"><p class="t-ui">display &middot; fluid / round(down, 1.1em, 3px)</p></div>
+      <div class="smp"><p class="t-display" style="font-size:clamp(2.75rem,6vw,6rem);font-weight:700;color:var(--text);margin:0;font-variation-settings:'opsz' 45">Hamburgefonstiv, at every width</p></div>
+      <div class="gap"></div>
+      <div class="lbl"><p class="t-ui">title &middot; 26 / 30 &middot; 10 lines</p></div>
+      <div class="smp"><p class="t-title" style="font-size:var(--type-title-size);font-weight:700;color:var(--text);margin:0">The leading, subdivided</p></div>
+      <div class="gap"></div>
+      <div class="lbl"><p class="t-ui">lede &middot; 18 / 27 &middot; 9 lines</p></div>
+      <div class="smp"><p class="t-lede" style="margin:0">Every role's leading is a whole number of three-pixel units, so baselines of different sizes still meet on one set of lines.</p></div>
+      <div class="gap"></div>
+      <div class="lbl"><p class="t-ui">body &middot; 16 / 24 &middot; 8 lines</p></div>
+      <div class="smp"><p style="margin:0">Body copy is where the grid is decided. At 24 every line of a long paragraph lands on a strong line. At 24.8 the first line does, and each line after it falls another 0.8px behind, until by the tenth it sits between lines. Flip the body chips with the lines on and watch this paragraph walk off the grid while the lede above and the interface type below stay put.</p></div>
+      <div class="gap"></div>
+      <div class="lbl"><p class="t-ui">ui &middot; 12 / 15 &middot; 5 lines</p></div>
+      <div class="smp"><p class="t-ui" style="max-width:52ch">Twelve on fifteen: the print grid this one is modelled on. Labels, captions, the dial's words.</p></div>
+      <div class="gap"></div>
+      <div class="lbl"><p class="t-ui">micro &middot; 9 / 12 &middot; 4 lines</p></div>
+      <div class="smp"><p class="t-micro">axis tags &middot; metric rules &middot; annotations</p></div>
+    </div>
+  </section>
+
+  <section class="wm-grid">
+    <div class="rule"></div>
+    <h2 style="--span:24">The numbers</h2>
+    <div style="--span:12;--span-md:12">
+      <table>
+        <tr><th>token</th><th>desktop</th><th>below 1024</th><th>below 600</th></tr>
+        <tr><td><code>--grid-cols</code></td><td>24</td><td>12</td><td>12</td></tr>
+        <tr><td><code>--grid-gutter</code></td><td>24px</td><td>24px</td><td>12px</td></tr>
+        <tr><td><code>--grid-margin</code></td><td>7vw</td><td>7vw</td><td>20px</td></tr>
+        <tr><td><code>--bl</code></td><td>3px</td><td>3px</td><td>3px</td></tr>
+        <tr><td>card inset</td><td colspan="3">one column + one gutter</td></tr>
+      </table>
+    </div>
+    <div style="--start:15;--span:10;--span-md:12">
+      <p><b>What is on the lines, and what is not.</b> Text and the space between text blocks are in units of 3px. A chip's padding, a button's, a card's top and bottom, stay on the pad scale (4 6 8 12 16 24 32 48 64) &mdash; components keep their own spacing; the column of text keeps the rhythm.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+/* gridSnap.js -- puts every text baseline inside a .wm-lines root on its --bl line, after layout.
+ *
+ * grid.css does what CSS can: leadings in whole units, and a per-face nudge that lands a
+ * block's baselines on the line when its BOX starts on one. What CSS cannot know is where a
+ * box starts after an image, an embed, a cube or a 1px rule -- anything in the flow whose
+ * height is not in units. This measures each text block's first rendered baseline and sets
+ * --snap on it to the remainder (0 <= snap < --bl), which grid.css adds to the block's `top`:
+ * the glyphs move down a fraction of a unit, the layout does not move at all, so nothing
+ * below is disturbed and one pass is enough.
+ *
+ * A "text block" is an in-flow element with its own text (a direct, non-blank text node):
+ * p, h1-h5, li, figcaption, a pill's label, a byline. Skipped: anything positioned
+ * absolute/fixed/sticky, anything already relatively placed for its own reasons, and any
+ * subtree marked [data-nosnap] -- an interactive demo with its own type keeps it.
+ *
+ * Plain script, no module, no dependency: <script src="shared/src/gridSnap.js" defer>.
+ * It reruns when fonts load, when a root resizes, and on window.wmGridSnap() -- call that
+ * after a script of the page's own changes heights. */
+(() => {
+  const BL = root => parseFloat(getComputedStyle(root).getPropertyValue('--bl')) || 3;
+  const probe = document.createElement('span');
+  probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+
+  function ownText(el) {
+    for (const n of el.childNodes) if (n.nodeType === 3 && n.textContent.trim()) return n;
+    return null;
+  }
+  function snapRoot(root) {
+    const bl = BL(root), top0 = root.getBoundingClientRect().top;
+    const blocks = [];
+    for (const el of root.querySelectorAll('*')) {
+      if (el.closest('[data-nosnap]')) continue;
+      const cs = getComputedStyle(el);
+      if (cs.display === 'inline' || cs.display === 'contents' || cs.display === 'none') continue;
+      if (/absolute|fixed|sticky/.test(cs.position)) continue;
+      // relatively placed for its own reasons (not by grid.css) -- leave it alone
+      if (cs.position === 'relative' && !el.matches('.wm-lines :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line])')) {
+        if (!el.hasAttribute('data-snap')) continue;
+      }
+      const t = ownText(el);
+      if (t) blocks.push([el, t]);
+    }
+    // measure everything first, then write: no layout thrash, and writes cannot move reads
+    const out = blocks.map(([el, t]) => {
+      el.style.removeProperty('--snap');
+      return [el, t];
+    }).map(([el, t]) => {
+      t.parentNode.insertBefore(probe, t);
+      const y = probe.getBoundingClientRect().top - top0;
+      probe.remove();
+      const m = ((y % bl) + bl) % bl;
+      return [el, m < 0.02 || bl - m < 0.02 ? 0 : bl - m];
+    });
+    for (const [el, d] of out) {
+      if (!d) continue;
+      if (getComputedStyle(el).position === 'static') { el.style.position = 'relative'; el.style.top = 'var(--snap)'; }
+      el.style.setProperty('--snap', d.toFixed(2) + 'px');
+    }
+  }
+  let raf = 0;
+  function run() { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => document.querySelectorAll('.wm-lines').forEach(snapRoot)); }
+  window.wmGridSnap = run;
+  const start = () => {
+    run();
+    document.fonts && document.fonts.ready.then(run);
+    if ('ResizeObserver' in window) { const ro = new ResizeObserver(run); document.querySelectorAll('.wm-lines').forEach(r => ro.observe(r)); }
+    addEventListener('load', run);
+  };
+  document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
+})();
+
+</script>
+<script>
+// the column overlay draws whatever --grid-cols says right now
+const colsHost = document.querySelector('#cols .wm-grid');
+function drawCols(){ const n = +getComputedStyle(document.documentElement).getPropertyValue('--grid-cols') || 24;
+  colsHost.innerHTML = Array.from({length:n}, (_, i) => `<div><span>${i+1}</span></div>`).join(''); }
+drawCols(); addEventListener('resize', drawCols);
+const root = document.documentElement;
+const flip = (cls, btn) => { const on = root.classList.toggle(cls); btn.classList.toggle('on', on); };
+const tCols = document.getElementById('tCols'), tLines = document.getElementById('tLines');
+tCols.onclick = () => flip('show-cols', tCols);
+tLines.onclick = () => flip('show-lines', tLines);
+const leads = [...document.querySelectorAll('[data-lead]')];
+const setLead = v => { root.classList.toggle('off-grid', v === '24.8'); leads.forEach(b => b.classList.toggle('on', b.dataset.lead === v)); };
+leads.forEach(b => b.onclick = () => setLead(b.dataset.lead));
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === 'g') tCols.click();
+  if (k === 'l') tLines.click();
+  if (k === 'b') setLead(root.classList.contains('off-grid') ? '24' : '24.8');
+});
+
+// The 3px lines, one device pixel each, on the device pixel the browser snaps a baseline to:
+// line k sits at round(k * 3 * dpr) in device pixels from main's top.
+const main = document.querySelector('main.wm-lines'), cv = document.getElementById('lines');
+function drawLines(){
+  const dpr = window.devicePixelRatio || 1, w = main.clientWidth, h = main.scrollHeight;
+  cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  const g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height);
+  g.fillStyle = getComputedStyle(root).getPropertyValue('--ov-bl-strong').trim() || 'rgba(40,120,255,.5)';
+  g.globalAlpha = .5;
+  // the line is the pixel row just above the baseline position, the way glyphs sit on it
+  for (let y = 0; y * dpr < cv.height; y += 3) g.fillRect(0, Math.round(y * dpr) - 1, cv.width, 1);
+}
+let raf = 0; const redraw = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(drawLines); };
+addEventListener('resize', redraw); matchMedia('(resolution: 1dppx)').addEventListener?.('change', redraw);
+new ResizeObserver(redraw).observe(main); document.fonts?.ready.then(redraw); redraw();
+// open with both overlays on: this page is about them
+tCols.click(); tLines.click();
+</script>
+</body>
+</html>

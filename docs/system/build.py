@@ -1894,3 +1894,27 @@ else:
     print(f"  fonts {(len(FACE)+len(SPEC))/1e6:.2f}MB   content {(len(page)-len(FACE)-len(SPEC))/1e6:.2f}MB")
 for s in secs:
     print(f"  {s['sid']:<9} css={len(s['css'])/1000:>6.1f}KB  html={len(s['html'])/1000:>6.1f}KB  js={len(s['js'])/1000:>5.1f}KB")
+
+
+# ── docs/grid.html: the grid's stand-alone page ─────────────────────────────────────────────
+# Written from docs/system/grid.html with every ../../src/ stylesheet and script inlined, so the
+# published page runs exactly the grid.css, chip.css and gridSnap.js that ship -- Pages serves
+# docs/ only, and a link into src/ would 404 there. Fonts resolve from docs/fonts/.
+def build_grid_page():
+    src = HERE / "grid.html"
+    if not src.exists():
+        return
+    raw = src.read_text()
+    def css(m):
+        return "<style>\n" + (HERE.parent.parent / "src" / m.group(1)).read_text() + "\n</style>"
+    def js(m):
+        return "<script>\n" + (HERE.parent.parent / "src" / m.group(1)).read_text() + "\n</script>"
+    raw = re.sub(r'<link rel="stylesheet" href="\.\./\.\./src/([\w.-]+\.css)">', css, raw)
+    raw = re.sub(r'<script src="\.\./\.\./src/([\w.-]+\.js)"[^>]*></script>', js, raw)
+    raw = raw.replace("url(../fonts/", "url(fonts/").replace('href="../favicon.svg"', 'href="favicon.svg"')
+    raw = re.sub(r"\n<!-- SOURCE\..*?-->", "", raw, flags=re.S)
+    (HERE.parent / "grid.html").write_text(raw)
+    print("docs/grid.html written from docs/system/grid.html")
+
+build_grid_page()
+

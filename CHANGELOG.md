@@ -12,6 +12,23 @@ Newest first.
 
 ---
 
+## 2026-10-01 — the grid
+
+`src/grid.css` + `src/gridSnap.js`, on trial in `docs/grid.html` and adopted first by the Cal
+Sans case study. 24 columns, 12 below 1024 (12 divides 24, so halves and thirds survive a
+phone; 30 lost because calsans splits 5:7, which is 10 | 14 here and 12.5 | 17.5 there). A 24px
+gutter, 12 on a phone, and the case study's margin as everyone's. Cards step their contents in
+one column + one gutter (rule A: the hanging version overlapped neighbours).
+
+The line is 3px -- the leading subdivided, like 12/15 on a 3pt grid -- and body is 16/24, which
+1.55 never divided. Getting baselines, not boxes, onto it took three discoveries, each now in
+the file: type.css's .t-* classes are unlayered, so the line rules can't live in a layer; the
+browser rounds ascent and descent to whole pixels and floors an odd half-leading, so the nudge
+does the same; and nothing in CSS can know where a block starts after an image, so gridSnap.js
+measures that after layout and sets --snap (glyphs only, under one unit). The demo puts 53/53
+baselines on a line at 1440, 49/49 at 900, 70/70 at 390; the case study goes from 1/125 to
+117/125, the rest being ornaments placed on purpose (pill arrows, counters, rings).
+
 ## 2026-10-01 — the chip
 
 `src/chip.css`: one of a set, every option visible, the chosen one filled. Three apps had
