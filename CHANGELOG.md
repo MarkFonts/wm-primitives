@@ -12,6 +12,20 @@ Newest first.
 
 ---
 
+## 2026-10-01 — the chip
+
+`src/chip.css`: one of a set, every option visible, the chosen one filled. Three apps had
+drawn it three ways -- ReCal's GEOM zone chips, font-proofer's preset bar (bare words, the
+chosen one boxed), Kernpare's context radios-then-chips. Mark's brief: ReCal's grammar at the
+preset bar's size, and forward-view -- the state reads at rest, never only on hover. So the
+unchosen options are outlined, not bare, which is the one thing that visibly changes in
+font-proofer. `--chip-color` gives a chip its hue; `--small` is the lens size; `--switch` is a
+modifier beside a set (dashed at rest, the secondary fill when on), never one more option.
+`data-label` reserves the chosen weight's width, ReCal's no-reflow trick, as a zero-height
+line rather than a grid, so it works on a bare word. ReCal's own zone chips stay: their HDR
+light is theirs. The coarse-pointer floor is 32px, not the button's 44 -- a row of chips at
+44 is a toolbar.
+
 ## 2026-09-27 — sync_alt joins the icon face
 
 77 names. Kernpare's context `rev` switch and ReCal's landing-page compare button (`(Geist ⇄)`,

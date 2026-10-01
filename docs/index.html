@@ -3132,6 +3132,70 @@ html,body{margin:0;padding:0;background:var(--bg)}
   transition: opacity calc(var(--dur-fast, .12s) * 2) ease-out;
 }#s-controls .triplet-step-btn:first-child::after{ mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 3.86 3.5 2.14 6 3.86' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 3.86 3.5 2.14 6 3.86' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }#s-controls .triplet-step-btn + .triplet-step-btn::after{ mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 2.14 3.5 3.86 6 2.14' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 2.14 3.5 3.86 6 2.14' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }#s-controls .triplet-step-btn:active::after{ opacity: 1; transition: none; }@media (prefers-reduced-motion: reduce){#s-controls .triplet-step-btn::after{ transition: none; } }@media (prefers-reduced-motion: reduce){#s-controls .triplet-step{ transition: none; }
 }@media (pointer: coarse){#s-controls .triplet-step{ opacity: 1; }#s-controls .triplet-step-btn{ width: 20px; height: 15px; }
+}@layer wm.controls{#s-controls .wm-chip-row{ display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-01, 4px); }#s-controls .wm-chip{
+    
+    --chip-color: initial;
+    
+    --chip-ink: var(--chip-color, var(--text-muted, rgba(232, 232, 232, .62)));
+    --chip-line: var(--chip-color, var(--text-dim, rgba(232, 232, 232, .38)));
+    --chip-fill: var(--chip-color, var(--text, #e8e8e8));
+    --chip-on-ink: var(--bg, #111);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-01, 4px) var(--spacing-04, 12px);
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 1.4);
+    font-weight: 400;
+    color: var(--chip-ink);
+    background: transparent;
+    border: 1px solid var(--chip-line);
+    border-radius: 999px;
+    corner-shape: superellipse(var(--corner-k, 1.2));
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--dur-fast, 140ms) ease, border-color var(--dur-fast, 140ms) ease, background var(--dur-fast, 140ms) ease;
+  }#s-controls .wm-chip > [data-mark]{
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1.35em;
+    line-height: 1;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+    font-feature-settings: 'liga';
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    color: inherit;
+  }#s-controls .wm-chip > [data-mark]:not(:last-child){ margin-right: 2px; }#s-controls .wm-chip[data-label]{ flex-direction: column; }#s-controls .wm-chip[data-label]::after{
+    content: attr(data-label);
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+    font-weight: 600;
+  }#s-controls .wm-chip > input{
+    position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none;
+  }#s-controls .wm-chip:hover{ color: var(--text, #e8e8e8); border-color: var(--chip-color, var(--text-muted, currentColor)); }#s-controls .wm-chip:is(.on,#s-controls [aria-pressed="true"],#s-controls :has(> input:checked)){
+    color: var(--chip-on-ink);
+    background: var(--chip-fill);
+    border-color: var(--chip-fill);
+    font-weight: 600;
+  }#s-controls .wm-chip--small{
+    
+    padding: 1px var(--spacing-03, 8px);
+    font-size: var(--type-micro-size, 0.5625rem);
+  }#s-controls .wm-chip--switch{ border-style: dashed; }#s-controls .wm-chip--switch:is(.on,#s-controls [aria-pressed="true"],#s-controls :has(> input:checked)){
+    --chip-fill: var(--chip-color, var(--text-muted, #a8a8a8));
+    border-style: solid;
+    font-weight: 400;
+  }#s-controls .wm-chip:focus{ outline: none; }#s-controls .wm-chip:is(:focus-visible,#s-controls :has(> input:focus-visible)){ outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }#s-controls .wm-chip:is(:disabled,#s-controls [aria-disabled="true"]){ opacity: .4; cursor: default; }@media (pointer: coarse){#s-controls .wm-chip{ min-height: 32px; }
+  }@media (prefers-reduced-motion: reduce){#s-controls .wm-chip{ transition: none; }
+  }
 }#s-controls{
   --bg: #fcfcfa; --panel: #f2f2ee; --sunk: #e8e8e3; --raised: #fff;
   --ink: #17181a; --ink-2: #4a4c50; --muted: #74767c;
@@ -3375,7 +3439,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--text-muted);
-}
+}#s-controls .chip-demo{display:grid;gap:10px;margin:8px 0 40px}#s-controls .chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}#s-controls .chip-cap code{text-transform:none;letter-spacing:0}#s-controls .chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}#s-controls .chip-demo .wm-chip--switch{margin-left:8px}
 #s-controls .wip{max-width:72ch}#s-controls .wip>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2)}#s-controls .wip>p b{color:var(--ink);font-weight:600}#s-controls .wip-list{display:grid;gap:16px;margin:0;padding:0;list-style:none}#s-controls .wip-card{display:block;position:relative;padding:22px 24px;text-decoration:none;color:inherit;
   border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
@@ -4453,7 +4517,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 </style>
 <div class="wm">
   <div class="wm-doc">
-  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in"><div class="wm-grp"><a class="wm-lvl0" href="#s-readme"><u>00</u>The package</a><a class="wm-lvl1" href="#readme-c1"><u>1</u><span>What you get</span></a><a class="wm-lvl1" href="#readme-c2"><u>2</u><span>What you must supply</span></a><a class="wm-lvl1" href="#readme-c3"><u>3</u><span>How to wire it in, and add a dial</span></a><a class="wm-lvl1" href="#readme-c4"><u>4</u><span>How to override</span></a><a class="wm-lvl1" href="#readme-c5"><u>5</u><span>How you know it shipped</span></a><a class="wm-lvl1" href="#readme-c6"><u></u><span>The rest</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a><a class="wm-lvl1" href="#type-c1"><u></u><span>The favicons</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1"><u></u><span>The 5 pills</span></a><a class="wm-lvl1" href="#corners-c2"><u></u><span>The radius ladder</span></a><a class="wm-lvl1" href="#corners-c3"><u></u><span>Asymmetric corners</span></a><a class="wm-lvl1" href="#corners-c4"><u></u><span>The 13 circles</span></a><a class="wm-lvl1" href="#corners-c6"><u></u><span>The button</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u>03</u>Interface</a><a class="wm-lvl1" href="#controls-c1"><u></u><span>The marks</span></a><a class="wm-lvl1" href="#controls-c2"><u></u><span>WIP primitives</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1"><u></u><span>The steps</span></a><a class="wm-lvl1" href="#space-c2"><u></u><span>The cap rule</span></a><a class="wm-lvl1" href="#space-c3"><u></u><span>Use a step</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1"><u></u><span>The vocabulary</span></a><a class="wm-lvl1" href="#color-c2"><u></u><span>Literal colors outside App.css</span></a><a class="wm-lvl1" href="#color-c3"><u></u><span>The GEOM zones</span></a><a class="wm-lvl1" href="#color-c4"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#color-c5"><u></u><span>The edge</span></a><a class="wm-lvl1" href="#color-c6"><u></u><span>Where you mix</span></a><a class="wm-lvl1" href="#color-c7"><u></u><span>Steering a channel</span></a><a class="wm-lvl1" href="#color-c8"><u></u><span>The blur</span></a><a class="wm-lvl1" href="#color-c9"><u></u><span>Banding</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div></div></div>
+  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in"><div class="wm-grp"><a class="wm-lvl0" href="#s-readme"><u>00</u>The package</a><a class="wm-lvl1" href="#readme-c1"><u>1</u><span>What you get</span></a><a class="wm-lvl1" href="#readme-c2"><u>2</u><span>What you must supply</span></a><a class="wm-lvl1" href="#readme-c3"><u>3</u><span>How to wire it in, and add a dial</span></a><a class="wm-lvl1" href="#readme-c4"><u>4</u><span>How to override</span></a><a class="wm-lvl1" href="#readme-c5"><u>5</u><span>How you know it shipped</span></a><a class="wm-lvl1" href="#readme-c6"><u></u><span>The rest</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a><a class="wm-lvl1" href="#type-c1"><u></u><span>The favicons</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1"><u></u><span>The 5 pills</span></a><a class="wm-lvl1" href="#corners-c2"><u></u><span>The radius ladder</span></a><a class="wm-lvl1" href="#corners-c3"><u></u><span>Asymmetric corners</span></a><a class="wm-lvl1" href="#corners-c4"><u></u><span>The 13 circles</span></a><a class="wm-lvl1" href="#corners-c6"><u></u><span>The button</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u>03</u>Interface</a><a class="wm-lvl1" href="#controls-c1"><u></u><span>The marks</span></a><a class="wm-lvl1" href="#controls-c2"><u></u><span>The chips</span></a><a class="wm-lvl1" href="#controls-c3"><u></u><span>WIP primitives</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1"><u></u><span>The steps</span></a><a class="wm-lvl1" href="#space-c2"><u></u><span>The cap rule</span></a><a class="wm-lvl1" href="#space-c3"><u></u><span>Use a step</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1"><u></u><span>The vocabulary</span></a><a class="wm-lvl1" href="#color-c2"><u></u><span>Literal colors outside App.css</span></a><a class="wm-lvl1" href="#color-c3"><u></u><span>The GEOM zones</span></a><a class="wm-lvl1" href="#color-c4"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#color-c5"><u></u><span>The edge</span></a><a class="wm-lvl1" href="#color-c6"><u></u><span>Where you mix</span></a><a class="wm-lvl1" href="#color-c7"><u></u><span>Steering a channel</span></a><a class="wm-lvl1" href="#color-c8"><u></u><span>The blur</span></a><a class="wm-lvl1" href="#color-c9"><u></u><span>Banding</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div></div></div>
     <span class="wm-rail-foot">wm&#8209;primitives</span></nav></div>
   <div class="wm-main">
   <header class="wm-head">
@@ -5321,6 +5385,7 @@ of 168 corners, <b>87</b> take the law, 13 are circles carved out, and 32 sit in
 
 
 
+
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
 
@@ -5377,7 +5442,39 @@ width rather than fixed &mdash; optical sizing by another name: at one absolute 
 chevron carries more ink per unit of mark and reads heavier.</p>
 <div class="marks marks--chev" id="controls-m-chevrons"></div>
 
-<h2 id="controls-c2">WIP primitives <span>pages to decide from</span></h2><div class="wip" id="controls-wip"><p><b>Nothing here ships.</b> A control above has a spec and a test; a page here has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline so it cannot pass for finished.</p><ul class="wip-list"><li><a class="wip-card" href="system/pages/buttons.html"><u>undecided</u><b>Six ways to say press</b><i>the button as six families, Keyline, Lozenge, Rule, Plate, Bracket, Menu, each drawing the same six specimens, with a coverage table of what each cannot do. Explorations: none chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; NEXT.md G says what a choice, if one is ever made, changes.</i></a></li><li><a class="wip-card" href="system/pages/play.html"><u>undecided</u><b>Seven ways to say play</b><i>the one control where a press does two things, drawn seven ways by what carries the difference: the mark, the ring, the word, the ground, the enclosure, the elevation, the surface. All live on one fake ninety-second clip. Superseded in scope by the transport page below &#8212; the bar, not the button, is the instrument &#8212; and kept as the record of the button question. TRANSPORT.md.</i></a></li><li><a class="wip-card" href="system/pages/transport.html"><u>undecided</u><b>Six ways to build the bar</b><i>one transport primitive &#8212; play, scrubber, readouts slot &#8212; in two registers, WORDMAKE's frames and Morf's builds, each schema drawn twice on the same live clocks: Deck, Slate, Ruler, Strip, Cells, Overlay. Decided: one primitive; no stage click; Morf's stops evenly by beat. Undecided: the schema. TRANSPORT.md has the coverage and what none has had.</i></a></li></ul></div></div>
+<h2 id="controls-c2" class="marks-h">The chips</h2>
+<p class="lede">One of a set, every option visible, the chosen one filled &mdash; so the state
+reads at rest and nothing waits to be discovered under the pointer. ReCal&rsquo;s zone chips
+gave the grammar (an outline in the option&rsquo;s own hue, a fill for the chosen one),
+font-proofer&rsquo;s preset bar the size. A chip chooses; <code>.wm-btn</code> does. Click any
+of these. <code>src/chip.css</code>.</p>
+<div class="chip-demo">
+  <p class="chip-cap">A set &middot; <code>.wm-chip</code>, with <code>data-label</code> so choosing never shifts the row</p>
+  <div class="wm-chip-row" data-one>
+    <button class="wm-chip on" data-label="Sample"><span>Sample</span></button>
+    <button class="wm-chip" data-label="A Tale of Two Cities"><span>A Tale of Two Cities</span></button>
+    <button class="wm-chip" data-label="Staatliche Bauhaus"><span>Staatliche Bauhaus</span></button>
+    <button class="wm-chip" data-label="Kern King"><span>Kern King</span></button>
+  </div>
+  <p class="chip-cap">Each its own hue &middot; <code>--chip-color</code></p>
+  <div class="wm-chip-row" data-one>
+    <button class="wm-chip" style="--chip-color:#e08a63" data-label="A11y"><span>A11y</span></button>
+    <button class="wm-chip on" data-label="UI"><span>UI</span></button>
+    <button class="wm-chip" style="--chip-color:#6f9ee8" data-label="Base"><span>Base</span></button>
+    <button class="wm-chip" style="--chip-color:#5fc678" data-label="Geo"><span>Geo</span></button>
+  </div>
+  <p class="chip-cap">A lens over a canvas, and a switch beside it &middot; <code>--small</code>, <code>--switch</code></p>
+  <div class="wm-chip-row" data-one>
+    <span class="chip-lbl">context</span>
+    <button class="wm-chip wm-chip--small on">off</button>
+    <button class="wm-chip wm-chip--small">on</button>
+    <button class="wm-chip wm-chip--small">OH</button>
+    <button class="wm-chip wm-chip--small">01</button>
+    <button class="wm-chip wm-chip--small wm-chip--switch" data-toggle><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">sync_alt</span>rev</button>
+  </div>
+</div>
+
+<h2 id="controls-c3">WIP primitives <span>pages to decide from</span></h2><div class="wip" id="controls-wip"><p><b>Nothing here ships.</b> A control above has a spec and a test; a page here has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline so it cannot pass for finished.</p><ul class="wip-list"><li><a class="wip-card" href="system/pages/buttons.html"><u>undecided</u><b>Six ways to say press</b><i>the button as six families, Keyline, Lozenge, Rule, Plate, Bracket, Menu, each drawing the same six specimens, with a coverage table of what each cannot do. Explorations: none chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; NEXT.md G says what a choice, if one is ever made, changes.</i></a></li><li><a class="wip-card" href="system/pages/play.html"><u>undecided</u><b>Seven ways to say play</b><i>the one control where a press does two things, drawn seven ways by what carries the difference: the mark, the ring, the word, the ground, the enclosure, the elevation, the surface. All live on one fake ninety-second clip. Superseded in scope by the transport page below &#8212; the bar, not the button, is the instrument &#8212; and kept as the record of the button question. TRANSPORT.md.</i></a></li><li><a class="wip-card" href="system/pages/transport.html"><u>undecided</u><b>Six ways to build the bar</b><i>one transport primitive &#8212; play, scrubber, readouts slot &#8212; in two registers, WORDMAKE's frames and Morf's builds, each schema drawn twice on the same live clocks: Deck, Slate, Ruler, Strip, Cells, Overlay. Decided: one primitive; no stage click; Morf's stops evenly by beat. Undecided: the schema. TRANSPORT.md has the coverage and what none has had.</i></a></li></ul></div></div>
 </section>
 <section class="wm-sec">
   <div class="wm-sec-head"><div class="wm-n">04 &middot; Space</div></div>
@@ -7416,6 +7513,13 @@ const strokeFor = w => Math.round(1.15 * Math.sqrt(w / 10) * 100) / 100;
   }
 })();
 
+
+// The chips: one chosen per [data-one] row; a [data-toggle] chip flips on its own.
+ROOT.querySelectorAll('.chip-demo [data-one]').forEach(row => row.addEventListener('click', e => {
+  const c = e.target.closest('.wm-chip'); if (!c) return;
+  if (c.hasAttribute('data-toggle')) { c.classList.toggle('on'); return; }
+  row.querySelectorAll('.wm-chip:not([data-toggle])').forEach(x => x.classList.toggle('on', x === c));
+}));
 
 })();
 (function(){var ROOT=document.getElementById('s-color');if(!ROOT)return;

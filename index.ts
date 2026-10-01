@@ -100,6 +100,9 @@ export type {
 // .active, --solid, --quiet. The mark (.wm-icon-btn) lives in icon.css, the pill (.ui-seg)
 // in toggleGroup.css. CHROME.md is the census that produced it.
 
+// The house chip (src/chip.css -- no JS to export): one of a set, every option visible,
+// the chosen one filled. .wm-chip / .wm-chip-row, --small, --switch, --chip-color. A chip
+// chooses; .wm-btn does. Kernpare's context dial and font-proofer's preset bar draw it.
 // A native <select> wearing the house chevron (src/select.css -- no JS to export):
 // .wm-select-wrap around .wm-select, with a <Chevron/> hung off the wrapper.
 

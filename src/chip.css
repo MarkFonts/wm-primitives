@@ -1,0 +1,140 @@
+/* chip.css -- the house CHIP: one of a set, every option visible, the chosen one filled.
+ *
+ * Three apps drew it three ways. ReCal's GEOM zone chips (an outline in the zone's hue,
+ * the chosen one filled), font-proofer's preset bar (bare words, the chosen one boxed)
+ * and Kernpare's context dial (radios, then outlined chips). Mark's brief for this one
+ * (2026-09-27): ReCal's grammar -- colour and outline say what is chosen and what is not --
+ * at the preset bar's size, and FORWARD-VIEW: every option and its state reads at rest.
+ * Nothing is discovered by rolling over it. Hover brightens; it never reveals.
+ *
+ * A chip is not .ui-seg. The segment is one control with a sliding thumb; a chip row is
+ * N buttons, each its own target, and a chip can carry its own hue. It is not .wm-btn
+ * either: a button does something, a chip chooses something.
+ *
+ *   .wm-chip-row           the set: a wrapping row, 4px apart
+ *   .wm-chip               outlined at rest; .on / [aria-pressed=true] / a checked input
+ *                          inside it = chosen, filled
+ *   .wm-chip--small        the micro size, for a lens over a canvas (Kernpare's dial)
+ *   .wm-chip--switch       a MODIFIER beside a set, not one more option in it: dashed at
+ *                          rest, the secondary fill when on -- a step below a chosen chip,
+ *                          so the two never read alike (Kernpare's rev)
+ *   --chip-color           give a chip its own hue: outline + label at rest, the fill when
+ *                          chosen (ReCal's zone colours). Unset, a chip is neutral ink.
+ *
+ * WEIGHT WITHOUT REFLOW, from ReCal: a chosen chip is heavier, and a heavier label is
+ * wider. Give the chip data-label="<its text>" and it reserves the bold width under the
+ * label, so choosing never shifts the row. Without data-label the weight stays put.
+ *
+ * A RADIO OR CHECKBOX MAY LIVE INSIDE. Wrap it in the chip (<label class="wm-chip">
+ * <input type=radio>...); the input is hidden but stays focusable, so Tab, arrows and
+ * the form state all work, and :has(input:checked) is the chosen state.
+ *
+ * Tokens with fallbacks throughout, in @layer wm.controls like button.css, so a host can
+ * override any line with an unlayered rule -- or bridge its own ink names on the row. */
+@layer wm.controls {
+  .wm-chip-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-01, 4px); }
+
+  .wm-chip {
+    /* Declared, and unset: `initial` is the guaranteed-invalid value, so every
+       var(--chip-color, ...) below takes its fallback until a host sets it ON THE CHIP
+       (inline, or an unlayered rule -- either beats this layer). Declared here rather than
+       listed as a runtime token because three consumers lint shared/src with their own
+       token lists, and a new runtime token fails all three. */
+    --chip-color: initial;
+    /* The rest and chosen inks, neutral unless --chip-color names a hue. */
+    --chip-ink: var(--chip-color, var(--text-muted, rgba(232, 232, 232, .62)));
+    --chip-line: var(--chip-color, var(--text-dim, rgba(232, 232, 232, .38)));
+    --chip-fill: var(--chip-color, var(--text, #e8e8e8));
+    --chip-on-ink: var(--bg, #111);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-01, 4px) var(--spacing-04, 12px);
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 1.4);
+    font-weight: 400;
+    color: var(--chip-ink);
+    background: transparent;
+    border: 1px solid var(--chip-line);
+    border-radius: 999px;
+    corner-shape: superellipse(var(--corner-k, 1.2));
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--dur-fast, 140ms) ease, border-color var(--dur-fast, 140ms) ease, background var(--dur-fast, 140ms) ease;
+  }
+  /* A MARK IN A CHIP IS PART OF ITS LABEL, so it takes the label's ink: dark on a filled
+     chip, the hue on an outlined one. That rules out .wm-icon, whose colour lives in
+     @layer wm.icon -- declared after wm.controls, so nothing here can reach it -- and is
+     a fixed light ink. A chip's mark is the same Material face flagged data-mark
+     (<span class="material-symbols-outlined" data-mark>sync_alt</span>), the flag
+     button.css already reads, drawn here in currentColor. Its own margin, no gap, so a
+     label written with inline markup never comes apart. */
+  .wm-chip > [data-mark] {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1.35em;
+    line-height: 1;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+    font-feature-settings: 'liga';
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    color: inherit;
+  }
+  .wm-chip > [data-mark]:not(:last-child) { margin-right: 2px; }
+  /* The bold width, reserved: the label and a zero-height copy of it at the chosen weight
+     stack in a column, so the chip is always as wide as its heavier self. Text only --
+     a data-label chip carries no mark. */
+  .wm-chip[data-label] { flex-direction: column; }
+  .wm-chip[data-label]::after {
+    content: attr(data-label);
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+    font-weight: 600;
+  }
+  .wm-chip > input {
+    position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none;
+  }
+
+  .wm-chip:hover { color: var(--text, #e8e8e8); border-color: var(--chip-color, var(--text-muted, currentColor)); }
+  .wm-chip:is(.on, [aria-pressed="true"], :has(> input:checked)) {
+    color: var(--chip-on-ink);
+    background: var(--chip-fill);
+    border-color: var(--chip-fill);
+    font-weight: 600;
+  }
+
+  .wm-chip--small {
+    /* 1px, not var(--hair): the hosts disagree on what --hair is (Kernpare's is a length,
+       the system page's a colour), and a colour there voids the whole padding. */
+    padding: 1px var(--spacing-03, 8px);
+    font-size: var(--type-micro-size, 0.5625rem);
+  }
+
+  /* A modifier, not an option: it stays on across the set, so it wears the secondary
+     fill (--text-muted under --bg ink), a step below the chosen chip's --text. */
+  .wm-chip--switch { border-style: dashed; }
+  .wm-chip--switch:is(.on, [aria-pressed="true"], :has(> input:checked)) {
+    --chip-fill: var(--chip-color, var(--text-muted, #a8a8a8));
+    border-style: solid;
+    font-weight: 400;
+  }
+
+  .wm-chip:focus { outline: none; }
+  .wm-chip:is(:focus-visible, :has(> input:focus-visible)) { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+  .wm-chip:is(:disabled, [aria-disabled="true"]) { opacity: .4; cursor: default; }
+
+  @media (pointer: coarse) {
+    .wm-chip { min-height: 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wm-chip { transition: none; }
+  }
+}
