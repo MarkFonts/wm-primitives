@@ -148,7 +148,7 @@ PRIMITIVE_CSS = {
     # chevron.css carries the stepper stroke and its rollover; without it the docs page
     # draws chevrons at the browser's default stroke-width of 1, thinner than anything
     # that ships, since the weight left the SVG attribute so it could answer :hover.
-    "controls": ("type.css", "chevron.css", "icon.css", "AxisSlider.css", "AxisTriplet.css"),
+    "controls": ("type.css", "chevron.css", "icon.css", "AxisSlider.css", "AxisTriplet.css", "chip.css"),
 }
 
 # ---------------------------------------------------------------- per section

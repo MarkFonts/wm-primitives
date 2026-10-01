@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="../../src/type.css">
 <link rel="stylesheet" href="../../src/AxisSlider.css">
 <link rel="stylesheet" href="../../src/AxisTriplet.css">
+<link rel="stylesheet" href="../../src/chip.css">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- The Material Symbols link that used to be here was SUBSETTED to four icon_names --
      fit_width, line_weight, format_line_spacing, mystery -- for card 04. It declared the
@@ -683,6 +684,12 @@
   text-transform: uppercase;
   color: var(--text-muted);
 }
+
+.chip-demo{display:grid;gap:10px;margin:8px 0 40px}
+.chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}
+.chip-cap code{text-transform:none;letter-spacing:0}
+.chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}
+.chip-demo .wm-chip--switch{margin-left:8px}
 </style>
 
 <h1>Five ways to draw one dial</h1>
@@ -737,6 +744,38 @@ specimen page can reach for one without a font rebuild. Each moves up the day an
 width rather than fixed &mdash; optical sizing by another name: at one absolute stroke a small
 chevron carries more ink per unit of mark and reads heavier.</p>
 <div class="marks marks--chev" id="m-chevrons"></div>
+
+<h2 class="marks-h">The chips</h2>
+<p class="lede">One of a set, every option visible, the chosen one filled &mdash; so the state
+reads at rest and nothing waits to be discovered under the pointer. ReCal&rsquo;s zone chips
+gave the grammar (an outline in the option&rsquo;s own hue, a fill for the chosen one),
+font-proofer&rsquo;s preset bar the size. A chip chooses; <code>.wm-btn</code> does. Click any
+of these. <code>src/chip.css</code>.</p>
+<div class="chip-demo">
+  <p class="chip-cap">A set &middot; <code>.wm-chip</code>, with <code>data-label</code> so choosing never shifts the row</p>
+  <div class="wm-chip-row" data-one>
+    <button class="wm-chip on" data-label="Sample"><span>Sample</span></button>
+    <button class="wm-chip" data-label="A Tale of Two Cities"><span>A Tale of Two Cities</span></button>
+    <button class="wm-chip" data-label="Staatliche Bauhaus"><span>Staatliche Bauhaus</span></button>
+    <button class="wm-chip" data-label="Kern King"><span>Kern King</span></button>
+  </div>
+  <p class="chip-cap">Each its own hue &middot; <code>--chip-color</code></p>
+  <div class="wm-chip-row" data-one>
+    <button class="wm-chip" style="--chip-color:#e08a63" data-label="A11y"><span>A11y</span></button>
+    <button class="wm-chip on" data-label="UI"><span>UI</span></button>
+    <button class="wm-chip" style="--chip-color:#6f9ee8" data-label="Base"><span>Base</span></button>
+    <button class="wm-chip" style="--chip-color:#5fc678" data-label="Geo"><span>Geo</span></button>
+  </div>
+  <p class="chip-cap">A lens over a canvas, and a switch beside it &middot; <code>--small</code>, <code>--switch</code></p>
+  <div class="wm-chip-row" data-one>
+    <span class="chip-lbl">context</span>
+    <button class="wm-chip wm-chip--small on">off</button>
+    <button class="wm-chip wm-chip--small">on</button>
+    <button class="wm-chip wm-chip--small">OH</button>
+    <button class="wm-chip wm-chip--small">01</button>
+    <button class="wm-chip wm-chip--small wm-chip--switch" data-toggle><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">sync_alt</span>rev</button>
+  </div>
+</div>
 
 <script>
 const $$ = s => document.querySelector(s);
@@ -1652,4 +1691,11 @@ const strokeFor = w => Math.round(1.15 * Math.sqrt(w / 10) * 100) / 100;
   }
 })();
 
+
+// The chips: one chosen per [data-one] row; a [data-toggle] chip flips on its own.
+document.querySelectorAll('.chip-demo [data-one]').forEach(row => row.addEventListener('click', e => {
+  const c = e.target.closest('.wm-chip'); if (!c) return;
+  if (c.hasAttribute('data-toggle')) { c.classList.toggle('on'); return; }
+  row.querySelectorAll('.wm-chip:not([data-toggle])').forEach(x => x.classList.toggle('on', x === c));
+}));
 </script>
