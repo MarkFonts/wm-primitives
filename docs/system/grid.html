@@ -92,7 +92,7 @@ html.off-grid .wm-lines{--lead-body:24.8px}
 
 <main class="wm-lines">
   <canvas id="lines" aria-hidden="true"></canvas>
-  <div class="wm-grid">
+  <div class="wm-grid wm-baselines">
     <p class="eyebrow t-micro" style="--span:24;margin-bottom:24px">WM Primitives · the grid</p>
     <h1 class="t-display" style="--span:20;--span-md:12;margin-bottom:48px">Twenty-four columns, three-pixel lines</h1>
     <div style="--span:13;--span-md:12">
@@ -130,23 +130,23 @@ html.off-grid .wm-lines{--lead-body:24.8px}
   <section class="wm-grid">
     <div class="rule"></div>
     <h2 style="--span:24">The lines</h2>
-    <div class="spec" style="--span:24;--span-md:12">
-      <div class="lbl"><p class="t-ui">display &middot; fluid / round(down, 1.1em, 3px)</p></div>
+    <div class="spec wm-baselines" style="--span:24;--span-md:12">
+      <div class="lbl" data-baseline="last"><p class="t-ui">display &middot; fluid &middot; round(nearest, 1.1em, 3px)</p></div>
       <div class="smp"><p class="t-display" style="font-size:clamp(2.75rem,6vw,6rem);font-weight:700;color:var(--text);margin:0;font-variation-settings:'opsz' 45">Hamburgefonstiv, at every width</p></div>
       <div class="gap"></div>
-      <div class="lbl"><p class="t-ui">title &middot; 26 / 30 &middot; 10 lines</p></div>
+      <div class="lbl" data-baseline="last"><p class="t-ui">title &middot; 26 / 30 &middot; 10 lines</p></div>
       <div class="smp"><p class="t-title" style="font-size:var(--type-title-size);font-weight:700;color:var(--text);margin:0">The leading, subdivided</p></div>
       <div class="gap"></div>
-      <div class="lbl"><p class="t-ui">lede &middot; 18 / 27 &middot; 9 lines</p></div>
+      <div class="lbl" data-baseline="last"><p class="t-ui">lede &middot; 18 / 27 &middot; 9 lines</p></div>
       <div class="smp"><p class="t-lede" style="margin:0">Every role's leading is a whole number of three-pixel units, so baselines of different sizes still meet on one set of lines.</p></div>
       <div class="gap"></div>
-      <div class="lbl"><p class="t-ui">body &middot; 16 / 24 &middot; 8 lines</p></div>
+      <div class="lbl" data-baseline="last"><p class="t-ui">body &middot; 16 / 24 &middot; 8 lines</p></div>
       <div class="smp"><p style="margin:0">Body copy is where the grid is decided. At 24 every line of a long paragraph lands on a strong line. At 24.8 the first line does, and each line after it falls another 0.8px behind, until by the tenth it sits between lines. Flip the body chips with the lines on and watch this paragraph walk off the grid while the lede above and the interface type below stay put.</p></div>
       <div class="gap"></div>
-      <div class="lbl"><p class="t-ui">ui &middot; 12 / 15 &middot; 5 lines</p></div>
+      <div class="lbl" data-baseline="last"><p class="t-ui">ui &middot; 12 / 15 &middot; 5 lines</p></div>
       <div class="smp"><p class="t-ui" style="max-width:52ch">Twelve on fifteen: the print grid this one is modelled on. Labels, captions, the dial's words.</p></div>
       <div class="gap"></div>
-      <div class="lbl"><p class="t-ui">micro &middot; 9 / 12 &middot; 4 lines</p></div>
+      <div class="lbl" data-baseline="last"><p class="t-ui">micro &middot; 9 / 12 &middot; 4 lines</p></div>
       <div class="smp"><p class="t-micro">axis tags &middot; metric rules &middot; annotations</p></div>
     </div>
   </section>
