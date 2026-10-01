@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WM Grid</title>
+<!-- SOURCE. docs/system/build.py writes the published docs/grid.html from this, with every
+     ../../src/ stylesheet and script inlined -- Pages serves docs/ only, so a link there 404s. -->
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../../src/color.css">
+<link rel="stylesheet" href="../../src/type.css">
+<link rel="stylesheet" href="../../src/chip.css">
+<link rel="stylesheet" href="../../src/grid.css">
+<style>
+@font-face{font-family:"Face";src:url(../fonts/CalSansVF.ttf) format("truetype");font-weight:400 700;font-style:normal;font-display:swap}
+@font-face{font-family:"Material Symbols Outlined";src:url(../fonts/MaterialSymbolsOutlined-full.woff2) format("woff2");font-weight:100 700;font-display:block}
+:root{--ui-font:"Face",system-ui,sans-serif;--ov-col:rgba(255,40,140,.07);--ov-col-line:rgba(255,40,140,.42);--ov-bl:rgba(40,120,255,.16);--ov-bl-strong:rgba(40,120,255,.5)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg,#0f0f0f);color:var(--text,#e8e8e8);font-family:var(--ui-font);font-size:16px;font-variation-settings:'opsz' 16}
+a{color:inherit}
+/* leading 1: a second face's taller metrics would otherwise stretch the line box past its 24 */
+code{font-family:ui-monospace,Menlo,monospace;font-size:.85em;line-height:1}
+
+/* chrome bar -- outside the lines, so it may be any height */
+.bar{position:sticky;top:0;z-index:20;background:color-mix(in oklab,var(--bg,#0f0f0f) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--border,rgba(232,232,232,.14))}
+.bar .wm-grid{padding-block:12px;align-items:center}
+.bar b{font-weight:700;letter-spacing:var(--track-caps,.12em);font-size:var(--type-micro-size,.5625rem);text-transform:uppercase}
+.bar .wm-chip-row{justify-content:flex-end}
+.bar .k{font-size:var(--type-micro-size,.5625rem);color:var(--text-dim);margin-left:4px}
+
+/* page */
+main.wm-lines{padding-top:72px;padding-bottom:96px;position:relative}
+/* this page's own text rhythm: a body line under every paragraph, titles on 30 */
+main.wm-lines :where(p, li){margin:0 0 24px}
+main.wm-lines h2, main.wm-lines h3{--lh:30px}
+.eyebrow{font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--text-muted)}
+h1.t-display{font-size:clamp(2.75rem,6vw,6rem);font-weight:700;margin:0;font-variation-settings:'opsz' 45}
+h2{font-size:var(--type-title-size,1.625rem);font-weight:700;margin:0 0 24px;font-variation-settings:'opsz' 26}
+.t-lede{font-size:var(--type-lede-size,1.125rem);color:var(--text)}
+p{font-size:var(--type-body-size,1rem);color:var(--text-muted)}
+p b{color:var(--text);font-weight:600}
+.t-ui{font-size:var(--type-ui-size,.75rem);color:var(--text-muted);margin:0}
+.t-micro{font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--text-dim);margin:0}
+section{margin-top:96px}
+.rule{grid-column:1 / -1;height:1px;background:var(--border);margin:0 0 47px}
+.card{background:var(--surface,#1a1a1a);border-radius:var(--radius,12px);margin-bottom:24px}
+.card :last-child{margin-bottom:0}
+.card h3{font-size:var(--type-title-size,1.625rem);font-weight:700;margin:0 0 24px;--lh:var(--lead-title)}
+.colnum{font-size:var(--type-micro-size,.5625rem);color:var(--text-dim);margin:0 0 12px;letter-spacing:var(--track-caps,.12em);text-transform:uppercase}
+.spec{display:grid;grid-template-columns:subgrid}
+.spec .lbl{grid-column:1 / span 4}
+.spec .smp{grid-column:5 / -1}
+@media (max-width:1023px){.spec .lbl{grid-column:1 / -1}.spec .smp{grid-column:1 / -1}}
+.spec .lbl p{margin:0}
+.spec .row{display:contents}
+.spec .gap{grid-column:1/-1;height:24px}
+table{border-collapse:collapse;width:100%}
+/* rows are one body line each; the rule is a shadow, so it takes no height and the table stays on the lines */
+tr{height:24px}
+td,th{text-align:left;padding:0;font-size:var(--type-ui-size,.75rem);line-height:24px;color:var(--text-muted);box-shadow:inset 0 -1px 0 var(--border);vertical-align:middle}
+th{color:var(--text-dim);font-weight:400}
+
+/* overlays */
+#cols{position:fixed;inset:0;z-index:15;pointer-events:none;display:none}
+#cols .wm-grid{height:100%}
+#cols .wm-grid > div{background:var(--ov-col);border-inline:1px solid var(--ov-col-line);position:relative}
+#cols .wm-grid > div span{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:9px;color:var(--ov-col-line)}
+html.show-cols #cols{display:block}
+html.show-cols #cols .wm-grid > div{--span:1;--span-md:1}
+/* lines: drawn on a canvas at the screen's own pixel density (see the script), not a CSS
+   gradient -- a 3px gradient at a fractional zoom is resampled into smeared, unevenly spaced
+   lines, which read as the type being off when it is the drawing that is. */
+#lines{position:absolute;left:0;top:0;pointer-events:none;z-index:0;display:none}
+html.show-lines #lines{display:block}
+main.wm-lines > *{position:relative;z-index:1}
+html.off-grid .wm-lines{--lead-body:24.8px}
+</style>
+</head>
+<body>
+<div class="bar"><div class="wm-grid">
+  <div style="--span:6;--span-md:12"><b>WM Grid</b> <span class="k">draft · on trial</span></div>
+  <div class="wm-chip-row" style="--span:18;--span-md:12">
+    <button class="wm-chip wm-chip--small wm-chip--switch" id="tCols" title="G"><span class="material-symbols-outlined" data-mark aria-hidden="true">view_column</span>columns</button>
+    <button class="wm-chip wm-chip--small wm-chip--switch" id="tLines" title="L"><span class="material-symbols-outlined" data-mark aria-hidden="true">format_line_spacing</span>lines</button>
+    <span class="k" style="margin-left:12px">body</span>
+    <button class="wm-chip wm-chip--small on" data-lead="24" title="B">16/24 · on the grid</button>
+    <button class="wm-chip wm-chip--small" data-lead="24.8" title="B">16/24.8 · today</button>
+  </div>
+</div></div>
+
+<div id="cols"><div class="wm-grid"></div></div>
+
+<main class="wm-lines">
+  <canvas id="lines" aria-hidden="true"></canvas>
+  <div class="wm-grid wm-baselines">
+    <p class="eyebrow t-micro" style="--span:24;margin-bottom:24px">WM Primitives · the grid</p>
+    <h1 class="t-display" style="--span:20;--span-md:12;margin-bottom:48px">Twenty-four columns, three-pixel lines</h1>
+    <div style="--span:13;--span-md:12">
+      <p class="t-lede">One margin, one gutter and one set of columns for every WORDMARK page, and a baseline cut from the leading the way 12/15 type sits on a 3pt grid. Turn on the columns (G) and the lines (L), then flip the body leading (B) to see why 24.8 cannot stay.</p>
+    </div>
+    <div style="--start:15;--span:10;--span-md:12">
+      <p><b>13 | skip | 10.</b> The hero is calsans's: thirteen columns of lede, one empty column, ten of notes. The empty column and two gutters make the 77px gap the page had chosen by eye (72).</p>
+      <p class="t-ui">grid-column: 15 / span 10</p>
+    </div>
+  </div>
+
+  <section class="wm-grid">
+    <div class="rule"></div>
+    <h2 style="--span:24">The columns</h2>
+    <p class="colnum" style="--span:24">10 | 14 &mdash; calsans's 5:7 split &middot; cards inset one column + one gutter (rule A)</p>
+    <div class="card wm-card" style="--span:10;--span-md:12">
+      <h3>Cal.com</h3>
+      <p>The card sits on the grid. Its text starts one column and one gutter in, so it lands on the next column line, not on a padding that happened to look right.</p>
+    </div>
+    <div class="card wm-card" style="--span:14;--span-md:12">
+      <h3>Geometry</h3>
+      <p>Fourteen columns. On a phone both cards take all twelve, and the inset stays one column + one gutter: 30px at 390.</p>
+    </div>
+    <p class="colnum" style="--span:24">8 · 8 · 8 &mdash; thirds &middot; 4 · 4 · 4 below 1024</p>
+    <div class="card wm-card" style="--span:8;--span-md:4"><p class="t-ui">eight</p></div>
+    <div class="card wm-card" style="--span:8;--span-md:4"><p class="t-ui">eight</p></div>
+    <div class="card wm-card" style="--span:8;--span-md:4"><p class="t-ui">eight</p></div>
+    <p class="colnum" style="--span:24">6 · 6 · 6 · 6 &mdash; quarters, which 30 columns could not do &middot; 6 · 6 below 1024</p>
+    <div class="card wm-card" style="--span:6;--span-md:6"><p class="t-ui">six</p></div>
+    <div class="card wm-card" style="--span:6;--span-md:6"><p class="t-ui">six</p></div>
+    <div class="card wm-card" style="--span:6;--span-md:6"><p class="t-ui">six</p></div>
+    <div class="card wm-card" style="--span:6;--span-md:6"><p class="t-ui">six</p></div>
+  </section>
+
+  <section class="wm-grid">
+    <div class="rule"></div>
+    <h2 style="--span:24">The lines</h2>
+    <div class="spec wm-baselines" style="--span:24;--span-md:12">
+      <div class="lbl" data-baseline="last"><p class="t-ui">display &middot; fluid &middot; round(nearest, 1.1em, 3px)</p></div>
+      <div class="smp"><p class="t-display" style="font-size:clamp(2.75rem,6vw,6rem);font-weight:700;color:var(--text);margin:0;font-variation-settings:'opsz' 45">Hamburgefonstiv, at every width</p></div>
+      <div class="gap"></div>
+      <div class="lbl" data-baseline="last"><p class="t-ui">title &middot; 26 / 30 &middot; 10 lines</p></div>
+      <div class="smp"><p class="t-title" style="font-size:var(--type-title-size);font-weight:700;color:var(--text);margin:0">The leading, subdivided</p></div>
+      <div class="gap"></div>
+      <div class="lbl" data-baseline="last"><p class="t-ui">lede &middot; 18 / 27 &middot; 9 lines</p></div>
+      <div class="smp"><p class="t-lede" style="margin:0">Every role's leading is a whole number of three-pixel units, so baselines of different sizes still meet on one set of lines.</p></div>
+      <div class="gap"></div>
+      <div class="lbl" data-baseline="last"><p class="t-ui">body &middot; 16 / 24 &middot; 8 lines</p></div>
+      <div class="smp"><p style="margin:0">Body copy is where the grid is decided. At 24 every line of a long paragraph lands on a strong line. At 24.8 the first line does, and each line after it falls another 0.8px behind, until by the tenth it sits between lines. Flip the body chips with the lines on and watch this paragraph walk off the grid while the lede above and the interface type below stay put.</p></div>
+      <div class="gap"></div>
+      <div class="lbl" data-baseline="last"><p class="t-ui">ui &middot; 12 / 15 &middot; 5 lines</p></div>
+      <div class="smp"><p class="t-ui" style="max-width:52ch">Twelve on fifteen: the print grid this one is modelled on. Labels, captions, the dial's words.</p></div>
+      <div class="gap"></div>
+      <div class="lbl" data-baseline="last"><p class="t-ui">micro &middot; 9 / 12 &middot; 4 lines</p></div>
+      <div class="smp"><p class="t-micro">axis tags &middot; metric rules &middot; annotations</p></div>
+    </div>
+  </section>
+
+  <section class="wm-grid">
+    <div class="rule"></div>
+    <h2 style="--span:24">The numbers</h2>
+    <div style="--span:12;--span-md:12">
+      <table>
+        <tr><th>token</th><th>desktop</th><th>below 1024</th><th>below 600</th></tr>
+        <tr><td><code>--grid-cols</code></td><td>24</td><td>12</td><td>12</td></tr>
+        <tr><td><code>--grid-gutter</code></td><td>24px</td><td>24px</td><td>12px</td></tr>
+        <tr><td><code>--grid-margin</code></td><td>7vw</td><td>7vw</td><td>20px</td></tr>
+        <tr><td><code>--bl</code></td><td>3px</td><td>3px</td><td>3px</td></tr>
+        <tr><td>card inset</td><td colspan="3">one column + one gutter</td></tr>
+      </table>
+    </div>
+    <div style="--start:15;--span:10;--span-md:12">
+      <p><b>What is on the lines, and what is not.</b> Text and the space between text blocks are in units of 3px. A chip's padding, a button's, a card's top and bottom, stay on the pad scale (4 6 8 12 16 24 32 48 64) &mdash; components keep their own spacing; the column of text keeps the rhythm.</p>
+    </div>
+  </section>
+</main>
+
+<script src="../../src/gridSnap.js" defer></script>
+<script>
+// the column overlay draws whatever --grid-cols says right now
+const colsHost = document.querySelector('#cols .wm-grid');
+function drawCols(){ const n = +getComputedStyle(document.documentElement).getPropertyValue('--grid-cols') || 24;
+  colsHost.innerHTML = Array.from({length:n}, (_, i) => `<div><span>${i+1}</span></div>`).join(''); }
+drawCols(); addEventListener('resize', drawCols);
+const root = document.documentElement;
+const flip = (cls, btn) => { const on = root.classList.toggle(cls); btn.classList.toggle('on', on); };
+const tCols = document.getElementById('tCols'), tLines = document.getElementById('tLines');
+tCols.onclick = () => flip('show-cols', tCols);
+tLines.onclick = () => flip('show-lines', tLines);
+const leads = [...document.querySelectorAll('[data-lead]')];
+const setLead = v => { root.classList.toggle('off-grid', v === '24.8'); leads.forEach(b => b.classList.toggle('on', b.dataset.lead === v)); };
+leads.forEach(b => b.onclick = () => setLead(b.dataset.lead));
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === 'g') tCols.click();
+  if (k === 'l') tLines.click();
+  if (k === 'b') setLead(root.classList.contains('off-grid') ? '24' : '24.8');
+});
+
+// The 3px lines, one device pixel each, on the device pixel the browser snaps a baseline to:
+// line k sits at round(k * 3 * dpr) in device pixels from main's top.
+const main = document.querySelector('main.wm-lines'), cv = document.getElementById('lines');
+function drawLines(){
+  const dpr = window.devicePixelRatio || 1, w = main.clientWidth, h = main.scrollHeight;
+  cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  const g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height);
+  g.fillStyle = getComputedStyle(root).getPropertyValue('--ov-bl-strong').trim() || 'rgba(40,120,255,.5)';
+  g.globalAlpha = .5;
+  // the line is the pixel row just above the baseline position, the way glyphs sit on it
+  for (let y = 0; y * dpr < cv.height; y += 3) g.fillRect(0, Math.round(y * dpr) - 1, cv.width, 1);
+}
+let raf = 0; const redraw = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(drawLines); };
+addEventListener('resize', redraw); matchMedia('(resolution: 1dppx)').addEventListener?.('change', redraw);
+new ResizeObserver(redraw).observe(main); document.fonts?.ready.then(redraw); redraw();
+// open with both overlays on: this page is about them
+tCols.click(); tLines.click();
+</script>
+</body>
+</html>
