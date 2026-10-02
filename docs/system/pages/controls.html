@@ -71,6 +71,10 @@
   --text:        var(--ink);
   --text-muted:  var(--muted);
   --text-dim:    var(--muted);
+  /* The ALPHA ink the triplet paints with: rgba(var(--text-rgb), a). Its fallback is the
+     dark ground's 232 -- so with no bridge the triplet drew near-white at .38 on a LIGHT
+     page and was invisible there (2026-10-02). Light here; the dark blocks below set 232. */
+  --text-rgb:    22, 22, 22;
   --border:      var(--line);
   --border-subtle: var(--hair);
   --surface:     var(--panel);
@@ -95,12 +99,14 @@
     --line: #2e2f34; --hair: #232428;
     --accent: #ffffff; --accent-soft: #26272b;
     --on-accent: #131416;
+    --text-rgb: 232, 232, 232;
   }}:root[data-theme="dark"]{
   --bg: #131416; --panel: #1b1c1f; --sunk: #232428; --raised: #26272b;
   --ink: #f0efec; --ink-2: #c2c1bd; --muted: #8d8f95;
   --line: #2e2f34; --hair: #232428;
   --accent: #ffffff; --accent-soft: #26272b;
   --on-accent: #131416;
+  --text-rgb: 232, 232, 232;
 }:root{
   background: var(--bg); color: var(--ink);
   font-family: var(--sans); font-size: 16px; line-height: 1.6;
@@ -138,7 +144,9 @@
      "optical size" plus the AUTO control in this card; 105px, the primitive's default,
      does not. Arrived at by measuring, not chosen. */
 .v1, .v2{ display: flex; flex-direction: column; gap: 14px; }
-.v1 .slider-row, .v2 .slider-row{ width: 100%; }&.vert .rig{ display: flex; gap: 1.25rem; align-items: flex-start; justify-content: safe center;
+.v1 .slider-row, .v2 .slider-row{ width: 100%; }/* :not(.v5): the triplet has no vertical form -- three numbers on one line IS the control
+   -- and turned into a flex row its heads collided and its columns clipped (2026-10-02). */
+&.vert .rig:not(.v5){ display: flex; gap: 1.25rem; align-items: flex-start; justify-content: safe center;
   min-height: 15rem; padding-top: .5rem;
   /* Three vertical columns can be wider than the card. Scroll the rig rather than let it
      hang off the side — the page body must never scroll sideways for this. */
@@ -1503,7 +1511,7 @@ const VARIANTS = [
   { name: 'The row is the track', note: '<b>Label and number sit inside the bar; the fill is the value.</b> Press anywhere on the row and it jumps there, then follows. The number is still typeable — click it and the drag stands down. One object, one readout, and the widest hit area of the five.', build: c => DIALS.forEach(d => c.appendChild(axisSlider(d, { variant: 'track' }))) },
   { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label — which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => c.appendChild(v3(d))) },
   { name: 'The toggle becomes the slider', note: '<b>One node, two states.</b> Ported from <code>MorphControl</code> in CustomTypeTester — the grip parked at the right edge IS the thumb: click it and it travels onto the rail and grows into it, while the stops fade out. It does not reveal a second control. The value only appears once there is a continuous number to show. <b>Added here:</b> a way back to the stops, which the original has no path to.', build: c => c.appendChild(v4()) },
-  { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired and max are one control, so they share a label and a unit \u2014 printed once, beside the name, because three copies of it would say the fields measure three different things. There is no box: the rule under each number IS the field, the same one 01 and 02 draw. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The four rows are the prop surface: heads on the first, a 100-centred store shown 0-centred on the second, a chip on the third, and the fourth disabled. The shape the other five cannot make, because they each hold a single value.', build: c => TRIPLETS.forEach(t => c.appendChild(axisTriplet(t))) },
+  { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired and max are one control, so they share a label and a unit \u2014 printed once, beside the name, because three copies of it would say the fields measure three different things. There is no box: the rule under each number IS the field, the same one 01 and 02 draw. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The four rows are the prop surface: heads on the first, a 100-centred store shown 0-centred on the second, a chip on the third, and the fourth disabled. The shape the other five cannot make, because they each hold a single value. It has no vertical form, so Vertical leaves it as it is.', build: c => TRIPLETS.forEach(t => c.appendChild(axisTriplet(t))) },
 ];
 
 const grid = document.getElementById('t-grid');
