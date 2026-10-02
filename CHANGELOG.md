@@ -26,6 +26,10 @@ does not while it has focus. The first focus ring was a capsule the size of the 
 the lozenge now. Its knobs (`--hd-rail`, `--hd-id`) default at the root, not on the dial, so a
 host can set them on any ancestor.
 
+The icon face grows to 81 names: `bookmark`, `call_merge`, `star` and `public`, drawn thin (weight
+100, the 48 cut, at 72px) as the marks of the case study's highlight bento -- a sleek line where a
+bento would have a photograph.
+
 `gridSnap.js`: a `.wm-baselines` row now moves ONLY the block it aligns. It moved every block in
 the item, so a card whose big word sat 3px above its neighbour's had its bottom-anchored text
 pushed 3px (and a half-size figure's text 45px, past the card) -- the very bottom lines Mark
