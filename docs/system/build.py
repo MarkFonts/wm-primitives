@@ -148,7 +148,12 @@ PRIMITIVE_CSS = {
     # chevron.css carries the stepper stroke and its rollover; without it the docs page
     # draws chevrons at the browser's default stroke-width of 1, thinner than anything
     # that ships, since the weight left the SVG attribute so it could answer :hover.
-    "controls": ("type.css", "chevron.css", "icon.css", "AxisSlider.css", "AxisTriplet.css", "chip.css"),
+    "controls": ("type.css", "chevron.css", "icon.css", "AxisSlider.css", "AxisTriplet.css", "chip.css", "dialHandle.css"),
+}
+# The same for scripts: a chapter that DEMONSTRATES a plain-script primitive runs the file
+# from src/, inlined ahead of its own code, so the demo is the shipped thing.
+PRIMITIVE_JS = {
+    "controls": ("dialHandle.js",),
 }
 
 # ---------------------------------------------------------------- per section
@@ -167,6 +172,7 @@ def build_section(sid, label, path, kicker):
     # inlined below from src/ instead, so the link would be a second copy and a 404 in the
     # assembled page, where ../../src/ is outside docs/.
     raw = re.sub(r'<link[^>]+href="\.\./\.\./src/[^"]+"[^>]*>', '', raw)
+    raw = re.sub(r'<script src="\.\./\.\./src/[^"]+"[^>]*></script>', '', raw)
     title = (re.search(r'<title>(.*?)</title>', raw, re.S) or [None, label])[1]
 
     css = "\n".join(re.findall(r'<style[^>]*>(.*?)</style>', raw, re.S))
@@ -196,7 +202,8 @@ def build_section(sid, label, path, kicker):
     # rule after it -- which is how the GEOM map lost all its --g-* colors and painted
     # black while --radius, declared earlier, still resolved.
     css = css.replace('<![CDATA[', '').replace(']]>', '')
-    js  = "\n".join(re.findall(r'<script[^>]*>(.*?)</script>', raw, re.S))
+    js  = "".join((HERE.parent.parent / "src" / f).read_text() + "\n" for f in PRIMITIVE_JS.get(sid, ())) \
+        + "\n".join(re.findall(r'<script[^>]*>(.*?)</script>', raw, re.S))
 
     html = re.sub(r'<style[^>]*>.*?</style>', '', raw, flags=re.S)
     html = re.sub(r'<script[^>]*>.*?</script>', '', html, flags=re.S)
