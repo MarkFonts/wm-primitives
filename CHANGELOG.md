@@ -12,6 +12,12 @@ Newest first.
 
 ---
 
+## 2026-10-02 — play_arrow and pause join the icon face
+
+83 names. The Cal Sans case study's Highlights section is getting a slideshow mode with a
+pause/play bar (the case-study session asked for them rather than drawing inline SVGs). Re-cut
+with `scripts/cut-icon-subset.py play_arrow pause`; lint-icons clean, both copies equal.
+
 ## 2026-10-02 — the value in the handle is a primitive; a row moves only what it aligns
 
 `src/dialHandle.js` + `dialHandle.css`: variant 03 ("Value in the handle"), until now a demo drawn
