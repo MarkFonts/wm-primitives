@@ -12,6 +12,16 @@ Newest first.
 
 ---
 
+## 2026-10-02 — the triplet, visible again
+
+Card 05 on the system page had drifted two ways. In light mode it was invisible: AxisTriplet
+paints its ink as `rgba(var(--text-rgb), a)`, whose fallback is the dark ground's 232, and the
+page's bridge handed the controls chapter `--text`, `--text-muted` and `--text-dim` but never
+`--text-rgb` -- so the triplet drew near-white at .38 on a light page. The bridge carries it now,
+per theme. And under the Vertical toggle its heads collided and its columns clipped: the toggle
+turned every rig into a flex row, and a triplet has no vertical form -- three numbers on one
+line IS the control -- so Vertical leaves it alone, and its note says so.
+
 ## 2026-10-02 — the line is a rule, not a convention
 
 Two checks, so a page on the grid cannot drift off it quietly.
