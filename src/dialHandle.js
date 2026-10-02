@@ -83,8 +83,12 @@
       const p = pct();
       rail.setAttribute('aria-valuenow', String(num(value)));
       rail.setAttribute('aria-valuetext', fmt(value, d) + (d.unit ? ' ' + d.unit : ''));
-      if (root.classList.contains('wm-hd--vertical')) { pill.style.top = (100 - p) + '%'; pill.style.left = '50%'; }
-      else { pill.style.left = p + '%'; pill.style.top = '50%'; }
+      // the lozenge's CENTRE travels the rail less an inset at each end (--hd-inset, half the
+      // lozenge when vertical), so at its ends it sits inside the rail instead of overhanging
+      // into the caption above or whatever is below
+      pill.style.setProperty('--p', String(p / 100));
+      if (root.classList.contains('wm-hd--vertical')) { pill.style.top = ''; pill.style.left = ''; }
+      else { pill.style.left = ''; pill.style.top = ''; }
       if (autoBtn) {
         const on = value === 'auto';
         autoBtn.classList.toggle('on', on); autoBtn.setAttribute('aria-pressed', String(on));

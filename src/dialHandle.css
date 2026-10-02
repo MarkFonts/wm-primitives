@@ -8,12 +8,14 @@
  * Tokens with fallbacks, in @layer wm.controls like button.css. Knobs a host may set:
  *   --hd-rail     the rail's length when vertical (default 11rem; the case study sets 96px)
  *   --hd-id       the id column's width when horizontal (default 5.5rem)
+ *   --hd-inset / --hd-inset-v   how far from the rail's ends the lozenge's centre stops
+ *                 (0 horizontal, as the docs draw it; 12px vertical, half the lozenge)
  * On the grid: a horizontal dial is 36px tall (12 units); a vertical one is its id column
  * plus --hd-rail, so a host on the grid gives --hd-rail a whole number of units. */
 @layer wm.controls {
   /* The knobs default at the root, not on the dial: set on .wm-hd they would beat a value a
      host sets on any ancestor (the case study's .axes gave --hd-rail 96px and got 11rem). */
-  :root { --hd-rail: 11rem; --hd-id: 5.5rem; }
+  :root { --hd-rail: 11rem; --hd-id: 5.5rem; --hd-inset: 0px; --hd-inset-v: 12px; }
   .wm-hd {
     display: flex;
     align-items: center;
@@ -77,7 +79,10 @@
   }
   .wm-hd-pill {
     position: absolute;
+    /* --p is the value as 0..1 (dialHandle.js); the centre runs from inset to length - inset */
+    --p: 0;
     top: 50%;
+    left: calc(var(--hd-inset) + (100% - 2 * var(--hd-inset)) * var(--p));
     transform: translate(-50%, -50%);
     display: inline-flex;
     align-items: center;
@@ -130,7 +135,7 @@
   .wm-hd--vertical .wm-hd-id { width: auto; }
   .wm-hd--vertical .wm-hd-rail { flex: none; width: 6rem; height: var(--hd-rail); cursor: ns-resize; touch-action: pan-x; }
   .wm-hd--vertical .wm-hd-rail > i { left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto; transform: translateX(-50%); }
-  .wm-hd--vertical .wm-hd-pill { left: 50%; cursor: ns-resize; touch-action: pan-x; }
+  .wm-hd--vertical .wm-hd-pill { left: 50%; top: calc(var(--hd-inset-v) + (100% - 2 * var(--hd-inset-v)) * (1 - var(--p))); cursor: ns-resize; touch-action: pan-x; }
 
   /* touch: the RAIL is the target and grows to 48; the lozenge stays a thumb */
   @media (pointer: coarse) {

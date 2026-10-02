@@ -3196,7 +3196,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   }#s-controls .wm-chip:focus{ outline: none; }#s-controls .wm-chip:is(:focus-visible,#s-controls :has(> input:focus-visible)){ outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }#s-controls .wm-chip:is(:disabled,#s-controls [aria-disabled="true"]){ opacity: .4; cursor: default; }@media (pointer: coarse){#s-controls .wm-chip{ min-height: 32px; }
   }@media (prefers-reduced-motion: reduce){#s-controls .wm-chip{ transition: none; }
   }
-}@layer wm.controls{#s-controls{ --hd-rail: 11rem; --hd-id: 5.5rem; }#s-controls .wm-hd{
+}@layer wm.controls{#s-controls{ --hd-rail: 11rem; --hd-id: 5.5rem; --hd-inset: 0px; --hd-inset-v: 12px; }#s-controls .wm-hd{
     display: flex;
     align-items: center;
     gap: var(--spacing-04, 12px);
@@ -3246,7 +3246,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
     transform: translateY(-50%);
   }#s-controls .wm-hd-pill{
     position: absolute;
+    
+    --p: 0;
     top: 50%;
+    left: calc(var(--hd-inset) + (100% - 2 * var(--hd-inset)) * var(--p));
     transform: translate(-50%, -50%);
     display: inline-flex;
     align-items: center;
@@ -3284,7 +3287,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     margin-top: 2px; padding: 0; border: 0; background: none;
     font: inherit; font-size: var(--type-micro-size, 0.5625rem); letter-spacing: var(--track-caps, .12em); text-transform: uppercase;
     color: var(--text-dim, rgba(232, 232, 232, .38)); cursor: pointer;
-  }#s-controls .wm-hd-auto.on{ color: var(--ok, var(--accent, currentColor)); }#s-controls .wm-hd--vertical{ flex-direction: column; gap: var(--spacing-03, 8px); }#s-controls .wm-hd--vertical .wm-hd-id{ width: auto; }#s-controls .wm-hd--vertical .wm-hd-rail{ flex: none; width: 6rem; height: var(--hd-rail); cursor: ns-resize; touch-action: pan-x; }#s-controls .wm-hd--vertical .wm-hd-rail > i{ left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto; transform: translateX(-50%); }#s-controls .wm-hd--vertical .wm-hd-pill{ left: 50%; cursor: ns-resize; touch-action: pan-x; }@media (pointer: coarse){#s-controls .wm-hd:not(.wm-hd--vertical) .wm-hd-rail{ height: 48px; }#s-controls .wm-hd-pill input{ font-size: var(--type-body-size, 1rem); }   
+  }#s-controls .wm-hd-auto.on{ color: var(--ok, var(--accent, currentColor)); }#s-controls .wm-hd--vertical{ flex-direction: column; gap: var(--spacing-03, 8px); }#s-controls .wm-hd--vertical .wm-hd-id{ width: auto; }#s-controls .wm-hd--vertical .wm-hd-rail{ flex: none; width: 6rem; height: var(--hd-rail); cursor: ns-resize; touch-action: pan-x; }#s-controls .wm-hd--vertical .wm-hd-rail > i{ left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto; transform: translateX(-50%); }#s-controls .wm-hd--vertical .wm-hd-pill{ left: 50%; top: calc(var(--hd-inset-v) + (100% - 2 * var(--hd-inset-v)) * (1 - var(--p))); cursor: ns-resize; touch-action: pan-x; }@media (pointer: coarse){#s-controls .wm-hd:not(.wm-hd--vertical) .wm-hd-rail{ height: 48px; }#s-controls .wm-hd-pill input{ font-size: var(--type-body-size, 1rem); }   
   }#s-controls .touch .wm-hd:not(.wm-hd--vertical) .wm-hd-rail{ height: 48px; }#s-controls .touch .wm-hd-pill input{ font-size: var(--type-body-size, 1rem); }@media (prefers-reduced-motion: reduce){#s-controls .wm-hd-pill input{ transition: none; }
   }
 }#s-controls{
@@ -6734,8 +6737,12 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       const p = pct();
       rail.setAttribute('aria-valuenow', String(num(value)));
       rail.setAttribute('aria-valuetext', fmt(value, d) + (d.unit ? ' ' + d.unit : ''));
-      if (root.classList.contains('wm-hd--vertical')) { pill.style.top = (100 - p) + '%'; pill.style.left = '50%'; }
-      else { pill.style.left = p + '%'; pill.style.top = '50%'; }
+      // the lozenge's CENTRE travels the rail less an inset at each end (--hd-inset, half the
+      // lozenge when vertical), so at its ends it sits inside the rail instead of overhanging
+      // into the caption above or whatever is below
+      pill.style.setProperty('--p', String(p / 100));
+      if (root.classList.contains('wm-hd--vertical')) { pill.style.top = ''; pill.style.left = ''; }
+      else { pill.style.left = ''; pill.style.top = ''; }
       if (autoBtn) {
         const on = value === 'auto';
         autoBtn.classList.toggle('on', on); autoBtn.setAttribute('aria-pressed', String(on));
