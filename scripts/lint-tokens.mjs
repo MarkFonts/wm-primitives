@@ -14,6 +14,11 @@
  * tokenSources scanned for declarations only -- where the primitives declare theirs
  * hostTokens   the consuming app declares these; reading one bare is legal
  * runtimeTokens this repo's own JS sets these on its own elements
+ * lines        files whose text sits on the house grid (src/grid.css, .wm-lines): every
+ *              leading and every vertical space in them is a whole number of 3px units
+ * linesSkip    a selector regex inside those files that is NOT on the line (a demo's insides)
+ * only         run just these checks: "scale" (padding/gap/margin), "size", "tracking",
+ *              "motion", "lines". A site that joins the system one law at a time.
  *
  * exempt is deliberate, not a backlog. Anything listed there should be explainable in one
  * sentence -- a frozen file, or a gallery of somebody else's components.
@@ -28,6 +33,10 @@ if (!existsSync(CONFIG)) {
   process.exit(2)
 }
 const cfg = JSON.parse(readFileSync(CONFIG, 'utf8'))
+const ONLY = new Set(cfg.only ?? [])
+const has = check => !ONLY.size || ONLY.has(check)
+const LINES = (cfg.lines ?? []).map(p => p.split('/').join(sep))
+const LINES_SKIP = cfg.linesSkip ? new RegExp(cfg.linesSkip) : null
 const EXEMPT = (cfg.exempt ?? []).map(p => p.split('/').join(sep))
 
 /* A host token with no prose is a token nobody can be told to define. Only where the
@@ -126,10 +135,13 @@ for (const root of cfg.roots ?? ['src']) {
 
     if (EXEMPT.some(e => rel === e || rel.startsWith(e + sep))) continue
     const lines = text.split('\n')
-    let off = false
+    const bare = decomment(text).split('\n')
+    const onGrid = LINES.includes(rel)
+    let off = false, sel = ''
 
     lines.forEach((line, i) => {
       const at = `${rel}:${i + 1}`
+      if (bare[i].includes('{')) sel = bare[i].slice(0, bare[i].lastIndexOf('{')).trim() || sel
 
       /* One line may say why it is off the system, on itself or on the line above:
              /* token-lint: allow -- 8px: the badge has to sit BESIDE its label *\/
@@ -157,7 +169,7 @@ for (const root of cfg.roots ?? ['src']) {
          same rule -- checking one and not the other is how 10px gaps survived a padding
          audit. flex/grid gap only; the word also appears in shorthand grid properties,
          which this deliberately does not touch. */
-      for (const m of line.matchAll(/(?<![-\w])((?:row-|column-)?gap|padding[-\w]*)\s*:\s*([^;}]+)/g)) {
+      if (has('scale')) for (const m of line.matchAll(/(?<![-\w])((?:row-|column-)?gap|padding[-\w]*)\s*:\s*([^;}]+)/g)) {
         for (const px of stripFallbacks(m[2]).matchAll(/(\d*\.?\d+)px/g)) {
           const n = Number(px[1])
           if (!STEPS.has(n))
@@ -174,7 +186,7 @@ for (const root of cfg.roots ?? ['src']) {
          package, font-proofer, ReCal, Kernpare -- 2026-09-24/25), then MARGIN_GATES
          flipped and it fails like padding does. A rule that turned five consumer legs
          red on the day it landed would have been reverted, not obeyed. */
-      for (const m of line.matchAll(/(?<![-\w])(margin(?:-(?:top|right|bottom|left|inline|block)(?:-(?:start|end))?)?)\s*:\s*([^;}]+)/g)) {
+      if (has('scale')) for (const m of line.matchAll(/(?<![-\w])(margin(?:-(?:top|right|bottom|left|inline|block)(?:-(?:start|end))?)?)\s*:\s*([^;}]+)/g)) {
         for (const px of stripFallbacks(m[2]).matchAll(/(-?\d*\.?\d+)px/g)) {
           const n = Math.abs(Number(px[1]))
           if (!STEPS.has(n))
@@ -182,7 +194,7 @@ for (const root of cfg.roots ?? ['src']) {
         }
       }
 
-      for (const m of line.matchAll(/(?<![-\w])font-size\s*:\s*([^;}]+)/g)) {
+      if (has('size')) for (const m of line.matchAll(/(?<![-\w])font-size\s*:\s*([^;}]+)/g)) {
         const v = m[1].trim()
         if (!SIZE_OK.test(v))
           problems.push(`${at}  font-size ${v} is a literal, not a role`)
@@ -193,7 +205,7 @@ for (const root of cfg.roots ?? ['src']) {
          the system." It existed anyway -- 0.02, 0.04, 0.06, 0.08em, spread across three
          repos, every one of them a lowercase UI label reading visibly open beside an
          untracked one. The rule is the law with nothing added: the token, or nothing. */
-      for (const m of line.matchAll(/(?<![-\w])letter-spacing\s*:\s*([^;}]+)/g)) {
+      if (has('tracking')) for (const m of line.matchAll(/(?<![-\w])letter-spacing\s*:\s*([^;}]+)/g)) {
         const v = m[1].trim()
         if (!/^(?:var\(--track-caps\b|normal$|inherit$|initial$|unset$|0(?:px|em|rem)?$)/.test(v))
           problems.push(`${at}  letter-spacing ${v} is not --track-caps  (capitals only, one value)`)
@@ -209,9 +221,50 @@ for (const root of cfg.roots ?? ['src']) {
          a loop's period, a bounce, a 2.1s wght-and-SHRP party. Linting those produced
          nothing but a queue of exemptions, which is how a rule teaches people to write
          `allow` without reading it. */
-      for (const m of line.matchAll(/(?<![-\w])(transition)(?:-duration|-delay)?\s*:\s*([^;}]+)/g)) {
+      if (has('motion')) for (const m of line.matchAll(/(?<![-\w])(transition)(?:-duration|-delay)?\s*:\s*([^;}]+)/g)) {
         for (const t of stripFallbacks(m[2]).matchAll(/(?<![\w.-])(\d*\.?\d+)(m?s)\b/g))
           problems.push(`${at}  ${m[1]} time ${t[0]} is a literal  (use var(--dur-fast|--dur-med|--dur-layout|--dur-slow, ...))`)
+      }
+
+      /* THE LINE (src/grid.css). In a file on the grid, a baseline lands on a 3px line only
+         if every leading above it, and every vertical space, is a whole number of units: one
+         line-height of 1.4 or one 10px margin puts everything after it between lines, and
+         gridSnap.js can only move glyphs by less than a unit. The nudge and the snapper fix
+         where a baseline sits INSIDE its box; this keeps the boxes on the line. So:
+           line-height  var(--lh) | var(--lead-*) | N x 3px | 1
+           --lh         var(--lead-*) | N x 3px | round(<mode>, <x>, var(--bl) | N x 3px)
+           vertical space (margin/padding top/bottom/block, row-gap, gap's row, a shorthand's
+           first and third)  0 | auto | N x 3px | var(...) | round(..., var(--bl) | N x 3px)
+         Not judged: anything matched by linesSkip (a demo's own insides), and the inline
+         axis. Added 2026-10-01 with the grid; the Cal Sans case study is the first file. */
+      if (onGrid && has('lines') && !(LINES_SKIP && LINES_SKIP.test(sel))) {
+        const b = bare[i]
+        const unit = n => Math.abs(Math.round(n * 1000) % 3000) < 1
+        const rounded = v => /^round\((?:nearest|up|down|to-zero)?\s*,?.*,\s*(?:var\(--bl\b[^)]*\)|(\d+)px)\s*\)$/.exec(v)
+        const spaceOk = v => {
+          v = v.trim(); if (!v) return true
+          if (/^(?:0|auto|inherit|initial|unset)$/.test(v) || /^var\(/.test(v)) return true
+          const px = /^-?(\d*\.?\d+)px$/.exec(v); if (px) return unit(Number(px[1]))
+          const r = rounded(v); if (r) return !r[1] || unit(Number(r[1]))
+          return false
+        }
+        const split = v => { const out = []; let d = 0, cur = ''; for (const ch of v.trim()) { if (ch === '(') d++; if (ch === ')') d--; if (ch === ' ' && !d) { if (cur) out.push(cur); cur = '' } else cur += ch } if (cur) out.push(cur); return out }
+        for (const m of b.matchAll(/(?<![-\w])line-height\s*:\s*([^;}]+)/g)) {
+          const v = m[1].trim(), px = /^(\d*\.?\d+)px$/.exec(v)
+          if (!(/^var\(--(?:lh|lead-[\w-]+)\b/.test(v) || v === '1' || (px && unit(Number(px[1])))))
+            problems.push(`${at}  line-height ${v} is off the line  (on the grid: var(--lh) set by --lh: round(nearest, Nem, var(--bl)), a --lead-* token, or N x 3px)`)
+        }
+        for (const m of b.matchAll(/(?<![-\w])--lh\s*:\s*([^;}]+)/g)) {
+          const v = m[1].trim(), px = /^(\d*\.?\d+)px$/.exec(v), r = rounded(v)
+          if (!(/^var\(--lead-[\w-]+\b/.test(v) || (px && unit(Number(px[1]))) || (r && (!r[1] || unit(Number(r[1]))))))
+            problems.push(`${at}  --lh ${v} is off the line  (round(nearest, Nem, var(--bl)), a --lead-* token, or N x 3px)`)
+        }
+        for (const m of b.matchAll(/(?<![-\w])(margin-top|margin-bottom|margin-block(?:-start|-end)?|padding-top|padding-bottom|padding-block(?:-start|-end)?|row-gap|gap|margin|padding)\s*:\s*([^;}]+)/g)) {
+          const vals = split(m[2]), prop = m[1]
+          const vertical = prop === 'gap' ? vals.slice(0, 1) : (prop === 'margin' || prop === 'padding') ? [vals[0], vals.length >= 3 ? vals[2] : vals[0]] : vals
+          for (const v of vertical) if (!spaceOk(v))
+            problems.push(`${at}  ${prop} ${v} is off the line  (vertical space on the grid: N x 3px, a token, or round(<x>, var(--bl)))`)
+        }
       }
     })
   }
@@ -419,8 +472,12 @@ if (problems.length) {
   console.error(`\nlint-tokens: ${problems.length} problem${problems.length > 1 ? 's' : ''}\n`)
   for (const p of problems) console.error('  ' + p)
   for (const n of notes) console.error(`  note -- ${n}`)
-  console.error('\nUse a step (4 6 8 12 16 24 32 48 64) or a --type-* role.')
-  console.error('If a value genuinely belongs off the system, add its file to .tokenlint.json exempt and say why.\n')
+  if (problems.some(p => p.includes('off the line')))
+    console.error('\nOn the grid (src/grid.css): a leading is --lh: round(nearest, Nem, var(--bl)), a --lead-* token or N x 3px; vertical space is N x 3px or round(<x>, var(--bl)).')
+  if (problems.some(p => !p.includes('off the line'))) {
+    console.error('\nUse a step (4 6 8 12 16 24 32 48 64) or a --type-* role.')
+    console.error('If a value genuinely belongs off the system, add its file to .tokenlint.json exempt and say why.\n')
+  }
   process.exit(1)
 }
 for (const n of notes) console.log(`lint-tokens: note -- ${n}`)

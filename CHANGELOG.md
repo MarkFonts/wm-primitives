@@ -12,6 +12,38 @@ Newest first.
 
 ---
 
+## 2026-10-02 — the line is a rule, not a convention
+
+Two checks, so a page on the grid cannot drift off it quietly.
+
+The INPUTS, in `scripts/lint-tokens.mjs`: a `lines` rule for files listed in a consumer's
+`.tokenlint.json`. In them every `line-height` is `var(--lh)`, a `--lead-*` token or N x 3px;
+every `--lh` is one of those or `round(..., var(--bl))`; every vertical space (margin/padding
+top, bottom and block, row-gap, a shorthand's first and third) is N x 3px, a token or a
+rounded unit. `linesSkip` names a demo's own insides by selector, since a line-based lint can't
+see the DOM. `only` lets a site join one law at a time: wordmark.nyc runs `lines` alone, and is
+now a consumer leg. It flags all 73 off-line values in the case study as it was before the grid,
+and each of a planted 1.4 / 10px / 25px.
+
+The OUTPUT, in `tests/behaviour/grid.spec.ts`: the demo and the case study (the site checked
+out with `shared/` at the commit under test), at 1440, 900 and 390. Every block gridSnap.js
+measured has its first baseline on a line; a block of more than one line has a leading in
+whole units (the snapper only moves first lines -- a planted 1.4 on the studio prose fails
+here); every .wm-baselines row meets; nothing was refused. It reads `wmGridSnap.blocks` and
+`wmGridSnap.firstLine`, so it judges exactly what the snapper judged.
+
+Writing it found a real defect: a block inside another block (a link's 56px ring) was measured
+twice and shifted twice. A block inside a measured block now travels with it.
+
+Then the first thing the grid shipped broke on a phone and both checks were green: `.look` had
+gone onto 12 columns and its six items had no span, so below 961px they sat in one column each,
+18px wide, their contents drawn over one another (wordmark #38 fixed it, 2026-10-02). Baselines
+were on the line throughout -- the lint and the spec test the LINE, not the layout. So the spec
+grew a layout check: no box narrower than its in-flow contents (text, or visible in-flow
+children -- not scrollWidth, which counts a handle parked outside its row on purpose), and no
+grid or flex siblings drawn over each other. Removing the one-line fix fails it on exactly the
+six items; it also found the demo's own heading 6px wider than its column at 390.
+
 ## 2026-10-01 — the grid
 
 `src/grid.css` + `src/gridSnap.js`, on trial in `docs/grid.html` and adopted first by the Cal

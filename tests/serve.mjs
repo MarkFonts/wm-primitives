@@ -14,6 +14,10 @@ const HOSTS = {
   // would otherwise be handed HTML to parse.
   '/opsz-proofer': { root: process.env.OPSZ_PROOFER_DIST ?? resolve('../wordmarktools/opsz-proofer/dist'), spa: false },
   '/kernpare':     { root: process.env.KERNPARE_DIR      ?? resolve('../wordmarktools/kernpare'),          spa: false },
+  // The grid's demo page (docs/grid.html, src/ inlined) and the first page on the grid,
+  // the Cal Sans case study: the wordmark site, with its shared/ pointed at this commit.
+  '/grid':         { root: resolve('docs'), spa: false },
+  '/wordmark':     { root: process.env.WORDMARK_DIR ?? resolve('../wordmark'), spa: false },
   // The bundle's contract fixture: this repo as a page without React.
   '/dial':         { root: resolve('tests/fixtures'), spa: false, shared: resolve('.') },
 }
