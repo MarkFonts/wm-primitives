@@ -10,7 +10,11 @@ import { resolve } from 'node:path'
      2. every row of a .wm-baselines grid meets on one baseline (data-baseline="last" items
         by their last line);
      3. the snapper refused nothing -- a refusal is a row that matched the wrong text (once:
-        a paragraph pushed 212px to meet a slider label).
+        a paragraph pushed 212px to meet a slider label);
+     4. the layout holds: no box narrower than what is in it, no grid or flex siblings drawn
+        over each other. The grid put .look on 12 columns and forgot its items' span, so on
+        a phone six 18px items drew their contents over one another (shipped 2026-10-01);
+        the baseline checks were green the whole time.
    It judges window.wmGridSnap.blocks, exactly what the snapper judged, so ornaments placed
    on purpose (a pill's arrow, a deck counter) drop out by the same rule that skips them,
    not by a list kept here. */
@@ -20,6 +24,31 @@ const PAGES = [
   { name: 'Cal Sans case study', url: '/wordmark/calsans/', dir: process.env.WORDMARK_DIR ?? resolve('../wordmark') },
 ]
 const WIDTHS = [1440, 900, 390]
+
+const LAYOUT = () => {   // runs in the page; stringified below
+  const vis = e => { const c = getComputedStyle(e); return c.display !== 'none' && c.visibility !== 'hidden' && +c.opacity > 0.05 && c.display !== 'contents' && !/absolute|fixed/.test(c.position) };
+  const skip = e => e.closest('[data-nosnap], svg') || !vis(e);
+  const narrow = [], overlap = [];
+  for (const el of document.querySelectorAll('main *')) {
+    if (skip(el)) continue;
+    const c = getComputedStyle(el); if (c.display === 'inline' || c.overflowX !== 'visible' || c.whiteSpace === 'nowrap') continue;
+    const b = el.getBoundingClientRect(); if (b.width < 1) continue;
+    let extent = -Infinity;
+    for (const k of el.children) { const kc = getComputedStyle(k); if (vis(k) && kc.position !== 'absolute' && kc.position !== 'fixed') extent = Math.max(extent, k.getBoundingClientRect().right); }
+    if ([...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) { const rg = document.createRange(); rg.selectNodeContents(el); extent = Math.max(extent, rg.getBoundingClientRect().right); }
+    if (extent > b.right + 2) narrow.push(`${el.tagName.toLowerCase()}.${(el.className + '').split(' ')[0]} is ${Math.round(b.width)}px wide with ${Math.round(extent - b.left)}px inside`);
+  }
+  for (const box of document.querySelectorAll('main *')) {
+    if (skip(box) || !/grid|flex/.test(getComputedStyle(box).display)) continue;
+    const kids = [...box.children].filter(vis).map(c => [c, c.getBoundingClientRect()]).filter(([, r]) => r.width > 4 && r.height > 4);
+    for (let i = 0; i < kids.length; i++) for (let j = i + 1; j < kids.length; j++) {
+      const [a, ra] = kids[i], [b2, rb] = kids[j];
+      const ox = Math.min(ra.right, rb.right) - Math.max(ra.left, rb.left), oy = Math.min(ra.bottom, rb.bottom) - Math.max(ra.top, rb.top);
+      if (ox > 4 && oy > 4) overlap.push(`${(box.className + '').split(' ')[0] || box.tagName}: ${(a.className + '').split(' ')[0] || a.tagName} and ${(b2.className + '').split(' ')[0] || b2.tagName} overlap by ${Math.round(ox)}x${Math.round(oy)}`);
+    }
+  }
+  return { narrow: narrow.slice(0, 8), overlap: overlap.slice(0, 8) };
+}
 
 for (const pg of PAGES) {
   test.describe(`${pg.name} · on the line`, () => {
@@ -71,6 +100,10 @@ for (const pg of PAGES) {
         expect(r.off, `text blocks off the 3px line:\n${r.off.join('\n')}`).toEqual([])
         expect(r.rows, `rows that do not share a baseline:\n${r.rows.join('\n')}`).toEqual([])
         expect(r.refused, `row shifts the snapper refused (a row matched the wrong text):\n${r.refused.join('\n')}`).toEqual([])
+
+        const l = await page.evaluate(fn => new Function('return (' + fn + ')()')(fn), LAYOUT.toString()) as { narrow: string[]; overlap: string[] }
+        expect(l.narrow, `boxes narrower than their contents:\n${l.narrow.join('\n')}`).toEqual([])
+        expect(l.overlap, `siblings drawn over each other:\n${l.overlap.join('\n')}`).toEqual([])
       })
     }
   })

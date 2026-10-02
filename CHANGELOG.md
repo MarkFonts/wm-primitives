@@ -35,6 +35,15 @@ here); every .wm-baselines row meets; nothing was refused. It reads `wmGridSnap.
 Writing it found a real defect: a block inside another block (a link's 56px ring) was measured
 twice and shifted twice. A block inside a measured block now travels with it.
 
+Then the first thing the grid shipped broke on a phone and both checks were green: `.look` had
+gone onto 12 columns and its six items had no span, so below 961px they sat in one column each,
+18px wide, their contents drawn over one another (wordmark #38 fixed it, 2026-10-02). Baselines
+were on the line throughout -- the lint and the spec test the LINE, not the layout. So the spec
+grew a layout check: no box narrower than its in-flow contents (text, or visible in-flow
+children -- not scrollWidth, which counts a handle parked outside its row on purpose), and no
+grid or flex siblings drawn over each other. Removing the one-line fix fails it on exactly the
+six items; it also found the demo's own heading 6px wider than its column at 390.
+
 ## 2026-10-01 — the grid
 
 `src/grid.css` + `src/gridSnap.js`, on trial in `docs/grid.html` and adopted first by the Cal
