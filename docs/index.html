@@ -3196,6 +3196,97 @@ html,body{margin:0;padding:0;background:var(--bg)}
   }#s-controls .wm-chip:focus{ outline: none; }#s-controls .wm-chip:is(:focus-visible,#s-controls :has(> input:focus-visible)){ outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }#s-controls .wm-chip:is(:disabled,#s-controls [aria-disabled="true"]){ opacity: .4; cursor: default; }@media (pointer: coarse){#s-controls .wm-chip{ min-height: 32px; }
   }@media (prefers-reduced-motion: reduce){#s-controls .wm-chip{ transition: none; }
   }
+}@layer wm.controls{#s-controls{ --hd-rail: 11rem; --hd-id: 5.5rem; }#s-controls .wm-hd{
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-04, 12px);
+    font-family: var(--ui-font, system-ui, sans-serif);
+    color: var(--text-muted, rgba(232, 232, 232, .62));
+  }#s-controls .wm-hd-id{
+    width: var(--hd-id);
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1px;
+  }#s-controls .wm-hd-icon{
+    
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 20px;   
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    direction: ltr;
+    font-feature-settings: 'liga';
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+    display: inline-block;
+    max-width: 20px;
+    overflow: hidden;
+  }#s-controls .wm-hd-name{ font-size: var(--type-micro-size, 0.5625rem); line-height: 1; }#s-controls .wm-hd-tag{
+    font-size: var(--type-micro-size, 0.5625rem);
+    line-height: 1;
+    font-variation-settings: 'ital' 1;
+    font-synthesis: none;
+  }#s-controls .wm-hd-tag::before{ content: '\00B7'; font-variation-settings: 'ital' 0; margin: 0 .35em 0 .1em; }#s-controls .wm-hd-rail{
+    position: relative;
+    flex: 1;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    touch-action: pan-y;
+    cursor: ew-resize;
+    outline: none;
+  }#s-controls .wm-hd-rail:focus-visible .wm-hd-pill{ outline: 2px solid var(--accent, currentColor); outline-offset: 3px; }#s-controls .wm-hd-rail > i{
+    position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+    background: var(--border, rgba(232, 232, 232, .14));
+    transform: translateY(-50%);
+  }#s-controls .wm-hd-pill{
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-02, 6px);
+    padding: 4px 8px;
+    border-radius: 999px;
+    corner-shape: superellipse(var(--corner-k, 1.2));
+    background: var(--text, #e8e8e8);
+    color: var(--bg, #111);
+    
+    box-shadow: 0 0 0 3px var(--surface, var(--bg, #111));
+    cursor: ew-resize;
+    touch-action: pan-y;
+    user-select: none;
+  }#s-controls .wm-hd-field{ display: inline-flex; align-items: baseline; }#s-controls .wm-hd-pill input{
+    font: inherit;
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem);
+    font-variation-settings: 'opsz' 10;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    background: none; border: 0; padding: 0; outline: none;
+    color: inherit;
+    field-sizing: content;
+    min-width: 2.25ch;
+    text-align: center;
+    cursor: text;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--dur-fast, 140ms);
+  }#s-controls .wm-hd-pill input:hover,#s-controls .wm-hd-pill input:focus{ text-decoration-color: currentColor; }#s-controls .wm-hd-unit{ font-size: var(--type-micro-size, 0.5625rem); opacity: .78; }#s-controls .wm-hd-unit:empty{ display: none; }#s-controls .wm-hd-auto{
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-top: 2px; padding: 0; border: 0; background: none;
+    font: inherit; font-size: var(--type-micro-size, 0.5625rem); letter-spacing: var(--track-caps, .12em); text-transform: uppercase;
+    color: var(--text-dim, rgba(232, 232, 232, .38)); cursor: pointer;
+  }#s-controls .wm-hd-auto.on{ color: var(--ok, var(--accent, currentColor)); }#s-controls .wm-hd--vertical{ flex-direction: column; gap: var(--spacing-03, 8px); }#s-controls .wm-hd--vertical .wm-hd-id{ width: auto; }#s-controls .wm-hd--vertical .wm-hd-rail{ flex: none; width: 6rem; height: var(--hd-rail); cursor: ns-resize; touch-action: pan-x; }#s-controls .wm-hd--vertical .wm-hd-rail > i{ left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto; transform: translateX(-50%); }#s-controls .wm-hd--vertical .wm-hd-pill{ left: 50%; cursor: ns-resize; touch-action: pan-x; }@media (pointer: coarse){#s-controls .wm-hd:not(.wm-hd--vertical) .wm-hd-rail{ height: 48px; }#s-controls .wm-hd-pill input{ font-size: var(--type-body-size, 1rem); }   
+  }#s-controls .touch .wm-hd:not(.wm-hd--vertical) .wm-hd-rail{ height: 48px; }#s-controls .touch .wm-hd-pill input{ font-size: var(--type-body-size, 1rem); }@media (prefers-reduced-motion: reduce){#s-controls .wm-hd-pill input{ transition: none; }
+  }
 }#s-controls{
   --bg: #fcfcfa; --panel: #f2f2ee; --sunk: #e8e8e3; --raised: #fff;
   --ink: #17181a; --ink-2: #4a4c50; --muted: #74767c;
@@ -3295,13 +3386,13 @@ html,body{margin:0;padding:0;background:var(--bg)}
   content: ''; position: absolute; width: 14px; height: 14px;
   border-radius: 50%; background: currentColor; opacity: 0;
   transition: opacity .1s; pointer-events: none;
-}#s-controls .f .arrows button:active::before{ opacity: .18; }#s-controls .f .arrows button:hover{ color: var(--ink); }#s-controls .f .arrows button:focus-visible{ outline: 1px solid var(--accent); outline-offset: -1px; }#s-controls .v2 .f input,#s-controls .v4 .f input,#s-controls .v3 .pill input{
+}#s-controls .f .arrows button:active::before{ opacity: .18; }#s-controls .f .arrows button:hover{ color: var(--ink); }#s-controls .f .arrows button:focus-visible{ outline: 1px solid var(--accent); outline-offset: -1px; }#s-controls .v2 .f input,#s-controls .v4 .f input{
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   transition: text-decoration-color .15s;
-}#s-controls .v2 .f input:hover,#s-controls .v4 .f input:hover,#s-controls .v3 .pill input:hover,#s-controls .v2 .f input:focus,#s-controls .v4 .f input:focus,#s-controls .v3 .pill input:focus{
+}#s-controls .v2 .f input:hover,#s-controls .v4 .f input:hover,#s-controls .v2 .f input:focus,#s-controls .v4 .f input:focus{
   text-decoration-color: currentColor;
 }#s-controls .trk{ -webkit-appearance: none; appearance: none; width: 100%; height: 2px;
   background: var(--line); border-radius: 2px; margin: 0; outline-offset: 4px; }#s-controls .trk::-webkit-slider-thumb{ -webkit-appearance: none; appearance: none;
@@ -3314,7 +3405,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   background: var(--sunk); overflow: hidden; cursor: ew-resize;
   touch-action: pan-y; user-select: none;
 }#s-controls .v2 .bar:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }#s-controls .v2 .bar > i{ position: absolute; inset: 0 auto 0 0; background: var(--raised);
-  border-right: 1px solid var(--line); pointer-events: none; }#s-controls .v2 .lab,#s-controls .v2 .d-val{ position: relative; z-index: 1; }#s-controls .v2 .f{ border: 0; background: none; }#s-controls .v2 .f input{ width: 4.2rem; cursor: text; }#s-controls .v2 .f .arrows{ display: none; }#s-controls.vert .v2 .bar,#s-controls.vert .v3 .rail,#s-controls.vert .v3 .pill,#s-controls.vert .v4 .knob{ touch-action: pan-x; }#s-controls.vert .v2 .bar{
+  border-right: 1px solid var(--line); pointer-events: none; }#s-controls .v2 .lab,#s-controls .v2 .d-val{ position: relative; z-index: 1; }#s-controls .v2 .f{ border: 0; background: none; }#s-controls .v2 .f input{ width: 4.2rem; cursor: text; }#s-controls .v2 .f .arrows{ display: none; }#s-controls.vert .v2 .bar,#s-controls.vert .v4 .knob{ touch-action: pan-x; }#s-controls.vert .v2 .bar{
   flex-direction: column; justify-content: space-between; align-items: center;
   height: 176px; width: 80px; padding: 8px 4px; cursor: ns-resize;
 }#s-controls.vert .v2 .bar > i{ inset: auto 0 0 0; width: 100%; height: 0;
@@ -3331,54 +3422,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   color: var(--muted); cursor: pointer;
   display: inline-flex; align-items: baseline; gap: .28em;
   vertical-align: baseline;
-}#s-controls .d-auto:hover{ color: var(--ink-2); }#s-controls .d-auto.on{ color: #00a01e; }#s-controls .d-auto-dot{ font-size: .7em; position: relative; top: -1px; }#s-controls .d-auto-word{ text-transform: uppercase; letter-spacing: normal; }#s-controls.touch .d-auto{ padding: 6px 0; }#s-controls .v3 .idcol{ width: 5.5rem; flex: none; display: flex; flex-direction: column;
-  align-items: center; text-align: center; gap: 1px; }#s-controls .v3 .idtag{
-  line-height: 1;
-  margin-left: 0;
-  font-variation-settings: 'ital' 1;
-  font-synthesis: none;
-}#s-controls .v3 .idtag::before{
-  content: '\00B7';
-  font-variation-settings: 'ital' 0;   
-  
-  
-  margin-right: .35em;
-  margin-left: .1em;
-  color: var(--muted);
-}#s-controls .v3 .idcol .icon{ width: auto; }#s-controls .v3 .icon.material-symbols-outlined{
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal; font-style: normal;
-  font-size: 20px; line-height: 1;
-  letter-spacing: normal; text-transform: none; white-space: nowrap;
-  direction: ltr; font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
-  
-  display: inline-block; max-width: 20px; overflow: hidden;
-  color: var(--muted);
-}#s-controls .v3 .idname{ font-size: .625rem; color: var(--muted); line-height: 1; }#s-controls .v3 .idcol .d-auto{ margin-left: 0; margin-top: 2px; }#s-controls .v3 .d{ display: flex; align-items: center; gap: .75rem; }#s-controls .v3 .icon{ font-family: var(--serif); font-size: .9375rem; color: var(--muted);
-  width: 2.25rem; flex: none; letter-spacing: -.02em; }#s-controls .v3 .rail{ position: relative; flex: 1; height: 34px; display: flex; align-items: center;
-  touch-action: pan-y; }#s-controls .v3 .rail > i{ position: absolute; left: 0; right: 0; top: 50%; height: 1px;
-  background: var(--line); transform: translateY(-50%); }#s-controls .v3 .pill{
-  position: absolute; top: 50%; transform: translate(-50%, -50%);
-  background: var(--accent); color: var(--on-accent); border-radius: 999px;
-  corner-shape: superellipse(1.2);
-  
-  padding: 4px 8px; display: inline-flex; align-items: center; gap: 6px;
-  cursor: ew-resize; touch-action: pan-y; box-shadow: 0 0 0 3px var(--panel);
-}#s-controls .v3 .f{ border: 0; background: none; gap: 6px; }#s-controls .v3 .pill input{ text-align: right; }#s-controls .v3 .pill input{
-  font-family: var(--dial); font-size: .875rem;
-  
-  font-variation-settings: 'opsz' 10;
-  
-  font-variant-numeric: tabular-nums;
-  background: none; border: 0; color: var(--on-accent); padding: 0; outline: none;
-  field-sizing: content; min-width: 2.25ch;
-  text-align: center; cursor: text;
-}#s-controls .v3 .pill .d-unit{ color: var(--on-accent); opacity: .78; font-size: .6875rem;
-  min-width: 0; }#s-controls .v3 .pill .arrows{ display: none; }#s-controls.always-arrows .v3 .pill .arrows{ display: flex; opacity: 1; }#s-controls .v3 .pill .arrows::after{ background: color-mix(in srgb, var(--on-accent) 35%, transparent); }#s-controls .v3 .pill .arrows button{ background: none; color: var(--on-accent); opacity: .7; }#s-controls .v3 .pill .arrows button:hover{ background: color-mix(in srgb, var(--on-accent) 16%, transparent);
-  color: var(--on-accent); opacity: 1; }#s-controls .v3 .f:focus-within{ border-color: transparent; }#s-controls.vert .v3 .d{ flex-direction: column; gap: .5rem; }#s-controls.vert .v3 .rail{ flex: none; width: 6rem; height: 11rem; }#s-controls.vert .v3 .rail > i{ left: 50%; width: 1px; }#s-controls.vert .v3 .icon{ width: auto; text-align: center; }#s-controls.vert .v3 .pill{ writing-mode: horizontal-tb; }#s-controls.vert .v3 .rail > i{ left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto;
-  transform: translateX(-50%); }#s-controls.vert .v3 .pill{ left: 50%; cursor: ns-resize; }#s-controls .v4 .d-head{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }#s-controls .v4 .d-val{ opacity: 0; transition: opacity .2s; }#s-controls .v4.on .d-val{ opacity: 1; }#s-controls .v4 .area{ position: relative; height: 34px; }#s-controls .v4 .stops{ position: absolute; inset: 0 var(--park, 34px) 0 0; display: flex; gap: 2px;
+}#s-controls .d-auto:hover{ color: var(--ink-2); }#s-controls .d-auto.on{ color: #00a01e; }#s-controls .d-auto-dot{ font-size: .7em; position: relative; top: -1px; }#s-controls .d-auto-word{ text-transform: uppercase; letter-spacing: normal; }#s-controls.touch .d-auto{ padding: 6px 0; }#s-controls .v4 .d-head{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }#s-controls .v4 .d-val{ opacity: 0; transition: opacity .2s; }#s-controls .v4.on .d-val{ opacity: 1; }#s-controls .v4 .area{ position: relative; height: 34px; }#s-controls .v4 .stops{ position: absolute; inset: 0 var(--park, 34px) 0 0; display: flex; gap: 2px;
   border: 1px solid var(--line); border-radius: 8px; corner-shape: superellipse(1.2);
   padding: 2px; background: var(--bg);
   transition: opacity .22s; }#s-controls .v4.on .stops{ opacity: 0; pointer-events: none; }#s-controls .v4 .stops button{ font: inherit; font-size: .75rem; flex: 1; border: 0; background: none;
@@ -3409,7 +3453,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   transform: translate(calc(-50% + var(--x, 0px)), var(--y, 0px)); }#s-controls.vert .v4.on .knob{ width: 20px; height: 20px; border-radius: 10px; }#s-controls.vert .v4 .rail{ top: 0; left: 50%; width: 2px; height: 0;
   transform: translate(-50%, calc(100% + 12px)); }#s-controls.vert .v4.on .rail{ height: calc(100% - var(--park, 34px)); width: 2px; transform: translate(-50%, 0); }#s-controls.vert .v4 .knob::before{ left: 50%; top: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }#s-controls.vert .v4 .knob::after{ left: 50%; right: auto; top: auto; bottom: -7px; width: 1.5px; height: 5px; transform: translateX(-50%); }#s-controls.touch .f input{ padding: 8px; font-size: 1rem; }#s-controls.touch .f .arrows{ opacity: 1; }#s-controls.touch .f .arrows button{ min-width: 0; width: 16px; height: 22px; }#s-controls.touch .f .arrows button::after{
     content: ''; position: absolute; inset: -5px -9px;   
-  }#s-controls.touch .f .arrows button:first-child{ min-height: 22px; }#s-controls.touch .f .arrows button:last-child{ min-height: 22px; }#s-controls.touch .trk{ height: 44px; background: none; }#s-controls.touch .trk::-webkit-slider-runnable-track{ height: 2px; background: var(--line); border-radius: 2px; }#s-controls.touch .trk::-moz-range-track{ height: 2px; background: var(--line); border-radius: 2px; }#s-controls.touch .trk::-webkit-slider-thumb{ width: 24px; height: 24px; margin-top: -11px; }#s-controls.touch .trk::-moz-range-thumb{ width: 24px; height: 24px; }#s-controls.touch.vert .trk{ width: 44px; height: 11rem; }#s-controls.touch:not(&.vert) .v4 .area{ height: 48px; }#s-controls.touch .v4 .stops button{ min-height: 44px; }#s-controls.touch .d{ margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v1 .d{ row-gap: var(--gap); margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v3 .d{ gap: var(--gap); }#s-controls.touch .v2 .d{ margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v4 .area{ margin-top: var(--gap); }#s-controls.touch .v4 .grip{ width: 22px; height: 44px; }#s-controls.touch:not(&.vert) .v2 .bar{ height: 48px; }#s-controls.touch.vert .v2 .bar{ width: 5.5rem; }#s-controls.touch .v2 .f input{ font-size: .9375rem; }#s-controls.touch:not(&.vert) .v3 .rail{ height: 48px; }#s-controls.touch .v3 .pill{ padding: .25rem .5rem; box-shadow: 0 0 0 2px var(--panel); }#s-controls.touch .v3 .pill input{ font-size: 16px; padding: 0; }#s-controls.touch:not(&.always-arrows) .v3 .pill .arrows{ display: none; }#s-controls.touch .toolbar button{ min-height: 44px; padding: .25rem 1rem; }#s-controls.vert .d-unit{ min-width: 0; text-align: center; }#s-controls.vert .v2 .lab{
+  }#s-controls.touch .f .arrows button:first-child{ min-height: 22px; }#s-controls.touch .f .arrows button:last-child{ min-height: 22px; }#s-controls.touch .trk{ height: 44px; background: none; }#s-controls.touch .trk::-webkit-slider-runnable-track{ height: 2px; background: var(--line); border-radius: 2px; }#s-controls.touch .trk::-moz-range-track{ height: 2px; background: var(--line); border-radius: 2px; }#s-controls.touch .trk::-webkit-slider-thumb{ width: 24px; height: 24px; margin-top: -11px; }#s-controls.touch .trk::-moz-range-thumb{ width: 24px; height: 24px; }#s-controls.touch.vert .trk{ width: 44px; height: 11rem; }#s-controls.touch:not(&.vert) .v4 .area{ height: 48px; }#s-controls.touch .v4 .stops button{ min-height: 44px; }#s-controls.touch .d{ margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v1 .d{ row-gap: var(--gap); margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v2 .d{ margin-bottom: calc(var(--gap) * 2); }#s-controls.touch .v4 .area{ margin-top: var(--gap); }#s-controls.touch .v4 .grip{ width: 22px; height: 44px; }#s-controls.touch:not(&.vert) .v2 .bar{ height: 48px; }#s-controls.touch.vert .v2 .bar{ width: 5.5rem; }#s-controls.touch .v2 .f input{ font-size: .9375rem; }#s-controls.touch .toolbar button{ min-height: 44px; padding: .25rem 1rem; }#s-controls.vert .d-unit{ min-width: 0; text-align: center; }#s-controls.vert .v2 .lab{
   
   white-space: normal; max-height: 4em; text-align: center;
 }#s-controls .f{ position: relative; overflow: visible; }#s-controls .f .arrows{
@@ -3417,7 +3461,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   padding-left: 2px; z-index: 1;
 }#s-controls .d-unit{ transition: opacity .12s; }#s-controls .d:hover .d-unit,#s-controls .d:focus-within .d-unit{ opacity: 0; }#s-controls.always-arrows .f .arrows,#s-controls.touch .f .arrows{
   position: static; padding-left: 0;
-}#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit{ opacity: 1; }#s-controls .d:hover .f .arrows,#s-controls .d:focus-within .f .arrows{ opacity: 1; }#s-controls .d:hover .d-unit,#s-controls .d:focus-within .d-unit,#s-controls .v3 .pill:hover .d-unit,#s-controls .v3 .pill:focus-within .d-unit,#s-controls .v3 .d:hover .pill .d-unit,#s-controls .v3 .d:focus-within .pill .d-unit{ opacity: 0; }#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.always-arrows .v3 .d:hover .pill .d-unit,#s-controls.always-arrows .v3 .d:focus-within .pill .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit,#s-controls.touch .v3 .d:hover .pill .d-unit,#s-controls.touch .v3 .d:focus-within .pill .d-unit{ opacity: .78; }#s-controls.always-arrows .d .f .arrows,#s-controls.touch .d .f .arrows{ opacity: 1; }#s-controls .marks-h{ margin: var(--pad-8, 48px) 0 var(--pad-2, 8px); }#s-controls .marks-h3{ margin: var(--pad-7, 32px) 0 var(--pad-2, 8px); }#s-controls .marks{
+}#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit{ opacity: 1; }#s-controls .d:hover .f .arrows,#s-controls .d:focus-within .f .arrows{ opacity: 1; }#s-controls .d:hover .d-unit,#s-controls .d:focus-within .d-unit{ opacity: 0; }#s-controls.always-arrows .d:hover .d-unit,#s-controls.always-arrows .d:focus-within .d-unit,#s-controls.touch .d:hover .d-unit,#s-controls.touch .d:focus-within .d-unit{ opacity: .78; }#s-controls.always-arrows .d .f .arrows,#s-controls.touch .d .f .arrows{ opacity: 1; }#s-controls .marks-h{ margin: var(--pad-8, 48px) 0 var(--pad-2, 8px); }#s-controls .marks-h3{ margin: var(--pad-7, 32px) 0 var(--pad-2, 8px); }#s-controls .marks{
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
   gap: var(--pad-4, 16px);
@@ -5390,6 +5434,8 @@ of 168 corners, <b>87</b> take the law, 13 are circles carved out, and 32 sit in
 
 
 
+
+
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
 
@@ -6603,6 +6649,169 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
 
 })();
 (function(){var ROOT=document.getElementById('s-controls');if(!ROOT)return;
+/* dialHandle.js -- the dial whose value rides in the handle. Plain script, no React.
+ *
+ * Variant 03 of the system page ("Value in the handle"), promoted from a docs demo into a
+ * primitive (2026-10-02) because the Cal Sans case study needed it: six axes beside a word
+ * on a page that loads no React. The docs card mounts this same code, so the demo and the
+ * shipped control cannot drift.
+ *
+ *   const d = wmHandleDial.mount(el, {
+ *     label: 'Optical size', tag: 'opsz', icon: 'mystery',    // icon: a Material ligature, optional
+ *     caption: 'opsz',                                         // optional: shown instead of the label
+ *     min: 8, max: 45, step: 1, value: 45, unit: '',
+ *     orient: 'vertical',                                      // or 'horizontal' (default)
+ *     auto: { value: 14 },                                     // optional: an \u25CB/\u25CF auto state
+ *     onChange: v => ...                                       // v is a number, or 'auto'
+ *   })
+ *   d.get() / d.set(v) / d.setOrient('vertical') / d.destroy()
+ *
+ * Anatomy: an id column (icon, name, tag) and a rail with a hairline; the lozenge on the
+ * rail holds the typeable number and its unit, and sits where the value is. Press the rail
+ * and the value jumps there, then follows; the rail is keyboard-operable (arrows, Home,
+ * End, shift x10); the number is typed in the lozenge. No stepper arrows in the handle: the
+ * lozenge is positioned BY the value, so an arrow would move out from under your finger.
+ * Vertical: the column stacks id over rail, the hairline runs down, the lozenge never rotates.
+ * Styles in dialHandle.css. */
+(() => {
+  const mk = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
+  const clamp = (v, d) => Math.min(d.max, Math.max(d.min, v));
+  const dec = d => (String(d.step).split('.')[1] || '').length;
+  const fmt = (v, d) => (v === 'auto' ? 'auto' : Number(v).toFixed(dec(d)).replace('-', '\u2212'));   // real minus
+  const parse = s => parseFloat(String(s).replace('\u2212', '-').trim());
+
+  function mount(el, props) {
+    const d = { min: 0, max: 100, step: 1, unit: '', orient: 'horizontal', label: '', ...props };
+    let value = d.value ?? d.min;
+    const num = v => (v === 'auto' ? (d.auto ? d.auto.value : d.min) : Number(v));
+    const pct = () => ((num(value) - d.min) / (d.max - d.min)) * 100;
+
+    const root = mk('div', 'wm-hd' + (d.orient === 'vertical' ? ' wm-hd--vertical' : ''));
+    // the id column: icon, then the name it never had, then the tag -- centred, one object
+    const id = mk('span', 'wm-hd-id');
+    if (d.icon) {
+      const ic = mk('span', 'wm-hd-icon material-symbols-outlined');
+      ic.textContent = d.icon; ic.setAttribute('aria-hidden', 'true'); ic.setAttribute('translate', 'no');
+      ic.title = d.label + (d.tag ? ' \u00B7 ' + d.tag : '');
+      id.appendChild(ic);
+    }
+    // caption: what the column SHOWS, when the full label is too long for it (the case study
+    // shows the axis tag and keeps the name for aria)
+    if (d.caption || d.label) { const n = mk('span', 'wm-hd-name'); n.textContent = d.caption || d.label; id.appendChild(n); }
+    if (d.tag) { const t = mk('span', 'wm-hd-tag d-tag'); t.textContent = d.tag; id.appendChild(t); }
+
+    const rail = mk('div', 'wm-hd-rail');
+    const line = mk('i');
+    const pill = mk('span', 'wm-hd-pill');
+    const field = mk('span', 'wm-hd-field');
+    const inp = mk('input');
+    inp.type = 'text'; inp.inputMode = 'decimal'; inp.setAttribute('aria-label', d.label);
+    field.appendChild(inp);
+    pill.appendChild(field);
+    const unit = mk('span', 'wm-hd-unit d-unit');
+    unit.textContent = d.unit || '';
+    if (!d.unit) unit.setAttribute('aria-hidden', 'true');
+    pill.appendChild(unit);
+    rail.append(line, pill);
+    root.append(id, rail);
+
+    // auto: the \u25CB/\u25CF pill under the id column, as the docs draw it for opsz
+    let autoBtn = null;
+    if (d.auto) {
+      autoBtn = mk('button', 'wm-hd-auto'); autoBtn.type = 'button';
+      const dot = mk('span', 'wm-hd-auto-dot'); dot.setAttribute('aria-hidden', 'true');
+      const word = mk('span', 'wm-hd-auto-word'); word.textContent = 'auto';
+      autoBtn.append(dot, word); autoBtn.title = d.auto.title || 'follow automatically';
+      autoBtn.addEventListener('click', () => nudge(value === 'auto' ? d.auto.value : 'auto'));
+      id.appendChild(autoBtn);
+      root.__dot = dot;
+    }
+
+    let echo = false;
+    const render = () => {
+      // a sync must not clobber what you are TYPING; an arrow or a drag is not typing
+      if (document.activeElement !== inp || echo) inp.value = fmt(value, d);
+      const p = pct();
+      rail.setAttribute('aria-valuenow', String(num(value)));
+      rail.setAttribute('aria-valuetext', fmt(value, d) + (d.unit ? ' ' + d.unit : ''));
+      if (root.classList.contains('wm-hd--vertical')) { pill.style.top = (100 - p) + '%'; pill.style.left = '50%'; }
+      else { pill.style.left = p + '%'; pill.style.top = '50%'; }
+      if (autoBtn) {
+        const on = value === 'auto';
+        autoBtn.classList.toggle('on', on); autoBtn.setAttribute('aria-pressed', String(on));
+        root.__dot.textContent = on ? '\u25CF' : '\u25CB';   // \u25CF / \u25CB, drawn at 76% of the em, unlike \u2022 and \u25E6
+      }
+    };
+    // force: a deliberate change -- a drag, an arrow key, the auto button -- rewrites the
+    // field even while it has focus. A value arriving from OUTSIDE (the host's set) while
+    // you are typing does not: the host echoing a clamped "9" back as "75.0" mid-word was
+    // how "90" became 75 (found by the docs test, 2026-10-02).
+    const set = (v, quiet, force) => {
+      const next = v === 'auto' ? 'auto' : clamp(parse(v), d);
+      if (Number.isNaN(next)) return;
+      value = next; echo = !!force; render(); echo = false;
+      if (!quiet && d.onChange) d.onChange(value);
+    };
+    const nudge = v => set(v, false, true);
+
+    // the number: typed, blurred back to the formatted value, nudged by arrow keys
+    inp.addEventListener('input', () => { const n = parse(inp.value); if (!Number.isNaN(n)) { value = clamp(n, d); render(); if (d.onChange) d.onChange(value); } });
+    inp.addEventListener('blur', () => { inp.value = fmt(value, d); });
+    inp.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      nudge(num(value) + (e.key === 'ArrowUp' ? d.step : -d.step) * (e.shiftKey ? 10 : 1));
+    });
+
+    // the rail: press anywhere and the value jumps there, then follows; capture is
+    // released from three places, because a release the rail never hears would leave the
+    // whole page delivering its clicks to a control nobody is touching
+    const fromPoint = e => {
+      const r = rail.getBoundingClientRect();
+      const t = root.classList.contains('wm-hd--vertical') ? 1 - (e.clientY - r.top) / r.height : (e.clientX - r.left) / r.width;
+      return clamp(d.min + t * (d.max - d.min), d);
+    };
+    let dragging = false;
+    rail.addEventListener('pointerdown', e => {
+      if (e.target.closest('input, button')) return;
+      dragging = true;
+      nudge(fromPoint(e));
+      try { rail.setPointerCapture(e.pointerId); } catch {}
+      e.preventDefault();
+    });
+    rail.addEventListener('pointermove', e => { if (dragging) nudge(fromPoint(e)); });
+    const endDrag = e => { dragging = false; if (e && e.pointerId != null) { try { if (rail.hasPointerCapture(e.pointerId)) rail.releasePointerCapture(e.pointerId); } catch {} } };
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => rail.addEventListener(ev, endDrag));
+    ['pointerup', 'pointercancel'].forEach(ev => window.addEventListener(ev, endDrag));
+    window.addEventListener('blur', () => { dragging = false; });
+    // no wheel: a control that moves on scroll steals the page's scroll the moment the
+    // pointer crosses it, and you cannot scroll PAST a rail of them
+    rail.tabIndex = 0; rail.setAttribute('role', 'slider'); rail.setAttribute('aria-label', d.label);
+    rail.setAttribute('aria-valuemin', String(d.min)); rail.setAttribute('aria-valuemax', String(d.max));
+    rail.addEventListener('keydown', e => {
+      const k = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
+      if (k === undefined) {
+        if (e.key === 'Home') { e.preventDefault(); nudge(d.min); }
+        if (e.key === 'End') { e.preventDefault(); nudge(d.max); }
+        return;
+      }
+      e.preventDefault();
+      nudge(num(value) + k * d.step * (e.shiftKey ? 10 : 1));
+    });
+
+    el.appendChild(root);
+    render();
+    return {
+      el: root,
+      get: () => value,
+      set: (v, quiet) => set(v, quiet),
+      setOrient: o => { root.classList.toggle('wm-hd--vertical', o === 'vertical'); render(); },
+      destroy: () => root.remove(),
+    };
+  }
+  window.wmHandleDial = { mount };
+})();
+
 
 const $$ = s => ROOT.querySelector(s);
 const $$$ = s => ROOT.querySelectorAll(s);
@@ -6910,50 +7119,7 @@ function v2(d) {
 // rather than two letters of its own label pretending to be a symbol.
 const ICONS = { measure: 'fit_width', width: 'line_weight',
                 leading: 'format_line_spacing', opsz: 'mystery' };
-function v3(d) {
-  const root = mk('div', 'd');
-  // The icon alone was the whole label, and a hover title is not a label -- on touch
-  // there is no hover, and even on a pointer the name is invisible until you go looking
-  // for it. The icon keeps the column; a micro caption under it names the dial, and
-  // prefers the TAG where there is one, since `opsz` is the thing you would search for.
-  const idcol = mk('span', 'idcol');
-  const icon = mk('span', 'icon material-symbols-outlined');
-  icon.textContent = ICONS[d.key];
-  icon.title = d.label + (d.tag ? ' \u00B7 ' + d.tag : '');
-  // Name AND tag, not one or the other. Putting the tag in the caption slot meant a
-  // tagged dial lost its human name entirely -- 03 showed `wdth` and `opsz` and never
-  // `width` or `optical size` -- and it meant those tags were not .d-tag, so the Tags
-  // toggle had nothing to hide here while it emptied the other variants.
-  const name = mk('span', 'idname');
-  name.textContent = d.label;
-  idcol.append(icon, name);
-  if (d.tag) { const t = mk('span', 'idtag d-tag'); t.textContent = d.tag; idcol.appendChild(t); }
-  if (d.auto) idcol.appendChild(autoPill(d));
-  const rail = mk('div', 'rail');
-  const line = mk('i');
-  const pill = mk('span', 'pill');
-  const set = v => { state[d.key] = v; sync(); };
-  const f = field(d, () => get(d), set, { fitContent: true });
-  pill.appendChild(f);
-  // No reserved slot here. The rows keep one so their numbers line up in a column;
-  // the pills are separate objects on separate rails, so there is no column to hold
-  // and an empty slot is just a wider lozenge for nothing.
-  if (d.unit) { const u = unitEl(d); pill.appendChild(u); }
-  rail.append(line, pill);
-  draggable(rail, d, () => get(d), set);
-  root.append(idcol, rail);
-  syncs.push(() => {
-    f._sync();
-    const p = pct(get(d), d);
-    rail.setAttribute('aria-valuenow', String(num(get(d), d)));
-    if (ROOT.classList.contains('vert')) {
-      pill.style.top = (100 - p) + '%'; pill.style.left = '50%';
-    } else {
-      pill.style.left = p + '%'; pill.style.top = '50%';
-    }
-  });
-  return root;
-}
+/* 03 is src/dialHandle.js now -- mounted above, not drawn here. */
 
 // \u2500\u2500 05 \u00B7 the toggle becomes the slider \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 // Ported from MorphControl in framercomponents/files/CustomTypeTester.tsx, without
@@ -7327,7 +7493,13 @@ function axisSlider(d, opts = {}) {
 const VARIANTS = [
   { name: 'One line', note: '<b>Everything on the label line.</b> Same anatomy, half the height \u2014 a rail of eight dials fits without scrolling. The value can crowd a long label at narrow widths.', build: c => DIALS.forEach(d => c.appendChild(axisSlider(d))) },
   { name: 'The row is the track', note: '<b>Label and number sit inside the bar; the fill is the value.</b> Press anywhere on the row and it jumps there, then follows. The number is still typeable \u2014 click it and the drag stands down. One object, one readout, and the widest hit area of the five.', build: c => DIALS.forEach(d => c.appendChild(axisSlider(d, { variant: 'track' }))) },
-  { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label \u2014 which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => c.appendChild(v3(d))) },
+  { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label \u2014 which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => {
+    // the primitive itself (src/dialHandle.js), driven by this page's state like the rest
+    const h = wmHandleDial.mount(c, { label: d.label, tag: d.tag, icon: ICONS[d.key], min: d.min, max: d.max, step: d.step, unit: d.unit,
+      value: get(d), auto: d.auto ? { value: d.autoValue, title: 'follow the optical size automatically' } : undefined,
+      onChange: v => { state[d.key] = v; sync(); } });
+    syncs.push(() => { h.set(get(d), true); h.setOrient(ROOT.classList.contains('vert') ? 'vertical' : 'horizontal'); });
+  }) },
   { name: 'The toggle becomes the slider', note: '<b>One node, two states.</b> Ported from <code>MorphControl</code> in CustomTypeTester \u2014 the grip parked at the right edge IS the thumb: click it and it travels onto the rail and grows into it, while the stops fade out. It does not reveal a second control. The value only appears once there is a continuous number to show. <b>Added here:</b> a way back to the stops, which the original has no path to.', build: c => c.appendChild(v4()) },
   { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired and max are one control, so they share a label and a unit \u2014 printed once, beside the name, because three copies of it would say the fields measure three different things. There is no box: the rule under each number IS the field, the same one 01 and 02 draw. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The four rows are the prop surface: heads on the first, a 100-centred store shown 0-centred on the second, a chip on the third, and the fourth disabled. The shape the other five cannot make, because they each hold a single value. It has no vertical form, so Vertical leaves it as it is.', build: c => TRIPLETS.forEach(t => c.appendChild(axisTriplet(t))) },
 ];

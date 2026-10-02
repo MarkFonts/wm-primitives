@@ -85,9 +85,8 @@
       return [el, m < 0.02 || bl - m < 0.02 ? 0 : bl - m];
     });
     // ROWS SHARE A FIRST BASELINE. In a .wm-baselines container, children that sit in one
-    // row (same box top) are moved so their first baselines meet the lowest one in the row:
-    // a label beside its specimen, two columns of a hero, two cards. Every block inside a
-    // moved child moves by the same amount, so its own lines stay on the line below.
+    // row (same box top) have their first text block moved so its baseline meets the lowest
+    // first baseline in the row: a label beside its specimen, two columns of a hero, two cards.
     const delta = new Map(out);
     const firstOf = child => out.find(([el]) => child === el || child.contains(el));
     // the last line of a child's last text block: a probe after its last text node
@@ -133,7 +132,10 @@
             console.warn('gridSnap: refused a ' + extra.toFixed(1) + 'px row shift (cap ' + cap + 'px)', child);
             continue;
           }
-          for (const [el] of out) if (child === el || child.contains(el)) delta.set(el, delta.get(el) + extra);
+          // ONLY the block being aligned moves. Every other block in the item keeps the snap it
+          // measured for itself -- it is on a line already. Moving the whole item put a card's
+          // bottom-anchored text 3px (and once 45px) below its neighbour's (2026-10-02).
+          delta.set(el, delta.get(el) + extra);
         }
       }
     }

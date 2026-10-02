@@ -1,0 +1,145 @@
+/* dialHandle.css -- the dial whose value rides in the handle (dialHandle.js).
+ *
+ * The lozenge is the thumb AND the readout: ink-filled, ground-inked, the way the chosen
+ * chip and the solid button are. It sits on a hairline rail at the value, horizontal or
+ * vertical; the number inside never rotates. The id column -- icon, name, tag -- is centred
+ * so it reads as one object with an axis of its own, not four things sharing a left edge.
+ *
+ * Tokens with fallbacks, in @layer wm.controls like button.css. Knobs a host may set:
+ *   --hd-rail     the rail's length when vertical (default 11rem; the case study sets 96px)
+ *   --hd-id       the id column's width when horizontal (default 5.5rem)
+ * On the grid: a horizontal dial is 36px tall (12 units); a vertical one is its id column
+ * plus --hd-rail, so a host on the grid gives --hd-rail a whole number of units. */
+@layer wm.controls {
+  /* The knobs default at the root, not on the dial: set on .wm-hd they would beat a value a
+     host sets on any ancestor (the case study's .axes gave --hd-rail 96px and got 11rem). */
+  :root { --hd-rail: 11rem; --hd-id: 5.5rem; }
+  .wm-hd {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-04, 12px);
+    font-family: var(--ui-font, system-ui, sans-serif);
+    color: var(--text-muted, rgba(232, 232, 232, .62));
+  }
+  .wm-hd-id {
+    width: var(--hd-id);
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1px;
+  }
+  .wm-hd-icon {
+    /* the small-size DRAWING of the family, not the 48px icon scaled down; overflow
+       clipped so a face that cannot draw the name shows nothing rather than the name */
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 20px;   /* token-lint: allow -- the mark's own opsz 20 drawing, not a text role */
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    direction: ltr;
+    font-feature-settings: 'liga';
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+    display: inline-block;
+    max-width: 20px;
+    overflow: hidden;
+  }
+  .wm-hd-name { font-size: var(--type-micro-size, 0.5625rem); line-height: 1; }
+  /* the tag is a different KIND of thing from the name above it: italic, after a middle dot */
+  .wm-hd-tag {
+    font-size: var(--type-micro-size, 0.5625rem);
+    line-height: 1;
+    font-variation-settings: 'ital' 1;
+    font-synthesis: none;
+  }
+  .wm-hd-tag::before { content: '\00B7'; font-variation-settings: 'ital' 0; margin: 0 .35em 0 .1em; }
+
+  .wm-hd-rail {
+    position: relative;
+    flex: 1;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    touch-action: pan-y;
+    cursor: ew-resize;
+    outline: none;
+  }
+  /* focus shows on the LOZENGE, the thing the keys move -- a ring round the rail was a capsule the size of the column */
+  .wm-hd-rail:focus-visible .wm-hd-pill { outline: 2px solid var(--accent, currentColor); outline-offset: 3px; }
+  .wm-hd-rail > i {
+    position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+    background: var(--border, rgba(232, 232, 232, .14));
+    transform: translateY(-50%);
+  }
+  .wm-hd-pill {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-02, 6px);
+    padding: 4px 8px;
+    border-radius: 999px;
+    corner-shape: superellipse(var(--corner-k, 1.2));
+    background: var(--text, #e8e8e8);
+    color: var(--bg, #111);
+    /* a ring of the ground, so the lozenge reads as sitting ON the hairline, not cut by it */
+    box-shadow: 0 0 0 3px var(--surface, var(--bg, #111));
+    cursor: ew-resize;
+    touch-action: pan-y;
+    user-select: none;
+  }
+  .wm-hd-field { display: inline-flex; align-items: baseline; }
+  .wm-hd-pill input {
+    font: inherit;
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem);
+    font-variation-settings: 'opsz' 10;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    background: none; border: 0; padding: 0; outline: none;
+    color: inherit;
+    field-sizing: content;
+    min-width: 2.25ch;
+    text-align: center;
+    cursor: text;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--dur-fast, 140ms);
+  }
+  .wm-hd-pill input:hover, .wm-hd-pill input:focus { text-decoration-color: currentColor; }
+  .wm-hd-unit { font-size: var(--type-micro-size, 0.5625rem); opacity: .78; }
+  .wm-hd-unit:empty { display: none; }
+
+  .wm-hd-auto {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-top: 2px; padding: 0; border: 0; background: none;
+    font: inherit; font-size: var(--type-micro-size, 0.5625rem); letter-spacing: var(--track-caps, .12em); text-transform: uppercase;
+    color: var(--text-dim, rgba(232, 232, 232, .38)); cursor: pointer;
+  }
+  .wm-hd-auto.on { color: var(--ok, var(--accent, currentColor)); }
+
+  /* vertical: id over rail, the hairline runs down, the lozenge never rotates */
+  .wm-hd--vertical { flex-direction: column; gap: var(--spacing-03, 8px); }
+  .wm-hd--vertical .wm-hd-id { width: auto; }
+  .wm-hd--vertical .wm-hd-rail { flex: none; width: 6rem; height: var(--hd-rail); cursor: ns-resize; touch-action: pan-x; }
+  .wm-hd--vertical .wm-hd-rail > i { left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto; transform: translateX(-50%); }
+  .wm-hd--vertical .wm-hd-pill { left: 50%; cursor: ns-resize; touch-action: pan-x; }
+
+  /* touch: the RAIL is the target and grows to 48; the lozenge stays a thumb */
+  @media (pointer: coarse) {
+    .wm-hd:not(.wm-hd--vertical) .wm-hd-rail { height: 48px; }
+    .wm-hd-pill input { font-size: var(--type-body-size, 1rem); }   /* under 16px Safari zooms the page on focus */
+  }
+  .touch .wm-hd:not(.wm-hd--vertical) .wm-hd-rail { height: 48px; }
+  .touch .wm-hd-pill input { font-size: var(--type-body-size, 1rem); }
+  @media (prefers-reduced-motion: reduce) {
+    .wm-hd-pill input { transition: none; }
+  }
+}

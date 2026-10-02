@@ -15,6 +15,8 @@
 <link rel="stylesheet" href="../../src/AxisSlider.css">
 <link rel="stylesheet" href="../../src/AxisTriplet.css">
 <link rel="stylesheet" href="../../src/chip.css">
+<link rel="stylesheet" href="../../src/dialHandle.css">
+<script src="../../src/dialHandle.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- The Material Symbols link that used to be here was SUBSETTED to four icon_names --
      fit_width, line_weight, format_line_spacing, mystery -- for card 04. It declared the
@@ -222,14 +224,14 @@
    one saying the same thing. Scoped, not global, for that reason.
    text-decoration rather than a border: it hugs the glyphs, so it moves with the value
    instead of underlining the whole fixed-width box including its empty space. */
-.v2 .f input, .v4 .f input, .v3 .pill input{
+.v2 .f input, .v4 .f input{
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   transition: text-decoration-color .15s;
-}.v2 .f input:hover, .v4 .f input:hover, .v3 .pill input:hover,
-.v2 .f input:focus, .v4 .f input:focus, .v3 .pill input:focus{
+}
+.v2 .f input:hover, .v4 .f input:hover, .v2 .f input:focus, .v4 .f input:focus{
   text-decoration-color: currentColor;
 }/* the track */
 .trk{ -webkit-appearance: none; appearance: none; width: 100%; height: 2px;
@@ -247,13 +249,12 @@
   background: var(--sunk); overflow: hidden; cursor: ew-resize;
   touch-action: pan-y; user-select: none;
 }.v2 .bar:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }.v2 .bar > i{ position: absolute; inset: 0 auto 0 0; background: var(--raised);
-  border-right: 1px solid var(--line); pointer-events: none; }.v2 .lab, .v2 .d-val{ position: relative; z-index: 1; }.v2 .f{ border: 0; background: none; }.v2 .f input{ width: 4.2rem; cursor: text; }.v2 .f .arrows{ display: none; }/* the bar is the coarse control; no arrows */
-/* These controls drag along ONE axis, so they only need to claim that axis. `none`
+  border-right: 1px solid var(--line); pointer-events: none; }.v2 .lab, .v2 .d-val{ position: relative; z-index: 1; }.v2 .f{ border: 0; background: none; }.v2 .f input{ width: 4.2rem; cursor: text; }.v2 .f .arrows{ display: none; }/* the bar is the coarse control; no arrows *//* These controls drag along ONE axis, so they only need to claim that axis. `none`
    claimed both, and the page stopped scrolling whenever the pointer happened to rest over
    a dial -- which, on a page that is mostly dials, meant it stopped scrolling. pan-y lets
    the page keep the vertical gesture while the control keeps the horizontal one; in
    vertical mode the two swap. */
-&.vert .v2 .bar, &.vert .v3 .rail, &.vert .v3 .pill, &.vert .v4 .knob{ touch-action: pan-x; }
+&.vert .v2 .bar, &.vert .v4 .knob{ touch-action: pan-x; }
 &.vert .v2 .bar{
   flex-direction: column; justify-content: space-between; align-items: center;
   height: 176px; width: 80px; padding: 8px 4px; cursor: ns-resize;
@@ -326,20 +327,14 @@
    axis -- turning off tags asks to see the rail without `opsz` and `wdth`, not without a
    control. It was tied to them only because the pill used to sit beside the tag, and the
    coupling outlived the layout that suggested it. */
-&.touch .d-auto{ padding: 6px 0; }
-
-/* 03's id column: icon, then the name it never had. */
-/* Wide enough for the longest NAME, since the name is what the reader needs and the tag
+&.touch .d-auto{ padding: 6px 0; }/* 03's id column: icon, then the name it never had. *//* Wide enough for the longest NAME, since the name is what the reader needs and the tag
    is the optional half. 2.25rem fitted only an abbreviation, which is how the tag ended
-   up standing in for the name. */
-/* Centred, so the four things in this stack read as ONE object rather than four items
+   up standing in for the name. *//* Centred, so the four things in this stack read as ONE object rather than four items
    that happen to share a left edge. Left-aligned they were a ragged block whose only
    straight edge was the one nearest the rail; centred, the icon sits over its own name
    and the column has an axis of its own.
    text-align matters as well as align-items: the flex property centres each LINE box in
    the column, and text-align centres the text inside a line that wraps. */
-.v3 .idcol{ width: 5.5rem; flex: none; display: flex; flex-direction: column;
-  align-items: center; text-align: center; gap: 1px; }
 /* Italic, so the tag is a different KIND of thing from the name stacked above it rather
    than a smaller copy of it. Cal Sans reaches italic through the real `ital` axis, never
    a synthesised slant -- font-synthesis: none makes the difference visible if the axis is
@@ -353,113 +348,59 @@
    with the tag under the Tags toggle, and it cannot be selected or copied along with the
    text. periodcentered is drawn around the middle of the em rather than on the baseline,
    which is why it needs no vertical nudge here. */
-.v3 .idtag{
-  line-height: 1;
-  margin-left: 0;
-  font-variation-settings: 'ital' 1;
-  font-synthesis: none;
-}
-.v3 .idtag::before{
-  content: '\00B7';
-  font-variation-settings: 'ital' 0;   /* the mark is not italic; only the letters are */
-  /* Space on the RIGHT only. The period is the first thing on this line, so a left
-     margin would push the whole tag in from the column edge -- which is the indent that
-     was there before and looked careless. The glyph's own side bearings give it a little
-     air on the left; .5em gives it more than that on the right, which reads as spaced
-     without breaking the flush edge the icon, name and AUTO all share.
-     If you want it optically centred in a gutter instead, that is a different layout:
-     the tag line gets its own indent and every row keeps it. */
-  /* Symmetric now that the column is centred: the earlier right-only gap existed to keep
-     a flush LEFT edge, and there is no flush left edge to protect any more. */
-  margin-right: .35em;
-  margin-left: .1em;
-  color: var(--muted);
-}
-.v3 .idcol .icon{ width: auto; }
+
+
 /* The icon face. font-variation-settings is how this family is configured: FILL 0 keeps
    the outlined cut, and opsz 20 is the small-size DRAWING -- the point of the family is
    that it is not the 48px icon scaled down. Overflow is clipped so a failed request shows
    nothing rather than the ligature's own name spelled out. */
-.v3 .icon.material-symbols-outlined{
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal; font-style: normal;
-  font-size: 20px; line-height: 1;
-  letter-spacing: normal; text-transform: none; white-space: nowrap;
-  direction: ltr; font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
-  /* inline-block, or max-width/overflow do nothing and a failed request spells out
-     "format_line_spacing" across the row. .v3 .icon sets the serif stack at equal
-     specificity and sits LATER in this file, so this selector carries .icon too. */
-  display: inline-block; max-width: 20px; overflow: hidden;
-  color: var(--muted);
-}
-.v3 .idname{ font-size: .625rem; color: var(--muted); line-height: 1; }
+
 /* The spec is one size in all three variants -- 03 was pulling it down to the caption's
    .625rem, which also broke the 1px rise, since that correction is computed for 10.5px.
    AUTO untracked is ~27px, and the column is 36px, so it fits without the override. */
-.v3 .idcol .d-auto{ margin-left: 0; margin-top: 2px; }
-
 /* ── 04 · the value rides in the handle (Font Gauntlet) ───── */
-.v3 .d{ display: flex; align-items: center; gap: .75rem; }.v3 .icon{ font-family: var(--serif); font-size: .9375rem; color: var(--muted);
-  width: 2.25rem; flex: none; letter-spacing: -.02em; }.v3 .rail{ position: relative; flex: 1; height: 34px; display: flex; align-items: center;
-  touch-action: pan-y; }.v3 .rail > i{ position: absolute; left: 0; right: 0; top: 50%; height: 1px;
-  background: var(--line); transform: translateY(-50%); }.v3 .pill{
-  position: absolute; top: 50%; transform: translate(-50%, -50%);
-  background: var(--accent); color: var(--on-accent); border-radius: 999px;
-  corner-shape: superellipse(1.2);
-  /* .375rem between every part, matching the gap inside the field, so the stepper sits
-     the same distance from the number as from the unit. It was 6px one side, 2px the
-     other, which reads as the chevrons being shoved toward the unit. */
-  padding: 4px 8px; display: inline-flex; align-items: center; gap: 6px;
-  cursor: ew-resize; touch-action: pan-y; box-shadow: 0 0 0 3px var(--panel);
-}/* The field carries its own border and fill for a bare panel. Inside a coloured handle
+
+
+
+
+/* The field carries its own border and fill for a bare panel. Inside a coloured handle
    that reads as a second box around the number — the same mistake in both directions,
-   so both variants strip it. */
-/* Stripping the field's box (see the note above) also took away the only thing standing
+   so both variants strip it. *//* Stripping the field's box (see the note above) also took away the only thing standing
    between the digits and the arrowheads: the value is centred in a 50px box, so "102.5"
    lands ~4px from them and reads as touching. Give the stepper its own air and let the
    number sit right, where a number belongs, instead of drifting toward the arrows. */
-.v3 .f{ border: 0; background: none; gap: 6px; }.v3 .pill input{ text-align: right; }/* No padding on the column. The flex gap already separates it from the number, and the
+
+/* No padding on the column. The flex gap already separates it from the number, and the
    padding pushed the BUTTONS right while the hairline stayed centred on the column box —
    so the line sat ~2px left of the chevrons it divides. The divider and the marks have to
-   share one centre. */
-/* No padding on the field. The pill pads the outside and the flex gaps pad between the
+   share one centre. *//* No padding on the field. The pill pads the outside and the flex gaps pad between the
    parts — a field that also pads itself doubles the outer edge and adds slack the eye
    reads as the number drifting: 39px of box for 30px of digits. */
-.v3 .pill input{
-  font-family: var(--dial); font-size: .875rem;
-  /* explicit: a form control does not inherit this through the UA's font reset */
-  font-variation-settings: 'opsz' 10;
-  /* tabular-nums only. `slashed-zero` is off because in Cal Sans 2 (rev 2.0) the glyph
-     `zero` substitutes carries the PROPORTIONAL advance, not the tabular one — measured:
-     ten zeros 106.2422 against ten of any other digit 103.3672, while tnum alone has all
-     ten equal. So the two features together silently un-tabulate any value containing a
-     0, which is the one thing tnum is here to prevent. The slash is worth having and
-     should come back once the font's zero joins the tabular set. */
-  font-variant-numeric: tabular-nums;
-  background: none; border: 0; color: var(--on-accent); padding: 0; outline: none;
-  field-sizing: content; min-width: 2.25ch;
-  text-align: center; cursor: text;
-}/* No reserved slot in here. The 1.25rem min-width exists so the ROWS' numbers end on
+/* No reserved slot in here. The 1.25rem min-width exists so the ROWS' numbers end on
    the same pixel; a pill is one object on its own rail with no column to hold, so the
    reservation is just dead space — 7.3px of a 12.7px glyph's slot, and the unit was
    costing a third of the resting lozenge. */
-.v3 .pill .d-unit{ color: var(--on-accent); opacity: .78; font-size: .6875rem;
-  min-width: 0; }/* Font Gauntlet has no steppers in the handle and it is right not to: the lozenge is
+/* Font Gauntlet has no steppers in the handle and it is right not to: the lozenge is
    positioned BY the value, so tapping an arrow moves the arrow out from under your
    finger. Off by default; "Arrows always" brings them back for comparison. */
-.v3 .pill .arrows{ display: none; }&.always-arrows .v3 .pill .arrows{ display: flex; opacity: 1; }/* No mirror. It was 55px of a 202px lozenge — a quarter of the width bought nothing but
+
+/* No mirror. It was 55px of a 202px lozenge — a quarter of the width bought nothing but
    symmetry, and it never actually balanced, because the unit sits on the right too. A
    handle is centred on the rail by its own box; the number inside it does not have to be
    centred as well. */
-.v3 .pill .arrows::after{ background: color-mix(in srgb, var(--on-accent) 35%, transparent); }.v3 .pill .arrows button{ background: none; color: var(--on-accent); opacity: .7; }.v3 .pill .arrows button:hover{ background: color-mix(in srgb, var(--on-accent) 16%, transparent);
-  color: var(--on-accent); opacity: 1; }.v3 .f:focus-within{ border-color: transparent; }&.vert .v3 .d{ flex-direction: column; gap: .5rem; }/* flex:1 in a column made the rail as short as its content — it must be told a height.
+
+
+
+
+/* flex:1 in a column made the rail as short as its content — it must be told a height.
    And the column has to be as wide as the PILL, not as the hairline: at 34px the pills
    hung 30px into their neighbours. The line stays centred inside the wider column. */
-&.vert .v3 .rail{ flex: none; width: 6rem; height: 11rem; }&.vert .v3 .rail > i{ left: 50%; width: 1px; }&.vert .v3 .icon{ width: auto; text-align: center; }&.vert .v3 .pill{ writing-mode: horizontal-tb; }/* the number never rotates */
-&.vert .v3 .rail > i{ left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto;
-  transform: translateX(-50%); }&.vert .v3 .pill{ left: 50%; cursor: ns-resize; }/* ── 05 · the toggle BECOMES the slider (MorphControl) ────── */
+
+
+
+/* the number never rotates */
+
+/* ── 05 · the toggle BECOMES the slider (MorphControl) ────── */
 .v4 .d-head{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }.v4 .d-val{ opacity: 0; transition: opacity .2s; }/* the number belongs to the slider */
 .v4.on .d-val{ opacity: 1; }.v4 .area{ position: relative; height: 34px; }/* The stops stop short of the area's right edge: that gutter is where the grip parks.
    The Framer original hangs the grip 12px past the toggle because its ROW is wider than
@@ -549,27 +490,28 @@
      spacing only has to stop a fingertip bridging the two edges — Material asks 8dp,
      and 16px is comfortable. A 44px GAP on top of 44px targets is a control built for
      no one: it was me over-correcting, not a guideline. */
-  &.touch .d{ margin-bottom: calc(var(--gap) * 2); }&.touch .v1 .d{ row-gap: var(--gap); margin-bottom: calc(var(--gap) * 2); }&.touch .v3 .d{ gap: var(--gap); }&.touch .v2 .d{ margin-bottom: calc(var(--gap) * 2); }&.touch .v4 .area{ margin-top: var(--gap); }&.touch .v4 .grip{ width: 22px; height: 44px; }&.touch:not(&.vert) .v2 .bar{ height: 48px; }&.touch.vert .v2 .bar{ width: 5.5rem; }/* height stays 11rem, see the vert block */
-  &.touch .v2 .f input{ font-size: .9375rem; }&.touch:not(&.vert) .v3 .rail{ height: 48px; }/* The pill does NOT grow to 44px. The RAIL is the 48px target — it carries the drag —
+  &.touch .d{ margin-bottom: calc(var(--gap) * 2); }&.touch .v1 .d{ row-gap: var(--gap); margin-bottom: calc(var(--gap) * 2); }
+&.touch .v2 .d{ margin-bottom: calc(var(--gap) * 2); }&.touch .v4 .area{ margin-top: var(--gap); }&.touch .v4 .grip{ width: 22px; height: 44px; }&.touch:not(&.vert) .v2 .bar{ height: 48px; }&.touch.vert .v2 .bar{ width: 5.5rem; }/* height stays 11rem, see the vert block */
+  &.touch .v2 .f input{ font-size: .9375rem; }
+/* The pill does NOT grow to 44px. The RAIL is the 48px target — it carries the drag —
      so the handle only has to be seeable and grabbable inside it. Sized up it became
      129x57, taller than the band it rides on, which reads as a lozenge rather than a
      thumb. Same rule as the hairline: hit area and ink are different problems.
      16px text, though, because Safari zooms the page on focusing anything smaller. */
-  &.touch .v3 .pill{ padding: .25rem .5rem; box-shadow: 0 0 0 2px var(--panel); }/* No padding, even here. The generic touch rule pads .f inputs so a standalone field
+/* No padding, even here. The generic touch rule pads .f inputs so a standalone field
      is comfortable to tap; inside the pill the LOZENGE is that padding, and adding it
      again put 19px of dead space around a 30px number — which is what pushed the digits
      away from the chevrons. */
-  &.touch .v3 .pill input{ font-size: 16px; padding: 0; }/* The arrows were what made it 52px: a 44px stepper column inside the handle set the
+/* The arrows were what made it 52px: a 44px stepper column inside the handle set the
      handle's height. They also put a small tap target inside a draggable object, which
      is a hit-test fight nobody wins. On touch the pill is dragged and the number typed —
-     the same reason variant 03 has none. */
-  /* :not(&.always-arrows) so the explicit toggle still wins. Hiding them on touch is the
+     the same reason variant 03 has none. *//* :not(&.always-arrows) so the explicit toggle still wins. Hiding them on touch is the
      default and the reasoning holds — the lozenge is positioned BY the value, so tapping
      an arrow moves it out from under your finger — but this selector carries an element
      as well as its classes, so it was outranking &.always-arrows and the toggle did
      nothing here. Worse, the mirror spacer is NOT gated the same way, so the lozenge was
      being padded 55px for a stepper that had been hidden. */
-  &.touch:not(&.always-arrows) .v3 .pill .arrows{ display: none; }&.touch .toolbar button{ min-height: 44px; padding: .25rem 1rem; }
+&.touch .toolbar button{ min-height: 44px; padding: .25rem 1rem; }
 
 /* ── vertical: centring, and the unit slot that fought it ─────────────────────
    .d-unit reserves min-width:1.25rem so a COLUMN of horizontal rows keeps its
@@ -629,24 +571,14 @@
 }
 &.always-arrows .d:hover .d-unit, &.always-arrows .d:focus-within .d-unit,
 &.touch .d:hover .d-unit, &.touch .d:focus-within .d-unit { opacity: 1; }
-
-
 /* ── the swap, stated once and at a specificity that cannot lose ──────────────
    The unit and the arrows share one slot, so one state drives both: the dial is
-   hovered or has focus inside it. Written here, last, because .v3's unit is pinned
-   by `.v3 .pill .d-unit {opacity:.78}` -- same specificity as a plain
+   hovered or has focus inside it. Written here, last{opacity:.78}` -- same specificity as a plain
    `.d:focus-within .d-unit`, so the tie went to whichever came later, and the pill
    showed its unit underneath the arrows. */
 .d:hover .f .arrows, .d:focus-within .f .arrows { opacity: 1; }
-.d:hover .d-unit, .d:focus-within .d-unit,
-.v3 .pill:hover .d-unit, .v3 .pill:focus-within .d-unit,
-.v3 .d:hover .pill .d-unit, .v3 .d:focus-within .pill .d-unit { opacity: 0; }
-
-/* Persistent arrows are not a swap: both are permanent, both are measured. */
-&.always-arrows .d:hover .d-unit, &.always-arrows .d:focus-within .d-unit,
-&.always-arrows .v3 .d:hover .pill .d-unit, &.always-arrows .v3 .d:focus-within .pill .d-unit,
-&.touch .d:hover .d-unit, &.touch .d:focus-within .d-unit,
-&.touch .v3 .d:hover .pill .d-unit, &.touch .v3 .d:focus-within .pill .d-unit { opacity: .78; }
+.d:hover .d-unit, .d:focus-within .d-unit{ opacity: 0; }/* Persistent arrows are not a swap: both are permanent, both are measured. */
+&.always-arrows .d:hover .d-unit, &.always-arrows .d:focus-within .d-unit, &.touch .d:hover .d-unit, &.touch .d:focus-within .d-unit{ opacity: .78; }
 &.always-arrows .d .f .arrows, &.touch .d .f .arrows { opacity: 1; }
 
 /* ── the marks grid ────────────────────────────────────────────────────────────
@@ -1092,50 +1024,7 @@ function v2(d) {
 // rather than two letters of its own label pretending to be a symbol.
 const ICONS = { measure: 'fit_width', width: 'line_weight',
                 leading: 'format_line_spacing', opsz: 'mystery' };
-function v3(d) {
-  const root = mk('div', 'd');
-  // The icon alone was the whole label, and a hover title is not a label -- on touch
-  // there is no hover, and even on a pointer the name is invisible until you go looking
-  // for it. The icon keeps the column; a micro caption under it names the dial, and
-  // prefers the TAG where there is one, since `opsz` is the thing you would search for.
-  const idcol = mk('span', 'idcol');
-  const icon = mk('span', 'icon material-symbols-outlined');
-  icon.textContent = ICONS[d.key];
-  icon.title = d.label + (d.tag ? ' · ' + d.tag : '');
-  // Name AND tag, not one or the other. Putting the tag in the caption slot meant a
-  // tagged dial lost its human name entirely -- 03 showed `wdth` and `opsz` and never
-  // `width` or `optical size` -- and it meant those tags were not .d-tag, so the Tags
-  // toggle had nothing to hide here while it emptied the other variants.
-  const name = mk('span', 'idname');
-  name.textContent = d.label;
-  idcol.append(icon, name);
-  if (d.tag) { const t = mk('span', 'idtag d-tag'); t.textContent = d.tag; idcol.appendChild(t); }
-  if (d.auto) idcol.appendChild(autoPill(d));
-  const rail = mk('div', 'rail');
-  const line = mk('i');
-  const pill = mk('span', 'pill');
-  const set = v => { state[d.key] = v; sync(); };
-  const f = field(d, () => get(d), set, { fitContent: true });
-  pill.appendChild(f);
-  // No reserved slot here. The rows keep one so their numbers line up in a column;
-  // the pills are separate objects on separate rails, so there is no column to hold
-  // and an empty slot is just a wider lozenge for nothing.
-  if (d.unit) { const u = unitEl(d); pill.appendChild(u); }
-  rail.append(line, pill);
-  draggable(rail, d, () => get(d), set);
-  root.append(idcol, rail);
-  syncs.push(() => {
-    f._sync();
-    const p = pct(get(d), d);
-    rail.setAttribute('aria-valuenow', String(num(get(d), d)));
-    if (document.body.classList.contains('vert')) {
-      pill.style.top = (100 - p) + '%'; pill.style.left = '50%';
-    } else {
-      pill.style.left = p + '%'; pill.style.top = '50%';
-    }
-  });
-  return root;
-}
+/* 03 is src/dialHandle.js now -- mounted above, not drawn here. */
 
 // ── 05 · the toggle becomes the slider ─────────────────────
 // Ported from MorphControl in framercomponents/files/CustomTypeTester.tsx, without
@@ -1509,7 +1398,13 @@ function axisSlider(d, opts = {}) {
 const VARIANTS = [
   { name: 'One line', note: '<b>Everything on the label line.</b> Same anatomy, half the height — a rail of eight dials fits without scrolling. The value can crowd a long label at narrow widths.', build: c => DIALS.forEach(d => c.appendChild(axisSlider(d))) },
   { name: 'The row is the track', note: '<b>Label and number sit inside the bar; the fill is the value.</b> Press anywhere on the row and it jumps there, then follows. The number is still typeable — click it and the drag stands down. One object, one readout, and the widest hit area of the five.', build: c => DIALS.forEach(d => c.appendChild(axisSlider(d, { variant: 'track' }))) },
-  { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label — which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => c.appendChild(v3(d))) },
+  { name: 'Value in the handle', note: '<b>The number rides inside the thing you drag.</b> No separate field to duplicate it, and the icon replaces the word label — which only works for dials with no tag, since an icon cannot stand in for <code>wght</code>. Hover the icon for the name.', build: c => DIALS.forEach(d => {
+    // the primitive itself (src/dialHandle.js), driven by this page's state like the rest
+    const h = wmHandleDial.mount(c, { label: d.label, tag: d.tag, icon: ICONS[d.key], min: d.min, max: d.max, step: d.step, unit: d.unit,
+      value: get(d), auto: d.auto ? { value: d.autoValue, title: 'follow the optical size automatically' } : undefined,
+      onChange: v => { state[d.key] = v; sync(); } });
+    syncs.push(() => { h.set(get(d), true); h.setOrient(document.body.classList.contains('vert') ? 'vertical' : 'horizontal'); });
+  }) },
   { name: 'The toggle becomes the slider', note: '<b>One node, two states.</b> Ported from <code>MorphControl</code> in CustomTypeTester — the grip parked at the right edge IS the thumb: click it and it travels onto the rail and grows into it, while the stops fade out. It does not reveal a second control. The value only appears once there is a continuous number to show. <b>Added here:</b> a way back to the stops, which the original has no path to.', build: c => c.appendChild(v4()) },
   { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired and max are one control, so they share a label and a unit \u2014 printed once, beside the name, because three copies of it would say the fields measure three different things. There is no box: the rule under each number IS the field, the same one 01 and 02 draw. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The four rows are the prop surface: heads on the first, a 100-centred store shown 0-centred on the second, a chip on the third, and the fourth disabled. The shape the other five cannot make, because they each hold a single value. It has no vertical form, so Vertical leaves it as it is.', build: c => TRIPLETS.forEach(t => c.appendChild(axisTriplet(t))) },
 ];

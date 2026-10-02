@@ -12,6 +12,25 @@ Newest first.
 
 ---
 
+## 2026-10-02 — the value in the handle is a primitive; a row moves only what it aligns
+
+`src/dialHandle.js` + `dialHandle.css`: variant 03 ("Value in the handle"), until now a demo drawn
+on the system page, is a plain-script primitive -- the case study needed six vertical dials
+beside a word on a page that loads no React, and Mark pointed out the vertical dial already
+existed, so it is one code now: the docs card mounts the primitive. Horizontal or vertical,
+typeable number in the lozenge, drag the rail, keyboard on the rail, an optional auto state, an
+optional icon and a `caption` for when the full label is too long for its column. Writing the
+docs test found a real bug: a host echoing a clamped value back into the field mid-word turned a
+typed "90" into 75. A deliberate change (drag, keys) rewrites the field; a value from outside
+does not while it has focus. The first focus ring was a capsule the size of the column; it is on
+the lozenge now. Its knobs (`--hd-rail`, `--hd-id`) default at the root, not on the dial, so a
+host can set them on any ancestor.
+
+`gridSnap.js`: a `.wm-baselines` row now moves ONLY the block it aligns. It moved every block in
+the item, so a card whose big word sat 3px above its neighbour's had its bottom-anchored text
+pushed 3px (and a half-size figure's text 45px, past the card) -- the very bottom lines Mark
+asked to meet. The other blocks keep the snap they measured for themselves.
+
 ## 2026-10-02 — the triplet, visible again
 
 Card 05 on the system page had drifted two ways. In light mode it was invisible: AxisTriplet
