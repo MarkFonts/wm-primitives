@@ -24,6 +24,7 @@ on:
       - 'dist/**'
       - 'tests/**'
       - 'playwright.config.ts'
+      - 'docs/grid.html'   # tests/behaviour/grid.spec.ts loads it
       - '.github/workflows/consumers.yml'
   pull_request:
     paths:
@@ -37,6 +38,7 @@ on:
       - 'dist/**'
       - 'tests/**'
       - 'playwright.config.ts'
+      - 'docs/grid.html'   # tests/behaviour/grid.spec.ts loads it
       - '.github/workflows/consumers.yml'
   # Re-run without inventing a commit -- the day a token changes or a consumer is added.
   workflow_dispatch:
@@ -86,6 +88,14 @@ jobs:
             shared: gliffdiff/shared
             kind: node
             workdir: gliffdiff
+          # wordmark.nyc (2026-10-02): the public site, joining one law at a time. Its
+          # .tokenlint.json runs only "lines" -- the Cal Sans case study is on the grid
+          # (src/grid.css), so every leading and vertical space there is in 3px units.
+          # No build: Pages serves the repo as it is.
+          - name: wordmark
+            repo: MarkFonts/wordmark
+            shared: shared
+            kind: html
     steps:
       # wordmarktools is private, so this is also the proof that the token can READ the
       # consumers, not only dispatch to them. The two public legs fall back to the job
@@ -173,9 +183,12 @@ jobs:
         with: { repository: MarkFonts/ReCal, path: hosts/ReCal, submodules: false }
       - uses: actions/checkout@v5
         with: { repository: MarkFonts/wordmarktools, path: hosts/wordmarktools, submodules: false, token: "${{ secrets.WORDMARK_DEPLOY_TOKEN4 }}" }
+      # The site, for the pages on the grid (tests/behaviour/grid.spec.ts). Public; no build.
+      - uses: actions/checkout@v5
+        with: { repository: MarkFonts/wordmark, path: hosts/wordmark, submodules: false }
       # Each host's shared/ is THIS commit, exactly as in check.
       - run: |
-          for d in hosts/font-proofer/shared hosts/ReCal/shared hosts/wordmarktools/opsz-proofer/shared hosts/wordmarktools/kernpare/shared; do
+          for d in hosts/font-proofer/shared hosts/ReCal/shared hosts/wordmarktools/opsz-proofer/shared hosts/wordmarktools/kernpare/shared hosts/wordmark/shared; do
             rm -rf "$d"; git clone -q --no-checkout . "$d" && git -C "$d" checkout -q ${{ github.sha }}
           done
       # Kernpare's data files are generated from a font source and gitignored; the page
@@ -229,6 +242,7 @@ jobs:
           RECAL_DIST: ${{ github.workspace }}/hosts/ReCal/dist
           OPSZ_PROOFER_DIST: ${{ github.workspace }}/hosts/wordmarktools/opsz-proofer/dist
           KERNPARE_DIR: ${{ github.workspace }}/hosts/wordmarktools/kernpare
+          WORDMARK_DIR: ${{ github.workspace }}/hosts/wordmark
         run: npx playwright test tests/behaviour
       - name: Rendering (EVAL §3) -- reports, never blocks
         if: always()
