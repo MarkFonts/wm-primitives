@@ -8,14 +8,28 @@
  * Tokens with fallbacks, in @layer wm.controls like button.css. Knobs a host may set:
  *   --hd-rail     the rail's length when vertical (default 11rem; the case study sets 96px)
  *   --hd-id       the id column's width when horizontal (default 5.5rem)
- *   --hd-inset / --hd-inset-v   how far from the rail's ends the lozenge's centre stops
- *                 (0 horizontal, as the docs draw it; 12px vertical, half the lozenge)
+ *   --hd-inset / --hd-inset-v   how far from the rail's ends the lozenge's centre stops, AND
+ *                 where the hairline ends: the line runs centre-to-centre, so at min or max the
+ *                 pill covers its end and nothing pokes out (0 horizontal, as the docs draw it;
+ *                 15px vertical, 17px on touch -- the arithmetic is at :root below)
+ *   --hd-chars    set by dialHandle.js on each lozenge, not by a host: the character count of the
+ *                 longest value the dial can show (min, max, "auto"); see the input rule
  * On the grid: a horizontal dial is 36px tall (12 units); a vertical one is its id column
  * plus --hd-rail, so a host on the grid gives --hd-rail a whole number of units. */
 @layer wm.controls {
   /* The knobs default at the root, not on the dial: set on .wm-hd they would beat a value a
      host sets on any ancestor (the case study's .axes gave --hd-rail 96px and got 11rem). */
-  :root { --hd-rail: 11rem; --hd-id: 5.5rem; --hd-inset: 0px; --hd-inset-v: 12px; }
+  :root { --hd-rail: 11rem; --hd-id: 5.5rem; --hd-inset: 0px; --hd-inset-v: 15px; }
+  /* --hd-inset-v is the distance from the rail's end to the lozenge's centre that puts the
+     ground ring's far edge on the rail's end, not past it. The input is pinned to 1.25em tall
+     (a text input otherwise takes its face's own line box, which is 15px for system-ui at 12px
+     and differs by face), so the pill is 1.25 x 12px = 15px + 4px padding x 2 = 23px; half is
+     11.5px, plus the 3px ring = 14.5px, rounded UP to 15px so the ring ends half a pixel inside
+     the rail. Touch: the input is 16px, so 20 + 8 = 28px; half 14 + 3 = 17px. (It was 12px: the
+     ring overhung the rail by 2.5px, and the hairline ran on below the pill because the line
+     ran the rail's full length.) */
+  @media (pointer: coarse) { :root { --hd-inset-v: 17px; } }
+  .touch { --hd-inset-v: 17px; }
   .wm-hd {
     display: flex;
     align-items: center;
@@ -72,8 +86,10 @@
   }
   /* focus shows on the LOZENGE, the thing the keys move -- a ring round the rail was a capsule the size of the column */
   .wm-hd-rail:focus-visible .wm-hd-pill { outline: 2px solid var(--accent, currentColor); outline-offset: 3px; }
+  /* the hairline runs from the lozenge's centre at min to its centre at max, so the pill (and
+     its ring) always covers the line's ends */
   .wm-hd-rail > i {
-    position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+    position: absolute; inset-inline: var(--hd-inset); top: 50%; height: 1px;
     background: var(--border, rgba(232, 232, 232, .14));
     transform: translateY(-50%);
   }
@@ -81,6 +97,7 @@
     position: absolute;
     /* --p is the value as 0..1 (dialHandle.js); the centre runs from inset to length - inset */
     --p: 0;
+    --hd-chars: initial;   /* declared, unset: dialHandle.js sets it inline; declared here so a consumer's token lint does not fail on a runtime-set var (as --chip-color in chip.css) */
     top: 50%;
     left: calc(var(--hd-inset) + (100% - 2 * var(--hd-inset)) * var(--p));
     transform: translate(-50%, -50%);
@@ -106,10 +123,16 @@
     font-variation-settings: 'opsz' 10;
     font-variant-numeric: tabular-nums;
     line-height: 1;
+    height: 1.25em;   /* pinned: the pill's height, and so --hd-inset-v, must not depend on the face */
     background: none; border: 0; padding: 0; outline: none;
     color: inherit;
+    /* Every lozenge is as wide as the longest value ITS OWN range can show (--hd-chars,
+       dialHandle.js: fmt(min), fmt(max), "auto"), and constant within a dial: "0" is no longer
+       a stub beside "0.00", and a value that gains a digit does not make the pill breathe as it
+       moves. Widths differ BETWEEN dials by design, each as wide as its own range. field-sizing
+       stays content so a longer typed value still fits, growing past the floor. */
     field-sizing: content;
-    min-width: 2.25ch;
+    min-width: calc(var(--hd-chars, 2.25) * 1ch);
     text-align: center;
     cursor: text;
     text-decoration: underline;
@@ -134,7 +157,7 @@
   .wm-hd--vertical { flex-direction: column; gap: var(--spacing-03, 8px); }
   .wm-hd--vertical .wm-hd-id { width: auto; }
   .wm-hd--vertical .wm-hd-rail { flex: none; width: 6rem; height: var(--hd-rail); cursor: ns-resize; touch-action: pan-x; }
-  .wm-hd--vertical .wm-hd-rail > i { left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto; transform: translateX(-50%); }
+  .wm-hd--vertical .wm-hd-rail > i { inset-inline: auto; left: 50%; inset-block: var(--hd-inset-v); width: 1px; height: auto; transform: translateX(-50%); }
   .wm-hd--vertical .wm-hd-pill { left: 50%; top: calc(var(--hd-inset-v) + (100% - 2 * var(--hd-inset-v)) * (1 - var(--p))); cursor: ns-resize; touch-action: pan-x; }
 
   /* touch: the RAIL is the target and grows to 48; the lozenge stays a thumb */
