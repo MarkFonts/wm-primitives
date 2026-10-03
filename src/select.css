@@ -13,9 +13,12 @@
   .wm-select-wrap { position: relative; display: block; }
   .wm-select {
     width: 100%;
-    padding: var(--spacing-02, 6px) var(--spacing-06, 24px) var(--spacing-02, 6px) var(--spacing-03, 8px);
+    /* ON THE LINE: 27px like the button (button.css) -- it was 29, the platform's own
+       line-height plus 6 + 6 + 2, and never the button's height when the two sat together */
+    padding: calc(var(--spacing-02, 6px) - 1px) var(--spacing-06, 24px) calc(var(--spacing-02, 6px) - 1px) var(--spacing-03, 8px);
     font-family: var(--ui-font, system-ui, sans-serif);
     font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 15px);
     color: var(--text, inherit);
     background: var(--surface, transparent);
     border: 1px solid var(--border, currentColor);

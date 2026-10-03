@@ -140,11 +140,17 @@ The coefficient tracks `--corner-k`. Recompute it rather than copying 0.6 if k m
 
 ### Height follows the type
 
-> `height = round(font-size × line-height) + 2 × padding-y`
+> `height = line-height + 2 × padding-y`, and the hairline sits **inside** the step
 
 `padding-y` is a step off the scale, picked for density. Never set a height and back into the
 padding — the line box belongs to the type, and a control with a hardcoded height stops
 tracking the role it is set in.
+
+Since the line (src/grid.css, 2026-10-02) the sum lands on the 3px unit: the chip, the button and
+the select are each `ui`'s 15 + (6 − 1) × 2 + 1 × 2 = **27px**, nine units, and the small
+chip is `micro`'s 12 + 2 × 2 + 2 = **18**. The border is counted inside the padding step
+rather than added after it, because 15 + 12 + 2 is 29 and no line passes through 29. The
+touch floors moved the same way: 32 → 33, 44 → 45. tests/behaviour/line.spec.ts holds them.
 
 
 ### The budget
@@ -371,15 +377,22 @@ can change without the name lying.
 Every role below spends **size** and nothing else. Ink and case are applied
 separately, and spending either means not also changing role.
 
-| role | size | leading | tracking | opsz | spends |
-|---|---|---|---|---|---|
-| `micro` | 8 | 1.2 | 0 | auto | size |
-| `label` | 12 | 1.3 | `--track-caps` ᶜ | 10 ᵖ | **case** (see below) |
-| `ui` | 12 | 1.4 | 0 | 10 ᵖ | — (chrome norm) |
-| `body` | 16 | 1.55 | 0 | auto | — (content norm) |
-| `lede` | 18 | 1.5 | 0 | auto | size |
-| `title` | 26 | 1.2 | 0 | auto | size |
-| `display` | 45 | 1.1 | 0 | auto ᵐ | size |
+| role | size | leading | line | tracking | opsz | spends |
+|---|---|---|---|---|---|---|
+| `micro` | 9 | 1.3 | 12 | 0 | auto | size |
+| `label` | 12 | 1.25 | 15 | `--track-caps` ᶜ | auto | **case** (see below) |
+| `ui` | 12 | 1.25 | 15 | 0 | auto | — (chrome norm) |
+| `body` | 16 | 1.5 | 24 | 0 | auto | — (content norm) |
+| `lede` | 18 | 1.5 | 27 | 0 | auto | size |
+| `title` | 26 | 1.15 | 30 | 0 | auto | size |
+| `display` | 45 | 1.12 | 51 | 0 | auto ᵐ | size |
+
+**line** is the leading in px at the 16px root, every one a multiple of the 3px unit
+(src/grid.css). type.css writes each as `round(nearest, <ratio>em, var(--bl))`, so it still follows
+the reader's text size and lands on the line again at whatever size that is. The ratios
+moved to make that true (2026-10-02): micro 1.2 → 1.3 (10.8 → 12), ui 1.4 → 1.25 (16.8 → 15),
+body 1.55 → 1.5 (24.8 → 24), title 1.2 → 1.15 (31.2 → 30), display 1.1 → 1.12 (49.5 → 51,
+written past the tie rather than on it). lede was 27 already.
 
 ᶜ compensation, not a signal · ᵖ pinned by policy (chrome must not drift between surfaces) ·
 ᵐ at 45px `auto` applies `opsz` 45 — the top of the axis

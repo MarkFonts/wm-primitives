@@ -280,14 +280,24 @@ if (cfg.typeParity) {
     const css = readFileSync(cssPath, 'utf8'), ts = readFileSync(tsPath, 'utf8')
     const toPx = v => v.endsWith('rem') ? parseFloat(v) * 16 : parseFloat(v)
 
+    /* A lead is `round(nearest, Rem, var(--bl))` since the line (src/grid.css): the ratio R is
+       what type.ts states as `lead`, and `line` is what R x size comes to on the 3px unit
+       at the 16px root. All three are checked, because a ratio whose product sits on a
+       tie (45 x 1.1 = 49.5) is a leading one browser rounding away from the line. */
     const cssRoles = {}
     for (const m of css.matchAll(/--type-([a-z]+)-(size|lead):\s*([^;]+);/g)) {
       cssRoles[m[1]] ??= {}
-      cssRoles[m[1]][m[2]] = m[2] === 'size' ? toPx(m[3].trim()) : parseFloat(m[3])
+      const v = m[3].trim()
+      if (m[2] === 'size') cssRoles[m[1]].size = toPx(v)
+      else {
+        const r = /^round\(nearest,\s*([\d.]+)em,\s*var\(--bl\)\)$/.exec(v)
+        if (!r) problems.push(`type.css: --type-${m[1]}-lead is ${v}; a lead is round(nearest, <ratio>em, var(--bl)) (src/grid.css)`)
+        else cssRoles[m[1]].lead = +r[1]
+      }
     }
     const tsRoles = {}
-    for (const m of ts.matchAll(/(\w+):\s*\{\s*size:\s*([\d.]+),\s*lead:\s*([\d.]+),\s*opsz:\s*(null|\d+)/g))
-      tsRoles[m[1]] = { size: +m[2], lead: +m[3], opsz: m[4] === 'null' ? null : +m[4] }
+    for (const m of ts.matchAll(/(\w+):\s*\{\s*size:\s*([\d.]+),\s*lead:\s*([\d.]+),\s*line:\s*(\d+),\s*opsz:\s*(null|\d+)/g))
+      tsRoles[m[1]] = { size: +m[2], lead: +m[3], line: +m[4], opsz: m[5] === 'null' ? null : +m[5] }
 
     for (const [role, c] of Object.entries(cssRoles)) {
       const t = tsRoles[role]
@@ -295,6 +305,13 @@ if (cfg.typeParity) {
       if (t.size !== c.size) problems.push(`type parity: ${role} size is ${t.size}px in type.ts, ${c.size}px in type.css`)
       if (c.lead !== undefined && t.lead !== c.lead)
         problems.push(`type parity: ${role} lead is ${t.lead} in type.ts, ${c.lead} in type.css`)
+      if (c.lead !== undefined) {
+        const raw = c.size * c.lead, line = Math.round(raw / 3) * 3
+        if (Math.abs(raw / 3 - Math.round(raw / 3)) > 0.49)
+          problems.push(`type parity: ${role} ${c.size} x ${c.lead} = ${raw} sits on a tie between lines; move the ratio`)
+        if (t.line !== line) problems.push(`type parity: ${role} line is ${t.line} in type.ts, but ${c.size} x ${c.lead} rounds to ${line}`)
+        if (t.line % 3) problems.push(`type parity: ${role} line ${t.line} is not on the 3px unit`)
+      }
     }
     /* type.ts's own header says opsz is pinned only where type.css pins it. */
     const cssPins = /font-variation-settings:[^;]*['"]opsz['"]/.test(css)

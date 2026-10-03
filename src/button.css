@@ -31,10 +31,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-02, 6px) var(--spacing-03, 8px);
+    /* ON THE LINE: 27px, nine units -- the ui leading (15) + a --spacing-02 step each side
+       with the hairline inside the step. It was 6 + 16.8 + 1 = 30.8, a height no line
+       passes through, and 2px taller than the select beside it. (chip.css, select.css: same) */
+    padding: calc(var(--spacing-02, 6px) - 1px) var(--spacing-03, 8px);
     font-family: var(--ui-font, system-ui, sans-serif);
     font-size: var(--type-ui-size, 0.75rem);
-    line-height: var(--type-ui-lead, 1.4);
+    line-height: var(--type-ui-lead, 15px);
     color: var(--text-muted, rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62)));
     background: var(--surface, transparent);
     border: 1px solid var(--border, currentColor);
@@ -70,7 +73,7 @@
   .wm-btn-row { display: flex; gap: var(--spacing-02, 6px); flex-wrap: wrap; }
   .wm-btn-row > .wm-btn { flex: 1 1 auto; }
   @media (pointer: coarse) {
-    .wm-btn { min-height: 44px; }
+    .wm-btn { min-height: 45px; }   /* fifteen units; the 44 floor, on the line */
   }
   @media (prefers-reduced-motion: reduce) {
     .wm-btn { transition: none; }

@@ -6,16 +6,20 @@
  * Sizes are px here because that is what JS consumers need. type.css declares the same
  * values in rem so they follow the reader's root size; if you set a size from here you
  * have opted out of that, which is fine for canvas and wrong for text.
+ *
+ * `lead` is the ratio type.css rounds to the 3px line (src/grid.css); `line` is what that comes
+ * to at the 16px root -- the number for canvas and measurement, always a multiple of 3.
+ * type() emits the same round() as type.css, so inline-styled text lands on the line too.
  */
 
 export const ROLES = {
-  micro:   { size: 9,  lead: 1.2,  opsz: null },
-  label:   { size: 12, lead: 1.3,  opsz: null },
-  ui:      { size: 12, lead: 1.4,  opsz: null },
-  body:    { size: 16, lead: 1.55, opsz: null },
-  lede:    { size: 18, lead: 1.5,  opsz: null },
-  title:   { size: 26, lead: 1.2,  opsz: null },
-  display: { size: 45, lead: 1.1,  opsz: null },
+  micro:   { size: 9,  lead: 1.3,  line: 12, opsz: null },
+  label:   { size: 12, lead: 1.25, line: 15, opsz: null },
+  ui:      { size: 12, lead: 1.25, line: 15, opsz: null },
+  body:    { size: 16, lead: 1.5,  line: 24, opsz: null },
+  lede:    { size: 18, lead: 1.5,  line: 27, opsz: null },
+  title:   { size: 26, lead: 1.15, line: 30, opsz: null },
+  display: { size: 45, lead: 1.12, line: 51, opsz: null },
 } as const
 
 export type Role = keyof typeof ROLES
@@ -49,7 +53,7 @@ export function type(role: Role): React.CSSProperties {
   const r = ROLES[role]
   const style: React.CSSProperties = {
     fontSize: `${r.size / 16}rem`,
-    lineHeight: r.lead,
+    lineHeight: `round(nearest, ${r.lead}em, var(--bl, 3px))`,
     fontOpticalSizing: r.opsz === null ? 'auto' : 'none',
   }
   if (role === 'label') {

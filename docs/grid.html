@@ -166,13 +166,22 @@
        group labels, glyph captions. Things pinned to something else that name it. It sat at
        8px, where exactly one declaration used it, while the real annotations were at 9 and
        10 — so 9 is where they actually live, and 8 was a size we were not using. ---- */
-    --type-micro-size: 0.5625rem;   --type-micro-lead: 1.2;    /*   9px */
-    --type-label-size: 0.75rem;     --type-label-lead: 1.3;    /*  12px */
-    --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       /*  12px */
-    --type-body-size: 1rem;         --type-body-lead: 1.55;    /*  16px */
-    --type-lede-size: 1.125rem;     --type-lede-lead: 1.5;     /*  18px */
-    --type-title-size: 1.625rem;    --type-title-lead: 1.2;    /*  26px */
-    --type-display-size: 2.8125rem; --type-display-lead: 1.1;  /*  45px */
+    --type-micro-size: 0.5625rem;   --type-micro-lead: round(nearest, 1.3em, var(--bl));    /*   9 / 12px */
+    --type-label-size: 0.75rem;     --type-label-lead: round(nearest, 1.25em, var(--bl));   /*  12 / 15px */
+    --type-ui-size: 0.75rem;        --type-ui-lead: round(nearest, 1.25em, var(--bl));      /*  12 / 15px */
+    --type-body-size: 1rem;         --type-body-lead: round(nearest, 1.5em, var(--bl));     /*  16 / 24px */
+    --type-lede-size: 1.125rem;     --type-lede-lead: round(nearest, 1.5em, var(--bl));     /*  18 / 27px */
+    --type-title-size: 1.625rem;    --type-title-lead: round(nearest, 1.15em, var(--bl));   /*  26 / 30px */
+    --type-display-size: 2.8125rem; --type-display-lead: round(nearest, 1.12em, var(--bl)); /*  45 / 51px */
+    /* ---- the line: every leading above is a whole number of these (grid.css, GRID.md). The
+       ratios are the ones the roles had (1.2 .. 1.55), each moved to the nearest multiple of
+       the unit at the 16px root: micro 10.8 -> 12, ui 16.8 -> 15, body 24.8 -> 24, title 31.2
+       -> 30, display 49.5 -> 51 (written 1.12em, not 1.1em: round(nearest) resolves a tie UP,
+       and a leading that depends on a tie is one browser rounding away from the line). They
+       are still em, so they follow the reader's text size; round() lands each on the line
+       again at whatever size that is. grid.css declares --bl too; same value, and a consumer
+       that imports type.css alone still resolves it. ---- */
+    --bl: 3px;
 
     /* ---- poster: the monster scale, ratio root-2 so every second step doubles.
        Sets size and leading only — never an axis — so it serves any face. ---- */
@@ -305,10 +314,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-01, 4px) var(--spacing-04, 12px);
+    /* ON THE LINE: 27px, nine units -- the ui leading (15) plus a --spacing-02 step each
+       side with the hairline INSIDE the step (6 - 1 + 1). The formula is TYPOGRAPHY.md's
+       (height follows the type); the line is GRID.md's. It was 4px + 16.8 + 1, which
+       came to the same 27 by accident; now it is 27 by rule, like the button and the select. */
+    padding: calc(var(--spacing-02, 6px) - 1px) var(--spacing-04, 12px);
     font-family: var(--ui-font, system-ui, sans-serif);
     font-size: var(--type-ui-size, 0.75rem);
-    line-height: var(--type-ui-lead, 1.4);
+    line-height: var(--type-ui-lead, 15px);
     font-weight: 400;
     color: var(--chip-ink);
     background: transparent;
@@ -369,8 +382,9 @@
   .wm-chip--small {
     /* 1px, not var(--hair): the hosts disagree on what --hair is (Kernpare's is a length,
        the system page's a colour), and a colour there voids the whole padding. */
-    padding: 1px var(--spacing-03, 8px);
+    padding: 2px var(--spacing-03, 8px);   /* 18px, six units: micro's 12 + 2 + 2 + the hairlines */
     font-size: var(--type-micro-size, 0.5625rem);
+    line-height: var(--type-micro-lead, 12px);
   }
 
   /* A modifier, not an option: it stays on across the set, so it wears the secondary
@@ -387,7 +401,7 @@
   .wm-chip:is(:disabled, [aria-disabled="true"]) { opacity: .4; cursor: default; }
 
   @media (pointer: coarse) {
-    .wm-chip { min-height: 32px; }
+    .wm-chip { min-height: 33px; }   /* eleven units; the touch floor, on the line */
   }
   @media (prefers-reduced-motion: reduce) {
     .wm-chip { transition: none; }
@@ -475,7 +489,11 @@
    A page sets --lh wherever it sets a leading; nothing here touches margins. */
 .wm-lines {
   --font-asc: 0.9; --font-desc: 0.245;
-  --lead-micro: 12px; --lead-ui: 15px; --lead-body: 24px; --lead-lede: 27px; --lead-title: 30px;
+  /* the roles' own leadings (type.css rounds each to --bl); the px are what they come to at
+     the 16px root, and what a page without type.css gets */
+  --lead-micro: var(--type-micro-lead, 12px); --lead-ui: var(--type-ui-lead, 15px);
+  --lead-body: var(--type-body-lead, 24px); --lead-lede: var(--type-lede-lead, 27px);
+  --lead-title: var(--type-title-lead, 30px); --lead-display: var(--type-display-lead, 51px);
   --lh: var(--lead-body);
 }
 /* :where, so any rule that sets --lh outranks it, whatever selector it is written with. */
@@ -497,7 +515,7 @@
 .wm-lines .t-title { --lh: var(--lead-title); }
 .wm-lines :is(.t-ui, .t-label) { --lh: var(--lead-ui); }
 .wm-lines .t-micro { --lh: var(--lead-micro); }
-.wm-lines .t-display { --lh: round(nearest, 1.1em, var(--bl)); }
+.wm-lines .t-display { --lh: var(--lead-display); }
 
 </style>
 <style>
