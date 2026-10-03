@@ -12,6 +12,17 @@ Newest first.
 
 ---
 
+## 2026-10-03 — the icon face's URL follows its glyph count
+
+`visibility` rendered as a "V" on wordmark.nyc the day it joined the face: the subset is re-cut
+under the same file name, so browsers and the Pages cache kept the old one, which has no such
+ligature. The URL is now `MaterialSymbolsOutlined.woff2?v=85`, the ligature count. A cut that adds
+a name changes the count, so `cut-icon-subset.py` rewrites the query in src/*.css as it writes the
+faces, and `lint-icons.py` fails when the two disagree. The cost is a rule that only moves when
+the count does: a cut that swaps one name for another would need a manual bump.
+
+---
+
 ## 2026-10-02 — four grid follow-ups: a relative unit row moves, ?grid on a tall page, stages out of grid.css, the reset trap
 
 **A unit row a host made `relative` now moves.** gridSnap.js wrote `top` only on a `--snap-unit: 1`

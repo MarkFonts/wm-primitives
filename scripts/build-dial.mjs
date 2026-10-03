@@ -20,7 +20,9 @@ const r = await build({
   loader: { '.css': 'css' },
   // Font and image URLs stay as written: dist/ sits beside src/, so '../fonts/…' resolves
   // the same from either, and the host serves shared/ whole.
-  external: ['*.woff2', '*.ttf', '*.avif', '*.png', '*.svg'],
+  // the face URL carries ?v=<count> (icon.css, the cache-buster); esbuild matches the query as
+  // part of the path and allows one wildcard per pattern, so '../fonts/*' covers it
+  external: ['*.woff2', '../fonts/*', '*.ttf', '*.avif', '*.png', '*.svg'],
   legalComments: 'none',
   logLevel: 'warning',
   metafile: true,
