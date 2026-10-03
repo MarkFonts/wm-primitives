@@ -12,6 +12,21 @@ Newest first.
 
 ---
 
+## 2026-10-03 -- the grid spec checks the margin, and the homepage joins it
+
+**The copy at x=0 passed.** The wordmark homepage's unlayered `* { padding: 0 }` reset beat the
+layered `.wm-grid` padding-inline, so the text sat flush against the window edge and every
+baseline, row, refusal and layout check stayed green -- they judge heights and overlaps, never
+where the column starts. `tests/behaviour/grid.spec.ts` now resolves `--grid-margin` (a probe
+`div` of that width, since it is a `clamp()`) and asserts every block gridSnap measured has its
+text inside it, left and right, reporting `tag.class at Xpx, margin is Mpx`. With the reset
+injected into the homepage the spec fails at all three widths (text at 0px, margin 20px at 390).
+The homepage is a fourth page in `PAGES`. The system page opts out of the margin only: its edges
+belong to the doc shell (a rail at 1440, 20px below 1080), and its copy is on the line, so
+`data-nosnap` was not an option. The first cut also flagged every card of a full-bleed
+carousel for ending 4,000px right of the viewport; text in a scroller that really scrolls is
+now judged by where it starts.
+
 ## 2026-10-03 — the dial's hairline stops at the lozenge; the lozenges are one width
 
 Two looks from a screenshot of three vertical dials at their minimums. The rail's hairline ran the
