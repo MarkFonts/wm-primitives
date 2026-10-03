@@ -18,6 +18,37 @@ Newest first.
 opsz 48, FILL 0, the way the bookmark sits over "12.6K bookmarks". visibility_off came along
 because it is the same cut. Re-cut with `scripts/cut-icon-subset.py visibility visibility_off`.
 
+## 2026-10-02 — the grid is a standard; the system page is on its line
+
+Grid roll-out, step 2. GRID.md says what the grid is the way InDesign would: the columns and
+why 24 and 12, the line and the seven leadings on it, what `.wm-lines` computes and why the
+ascent is rounded, the row rule, what gridSnap.js measures, the lint's three keys, what the CI
+spec asserts, and the order a page adopts it in -- every step written after a trap, from the
+Closer Look columns that shipped at 18px to the stat figures that did not fit five across.
+
+The system page shows it. The Grid part rides inside 01 Type, as the ramps ride inside Color,
+because the poster says six laws and the grid is the type's own measure; its two chapters, Columns
+and Baseline, are in the rail under Type: the columns at 1440, 900 and
+390 as real `.wm-grid`s with each width's numbers set on them and scaled to fit, the baseline with
+a paragraph to flip back to 1.55 and watch walk off, the seven roles over a `?grid`-style
+overlay cut to each demo, three cards whose first baselines meet (the third by its last line),
+and a pair of slider rows under an off-unit block -- the label snapped alone slides off its thumb, the row
+that moves whole stays level -- with a chip that steps the block 48 to 52px (the first version moved
+2px and nobody could see it). type.css and chip.css are
+inlined for the part alone (PRIMITIVE_CSS_PART); grid.css and gridSnap.js are the shell's,
+once, because a section-scoped gridSnap.js has its document queries rewritten to the section.
+
+And the page is on the line: `<main>` is the `.wm-lines` root, so the README, the section
+numbers and the Grid part share one set of lines, and the page joins the grid spec at all three
+widths. The other chapters are not, and say so (Type's own page and its favicons are stages around the Grid part): each is a stage, data-nosnap, and build.py's
+OFF_LINE records what putting it on would cost (the controls h1 is 40px at `normal` and would be
+set solid at 24; 3,704 cells of usage table made one snapper pass 1.7s; the type chart is SVG
+text the snapper can measure and cannot move). data-nosnap stops the snapper but not grid.css,
+which is CSS, so the shell hands a stage's leadings back with `revert-layer`; measured, those
+six chapters lay out to the pixel as they did. The page is NOT on the columns -- it is still
+the rail and a 1080 measure -- and `?grid`'s lines do not draw on it past 65,535 device pixels,
+which it is on a phone or at 2x.
+
 ## 2026-10-02 — the roles lead on the line; the chip, the button and the select are 27
 
 Grid roll-out, step 1. type.css's seven leadings are `round(nearest, <ratio>em, var(--bl))`

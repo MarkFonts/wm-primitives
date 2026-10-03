@@ -21,6 +21,10 @@ import { resolve } from 'node:path'
 
 const PAGES = [
   { name: 'grid demo', url: '/grid/grid.html' },
+  // The system page: <main> is the root. On the line are the shell's copy, the README and
+  // the Grid part of Type; the other chapters are stages, data-nosnap (build.py OFF_LINE
+  // says what each would need), so the layout check skips them by the same rule.
+  { name: 'system page', url: '/grid/index.html' },
   { name: 'Cal Sans case study', url: '/wordmark/calsans/', dir: process.env.WORDMARK_DIR ?? resolve('../wordmark') },
 ]
 const WIDTHS = [1440, 900, 390]
