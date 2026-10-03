@@ -12,6 +12,12 @@ Newest first.
 
 ---
 
+## 2026-10-02 — visibility and visibility_off join the icon face
+
+85 names. The case study's census card draws the eye over "1.4M views" at 72px, wght 100,
+opsz 48, FILL 0, the way the bookmark sits over "12.6K bookmarks". visibility_off came along
+because it is the same cut. Re-cut with `scripts/cut-icon-subset.py visibility visibility_off`.
+
 ## 2026-10-02 — the grid is a standard; the system page is on its line
 
 Grid roll-out, step 2. GRID.md says what the grid is the way InDesign would: the columns and
