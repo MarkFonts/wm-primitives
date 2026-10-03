@@ -84,8 +84,14 @@
   --lead-title: var(--type-title-lead, 30px); --lead-display: var(--type-display-lead, 51px);
   --lh: var(--lead-body);
 }
-/* :where, so any rule that sets --lh outranks it, whatever selector it is written with. */
-.wm-lines :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line]) {
+/* :where, so any rule that sets --lh outranks it, whatever selector it is written with.
+   A STAGE IS NOT REACHED. The trailing :not(:where(...)) leaves out a [data-nosnap] subtree
+   (the element itself, or anything inside it): a demo with its own type keeps its own leading,
+   position and top, and a shell no longer hands them back with a `revert-layer` rule. The
+   :where inside the :not is what keeps the specificity story true -- a :not() counts its
+   argument, so a bare :not([data-nosnap] *) would lift this from (0,1,0) to (0,2,0) and a
+   page's own `.card p` would stop outranking it. */
+.wm-lines :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line]):not(:where([data-nosnap], [data-nosnap] *)) {
   line-height: var(--lh);
   position: relative;
   /* unset until a builder or gridSnap.js writes it ON the element (inline wins); declared
@@ -99,8 +105,9 @@
    line; a block below an image, an embed or a 1px rule starts wherever those end. A builder
    (or src/gridSnap.js, after layout) measures the rendered baseline and sets --snap to the
    remainder -- under one unit, glyphs only, never the layout. */
-.wm-lines .t-lede { --lh: var(--lead-lede); }
-.wm-lines .t-title { --lh: var(--lead-title); }
-.wm-lines :is(.t-ui, .t-label) { --lh: var(--lead-ui); }
-.wm-lines .t-micro { --lh: var(--lead-micro); }
-.wm-lines .t-display { --lh: var(--lead-display); }
+/* The roles' --lh, out of a stage by the same :not(:where()) -- (0,2,0) as before, not more. */
+.wm-lines .t-lede:not(:where([data-nosnap], [data-nosnap] *)) { --lh: var(--lead-lede); }
+.wm-lines .t-title:not(:where([data-nosnap], [data-nosnap] *)) { --lh: var(--lead-title); }
+.wm-lines :is(.t-ui, .t-label):not(:where([data-nosnap], [data-nosnap] *)) { --lh: var(--lead-ui); }
+.wm-lines .t-micro:not(:where([data-nosnap], [data-nosnap] *)) { --lh: var(--lead-micro); }
+.wm-lines .t-display:not(:where([data-nosnap], [data-nosnap] *)) { --lh: var(--lead-display); }
