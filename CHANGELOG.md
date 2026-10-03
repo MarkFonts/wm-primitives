@@ -12,6 +12,15 @@ Newest first.
 
 ---
 
+## 2026-10-03 -- ReCal's eight landing pages join the grid spec
+
+ReCal #27 put the compare pages (poppins, inter, geist, futura, neutra, circular, gotham,
+gt-america) on the grid, and nothing held them there. They are now in `PAGES`, read from
+`RECAL_DIST` (the browser job already exports it and builds ReCal with `npm run build`, which
+runs `gen-landing.mjs`, so `dist/<slug>/index.html` exists). The skip clause used to strip
+`/wordmark/` only; it now strips the first path segment, so one rule finds the file under
+whichever host's `dir`. 24 more tests, no CI change.
+
 ## 2026-10-03 -- the grid spec checks the margin, and the homepage joins it
 
 **The copy at x=0 passed.** The wordmark homepage's unlayered `* { padding: 0 }` reset beat the

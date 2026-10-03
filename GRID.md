@@ -197,7 +197,7 @@ On the case study as it was before the grid it flags all 73 off-line values.
 
 `tests/behaviour/grid.spec.ts` holds the OUTPUT, on every page in its `PAGES` -- the bench
 (`docs/grid.html`), the system page (`docs/index.html`) and the case study (the wordmark site
-checked out with `shared/` at the commit under test) and the wordmark homepage -- at **1440, 900 and 390** wide, 900 tall,
+checked out with `shared/` at the commit under test) the wordmark homepage and ReCal's eight compare pages (`/recalsans/<slug>/`, from `RECAL_DIST`) -- at **1440, 900 and 390** wide, 900 tall,
 in Chromium. After fonts load and one more snapper pass:
 
 1. the snapper measured more than five blocks (is it loaded, is the page `.wm-lines`?);
