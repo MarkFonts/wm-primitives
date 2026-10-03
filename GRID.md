@@ -19,10 +19,10 @@ and `grid.css` disagree, the CSS is right.
 
 **24 columns on a desktop, 12 below 1024px.**
 
-- 24, not 30. 30 was the other candidate and lost to the page it was for: calsans splits its
-  sections 5:7 three times, which is 10 | 14 on 24 and 12.5 | 17.5 on 30.
-- 12 below 1024, not 10. The phone's count has to divide the desktop's, so a half is still a
-  half and a third still a third when the columns fold.
+- 24. It halves, thirds, quarters, sixths and eighths, and calsans splits its sections 5:7
+  three times, which is 10 | 14 in whole columns.
+- 12 below 1024. The phone's count has to divide the desktop's, so a half is still a half and
+  a third still a third when the columns fold.
 - **Gutter**: the pad scale's 24px, 12 below 600.
 - **Margin**: `clamp(20px, 5vw, 40px)` on a phone, `clamp(32px, 7vw, 112px)` from 681px. The case
   study's own, and the same for every project: page padding belongs to the grid, not to the page.
