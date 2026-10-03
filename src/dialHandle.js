@@ -76,6 +76,11 @@
       root.__dot = dot;
     }
 
+    // the widest thing the lozenge can show, in characters (the real minus and the point count
+    // as one each): the CSS gives the input that as a min-width, so the pill is one width
+    const chars = Math.max(fmt(d.min, d).length, fmt(d.max, d).length, d.auto ? 4 : 0);
+    pill.style.setProperty('--hd-chars', String(chars));
+
     let echo = false;
     const render = () => {
       // a sync must not clobber what you are TYPING; an arrow or a drag is not typing
@@ -84,7 +89,7 @@
       rail.setAttribute('aria-valuenow', String(num(value)));
       rail.setAttribute('aria-valuetext', fmt(value, d) + (d.unit ? ' ' + d.unit : ''));
       // the lozenge's CENTRE travels the rail less an inset at each end (--hd-inset, half the
-      // lozenge when vertical), so at its ends it sits inside the rail instead of overhanging
+      // lozenge plus its ring when vertical), and the hairline ends at those centres, so at its ends it sits inside the rail instead of overhanging
       // into the caption above or whatever is below
       pill.style.setProperty('--p', String(p / 100));
       if (root.classList.contains('wm-hd--vertical')) { pill.style.top = ''; pill.style.left = ''; }

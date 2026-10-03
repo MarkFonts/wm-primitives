@@ -27,6 +27,36 @@ belong to the doc shell (a rail at 1440, 20px below 1080), and its copy is on th
 carousel for ending 4,000px right of the viewport; text in a scroller that really scrolls is
 now judged by where it starts.
 
+## 2026-10-03 — the dial's hairline stops at the lozenge; the lozenges are one width
+
+Two looks from a screenshot of three vertical dials at their minimums. The rail's hairline ran the
+whole rail, so at min it ran on below the pill and poked out under the ground ring; it now runs from
+the lozenge's centre at min to its centre at max (`inset-block` / `inset-inline` from the same
+--hd-inset knobs that stop the lozenge), so the pill always covers the line's end. That exposed the
+inset itself: 12px was a guess, and the pill is not the 20px it was assumed to be -- a text input
+takes its face's own line box (15px for system-ui at 12px), so the input is now pinned to 1.25em
+and the inset is arithmetic: 15px, 17px on touch (the comment at :root has the sums).
+
+The other: the lozenge was `field-sizing: content` with a 2.25ch floor, so "0" was a stub, "0.00"
+was wide, and a value gaining a digit made the pill breathe as it moved. dialHandle.js now sets
+--hd-chars on each lozenge, the longest of fmt(min), fmt(max) and "auto", and the input floors at
+that many ch. Widths differ BETWEEN dials by design (each is as wide as its own range) and are
+constant within one; content sizing stays so a longer typed value still fits. Case-study axes: wght
+3, GEOM 3, opsz 4 (it has an auto, and "auto" is four characters), YTAS 4, SHRP 3, ital 4.
+`--hd-chars: initial` is declared like --chip-color so token lints do not fail on a runtime var.
+tests/behaviour/dial-handle.spec.ts holds both, on tests/fixtures/dial-handle.html.
+
+## 2026-10-03 — the icon face's URL follows its glyph count
+
+`visibility` rendered as a "V" on wordmark.nyc the day it joined the face: the subset is re-cut
+under the same file name, so browsers and the Pages cache kept the old one, which has no such
+ligature. The URL is now `MaterialSymbolsOutlined.woff2?v=85`, the ligature count. A cut that adds
+a name changes the count, so `cut-icon-subset.py` rewrites the query in src/*.css as it writes the
+faces, and `lint-icons.py` fails when the two disagree. The cost is a rule that only moves when
+the count does: a cut that swaps one name for another would need a manual bump.
+
+---
+
 ## 2026-10-02 — four grid follow-ups: a relative unit row moves, ?grid on a tall page, stages out of grid.css, the reset trap
 
 **A unit row a host made `relative` now moves.** gridSnap.js wrote `top` only on a `--snap-unit: 1`
