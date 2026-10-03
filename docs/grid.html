@@ -294,7 +294,14 @@
  * the form state all work, and :has(input:checked) is the chosen state.
  *
  * Tokens with fallbacks throughout, in @layer wm.controls like button.css, so a host can
- * override any line with an unlayered rule -- or bridge its own ink names on the row. */
+ * override any line with an unlayered rule -- or bridge its own ink names on the row.
+ *
+ * THE UNIVERSAL-RESET TRAP. That same rule means a host's unlayered `* { padding: 0 }` (a
+ * reset) silently zeroes the padding here: the chip draws 17px tall and still sits on a line,
+ * which the grid spec cannot see (the case study, 2026-10-02). The box is therefore ALSO held
+ * by min-height, which no padding reset touches; the fix on the host is still to leave
+ * `.wm-chip, .wm-btn, .wm-select` out of the reset, or to put the reset in a layer below
+ * wm.controls (GRID.md, the adoption checklist). */
 @layer wm.controls {
   .wm-chip-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-01, 4px); }
 
@@ -317,7 +324,11 @@
     /* ON THE LINE: 27px, nine units -- the ui leading (15) plus a --spacing-02 step each
        side with the hairline INSIDE the step (6 - 1 + 1). The formula is TYPOGRAPHY.md's
        (height follows the type); the line is GRID.md's. It was 4px + 16.8 + 1, which
-       came to the same 27 by accident; now it is 27 by rule, like the button and the select. */
+       came to the same 27 by accident; now it is 27 by rule, like the button and the select.
+       The min-height says the same 27 a second way, because a host's unlayered `* { padding: 0 }`
+       beats this layer and takes the padding with it (see the header) -- no reset touches it. */
+    box-sizing: border-box;
+    min-height: 27px;
     padding: calc(var(--spacing-02, 6px) - 1px) var(--spacing-04, 12px);
     font-family: var(--ui-font, system-ui, sans-serif);
     font-size: var(--type-ui-size, 0.75rem);
@@ -382,6 +393,7 @@
   .wm-chip--small {
     /* 1px, not var(--hair): the hosts disagree on what --hair is (Kernpare's is a length,
        the system page's a colour), and a colour there voids the whole padding. */
+    min-height: 18px;   /* the same box without the padding, as above */
     padding: 2px var(--spacing-03, 8px);   /* 18px, six units: micro's 12 + 2 + 2 + the hairlines */
     font-size: var(--type-micro-size, 0.5625rem);
     line-height: var(--type-micro-lead, 12px);
@@ -496,8 +508,14 @@
   --lead-title: var(--type-title-lead, 30px); --lead-display: var(--type-display-lead, 51px);
   --lh: var(--lead-body);
 }
-/* :where, so any rule that sets --lh outranks it, whatever selector it is written with. */
-.wm-lines :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line]) {
+/* :where, so any rule that sets --lh outranks it, whatever selector it is written with.
+   A STAGE IS NOT REACHED. The trailing :not(:where(...)) leaves out a [data-nosnap] subtree
+   (the element itself, or anything inside it): a demo with its own type keeps its own leading,
+   position and top, and a shell no longer hands them back with a `revert-layer` rule. The
+   :where inside the :not is what keeps the specificity story true -- a :not() counts its
+   argument, so a bare :not([data-nosnap] *) would lift this from (0,1,0) to (0,2,0) and a
+   page's own `.card p` would stop outranking it. */
+.wm-lines :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line]):not(:where([data-nosnap], [data-nosnap] *)) {
   line-height: var(--lh);
   position: relative;
   /* unset until a builder or gridSnap.js writes it ON the element (inline wins); declared
@@ -511,11 +529,12 @@
    line; a block below an image, an embed or a 1px rule starts wherever those end. A builder
    (or src/gridSnap.js, after layout) measures the rendered baseline and sets --snap to the
    remainder -- under one unit, glyphs only, never the layout. */
-.wm-lines .t-lede { --lh: var(--lead-lede); }
-.wm-lines .t-title { --lh: var(--lead-title); }
-.wm-lines :is(.t-ui, .t-label) { --lh: var(--lead-ui); }
-.wm-lines .t-micro { --lh: var(--lead-micro); }
-.wm-lines .t-display { --lh: var(--lead-display); }
+/* The roles' --lh, out of a stage by the same :not(:where()) -- (0,2,0) as before, not more. */
+.wm-lines .t-lede:not(:where([data-nosnap], [data-nosnap] *)) { --lh: var(--lead-lede); }
+.wm-lines .t-title:not(:where([data-nosnap], [data-nosnap] *)) { --lh: var(--lead-title); }
+.wm-lines :is(.t-ui, .t-label):not(:where([data-nosnap], [data-nosnap] *)) { --lh: var(--lead-ui); }
+.wm-lines .t-micro:not(:where([data-nosnap], [data-nosnap] *)) { --lh: var(--lead-micro); }
+.wm-lines .t-display:not(:where([data-nosnap], [data-nosnap] *)) { --lh: var(--lead-display); }
 
 </style>
 <style>
@@ -691,7 +710,9 @@ html.off-grid .wm-lines{--lead-body:24.8px}
  * A "text block" is an in-flow element with its own text (a direct, non-blank text node):
  * p, h1-h5, li, figcaption, a pill's label, a byline. Skipped: anything positioned
  * absolute/fixed/sticky, anything already relatively placed for its own reasons, and any
- * subtree marked [data-nosnap] -- an interactive demo with its own type keeps it.
+ * subtree marked [data-nosnap] -- an interactive demo with its own type keeps it. (A
+ * --snap-unit: 1 component is the exception to "relatively placed": a row a host made
+ * `relative` for a guide still moves whole, by the `top` this writes on it.)
  *
  * Plain script, no module, no dependency: <script src="shared/src/gridSnap.js" defer>.
  * In a .wm-baselines container, items in one row also share their first baseline -- or, for an
@@ -701,6 +722,8 @@ html.off-grid .wm-lines{--lead-body:24.8px}
  * and the lines drawn over the page. */
 (() => {
   const BL = root => parseFloat(getComputedStyle(root).getPropertyValue('--bl')) || 3;
+  // what grid.css already nudges (it writes `position: relative` and a `top` that includes --snap)
+  const NUDGED = '.wm-lines :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line])';
   const probe = document.createElement('span');
   probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
 
@@ -742,7 +765,7 @@ html.off-grid .wm-lines{--lead-body:24.8px}
       if (cs.display === 'inline' || cs.display === 'contents' || cs.display === 'none') continue;
       if (/absolute|fixed|sticky/.test(cs.position)) continue;
       // relatively placed for its own reasons (not by grid.css) -- leave it alone
-      if (cs.position === 'relative' && !el.matches('.wm-lines :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line])')) {
+      if (cs.position === 'relative' && !el.matches(NUDGED)) {
         if (!el.hasAttribute('data-snap')) continue;
       }
       const t = ownText(el);
@@ -822,8 +845,14 @@ html.off-grid .wm-lines{--lead-body:24.8px}
     for (const [el] of out) measured.push(el);
     for (const [el, d] of delta) {
       if (Math.abs(d) < 0.02) continue;
-      // tagged, so the next pass knows this `relative` is ours and measures it again
-      if (getComputedStyle(el).position === 'static') { el.style.position = 'relative'; el.style.top = 'var(--snap)'; el.setAttribute('data-snap', ''); }
+      // A static one is made `relative`, tagged so the next pass knows that `relative` is ours.
+      // One a host made `relative` itself (a unit row with a guide or a badge hung off it) is
+      // already placed and still has to MOVE, so it gets the `top` too -- but not the tag, the
+      // position was never ours. Absolute, fixed and sticky boxes are the host's and untouched.
+      const pos = getComputedStyle(el).position;
+      if (pos === 'static') { el.style.position = 'relative'; el.style.top = 'var(--snap)'; el.setAttribute('data-snap', ''); }
+      else if (pos === 'relative' && !el.matches(NUDGED)) el.style.top = 'var(--snap)';
+      else if (pos !== 'relative') continue;
       el.style.setProperty('--snap', d.toFixed(2) + 'px');
     }
   }
@@ -841,7 +870,7 @@ html.off-grid .wm-lines{--lead-body:24.8px}
      density, one device pixel each: a CSS gradient at a fractional zoom smears them. */
   function overlay() {
     const css = document.createElement('style');
-    css.textContent = `.wm-ov{position:absolute;pointer-events:none;z-index:2147483646}
+    css.textContent = `.wm-ov{position:fixed;left:0;top:0;pointer-events:none;z-index:2147483646}
       .wm-ov-cols{position:fixed;inset:0;pointer-events:none;z-index:2147483646;display:grid;
         grid-template-columns:repeat(var(--grid-cols),minmax(0,1fr));column-gap:var(--grid-gutter);padding-inline:var(--grid-margin)}
       .wm-ov-cols>i{background:rgba(255,40,140,.06);border-inline:1px solid rgba(255,40,140,.4)}`;
@@ -849,14 +878,31 @@ html.off-grid .wm-lines{--lead-body:24.8px}
     const cols = document.createElement('div'); cols.className = 'wm-ov-cols'; document.body.appendChild(cols);
     const drawCols = () => { const n = +getComputedStyle(document.documentElement).getPropertyValue('--grid-cols') || 24;
       cols.innerHTML = '<i></i>'.repeat(n); };
-    const canv = [...document.querySelectorAll('.wm-lines')].map(root => { const c = document.createElement('canvas'); c.className = 'wm-ov'; document.body.appendChild(c); return [root, c]; });
-    const drawLines = () => canv.forEach(([root, c]) => {
-      const r = root.getBoundingClientRect(), dpr = devicePixelRatio || 1, bl = BL(root);
-      Object.assign(c.style, { left: r.left + scrollX + 'px', top: r.top + scrollY + 'px', width: r.width + 'px', height: r.height + 'px' });
-      c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
-      const g = c.getContext('2d'); g.fillStyle = 'rgba(40,120,255,.45)';
-      for (let y = 0; y * dpr < c.height; y += bl) g.fillRect(0, Math.round(y * dpr) - 1, c.width, 1);
-    });
+    // ONE viewport-sized fixed canvas, redrawn on scroll. A canvas the height of the root went
+    // blank past 65,535 device pixels (the system page is ~47,000 CSS px: blank at 2x), and a
+    // page that tall is the page that needs the lines. Each root's lines are drawn where the
+    // root's top is NOW, one every --bl from it, clipped to what is on screen.
+    const c = document.createElement('canvas'); c.className = 'wm-ov';
+    document.body.appendChild(c);
+    const roots = [...document.querySelectorAll('.wm-lines')];
+    const drawLines = () => {
+      const dpr = devicePixelRatio || 1, vw = document.documentElement.clientWidth, vh = innerHeight;
+      c.style.width = vw + 'px'; c.style.height = vh + 'px';
+      if (c.width !== Math.round(vw * dpr) || c.height !== Math.round(vh * dpr)) { c.width = Math.round(vw * dpr); c.height = Math.round(vh * dpr); }
+      const g = c.getContext('2d'); g.clearRect(0, 0, c.width, c.height); g.fillStyle = 'rgba(40,120,255,.45)';
+      for (const root of roots) {
+        const r = root.getBoundingClientRect(), bl = BL(root);
+        const x0 = Math.max(0, r.left), x1 = Math.min(vw, r.right), y0 = Math.max(0, r.top), y1 = Math.min(vh, r.bottom);
+        if (x1 <= x0 || y1 <= y0) continue;
+        for (let k = Math.max(0, Math.ceil((y0 - r.top) / bl)); r.top + k * bl < y1; k++) {
+          const y = Math.round((r.top + k * bl) * dpr) - 1;
+          g.fillRect(Math.round(x0 * dpr), y, Math.round((x1 - x0) * dpr), 1);
+        }
+      }
+    };
+    let ovRaf = 0;
+    const redraw = () => { cancelAnimationFrame(ovRaf); ovRaf = requestAnimationFrame(drawLines); };
+    addEventListener('scroll', redraw, { passive: true });
     const draw = () => { drawCols(); drawLines(); };
     draw(); addEventListener('resize', draw); document.fonts && document.fonts.ready.then(draw);
     if ('ResizeObserver' in window) new ResizeObserver(draw).observe(document.body);

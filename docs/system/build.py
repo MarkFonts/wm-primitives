@@ -788,15 +788,6 @@ else:
 """
 
 SHELL = """
-/* A STAGE KEEPS ITS OWN TYPE. grid.css (above) gives every p, li and heading inside .wm-main
-   the line's leading, a relative position and a sub-unit `top`; a subtree marked data-nosnap
-   (the poster, a chapter whose demos set their own type) is skipped by gridSnap.js but NOT
-   by those rules, which are plain CSS. This hands it back: revert-layer drops the grid's
-   declarations to whatever the layers below say, as if grid.css were not loaded. Same
-   specificity as the grid's rule and later, so it beats it; any rule of the shell's or a
-   chapter's that sets these itself is later or more specific, and still wins. */
-[data-nosnap] :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line]){
-  line-height:revert-layer;position:revert-layer;top:revert-layer}
 /* ── THE COLOUR SYSTEM ─────────────────────────────────────────────────────────
    Four hues and one lightness ramp. A theme is not a second palette: it is where
    each role sits on that ramp, plus how hard the three inks press. Seven numbers,

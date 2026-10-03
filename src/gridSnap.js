@@ -11,7 +11,9 @@
  * A "text block" is an in-flow element with its own text (a direct, non-blank text node):
  * p, h1-h5, li, figcaption, a pill's label, a byline. Skipped: anything positioned
  * absolute/fixed/sticky, anything already relatively placed for its own reasons, and any
- * subtree marked [data-nosnap] -- an interactive demo with its own type keeps it.
+ * subtree marked [data-nosnap] -- an interactive demo with its own type keeps it. (A
+ * --snap-unit: 1 component is the exception to "relatively placed": a row a host made
+ * `relative` for a guide still moves whole, by the `top` this writes on it.)
  *
  * Plain script, no module, no dependency: <script src="shared/src/gridSnap.js" defer>.
  * In a .wm-baselines container, items in one row also share their first baseline -- or, for an
@@ -21,6 +23,8 @@
  * and the lines drawn over the page. */
 (() => {
   const BL = root => parseFloat(getComputedStyle(root).getPropertyValue('--bl')) || 3;
+  // what grid.css already nudges (it writes `position: relative` and a `top` that includes --snap)
+  const NUDGED = '.wm-lines :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line])';
   const probe = document.createElement('span');
   probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
 
@@ -62,7 +66,7 @@
       if (cs.display === 'inline' || cs.display === 'contents' || cs.display === 'none') continue;
       if (/absolute|fixed|sticky/.test(cs.position)) continue;
       // relatively placed for its own reasons (not by grid.css) -- leave it alone
-      if (cs.position === 'relative' && !el.matches('.wm-lines :where(p, li, h1, h2, h3, h4, h5, figcaption, .t-display, .t-title, .t-lede, .t-ui, .t-label, .t-micro, [data-line])')) {
+      if (cs.position === 'relative' && !el.matches(NUDGED)) {
         if (!el.hasAttribute('data-snap')) continue;
       }
       const t = ownText(el);
@@ -142,8 +146,14 @@
     for (const [el] of out) measured.push(el);
     for (const [el, d] of delta) {
       if (Math.abs(d) < 0.02) continue;
-      // tagged, so the next pass knows this `relative` is ours and measures it again
-      if (getComputedStyle(el).position === 'static') { el.style.position = 'relative'; el.style.top = 'var(--snap)'; el.setAttribute('data-snap', ''); }
+      // A static one is made `relative`, tagged so the next pass knows that `relative` is ours.
+      // One a host made `relative` itself (a unit row with a guide or a badge hung off it) is
+      // already placed and still has to MOVE, so it gets the `top` too -- but not the tag, the
+      // position was never ours. Absolute, fixed and sticky boxes are the host's and untouched.
+      const pos = getComputedStyle(el).position;
+      if (pos === 'static') { el.style.position = 'relative'; el.style.top = 'var(--snap)'; el.setAttribute('data-snap', ''); }
+      else if (pos === 'relative' && !el.matches(NUDGED)) el.style.top = 'var(--snap)';
+      else if (pos !== 'relative') continue;
       el.style.setProperty('--snap', d.toFixed(2) + 'px');
     }
   }
@@ -161,7 +171,7 @@
      density, one device pixel each: a CSS gradient at a fractional zoom smears them. */
   function overlay() {
     const css = document.createElement('style');
-    css.textContent = `.wm-ov{position:absolute;pointer-events:none;z-index:2147483646}
+    css.textContent = `.wm-ov{position:fixed;left:0;top:0;pointer-events:none;z-index:2147483646}
       .wm-ov-cols{position:fixed;inset:0;pointer-events:none;z-index:2147483646;display:grid;
         grid-template-columns:repeat(var(--grid-cols),minmax(0,1fr));column-gap:var(--grid-gutter);padding-inline:var(--grid-margin)}
       .wm-ov-cols>i{background:rgba(255,40,140,.06);border-inline:1px solid rgba(255,40,140,.4)}`;
@@ -169,14 +179,31 @@
     const cols = document.createElement('div'); cols.className = 'wm-ov-cols'; document.body.appendChild(cols);
     const drawCols = () => { const n = +getComputedStyle(document.documentElement).getPropertyValue('--grid-cols') || 24;
       cols.innerHTML = '<i></i>'.repeat(n); };
-    const canv = [...document.querySelectorAll('.wm-lines')].map(root => { const c = document.createElement('canvas'); c.className = 'wm-ov'; document.body.appendChild(c); return [root, c]; });
-    const drawLines = () => canv.forEach(([root, c]) => {
-      const r = root.getBoundingClientRect(), dpr = devicePixelRatio || 1, bl = BL(root);
-      Object.assign(c.style, { left: r.left + scrollX + 'px', top: r.top + scrollY + 'px', width: r.width + 'px', height: r.height + 'px' });
-      c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
-      const g = c.getContext('2d'); g.fillStyle = 'rgba(40,120,255,.45)';
-      for (let y = 0; y * dpr < c.height; y += bl) g.fillRect(0, Math.round(y * dpr) - 1, c.width, 1);
-    });
+    // ONE viewport-sized fixed canvas, redrawn on scroll. A canvas the height of the root went
+    // blank past 65,535 device pixels (the system page is ~47,000 CSS px: blank at 2x), and a
+    // page that tall is the page that needs the lines. Each root's lines are drawn where the
+    // root's top is NOW, one every --bl from it, clipped to what is on screen.
+    const c = document.createElement('canvas'); c.className = 'wm-ov';
+    document.body.appendChild(c);
+    const roots = [...document.querySelectorAll('.wm-lines')];
+    const drawLines = () => {
+      const dpr = devicePixelRatio || 1, vw = document.documentElement.clientWidth, vh = innerHeight;
+      c.style.width = vw + 'px'; c.style.height = vh + 'px';
+      if (c.width !== Math.round(vw * dpr) || c.height !== Math.round(vh * dpr)) { c.width = Math.round(vw * dpr); c.height = Math.round(vh * dpr); }
+      const g = c.getContext('2d'); g.clearRect(0, 0, c.width, c.height); g.fillStyle = 'rgba(40,120,255,.45)';
+      for (const root of roots) {
+        const r = root.getBoundingClientRect(), bl = BL(root);
+        const x0 = Math.max(0, r.left), x1 = Math.min(vw, r.right), y0 = Math.max(0, r.top), y1 = Math.min(vh, r.bottom);
+        if (x1 <= x0 || y1 <= y0) continue;
+        for (let k = Math.max(0, Math.ceil((y0 - r.top) / bl)); r.top + k * bl < y1; k++) {
+          const y = Math.round((r.top + k * bl) * dpr) - 1;
+          g.fillRect(Math.round(x0 * dpr), y, Math.round((x1 - x0) * dpr), 1);
+        }
+      }
+    };
+    let ovRaf = 0;
+    const redraw = () => { cancelAnimationFrame(ovRaf); ovRaf = requestAnimationFrame(drawLines); };
+    addEventListener('scroll', redraw, { passive: true });
     const draw = () => { drawCols(); drawLines(); };
     draw(); addEventListener('resize', draw); document.fonts && document.fonts.ready.then(draw);
     if ('ResizeObserver' in window) new ResizeObserver(draw).observe(document.body);
