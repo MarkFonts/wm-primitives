@@ -104,9 +104,9 @@
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-02, 6px);
-    /* 10 each side, not 8: at 8 the capsule wall sat on the digits (Mark, 2026-10-03), and a
-       lozenge is read as a number IN a shape, which needs a counter's worth of air */
-    padding: 4px 10px;
+    /* a --spacing-04 step each side, not 8: at 8 the capsule wall sat on the digits (Mark,
+       2026-10-03), and a lozenge is read as a number IN a shape, which needs a counter of air */
+    padding: var(--spacing-01, 4px) var(--spacing-04, 12px);
     border-radius: 999px;
     corner-shape: superellipse(var(--corner-k, 1.2));
     background: var(--text, #e8e8e8);
