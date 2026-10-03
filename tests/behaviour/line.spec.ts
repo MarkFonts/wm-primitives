@@ -14,7 +14,7 @@ test.describe('the line · roles and controls', () => {
       .map(e => [e.getAttribute('data-role'), parseFloat(getComputedStyle(e).lineHeight)])))
     expect(leads).toEqual(LINE)
     const heights = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('[data-h]')]
-      .map(e => [e.getAttribute('data-h'), e.getBoundingClientRect().height])))
+      .map(e => [e.getAttribute('data-h'), Math.round(e.getBoundingClientRect().height * 100) / 100])))   // WebKit reports 32.99998 for 33
     for (const [k, h] of Object.entries(heights)) expect(h % 3, `${k} is ${h}px, not on the 3px unit`).toBe(0)
     if (!hasTouch) expect(heights).toEqual({ chip: 27, small: 18, btn: 27, select: 27 })
     else { expect(heights.chip).toBe(33); expect(heights.btn).toBe(45) }
