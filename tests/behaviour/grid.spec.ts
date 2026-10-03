@@ -15,6 +15,9 @@ import { resolve } from 'node:path'
         over each other. The grid put .look on 12 columns and forgot its items' span, so on
         a phone six 18px items drew their contents over one another (shipped 2026-10-01);
         the baseline checks were green the whole time.
+     5. the margin holds: no measured text starts left of the house margin or ends right of
+        the viewport minus it. The homepage's unlayered `* { padding: 0 }` reset beat the
+        layered `.wm-grid` padding-inline, the copy sat at x=0, and checks 1-4 were green.
    It judges window.wmGridSnap.blocks, exactly what the snapper judged, so ornaments placed
    on purpose (a pill's arrow, a deck counter) drop out by the same rule that skips them,
    not by a list kept here. */
@@ -24,8 +27,12 @@ const PAGES = [
   // The system page: <main> is the root. On the line are the shell's copy, the README and
   // the Grid part of Type; the other chapters are stages, data-nosnap (build.py OFF_LINE
   // says what each would need), so the layout check skips them by the same rule.
-  { name: 'system page', url: '/grid/index.html' },
+  // Its edges belong to the doc shell, not to .wm-grid: a rail column at 1440 (copy at 202px)
+  // and --edge-l/--edge-r 20px below 1080 (build-time shell CSS). It is the one page that
+  // opts out of the margin check; it cannot be data-nosnap'd, its copy IS on the line.
+  { name: 'system page', url: '/grid/index.html', ownEdges: true },
   { name: 'Cal Sans case study', url: '/wordmark/calsans/', dir: process.env.WORDMARK_DIR ?? resolve('../wordmark') },
+  { name: 'homepage', url: '/wordmark/index.html', dir: process.env.WORDMARK_DIR ?? resolve('../wordmark') },
 ]
 const WIDTHS = [1440, 900, 390]
 
@@ -54,10 +61,34 @@ const LAYOUT = () => {   // runs in the page; stringified below
   return { narrow: narrow.slice(0, 8), overlap: overlap.slice(0, 8) };
 }
 
+const MARGIN = () => {   // runs in the page; stringified below
+  // the house margin, resolved: --grid-margin is a clamp(), so measure it with a probe
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--grid-margin').trim();
+  const pr = document.createElement('div'); pr.style.cssText = 'position:absolute;visibility:hidden;height:0;width:var(--grid-margin)';
+  document.body.appendChild(pr); const margin = pr.getBoundingClientRect().width; pr.remove();
+  const vw = document.documentElement.clientWidth, snap = (window as any).wmGridSnap;
+  // an inset scroller (a strip that scrolls inside the margin on purpose) is judged by its own box, not its text
+  const inset = (e: Element) => { for (let a = e.parentElement; a && a !== document.documentElement; a = a.parentElement) { if (getComputedStyle(a).overflowX !== 'visible') { const r = a.getBoundingClientRect(); if (r.left > 1 || r.right < vw - 1) return true } } return false };
+  // a scroller's far content is clipped, not out of margin: only its start edge is judged
+  const clipped = (e: Element) => { for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) if (getComputedStyle(a).overflowX !== 'visible' && a.scrollWidth > a.clientWidth + 1) return true; return false };
+  const off: string[] = []; let minLeft = Infinity, maxRight = -Infinity, n = 0;
+  for (const el of snap.blocks as Element[]) {
+    if (el.closest('[data-nosnap]') || /absolute|fixed/.test(getComputedStyle(el).position) || inset(el)) continue;
+    const rg = document.createRange(); rg.selectNodeContents(el);
+    const rects = [...rg.getClientRects()].filter(r => r.width > 0 && r.height > 0); if (!rects.length) continue;
+    const left = Math.min(...rects.map(r => r.left)), right = Math.max(...rects.map(r => r.right)); n++;
+    minLeft = Math.min(minLeft, left); if (!clipped(el)) maxRight = Math.max(maxRight, right);
+    const name = `${el.tagName.toLowerCase()}.${(el.getAttribute('class') || '').split(' ')[0]}`;
+    if (left < margin - 1) off.push(`${name} at ${Math.round(left)}px, margin is ${Math.round(margin)}px`);
+    if (right > vw - margin + 1 && !clipped(el)) off.push(`${name} ends at ${Math.round(right)}px, margin is ${Math.round(margin)}px (limit ${Math.round(vw - margin)}px)`);
+  }
+  return { raw, margin, n, minLeft, maxRight, vw, off: off.slice(0, 12) };
+}
+
 for (const pg of PAGES) {
   test.describe(`${pg.name} · on the line`, () => {
     test.skip(({ hasTouch }) => hasTouch, 'widths are the axis here, not the input')
-    test.skip(!!pg.dir && !existsSync(resolve(pg.dir, 'calsans/index.html')), 'no wordmark checkout (WORDMARK_DIR)')
+    test.skip(!!pg.dir && !existsSync(resolve(pg.dir, pg.url.replace('/wordmark/', '') + (pg.url.endsWith('/') ? 'index.html' : ''))), 'no wordmark checkout (WORDMARK_DIR)')
 
     for (const w of WIDTHS) {
       test(`${pg.name} · ${w}px`, async ({ page }) => {
@@ -108,6 +139,13 @@ for (const pg of PAGES) {
         const l = await page.evaluate(fn => new Function('return (' + fn + ')()')(fn), LAYOUT.toString()) as { narrow: string[]; overlap: string[] }
         expect(l.narrow, `boxes narrower than their contents:\n${l.narrow.join('\n')}`).toEqual([])
         expect(l.overlap, `siblings drawn over each other:\n${l.overlap.join('\n')}`).toEqual([])
+
+        // MARGIN: the copy sits inside the house margin, both sides (a page with ownEdges answers to its shell)
+        const m = await page.evaluate(fn => new Function('return (' + fn + ')()')(fn), MARGIN.toString()) as { raw: string; margin: number; n: number; minLeft: number; maxRight: number; vw: number; off: string[] }
+        if (pg.ownEdges) return
+        console.log(`margin ${pg.name} ${w}: --grid-margin ${m.raw} = ${m.margin}px, ${m.n} blocks, smallest left ${m.minLeft.toFixed(1)}px, largest right ${m.maxRight.toFixed(1)}px of ${m.vw}`)
+        expect(m.margin, '--grid-margin did not resolve -- is grid.css loaded?').toBeGreaterThan(0)
+        expect(m.off, `text outside the ${Math.round(m.margin)}px margin (an unlayered reset wiping .wm-grid padding-inline?):\n${m.off.join('\n')}`).toEqual([])
       })
     }
   })

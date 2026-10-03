@@ -197,7 +197,7 @@ On the case study as it was before the grid it flags all 73 off-line values.
 
 `tests/behaviour/grid.spec.ts` holds the OUTPUT, on every page in its `PAGES` -- the bench
 (`docs/grid.html`), the system page (`docs/index.html`) and the case study (the wordmark site
-checked out with `shared/` at the commit under test) -- at **1440, 900 and 390** wide, 900 tall,
+checked out with `shared/` at the commit under test) and the wordmark homepage -- at **1440, 900 and 390** wide, 900 tall,
 in Chromium. After fonts load and one more snapper pass:
 
 1. the snapper measured more than five blocks (is it loaded, is the page `.wm-lines`?);
@@ -211,6 +211,11 @@ in Chromium. After fonts load and one more snapper pass:
    in-flow children; not `scrollWidth`, which counts a handle parked outside its row on purpose),
    and no grid or flex siblings drawn over each other by more than 4 × 4px. Stages and SVG are
    skipped.
+7. **the margin holds** -- every measured text block (not `data-nosnap`, not absolute or fixed,
+   not inside an inset scroller) starts at or right of the root's `--grid-margin` (resolved by
+   a probe, it is a `clamp()`) minus 1px, and ends at or left of the viewport minus it; text in
+   a scroller that actually scrolls is judged by its start edge only. The system page opts out
+   (`ownEdges`): its edges are the doc shell's rail and `--edge-l`, not `.wm-grid`.
 
 Check 6 exists because every baseline check was green while the first page on the grid was
 broken on a phone (below).
