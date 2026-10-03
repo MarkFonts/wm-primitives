@@ -1,0 +1,37 @@
+<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><title>wmHandleDial contract</title>
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css">
+<link rel="stylesheet" href="/dial/shared/src/dialHandle.css">
+<style>
+  :root{--ui-font:system-ui;--text-rgb:232,232,232;--hd-rail:96px}
+  body{background:var(--bg);color:var(--text);padding:24px;margin:0}
+  #v{display:flex;gap:24px;align-items:flex-start}
+  #h{display:flex;flex-direction:column;gap:12px;margin-top:24px;width:360px}
+</style></head><body>
+<div id="v"></div><div id="h"></div>
+<script src="/dial/shared/src/dialHandle.js"></script>
+<script>
+  // the Cal Sans case study's six axes
+  const AXES = [
+    { tag: 'wght', min: 400, max: 700, step: 1, value: 600 },
+    { tag: 'GEOM', min: 0, max: 100, step: 1, value: 50 },
+    { tag: 'opsz', min: 8, max: 45, step: 1, value: 45, auto: { value: 14 } },
+    { tag: 'YTAS', min: 1440, max: 1600, step: 1, value: 1440 },
+    { tag: 'SHRP', min: 0, max: 100, step: 1, value: 0 },
+    { tag: 'ital', min: 0, max: 1, step: 0.01, value: 0 },
+  ]
+  window.dials = {}
+  for (const a of AXES) {
+    const el = document.createElement('div'); el.dataset.axis = a.tag
+    document.getElementById('v').appendChild(el)
+    window.dials[a.tag] = wmHandleDial.mount(el, { label: a.tag, caption: a.tag, ...a, orient: 'vertical' })
+  }
+  for (const a of [AXES[0], AXES[5]]) {
+    const el = document.createElement('div'); el.dataset.axis = a.tag + '-h'
+    document.getElementById('h').appendChild(el)
+    window.dials[a.tag + '-h'] = wmHandleDial.mount(el, { label: a.tag, caption: a.tag, ...a })
+  }
+  // every dial to min / max
+  window.park = which => { for (const k in dials) { const d = dials[k]; d.set(which === 'min' ? d.__min : d.__max, true) } }
+  const ranges = Object.fromEntries(AXES.map(a => [a.tag, a]))
+  for (const k in dials) { const r = ranges[k.replace('-h', '')]; dials[k].__min = r.min; dials[k].__max = r.max }
+</script></body></html>
