@@ -27,7 +27,7 @@ put the name into the subset (regenerate fonts/MaterialSymbolsOutlined.woff2 fro
 full face with pyftsubset, --layout-features='liga' and the union of every name here) or
 use a name that is in it. Either way, run this before trusting a screenshot.
 """
-import os, re, sys
+import glob, os, re, sys
 from fontTools.ttLib import TTFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -82,6 +82,8 @@ def sites(dirs):
                     for m in LITERAL.finditer(line): out.append((m.group(1), f'{rel}:{i}', False))
     return out
 
+FACE_URL = re.compile(r'MaterialSymbolsOutlined\.woff2(?:\?v=\d+)?(?=[\'"\)])')
+
 def main():
     if not os.path.exists(FONT):
         print(f'lint-icons: {FONT} is missing'); return 2
@@ -94,6 +96,10 @@ def main():
         name, d = pair.split('=', 1); dirs.append((name, d))
     found = sites(dirs)
     problems = {}
+    stale = []
+    for css in sorted(glob.glob(os.path.join(ROOT, 'src', '*.css'))):
+        for m in re.finditer(r'MaterialSymbolsOutlined\.woff2(\?v=(\d+))?(?=[\'"\)])', open(css, encoding='utf-8').read()):
+            if m.group(2) != str(len(have)): stale.append(f'{os.path.relpath(css, ROOT)} has {m.group(0)}')
     for name, where, sure in found:
         own = faces.get(where.split(':', 1)[0])
         if name in (own if own is not None else have): continue
@@ -112,6 +118,11 @@ def main():
             if not sure and not re.fullmatch(r'[a-z]+(_[a-z0-9]+)+', name): continue
             problems.setdefault(name, []).append(where)
         print(f'lint-icons: the system page draws from the full face ({len(docs_have)} ligatures); its pages use {len({n for n, _, _ in docs_found if n in docs_have})}')
+    if stale:
+        print(f'\nlint-icons: the face ships {len(have)} ligatures but its URL says otherwise (a cached copy would draw new icons as letters):')
+        for x in stale: print('  ' + x)
+        print(f'Run scripts/cut-icon-subset.py to set ?v={len(have)}.')
+        return 1
     if problems:
         print(f'\nlint-icons: {len(problems)} name(s) the shipped face cannot draw\n')
         for name, wheres in sorted(problems.items()):

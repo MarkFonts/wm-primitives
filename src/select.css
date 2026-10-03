@@ -14,7 +14,10 @@
   .wm-select {
     width: 100%;
     /* ON THE LINE: 27px like the button (button.css) -- it was 29, the platform's own
-       line-height plus 6 + 6 + 2, and never the button's height when the two sat together */
+       line-height plus 6 + 6 + 2, and never the button's height when the two sat together.
+       min-height holds the 27 when a host's unlayered `* { padding: 0 }` zeroes the padding. */
+    box-sizing: border-box;
+    min-height: 27px;
     padding: calc(var(--spacing-02, 6px) - 1px) var(--spacing-06, 24px) calc(var(--spacing-02, 6px) - 1px) var(--spacing-03, 8px);
     font-family: var(--ui-font, system-ui, sans-serif);
     font-size: var(--type-ui-size, 0.75rem);

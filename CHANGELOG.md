@@ -31,6 +31,56 @@ constant within one; content sizing stays so a longer typed value still fits. Ca
 `--hd-chars: initial` is declared like --chip-color so token lints do not fail on a runtime var.
 tests/behaviour/dial-handle.spec.ts holds both, on tests/fixtures/dial-handle.html.
 
+## 2026-10-03 — the icon face's URL follows its glyph count
+
+`visibility` rendered as a "V" on wordmark.nyc the day it joined the face: the subset is re-cut
+under the same file name, so browsers and the Pages cache kept the old one, which has no such
+ligature. The URL is now `MaterialSymbolsOutlined.woff2?v=85`, the ligature count. A cut that adds
+a name changes the count, so `cut-icon-subset.py` rewrites the query in src/*.css as it writes the
+faces, and `lint-icons.py` fails when the two disagree. The cost is a rule that only moves when
+the count does: a cut that swaps one name for another would need a manual bump.
+
+---
+
+## 2026-10-02 — four grid follow-ups: a relative unit row moves, ?grid on a tall page, stages out of grid.css, the reset trap
+
+**A unit row a host made `relative` now moves.** gridSnap.js wrote `top` only on a `--snap-unit: 1`
+row it found `position: static`, so a row positioned for its own guide or badge never moved; the
+docs demo carried `.gx-srow.whole{top:var(--snap,0px)}` to cover for it. The write now always
+puts the shift on a static or relative row (static ones are made relative and tagged `data-snap`
+as before; a host's relative one gets the `top` and no tag), and leaves absolute, fixed and sticky
+boxes alone. The workaround is gone; the demo's right-hand row still moves whole, and its caption
+prints the shift (2.66px at 51px above, 1.66px at 52).
+
+**`?grid` draws its lines on a page of any height.** The baseline canvas was the height of the root
+and went blank past 65,535 device pixels -- the system page is ~47,000px, so 2x was dark. It is now
+one fixed canvas the size of the viewport, redrawn on scroll with each root's lines offset from
+the root's current top. At 1440 x 2, scrolled to the bottom (scrollY 46,448), mid-page and the top,
+the canvas has a line every 6 device pixels (3 CSS px) in every case.
+
+**grid.css no longer reaches into a stage.** The `.wm-lines :where(...)` rule (line-height,
+position, top) and the `.t-*` `--lh` rules end in `:not(:where([data-nosnap], [data-nosnap] *))`.
+build.py's shell had to undo them with a `revert-layer` rule; that rule is deleted, and GRID.md §6
+no longer tells adopters to add it. The `:where` inside the `:not` is deliberate: a `:not()` counts
+its argument, so a bare `:not([data-nosnap] *)` would have lifted the rule from (0,1,0) to (0,2,0)
+and a page's `.card p` would have stopped outranking it. The system page's stage chapters
+(472 elements at 1440 and at 390: rect, leading, position and top) are identical before and after.
+
+**The universal-reset trap, recorded and held.** A host's unlayered `* { padding: 0 }` beats the
+controls' layered padding, so chips drew 17px tall and still sat on a line, which the grid spec
+cannot see (the case study, which now leaves `.wm-chip` out of its reset). Written into chip.css's
+header and GRID.md's checklist (step 9): leave `.wm-chip, .wm-btn, .wm-select` out of the reset, or
+put the reset in a layer below `wm.controls`. Three ways to survive it were weighed: (a) a note
+alone changes nothing for the page that never reads it; (b) `padding-block`/`padding-inline` lose
+to a universal `padding: 0` all the same; (c) `min-height`, in the layer beside the padding, which
+no padding reset touches. Chosen: (c) plus the note. chip, button and select declare `box-sizing:
+border-box; min-height: 27px` (the small chip 18px), the same number the padding computes to, so
+nothing moves where the padding survives. It keeps the HEIGHT on the line, not the padding: a
+reset page gets the box and a label flush against its hairline, which is why the note stays the
+fix. tests/behaviour/line.spec.ts has a second test, the same fixture plus an injected
+`* { padding: 0; margin: 0 }`, asserting 27 / 18 / 27 / 27 (33 and 45 on touch); it failed at 17
+before the change.
+
 ## 2026-10-02 — visibility and visibility_off join the icon face
 
 85 names. The case study's census card draws the eye over "1.4M views" at 72px, wght 100,

@@ -98,7 +98,7 @@ code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-h
 .gx-cell .gx-k{font-size:var(--type-micro-size,.75rem);--lh:var(--lead-micro);color:var(--ink-3,rgba(23,24,26,.38));margin:0 0 9px}
 .gx-srow{position:relative;display:flex;align-items:center;gap:12px;
   font-size:var(--type-title-size,1.625rem);line-height:var(--lead-title,30px);font-weight:600;color:var(--ink,#17181a)}
-.gx-srow.whole{--snap-unit:1;top:var(--snap,0px)}   /* positioned for its guide, so the snapper will not add the top itself */
+.gx-srow.whole{--snap-unit:1}   /* relative for its guide; the snapper still moves it whole */
 .gx-srow::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#ff4d8d;opacity:.8;z-index:2;pointer-events:none}
 .gx-srow input{flex:1;min-width:0;accent-color:var(--ink,#17181a);margin:0;position:relative;z-index:1}
 .gx-srow output{min-width:3ch;text-align:right;font-variant-numeric:tabular-nums;font-size:var(--type-ui-size,.75rem);font-weight:400;color:var(--ink-2,rgba(23,24,26,.62))}
@@ -208,7 +208,7 @@ level. Step the block above from 48 to 52px and watch which side walks.</p>
   </div>
   <p><b>Stages keep their own room.</b> A demo with type of its own &#8212; the sheets above, every chapter
   on this page that draws its own specimens &#8212; is marked <code>data-nosnap</code>: the snapper skips it,
-  and the shell hands back its leadings, so a stage is never half on the line.</p>
+  and so does grid.css, so a stage is never half on the line.</p>
 </div>
 
 <script>

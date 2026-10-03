@@ -12,9 +12,9 @@ subtables, keeps only the entries that spell a wanted name, then cuts with the w
 names' letters and the surviving ligature glyphs. 25 names, 54 glyphs, 16KB.
 
 The wanted set is what the shipped face already holds plus every name on the command
-line. Writes fonts/ and the synced copy in docs/fonts/ (build.py SYNCED_FACES; the faces
+line. Writes fonts/, sets ?v=<count> on the face's URL in src/*.css, and the synced copy in docs/fonts/ (build.py SYNCED_FACES; the faces
 job in lint.yml holds them equal). Needs fonttools + brotli, like lint-icons.py."""
-import os, subprocess, sys, tempfile
+import glob, os, re, subprocess, sys, tempfile
 from fontTools.ttLib import TTFont
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import importlib.util
@@ -54,3 +54,11 @@ with tempfile.TemporaryDirectory() as d:
     for p in OUT:
         with open(out, 'rb') as src, open(p, 'wb') as dst: dst.write(src.read())
     print(f'{len(have)} ligatures, {len(TTFont(out).getGlyphOrder())} glyphs, {os.path.getsize(out)} bytes -> fonts/ and docs/fonts/')
+    # the face keeps its name across re-cuts, so its URL carries the ligature count (?v=) or a
+    # cached copy draws the new icon as its letters. Set it wherever src/*.css declares the face.
+    for css in sorted(glob.glob(os.path.join(ROOT, 'src', '*.css'))):
+        text = open(css, encoding='utf-8').read()
+        new = li.FACE_URL.sub(lambda m: f'MaterialSymbolsOutlined.woff2?v={len(have)}', text)
+        if new != text:
+            open(css, 'w', encoding='utf-8').write(new)
+            print(f'cut-icon-subset: {os.path.relpath(css, ROOT)} -> MaterialSymbolsOutlined.woff2?v={len(have)}')
