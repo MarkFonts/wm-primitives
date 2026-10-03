@@ -58,6 +58,9 @@
    consumer CI builds. Growing the subset: pyftsubset from the full face,
    --layout-features=liga, the union of every name in use; then both copies (fonts/ and
    docs/fonts/, which build.py syncs).
+   ?v= is the ligature count: the face is re-cut under the same name whenever an icon joins it,
+   and a cached copy would draw the new name as its letters. cut-icon-subset.py rewrites it,
+   lint-icons.py holds it.
    The path is relative to THIS stylesheet, so it resolves the same whether the file is
    read from src/ in the package or from shared/src/ in a consumer. */
 @font-face {
@@ -65,7 +68,7 @@
   font-style: normal;
   font-weight: 100 700;
   font-display: block;   /* block, not swap: a fallback would print the ligature NAME */
-  src: url('../fonts/MaterialSymbolsOutlined.woff2') format('woff2');
+  src: url('../fonts/MaterialSymbolsOutlined.woff2?v=85') format('woff2');
 }
 
 /* --icon-hdr has to be REGISTERED or it cannot be transitioned: an unregistered custom

@@ -12,6 +12,17 @@ Newest first.
 
 ---
 
+## 2026-10-03 — the icon face's URL follows its glyph count
+
+`visibility` rendered as a "V" on wordmark.nyc the day it joined the face: the subset is re-cut
+under the same file name, so browsers and the Pages cache kept the old one, which has no such
+ligature. The URL is now `MaterialSymbolsOutlined.woff2?v=85`, the ligature count. A cut that adds
+a name changes the count, so `cut-icon-subset.py` rewrites the query in src/*.css as it writes the
+faces, and `lint-icons.py` fails when the two disagree. The cost is a rule that only moves when
+the count does: a cut that swaps one name for another would need a manual bump.
+
+---
+
 ## 2026-10-02 — visibility and visibility_off join the icon face
 
 85 names. The case study's census card draws the eye over "1.4M views" at 72px, wght 100,
