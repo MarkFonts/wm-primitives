@@ -86,13 +86,24 @@ code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-h
 .gx-row .t-display{font-weight:600;color:var(--ink,#17181a)}
 .gx-row .t-ui{color:var(--ink-2,rgba(23,24,26,.62))}
 
-/* a component moves whole: --snap-unit:1 on the row, so its words stay on its thumb */
-.gx-odd{height:50px;border-radius:6px;background:var(--surface,#f2f2f2);margin:0}   /* 50: off the unit on purpose */
-.gx-srow{--snap-unit:1;display:flex;align-items:center;gap:12px;max-width:420px;
-  font-size:var(--type-ui-size,.75rem);line-height:var(--lead-ui,15px);color:var(--ink-2,rgba(23,24,26,.62))}
-.gx-srow input{flex:1;min-width:0;accent-color:var(--ink,#17181a);margin:0}
-.gx-srow output{min-width:3ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink,#17181a)}
-.gx-moved{font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);color:var(--ink-3,rgba(23,24,26,.38));margin:6px 0 24px;font-variant-numeric:tabular-nums}
+/* a component moves whole: --snap-unit:1 on the row, so its words stay on its thumb.
+   Left: no unit, the label is snapped alone and leaves the thumb. Right: the row is one piece. */
+.gx-odd{--sp:51px;height:var(--sp);margin:0;border-top:1px solid var(--line,rgba(23,24,26,.16));
+  font-size:var(--type-micro-size,.75rem);line-height:var(--lead-micro,12px);color:var(--ink-3,rgba(23,24,26,.38))}
+.gx-odd span{display:block;padding-top:6px;font-variant-numeric:tabular-nums}
+.gx-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px;row-gap:24px;margin:24px 0}
+@media (max-width:599px){.gx-pair{grid-template-columns:minmax(0,1fr)}}
+.gx-cell{min-width:0}
+.gx-cell > p{margin:0;max-width:none}
+.gx-cell .gx-k{font-size:var(--type-micro-size,.75rem);--lh:var(--lead-micro);color:var(--ink-3,rgba(23,24,26,.38));margin:0 0 9px}
+.gx-srow{position:relative;display:flex;align-items:center;gap:12px;
+  font-size:var(--type-title-size,1.625rem);line-height:var(--lead-title,30px);font-weight:600;color:var(--ink,#17181a)}
+.gx-srow.whole{--snap-unit:1;top:var(--snap,0px)}   /* positioned for its guide, so the snapper will not add the top itself */
+.gx-srow::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#ff4d8d;opacity:.8;z-index:2;pointer-events:none}
+.gx-srow input{flex:1;min-width:0;accent-color:var(--ink,#17181a);margin:0;position:relative;z-index:1}
+.gx-srow output{min-width:3ch;text-align:right;font-variant-numeric:tabular-nums;font-size:var(--type-ui-size,.75rem);font-weight:400;color:var(--ink-2,rgba(23,24,26,.62))}
+.gx-moved{font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);color:var(--ink-3,rgba(23,24,26,.38));margin:9px 0 0;font-variant-numeric:tabular-nums}
+.gx-chips{--snap-unit:1;margin:0 0 15px}
 </style>
 <body class="wm-lines">
 
@@ -175,14 +186,26 @@ bottom of a card stays on its line. A shift larger than the target's font-size i
 </div>
 
 <h2>A component moves whole <span>--snap-unit: 1</span></h2>
-<p>What carries text in the flow and has a part beside its words &#8212; a slider row, a pill with a mark
-&#8212; is shifted as one, by its first line, and nothing inside it is snapped on its own: snapping the
-label alone would pull it off its thumb. Below, the block above the row is 50px, off the unit on purpose,
-so the row starts between lines and the snapper has something to do.</p>
-<div class="gx-odd" data-nosnap></div>
+<p>Snap a label alone and it leaves the thing it labels. The pair below sits under a block that is off
+the unit on purpose, so both rows start between lines and the snapper has to move something. On the
+left it moves only the words, and the words slide off the pink line through the thumb. On the right the
+row is a component, <code>--snap-unit: 1</code>, and it travels as one: words, track and thumb stay
+level. Step the block above from 48 to 52px and watch which side walks.</p>
 <div class="gx-box" data-ov>
-  <label class="gx-srow"><span>Weight</span><input type="range" min="400" max="700" value="600" aria-label="Weight"><output>600</output></label>
-  <p class="gx-moved">&#8212;</p>
+  <div class="wm-chip-row gx-chips"><button class="wm-chip wm-chip--small gx-step" type="button">block above: 51px &#183; next</button></div>
+  <div class="gx-odd" data-nosnap><span class="gx-cap">51px above, off the unit on purpose</span></div>
+  <div class="gx-pair">
+    <div class="gx-cell">
+      <p class="gx-k">label snapped alone</p>
+      <label class="gx-srow alone"><span>Weight</span><input type="range" min="400" max="700" value="600" aria-label="Weight, label snapped alone"><output>600</output></label>
+      <p class="gx-moved gx-ma">&#8212;</p>
+    </div>
+    <div class="gx-cell">
+      <p class="gx-k">component moves whole</p>
+      <label class="gx-srow whole"><span>Weight</span><input type="range" min="400" max="700" value="600" aria-label="Weight, component moves whole"><output>600</output></label>
+      <p class="gx-moved gx-mb">&#8212;</p>
+    </div>
+  </div>
   <p><b>Stages keep their own room.</b> A demo with type of its own &#8212; the sheets above, every chapter
   on this page that draws its own specimens &#8212; is marked <code>data-nosnap</code>: the snapper skips it,
   and the shell hands back its leadings, so a stage is never half on the line.</p>
@@ -227,17 +250,29 @@ so the row starts between lines and the snapper has something to do.</p>
     if (window.wmGridSnap) window.wmGridSnap();
   }); });
 
-  // the component: what the snapper did to the row, read back from the row itself
-  var row = document.querySelector('.gx-srow'), moved = document.querySelector('.gx-moved');
-  var range = row.querySelector('input'), out = row.querySelector('output');
-  range.addEventListener('input', function(){ out.textContent = range.value; });
-  function report(){
-    var s = parseFloat(row.style.getPropertyValue('--snap')) || 0;
-    moved.textContent = s ? 'gridSnap.js moved this row ' + s.toFixed(2) + 'px, words, track and thumb together'
-                          : 'this row started on a line; the snapper left it';
+  // the pair: what the snapper did, read back from the element it moved
+  var steps = [48, 49, 50, 51, 52], si = 3, odd = document.querySelector('.gx-odd');
+  function pair(rowId, movedId, pick, what){
+    var row = document.querySelector(rowId), note = document.querySelector(movedId);
+    var tgt = pick(row), range = row.querySelector('input'), out = row.querySelector('output');
+    range.addEventListener('input', function(){ out.textContent = range.value; });
+    function report(){
+      var s = parseFloat(tgt.style.getPropertyValue('--snap')) || 0;
+      note.textContent = s ? what + ' moved ' + s.toFixed(2) + 'px' : 'started on a line, not moved';
+    }
+    new MutationObserver(report).observe(tgt, { attributes: true, attributeFilter: ['style'] });
+    report();
   }
-  new MutationObserver(report).observe(row, { attributes: true, attributeFilter: ['style'] });
-  report();
+  pair('.gx-srow.alone', '.gx-ma', function(r){ return r.querySelector('span'); }, 'the label alone');
+  pair('.gx-srow.whole', '.gx-mb', function(r){ return r; }, 'the whole row');
+  document.querySelector('.gx-step').addEventListener('click', function(){
+    si = (si + 1) % steps.length;
+    var h = steps[si];
+    odd.style.setProperty('--sp', h + 'px');
+    this.textContent = 'block above: ' + h + 'px \u00b7 next';
+    document.querySelector('.gx-cap').textContent = h + 'px above, off the unit on purpose';
+    if (window.wmGridSnap) window.wmGridSnap();
+  });
 })();
 </script>
 </body>

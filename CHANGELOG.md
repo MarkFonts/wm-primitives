@@ -26,7 +26,9 @@ and Baseline, are in the rail under Type: the columns at 1440, 900 and
 390 as real `.wm-grid`s with each width's numbers set on them and scaled to fit, the baseline with
 a paragraph to flip back to 1.55 and watch walk off, the seven roles over a `?grid`-style
 overlay cut to each demo, three cards whose first baselines meet (the third by its last line),
-and a slider row the snapper moves whole and says by how much. type.css and chip.css are
+and a pair of slider rows under an off-unit block -- the label snapped alone slides off its thumb, the row
+that moves whole stays level -- with a chip that steps the block 48 to 52px (the first version moved
+2px and nobody could see it). type.css and chip.css are
 inlined for the part alone (PRIMITIVE_CSS_PART); grid.css and gridSnap.js are the shell's,
 once, because a section-scoped gridSnap.js has its document queries rewritten to the section.
 
