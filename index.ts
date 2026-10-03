@@ -103,7 +103,8 @@ export type {
 // The house grid (src/grid.css -- no JS to export): 24 columns (12 below 1024), the page
 // margin, the card inset, and a 3px line that .wm-lines puts text baselines on. Its partner
 // src/gridSnap.js is a plain <script> for static pages, not a module: it measures what CSS
-// cannot (a block below an image) and sets --snap. docs/grid.html shows both.
+// cannot (a block below an image) and sets --snap. GRID.md is the standard and the adoption
+// checklist; docs/grid.html and the system page's Grid part show both.
 // The dial whose value rides in the handle (src/dialHandle.css -- no JS to export, and
 // src/dialHandle.js, a plain script): variant 03 of the system page, promoted for the Cal
 // Sans case study, which loads no React. wmHandleDial.mount(el, {...}); horizontal or

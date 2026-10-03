@@ -23,6 +23,8 @@ The ones people come for:
 - **`dist/dial.js`** — the dial for a page with no React, same source, as a script tag.
 - Tokens, in four sheets that style nothing until you use them: `color.css`,
   `type.css` ([TYPOGRAPHY.md](TYPOGRAPHY.md)), `space.css`, `motion.css`.
+- **The grid** — `grid.css` + `gridSnap.js`: 24 columns, a 3px line, one margin. A
+  standard, with a lint and a CI check: [GRID.md](GRID.md).
 
 ## 2 · What you must supply
 

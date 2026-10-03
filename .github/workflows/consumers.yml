@@ -25,6 +25,7 @@ on:
       - 'tests/**'
       - 'playwright.config.ts'
       - 'docs/grid.html'   # tests/behaviour/grid.spec.ts loads it
+      - 'docs/index.html'  # and the system page, which is on the line too
       - '.github/workflows/consumers.yml'
   pull_request:
     paths:
@@ -39,6 +40,7 @@ on:
       - 'tests/**'
       - 'playwright.config.ts'
       - 'docs/grid.html'   # tests/behaviour/grid.spec.ts loads it
+      - 'docs/index.html'  # and the system page, which is on the line too
       - '.github/workflows/consumers.yml'
   # Re-run without inventing a commit -- the day a token changes or a consumer is added.
   workflow_dispatch:

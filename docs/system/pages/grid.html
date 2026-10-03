@@ -1,0 +1,243 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>The grid</title>
+<!-- Source for the Grid part of section 04, Space. Written standalone: `body` is the part,
+     and its class goes with the tag when build.py assembles the page, because there the
+     page's own <main> is the one .wm-lines root and every chapter shares its lines. The
+     links below are for opening this file directly; build.py strips them, inlines type.css
+     and chip.css from src/ for this part (PRIMITIVE_CSS_PART), and the SHELL carries grid.css
+     and gridSnap.js for the whole page. So nothing drawn here is a copy of the grid: it is
+     the grid. GRID.md at the repo root is the standard in words. -->
+<link rel="stylesheet" href="../../src/type.css">
+<link rel="stylesheet" href="../../src/chip.css">
+<link rel="stylesheet" href="../../src/grid.css">
+<script src="../../src/gridSnap.js" defer></script>
+<style>
+@font-face{font-family:"Face";src:url("../../fonts/CalSansVF.ttf") format("truetype");font-weight:400 700;font-display:swap}
+*{box-sizing:border-box}
+/* Ink from the host, never a ground: this part follows the page's theme, like the README and
+   the WIP chapter (ramps and space state their own dark ground; this does not, so it states
+   no ink of its own either). The fallbacks are for opening the file on its own. The chip
+   reads --text*, the page writes --ink*: bridged here, as the controls chapter does. */
+body{margin:0;padding:63px 0 0;color:var(--ink,#17181a);font-family:var(--ui-font,"Face",system-ui,sans-serif);
+  font-optical-sizing:auto;font-size:var(--type-body-size,1rem);
+  --text:var(--ink,#17181a);--text-muted:var(--ink-2,rgba(23,24,26,.62));--text-dim:var(--ink-3,rgba(23,24,26,.38));
+  --border:var(--line,rgba(23,24,26,.16));
+  /* and the grounds, re-derived from the shell's numbers: the space page beside this part is
+     a dark stage and states --bg and --surface for the whole section, so inheriting them drew
+     dark sheets and an unreadable chosen chip on the light page */
+  --bg:#f4f4f4;--bg:oklch(var(--l-ground,96.66%) 0 0);
+  --surface:#fff;--surface:oklch(var(--l-surface,100%) 0 0);
+  --surface-hi:#ebebeb;--surface-hi:oklch(var(--l-surface-hi,93.92%) 0 0);
+  --ov-line:rgba(40,120,255,.2);--ov-col:rgba(255,40,140,.1);--ov-col-edge:rgba(255,40,140,.45)}
+h1{margin:0 0 15px;font-weight:600;font-variation-settings:"GEOM" 50}
+/* the space page's head grammar beside it -- caps and a note on one hairline -- on the line:
+   15 of leading, 5 below and the 1px rule make 21, seven units, so what follows starts on one */
+h2{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0 24px;
+  margin:48px 0 15px;padding-bottom:5px;border-bottom:1px solid var(--line,rgba(23,24,26,.16));
+  font-size:var(--type-label-size,.75rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;font-weight:600;
+  font-variation-settings:"GEOM" 100;--lh:var(--lead-ui)}
+h2 span{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-3,rgba(23,24,26,.38));font-variation-settings:"GEOM" 25}
+p{margin:0 0 24px;max-width:64ch;color:var(--ink-2,rgba(23,24,26,.62))}
+p b{color:var(--ink,#17181a);font-weight:600}
+a{color:inherit;text-decoration:underline;text-underline-offset:.15em;text-decoration-color:var(--ink-3,currentColor)}
+a:hover{text-decoration-color:currentColor}
+code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-height:1}
+.gx-lede{color:var(--ink,#17181a)}
+.gx-cap{font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);color:var(--ink-3,rgba(23,24,26,.38));margin:6px 0 24px}
+
+/* THE COLUMNS. Each sheet is a real .wm-grid at the real width, with that width's three
+   numbers set on it, then scaled to fit -- so the column, the gutter and the card inset
+   are computed by grid.css, not drawn to match it. A stage, so data-nosnap. */
+.gx-frame{position:relative;overflow:hidden;height:calc(var(--h) * var(--k,1) * 1px)}
+.gx-scale{position:absolute;left:0;top:0;transform-origin:0 0;transform:scale(var(--k,1))}
+.gx-sheet{height:calc(var(--h) * 1px);grid-template-rows:var(--rows);background:var(--surface,#f2f2f2);border-radius:6px}
+.gx-sheet > i{grid-row:1 / -1;background:var(--ov-col);border-inline:1px solid var(--ov-col-edge)}
+.gx-card{position:relative;background:var(--surface-hi,#e6e6e6);border:1px solid var(--line,rgba(23,24,26,.16));border-radius:6px}
+.gx-card b{display:block;height:100%;background:repeating-linear-gradient(135deg,var(--ink-3,#999) 0 .5px,transparent .5px 4px);opacity:.7}
+
+/* THE OVERLAY: a canvas at the device's own pixels, under the text, aligned to the ROOT's
+   lines -- the same drawing ?grid makes, cut to one box (gridSnap.js says why it is not a
+   gradient). */
+[data-ov]{position:relative}
+[data-ov] > canvas{position:absolute;left:0;top:0;pointer-events:none}
+.gx-box{padding:24px 0}
+
+/* the line: one paragraph, two leadings to try it at */
+.gx-try{--snap-unit:1;margin:0 0 15px}
+.gx-walk{max-width:52ch}
+.gx-walk.off{--lh:24.8px}   /* 1.55 x 16: the body leading before the grid, kept to show it walk */
+
+/* the roles: a label meeting its sample by its last line, a sample on the line */
+.gx-roles{display:grid;grid-template-columns:minmax(0,9rem) minmax(0,1fr);column-gap:24px;row-gap:24px}
+.gx-roles > div > p{margin:0;max-width:none}
+.gx-roles .lbl p{font-size:var(--type-ui-size,.75rem);color:var(--ink-3,rgba(23,24,26,.38))}
+.gx-roles .smp p{color:var(--ink,#17181a)}
+.gx-roles .t-title,.gx-roles .t-display{font-weight:600}
+.gx-roles .body p{font-size:var(--type-body-size,1rem);max-width:48ch}
+@media (max-width:599px){.gx-roles{grid-template-columns:minmax(0,1fr);row-gap:6px}.gx-roles .smp{margin-bottom:15px}}
+
+/* a row that meets: three cards on the house columns, rule A inside each */
+.gx-row{margin:0 0 24px}
+.gx-row > *{--span:8;--span-md:4}
+@media (max-width:599px){.gx-row > *{--span-md:12}.gx-row{row-gap:24px}}
+.gx-row .wm-card{background:var(--surface,#f2f2f2);border-radius:var(--radius,6px)}
+.gx-row p{margin:0;max-width:none}
+.gx-row .t-display{font-weight:600;color:var(--ink,#17181a)}
+.gx-row .t-ui{color:var(--ink-2,rgba(23,24,26,.62))}
+
+/* a component moves whole: --snap-unit:1 on the row, so its words stay on its thumb */
+.gx-odd{height:50px;border-radius:6px;background:var(--surface,#f2f2f2);margin:0}   /* 50: off the unit on purpose */
+.gx-srow{--snap-unit:1;display:flex;align-items:center;gap:12px;max-width:420px;
+  font-size:var(--type-ui-size,.75rem);line-height:var(--lead-ui,15px);color:var(--ink-2,rgba(23,24,26,.62))}
+.gx-srow input{flex:1;min-width:0;accent-color:var(--ink,#17181a);margin:0}
+.gx-srow output{min-width:3ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink,#17181a)}
+.gx-moved{font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);color:var(--ink-3,rgba(23,24,26,.38));margin:6px 0 24px;font-variant-numeric:tabular-nums}
+</style>
+<body class="wm-lines">
+
+<h1 class="t-title">The grid</h1>
+<p class="gx-lede">Twenty-four columns, a 3px line and one margin for every page &#8212; a standard the
+way InDesign has one, not a convention. Text beside text shares a first baseline, a two-line label meets
+its sample by its last line, a component moves whole. Everything on this page outside a stage is on it:
+<code>main</code> is the <code>.wm-lines</code> root. Its columns are not yet: the page is still laid out
+as the rail and a 1080px measure, so the sheets below show the columns rather than this page sitting on them. <a href="https://github.com/MarkFonts/wm-primitives/blob/main/GRID.md">GRID.md</a>
+is the standard in words; <a href="grid.html">grid.html</a> is the bench it was cut on.</p>
+
+<h2>The columns <span>24, and 12 below 1024</span></h2>
+<p><b>24, not 30.</b> calsans splits its sections 5:7 three times, which is 10 | 14 here and
+12.5 | 17.5 on thirty. <b>12 below 1024, not 10</b>, because the phone's count has to divide the
+desktop's: a half is still a half and a third still a third. The gutter is the pad scale's 24, 12 on a
+phone; the margin is the case study's, and it is everyone's. A card is a box on the columns and its
+contents step in one column and one gutter (rule A: the hanging version drew over its neighbours).</p>
+
+<div class="gx-frame" data-nosnap data-w="1440" style="--h:168"><div class="gx-scale" style="width:1440px">
+  <div class="wm-grid gx-sheet" style="--grid-cols:24;--grid-gutter:24px;--grid-margin:100.8px;--rows:24px 1fr 24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><i style="grid-column:13"></i><i style="grid-column:14"></i><i style="grid-column:15"></i><i style="grid-column:16"></i><i style="grid-column:17"></i><i style="grid-column:18"></i><i style="grid-column:19"></i><i style="grid-column:20"></i><i style="grid-column:21"></i><i style="grid-column:22"></i><i style="grid-column:23"></i><i style="grid-column:24"></i><div class="wm-card gx-card" style="grid-column:1 / span 10;grid-row:2"><b></b></div><div class="wm-card gx-card" style="grid-column:11 / span 14;grid-row:2"><b></b></div></div></div></div>
+<p class="gx-cap">1440 &#183; 24 columns of 28.6 &#183; gutter 24 &#183; margin 7vw, 100.8 &#183; cards 10 | 14</p>
+<div class="gx-frame" data-nosnap data-w="900" style="--h:168"><div class="gx-scale" style="width:900px">
+  <div class="wm-grid gx-sheet" style="--grid-cols:12;--grid-gutter:24px;--grid-margin:63px;--rows:24px 1fr 24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><div class="wm-card gx-card" style="grid-column:1 / span 5;grid-row:2"><b></b></div><div class="wm-card gx-card" style="grid-column:6 / span 7;grid-row:2"><b></b></div></div></div></div>
+<p class="gx-cap">900 &#183; 12 columns of 42.5 &#183; gutter 24 &#183; margin 7vw, 63 &#183; cards 5 | 7</p>
+<div class="gx-frame" data-nosnap data-w="390" style="--h:240"><div class="gx-scale" style="width:390px">
+  <div class="wm-grid gx-sheet" style="--grid-cols:12;--grid-gutter:12px;--grid-margin:20px;--rows:24px 1fr 1fr 24px;row-gap:12px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><div class="wm-card gx-card" style="grid-column:1 / span 12;grid-row:2"><b></b></div><div class="wm-card gx-card" style="grid-column:1 / span 12;grid-row:3"><b></b></div></div></div></div>
+<p class="gx-cap">390 &#183; 12 columns of 18.2 &#183; gutter 12 &#183; margin 5vw, held at 20 &#183; the cards stack, the inset stays one column + one gutter: 30.2</p>
+
+<h2>The line <span>3px, the leading subdivided</span></h2>
+<p><b>Fractional, the way 12/15 sits on a 3pt grid:</b> the line is a unit every leading divides into,
+not a leading itself. Body is 16/24, eight units, which 1.55 never was. Inside <code>.wm-lines</code> each
+text block takes its leading from <code>--lh</code> and is nudged down by however far its first baseline
+lands short of the next line &#8212; half the leading less the face, plus the ascent, with ascent and
+descent rounded to whole pixels and an odd half-leading floored, because the browser does both. Cal Sans's
+hhea is .9 / .245; a page on another face sets <code>--font-asc</code> and <code>--font-desc</code>.</p>
+<div class="wm-chip-row gx-try"><button class="wm-chip wm-chip--small on" data-lead="on">16 / 24 &#183; on the line</button><button class="wm-chip wm-chip--small" data-lead="off">16 / 24.8 &#183; 1.55, before</button></div>
+<div class="gx-box" data-ov>
+  <p class="gx-walk">Body copy is where the grid is decided. At 24 every line of a long paragraph lands on a
+  line. At 24.8 the first line still does &#8212; the snapper puts it there &#8212; and each line after it falls
+  another 0.8px behind, until by the fourth it sits a full unit off and the paragraph beside it no longer
+  shares a single line with this one. The snapper moves first lines only, and on purpose: a leading that is
+  not whole units is a fault in the stylesheet, and the lint and the CI spec both say so.</p>
+</div>
+
+<h2>The seven roles <span>12 &#183; 15 &#183; 15 &#183; 24 &#183; 27 &#183; 30 &#183; 51</span></h2>
+<p>type.css writes each leading as <code>round(nearest, ratio&#160;em, var(--bl))</code>: still em, so it
+follows the reader's text size, and on the line at whatever size that is. The ratios moved to make it true
+at the 16px root; display is 1.12, not 1.1, because 49.5 is a tie and <code>round(nearest)</code> takes a
+tie up &#8212; one browser's rounding from off the line.</p>
+<div class="gx-box" data-ov>
+<div class="gx-roles wm-baselines">
+  <div class="lbl" data-baseline="last"><p>micro &#183; 9 / 12 &#183; 4 units</p></div>
+  <div class="smp"><p class="t-micro">axis tags &#183; metric rules &#183; annotations</p></div>
+  <div class="lbl" data-baseline="last"><p>label &#183; 12 / 15 &#183; 5 units</p></div>
+  <div class="smp"><p class="t-label">Section labels</p></div>
+  <div class="lbl" data-baseline="last"><p>ui &#183; 12 / 15 &#183; 5 units</p></div>
+  <div class="smp"><p class="t-ui">Twelve on fifteen: the print grid this one is modelled on. Labels, captions, the dial's words.</p></div>
+  <div class="lbl" data-baseline="last"><p>body &#183; 16 / 24 &#183; 8 units</p></div>
+  <div class="smp body"><p>Running copy. Two lines of it, so the second line can be seen landing where the first one did, eight units on.</p></div>
+  <div class="lbl" data-baseline="last"><p>lede &#183; 18 / 27 &#183; 9 units</p></div>
+  <div class="smp"><p class="t-lede">The paragraph that opens a page.</p></div>
+  <div class="lbl" data-baseline="last"><p>title &#183; 26 / 30 &#183; 10 units</p></div>
+  <div class="smp"><p class="t-title">The leading, subdivided</p></div>
+  <div class="lbl" data-baseline="last"><p>display &#183; 45 / 51 &#183; 17 units</p></div>
+  <div class="smp"><p class="t-display">24 / 3</p></div>
+</div>
+</div>
+
+<h2>A row meets <span>.wm-baselines</span></h2>
+<p>In a <code>.wm-baselines</code> container, items that start in one row have their first text block
+moved to the lowest first baseline among them. An item marked <code>data-baseline="last"</code> meets the
+row by its last line instead, so a two-line caption ends on the big word's baseline rather than hanging
+below it. Only the block being aligned moves; the rest of each card keeps its own snap, so text set at the
+bottom of a card stays on its line. A shift larger than the target's font-size is refused and reported
+&#8212; that is a row that matched the wrong text, and once it pushed a paragraph 212px.</p>
+<div class="wm-cols wm-baselines gx-row">
+  <div class="wm-card"><p class="t-display">24</p><p class="t-ui">columns from 1024px</p></div>
+  <div class="wm-card"><p class="t-display">3px</p><p class="t-ui">the line</p></div>
+  <div class="wm-card" data-baseline="last"><p class="t-ui">12 below 1024,<br>to divide 24.</p></div>
+</div>
+
+<h2>A component moves whole <span>--snap-unit: 1</span></h2>
+<p>What carries text in the flow and has a part beside its words &#8212; a slider row, a pill with a mark
+&#8212; is shifted as one, by its first line, and nothing inside it is snapped on its own: snapping the
+label alone would pull it off its thumb. Below, the block above the row is 50px, off the unit on purpose,
+so the row starts between lines and the snapper has something to do.</p>
+<div class="gx-odd" data-nosnap></div>
+<div class="gx-box" data-ov>
+  <label class="gx-srow"><span>Weight</span><input type="range" min="400" max="700" value="600" aria-label="Weight"><output>600</output></label>
+  <p class="gx-moved">&#8212;</p>
+  <p><b>Stages keep their own room.</b> A demo with type of its own &#8212; the sheets above, every chapter
+  on this page that draws its own specimens &#8212; is marked <code>data-nosnap</code>: the snapper skips it,
+  and the shell hands back its leadings, so a stage is never half on the line.</p>
+</div>
+
+<script>
+(function(){
+  // the sheets: a real width, scaled to the column it has here
+  var frames = [].slice.call(document.querySelectorAll('.gx-frame'));
+  function fit(){ frames.forEach(function(f){ f.style.setProperty('--k', Math.min(1, f.clientWidth / +f.dataset.w)); }); }
+
+  // the overlay: lines every --bl from the ROOT's top, at device pixels, cut to each box
+  var boxes = [].slice.call(document.querySelectorAll('[data-ov]'));
+  function draw(){
+    var dpr = window.devicePixelRatio || 1;
+    boxes.forEach(function(box){
+      var c = box.querySelector(':scope > canvas');
+      if (!c) { c = document.createElement('canvas'); c.setAttribute('aria-hidden', 'true'); box.insertBefore(c, box.firstChild); }
+      var root = box.closest('.wm-lines') || box, rb = root.getBoundingClientRect(), r = box.getBoundingClientRect();
+      var bl = parseFloat(getComputedStyle(root).getPropertyValue('--bl')) || 3, off = r.top - rb.top;
+      c.style.width = r.width + 'px'; c.style.height = r.height + 'px';
+      c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+      var g = c.getContext('2d'); g.clearRect(0, 0, c.width, c.height);
+      g.fillStyle = getComputedStyle(box).getPropertyValue('--ov-line').trim() || 'rgba(40,120,255,.3)';
+      // line k sits where ?grid draws it: the device row just above k * bl from the root's top
+      for (var k = Math.ceil(off / bl); (k * bl - off) < r.height + bl; k++)
+        g.fillRect(0, Math.round(k * bl * dpr) - Math.round(off * dpr) - 1, c.width, 1);
+    });
+  }
+  var raf = 0;
+  function redraw(){ cancelAnimationFrame(raf); raf = requestAnimationFrame(function(){ fit(); draw(); }); }
+  addEventListener('resize', redraw);
+  if (document.fonts) document.fonts.ready.then(redraw);
+  if ('ResizeObserver' in window && boxes[0]) new ResizeObserver(redraw).observe(boxes[0].closest('.wm-lines') || boxes[0]);
+  fit(); draw();
+
+  // the line: try the paragraph at the leading the page had before
+  var walk = document.querySelector('.gx-walk'), chips = [].slice.call(document.querySelectorAll('[data-lead]'));
+  chips.forEach(function(b){ b.addEventListener('click', function(){
+    walk.classList.toggle('off', b.dataset.lead === 'off');
+    chips.forEach(function(x){ x.classList.toggle('on', x === b); });
+    if (window.wmGridSnap) window.wmGridSnap();
+  }); });
+
+  // the component: what the snapper did to the row, read back from the row itself
+  var row = document.querySelector('.gx-srow'), moved = document.querySelector('.gx-moved');
+  var range = row.querySelector('input'), out = row.querySelector('output');
+  range.addEventListener('input', function(){ out.textContent = range.value; });
+  function report(){
+    var s = parseFloat(row.style.getPropertyValue('--snap')) || 0;
+    moved.textContent = s ? 'gridSnap.js moved this row ' + s.toFixed(2) + 'px, words, track and thumb together'
+                          : 'this row started on a line; the snapper left it';
+  }
+  new MutationObserver(report).observe(row, { attributes: true, attributeFilter: ['style'] });
+  report();
+})();
+</script>
+</body>
