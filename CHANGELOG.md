@@ -20,9 +20,10 @@ ascent is rounded, the row rule, what gridSnap.js measures, the lint's three key
 spec asserts, and the order a page adopts it in -- every step written after a trap, from the
 Closer Look columns that shipped at 18px to the stat figures that did not fit five across.
 
-The system page shows it. The Grid part rides inside 04 Space, as the ramps ride inside Color,
-because the poster says six laws and the line is vertical space: the columns at 1440, 900 and
-390 as real `.wm-grid`s with each width's numbers set on them and scaled to fit, the line with
+The system page shows it. The Grid part rides inside 01 Type, as the ramps ride inside Color,
+because the poster says six laws and the grid is the type's own measure; its two chapters, Columns
+and Baseline, are in the rail under Type: the columns at 1440, 900 and
+390 as real `.wm-grid`s with each width's numbers set on them and scaled to fit, the baseline with
 a paragraph to flip back to 1.55 and watch walk off, the seven roles over a `?grid`-style
 overlay cut to each demo, three cards whose first baselines meet (the third by its last line),
 and a slider row the snapper moves whole and says by how much. type.css and chip.css are
@@ -31,7 +32,7 @@ once, because a section-scoped gridSnap.js has its document queries rewritten to
 
 And the page is on the line: `<main>` is the `.wm-lines` root, so the README, the section
 numbers and the Grid part share one set of lines, and the page joins the grid spec at all three
-widths. The other six chapters are not, and say so: each is a stage, data-nosnap, and build.py's
+widths. The other chapters are not, and say so (Type's own page and its favicons are stages around the Grid part): each is a stage, data-nosnap, and build.py's
 OFF_LINE records what putting it on would cost (the controls h1 is 40px at `normal` and would be
 set solid at 24; 3,704 cells of usage table made one snapper pass 1.7s; the type chart is SVG
 text the snapper can measure and cannot move). data-nosnap stops the snapper but not grid.css,

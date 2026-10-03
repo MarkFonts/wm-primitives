@@ -9,7 +9,7 @@ place onto it, `scripts/lint-tokens.mjs` keeps a stylesheet from drifting off it
 
 Companion to [TYPOGRAPHY.md](TYPOGRAPHY.md) (the roles whose leadings sit on the line) and
 [HOWTO.md](HOWTO.md) (wiring the package in). Shown, live, on
-[the system page](https://markfonts.github.io/wm-primitives/) under 04 Space, and on the bench it
+[the system page](https://markfonts.github.io/wm-primitives/) under 01 Type, and on the bench it
 was cut on, [docs/grid.html](https://markfonts.github.io/wm-primitives/grid.html). If this page
 and `grid.css` disagree, the CSS is right.
 

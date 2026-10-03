@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8">
 <title>The grid</title>
-<!-- Source for the Grid part of section 04, Space. Written standalone: `body` is the part,
+<!-- Source for the Grid part of section 01, Type. Written standalone: `body` is the part,
      and its class goes with the tag when build.py assembles the page, because there the
      page's own <main> is the one .wm-lines root and every chapter shares its lines. The
      links below are for opening this file directly; build.py strips them, inlines type.css
@@ -23,7 +23,7 @@ body{margin:0;padding:63px 0 0;color:var(--ink,#17181a);font-family:var(--ui-fon
   font-optical-sizing:auto;font-size:var(--type-body-size,1rem);
   --text:var(--ink,#17181a);--text-muted:var(--ink-2,rgba(23,24,26,.62));--text-dim:var(--ink-3,rgba(23,24,26,.38));
   --border:var(--line,rgba(23,24,26,.16));
-  /* and the grounds, re-derived from the shell's numbers: the space page beside this part is
+  /* and the grounds, re-derived from the shell's numbers: the type and space pages beside this part are
      a dark stage and states --bg and --surface for the whole section, so inheriting them drew
      dark sheets and an unreadable chosen chip on the light page */
   --bg:#f4f4f4;--bg:oklch(var(--l-ground,96.66%) 0 0);
@@ -104,7 +104,7 @@ its sample by its last line, a component moves whole. Everything on this page ou
 as the rail and a 1080px measure, so the sheets below show the columns rather than this page sitting on them. <a href="https://github.com/MarkFonts/wm-primitives/blob/main/GRID.md">GRID.md</a>
 is the standard in words; <a href="grid.html">grid.html</a> is the bench it was cut on.</p>
 
-<h2>The columns <span>24, and 12 below 1024</span></h2>
+<h2>Columns <span>24, and 12 below 1024</span></h2>
 <p><b>24, not 30.</b> calsans splits its sections 5:7 three times, which is 10 | 14 here and
 12.5 | 17.5 on thirty. <b>12 below 1024, not 10</b>, because the phone's count has to divide the
 desktop's: a half is still a half and a third still a third. The gutter is the pad scale's 24, 12 on a
@@ -121,7 +121,7 @@ contents step in one column and one gutter (rule A: the hanging version drew ove
   <div class="wm-grid gx-sheet" style="--grid-cols:12;--grid-gutter:12px;--grid-margin:20px;--rows:24px 1fr 1fr 24px;row-gap:12px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><div class="wm-card gx-card" style="grid-column:1 / span 12;grid-row:2"><b></b></div><div class="wm-card gx-card" style="grid-column:1 / span 12;grid-row:3"><b></b></div></div></div></div>
 <p class="gx-cap">390 &#183; 12 columns of 18.2 &#183; gutter 12 &#183; margin 5vw, held at 20 &#183; the cards stack, the inset stays one column + one gutter: 30.2</p>
 
-<h2>The line <span>3px, the leading subdivided</span></h2>
+<h2>Baseline <span>3px, the leading subdivided</span></h2>
 <p><b>Fractional, the way 12/15 sits on a 3pt grid:</b> the line is a unit every leading divides into,
 not a leading itself. Body is 16/24, eight units, which 1.55 never was. Inside <code>.wm-lines</code> each
 text block takes its leading from <code>--lh</code> and is nudged down by however far its first baseline
