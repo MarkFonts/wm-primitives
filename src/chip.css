@@ -50,10 +50,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-01, 4px) var(--spacing-04, 12px);
+    /* ON THE LINE: 27px, nine units -- the ui leading (15) plus a --spacing-02 step each
+       side with the hairline INSIDE the step (6 - 1 + 1). The formula is TYPOGRAPHY.md's
+       (height follows the type); the line is GRID.md's. It was 4px + 16.8 + 1, which
+       came to the same 27 by accident; now it is 27 by rule, like the button and the select. */
+    padding: calc(var(--spacing-02, 6px) - 1px) var(--spacing-04, 12px);
     font-family: var(--ui-font, system-ui, sans-serif);
     font-size: var(--type-ui-size, 0.75rem);
-    line-height: var(--type-ui-lead, 1.4);
+    line-height: var(--type-ui-lead, 15px);
     font-weight: 400;
     color: var(--chip-ink);
     background: transparent;
@@ -114,8 +118,9 @@
   .wm-chip--small {
     /* 1px, not var(--hair): the hosts disagree on what --hair is (Kernpare's is a length,
        the system page's a colour), and a colour there voids the whole padding. */
-    padding: 1px var(--spacing-03, 8px);
+    padding: 2px var(--spacing-03, 8px);   /* 18px, six units: micro's 12 + 2 + 2 + the hairlines */
     font-size: var(--type-micro-size, 0.5625rem);
+    line-height: var(--type-micro-lead, 12px);
   }
 
   /* A modifier, not an option: it stays on across the set, so it wears the secondary
@@ -132,7 +137,7 @@
   .wm-chip:is(:disabled, [aria-disabled="true"]) { opacity: .4; cursor: default; }
 
   @media (pointer: coarse) {
-    .wm-chip { min-height: 32px; }
+    .wm-chip { min-height: 33px; }   /* eleven units; the touch floor, on the line */
   }
   @media (prefers-reduced-motion: reduce) {
     .wm-chip { transition: none; }

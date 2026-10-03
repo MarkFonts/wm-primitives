@@ -198,7 +198,7 @@
 .grad-readout {
   font-family: ui-monospace, monospace;
   font-size: var(--type-micro-size, 0.5625rem);
-  line-height: var(--type-micro-lead, 1.2);
+  line-height: var(--type-micro-lead, 12px);
   color: var(--text-dim, rgba(232, 232, 232, .38));
   text-align: center;
   /* One line. It is a readout of four numbers, and breaking it mid-number -- which

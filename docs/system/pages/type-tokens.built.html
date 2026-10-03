@@ -19,13 +19,14 @@
     /* roles - each spends size and nothing else */
     /* Declared in rem (root 16px) so the scale follows the reader's own text size.
        We quote px in writing, because that is how type is talked about. */
-    --type-micro-size: 0.5625rem;   --type-micro-lead: 1.2;    /*  9px */
-    --type-label-size: 0.75rem;     --type-label-lead: 1.3;    /* 12px */
-    --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       /* 12px */
-    --type-body-size: 1rem;         --type-body-lead: 1.55;    /* 16px */
-    --type-lede-size: 1.125rem;     --type-lede-lead: 1.5;     /* 18px */
-    --type-title-size: 1.625rem;    --type-title-lead: 1.2;    /* 26px */
-    --type-display-size: 2.8125rem; --type-display-lead: 1.1;  /* 45px */
+    --type-micro-size: 0.5625rem;   --type-micro-lead: round(nearest, 1.3em, var(--bl));    /*  9 / 12px */
+    --type-label-size: 0.75rem;     --type-label-lead: round(nearest, 1.25em, var(--bl));   /* 12 / 15px */
+    --type-ui-size: 0.75rem;        --type-ui-lead: round(nearest, 1.25em, var(--bl));      /* 12 / 15px */
+    --type-body-size: 1rem;         --type-body-lead: round(nearest, 1.5em, var(--bl));     /* 16 / 24px */
+    --type-lede-size: 1.125rem;     --type-lede-lead: round(nearest, 1.5em, var(--bl));     /* 18 / 27px */
+    --type-title-size: 1.625rem;    --type-title-lead: round(nearest, 1.15em, var(--bl));   /* 26 / 30px */
+    --type-display-size: 2.8125rem; --type-display-lead: round(nearest, 1.12em, var(--bl)); /* 45 / 51px */
+    --bl: 3px;
 
     /* The ONLY tracking value in the system. Caps must be letterspaced; nothing else
        may be. Size is opsz's job - tracking it by hand double-counts the axis. */
@@ -741,21 +742,21 @@
         <div class="role-sample t-micro">latin small letter a with ring above</div>
         <div class="role-meta">
           <div class="t-ui">micro <span class="ink-faint">&#183; glyph captions</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>9px</span><span>1.2</span><span class="spends">size</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>9px</span><span>12</span><span class="spends">size</span></div>
         </div>
       </div>
       <div class="role">
         <div class="role-sample t-label">Geometric form</div>
         <div class="role-meta">
           <div class="t-ui">label <span class="ink-faint">&#183; eyebrows, section heads</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>12px</span><span>1.3</span><span class="spends">case</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>12px</span><span>15</span><span class="spends">case</span></div>
         </div>
       </div>
       <div class="role">
         <div class="role-sample t-ui">Freeze opsz &#183; Optical scale &#215;6 &#183; Return to your defaults</div>
         <div class="role-meta">
           <div class="t-ui">ui <span class="ink-faint">&#183; all chrome</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>12px</span><span>1.4</span><span>norm</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>12px</span><span>15</span><span>norm</span></div>
         </div>
       </div>
       <div class="role">
@@ -766,28 +767,28 @@
         </div>
         <div class="role-meta">
           <div class="t-ui">body <span class="ink-faint">&#183; prose, docs</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>16px</span><span>1.55</span><span>norm</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>16px</span><span>24</span><span>norm</span></div>
         </div>
       </div>
       <div class="role">
         <div class="role-sample t-lede">Tokens govern the Face. The Specimen belongs to the user.</div>
         <div class="role-meta">
           <div class="t-ui">lede <span class="ink-faint">&#183; intros</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>18px</span><span>1.5</span><span class="spends">size</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>18px</span><span>27</span><span class="spends">size</span></div>
         </div>
       </div>
       <div class="role">
         <div class="role-sample t-title">Optical size is part of the token</div>
         <div class="role-meta">
           <div class="t-ui">title <span class="ink-faint">&#183; panel + page titles</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>26px</span><span>1.2</span><span class="spends">size</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>26px</span><span>30</span><span class="spends">size</span></div>
         </div>
       </div>
       <div class="role">
         <div class="role-sample t-display">Face &amp; Specimen</div>
         <div class="role-meta">
           <div class="t-ui">display <span class="ink-faint">&#183; largest chrome</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>45px</span><span>1.1</span><span class="spends">size</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>45px</span><span>51</span><span class="spends">size</span></div>
         </div>
       </div>
     </div>

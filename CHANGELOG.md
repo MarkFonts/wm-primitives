@@ -12,6 +12,24 @@ Newest first.
 
 ---
 
+## 2026-10-02 — the roles lead on the line; the chip, the button and the select are 27
+
+Grid roll-out, step 1. type.css's seven leadings are `round(nearest, <ratio>em, var(--bl))`
+now: still em, so they follow the reader's text size, and each lands on the 3px line at
+whatever size that is. The ratios moved to make that true at the 16px root -- micro 1.2 → 1.3
+(12), ui 1.4 → 1.25 (15), body 1.55 → 1.5 (24), title 1.2 → 1.15 (30), display 1.1 → 1.12
+(51, written past the tie: 49.5 rounds UP in round(nearest), and a leading on a tie is one
+browser rounding from the line). grid.css's --lead-* are aliases of these, with the px as
+fallbacks for a page without type.css; .t-display takes --lead-display. type.ts gains `line`
+(the px) and emits the same round() from type(); the parity lint checks ratio, line and that
+no product sits on a tie. Every fallback in src/ that said `1.4` says `15px`.
+
+The controls: height = leading + 2 × padding with the hairline INSIDE the step, so the chip
+(27 already, by accident), the button (30.8) and the select (29, and never the button's
+height beside it) are all 27px, nine units; the small chip 18; the touch floors 33 and 45.
+tests/behaviour/line.spec.ts holds the computed leadings and the control heights on a fixture
+that loads only src/. The case study is unaffected: its stylesheet sets every --lh itself.
+
 ## 2026-10-02 — play_arrow and pause join the icon face
 
 83 names. The Cal Sans case study's Highlights section is getting a slideshow mode with a

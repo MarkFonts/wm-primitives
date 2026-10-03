@@ -440,13 +440,14 @@ html,body{margin:0;padding:0;background:var(--bg)}
 
     
     
-    --type-micro-size: 0.5625rem;   --type-micro-lead: 1.2;    
-    --type-label-size: 0.75rem;     --type-label-lead: 1.3;    
-    --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       
-    --type-body-size: 1rem;         --type-body-lead: 1.55;    
-    --type-lede-size: 1.125rem;     --type-lede-lead: 1.5;     
-    --type-title-size: 1.625rem;    --type-title-lead: 1.2;    
-    --type-display-size: 2.8125rem; --type-display-lead: 1.1;  
+    --type-micro-size: 0.5625rem;   --type-micro-lead: round(nearest, 1.3em, var(--bl));    
+    --type-label-size: 0.75rem;     --type-label-lead: round(nearest, 1.25em, var(--bl));   
+    --type-ui-size: 0.75rem;        --type-ui-lead: round(nearest, 1.25em, var(--bl));      
+    --type-body-size: 1rem;         --type-body-lead: round(nearest, 1.5em, var(--bl));     
+    --type-lede-size: 1.125rem;     --type-lede-lead: round(nearest, 1.5em, var(--bl));     
+    --type-title-size: 1.625rem;    --type-title-lead: round(nearest, 1.15em, var(--bl));   
+    --type-display-size: 2.8125rem; --type-display-lead: round(nearest, 1.12em, var(--bl)); 
+    --bl: 3px;
 
     
     --track-caps: .12em;
@@ -578,13 +579,14 @@ html,body{margin:0;padding:0;background:var(--bg)}
  corner-shape:superellipse(1.2)}#s-corners .g3{grid-template-columns:repeat(3,1fr)}#s-corners .g5{grid-template-columns:repeat(5,1fr)}#s-corners .c,#s-corners .lad{background:#141414;padding:16px 15px 13px;display:flex;flex-direction:column;gap:9px}#s-corners .c-name{font-size:12px;display:flex;flex-direction:column;gap:2px}#s-corners .c-src{font-size:9px;color:#666;font-family:ui-monospace,Menlo,monospace}#s-corners .pr{display:flex;align-items:center;gap:9px}#s-corners .tag{font-size:9px;color:#555;font-family:ui-monospace,Menlo,monospace;width:44px;flex:none}#s-corners .pb{display:flex;gap:6px;align-items:center;flex-wrap:wrap}#s-corners .pb.rnd *{corner-shape:round !important}#s-corners .lad-r{font-size:11px;font-family:ui-monospace,Menlo,monospace;display:flex;justify-content:space-between}#s-corners .lad-r span{color:#555;font-size:9px}#s-corners .lad-pair{display:flex;gap:8px}#s-corners .sw{width:76px;height:38px;background:#2a2a2a;border:1px solid #4a4a4a;flex:none}#s-corners .sw.wide{width:76px;height:38px}#s-corners .st{border:1px solid #333;padding:3px 9px;font-size:10px;border-radius:999px;display:inline-block}#s-corners .prb{border-radius:999px;border:1px solid #333;background:none;color:#999;padding:5px 12px;font:inherit;font-size:11px}#s-corners .r21 .zone-chip,#s-corners .r21 .ssd-chip,#s-corners .r21 .st,#s-corners .r21 .prb,#s-corners .r21 .preview-reset{
   --ph:27px;min-height:var(--ph);min-width:calc(var(--ph)*2);display:inline-grid;place-items:center}#s-corners{
   
-  --type-micro-size: 0.5625rem;   --type-micro-lead: 1.2;    
-  --type-label-size: 0.75rem;     --type-label-lead: 1.3;    
-  --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       
-  --type-body-size: 1rem;         --type-body-lead: 1.55;    
-  --type-lede-size: 1.125rem;     --type-lede-lead: 1.5;     
-  --type-title-size: 1.625rem;    --type-title-lead: 1.2;    
-  --type-display-size: 2.8125rem; --type-display-lead: 1.1;  
+  --type-micro-size: 0.5625rem;   --type-micro-lead: round(nearest, 1.3em, var(--bl));    
+    --type-label-size: 0.75rem;     --type-label-lead: round(nearest, 1.25em, var(--bl));   
+    --type-ui-size: 0.75rem;        --type-ui-lead: round(nearest, 1.25em, var(--bl));      
+    --type-body-size: 1rem;         --type-body-lead: round(nearest, 1.5em, var(--bl));     
+    --type-lede-size: 1.125rem;     --type-lede-lead: round(nearest, 1.5em, var(--bl));     
+    --type-title-size: 1.625rem;    --type-title-lead: round(nearest, 1.15em, var(--bl));   
+    --type-display-size: 2.8125rem; --type-display-lead: round(nearest, 1.12em, var(--bl)); 
+    --bl: 3px;
 
   
   --poster-1: 3rem;    --poster-2: 4.25rem;  --poster-3: 6rem;   
@@ -1603,13 +1605,14 @@ html,body{margin:0;padding:0;background:var(--bg)}
   --ph:27px;min-height:var(--ph);min-width:calc(var(--ph)*2);
   display:inline-grid;place-items:center}body[data-force="on"] #s-corners .part-1 .c *{corner-shape:superellipse(var(--k,1.2)) !important}#s-corners .part-1{
   
-  --type-micro-size: 0.5625rem;   --type-micro-lead: 1.2;    
-  --type-label-size: 0.75rem;     --type-label-lead: 1.3;    
-  --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       
-  --type-body-size: 1rem;         --type-body-lead: 1.55;    
-  --type-lede-size: 1.125rem;     --type-lede-lead: 1.5;     
-  --type-title-size: 1.625rem;    --type-title-lead: 1.2;    
-  --type-display-size: 2.8125rem; --type-display-lead: 1.1;  
+  --type-micro-size: 0.5625rem;   --type-micro-lead: round(nearest, 1.3em, var(--bl));    
+    --type-label-size: 0.75rem;     --type-label-lead: round(nearest, 1.25em, var(--bl));   
+    --type-ui-size: 0.75rem;        --type-ui-lead: round(nearest, 1.25em, var(--bl));      
+    --type-body-size: 1rem;         --type-body-lead: round(nearest, 1.5em, var(--bl));     
+    --type-lede-size: 1.125rem;     --type-lede-lead: round(nearest, 1.5em, var(--bl));     
+    --type-title-size: 1.625rem;    --type-title-lead: round(nearest, 1.15em, var(--bl));   
+    --type-display-size: 2.8125rem; --type-display-lead: round(nearest, 1.12em, var(--bl)); 
+    --bl: 3px;
 
   
   --poster-1: 3rem;    --poster-2: 4.25rem;  --poster-3: 6rem;   
@@ -2625,13 +2628,15 @@ html,body{margin:0;padding:0;background:var(--bg)}
 /* ===== controls ===== */
 @layer wm.type{#s-controls{
     
-    --type-micro-size: 0.5625rem;   --type-micro-lead: 1.2;    
-    --type-label-size: 0.75rem;     --type-label-lead: 1.3;    
-    --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       
-    --type-body-size: 1rem;         --type-body-lead: 1.55;    
-    --type-lede-size: 1.125rem;     --type-lede-lead: 1.5;     
-    --type-title-size: 1.625rem;    --type-title-lead: 1.2;    
-    --type-display-size: 2.8125rem; --type-display-lead: 1.1;  
+    --type-micro-size: 0.5625rem;   --type-micro-lead: round(nearest, 1.3em, var(--bl));    
+    --type-label-size: 0.75rem;     --type-label-lead: round(nearest, 1.25em, var(--bl));   
+    --type-ui-size: 0.75rem;        --type-ui-lead: round(nearest, 1.25em, var(--bl));      
+    --type-body-size: 1rem;         --type-body-lead: round(nearest, 1.5em, var(--bl));     
+    --type-lede-size: 1.125rem;     --type-lede-lead: round(nearest, 1.5em, var(--bl));     
+    --type-title-size: 1.625rem;    --type-title-lead: round(nearest, 1.15em, var(--bl));   
+    --type-display-size: 2.8125rem; --type-display-lead: round(nearest, 1.12em, var(--bl)); 
+    
+    --bl: 3px;
 
     
     --poster-1: 3rem;    --poster-2: 4.25rem;  --poster-3: 6rem;   
@@ -2784,7 +2789,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   }
 }@layer wm.controls{#s-controls .slider-row{ display: flex; flex-direction: column; gap: 3px; }#s-controls .slider-row--off{ opacity: 0.4; }#s-controls .slider-label{
     display: flex; align-items: center; justify-content: space-between; gap: 6px;
-    font-size: var(--type-ui-size, 0.75rem); line-height: var(--type-ui-lead, 1.4);
+    font-size: var(--type-ui-size, 0.75rem); line-height: var(--type-ui-lead, 15px);
   }#s-controls .slider-label-left{
     display: flex; align-items: baseline; gap: var(--spacing-01, 4px);
     
@@ -3144,10 +3149,11 @@ html,body{margin:0;padding:0;background:var(--bg)}
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-01, 4px) var(--spacing-04, 12px);
+    
+    padding: calc(var(--spacing-02, 6px) - 1px) var(--spacing-04, 12px);
     font-family: var(--ui-font, system-ui, sans-serif);
     font-size: var(--type-ui-size, 0.75rem);
-    line-height: var(--type-ui-lead, 1.4);
+    line-height: var(--type-ui-lead, 15px);
     font-weight: 400;
     color: var(--chip-ink);
     background: transparent;
@@ -3187,13 +3193,14 @@ html,body{margin:0;padding:0;background:var(--bg)}
     font-weight: 600;
   }#s-controls .wm-chip--small{
     
-    padding: 1px var(--spacing-03, 8px);
+    padding: 2px var(--spacing-03, 8px);   
     font-size: var(--type-micro-size, 0.5625rem);
+    line-height: var(--type-micro-lead, 12px);
   }#s-controls .wm-chip--switch{ border-style: dashed; }#s-controls .wm-chip--switch:is(.on,#s-controls [aria-pressed="true"],#s-controls :has(> input:checked)){
     --chip-fill: var(--chip-color, var(--text-muted, #a8a8a8));
     border-style: solid;
     font-weight: 400;
-  }#s-controls .wm-chip:focus{ outline: none; }#s-controls .wm-chip:is(:focus-visible,#s-controls :has(> input:focus-visible)){ outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }#s-controls .wm-chip:is(:disabled,#s-controls [aria-disabled="true"]){ opacity: .4; cursor: default; }@media (pointer: coarse){#s-controls .wm-chip{ min-height: 32px; }
+  }#s-controls .wm-chip:focus{ outline: none; }#s-controls .wm-chip:is(:focus-visible,#s-controls :has(> input:focus-visible)){ outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }#s-controls .wm-chip:is(:disabled,#s-controls [aria-disabled="true"]){ opacity: .4; cursor: default; }@media (pointer: coarse){#s-controls .wm-chip{ min-height: 33px; }   
   }@media (prefers-reduced-motion: reduce){#s-controls .wm-chip{ transition: none; }
   }
 }@layer wm.controls{#s-controls{ --hd-rail: 11rem; --hd-id: 5.5rem; --hd-inset: 0px; --hd-inset-v: 12px; }#s-controls .wm-hd{
@@ -5046,21 +5053,21 @@ html,body{margin:0;padding:0;background:var(--bg)}
         <div class="role-sample t-micro">latin small letter a with ring above</div>
         <div class="role-meta">
           <div class="t-ui">micro <span class="ink-faint">&#183; glyph captions</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>9px</span><span>1.2</span><span class="spends">size</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>9px</span><span>12</span><span class="spends">size</span></div>
         </div>
       </div>
       <div class="role">
         <div class="role-sample t-label">Geometric form</div>
         <div class="role-meta">
           <div class="t-ui">label <span class="ink-faint">&#183; eyebrows, section heads</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>12px</span><span>1.3</span><span class="spends">case</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>12px</span><span>15</span><span class="spends">case</span></div>
         </div>
       </div>
       <div class="role">
         <div class="role-sample t-ui">Freeze opsz &#183; Optical scale &#215;6 &#183; Return to your defaults</div>
         <div class="role-meta">
           <div class="t-ui">ui <span class="ink-faint">&#183; all chrome</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>12px</span><span>1.4</span><span>norm</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>12px</span><span>15</span><span>norm</span></div>
         </div>
       </div>
       <div class="role">
@@ -5071,28 +5078,28 @@ html,body{margin:0;padding:0;background:var(--bg)}
         </div>
         <div class="role-meta">
           <div class="t-ui">body <span class="ink-faint">&#183; prose, docs</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>16px</span><span>1.55</span><span>norm</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>16px</span><span>24</span><span>norm</span></div>
         </div>
       </div>
       <div class="role">
         <div class="role-sample t-lede">Tokens govern the Face. The Specimen belongs to the user.</div>
         <div class="role-meta">
           <div class="t-ui">lede <span class="ink-faint">&#183; intros</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>18px</span><span>1.5</span><span class="spends">size</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>18px</span><span>27</span><span class="spends">size</span></div>
         </div>
       </div>
       <div class="role">
         <div class="role-sample t-title">Optical size is part of the token</div>
         <div class="role-meta">
           <div class="t-ui">title <span class="ink-faint">&#183; panel + page titles</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>26px</span><span>1.2</span><span class="spends">size</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>26px</span><span>30</span><span class="spends">size</span></div>
         </div>
       </div>
       <div class="role">
         <div class="role-sample t-display">Face &amp; Specimen</div>
         <div class="role-meta">
           <div class="t-ui">display <span class="ink-faint">&#183; largest chrome</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>45px</span><span>1.1</span><span class="spends">size</span></div>
+          <div class="spec t-ui ink-quiet tnum"><span>45px</span><span>51</span><span class="spends">size</span></div>
         </div>
       </div>
     </div>

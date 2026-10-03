@@ -77,7 +77,11 @@
    A page sets --lh wherever it sets a leading; nothing here touches margins. */
 .wm-lines {
   --font-asc: 0.9; --font-desc: 0.245;
-  --lead-micro: 12px; --lead-ui: 15px; --lead-body: 24px; --lead-lede: 27px; --lead-title: 30px;
+  /* the roles' own leadings (type.css rounds each to --bl); the px are what they come to at
+     the 16px root, and what a page without type.css gets */
+  --lead-micro: var(--type-micro-lead, 12px); --lead-ui: var(--type-ui-lead, 15px);
+  --lead-body: var(--type-body-lead, 24px); --lead-lede: var(--type-lede-lead, 27px);
+  --lead-title: var(--type-title-lead, 30px); --lead-display: var(--type-display-lead, 51px);
   --lh: var(--lead-body);
 }
 /* :where, so any rule that sets --lh outranks it, whatever selector it is written with. */
@@ -99,4 +103,4 @@
 .wm-lines .t-title { --lh: var(--lead-title); }
 .wm-lines :is(.t-ui, .t-label) { --lh: var(--lead-ui); }
 .wm-lines .t-micro { --lh: var(--lead-micro); }
-.wm-lines .t-display { --lh: round(nearest, 1.1em, var(--bl)); }
+.wm-lines .t-display { --lh: var(--lead-display); }
