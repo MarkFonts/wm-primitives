@@ -55,6 +55,13 @@ Skip this and the dial **renders without a rail**. The label, tag and value appe
 track does not, because `--border` resolves to nothing and the gradient it sits in is
 invalid. No error, no warning, a control that looks finished and is not.
 
+### 4b · A page on the grid
+
+A static page that sets text (wordmark.nyc, a docs page) also links `grid.css` after
+`type.css` and loads `gridSnap.js`. That is a standard with its own order of steps and its
+own traps, all of them hit on the Cal Sans case study: [GRID.md](GRID.md) §6. An app's
+chrome does not need it; its chips, buttons and selects are on the unit already.
+
 ### 5 · Supply the host contract
 
 ```css
