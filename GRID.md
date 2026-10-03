@@ -125,14 +125,18 @@ of a hero, three cards.
 A slider row, a pill with a mark, a chip row: anything with a part beside its words is shifted as
 one, by its first line, and nothing inside it is snapped on its own (that would pull the words off
 the thumb). Set `--snap-unit: 1` on the component; it inherits, and only the outermost one counts.
+A row a host made `position: relative` (to hang a guide or a badge off it) still moves: the snapper
+writes the `top` on it whether it found it static or relative. Absolute, fixed and sticky boxes are
+left alone.
 
 ### Stages: `data-nosnap`
 
 A subtree marked `data-nosnap` -- a demo with its own type, a cube, a tester, a poster -- is
-skipped by the snapper and by the CI checks. **It is not skipped by grid.css**, which is plain
-CSS: a `p` inside a stage still gets `line-height: var(--lh)` and a sub-unit `top` unless the
-stage sets its own. The system page hands them back with one rule in its shell (§6); a page with
-stages that set no leading of their own needs the same.
+skipped by the snapper, by grid.css and by the CI checks. grid.css's `.wm-lines` rules end in
+`:not(:where([data-nosnap], [data-nosnap] *))`, so a `p` inside a stage keeps whatever leading,
+position and `top` it had without the grid; no shell has to hand them back. (They used to reach
+in, and the system page undid them with a `revert-layer` rule. The `:where` inside the `:not`
+keeps the selector at the specificity it had: a bare `:not()` counts its argument.)
 
 ## 3 · gridSnap.js -- what CSS cannot know
 
@@ -147,7 +151,8 @@ grid.css adds to `top`. Glyphs move, layout does not, so one pass is enough.
   anything absolute, fixed or sticky; anything `relative` for its own reasons; `[data-nosnap]`.
 - A static block the snapper has to move is made `relative` and **tagged `data-snap`**, so the
   next pass knows that `relative` is its own and measures it again. Untagged, every rerun dropped
-  it.
+  it. A unit row that was already `relative` gets the `top` but no tag: the position was never
+  its to claim.
 - A block inside another block travels with it. A link's 56px ring was measured as a block of its
   own and shifted twice.
 - It **reruns** when fonts load, on `load`, when a root resizes, and on `window.wmGridSnap()`.
@@ -160,7 +165,8 @@ grid.css adds to `top`. Glyphs move, layout does not, so one pass is enough.
 - **`?grid`** on any adopting page draws the columns (pink) and the 3px lines (blue) over each
   `.wm-lines` root. The lines are a canvas at the screen's own pixel density, one device pixel
   each: a CSS gradient at a fractional zoom resamples 3px stripes into smeared, unevenly spaced
-  lines, which read as the type being off when it is the drawing that is.
+  lines, which read as the type being off when it is the drawing that is. It is ONE canvas the size
+  of the viewport, fixed, redrawn on scroll, so how tall the page is does not matter.
 
 Plain script, no module: `<script src="shared/src/gridSnap.js" defer>`.
 
@@ -233,32 +239,35 @@ In this order. Each step names the trap it was written after.
    80px)`.
 7. **Cards: rule A** (`.wm-card`, or `padding: var(--grid-gutter) calc(var(--grid-col) +
    var(--grid-gutter))`). Stages inset by what they need.
-8. **Mark the stages** `data-nosnap`, and name them in `linesSkip`. If a stage's text sets no
-   leading of its own, give back what grid.css set (the system page's shell rule:
-   `[data-nosnap] :where(p, li, ...) { line-height: revert-layer; position: revert-layer; top:
-   revert-layer }`). A table of thousands of cells is a stage too: the system page with every
-   chapter on measured 5,569 blocks, and one pass took 1.7s, every time `main` resized.
-9. **Hidden is `display: none`.** A slideshow whose other slides stay in the flow, stacked in one
-   cell, is siblings drawn over each other to the layout check -- the spec caught the case study's
-   highlights doing it (2026-10-02). They show the current slide and `display: none` the rest.
-10. **Components move whole**: `--snap-unit: 1` on a slider row, a chip row, a pill with a mark.
-11. **Rows meet**: `.wm-baselines` on side-by-side text; `data-baseline="last"` on a caption that
+8. **Mark the stages** `data-nosnap`, and name them in `linesSkip`. grid.css leaves a stage alone,
+   so a stage that sets no leading of its own needs nothing handed back (it used to take a shell
+   rule, `revert-layer` on line-height, position and top; delete it if your shell has one). A
+   table of thousands of cells is a stage too: the system page with every chapter on measured
+   5,569 blocks, and one pass took 1.7s, every time `main` resized.
+9. **Keep the controls out of a universal reset.** A host's unlayered `* { padding: 0 }` beats
+   the controls' layered padding, so chips, buttons and selects shrank to 17px: still on a line,
+   so the grid spec could not see it (found on the case study, 2026-10-02, which now leaves
+   `.wm-chip` out of its reset). Leave
+   `.wm-chip, .wm-btn, .wm-select` out of the reset, or put the reset in a layer below
+   `wm.controls`. The controls also hold their 27px with a `min-height` that a padding reset cannot
+   reach, so a page that missed this still has the height; it does not have the padding.
+10. **Hidden is `display: none`.** A slideshow whose other slides stay in the flow, stacked in one
+    cell, is siblings drawn over each other to the layout check -- the spec caught the case study's
+    highlights doing it (2026-10-02). They show the current slide and `display: none` the rest.
+11. **Components move whole**: `--snap-unit: 1` on a slider row, a chip row, a pill with a mark.
+12. **Rows meet**: `.wm-baselines` on side-by-side text; `data-baseline="last"` on a caption that
     should end on its neighbour's line.
-12. **Load gridSnap.js** (`defer`), and call `wmGridSnap()` after any script of yours changes a
+13. **Load gridSnap.js** (`defer`), and call `wmGridSnap()` after any script of yours changes a
     height.
-13. **Lint**: add the stylesheet to `lines` (and `only: ["lines"]` if the site is not on the rest
+14. **Lint**: add the stylesheet to `lines` (and `only: ["lines"]` if the site is not on the rest
     of the system yet).
-14. **CI**: add the page to `PAGES` in `tests/behaviour/grid.spec.ts`.
-15. **Look** at every section at 390, about 800 and 1440, and at a short phone (660-740px of
+15. **CI**: add the page to `PAGES` in `tests/behaviour/grid.spec.ts`.
+16. **Look** at every section at 390, about 800 and 1440, and at a short phone (660-740px of
     visible height), with `?grid` on. The checks test the line and a coarse layout; they do not
     test whether it looks right, and Closer Look broke at the two widths nobody looked at.
 
 ## 7 · Known limits
 
-- **`?grid`'s lines stop past 65,535 device pixels.** The overlay draws one canvas the height of
-  the root, and a canvas taller than that stays blank. The system page is ~47,000px at 1440, so
-  its lines draw at 1x and not at 2x or on a phone (68,000px); the columns always draw. Its Grid
-  part draws its own overlay, cut to each demo.
 - **Side-by-side columns with different leadings drift after line 1.** The row rule meets first
   baselines; a body column beside a lede column shares every third line and no others. An open
   design call (the case study's hero).

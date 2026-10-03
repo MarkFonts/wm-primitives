@@ -30,7 +30,14 @@
  * the form state all work, and :has(input:checked) is the chosen state.
  *
  * Tokens with fallbacks throughout, in @layer wm.controls like button.css, so a host can
- * override any line with an unlayered rule -- or bridge its own ink names on the row. */
+ * override any line with an unlayered rule -- or bridge its own ink names on the row.
+ *
+ * THE UNIVERSAL-RESET TRAP. That same rule means a host's unlayered `* { padding: 0 }` (a
+ * reset) silently zeroes the padding here: the chip draws 17px tall and still sits on a line,
+ * which the grid spec cannot see (the case study, 2026-10-02). The box is therefore ALSO held
+ * by min-height, which no padding reset touches; the fix on the host is still to leave
+ * `.wm-chip, .wm-btn, .wm-select` out of the reset, or to put the reset in a layer below
+ * wm.controls (GRID.md, the adoption checklist). */
 @layer wm.controls {
   .wm-chip-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-01, 4px); }
 
@@ -53,7 +60,11 @@
     /* ON THE LINE: 27px, nine units -- the ui leading (15) plus a --spacing-02 step each
        side with the hairline INSIDE the step (6 - 1 + 1). The formula is TYPOGRAPHY.md's
        (height follows the type); the line is GRID.md's. It was 4px + 16.8 + 1, which
-       came to the same 27 by accident; now it is 27 by rule, like the button and the select. */
+       came to the same 27 by accident; now it is 27 by rule, like the button and the select.
+       The min-height says the same 27 a second way, because a host's unlayered `* { padding: 0 }`
+       beats this layer and takes the padding with it (see the header) -- no reset touches it. */
+    box-sizing: border-box;
+    min-height: 27px;
     padding: calc(var(--spacing-02, 6px) - 1px) var(--spacing-04, 12px);
     font-family: var(--ui-font, system-ui, sans-serif);
     font-size: var(--type-ui-size, 0.75rem);
@@ -118,6 +129,7 @@
   .wm-chip--small {
     /* 1px, not var(--hair): the hosts disagree on what --hair is (Kernpare's is a length,
        the system page's a colour), and a colour there voids the whole padding. */
+    min-height: 18px;   /* the same box without the padding, as above */
     padding: 2px var(--spacing-03, 8px);   /* 18px, six units: micro's 12 + 2 + 2 + the hairlines */
     font-size: var(--type-micro-size, 0.5625rem);
     line-height: var(--type-micro-lead, 12px);

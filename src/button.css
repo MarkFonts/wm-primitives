@@ -33,7 +33,10 @@
     justify-content: center;
     /* ON THE LINE: 27px, nine units -- the ui leading (15) + a --spacing-02 step each side
        with the hairline inside the step. It was 6 + 16.8 + 1 = 30.8, a height no line
-       passes through, and 2px taller than the select beside it. (chip.css, select.css: same) */
+       passes through, and 2px taller than the select beside it. (chip.css, select.css: same)
+       min-height holds the 27 when a host's unlayered `* { padding: 0 }` zeroes the padding. */
+    box-sizing: border-box;
+    min-height: 27px;
     padding: calc(var(--spacing-02, 6px) - 1px) var(--spacing-03, 8px);
     font-family: var(--ui-font, system-ui, sans-serif);
     font-size: var(--type-ui-size, 0.75rem);
