@@ -104,6 +104,25 @@ code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-h
 .gx-srow output{min-width:3ch;text-align:right;font-variant-numeric:tabular-nums;font-size:var(--type-ui-size,.75rem);font-weight:400;color:var(--ink-2,rgba(23,24,26,.62))}
 .gx-moved{font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);color:var(--ink-3,rgba(23,24,26,.38));margin:9px 0 0;font-variant-numeric:tabular-nums}
 .gx-chips{--snap-unit:1;margin:0 0 15px}
+
+/* BREAKERS AND TOOLS. Two more real sheets at 1440: a page's margined .wm-grid with a breaker
+   strip, a text breaker and a flagged macOS shot on columns 11-24, and a tool's .wm-grid--bleed.
+   The column overlay is drawn OVER the content here (gx-over), so a column line can be seen
+   running into the window's edge. The sheet's text is the sheet's, scaled with it: a stage.
+   Every item names its --start: the overlay's <i>s fill every cell, so an auto-placed item
+   would be pushed past column 24 into columns the grid makes up. And its -md twin: the sheet is
+   1440 wide at any viewport, but the house's below-1024 rule re-places children by --start-md
+   and --span-md, and a 390 phone drew the 1440 sheet on twelve-column spans. */
+.gx-over > i{position:relative;z-index:2;pointer-events:none}
+.gx-sheet p{margin:0;font-size:21px;line-height:27px;color:var(--ink,#17181a)}
+.gx-sheet p small{display:block;font-size:15px;color:var(--ink-2,rgba(23,24,26,.62))}
+.gx-strip{grid-row:2;background:repeating-linear-gradient(135deg,var(--ink-3,#999) 0 1px,transparent 1px 7px);opacity:.55}
+.gx-band{grid-row:3;align-self:stretch;display:flex;flex-direction:column;justify-content:center;background:var(--surface-hi,#e6e6e6)}
+.gx-note{grid-row:4;align-self:start}
+.gx-shotcell{grid-row:4;align-self:start}
+.gx-panel{grid-row:2 / 4;background:var(--surface-hi,#e6e6e6);padding-block:24px}
+.gx-stage{grid-row:2 / 4;background:repeating-linear-gradient(135deg,var(--ink-3,#999) 0 1px,transparent 1px 7px);opacity:.55}
+.gx-wide{grid-row:4;align-self:center}
 </style>
 <body class="wm-lines">
 
@@ -210,6 +229,27 @@ level. Step the block above from 48 to 52px and watch which side walks.</p>
   on this page that draws its own specimens &#8212; is marked <code>data-nosnap</code>: the snapper skips it,
   and so does grid.css, so a stage is never half on the line.</p>
 </div>
+
+<h2>Breakers and tools <span>.wm-break &#183; .wm-grid--bleed &#183; data-shot="mac"</span></h2>
+<p><b>A page keeps its margin; a tool has none, ever.</b> The homepage, the case study, Kernpare and the
+opsz proofer are pages. font-proofer and ReCal are tools: <code>.wm-grid--bleed</code> on their
+<code>main</code> drops the margin, the columns run edge to edge and the gutter stays, and a box that touches
+the window holds its text one gutter in from it, never flush. <b>A breaker</b> is the page's way out of its
+margin: <code>.wm-break</code> (or <code>--left</code>, <code>--right</code>) takes a box to the window edge and
+keeps its words at the margin. A picture breaker, marked <code>data-nosnap</code>, is all box.</p>
+<p><b>A macOS window screenshot</b> carries its drop shadow as a transparent margin, so the window
+sits inside the image and lands short of the columns. <code>data-shot="mac"</code> cuts the shadow out of
+the layout: 112 / 112 / 76 / 148 capture px (left, right, top, bottom, at 2x), measured on the case study's
+shots. It is a fixed size in points, not a ratio, so a file scaled after capture says by how much
+(<code>--shot-scale</code>; the case study's 2000px files are .643). Below, the window's edges sit on the lines
+of columns 11 and 24.</p>
+
+<div class="gx-frame" data-nosnap data-w="1440" style="--h:760"><div class="gx-scale" style="width:1440px">
+  <div class="wm-grid gx-sheet gx-over" style="--grid-cols:24;--grid-gutter:24px;--grid-margin:100.8px;--rows:24px 48px 120px 1fr 24px;row-gap:24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><i style="grid-column:13"></i><i style="grid-column:14"></i><i style="grid-column:15"></i><i style="grid-column:16"></i><i style="grid-column:17"></i><i style="grid-column:18"></i><i style="grid-column:19"></i><i style="grid-column:20"></i><i style="grid-column:21"></i><i style="grid-column:22"></i><i style="grid-column:23"></i><i style="grid-column:24"></i><div class="wm-break gx-strip" data-nosnap></div><div class="wm-break gx-band"><p>A breaker: the ground meets the window, the words stay on the margin.<small>.wm-break &#183; padding-inline is the margin it took back</small></p></div><div class="gx-note" style="--start:1;--span:10;--start-md:1;--span-md:10"><p>The window, not the image, on the columns.<small>data-shot="mac" &#183; --shot-scale: .643 &#183; columns 11 to 24</small></p></div><div class="gx-shotcell" style="--start:11;--span:14;--start-md:11;--span-md:14"><img data-shot="mac" src="../../assets/shot-mac-font-proofer.webp" width="2000" height="1305" style="--shot-scale:.643" alt="font-proofer's window, a macOS screenshot with its shadow"></div></div></div></div>
+<p class="gx-cap">1440, a page &#183; margin 100.8 &#183; a breaker strip, a text breaker, and a window screenshot whose edges meet columns 11 and 24</p>
+<div class="gx-frame" data-nosnap data-w="1440" style="--h:312"><div class="gx-scale" style="width:1440px">
+  <div class="wm-grid wm-grid--bleed gx-sheet gx-over" style="--grid-cols:24;--grid-gutter:24px;--rows:24px 1fr 1fr 72px 24px;row-gap:24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><i style="grid-column:13"></i><i style="grid-column:14"></i><i style="grid-column:15"></i><i style="grid-column:16"></i><i style="grid-column:17"></i><i style="grid-column:18"></i><i style="grid-column:19"></i><i style="grid-column:20"></i><i style="grid-column:21"></i><i style="grid-column:22"></i><i style="grid-column:23"></i><i style="grid-column:24"></i><div class="gx-panel" style="--start:1;--span:5;--start-md:1;--span-md:5"><p>Rail<small>column 1: one gutter in from the window</small></p></div><div class="gx-stage" data-nosnap style="--start:6;--span:14;--start-md:6;--span-md:14"></div><div class="gx-panel" style="--start:20;--span:5;--start-md:20;--span-md:5"><p>Inspector<small>column 24: one gutter from the right</small></p></div><p class="gx-wide" style="--start:1;--span:24;--start-md:1;--span-md:24">.wm-grid--bleed: no margin, ever &#8212; but never flush.</p></div></div></div>
+<p class="gx-cap">1440, a tool &#183; .wm-grid--bleed &#183; columns of 37 to the window's edges &#183; text one gutter (24) in where a box touches an edge</p>
 
 <script>
 (function(){

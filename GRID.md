@@ -49,6 +49,85 @@ its rings are sized from the edge distance; its Closer Look demos inset by the g
 1024, where a column is wide enough that the card inset pushed the big words past the box (+38px
 at 900).
 
+### Pages and tools
+
+Mark's call, 2026-10-04: **a page has the margin; a tool has none, ever.** The homepage, the Cal
+Sans case study, Kernpare and the opsz proofer are pages, and keep it (and may break out of it,
+below). font-proofer and ReCal are tools: they fill the window.
+
+**Tools bleed: `.wm-grid--bleed`.** On a `.wm-grid`, or once on `main` or `body` so every grid in
+the app opts in (`--grid-margin` is inherited; on `<html>` a host's own unlayered `:root
+--grid-margin` would beat it, so prefer `main`). It sets `--grid-margin: 0`: the columns run the
+full width, still 24 / 12, and the gutter stays.
+
+**The one-gutter rule.** Text in a bleeding tool is never flush against the window. A child of a
+bleed grid that touches a window edge pads one `--grid-gutter` on that side, worked out from the
+house placement rather than left to each app:
+
+```
+start pad = gutter x max(0, 2 - start)                 one gutter when it starts in column 1
+end pad   = gutter x max(0, start + span - cols)        one gutter when it ends in the last
+```
+
+(`--start-md` / `--span-md` below 1024.) An auto-placed child counts as starting in column 1, so
+give a child that starts elsewhere its `--start`. Stages (`data-nosnap`) and pictures (`img`,
+`video`, `picture`, `canvas`, `svg`, `[data-shot]`) are not padded. The pad is layered: a host's
+own unlayered padding on the box replaces it, so put that padding on an element inside.
+
+**Breakers: `.wm-break`, `.wm-break--left`, `.wm-break--right`.** A child of a margined `.wm-grid`
+whose box runs to the window edge: it takes the margin back with a negative `margin-inline` of
+`--grid-margin` on the breaking side(s) and pads it back in, so the **text in a breaker still
+sits at the margin** -- a breaker is a bleed of the box, not of the words. `.wm-break` spans
+everything and breaks both sides; `--left` and `--right` keep the child's `--span` (`--span-md`)
+and run to their side. With both classes the modifier wins. A picture or stage breaker is marked
+`data-nosnap` and gets no inner padding: it is all box. **`.wm-cols` works inside a breaker**
+with nothing extra: the breaker's content box is the page's column area, so its columns are the
+page's (the spec checks a half inside one ends where the page's half does). In a bleed root there
+is no margin to break, and a breaker is an ordinary, gutter-padded child.
+
+**macOS screenshots: `data-shot="mac"`.** A window captured with Cmd-Shift-4, space carries its
+drop shadow as a transparent margin, so the visible window sits inside the image and a shot set
+on the columns lands its window short of them. Flag it -- on an `img`, a `video`, or a
+`picture` (whose `img` takes the rules) -- and the shadow is cut out of the layout: the image's
+box is the window, to the pixel, and the shadow is drawn past it.
+
+Measured on the case study's tool shots (2026-10-04; alpha >= 250 is the window, its rounded
+corners are opaque and the shadow is partial alpha):
+
+| image | file px | left | right | top | bottom | as fractions (l r t b) |
+|---|---|---|---|---|---|---|
+| calbuild (Terminal, native 2x) | 1666 x 1790 | 112 | 112 | 76 | 148 | .0672 .0672 .0425 .0827 |
+| proofer-ui-light | 2000 x 1305 | 72 | 72 | 49 | 95 | .0360 .0360 .0375 .0728 |
+| kernpare-dark | 2000 x 1308 | 72 | 72 | 49 | 95 | .0360 .0360 .0375 .0726 |
+| recal | 2000 x 1305 | 72 | 72 | 49 | 95 | .0360 .0360 .0375 .0728 |
+
+The fractions disagree between files and the pixels do not: the 2000px files are the same
+112 / 112 / 76 / 148 scaled by 72 / 112 = .643 (76 x .643 = 48.9, 148 x .643 = 95.2). **The shadow
+is a fixed size in points** (56 / 56 / 38 / 74 pt at 2x; it falls downward, so the bottom is
+twice the top), not a ratio of the window, so a ratio measured on one shot is wrong on a window
+of another size. The tokens are therefore capture px at 2x:
+
+```
+--shot-mac-l: 112   --shot-mac-r: 112   --shot-mac-t: 76   --shot-mac-b: 148
+--shot-scale: 1     file px per capture px: .643 for the case study's 2000px exports, .5 for a 1x capture
+--shot-w            the file's pixel width (unitless) -- gridSnap.js writes it
+```
+
+The arithmetic, with B the box the window should fill (the containing block, 100%), w the file's
+width and l r t b the shadow in file px (token x scale): one file px renders at
+k = B / (w - l - r), so `width = k x w` and `margin = -k t, -k r, -k b, -k l`. Percent margins
+resolve against the containing block's inline size on all four sides, top and bottom included,
+which is exactly B, so every term is `100% x n / (w - l - r)` and no wrapper is needed. CSS
+cannot read a file's pixel width, so gridSnap.js writes `--shot-w` inline (the width attribute at
+DOMContentLoaded, so a page with width/height lays out once; corrected from `naturalWidth` on
+load) and the rules wait for it (`[style*="--shot-w"]`): without the script, or before it, the
+plain image shows, never one sized from a guess. A margined `.wm-grid` holding a shot clips its
+sides (`overflow-x: clip`, not a scroll container): on a phone the 20px margin is narrower than a
+native capture's shadow, and the page must not scroll sideways for a shadow.
+
+The snapper skips a flagged image (as if `data-nosnap`), and the spec's layout check judges its
+window, not its box.
+
 ## 2 · The line
 
 **3px.** Not a leading: a unit every leading divides into, "fractional" in the sense that 12/15
@@ -168,6 +247,10 @@ grid.css adds to `top`. Glyphs move, layout does not, so one pass is enough.
   lines, which read as the type being off when it is the drawing that is. It is ONE canvas the size
   of the viewport, fixed, redrawn on scroll, so how tall the page is does not matter.
 
+- **Shots.** Every pass writes `--shot-w` on a `[data-shot="mac"]` that has none (§1, Pages and
+  tools), and skips the flagged image as a stage. The `?grid` columns take the first root's
+  margin, so a tool's `.wm-grid--bleed` draws them edge to edge.
+
 Plain script, no module: `<script src="shared/src/gridSnap.js" defer>`.
 
 ## 4 · The lint
@@ -197,7 +280,7 @@ On the case study as it was before the grid it flags all 73 off-line values.
 
 `tests/behaviour/grid.spec.ts` holds the OUTPUT, on every page in its `PAGES` -- the bench
 (`docs/grid.html`), the system page (`docs/index.html`) and the case study (the wordmark site
-checked out with `shared/` at the commit under test) the wordmark homepage and ReCal's eight compare pages (`/recalsans/<slug>/`, from `RECAL_DIST`) -- at **1440, 900 and 390** wide, 900 tall,
+checked out with `shared/` at the commit under test) and the wordmark homepage -- at **1440, 900 and 390** wide, 900 tall,
 in Chromium. After fonts load and one more snapper pass:
 
 1. the snapper measured more than five blocks (is it loaded, is the page `.wm-lines`?);
@@ -215,7 +298,18 @@ in Chromium. After fonts load and one more snapper pass:
    not inside an inset scroller) starts at or right of the root's `--grid-margin` (resolved by
    a probe, it is a `clamp()`) minus 1px, and ends at or left of the viewport minus it; text in
    a scroller that actually scrolls is judged by its start edge only. The system page opts out
-   (`ownEdges`): its edges are the doc shell's rail and `--edge-l`, not `.wm-grid`.
+   (`ownEdges`): its edges are the doc shell's rail and `--edge-l`, not `.wm-grid`. The margin is
+   resolved in each block's own root. **Text in a `.wm-grid--bleed` root is judged against one
+   gutter instead**, and the report line says so (`EXEMPT from the margin: N blocks in a
+   .wm-grid--bleed root, judged against one gutter (24px)`); on a page whose every root bleeds,
+   the margin is asserted to be 0 rather than more than 0. A breaker's box reaching the window
+   edge is allowed -- only text is judged -- so the text inside one still answers to the margin.
+   The layout check judges a `[data-shot="mac"]` image by its window, not its shadowed box.
+8. **bleed, breakers, shots, by geometry** (`tests/fixtures/grid-bleed.html` at
+   `/dial/grid-bleed.html`, which is also in `PAGES`): a bleed rail's box at x=0 and its text one
+   gutter in; a `.wm-break`'s box from 0 to the window width with its text at the margin, and a
+   `.wm-cols` inside it on the page's columns; a `--left` breaker keeping its span; a flagged shot's
+   window equal to its cell on all four sides.
 
 Check 6 exists because every baseline check was green while the first page on the grid was
 broken on a phone (below).
@@ -267,6 +361,10 @@ In this order. Each step names the trap it was written after.
 14. **Lint**: add the stylesheet to `lines` (and `only: ["lines"]` if the site is not on the rest
     of the system yet).
 15. **CI**: add the page to `PAGES` in `tests/behaviour/grid.spec.ts`.
+    **A page or a tool?** A tool puts `.wm-grid--bleed` on `main` (one gutter from the window,
+    never flush, never a margin) and gives each edge child its `--start`; a page keeps the
+    margin and breaks out of it with `.wm-break`. A macOS window screenshot gets
+    `data-shot="mac"` and, if it was resized after capture, its `--shot-scale`.
 16. **Look** at every section at 390, about 800 and 1440, and at a short phone (660-740px of
     visible height), with `?grid` on. The checks test the line and a coarse layout; they do not
     test whether it looks right, and Closer Look broke at the two widths nobody looked at.
