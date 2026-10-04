@@ -28,14 +28,12 @@ grid on `align-items: baseline` (`AxisSlider.css`, and `alignment.spec.ts` gains
 one baseline"). The skip clause strips the first path segment for any host, and
 The bleed-gutter lines in `alignment-lines.json` land with the two app pages, after the app PRs merge.
 
-## 2026-10-03 -- ReCal's eight landing pages join the grid spec
+## 2026-10-04 — the arrows join the icon face
 
-ReCal #27 put the compare pages (poppins, inter, geist, futura, neutra, circular, gotham,
-gt-america) on the grid, and nothing held them there. They are now in `PAGES`, read from
-`RECAL_DIST` (the browser job already exports it and builds ReCal with `npm run build`, which
-runs `gen-landing.mjs`, so `dist/<slug>/index.html` exists). The skip clause used to strip
-`/wordmark/` only; it now strips the first path segment, so one rule finds the file under
-whichever host's `dir`. 24 more tests, no CI change.
+89 names. The case study's Highlights slideshow gets back/next buttons drawn from the face:
+chevron_left and chevron_right, with arrow_back and arrow_forward in the same cut. Re-cut with
+`scripts/cut-icon-subset.py chevron_left chevron_right arrow_back arrow_forward`, which also
+moved the face URL to ?v=89.
 
 ## 2026-10-04 -- pages keep the margin, tools bleed, breakers, and the macOS shadow
 
