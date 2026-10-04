@@ -25,8 +25,7 @@ It found the first offender on its first run: the system page's "component moves
 row, whose value was centred beside a 26px label (4px up); fixed with `align-self: baseline` on
 the label and output. The real source of the rail drift is `.slider-label`, now a two-column
 grid on `align-items: baseline` (`AxisSlider.css`, and `alignment.spec.ts` gains "a dial row is
-one baseline"). The spec also gains the two apps in `PAGES` (they opt out of the page-margin check,
-being `.wm-grid--bleed`), the skip clause strips the first path segment for any host, and
+one baseline"). The skip clause strips the first path segment for any host, and
 `alignment-lines.json` moves the rail and canvas lines to the bleed gutter.
 
 ## 2026-10-03 -- ReCal's eight landing pages join the grid spec

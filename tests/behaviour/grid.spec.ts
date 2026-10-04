@@ -42,12 +42,6 @@ const PAGES = [
   // .wm-lines root; the app above it is outside the root, the specimen is data-nosnap.
   ...['poppins', 'inter', 'geist', 'futura', 'neutra', 'circular', 'gotham', 'gt-america'].map(slug =>
     ({ name: `ReCal /${slug}/`, url: `/recalsans/${slug}/`, dir: process.env.RECAL_DIST ?? resolve('../ReCal/dist') })),
-  // The two apps, TOOLS: #root is the .wm-lines root, the rail and the chrome on the line,
-  // the specimen / proof sheet / UI board stages (data-nosnap). RECAL_DIST / FONT_PROOFER_DIST,
-  // the builds tests/serve.mjs serves. Tools are .wm-grid--bleed (no margin, text one gutter
-  // from the window), so like the system page they opt out of the page-margin check.
-  { name: 'ReCal app', url: '/recalsans/', ownEdges: true, dir: process.env.RECAL_DIST ?? resolve('../ReCal/dist') },
-  { name: 'font-proofer', url: '/font-proofer/', ownEdges: true, dir: process.env.FONT_PROOFER_DIST ?? resolve('../font-proofer/dist') },
 ]
 const WIDTHS = [1440, 900, 390]
 
