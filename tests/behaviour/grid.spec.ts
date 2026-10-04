@@ -33,6 +33,10 @@ const PAGES = [
   { name: 'system page', url: '/grid/index.html', ownEdges: true },
   { name: 'Cal Sans case study', url: '/wordmark/calsans/', dir: process.env.WORDMARK_DIR ?? resolve('../wordmark') },
   { name: 'homepage', url: '/wordmark/index.html', dir: process.env.WORDMARK_DIR ?? resolve('../wordmark') },
+  // ReCal's eight compare pages (scripts/gen-landing.mjs): the article under the app is the
+  // .wm-lines root; the app above it is outside the root, the specimen is data-nosnap.
+  ...['poppins', 'inter', 'geist', 'futura', 'neutra', 'circular', 'gotham', 'gt-america'].map(slug =>
+    ({ name: `ReCal /${slug}/`, url: `/recalsans/${slug}/`, dir: process.env.RECAL_DIST ?? resolve('../ReCal/dist') })),
 ]
 const WIDTHS = [1440, 900, 390]
 
@@ -88,7 +92,7 @@ const MARGIN = () => {   // runs in the page; stringified below
 for (const pg of PAGES) {
   test.describe(`${pg.name} · on the line`, () => {
     test.skip(({ hasTouch }) => hasTouch, 'widths are the axis here, not the input')
-    test.skip(!!pg.dir && !existsSync(resolve(pg.dir, pg.url.replace('/wordmark/', '') + (pg.url.endsWith('/') ? 'index.html' : ''))), 'no wordmark checkout (WORDMARK_DIR)')
+    test.skip(!!pg.dir && !existsSync(resolve(pg.dir, pg.url.replace(/^\/[^/]+\//, '') + (pg.url.endsWith('/') ? 'index.html' : ''))), 'no checkout of that host (WORDMARK_DIR, RECAL_DIST)')
 
     for (const w of WIDTHS) {
       test(`${pg.name} · ${w}px`, async ({ page }) => {
