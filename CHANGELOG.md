@@ -12,6 +12,13 @@ Newest first.
 
 ---
 
+## 2026-10-04 — the arrows join the icon face
+
+89 names. The case study's Highlights slideshow gets back/next buttons drawn from the face:
+chevron_left and chevron_right, with arrow_back and arrow_forward in the same cut. Re-cut with
+`scripts/cut-icon-subset.py chevron_left chevron_right arrow_back arrow_forward`, which also
+moved the face URL to ?v=89.
+
 ## 2026-10-03 -- ReCal's eight landing pages join the grid spec
 
 ReCal #27 put the compare pages (poppins, inter, geist, futura, neutra, circular, gotham,
