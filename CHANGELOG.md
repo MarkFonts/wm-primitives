@@ -26,7 +26,7 @@ row, whose value was centred beside a 26px label (4px up); fixed with `align-sel
 the label and output. The real source of the rail drift is `.slider-label`, now a two-column
 grid on `align-items: baseline` (`AxisSlider.css`, and `alignment.spec.ts` gains "a dial row is
 one baseline"). The skip clause strips the first path segment for any host, and
-`alignment-lines.json` moves the rail and canvas lines to the bleed gutter.
+The bleed-gutter lines in `alignment-lines.json` land with the two app pages, after the app PRs merge.
 
 ## 2026-10-03 -- ReCal's eight landing pages join the grid spec
 
