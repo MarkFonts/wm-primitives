@@ -15,12 +15,12 @@
      ],
      "lines": {
       "box": {
-       "x": 16,
-       "why": "the rail's padding; section labels and any control's box edge"
+       "x": 24,
+       "why": "one gutter from the window: the apps are tools on the bleed grid since 2026-10-04 (grid.css .wm-grid--bleed: no margin, and a box on the window's edge pads one --grid-gutter, 24 at 1500px); section labels, the default dial's label and any control's box edge"
       },
       "inset": {
-       "x": 29,
-       "why": "box 16 + 1px border + 12px field padding; the text inside every field, the upload button and the mode buttons (a transparent 1px edge)"
+       "x": 37,
+       "why": "box 24 + 1px border + 12px field padding; the text inside every field, the upload button and the mode buttons (a transparent 1px edge)"
       }
      }
     }
@@ -30,7 +30,7 @@
    "url": "/recalsans/",
    "regions": {
     "rail": {
-     "where": "text left edge under 264px",
+     "where": "text left edge under 300px",
      "selectors": [
       ".rail-title",
       ".rail-sub",
@@ -41,21 +41,21 @@
      ],
      "lines": {
       "box": {
-       "x": 16,
-       "why": "the rail's padding; the title, its caption, every group label"
+       "x": 24,
+       "why": "one gutter from the window: the apps are tools on the bleed grid since 2026-10-04 (grid.css .wm-grid--bleed: no margin, and a box on the window's edge pads one --grid-gutter, 24 at 1500px); the title, its caption, every group label"
       },
       "inset": {
-       "x": 29,
-       "why": "box 16 + 1px border + 12px field padding; the label inside every dial row"
+       "x": 37,
+       "why": "box 24 + 1px border + 12px field padding; the label inside every dial row"
       },
       "chip": {
-       "x": 28,
-       "why": "box 16 + the zone chip's 12px padding, no border"
+       "x": 36,
+       "why": "box 24 + the zone chip's 12px padding, no border"
       }
      }
     },
     "canvas": {
-     "where": "text left edge from 264px",
+     "where": "text left edge from 300px",
      "selectors": [
       ".canvas-bar .mode-btn:first-child",
       ".mode-row .mode-label",
@@ -64,12 +64,12 @@
      ],
      "lines": {
       "tabs": {
-       "x": 296,
-       "why": "canvas 264 + bar padding 24 + tab button padding 8; Words, and the mode label under it (shell.css: 32px = 24 + 8)"
+       "x": 317.5,
+       "why": "the canvas's first column line at 1500px, no margin: the rail's 5 columns (5 x 39.5) + 5 gutters (5 x 24) = 317.5. Bare text aligns by its glyphs: Words (the bar is pulled left by the tab's own 8px padding, and a tab's words start at its padding edge, not centred in the bold width) and the mode label under it (shell.css, scenes.css)"
       },
       "submenu": {
-       "x": 458,
-       "why": "tabs 296 + the mode label's fixed 154px box + 8px, so the submenu sits under the Scale tab"
+       "x": 508,
+       "why": "the stage's 4th column line at 1500: tabs 317.5 + 3 columns and gutters (3 x 63.5). The mode label's box is at least 154px, rounded up to whole columns less the 8px every submenu item insets its text (shell.css .mode-row .mode-label)"
       }
      }
     }

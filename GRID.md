@@ -129,6 +129,15 @@ A row a host made `position: relative` (to hang a guide or a badge off it) still
 writes the `top` on it whether it found it static or relative. Absolute, fixed and sticky boxes are
 left alone.
 
+**Inside a unit, one line of text is one baseline.** Every text run on a line of a `--snap-unit: 1`
+component -- a slider row's name, tag and value; a chip row's chips -- has the same baseline as
+the first run on that line, within 0.5px. The row rule above aligns siblings of a `.wm-baselines`
+grid; this holds the words *inside* one component together (a rail row's value field once sat
+2px under its label and every other check was green). A unit that wraps has a baseline per line,
+and each line is held to its own first run. Opt out with `data-baseline="free"` on the unit, or
+on a run inside it (a caption meant to hang), and say why in a comment; `data-nosnap`,
+`aria-hidden` marks and icon glyphs (`.material-symbols-outlined`, `.wm-icon`) are not text runs.
+
 ### Stages: `data-nosnap`
 
 A subtree marked `data-nosnap` -- a demo with its own type, a cube, a tester, a poster -- is
@@ -197,7 +206,7 @@ On the case study as it was before the grid it flags all 73 off-line values.
 
 `tests/behaviour/grid.spec.ts` holds the OUTPUT, on every page in its `PAGES` -- the bench
 (`docs/grid.html`), the system page (`docs/index.html`) and the case study (the wordmark site
-checked out with `shared/` at the commit under test) the wordmark homepage and ReCal's eight compare pages (`/recalsans/<slug>/`, from `RECAL_DIST`) -- at **1440, 900 and 390** wide, 900 tall,
+checked out with `shared/` at the commit under test) the wordmark homepage, ReCal's eight compare pages (`/recalsans/<slug>/`, from `RECAL_DIST`) and the two apps (`/recalsans/`, `/font-proofer/`, from `RECAL_DIST` / `FONT_PROOFER_DIST`) -- at **1440, 900 and 390** wide, 900 tall,
 in Chromium. After fonts load and one more snapper pass:
 
 1. the snapper measured more than five blocks (is it loaded, is the page `.wm-lines`?);
@@ -215,7 +224,15 @@ in Chromium. After fonts load and one more snapper pass:
    not inside an inset scroller) starts at or right of the root's `--grid-margin` (resolved by
    a probe, it is a `clamp()`) minus 1px, and ends at or left of the viewport minus it; text in
    a scroller that actually scrolls is judged by its start edge only. The system page opts out
-   (`ownEdges`): its edges are the doc shell's rail and `--edge-l`, not `.wm-grid`.
+   (`ownEdges`): its edges are the doc shell's rail and `--edge-l`, not `.wm-grid`; so do the two
+   tools (ReCal, font-proofer), which are `.wm-grid--bleed`.
+8. **units share a baseline** -- inside every `--snap-unit: 1` component (not nested in another,
+   not `data-nosnap`, not `data-baseline="free"`) the text runs on one line of the unit sit on
+   one baseline, within 0.5px. A run's baseline is the bottom of its Range's first client rect
+   minus the face's descent (read once per font from a probe span); an `<input>`/`<textarea>`
+   value, which has no text node, is read from its content box with the same descent, the line
+   centred in an input and top-aligned in a textarea. Offenders print as
+   `unit tag.class: "text" at Ypx vs "first text" at Ypx (delta)`.
 
 Check 6 exists because every baseline check was green while the first page on the grid was
 broken on a phone (below).

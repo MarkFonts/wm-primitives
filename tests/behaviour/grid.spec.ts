@@ -18,6 +18,11 @@ import { resolve } from 'node:path'
      5. the margin holds: no measured text starts left of the house margin or ends right of
         the viewport minus it. The homepage's unlayered `* { padding: 0 }` reset beat the
         layered `.wm-grid` padding-inline, the copy sat at x=0, and checks 1-4 were green.
+     6. units share a baseline: every text run inside a --snap-unit: 1 component (a slider row,
+        a chip row, a rail row) has the SAME baseline as the unit's first run, within 0.5px,
+        unless the unit is data-baseline="free". The row rule (2) aligns siblings of a
+        .wm-baselines grid; nothing held the text INSIDE one component together, and a rail
+        row's value field drifted below its label with every other check green.
    It judges window.wmGridSnap.blocks, exactly what the snapper judged, so ornaments placed
    on purpose (a pill's arrow, a deck counter) drop out by the same rule that skips them,
    not by a list kept here. */
@@ -37,6 +42,12 @@ const PAGES = [
   // .wm-lines root; the app above it is outside the root, the specimen is data-nosnap.
   ...['poppins', 'inter', 'geist', 'futura', 'neutra', 'circular', 'gotham', 'gt-america'].map(slug =>
     ({ name: `ReCal /${slug}/`, url: `/recalsans/${slug}/`, dir: process.env.RECAL_DIST ?? resolve('../ReCal/dist') })),
+  // The two apps, TOOLS: #root is the .wm-lines root, the rail and the chrome on the line,
+  // the specimen / proof sheet / UI board stages (data-nosnap). RECAL_DIST / FONT_PROOFER_DIST,
+  // the builds tests/serve.mjs serves. Tools are .wm-grid--bleed (no margin, text one gutter
+  // from the window), so like the system page they opt out of the page-margin check.
+  { name: 'ReCal app', url: '/recalsans/', ownEdges: true, dir: process.env.RECAL_DIST ?? resolve('../ReCal/dist') },
+  { name: 'font-proofer', url: '/font-proofer/', ownEdges: true, dir: process.env.FONT_PROOFER_DIST ?? resolve('../font-proofer/dist') },
 ]
 const WIDTHS = [1440, 900, 390]
 
@@ -63,6 +74,76 @@ const LAYOUT = () => {   // runs in the page; stringified below
     }
   }
   return { narrow: narrow.slice(0, 8), overlap: overlap.slice(0, 8) };
+}
+
+const UNITS = () => {   // runs in the page; stringified below
+  /* UNITS SHARE A BASELINE. A --snap-unit: 1 component moves whole, by its first line; this
+     holds that every text run INSIDE it sits on that baseline. A run's baseline is its Range's
+     first client rect bottom (the inline box's content area, whatever the line-height) minus
+     the face's descent, measured once per font with a probe span ("x" in the same computed
+     font: span bottom less a zero-size inline-block's top, which is the baseline). An
+     <input>/<textarea> has no text node: its value is measured from its content box, where the
+     browser centres the text line (inputs) or starts it (textarea) -- the same descent probe. */
+  const unitOf = (e: Element) => getComputedStyle(e).getPropertyValue('--snap-unit').trim() === '1'
+  const FREE = '[data-baseline="free"], [data-nosnap], [aria-hidden="true"], .material-symbols-outlined, .wm-icon, svg, script, style, noscript'
+  const cache = new Map<string, { a: number; d: number }>()
+  const metrics = (host: Element) => {
+    const c = getComputedStyle(host)
+    const key = [c.fontFamily, c.fontSize, c.fontWeight, c.fontStyle, c.fontStretch, c.fontVariationSettings, c.fontOpticalSizing, c.fontFeatureSettings, c.letterSpacing].join('|')
+    let m = cache.get(key); if (m) return m
+    const sp = document.createElement('span'), ib = document.createElement('span')
+    sp.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;line-height:normal;padding:0;border:0;margin:0'
+    ib.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline'
+    sp.append('x', ib)
+    // an <input> cannot hold a child: the probe goes in its parent wearing the input's font
+    const into = /^(input|textarea)$/i.test(host.tagName) ? host.parentElement! : host
+    if (into !== host) for (const k of ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'fontStretch', 'fontVariationSettings', 'fontOpticalSizing', 'fontFeatureSettings', 'letterSpacing'] as const) (sp.style as any)[k] = (c as any)[k]
+    into.appendChild(sp)
+    const r = sp.getBoundingClientRect(), base = ib.getBoundingClientRect().top
+    sp.remove()
+    m = { a: base - r.top, d: r.bottom - base }; cache.set(key, m); return m
+  }
+  const short = (t: string) => t.replace(/\s+/g, ' ').trim().slice(0, 24)
+  const name = (e: Element) => `${e.tagName.toLowerCase()}.${(e.getAttribute('class') || '').split(' ')[0]}`
+  const off: string[] = []; let units = 0, runs = 0
+  for (const u of document.querySelectorAll('.wm-lines *')) {
+    if (!unitOf(u) || (u.parentElement && unitOf(u.parentElement)) || u.closest('[data-nosnap], [data-baseline="free"]')) continue
+    units++
+    const found: { y: number; t: string; top: number; bottom: number }[] = []
+    const w = document.createTreeWalker(u, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
+      acceptNode: n => n.nodeType === 1
+        ? ((n as Element).matches(FREE) ? NodeFilter.FILTER_REJECT : (n as Element).matches('input, textarea') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP)
+        : (n.textContent!.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) })
+    let n: Node | null
+    while ((n = w.nextNode())) {
+      if (n.nodeType === 1) {   // a field: its value has no text node
+        const el = n as HTMLInputElement
+        if (el.tagName === 'INPUT' && !/^(text|number|search|email|url|tel|password)$/.test(el.type)) continue
+        const cs = getComputedStyle(el), r = el.getBoundingClientRect(); if (!el.value || !r.height || cs.visibility === 'hidden') continue
+        const m = metrics(el), pt = parseFloat(cs.paddingTop) + parseFloat(cs.borderTopWidth), pb = parseFloat(cs.paddingBottom) + parseFloat(cs.borderBottomWidth)
+        const ch = r.height - pt - pb
+        found.push({ y: r.top + pt + (el.tagName === 'INPUT' ? (ch - (m.a + m.d)) / 2 : 0) + m.a, t: el.value, top: r.top + pt, bottom: r.bottom - pb }); continue
+      }
+      const tn = n as Text, host = tn.parentElement!
+      if (host.closest(FREE) || getComputedStyle(host).visibility === 'hidden') continue
+      const rg = document.createRange(); rg.selectNodeContents(tn)
+      const rect = [...rg.getClientRects()].find(r => r.width > 0 && r.height > 0); if (!rect) continue
+      found.push({ y: rect.bottom - metrics(host).d, t: tn.textContent!, top: rect.top, bottom: rect.bottom })
+    }
+    runs += found.length
+    if (found.length < 2) continue
+    // A unit that wraps (a row of chips, a caption under its label) has one baseline PER LINE, so
+    // runs are grouped into lines by vertical overlap, in document order, and each run is held
+    // to the first run of ITS line. Runs on a line must meet; lines are the layout's business.
+    const lines: typeof found[] = []
+    for (const f of found) {
+      const ln = lines.find(l => { const g = l[0], ov = Math.min(g.bottom, f.bottom) - Math.max(g.top, f.top); return ov > 0.5 * Math.min(g.bottom - g.top, f.bottom - f.top) })
+      ln ? ln.push(f) : lines.push([f])
+    }
+    for (const ln of lines) for (const f of ln.slice(1)) if (Math.abs(f.y - ln[0].y) > 0.5)
+      off.push(`unit ${name(u)}: "${short(f.t)}" at ${f.y.toFixed(1)}px vs "${short(ln[0].t)}" at ${ln[0].y.toFixed(1)}px (${(f.y - ln[0].y > 0 ? '+' : '') + (f.y - ln[0].y).toFixed(1)})`)
+  }
+  return { units, runs, off }
 }
 
 const MARGIN = () => {   // runs in the page; stringified below
@@ -92,7 +173,7 @@ const MARGIN = () => {   // runs in the page; stringified below
 for (const pg of PAGES) {
   test.describe(`${pg.name} · on the line`, () => {
     test.skip(({ hasTouch }) => hasTouch, 'widths are the axis here, not the input')
-    test.skip(!!pg.dir && !existsSync(resolve(pg.dir, pg.url.replace(/^\/[^/]+\//, '') + (pg.url.endsWith('/') ? 'index.html' : ''))), 'no checkout of that host (WORDMARK_DIR, RECAL_DIST)')
+    test.skip(!!pg.dir && !existsSync(resolve(pg.dir, pg.url.replace(/^\/[^/]+\//, '') + (pg.url.endsWith('/') ? 'index.html' : ''))), `no checkout at ${pg.dir} (WORDMARK_DIR, RECAL_DIST, FONT_PROOFER_DIST)`)
 
     for (const w of WIDTHS) {
       test(`${pg.name} · ${w}px`, async ({ page }) => {
@@ -143,6 +224,11 @@ for (const pg of PAGES) {
         const l = await page.evaluate(fn => new Function('return (' + fn + ')()')(fn), LAYOUT.toString()) as { narrow: string[]; overlap: string[] }
         expect(l.narrow, `boxes narrower than their contents:\n${l.narrow.join('\n')}`).toEqual([])
         expect(l.overlap, `siblings drawn over each other:\n${l.overlap.join('\n')}`).toEqual([])
+
+        // UNITS: every text run in a --snap-unit: 1 component shares the unit's first baseline (data-baseline="free" opts out)
+        const un = await page.evaluate(fn => new Function('return (' + fn + ')()')(fn), UNITS.toString()) as { units: number; runs: number; off: string[] }
+        console.log(`units ${pg.name} ${w}: ${un.units} units, ${un.runs} text runs`)
+        expect(un.off, `text inside a unit that does not share the unit's baseline (mark the unit or run data-baseline="free" with a reason if it is meant to hang):\n${un.off.join('\n')}`).toEqual([])
 
         // MARGIN: the copy sits inside the house margin, both sides (a page with ownEdges answers to its shell)
         const m = await page.evaluate(fn => new Function('return (' + fn + ')()')(fn), MARGIN.toString()) as { raw: string; margin: number; n: number; minLeft: number; maxRight: number; vw: number; off: string[] }
