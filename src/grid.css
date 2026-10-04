@@ -25,7 +25,19 @@
  *   .wm-card            a box whose contents start one column + one gutter in
  *   --grid-col          one column's width, as a length, inside either container
  *   --bl                the line; .wm-lines puts text's baselines on it (below)
- *   --snap              the remainder a builder or gridSnap.js measured (below) */
+ *   --snap              the remainder a builder or gridSnap.js measured (below)
+ *
+ * PAGES AND TOOLS (Mark 2026-10-04). A page has the margin; a tool has none, ever.
+ *   .wm-grid--bleed     no margin: on a .wm-grid, or once on main/body for a whole app.
+ *                       Columns run the full width, the gutter stays, and a box touching a
+ *                       window edge holds its text one gutter in from it.
+ *   .wm-break           a child of a margined grid whose BOX runs to both window edges; its
+ *   .wm-break--left     text stays at the margin (a bleed of the box, not of the words).
+ *   .wm-break--right    One edge only, on the child's own --span. [data-nosnap]: a picture
+ *                       or stage, no inner padding.
+ *   [data-shot="mac"]   a macOS window screenshot (img, video, or a picture): the shadow
+ *                       margin is cut out of the layout so the WINDOW's edge sits on the
+ *                       column edge. --shot-mac-l/r/t/b are the shadow in capture px. */
 @layer wm.grid {
   :root {
     --grid-cols: 24;
@@ -59,6 +71,87 @@
     :is(.wm-grid, .wm-cols) > * { grid-column: var(--start-md, auto) / span var(--span-md, 12); }
   }
   .wm-card { padding: var(--grid-gutter) calc(var(--grid-col) + var(--grid-gutter)); }
+
+  /* GRID BREAKERS. A child of a margined .wm-grid that runs to the window edge: the box takes
+     the margin back (negative margin-inline by --grid-margin) and pads it back in, so text in a
+     breaker still starts at the margin and a .wm-cols inside it lands on the page's own
+     columns -- its content box IS the page's column area. A breaker of two edges spans
+     everything; a one-edge breaker keeps the child's --span (--span-md below 1024) and runs to
+     the side it breaks. A picture or stage (data-nosnap) gets no inner padding: it is the box.
+     With both classes, the side the modifier names wins. In a bleed root there is no margin
+     to break: a breaker is an ordinary child there, and the bleed rule below pads it. */
+  .wm-grid > .wm-break { grid-column: 1 / -1; margin-inline: calc(-1 * var(--grid-margin)); padding-inline: var(--grid-margin); }
+  .wm-grid > .wm-break--left { grid-column: 1 / span var(--span, 24); margin-inline: calc(-1 * var(--grid-margin)) 0; padding-inline: var(--grid-margin) 0; }
+  .wm-grid > .wm-break--right { grid-column: span var(--span, 24) / -1; margin-inline: 0 calc(-1 * var(--grid-margin)); padding-inline: 0 var(--grid-margin); }
+  .wm-grid > :is(.wm-break, .wm-break--left, .wm-break--right):where([data-nosnap]) { padding-inline: 0; }
+
+  /* TOOLS BLEED: .wm-grid--bleed. font-proofer, ReCal: no margin, ever. On one .wm-grid, or once
+     on main / body so every grid inside opts in (--grid-margin is inherited; on <html> a
+     host's own unlayered :root --grid-margin would beat it, so prefer main or body). The
+     columns run edge to edge, still 24 / 12, gutter kept -- and text never sits flush against
+     the window: a box that touches an edge pads one gutter on that side. Which boxes touch an
+     edge is read from the house placement, not guessed from the DOM:
+       start pad = gutter x max(0, 2 - start)                      1 when it starts in column 1
+       end pad   = gutter x max(0, start + span - cols)            1 when it ends in the last
+     An auto-placed child counts as starting in column 1: give one that starts elsewhere its
+     --start (--start-md). A stage (data-nosnap) or a picture is not padded: it keeps its own room. The pad is
+     layered, so a host's own unlayered padding on the box replaces it -- put that padding on
+     an inner element instead. */
+  .wm-grid--bleed { --grid-margin: 0px; }
+  :is(.wm-grid--bleed .wm-grid, .wm-grid.wm-grid--bleed) > :not(:where([data-nosnap], [data-shot], img, video, picture, canvas, svg)) {
+    padding-inline-start: calc(var(--grid-gutter) * max(0, 2 - var(--start, 1)));
+    padding-inline-end: calc(var(--grid-gutter) * max(0, var(--start, 1) + var(--span, 24) - var(--grid-cols)));
+  }
+  @media (max-width: 1023px) {
+    .wm-grid > .wm-break--left { grid-column: 1 / span var(--span-md, 12); }
+    .wm-grid > .wm-break--right { grid-column: span var(--span-md, 12) / -1; }
+    :is(.wm-grid--bleed .wm-grid, .wm-grid.wm-grid--bleed) > :not(:where([data-nosnap], [data-shot], img, video, picture, canvas, svg)) {
+      padding-inline-start: calc(var(--grid-gutter) * max(0, 2 - var(--start-md, 1)));
+      padding-inline-end: calc(var(--grid-gutter) * max(0, var(--start-md, 1) + var(--span-md, 12) - var(--grid-cols)));
+    }
+  }
+
+  /* MACOS WINDOW SCREENSHOTS: [data-shot="mac"]. Cmd-Shift-4, space, and the window comes with
+     its drop shadow as a transparent margin, so the visible window edge sits INSIDE the image
+     and a shot set on the columns lands its window short of them. The margin is a fixed size
+     in points, not a ratio: measured on the case study's shots (2026-10-04, alpha >= 250), a 2x
+     capture carries 112 px left and right, 76 on top and 148 below (56 / 38 / 74 pt; the
+     shadow falls downward). A file scaled after capture keeps the same FRACTIONS of its own
+     width as the capture had of its, so it says by how much in --shot-scale (file px per
+     capture px: the case study's 2000px files are 0.643 of a ~3111px capture, 72 / 2000).
+     A 1x capture is --shot-scale: 0.5.
+
+     The arithmetic. B is the box the WINDOW should fill (the containing block, 100%), w the
+     file's width in px (--shot-w), and l r t b the shadow in file px (token x scale). The
+     window is w - l - r file px wide, so one file px renders at k = B / (w - l - r), and:
+       width  = k x w                            the whole file, shadow included
+       margin = -k x t   -k x r   -k x b   -k x l
+     Percent margins resolve against the containing block's INLINE size on all four sides,
+     the top and bottom too -- which is exactly B, so every term is 100% x n / (w - l - r)
+     and the image's layout box is the window, to the pixel, at any width. The shadow is
+     drawn past the box like any shadow; a margined .wm-grid holding a shot clips its own
+     sides (overflow-x: clip, not a scroll container) so a phone's 20px margin, narrower
+     than the shadow, does not scroll the page sideways.
+
+     --shot-w needs the file's pixel width and CSS cannot read it: gridSnap.js writes it
+     inline (from the loaded image, the width attribute until then), or the page does. The
+     rules apply only once it is there -- [style*="--shot-w"] -- so a page without the
+     script shows the plain image, never one sized from a guess. */
+  :root { --shot-mac-l: 112; --shot-mac-r: 112; --shot-mac-t: 76; --shot-mac-b: 148; }
+  [data-shot="mac"] { --shot-w: initial; --shot-scale: 1; }
+  picture[data-shot="mac"] { display: block; }
+  :is(img, video)[data-shot="mac"][style*="--shot-w"], picture[data-shot="mac"][style*="--shot-w"] > img {
+    --_shot-k: calc(100% / (var(--shot-w) - (var(--shot-mac-l) + var(--shot-mac-r)) * var(--shot-scale)));
+    display: block;
+    max-width: none;
+    height: auto;
+    width: calc(var(--_shot-k) * var(--shot-w));
+    margin: calc(var(--_shot-k) * var(--shot-mac-t) * var(--shot-scale) * -1)
+            calc(var(--_shot-k) * var(--shot-mac-r) * var(--shot-scale) * -1)
+            calc(var(--_shot-k) * var(--shot-mac-b) * var(--shot-scale) * -1)
+            calc(var(--_shot-k) * var(--shot-mac-l) * var(--shot-scale) * -1);
+  }
+  .wm-grid:has([data-shot="mac"]) { overflow-x: clip; }
 }
 
 /* BASELINES ON THE LINE -- UNLAYERED, on purpose. type.css's .t-* classes are unlayered (they

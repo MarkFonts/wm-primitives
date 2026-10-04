@@ -12,14 +12,36 @@ Newest first.
 
 ---
 
-## 2026-10-03 -- ReCal's eight landing pages join the grid spec
+## 2026-10-04 -- pages keep the margin, tools bleed, breakers, and the macOS shadow
 
-ReCal #27 put the compare pages (poppins, inter, geist, futura, neutra, circular, gotham,
-gt-america) on the grid, and nothing held them there. They are now in `PAGES`, read from
-`RECAL_DIST` (the browser job already exports it and builds ReCal with `npm run build`, which
-runs `gen-landing.mjs`, so `dist/<slug>/index.html` exists). The skip clause used to strip
-`/wordmark/` only; it now strips the first path segment, so one rule finds the file under
-whichever host's `dir`. 24 more tests, no CI change.
+Mark's call: the homepage, the case study, Kernpare and the opsz proofer are pages and keep the
+margin (and may break out of it); font-proofer and ReCal are tools and have none, ever. Three
+additions to `src/grid.css`, written up in GRID.md under "Pages and tools":
+
+- **`.wm-grid--bleed`**, on a grid or once on `main`: `--grid-margin: 0`, columns edge to edge,
+  gutter kept. Text is still never flush: a child touching a window edge pads one gutter on that
+  side, computed from its `--start` / `--span` (`max(0, 2 - start)`, `max(0, start + span -
+  cols)`), not left to each app. An auto-placed child counts as column 1 -- the one guess, and
+  the rule names it.
+- **`.wm-break`, `--left`, `--right`**: a margined grid's child whose box runs to the window, its
+  text padded back to the margin. `.wm-cols` inside one lands on the page's own columns for
+  free, because the breaker's content box is the page's column area.
+- **`[data-shot="mac"]`**: the window screenshot's shadow cut out of the layout. Measured on the
+  case study's shots: a native 2x capture carries 112 / 112 / 76 / 148 px of shadow (l r t b),
+  and its 2000px exports carry 72 / 72 / 49 / 95 -- the same pixels scaled by .643, while the
+  fractions of width differ (.067 against .036). So the tokens are capture px, not a ratio, and a
+  resized file states `--shot-scale`. Percent margins resolve against the containing block's
+  width on all four sides, so `100% x n / (w - l - r)` sizes and shifts the image with no
+  wrapper; gridSnap.js writes the file width the CSS cannot read, and the rules wait for it.
+
+The grid spec judges a bleed root's text against one gutter and says so in its report, judges
+breakers' text (not their boxes) against the margin, and judges a flagged shot by its window. A
+new fixture, `tests/fixtures/grid-bleed.html`, is in `PAGES` and has a geometry test of its own.
+The system page's Grid part gains "Breakers and tools", two more 1440 sheets with the
+font-proofer shot on columns 11-24; the bench gains a breakers section. The first cut of the
+sheets put everything past column 24: the overlay's column `<i>`s fill every cell, so an
+auto-placed item is pushed into implicit columns, and a 390 viewport re-placed the 1440 sheet
+on `--span-md`. Each sheet item now names both.
 
 ## 2026-10-03 -- the grid spec checks the margin, and the homepage joins it
 
