@@ -1,0 +1,39 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>grid: bleed, breakers, a mac shot</title>
+<!-- grid.spec.ts's fixture for PAGES AND TOOLS (src/grid.css, Mark 2026-10-04). Two roots: a
+     tool's .wm-grid--bleed (no margin; text one gutter in from each window edge) and a page's
+     margined .wm-grid with breakers, a .wm-cols inside one, and a [data-shot="mac"] window
+     screenshot whose WINDOW should land on columns 11-24. Served at /dial/grid-bleed.html. -->
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css"><link rel="stylesheet" href="/dial/shared/src/grid.css">
+<script src="/dial/shared/src/gridSnap.js" defer></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui;background:#111;color:#e8e8e8;--ui-font:system-ui}
+main p{margin:0 0 24px}
+.panel{background:#1d1d1d;padding-block:24px}
+.panel p{margin:0}
+.stage{height:96px;background:repeating-linear-gradient(135deg,#333 0 1px,transparent 1px 6px)}
+.band{background:#1d1d1d;padding-block:24px;margin-bottom:24px}
+.band p{margin:0}
+.strip{height:48px;margin-bottom:24px;background:repeating-linear-gradient(135deg,#444 0 1px,transparent 1px 6px)}
+section + section{margin-top:48px}
+</style>
+<main>
+<section class="wm-grid wm-grid--bleed wm-lines" id="bleed">
+  <div class="panel" id="rail" style="--span:6;--span-md:6"><p id="rail-t">Rail. A tool's rail touches the window's left edge; its words do not.</p></div>
+  <div class="stage" data-nosnap id="stage" style="--start:7;--span:12;--start-md:7;--span-md:6"></div>
+  <div class="panel" id="insp" style="--start:19;--span:6;--start-md:1;--span-md:12"><p id="insp-t">Inspector, ending in the last column: one gutter from the right edge.</p></div>
+  <p id="full" style="margin-top:24px">A paragraph across the whole bleed grid sits one gutter in from both edges of the window, and never flush against either.</p>
+</section>
+
+<section class="wm-grid wm-lines" id="page">
+  <p id="lead">A page keeps its margin. A breaker is a box that runs past it to the window's edge, and keeps its words at the margin.</p>
+  <p id="ref12" style="--span:12;--span-md:6">Twelve columns, for reference.</p>
+  <div class="wm-break band" id="brk"><p id="brk-t">A breaker of both edges: its ground meets the window, its text sits at the margin.</p>
+    <div class="wm-cols" id="brk-cols" style="margin-top:24px"><p id="brk-a" style="--span:12;--span-md:6">Left half, on the page's columns.</p><p id="brk-b" style="--span:12;--span-md:6">Right half, ending on the margin.</p></div></div>
+  <div class="wm-break--left band" id="brk-l" style="--span:12;--span-md:6"><p id="brk-l-t">A left breaker of twelve columns.</p></div>
+  <div class="wm-break strip" data-nosnap id="strip"></div>
+  <p style="--span:10;--span-md:12">A window screenshot, flagged: its shadow is cut out of the layout, so the window meets the columns.</p>
+  <div id="cell" style="--span:14;--span-md:12"><img id="shot" data-shot="mac" src="/dial/shared/docs/assets/shot-mac-font-proofer.webp" width="2000" height="1305" style="--shot-scale:.643" alt="font-proofer, a macOS window screenshot"></div>
+  <p id="after" style="margin-top:24px">The line after the shot starts where the window ends.</p>
+</section>
+</main>
