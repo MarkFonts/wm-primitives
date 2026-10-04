@@ -74,6 +74,11 @@ html.show-cols #cols .wm-grid > div{--span:1;--span-md:1}
 html.show-lines #lines{display:block}
 main.wm-lines > *{position:relative;z-index:1}
 html.off-grid .wm-lines{--lead-body:24.8px}
+/* breakers: a strip (a picture breaker, all box) and a band whose words stay at the margin */
+.strip{height:48px;margin-bottom:24px;background:repeating-linear-gradient(135deg,var(--border,rgba(232,232,232,.14)) 0 1px,transparent 1px 7px)}
+.band{background:var(--surface,#1a1a1a);padding-block:24px;margin-bottom:48px}
+.band p{margin:0}
+.band .wm-cols{margin-top:24px}
 </style>
 </head>
 <body>
@@ -148,6 +153,22 @@ html.off-grid .wm-lines{--lead-body:24.8px}
       <div class="gap"></div>
       <div class="lbl" data-baseline="last"><p class="t-ui">micro &middot; 9 / 12 &middot; 4 lines</p></div>
       <div class="smp"><p class="t-micro">axis tags &middot; metric rules &middot; annotations</p></div>
+    </div>
+  </section>
+
+  <section class="wm-grid">
+    <div class="rule"></div>
+    <h2 style="--span:24">Breakers and screenshots</h2>
+    <div class="wm-break strip" data-nosnap></div>
+    <div class="wm-break band">
+      <p><b>A breaker.</b> <code>.wm-break</code> takes its box to the window's edges and pads the margin back in, so its words sit where the page's do. A tool has no margin at all (<code>.wm-grid--bleed</code>): its text keeps one gutter from the window instead.</p>
+      <div class="wm-cols"><p style="--span:12;--span-md:6">A <code>.wm-cols</code> inside a breaker lands on the page's own columns.</p><p style="--span:12;--span-md:6">This half ends on the right margin, as the page's would.</p></div>
+    </div>
+    <div style="--span:10;--span-md:12">
+      <p><b>A macOS window screenshot</b> keeps its shadow as a transparent margin, so the window sits inside the image. Flagged <code>data-shot="mac"</code>, the shadow is cut out of the layout and the window's edges sit on columns 11 and 24 (turn the columns on: G).</p>
+    </div>
+    <div style="--span:14;--span-md:12;margin-bottom:24px">
+      <img data-shot="mac" src="../assets/shot-mac-font-proofer.webp" width="2000" height="1305" style="--shot-scale:.643" alt="font-proofer's window, a macOS screenshot with its shadow">
     </div>
   </section>
 

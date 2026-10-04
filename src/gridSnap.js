@@ -57,7 +57,8 @@
     const firstText = el => { const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => n.textContent.trim() ? 1 : 3 }); return w.nextNode(); };
     const units = [...root.querySelectorAll('*')].filter(isUnit);
     for (const el of root.querySelectorAll('*')) {
-      if (el.closest('[data-nosnap]')) continue;
+      // a stage, or a flagged screenshot (its box is cut to the window on purpose, below)
+      if (el.closest('[data-nosnap], [data-shot]')) continue;
       if (units.some(u => u.contains(el))) {
         if (units.includes(el)) { const t = firstText(el); if (t) blocks.push([el, t]); }
         continue;
@@ -157,14 +158,39 @@
       el.style.setProperty('--snap', d.toFixed(2) + 'px');
     }
   }
+  /* MAC SHOTS. grid.css cuts a [data-shot="mac"] image's shadow out of the layout, and for
+     that it needs the file's pixel width, which CSS cannot read. Written inline as --shot-w
+     (its rules wait for it: [style*="--shot-w"]): the loaded image's naturalWidth, or until it
+     loads the width attribute, then corrected on load -- so a page with width/height set lays
+     out once, at DOMContentLoaded. A value the page set itself (inline, or in a stylesheet)
+     is kept. On a <picture> the flag sits on the picture and its img inherits the width.
+     Every pass looks again, so an app that renders its shots later is covered by wmGridSnap(). */
+  const waiting = new WeakSet();
+  function shots() {
+    for (const el of document.querySelectorAll('[data-shot="mac"]')) {
+      if (el.style.getPropertyValue('--shot-w')) continue;
+      const own = getComputedStyle(el).getPropertyValue('--shot-w').trim();
+      if (own) { el.style.setProperty('--shot-w', own); continue; }
+      const m = el.matches('picture') ? el.querySelector('img') : el;
+      if (!m) continue;
+      const loaded = m.tagName === 'VIDEO' ? m.videoWidth : (m.complete && m.naturalWidth);
+      const w = loaded || +m.getAttribute('width');
+      if (w) el.style.setProperty('--shot-w', String(w));
+      if (!loaded && !waiting.has(m)) waiting.add(m), m.addEventListener(m.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', () => {
+        const n = m.tagName === 'VIDEO' ? m.videoWidth : m.naturalWidth;
+        if (n) { el.style.setProperty('--shot-w', String(n)); run(); }
+      }, { once: true });
+    }
+  }
   let raf = 0;
-  function run() { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { refused.length = 0; measured.length = 0; document.querySelectorAll('.wm-lines').forEach(snapRoot); }); }
+  function run() { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { shots(); refused.length = 0; measured.length = 0; document.querySelectorAll('.wm-lines').forEach(snapRoot); }); }
   window.wmGridSnap = run;
   run.refused = refused;
   // what the last pass measured: every block it put on the line (the CI check reads this,
   // so it judges exactly the blocks the snapper judged, not a copy of the rules)
   run.blocks = measured;
   run.firstLine = el => units_or_own(el);
+  run.shots = shots;
 
   /* ?grid on any page: the columns (pink) and the 3px lines (blue), drawn over each .wm-lines
      root -- a checking tool, never on by default. Lines are canvas at the screen's own pixel
@@ -177,7 +203,11 @@
       .wm-ov-cols>i{background:rgba(255,40,140,.06);border-inline:1px solid rgba(255,40,140,.4)}`;
     document.head.appendChild(css);
     const cols = document.createElement('div'); cols.className = 'wm-ov-cols'; document.body.appendChild(cols);
+    // the margin of the first root, not the document's: a tool's .wm-grid--bleed on main or
+    // body sets it to 0 below <html>, and the columns must be drawn where the page has them
     const drawCols = () => { const n = +getComputedStyle(document.documentElement).getPropertyValue('--grid-cols') || 24;
+      const r0 = document.querySelector('.wm-lines');
+      if (r0) cols.style.setProperty('--grid-margin', getComputedStyle(r0).getPropertyValue('--grid-margin').trim() || '0px');
       cols.innerHTML = '<i></i>'.repeat(n); };
     // ONE viewport-sized fixed canvas, redrawn on scroll. A canvas the height of the root went
     // blank past 65,535 device pixels (the system page is ~47,000 CSS px: blank at 2x), and a
@@ -209,6 +239,7 @@
     if ('ResizeObserver' in window) new ResizeObserver(draw).observe(document.body);
   }
   const start = () => {
+    shots();   // now, not a frame later: a shot with a width attribute lays out once
     run();
     if (/[?&]grid\b/.test(location.search)) overlay();
     document.fonts && document.fonts.ready.then(run);

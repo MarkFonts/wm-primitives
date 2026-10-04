@@ -200,6 +200,14 @@ OFF_LINE = {
 # html is wrapped instead. Empty now; Type does it on its .wrap, see above.
 OFF_LINE_PART = {}
 
+def asset_src(m):
+    if "--linked" in sys.argv:
+        return f'src="assets/{m.group(1)}"'
+    import base64, mimetypes
+    f = HERE.parent / "assets" / m.group(1)
+    mime = mimetypes.guess_type(f.name)[0] or ("image/webp" if f.suffix == ".webp" else "application/octet-stream")
+    return f'src="data:{mime};base64,{base64.b64encode(f.read_bytes()).decode()}"'
+
 # ---------------------------------------------------------------- per section
 def build_section(sid, label, path, kicker):
     """`path` may be a list. Extra sources fold into the SAME section under a wrapper
@@ -275,6 +283,10 @@ def build_section(sid, label, path, kicker):
         ex_html = re.sub(r'<title>.*?</title>', '', ex_html, flags=re.S)
         ex_html = re.sub(r'<!doctype[^>]*>', '', ex_html, flags=re.I)
         ex_html = re.sub(r'</?(html|head|body)[^>]*>', '', ex_html, flags=re.I)
+        # an image a part shows (the Grid part's macOS screenshot): ../../assets/ from
+        # docs/system/pages/, assets/ from the linked page in docs/; the bundled artifact has no
+        # docs/ beside it, so it carries the file as a data: URI.
+        ex_html = re.sub(r'src="\.\./\.\./assets/([\w.-]+)"', asset_src, ex_html)
         part = f"part-{n}"
         css += scope_css(ex_css, f"{root} .{part}")
         html += f'<div class="{part}">{ex_html}</div>'
@@ -1988,6 +2000,7 @@ def build_grid_page():
     raw = re.sub(r'<link rel="stylesheet" href="\.\./\.\./src/([\w.-]+\.css)">', css, raw)
     raw = re.sub(r'<script src="\.\./\.\./src/([\w.-]+\.js)"[^>]*></script>', js, raw)
     raw = raw.replace("url(../fonts/", "url(fonts/").replace('href="../favicon.svg"', 'href="favicon.svg"')
+    raw = raw.replace('src="../assets/', 'src="assets/')   # the breakers section's macOS screenshot
     raw = re.sub(r"\n<!-- SOURCE\..*?-->", "", raw, flags=re.S)
     (HERE.parent / "grid.html").write_text(raw)
     print("docs/grid.html written from docs/system/grid.html")
