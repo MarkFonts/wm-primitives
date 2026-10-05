@@ -26,8 +26,19 @@
   /* The label box sets its own size and leading, so the row is the same height in a
      16px/normal page and a 12px/1.4 panel: before this it inherited both, and the parity
      report read 18px rows in two hosts and 18.8 in the third (NEXT.md D, 2026-09-19). */
+  /* ONE BASELINE: the name, the tag and the value share it. This was a flex row with
+     align-items: center, which centres each BOX: .slider-label-left (the 15px line plus
+     its 2px --nudge) and .slider-value (the field's own 14px box) are different heights
+     with their text at different depths, so the number sat 1-2px below the name and tag
+     -- measured on live font-proofer and ReCal (1.0-2.25px, ink), and 2.25 once the one
+     rail's 33px track row moved the centres (Mark, 2026-10-04: "the slider buttons no
+     longer align their number value with the other words"). A grid of two columns aligns
+     the two by their BASELINES, and align-content centres that one line in a row taller
+     than it (the track bar's min-height), so the bar keeps its vertical centring.
+     Two columns, not flex: the left takes the leftover (minmax(0, 1fr), as flex: 1 1 auto
+     did) and nothing can wrap. */
   .slider-label {
-    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; align-content: center; column-gap: 6px;
     font-size: var(--type-ui-size, 0.75rem); line-height: var(--type-ui-lead, 15px);
   }
   .slider-label-left {

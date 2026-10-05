@@ -12,6 +12,22 @@ Newest first.
 
 ---
 
+## 2026-10-04 -- the grid spec checks that a unit's words share a baseline
+
+**A rail row's value field sat 2px under its label and nothing noticed.** The row rule
+(`.wm-baselines`) aligns siblings, and gridSnap moves a `--snap-unit: 1` component whole by its
+first line -- so nothing ever looked at the words *inside* one. `tests/behaviour/grid.spec.ts` now
+does (check 9 in GRID.md section 5): inside every unit, runs on one line of the unit have the same
+baseline within 0.5px, unless the unit or run is `data-baseline="free"`. Baselines are measured, not
+inferred from boxes: the Range's first client-rect bottom less the face's descent (one probe per
+font); input values are read from their content box. A wrapped unit is judged per line.
+It found the first offender on its first run: the system page's "component moves whole" slider
+row, whose value was centred beside a 26px label (4px up); fixed with `align-self: baseline` on
+the label and output. The real source of the rail drift is `.slider-label`, now a two-column
+grid on `align-items: baseline` (`AxisSlider.css`, and `alignment.spec.ts` gains "a dial row is
+one baseline"). The skip clause strips the first path segment for any host, and
+The bleed-gutter lines in `alignment-lines.json` land with the two app pages, after the app PRs merge.
+
 ## 2026-10-04 — the arrows join the icon face
 
 89 names. The case study's Highlights slideshow gets back/next buttons drawn from the face:

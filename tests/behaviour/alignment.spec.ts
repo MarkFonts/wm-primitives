@@ -145,3 +145,48 @@ for (const [host, h] of Object.entries(SPEC.hosts)) {
     })
   })
 }
+
+/* ONE BASELINE IN A DIAL ROW: the name, the axis tag and the value. The label used to
+   centre two boxes of different heights (the name's line plus its 2px nudge, the field's
+   own box), so the number sat 1-2px below the words beside it -- on the live sites too,
+   and 2.25px once the one rail's 33px track row moved the centres (Mark, 2026-10-04: "the
+   slider buttons no longer align their number value with the other words"). The value
+   is an <input>, which has no text node for a Range: its baseline is read with a
+   zero-size probe aligned to it by baseline inside .slider-value, the same flex box the
+   input sits in. Every visible row, every host in alignment-lines.json. */
+const rowBaselines = () => {
+  const probe = () => { const p = document.createElement('span'); p.style.cssText = 'display:inline-block;width:0;height:0;padding:0;margin:0;border:0;vertical-align:baseline;align-self:baseline'; return p }
+  const at = (t: Node) => { const w = document.createElement('span'); t.parentNode!.insertBefore(w, t); w.appendChild(t); const p = probe(); w.prepend(p); const y = p.getBoundingClientRect().top; w.replaceWith(t); return y }
+  const first = (el: Element | null) => { if (!el) return null; const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => n.textContent!.trim() ? 1 : 3 }); return w.nextNode() }
+  const out: { name: string; label: number; tag: number | null; value: number | null }[] = []
+  for (const row of document.querySelectorAll('.slider-row')) {
+    const r = row.getBoundingClientRect(); if (!r.width || !r.height || r.bottom < 0 || r.top > innerHeight) continue
+    const n = first(row.querySelector('.slider-label-name')); if (!n) continue
+    const t = first(row.querySelector('.slider-tag'))
+    const inp = row.querySelector('.slider-value input')
+    let value: number | null = null
+    if (inp) { const p = probe(); inp.parentElement!.insertBefore(p, inp); value = p.getBoundingClientRect().top; p.remove() }
+    out.push({ name: n.textContent!.trim(), label: +at(n).toFixed(2), tag: t ? +at(t).toFixed(2) : null, value: value === null ? null : +value.toFixed(2) })
+  }
+  return out
+}
+
+for (const [host, h] of Object.entries(SPEC.hosts)) {
+  test.describe(`${host} · a dial row is one baseline`, () => {
+    test.skip(({ hasTouch }) => hasTouch, 'one width, one profile')
+    test(`${host} · name, tag and value share a baseline`, async ({ page }) => {
+      await sealed(page)
+      await page.setViewportSize({ width: 1500, height: 900 })
+      await page.goto(h.url)
+      await settle(page)
+      const rows = await page.evaluate(fn => new Function('return (' + fn + ')()')(), rowBaselines.toString()) as Awaited<ReturnType<typeof rowBaselines>>
+      console.log(`${host}: ${rows.length} dial rows, value - name: ${rows.map(r => r.value === null ? '-' : (r.value - r.label).toFixed(2)).join(' ')}`)
+      expect(rows.length, 'no dial rows measured').toBeGreaterThan(0)
+      const off = rows.flatMap(r => [
+        r.tag !== null && Math.abs(r.tag - r.label) > SPEC.tolerance ? `${r.name}: tag ${(r.tag - r.label).toFixed(2)}px off the name's baseline` : '',
+        r.value !== null && Math.abs(r.value - r.label) > SPEC.tolerance ? `${r.name}: value ${(r.value - r.label).toFixed(2)}px off the name's baseline` : '',
+      ]).filter(Boolean)
+      expect(off, off.join('\n')).toEqual([])
+    })
+  })
+}
