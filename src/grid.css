@@ -56,16 +56,16 @@
     grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
     column-gap: var(--grid-gutter);
   }
-  .wm-grid { padding-inline: var(--grid-margin); --_m: var(--grid-margin); }
-  .wm-cols { --_m: 0px; }
+  .wm-grid { padding-inline: var(--grid-margin); }
   :is(.wm-grid, .wm-cols) > * {
     /* Declared and unset (`initial`), so the fallbacks apply until a host sets them on the
        child -- the same move as chip.css's --chip-color. */
     --span: initial; --start: initial; --span-md: initial; --start-md: initial;
     min-width: 0;
     grid-column: var(--start, auto) / span var(--span, 24);
-    /* One column, as a length. 100cqw is the container's own width, margins included. */
-    --grid-col: calc((100cqw - 2 * var(--_m) - (var(--grid-cols) - 1) * var(--grid-gutter)) / var(--grid-cols));
+    /* One column, as a length. 100cqw is the container's CONTENT box, so .wm-grid's
+       padding-inline is already out of it: only the gutters come off. */
+    --grid-col: calc((100cqw - (var(--grid-cols) - 1) * var(--grid-gutter)) / var(--grid-cols));
   }
   @media (max-width: 1023px) {
     :is(.wm-grid, .wm-cols) > * { grid-column: var(--start-md, auto) / span var(--span-md, 12); }
