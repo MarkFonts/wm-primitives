@@ -30,12 +30,14 @@ Only the variable faces are worth running the check below against.
 Don't flatten them into each other:
 
 - **Cal Sans** — six axes, 15 FeatureVariations. This file.
-- **Cal Sans Flex** — the **avar2** build, not a reduced anything. Same 1545 glyphs and
-  same 15 FeatureVariations as the full face; what differs is `avar` v2 carrying a
-  `VarIdxMap` (the full face has plain v1), and `YTAS` hidden, cross-mapped off `opsz`.
-  Built by `calbuild/scripts/lib/build_flex.py`. It is LARGER than the full face --
-  1.31MB against 992KB -- because shifting the defaults expands `gvar` by ~292KB and
-  `HVAR` by ~16KB. Bigger is expected here and is not a sign of a bad build.
+- **Cal Sans Flex** — the **avar2** build, and true HOI: the glyph morphs ride three
+  hidden helper axes (`GE1M`, `GE2M`, `GE3M`) that `avar` v2 drives from `GEOM`, and the
+  stock `rclt` swaps are kept, so it carries 25 FeatureVariations against the full face's
+  15. Same 1546 glyphs; `avar` v2 carries a `VarIdxMap` (the full face has plain v1), and
+  `YTAS` is hidden, cross-mapped off `opsz`. A renderer without avar2 shows the drawn
+  forms, swapping at the stock `GEOM` thresholds. Built in `calbuild`. It is LARGER than
+  the full face -- 3.22MB ttf / 641KB woff2 against 1.17MB / 286KB -- because the morphs
+  live in `gvar`. Bigger is expected here and is not a sign of a bad build.
 - **Cal Sans UI** — `wght, GEOM` only, 9 FeatureVariations. A deliberately reduced face
   for interface work and for Framer, which handles a face carrying 20 stylistic sets and
   42 character variants badly.
