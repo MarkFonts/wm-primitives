@@ -12,6 +12,23 @@ Newest first.
 
 ---
 
+## 2026-10-05 -- `--grid-col` no longer takes the margin off twice
+
+**Every `.wm-card` in a `.wm-grid` started about 8px short of its column line.** `--grid-col` was
+`(100cqw - 2 * --_m - gutters) / cols`. But `.wm-grid` is a size container with
+`padding-inline: var(--grid-margin)`, and `cqw` measures a container's *content* box -- the margin
+is already out of it. So the margin came off twice: at 1440 a column computed 20.2px against a real
+28.6px, and a card's padding (one column + one gutter) landed 8.4px before the next column line.
+`.wm-cols` has no padding and was right all along, which is why nothing looked wrong in the
+breakers. The fix drops `2 * var(--_m)` and the two `--_m` declarations; the comment that said
+"margins included" was the wrong belief written down. `tests/behaviour/grid.spec.ts` now reads
+`--grid-col` through a `width: var(--grid-col)` probe inside a `.wm-grid` and a `.wm-cols` and holds
+it to a real grid track, at 1440 and 390; it fails on the old formula (20.19 vs 28.59, 14.83 vs
+18.16). Consumers: `wordmark/css/main.css` already measures a column from `100cqw` itself because
+of this; once shared/ is bumped that local copy can go back to `--grid-col`.
+
+---
+
 ## 2026-10-04 -- the grid spec checks that a unit's words share a baseline
 
 **A rail row's value field sat 2px under its label and nothing noticed.** The row rule

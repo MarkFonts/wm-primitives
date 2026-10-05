@@ -323,3 +323,44 @@ test.describe('bleed, breakers, mac shot · geometry', () => {
     })
   }
 })
+
+/* --grid-col IS A COLUMN (src/grid.css). A child of .wm-grid or .wm-cols can read one column as
+   a length, and .wm-card's padding is built from it. The value was measured from 100cqw less
+   twice the margin; but 100cqw is the container's CONTENT box, which already excludes
+   .wm-grid's padding-inline, so the margin came off twice: at 1440 a column computed 20.2px
+   against a real 28.6px, and every .wm-card started ~8px short of the column line. .wm-cols
+   (no padding) was right all along. This reads --grid-col through a probe (width: var(--grid-col))
+   and compares it with the width of a track, as the browser laid the grid out. */
+test.describe('--grid-col · is a column', () => {
+  test.skip(({ hasTouch }) => hasTouch, 'widths are the axis here, not the input')
+  for (const w of [1440, 390]) {
+    test(`.wm-grid and .wm-cols · ${w}px`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: 900 })
+      await page.goto('/grid/grid.html')
+      await page.evaluate(() => document.fonts.ready)
+      const r = await page.evaluate(() => {
+        const out: { kind: string; cols: number; track: number; first: number; probe: number }[] = []
+        for (const kind of ['wm-grid', 'wm-cols']) {
+          const host = document.createElement('div')
+          host.className = kind; host.style.cssText = 'position:absolute;left:0;right:0;top:0;visibility:hidden'
+          const n = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-cols'))
+          for (let i = 0; i < n; i++) {
+            const c = document.createElement('div'); c.style.cssText = '--span:1;--span-md:1;height:1px'
+            if (!i) { const p = document.createElement('div'); p.style.cssText = 'height:0;width:var(--grid-col)'; p.className = 'probe'; c.appendChild(p) }
+            host.appendChild(c)
+          }
+          document.body.appendChild(host)
+          const tracks = getComputedStyle(host).gridTemplateColumns.split(' ').map(parseFloat)
+          out.push({ kind, cols: tracks.length, track: tracks[0], first: host.children[0].getBoundingClientRect().width, probe: host.querySelector('.probe')!.getBoundingClientRect().width })
+          host.remove()
+        }
+        return out
+      })
+      for (const k of r) {
+        expect(k.cols, `${k.kind} has columns`).toBeGreaterThan(1)
+        expect(Math.abs(k.first - k.track), `${k.kind}: a span-1 child is one track`).toBeLessThan(0.5)
+        expect(Math.abs(k.probe - k.track), `${k.kind} at ${w}px: --grid-col is ${k.probe.toFixed(2)}px, a real column is ${k.track.toFixed(2)}px`).toBeLessThan(0.5)
+      }
+    })
+  }
+})

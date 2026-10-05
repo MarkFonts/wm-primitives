@@ -36,8 +36,8 @@ and `grid.css` disagree, the CSS is right.
 
 `.wm-grid` is the columns plus the margin; `.wm-cols` the same columns inside a wrapper that
 already has it. A child spans `--span` of the 24 and `--span-md` of the 12, starting at `--start`
-/ `--start-md` (default: all of them). `--grid-col` is one column as a length, from `100cqw`, so
-anything inside can measure a column without script.
+/ `--start-md` (default: all of them). `--grid-col` is one column as a length, from `100cqw` (the container's content box, so
+the margin is already out of it), so anything inside can measure a column without script.
 
 **Cards: rule A.** A card is a box on the columns, and its contents step in one column and one
 gutter, so they land on the next column line (`.wm-card`). The hanging version (B), where the box
