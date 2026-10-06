@@ -56,6 +56,38 @@ a task. Skip nothing above the line you are on; below it, pick.
 - [ ] **Icon inventory.** 24 marks, recorded on the system page. Add: which app uses
       which, so removing one is a search, not a guess.
 - [ ] **Retire `◆`.** The vocabulary still says diamond; the marker is a foot tick.
+- [ ] **Measurement, split out of the PreText effects.** Three descendants of Cheng Lou's
+      PreText live here and not one of them will tell a caller how wide a string is.
+      `createLetterbox` bundles measurement with fill-with-prose; `flattersatz` bundles it
+      with a rag; `makeMeasurer` is the real thing and is private to the latter. So every
+      new caller either takes a line-breaker it did not want or writes the probe again —
+      WORDMAKE already refused both (PLAN.md: *"Do not take flattersatz / FittedParagraph…
+      Take the measurement, leave the setter."*) and wordmark.nyc/fontchooserchooser wrote
+      its own word-span-and-offsetTop pass on the live DOM, which is the third copy.
+      Done: `measure(text) -> advance` and a pure greedy `breakLines(text, width, measure)`
+      exported on their own, with the policy left to the caller; `createLetterbox` and
+      `flattersatz` consume them instead of carrying their own.
+
+      **Two backends, because neither covers the field.** A DOM probe is correct for text
+      the browser will draw — it inherits the axes, features and optical size, and canvas
+      2d silently ignores `font-variation-settings` in Chrome, so canvas is not a
+      shortcut (see `canvas-cannot-do-variable-axes`). HarfBuzz advance widths are correct
+      where there is no document: WORDMAKE's seven render workers and its node export.
+      One interface, two implementations, chosen by the caller, not by the primitive.
+
+      **HarfBuzz cannot parse woff2** — it does not error, it silently returns unligated
+      glyphs (WORDMAKE PLAN.md, font rules). Any host on the HarfBuzz backend must be fed
+      raw TTF, and the primitive should say so at the door rather than let a caller
+      discover it as mysterious widths. This is also why the HarfBuzz backend does NOT
+      serve a page whose faces are woff2 data URIs: fontchooserchooser stays on the probe.
+
+      **Licensing: this is the way out.** The flattersatz port's licence is unresolved and
+      blocks publication (`pretext-attribution`). A measurer written here from HarfBuzz
+      advances descends from Cheng Lou's *idea*, not from Seth Thompson's source, so the
+      primitive ships clean and the port's status stops being load-bearing. Credit Cheng
+      Lou for PreText; do not credit either implementer for code that is not theirs.
+
+      Second consumer exists already (WORDMAKE), which is the bar.
 
 ## D · The decisions still open (write them down or they get re-argued)
 
