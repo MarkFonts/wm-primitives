@@ -12,6 +12,22 @@ Newest first.
 
 ---
 
+## 2026-10-05 -- the system page's baseline rule was scoped twice
+
+**The `browser` job went red on main when the docs were rebuilt.** The "A component moves whole"
+demo in `docs/system/pages/grid.html` carried `#s-type .part-1 .gx-srow.whole > span,...` as a
+hand-written, already-scoped selector. `build.py`'s `scope_selector` prefixes every selector of a
+comma list with the section and part, so a rebuild turned it into `#s-type .part-1 #s-type .part-1 ...`,
+which matches nothing. The value lost `align-self: baseline`, fell back to centre and sat 4px above its
+label (`grid.spec.ts` check 9, system page at 1440/900/390). The committed `docs/index.html` had
+been patched to the single prefix by hand, so it was green until the bot's "rebuild docs for a font
+bump" regenerated it from the source. The source now writes the bare `.gx-srow.whole > span,
+.gx-srow.whole > output` like every other rule in the file, and the prefixer is left alone: a source
+page is unscoped CSS, and a rule that scopes itself is the bug. A rebuild is stable (two runs, same
+bytes) and changes only that one rule in `docs/index.html`.
+
+---
+
 ## 2026-10-05 -- `--grid-col` no longer takes the margin off twice
 
 **Every `.wm-card` in a `.wm-grid` started about 8px short of its column line.** `--grid-col` was
