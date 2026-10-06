@@ -45,8 +45,13 @@ const PAGES = [
   // A tool and a page in one fixture: a .wm-grid--bleed root (no margin, text one gutter in),
   // and a margined root with breakers, a .wm-cols inside one, and a flagged macOS shot.
   { name: 'bleed + breakers fixture', url: '/dial/grid-bleed.html' },
+  // Columns that ARE text blocks, with different leads: each carries its own baseline nudge as
+  // a `top`, so a row is only found if it is grouped by the box, before the nudge.
+  { name: 'row of unlike leads fixture', url: '/dial/grid-row.html' },
 ]
-const WIDTHS = [1440, 900, 390]
+// 1024 is where the 24 columns begin (grid.css) and where the Cal Sans hero's two columns first
+// share a row; 900 is below it, 1440 above.
+const WIDTHS = [1440, 1024, 900, 390]
 
 const LAYOUT = () => {   // runs in the page; stringified below
   // A flagged macOS shot is drawn past its box on purpose (its shadow); judge its WINDOW, the
@@ -223,8 +228,9 @@ for (const pg of PAGES) {
           }
           const rows: string[] = []
           for (const box of document.querySelectorAll('.wm-lines .wm-baselines')) {
+            // group by the box BEFORE grid.css's baseline nudge (a relative `top`), as gridSnap does
             const byTop = new Map<number, Element[]>()
-            for (const c of box.children) { const r = c.getBoundingClientRect(); if (!r.height || !textOf(c)) continue; const k = Math.round(r.top); const key = [...byTop.keys()].find(x => Math.abs(x - k) <= 1) ?? k; (byTop.get(key) ?? byTop.set(key, []).get(key)!).push(c) }
+            for (const c of box.children) { const r = c.getBoundingClientRect(); if (!r.height || !textOf(c)) continue; const cs = getComputedStyle(c); const k = Math.round(r.top - (cs.position === 'relative' ? parseFloat(cs.top) || 0 : 0)); const key = [...byTop.keys()].find(x => Math.abs(x - k) <= 1) ?? k; (byTop.get(key) ?? byTop.set(key, []).get(key)!).push(c) }
             for (const items of byTop.values()) if (items.length > 1) {
               const ys = items.map(c => c.getAttribute('data-baseline') === 'last' ? at(lastTextOf(c)!, true) : at(textOf(c)!))
               const spread = Math.max(...ys) - Math.min(...ys)

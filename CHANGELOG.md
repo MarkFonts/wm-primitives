@@ -12,6 +12,23 @@ Newest first.
 
 ---
 
+## 2026-10-06 -- the row rule grouped columns by where the nudge left them
+
+**The Cal Sans hero's lede and sub sat three px apart at 1024 and the row rule never ran.**
+`gridSnap.js` finds a `.wm-baselines` row by grouping children on `getBoundingClientRect().top`
+within 1px. A column that is itself the text block (a `p.t-lede` beside a body `p`) carries
+grid.css's baseline nudge as a relative `top`, up to 2px and different for different leads, so two
+columns whose boxes start on one row landed in two groups and each was alone. It was fine at
+1440, 900 and 390 only because the nudges happened to agree or the columns had stacked. The key is
+now the box's top BEFORE the nudge: `rect.top` less the child's own computed `top` when it is
+`position: relative`. That is exact, where widening the tolerance to the 3px unit would also have
+merged rows that really are one line apart. The spec's "a row meets" check grouped the same way
+and so could not see the miss; it takes the same pre-nudge key. `tests/fixtures/grid-row.html`
+(a lede beside a `t-micro` note, nudges 4px and 0px) failed it on main, first baselines 15px
+apart at 1440 and 1024, and passes now. 1024 joins `WIDTHS` in `grid.spec.ts`, so every page on
+the grid is held where the 24 columns begin. gridSnap is not in `dist/`; the docs were rebuilt
+because `docs/grid.html` and `docs/index.html` inline it, and only that hunk changed.
+
 ## 2026-10-05 -- the system page's baseline rule was scoped twice
 
 **The `browser` job went red on main when the docs were rebuilt.** The "A component moves whole"
