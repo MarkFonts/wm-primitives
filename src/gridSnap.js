@@ -17,7 +17,9 @@
  *
  * Plain script, no module, no dependency: <script src="shared/src/gridSnap.js" defer>.
  * In a .wm-baselines container, items in one row also share their first baseline -- or, for an
- * item marked data-baseline="last", meet it with their last line (below).
+ * item marked data-baseline="last", meet it with their last line (below). Before that, a row of
+ * side-by-side TEXT shares its lines: the larger lead takes the next multiple of the smaller
+ * (the lead rule, below; data-lead="own" on a block keeps its own).
  * It reruns when fonts load, when a root resizes, and on window.wmGridSnap() -- call that
  * after a script of the page's own changes heights. Add ?grid to the URL to see the columns
  * and the lines drawn over the page. */
@@ -46,6 +48,97 @@
     if (isUnitEl(el)) { const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => n.textContent.trim() ? 1 : 3 }); return w.nextNode(); }
     return ownText(el);
   };
+  // A ROW of a .wm-baselines container: its children grouped by the BOX's top, before grid.css's
+  // baseline nudge -- a column that is itself the text block carries the nudge as a relative
+  // `top` (up to 2px, and unlike for unlike leads), which would otherwise split two columns that
+  // start on one row (the Cal Sans hero at 1024px, line 1 three px apart). The lead rule and the
+  // row rule both read rows from here.
+  function rowsOf(box) {
+    const rows = new Map();
+    for (const child of box.children) {
+      const r = child.getBoundingClientRect(); if (!r.height) continue;
+      const cs = getComputedStyle(child);
+      const key = Math.round(r.top - (cs.position === 'relative' ? parseFloat(cs.top) || 0 : 0));
+      const row = [...rows.keys()].find(k => Math.abs(k - key) <= 1) ?? key;
+      if (!rows.has(row)) rows.set(row, []);
+      rows.get(row).push(child);
+    }
+    return [...rows.values()];
+  }
+
+  /* THE LEAD RULE (Mark 2026-10-06). The baseline grid is 3px and never changes. In a row of
+     side-by-side text -- blocks in text roles (body, lede, title, display) that each wrap to more
+     than one line -- the block with the larger lead takes the next multiple of the smaller
+     block's lead, so every one of its lines lands on a line of the smaller text (the Cal Sans
+     hero: a lede at 39 beside a sub at 27 goes to 54). Annotation roles (micro, label, ui) and
+     one-line blocks are left alone: they keep their lead and share only the first baseline,
+     which the row rule gives them. data-lead="own" on a block (or around it) keeps its lead.
+     Where a row's leads cannot work (a 27 body beside a 24 caption would go to 48) the PAGE sets
+     the token; this does not guess. It is a lead rule: the line stays 3px.
+
+     A block's role is read from the tokens it resolves to: a .t-micro / .t-ui / .t-label block
+     is an annotation, and so is any block whose leading is under body's (--lead-body, resolved
+     in the root). Wrapping is its height over its leading. Line counts change with the width,
+     so every pass first hands back what the last one set and counts again.
+
+     The lead is written INLINE, as both `line-height` and `--lh`: inline beats any host rule
+     that sets line-height on the block (a page's `.hero-lede { --lh: ... }` or a bare
+     `line-height`), and --lh keeps grid.css's baseline nudge -- which is computed from --lh --
+     in step with the leading actually used. What the host had inline is kept and restored. */
+  // Lines are counted from the text, not the box: a grid item is stretched to its row's height,
+  // so a one-line label beside a paragraph has a box three lines tall.
+  function linesOf(el, lh) {
+    const rg = document.createRange(); rg.selectNodeContents(el);
+    const tops = [];
+    for (const r of rg.getClientRects()) if (r.width && r.height && !tops.some(t => Math.abs(t - r.bottom) < lh / 2)) tops.push(r.bottom);
+    return tops.length;
+  }
+  const ANNOTATION = '.t-micro, .t-ui, .t-label';
+  const leadSet = new Map();   // element -> [its own inline line-height, its own inline --lh]
+  function bodyLead(root) {
+    const d = document.createElement('div');
+    d.style.cssText = 'position:absolute;visibility:hidden;height:0;padding:0;border:0;font-size:var(--type-body-size,1rem);line-height:var(--lead-body,24px)';
+    root.appendChild(d); const v = parseFloat(getComputedStyle(d).lineHeight); d.remove();
+    return v || 24;
+  }
+  function leadRule(root, blocks, bl) {
+    for (const [el, [lh, v]] of leadSet) {
+      if (!root.contains(el)) continue;
+      el.style.lineHeight = lh; v ? el.style.setProperty('--lh', v) : el.style.removeProperty('--lh');
+      leadSet.delete(el);
+    }
+    const boxes = root.querySelectorAll('.wm-baselines'); if (!boxes.length) return;
+    const body = bodyLead(root), set = [];
+    const text = el => {
+      if (el.closest('[data-lead="own"]') || el.matches(ANNOTATION) || el.closest(ANNOTATION) || isUnitEl(el)) return 0;
+      const lh = parseFloat(getComputedStyle(el).lineHeight);
+      if (!lh || lh < body - 0.5) return 0;
+      return linesOf(el, lh) > 1 ? lh : 0;
+    };
+    for (const box of boxes) for (const items of rowsOf(box)) {
+      if (items.length < 2) continue;
+      const found = items.map(child => blocks.filter(([el]) => child === el || child.contains(el)).map(([el]) => [el, text(el)]).filter(b => b[1]));
+      if (found.filter(f => f.length).length < 2) continue;
+      // each block answers to the smallest lead in the OTHER items of its row -- the text beside it
+      found.forEach((mine, i) => {
+        const others = found.filter((_, j) => j !== i).flat().map(b => b[1]);
+        if (!others.length) return;
+        const L = Math.min(...others);
+        for (const [el, lh] of mine) {
+          if (lh <= L + 0.01) continue;
+          const k = lh / L; if (Math.abs(k - Math.round(k)) < 0.01) continue;
+          set.push([el, Math.ceil(k) * L]);
+        }
+      });
+    }
+    for (const [el, lead] of set) {
+      if (leadSet.has(el)) continue;
+      leadSet.set(el, [el.style.lineHeight, el.style.getPropertyValue('--lh')]);
+      const px = (Math.round(lead / bl) * bl) + 'px';
+      el.style.lineHeight = px; el.style.setProperty('--lh', px);
+    }
+  }
+
   function snapRoot(root) {
     const bl = BL(root), top0 = root.getBoundingClientRect().top;
     const blocks = [], ys = new Map();
@@ -77,6 +170,9 @@
     // subtree, so measuring the inner one too would shift it twice (a link's 56px ring, once).
     for (let i = blocks.length - 1; i >= 0; i--)
       if (blocks.some(([o], j) => j !== i && o !== blocks[i][0] && o.contains(blocks[i][0]))) blocks.splice(i, 1);
+    // side-by-side text shares its lines (the lead rule, above) -- before anything is measured,
+    // since a new leading moves everything below it
+    leadRule(root, blocks, bl);
     // measure everything first, then write: no layout thrash, and writes cannot move reads
     const out = blocks.map(([el, t]) => {
       el.style.removeProperty('--snap');
@@ -105,26 +201,21 @@
       return [el, y];
     };
     for (const box of root.querySelectorAll('.wm-baselines')) {
-      const rows = new Map();
-      for (const child of box.children) {
-        const r = child.getBoundingClientRect(); if (!r.height) continue;
-        const f = firstOf(child); if (!f) continue;
-        // the row is the BOX's top, before grid.css's baseline nudge: a column that is itself the
-        // text block carries the nudge as a relative `top` (up to 2px, and unlike for unlike
-        // leads), which would otherwise split two columns that start on one row (the Cal Sans
-        // hero at 1024px, line 1 three px apart)
-        const cs = getComputedStyle(child);
-        const key = Math.round(r.top - (cs.position === 'relative' ? parseFloat(cs.top) || 0 : 0));
-        const row = [...rows.keys()].find(k => Math.abs(k - key) <= 1) ?? key;
-        if (!rows.has(row)) rows.set(row, []);
-        // data-baseline="last": the item meets the row by its LAST line (a two-line caption
-        // beside one big word ends on the word's baseline instead of hanging below it)
-        if (child.getAttribute('data-baseline') === 'last') {
-          const l = lastOf(child);
-          rows.get(row).push([child, l[0], l[1] + delta.get(l[0]), true]);
-        } else rows.get(row).push([child, f[0], ys.get(f[0]) + delta.get(f[0])]);
+      const rows = [];
+      for (const kids of rowsOf(box)) {
+        const row = [];
+        for (const child of kids) {
+          const f = firstOf(child); if (!f) continue;
+          // data-baseline="last": the item meets the row by its LAST line (a two-line caption
+          // beside one big word ends on the word's baseline instead of hanging below it)
+          if (child.getAttribute('data-baseline') === 'last') {
+            const l = lastOf(child);
+            row.push([child, l[0], l[1] + delta.get(l[0]), true]);
+          } else row.push([child, f[0], ys.get(f[0]) + delta.get(f[0])]);
+        }
+        rows.push(row);
       }
-      for (const items of rows.values()) {
+      for (const items of rows) {
         if (items.length < 2) continue;
         // the row's line: the lowest FIRST baseline (a last-line item may need to move up to it)
         const firsts = items.filter(i => !i[3]).map(i => i[2]);
@@ -195,6 +286,9 @@
   // so it judges exactly the blocks the snapper judged, not a copy of the rules)
   run.blocks = measured;
   run.firstLine = el => units_or_own(el);
+  // how many lines a block's text runs to, and the leads the lead rule set on the last pass: [element, px] (the CI check reads it)
+  run.lines = linesOf;
+  run.leads = () => [...leadSet.keys()].filter(e => e.isConnected).map(e => [e, parseFloat(e.style.lineHeight)]);
   run.shots = shots;
 
   /* ?grid on any page: the columns (pink) and the 3px lines (blue), drawn over each .wm-lines

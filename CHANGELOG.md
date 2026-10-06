@@ -12,6 +12,41 @@ Newest first.
 
 ---
 
+## 2026-10-06 -- side-by-side text shares its lines (step 4)
+
+**The row rule met first baselines and nothing after them.** A lede at 39 beside a sub at 27
+shared one line in three; the homepage's headline at 39 beside its caption at 24 shared almost
+none. Mark settled it on 2026-10-06 after five rounds of renders: the baseline grid is 3px and
+never changes. In a row of side-by-side text -- blocks in text roles (body, lede, title, display)
+that each wrap to more than one line -- the block with the larger lead takes the next multiple of
+the smaller block's lead, so every one of its lines lands on a line of the smaller text.
+Annotation roles (micro, label, ui) and one-line blocks are left alone: they keep their lead and
+share only the first baseline. Where a row's leads can't work (a 27 body beside a 24 caption would
+send the body to 48), the page sets the token instead. Rejected on the renders: spacing the
+smaller text out to a divisor (it only ever helped the annotation case, and 27, 39 and 51 have no
+usable divisors), and taking both to a common multiple.
+
+`gridSnap.js` applies it per row before it measures, since wrapping depends on the width: each
+wrapping text-role block is held to the smallest lead in the other items of its row and goes up
+to the next multiple. Role comes from the tokens (`.t-micro/.t-ui/.t-label`, or a leading under
+`--lead-body`); lines are counted from the text's line boxes, because a grid item is stretched to
+its row and a one-line label beside a paragraph had a box three lines tall (the first fixture run
+said so). The lead is written inline as `line-height` and `--lh` both: inline outranks the host's
+own rule on the block, and `--lh` keeps grid.css's nudge, which is computed from it, in step.
+Every pass hands back what the last one set. `data-lead="own"` keeps a block's lead. The row cap
+(the target's font size) holds: nothing refused on any page in `PAGES`.
+
+`grid.spec.ts` gains "a row shares its lines" on every page, and `tests/fixtures/grid-lead.html`
+with five rows and the leads each must end with (a 30/39 lede beside a 16/27 sub and a one-line
+byline -> 54, byline 24; a title 30 beside body 24 -> 48; a lede beside a micro note, a body beside
+a one-line label and a `data-lead="own"` title unchanged). On #95's gridSnap it fails at every
+width (and on the Cal Sans hero and all four homepage work rows); with this it passes. Docs
+rebuilt (`docs/grid.html` and `docs/index.html` inline gridSnap); gridSnap is not in `dist/`.
+Consumers change when they bump `shared/`: the Cal Sans hero lede 39 -> 54 at 1440 (30 -> 54 at
+1024), the bench's hero lede 27 -> 48 beside its body notes, the homepage's work headlines to 48 at
+1440, 1024 and 900 -- which want wordmark's body-at-24 and headline-margin-0 edits in the same
+release.
+
 ## 2026-10-06 -- the row rule grouped columns by where the nudge left them
 
 **The Cal Sans hero's lede and sub sat three px apart at 1024 and the row rule never ran.**

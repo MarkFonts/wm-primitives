@@ -1,0 +1,48 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>grid: side-by-side text shares its lines</title>
+<!-- grid.spec.ts's fixture for the lead rule (src/gridSnap.js, GRID.md §2 "Side-by-side text
+     shares its lines"). In a row of side-by-side text that wraps, the larger lead takes the next
+     multiple of the smaller: every line of the big text lands on a line of the small. Annotation
+     roles, one-line blocks and data-lead="own" keep their lead. Each row says what it must become
+     in data-expect (id=px); grid.spec.ts reads it. Served at /dial/grid-lead.html. -->
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css"><link rel="stylesheet" href="/dial/shared/src/grid.css">
+<script src="/dial/shared/src/gridSnap.js" defer></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui;background:#111;color:#e8e8e8;--ui-font:system-ui}
+main p{margin:0}
+section{margin-top:48px}
+/* the Cal Sans hero's shape: a 30/39 lede beside a 16/27 sub over a one-line 13/24 byline */
+.lede30{font-size:30px;--lh:39px}
+.sub{font-size:16px;--lh:27px}
+.byline{font-size:13px;--lh:24px;margin-top:21px;white-space:nowrap}
+</style>
+<main class="wm-lines">
+<!-- 1. lede 39 beside sub 27 -> 54; the byline is one line and keeps 24 -->
+<section class="wm-grid wm-baselines" id="hero" data-expect="l1=54,s1=27,by1=24">
+  <p class="lede30" id="l1" style="--span:14;--span-md:7">Over five years the studio has sharpened one brand's type, from a single headline weight to the whole family.</p>
+  <div style="--start:16;--span:9;--start-md:8;--span-md:5">
+    <p class="sub" id="s1">In 2021 the brand had no typographic voice of its own, from logo to website to marketing. One weight proved a custom face could replace a standard.</p>
+    <p class="byline" id="by1">Sep 29, 2026</p>
+  </div>
+</section>
+<!-- 2. title 30 beside body 24 -> 48 -->
+<section class="wm-grid wm-baselines" id="title" data-expect="t2=48,b2=24">
+  <p class="t-title" id="t2" style="--span:6;--span-md:4">A title set across two lines at least</p>
+  <p id="b2" style="--start:13;--span:12;--start-md:7;--span-md:6">Body copy beside it, at its own leading of twenty-four, long enough to wrap onto a second and a third line in its column.</p>
+</section>
+<!-- 3. lede beside a micro note: an annotation, nothing changes -->
+<section class="wm-grid wm-baselines" id="micro" data-expect="l3=27,m3=12">
+  <p class="t-lede" id="l3" style="--span:14;--span-md:8">Inter cuts almost every terminal at ninety degrees to its stroke and square to the baseline; the a is one of the few exceptions.</p>
+  <p class="t-micro" id="m3" style="--start:17;--span:4;--start-md:10;--span-md:3">Measured on the cap-height-normalised comparison, Inter runs about ten per cent taller.</p>
+</section>
+<!-- 4. body beside a one-line label: nothing changes -->
+<section class="wm-grid wm-baselines" id="label" data-expect="b4=24,lb4=15">
+  <p id="b4" style="--span:14;--span-md:8">Running copy beside a label that fits on one line, which keeps its own lead and shares only the first baseline with this paragraph.</p>
+  <p class="t-label" id="lb4" style="--start:17;--span:8;--start-md:10;--span-md:3">Label</p>
+</section>
+<!-- 5. data-lead="own": the title keeps 30 beside body 24 -->
+<section class="wm-grid wm-baselines" id="own" data-expect="t5=30,b5=24">
+  <p class="t-title" id="t5" data-lead="own" style="--span:6;--span-md:4">A title that keeps its own leading</p>
+  <p id="b5" style="--start:13;--span:12;--start-md:7;--span-md:6">Body copy beside it, at twenty-four, long enough to wrap onto a second and a third line in its column, while the title opts out.</p>
+</section>
+</main>

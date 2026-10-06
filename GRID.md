@@ -199,6 +199,50 @@ of a hero, three cards.
   the specimen above it once pushed a paragraph 212px -- so it is refused, warned in the
   console and listed in `wmGridSnap.refused`, which CI reads.
 
+### Side-by-side text shares its lines: the lead rule
+
+Decided by Mark, 2026-10-06, after five rounds of renders. **The baseline grid is 3px and never
+changes.** In a row of side-by-side text -- blocks in text roles (body, lede, title, display) that
+each wrap to more than one line -- the block with the larger lead takes the next multiple of the
+smaller block's lead, so every one of its lines lands on a line of the smaller text. Annotation
+roles (micro, label, ui) and one-line blocks are left alone: they keep their lead and share only
+the first baseline. Where a row's leads can't work (a 27 body beside a 24 caption would send the
+body to 48), the page sets the token instead.
+
+It is a rule about leads, not about the grid: nothing here makes the line 24 or 27. The row
+rule above still meets the first baselines; this makes the lines after the first meet too.
+
+| row | before | after |
+|---|---|---|
+| Cal Sans hero: lede 30/39 beside sub 16/27 (+ a one-line 13/24 byline) | lede shares one line in three with the sub | lede 54, two sub lines to each of its own; the byline keeps 24 |
+| homepage work row: headline 36/39 beside caption 14/24 | 39 and 24 meet at line 1 only (next at 312) | headline 48, one line to two of the caption's |
+| title 26/30 beside body 16/24 | every fourth title line meets (120) | title 48 |
+| lede 18/27 beside a micro note 9/12 | first baselines meet | unchanged: micro is an annotation |
+
+- **gridSnap.js does it per row, at render**, because whether a block wraps depends on the width.
+  For each row of a `.wm-baselines` container (grouped as the row rule groups them), it takes
+  the measured text blocks of each item, keeps those in a text role that run to more than one
+  line, and holds each to the smallest lead among the OTHER items of the row: a lead that is not
+  a multiple of it goes up to the next one, `ceil(lead / L) x L`. Then the row rule runs as
+  before.
+- **A block's role is read from the tokens it resolves to.** `.t-micro`, `.t-ui` and `.t-label`
+  are annotations, and so is any block whose leading is under body's (`--lead-body`, resolved in
+  the root). Lines are counted from the text's own line boxes, not the box: a grid item is
+  stretched to its row, so a one-line label beside a paragraph has a box three lines tall.
+- **Written inline, as `line-height` and `--lh` both.** Inline beats whatever the host set on the
+  block (a page's own `--lh` or a bare `line-height`), and `--lh` keeps grid.css's baseline
+  nudge, which is computed from it, in step with the leading actually used. Whatever the host had
+  inline is put back first on every pass, so a resize that unwraps a block hands its lead back.
+- **`data-lead="own"`** on a block, or around it, keeps its lead -- the twin of
+  `data-baseline="free"`. Say why in a comment.
+- **The page's part.** The rule takes a lead up and never down. When the smaller lead is the
+  wrong one to follow (a 27 body that would go to 48 beside a 24 caption), the page sets that
+  token -- the homepage's body to 24 and its headline's margin-bottom to 0, so the body lands one
+  24 line below the headline -- or marks a block `data-lead="own"`.
+- **The row cap holds.** A larger lead puts more half-leading above line 1, so the row rule moves
+  the smaller column further down to meet it (the Cal Sans hero's sub: about 17px, under the
+  lede's 30px cap). Measured on every page in `PAGES`: nothing refused.
+
 ### Components move whole: `--snap-unit: 1`
 
 A slider row, a pill with a mark, a chip row: anything with a part beside its words is shifted as
@@ -245,8 +289,11 @@ grid.css adds to `top`. Glyphs move, layout does not, so one pass is enough.
   own and shifted twice.
 - It **reruns** when fonts load, on `load`, when a root resizes, and on `window.wmGridSnap()`.
   Call that after a script of the page's own changes heights.
+- **Before it measures, it applies the lead rule** (§2) to every row, so a new leading moves what
+  is below it before anything is put on a line.
 - `window.wmGridSnap.blocks` is every block the last pass measured and `.firstLine(el)` the text
-  it measured by; `.refused` the row shifts it would not make. The CI spec reads these, so it
+  it measured by; `.refused` the row shifts it would not make; `.leads()` the `[element, px]`
+  the lead rule set, and `.lines(el, lead)` how many lines a block's text runs to. The CI spec reads these, so it
   judges exactly what the snapper judged.
 - `--snap` is declared `initial` in grid.css and set inline. Never list it (or `--chip-color`) as
   a runtime token: three consumers lint `shared/src` with their own lists.
@@ -327,6 +374,14 @@ in Chromium. After fonts load and one more snapper pass:
    centred in an input and top-aligned in a textarea. Offenders print as
    `unit tag.class: "text" at Ypx vs "first text" at Ypx (delta)`.
 
+10. **a row shares its lines** -- in every `.wm-baselines` row with text blocks in two or more
+   items that qualify for the lead rule (text role, wrapping, not `data-lead="own"`), each block
+   with a larger lead than the smallest in the other items has every baseline on that block's
+   lines, extended from its first baseline, within 0.5px. Offenders print as
+   `p#l1 "..." at 39px beside p#s1 "..." at 27px: 3 of 4 lines off its lines (39 is not a multiple of 27)`.
+   `tests/fixtures/grid-lead.html` (`/dial/grid-lead.html`, in `PAGES`) holds the five cases, and
+   a test of its own reads each row's `data-expect` leads by number.
+
 Check 6 exists because every baseline check was green while the first page on the grid was
 broken on a phone (below).
 
@@ -371,7 +426,8 @@ In this order. Each step names the trap it was written after.
     highlights doing it (2026-10-02). They show the current slide and `display: none` the rest.
 11. **Components move whole**: `--snap-unit: 1` on a slider row, a chip row, a pill with a mark.
 12. **Rows meet**: `.wm-baselines` on side-by-side text; `data-baseline="last"` on a caption that
-    should end on its neighbour's line.
+    should end on its neighbour's line. Wrapping text beside wrapping text takes the lead rule
+    (§2): check the row's leads can work, and set the token where they can't.
 13. **Load gridSnap.js** (`defer`), and call `wmGridSnap()` after any script of yours changes a
     height.
 14. **Lint**: add the stylesheet to `lines` (and `only: ["lines"]` if the site is not on the rest
@@ -387,9 +443,16 @@ In this order. Each step names the trap it was written after.
 
 ## 7 · Known limits
 
-- **Side-by-side columns with different leadings drift after line 1.** The row rule meets first
-  baselines; a body column beside a lede column shares every third line and no others. An open
-  design call (the case study's hero).
+- **Side-by-side columns with different leadings: settled (2026-10-06), the lead rule (§2).** The
+  baseline grid is 3px and never changes. In a row of side-by-side text that wraps, the larger
+  lead takes the next multiple of the smaller, so every one of its lines lands on a line of the
+  smaller text; annotations and one-line blocks keep their lead and share only the first
+  baseline; where a row's leads can't work, the page sets the token. What it does not do: it
+  puts a block's later lines on the smaller text's lines only when its FIRST line is on one --
+  true for the first block of each item, which the row rule aligns, not guaranteed for a second
+  block lower in a column (the homepage's body under its headline lands there by its token and
+  margin, not by the snapper). And a paragraph set line by line into block children (the
+  homepage's Flattersatz `.para`) is not a text block to the snapper, so the rule never sees it.
 - **The system page is on the line but not on the columns.** Its layout is still the rail and a
   1080px measure; only the README, the section numbers and the Grid part are on the line, and the
   other chapters are stages (docs/system/build.py, `OFF_LINE`, says what each would need).

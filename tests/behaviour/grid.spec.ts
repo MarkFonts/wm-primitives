@@ -27,6 +27,10 @@ import { resolve } from 'node:path'
         unless the unit is data-baseline="free". The row rule (2) aligns siblings of a
         .wm-baselines grid; nothing held the text INSIDE one component together, and a rail
         row's value field drifted below its label with every other check green.
+     7. a row shares its lines: in a .wm-baselines row of side-by-side text that wraps (roles
+        body and up), every baseline of the larger-lead block lands on a line of the smaller
+        block's leading, extended from its first baseline -- the lead rule (Mark 2026-10-06).
+        Annotation roles, one-line blocks and data-lead="own" are not judged.
    It judges window.wmGridSnap.blocks, exactly what the snapper judged, so ornaments placed
    on purpose (a pill's arrow, a deck counter) drop out by the same rule that skips them,
    not by a list kept here. */
@@ -48,6 +52,10 @@ const PAGES = [
   // Columns that ARE text blocks, with different leads: each carries its own baseline nudge as
   // a `top`, so a row is only found if it is grouped by the box, before the nudge.
   { name: 'row of unlike leads fixture', url: '/dial/grid-row.html' },
+  // Side-by-side text that wraps: the larger lead goes to the next multiple of the smaller
+  // (a 39 lede beside a 27 sub -> 54; a title 30 beside body 24 -> 48), and annotations, one-line
+  // blocks and data-lead="own" keep theirs. The geometry test below reads each row's data-expect.
+  { name: 'side-by-side leads fixture', url: '/dial/grid-lead.html' },
 ]
 // 1024 is where the 24 columns begin (grid.css) and where the Cal Sans hero's two columns first
 // share a row; 900 is below it, 1440 above.
@@ -153,6 +161,53 @@ const UNITS = () => {   // runs in the page; stringified below
   return { units, runs, off }
 }
 
+const LEADS = () => {   // runs in the page; stringified below
+  /* A ROW SHARES ITS LINES (the lead rule, src/gridSnap.js). Rows are grouped as the snapper
+     groups them (the box top less grid.css's nudge). A block qualifies if it is a measured text
+     block in a text role -- not .t-micro/.t-ui/.t-label, a leading no smaller than body's
+     (--lead-body resolved in the root) -- that wraps, outside [data-lead="own"] and any
+     --snap-unit component. Each qualifying block is held to the smallest lead in the OTHER items
+     of its row (the first such block, its smallest lead L): its leading must be a multiple of L,
+     and every one of its baselines must sit on L's lines from that block's first baseline. */
+  const snap = (window as any).wmGridSnap, blocks = snap.blocks as Element[]
+  const probe = document.createElement('span'); probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline'
+  const first = (el: Element) => { const t = snap.firstLine(el) as Node; if (!t) return NaN; t.parentNode!.insertBefore(probe, t); const y = probe.getBoundingClientRect().top; probe.remove(); return y }
+  const name = (e: Element) => `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : '.' + (e.getAttribute('class') || '').split(' ')[0]} "${(e.textContent || '').trim().slice(0, 20)}"`
+  const off: string[] = []; let rows = 0, judged = 0
+  for (const root of document.querySelectorAll('.wm-lines')) {
+    const d = document.createElement('div'); d.style.cssText = 'position:absolute;visibility:hidden;height:0;font-size:var(--type-body-size,1rem);line-height:var(--lead-body,24px)'
+    root.appendChild(d); const body = parseFloat(getComputedStyle(d).lineHeight) || 24; d.remove()
+    const lead = (el: Element) => {
+      if (el.closest('[data-lead="own"], .t-micro, .t-ui, .t-label') || getComputedStyle(el).getPropertyValue('--snap-unit').trim() === '1') return 0
+      const lh = parseFloat(getComputedStyle(el).lineHeight); if (!lh || lh < body - 0.5) return 0
+      return snap.lines(el, lh) > 1 ? lh : 0   // from the text: a grid item's box is stretched to its row
+    }
+    for (const box of root.querySelectorAll('.wm-baselines')) {
+      if (box.closest('[data-nosnap]')) continue
+      const byTop = new Map<number, Element[]>()
+      for (const c of box.children) { const r = c.getBoundingClientRect(); if (!r.height) continue; const cs = getComputedStyle(c); const k = Math.round(r.top - (cs.position === 'relative' ? parseFloat(cs.top) || 0 : 0)); const key = [...byTop.keys()].find(x => Math.abs(x - k) <= 1) ?? k; (byTop.get(key) ?? byTop.set(key, []).get(key)!).push(c) }
+      for (const items of byTop.values()) {
+        if (items.length < 2) continue
+        const found = items.map(c => blocks.filter(el => c === el || c.contains(el)).map(el => [el, lead(el)] as [Element, number]).filter(b => b[1]))
+        if (found.filter(f => f.length).length < 2) continue
+        rows++
+        found.forEach((mine, i) => {
+          const others = found.filter((_, j) => j !== i).flat(); if (!others.length) return
+          const L = Math.min(...others.map(b => b[1])), small = others.find(b => b[1] === L)![0], y0 = first(small)
+          for (const [el, lh] of mine) {
+            if (lh <= L + 0.01) continue
+            judged++
+            const n = snap.lines(el, lh), y = first(el)
+            const bad = Array.from({ length: n }, (_, k) => y + k * lh).map(b => { const m = (((b - y0) % L) + L) % L; return Math.min(m, L - m) }).filter(m => m > 0.5)
+            if (bad.length) off.push(`${name(el)} at ${lh}px beside ${name(small)} at ${L}px: ${bad.length} of ${n} lines off its lines` + (Math.abs(lh / L - Math.round(lh / L)) > 0.01 ? ` (${lh} is not a multiple of ${L})` : ` (first baseline ${(y - y0).toFixed(1)}px from its)`))
+          }
+        })
+      }
+    }
+  }
+  return { rows, judged, off: off.slice(0, 12) }
+}
+
 const MARGIN = () => {   // runs in the page; stringified below
   // the house margin, resolved: --grid-margin is a clamp(), so measure it with a probe
   // Resolved INSIDE each root, not on <html>: a tool's .wm-grid--bleed on main or body sets it
@@ -254,6 +309,11 @@ for (const pg of PAGES) {
         console.log(`units ${pg.name} ${w}: ${un.units} units, ${un.runs} text runs`)
         expect(un.off, `text inside a unit that does not share the unit's baseline (mark the unit or run data-baseline="free" with a reason if it is meant to hang):\n${un.off.join('\n')}`).toEqual([])
 
+        // LEADS: side-by-side text that wraps shares its lines (data-lead="own" opts a block out)
+        const ld = await page.evaluate(fn => new Function('return (' + fn + ')()')(fn), LEADS.toString()) as { rows: number; judged: number; off: string[] }
+        console.log(`leads ${pg.name} ${w}: ${ld.rows} rows of side-by-side text, ${ld.judged} larger-lead blocks judged`)
+        expect(ld.off, `a row that does not share its lines (the larger lead must be a multiple of the smaller, from its first baseline; data-lead="own" with a reason if it is meant to differ):\n${ld.off.join('\n')}`).toEqual([])
+
         // MARGIN: the copy sits inside the house margin, both sides (a page with ownEdges answers to its shell)
         const m = await page.evaluate(fn => new Function('return (' + fn + ')()')(fn), MARGIN.toString()) as { raw: string; margin: number; n: number; nBleed: number; gutter: number; pageBleed: boolean; minLeft: number; maxRight: number; vw: number; off: string[] }
         if (pg.ownEdges) return
@@ -326,6 +386,30 @@ test.describe('bleed, breakers, mac shot · geometry', () => {
       near(g.win.left, g.cell.left, 'the window\'s left edge on the column'); near(g.win.right, g.cell.right, 'the window\'s right edge on the column')
       near(g.win.top, g.cell.top, 'the window\'s top is the cell\'s'); near(g.win.bottom, g.cell.bottom, 'the window\'s bottom is the cell\'s')
       expect(g.after.top - g.win.bottom, 'the next line follows the window, not the shadow').toBeGreaterThanOrEqual(23)
+    })
+  }
+})
+
+/* THE LEAD RULE, by number (tests/fixtures/grid-lead.html). Each row's data-expect names the
+   leading every block must end with: the larger lead rounded UP to a multiple of the smaller
+   beside it, and annotations, one-line blocks and data-lead="own" untouched. On a page without
+   the rule the lede stays at 39 and the title at 30, and this says so by name. */
+test.describe('side-by-side leads · by number', () => {
+  test.skip(({ hasTouch }) => hasTouch, 'widths are the axis here, not the input')
+  for (const w of [1440, 1024, 900, 390]) {
+    test(`fixture · ${w}px`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: 900 })
+      await page.goto('/dial/grid-lead.html')
+      await page.evaluate(() => document.fonts.ready)
+      await page.waitForFunction(() => typeof (window as any).wmGridSnap === 'function')
+      await page.evaluate(() => (window as any).wmGridSnap())
+      await page.waitForTimeout(300)
+      const got = await page.evaluate(() => [...document.querySelectorAll('[data-expect]')].flatMap(s => s.getAttribute('data-expect')!.split(',').map(kv => {
+        const [id, px] = kv.split('='), el = document.getElementById(id)!
+        return { id, want: +px, got: parseFloat(getComputedStyle(el).lineHeight), lines: (window as any).wmGridSnap.lines(el, parseFloat(getComputedStyle(el).lineHeight)) }
+      })))
+      console.log(`leads fixture ${w}: ` + got.map(g => `${g.id} ${g.got}${g.got !== g.want ? ' (want ' + g.want + ')' : ''} x${g.lines}`).join(', '))
+      expect(got.filter(g => g.got !== g.want).map(g => `#${g.id}: ${g.got}px, want ${g.want}px`)).toEqual([])
     })
   }
 })
