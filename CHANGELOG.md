@@ -73,11 +73,16 @@ keep the value. With the mark as the reset, fit_screen left the control and the 
 it). In the stack the mark keeps the right end of the zoom row; without `data-collapse` it is only
 the reset.
 
+**The default mark is pageview.** Mark: frame_inspect "doesnt have a fill". Rendered at FILL 0 and
+1 from the subset: frame_inspect is byte-identical (no fill drawing), pageview and feature_search
+both fill. pageview is the default; feature_search stays as the alternative; frame_inspect left the
+subset.
+
 GliffDiff, testing at 350%: the actions panned away with the proof. That was the host's (its
 title row lives inside the scroller), fixed there: the cluster is pinned to the window's top-right.
 
  (cut-icon-subset.py), then pageview, feature_search and
-frame_inspect, then fit_screen left again: 94 ligatures, 66,688 bytes, `?v=94`. The prototype had loaded them from Google as a second family, because a
+frame_inspect, then fit_screen and frame_inspect left again: 93 ligatures, 65,880 bytes, `?v=93`. The prototype had loaded them from Google as a second family, because a
 second face under the same name replaces the first. `dist/dial.css` rebuilt for the new URL and
 the stack rule (dial-entry imports themeSwitch.css). System page: a chapter in Interface after
 the chips -- the stack zooming a sample card, the markup, the keys.

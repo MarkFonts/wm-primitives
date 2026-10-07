@@ -11,7 +11,8 @@
  *   key      localStorage key (data-key), default 'wm-zoom'
  *   keys     'local' (data-keys="local"): + − 0 only while focus is inside this control
  *   value    the start value when nothing is stored, default 100
- *   icon     (data-icon) the mark at the right end: frame_inspect | pageview | feature_search.
+ *   icon     (data-icon) the mark at the right end: pageview (default) | feature_search -- both
+ *            have a FILL drawing, which the open state needs (frame_inspect has none).
  *            Pressed, it is the default view: back to 100.
  *   collapse (data-collapse) rest as that ONE mark and open leftwards out of it on press; the
  *            mark stays, filled (FILL 1), and pressing it again closes AND goes back to 100.
@@ -78,7 +79,7 @@
     // also what it rests as -- the box shrinks to the mark alone, and opens leftwards out of it.
     const collapse = !!(opts.collapse ?? ('collapse' in ds));
     const box = mk('div', 'wm-zoom-box');
-    const toggle = btn(opts.icon ?? ds.icon ?? 'frame_inspect', 'Back to 100%', 'Back to 100% (0)');
+    const toggle = btn(opts.icon ?? ds.icon ?? 'pageview', 'Back to 100%', 'Back to 100% (0)');
     toggle.classList.add('wm-zoom-toggle');
     box.append(out, rail, into, toggle);
     el.replaceChildren(box);

@@ -44,7 +44,7 @@ test('G59 · zoom_in / zoom_out step by 10; the mark goes back to 100', async ({
   await press('Back to 100%')
   expect(await value(page)).toBe(100)
   expect(await page.locator(`${ctl} .wm-icon-btn`).count()).toBe(3)   // zoom_out, zoom_in, the mark: no fit_screen
-  expect(await page.locator(`${ctl} .wm-zoom-toggle .wm-icon`).textContent()).toBe('frame_inspect')
+  expect(await page.locator(`${ctl} .wm-zoom-toggle .wm-icon`).textContent()).toBe('pageview')
   expect(await zoomOf(page)).toBe('')
 })
 
@@ -171,7 +171,7 @@ test('G65 · press the lozenge and it does not jump; drag to the end reaches max
 const rect = (page: Page, s: string) => page.evaluate(s => { const b = document.querySelector(s)!.getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, w: b.width, h: Math.round(b.height * 100) / 100 } }, s)
 const press = (page: Page, s: string, hasTouch: boolean) => hasTouch ? page.locator(s).dispatchEvent('click') : page.locator(s).click()
 
-test('G66 · at rest a collapsing control is one 27px mark: data-icon, frame_inspect by default', async ({ page, hasTouch }) => {
+test('G66 · at rest a collapsing control is one 27px mark: data-icon, pageview by default', async ({ page, hasTouch }) => {
   const H = hasTouch ? 33 : 27
   const row = await page.evaluate(() => {
     const z = document.querySelector('#row .wm-zoom')!
@@ -179,12 +179,12 @@ test('G66 · at rest a collapsing control is one 27px mark: data-icon, frame_ins
       inert: [...z.querySelectorAll('.wm-zoom-box > .wm-icon-btn:not(.wm-zoom-toggle), .wm-hd-rail')].map(e => (e as HTMLElement).inert),
       expanded: z.querySelector('.wm-zoom-toggle')!.getAttribute('aria-expanded') }
   })
-  expect(row.open).toBe('false'); expect(row.mark).toBe('frame_inspect'); expect(row.expanded).toBe('false')
+  expect(row.open).toBe('false'); expect(row.mark).toBe('pageview'); expect(row.expanded).toBe('false')
   expect(row.inert.every(Boolean)).toBe(true)
   const box = await rect(page, '#row .wm-zoom-box'), t = await rect(page, '#row .wm-zoom-toggle')
   expect(box.w).toBe(H); expect(box.h).toBe(H); expect(t.w).toBe(H); expect(t.h).toBe(H)
   // the other two rest marks, as data-icon picks them
-  expect(await page.locator('#cstack .wm-zoom-toggle .wm-icon').textContent()).toBe('pageview')
+  expect(await page.locator('#cstack .wm-zoom-toggle .wm-icon').textContent()).toBe('feature_search')
   const fs = await page.evaluate(() => { const el = document.createElement('div'); el.className = 'wm-zoom'; el.dataset.collapse = ''; el.dataset.icon = 'feature_search'; el.dataset.key = 'wm-zoom-x'; el.dataset.keys = 'local'; document.body.appendChild(el); (window as any).wmZoom.mount(el); return el.querySelector('.wm-zoom-toggle .wm-icon')!.textContent })
   expect(fs).toBe('feature_search')
 })

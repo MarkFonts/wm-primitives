@@ -240,7 +240,7 @@ switch as `.wm-theme-stack` (themeSwitch.css). Prototyped on two scratch study p
 
 | id | gesture | promise | commit |
 | --- | --- | --- | --- |
-| G66 | at rest, `data-collapse` | one 27px `.wm-icon-btn` (33 on touch), the mark, showing `data-icon` — `frame_inspect` by default, `pageview` or `feature_search` — unfilled (FILL 0), with `aria-expanded="false"`; every other part is `inert` and clipped off its left | zoom-control |
+| G66 | at rest, `data-collapse` | one 27px `.wm-icon-btn` (33 on touch), the mark, showing `data-icon` — `pageview` by default, or `feature_search`; both have a FILL drawing (frame_inspect, the first default, has none) — unfilled (FILL 0), with `aria-expanded="false"`; every other part is `inert` and clipped off its left | zoom-control |
 | G67 | press the mark | the control opens **leftwards out of it**: the box's width runs from the mark to the control over `--dur-med` (240ms) while zoom_out, the rail with its lozenge and zoom_in fade in; the mark **stays where it is** at the right end and fills (Material's FILL axis, 0 → 1, over the same 240ms) and stays filled while open; focus goes to the rail. Pressed again while open, the mark **closes the control and goes back to 100**, the default view. `Escape` (focus inside) and a press anywhere outside close it and **keep** the value; Escape returns focus to the mark. Closing unfills it | zoom-control |
 | G68 | `prefers-reduced-motion: reduce` | the same two states, swapped with no transition | zoom-control |
 | G69 | reload | open or closed is kept with the value under the one key: `"170 open"` / `"170 closed"` (`parseFloat` still reads the number); with nothing stored, `data-open="true"` starts it open | zoom-control |
