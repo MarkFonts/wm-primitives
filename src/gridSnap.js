@@ -17,7 +17,9 @@
  *
  * Plain script, no module, no dependency: <script src="shared/src/gridSnap.js" defer>.
  * In a .wm-baselines container, items in one row also share their first baseline -- or, for an
- * item marked data-baseline="last", meet it with their last line (below).
+ * item marked data-baseline="last", meet it with their last line (below). A row of side-by-side
+ * text that wraps has a STEP, its smallest text lead, published as --row-step on the row's items
+ * for the page's rules and folio marks (the row step, below).
  * It reruns when fonts load, when a root resizes, and on window.wmGridSnap() -- call that
  * after a script of the page's own changes heights. Add ?grid to the URL to see the columns
  * and the lines drawn over the page. */
@@ -46,6 +48,73 @@
     if (isUnitEl(el)) { const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => n.textContent.trim() ? 1 : 3 }); return w.nextNode(); }
     return ownText(el);
   };
+  // A ROW of a .wm-baselines container: its children grouped by the BOX's top, before grid.css's
+  // baseline nudge -- a column that is itself the text block carries the nudge as a relative
+  // `top` (up to 2px, and unlike for unlike leads), which would otherwise split two columns that
+  // start on one row (the Cal Sans hero at 1024px, line 1 three px apart). The row rule and the
+  // row step both read rows from here.
+  function rowsOf(box) {
+    const rows = new Map();
+    for (const child of box.children) {
+      const r = child.getBoundingClientRect(); if (!r.height) continue;
+      const cs = getComputedStyle(child);
+      const key = Math.round(r.top - (cs.position === 'relative' ? parseFloat(cs.top) || 0 : 0));
+      const row = [...rows.keys()].find(k => Math.abs(k - key) <= 1) ?? key;
+      if (!rows.has(row)) rows.set(row, []);
+      rows.get(row).push(child);
+    }
+    return [...rows.values()];
+  }
+
+  /* THE ROW STEP (Mark 2026-10-06). The baseline grid is 3px and never changes. In a row of
+     side-by-side text -- blocks in text roles (body, lede, title, display) that each wrap -- the
+     SMALLEST text lead is the row's step, and the larger text is SIZED so its lead is a whole
+     multiple of it (the homepage: a 45/48 headline beside a 12/24 caption). That is a design
+     rule the CI spec enforces ("a row shares its lines"); nothing here rewrites a leading.
+     The tiny lines next to the big lines are the macrogrid for the row's rules and folio marks:
+     they sit on multiples of the step from the row's shared first baseline. This measures the
+     step and writes it as --row-step on every item of the row, so page CSS can place a rule
+     with `top: calc(-1 * var(--row-step, 24px))`; an item in no stepped row has it removed.
+     Annotation roles (.t-micro, .t-ui, .t-label, or a leading under --lead-body) and one-line
+     blocks are not part of the step: they share the first baseline only. */
+  // Lines are counted from the text, not the box: a grid item is stretched to its row's height,
+  // so a one-line label beside a paragraph has a box three lines tall.
+  function linesOf(el, lh) {
+    const rg = document.createRange(); rg.selectNodeContents(el);
+    const tops = [];
+    for (const r of rg.getClientRects()) if (r.width && r.height && !tops.some(t => Math.abs(t - r.bottom) < lh / 2)) tops.push(r.bottom);
+    return tops.length;
+  }
+  const ANNOTATION = '.t-micro, .t-ui, .t-label';
+  function bodyLead(root) {
+    const d = document.createElement('div');
+    d.style.cssText = 'position:absolute;visibility:hidden;height:0;padding:0;border:0;font-size:var(--type-body-size,1rem);line-height:var(--lead-body,24px)';
+    root.appendChild(d); const v = parseFloat(getComputedStyle(d).lineHeight); d.remove();
+    return v || 24;
+  }
+  // the lead of a block that counts toward a row's step, or 0
+  function textLead(el, body) {
+    if (el.matches(ANNOTATION) || el.closest(ANNOTATION) || isUnitEl(el)) return 0;
+    const lh = parseFloat(getComputedStyle(el).lineHeight);
+    if (!lh || lh < body - 0.5) return 0;
+    return linesOf(el, lh) > 1 ? lh : 0;
+  }
+  const stepped = new Set();   // items carrying a --row-step from the last pass
+  function rowSteps(root, blocks) {
+    const steps = [];
+    const boxes = root.querySelectorAll('.wm-baselines');
+    const body = boxes.length ? bodyLead(root) : 0;
+    for (const box of boxes) for (const items of rowsOf(box)) {
+      if (items.length < 2) continue;
+      const leads = items.map(child => blocks.filter(el => child === el || child.contains(el)).map(el => textLead(el, body)).filter(Boolean));
+      // side-by-side text: wrapping text-role blocks in two items or more
+      if (leads.filter(l => l.length).length < 2) continue;
+      steps.push([items, Math.min(...leads.flat())]);
+    }
+    for (const el of stepped) if (root.contains(el) || !el.isConnected) { el.style.removeProperty('--row-step'); stepped.delete(el); }
+    for (const [items, L] of steps) for (const el of items) { el.style.setProperty('--row-step', L + 'px'); stepped.add(el); }
+  }
+
   function snapRoot(root) {
     const bl = BL(root), top0 = root.getBoundingClientRect().top;
     const blocks = [], ys = new Map();
@@ -105,26 +174,21 @@
       return [el, y];
     };
     for (const box of root.querySelectorAll('.wm-baselines')) {
-      const rows = new Map();
-      for (const child of box.children) {
-        const r = child.getBoundingClientRect(); if (!r.height) continue;
-        const f = firstOf(child); if (!f) continue;
-        // the row is the BOX's top, before grid.css's baseline nudge: a column that is itself the
-        // text block carries the nudge as a relative `top` (up to 2px, and unlike for unlike
-        // leads), which would otherwise split two columns that start on one row (the Cal Sans
-        // hero at 1024px, line 1 three px apart)
-        const cs = getComputedStyle(child);
-        const key = Math.round(r.top - (cs.position === 'relative' ? parseFloat(cs.top) || 0 : 0));
-        const row = [...rows.keys()].find(k => Math.abs(k - key) <= 1) ?? key;
-        if (!rows.has(row)) rows.set(row, []);
-        // data-baseline="last": the item meets the row by its LAST line (a two-line caption
-        // beside one big word ends on the word's baseline instead of hanging below it)
-        if (child.getAttribute('data-baseline') === 'last') {
-          const l = lastOf(child);
-          rows.get(row).push([child, l[0], l[1] + delta.get(l[0]), true]);
-        } else rows.get(row).push([child, f[0], ys.get(f[0]) + delta.get(f[0])]);
+      const rows = [];
+      for (const kids of rowsOf(box)) {
+        const row = [];
+        for (const child of kids) {
+          const f = firstOf(child); if (!f) continue;
+          // data-baseline="last": the item meets the row by its LAST line (a two-line caption
+          // beside one big word ends on the word's baseline instead of hanging below it)
+          if (child.getAttribute('data-baseline') === 'last') {
+            const l = lastOf(child);
+            row.push([child, l[0], l[1] + delta.get(l[0]), true]);
+          } else row.push([child, f[0], ys.get(f[0]) + delta.get(f[0])]);
+        }
+        rows.push(row);
       }
-      for (const items of rows.values()) {
+      for (const items of rows) {
         if (items.length < 2) continue;
         // the row's line: the lowest FIRST baseline (a last-line item may need to move up to it)
         const firsts = items.filter(i => !i[3]).map(i => i[2]);
@@ -150,6 +214,7 @@
       }
     }
     for (const [el] of out) measured.push(el);
+    rowSteps(root, out.map(([el]) => el));
     for (const [el, d] of delta) {
       if (Math.abs(d) < 0.02) continue;
       // A static one is made `relative`, tagged so the next pass knows that `relative` is ours.
@@ -195,6 +260,8 @@
   // so it judges exactly the blocks the snapper judged, not a copy of the rules)
   run.blocks = measured;
   run.firstLine = el => units_or_own(el);
+  // how many lines a block's text runs to (the CI spec counts wrapping with it, as the step does)
+  run.lines = linesOf;
   run.shots = shots;
 
   /* ?grid on any page: the columns (pink) and the 3px lines (blue), drawn over each .wm-lines

@@ -199,6 +199,20 @@ of a hero, three cards.
   the specimen above it once pushed a paragraph 212px -- so it is refused, warned in the
   console and listed in `wmGridSnap.refused`, which CI reads.
 
+### The row step
+
+In a row of side-by-side text -- blocks in text roles (body, lede, title, display) that each wrap,
+in two items or more -- the **smallest text lead is the row's step**. gridSnap measures it on
+every pass and writes it inline as `--row-step` on each item of the row (a `.wm-baselines`
+container can hold several rows; grid.css declares it unset on every item, so a nested row never
+inherits an outer one's). A row with no side-by-side text has no step, and its items lose the
+property. The larger text is **sized** so its lead is a whole multiple of the step; nothing at
+render rewrites a leading, and [check 10](#5--the-ci-spec) reports a row whose leads do not
+divide. The step is also the row's macrogrid: rules, dots, figure tops and folio marks sit on
+multiples of it from the shared first baseline, `top: calc(-1 * var(--row-step, 24px))` for the
+homepage caption's rule ([check 11](#5--the-ci-spec)). Write the fallback: below 1024 the
+columns stack and the row has no step. Annotation roles and one-line blocks are not part of it.
+
 ### Components move whole: `--snap-unit: 1`
 
 A slider row, a pill with a mark, a chip row: anything with a part beside its words is shifted as
@@ -226,6 +240,47 @@ position and `top` it had without the grid; no shell has to hand them back. (The
 in, and the system page undid them with a `revert-layer` rule. The `:where` inside the `:not`
 keeps the selector at the specificity it had: a bare `:not()` counts its argument.)
 
+### Recommendations
+
+Big type beside small, as rules. Each is held by a spec check where one exists (§5).
+
+1. **Set every lead in whole 3px lines.** The line never changes, so a lead of 24, 27 or 48 is
+   eight, nine or sixteen of it, and a block's later lines stay on the grid its first line was
+   put on. A lead of 24.8 is on the line once and walks off by the second. Checks 2 and 3.
+2. **In a row of side-by-side text, take the smallest text lead as the row's step.** The tiny
+   lines next to the big lines are the row's macrogrid: a 12/24 caption beside a 45/48 headline
+   gives the row a step of 24. Only text that wraps and is in a text role counts (body, lede,
+   title, display). gridSnap measures the step and writes it on the row's items as `--row-step`.
+   Check 11.
+3. **Size the big text so its lead is a whole multiple of the step; do not loosen a lead to make
+   it fit.** The homepage headline went from 36/39 to 45/48 beside a 24 caption, not to 36/48: a
+   lead opened by a third looks spaced out, a size one token larger does not. Each headline line
+   then lands on every other caption line. Check 10, "a row shares its lines".
+4. **Keep one step of white around every line of the big text.** Between its lines (a baseline to
+   the next line's x-height), above the block (what precedes it ends one step above its first
+   x-height) and below it (the next text's x-height sits one step under its last baseline). Cal
+   Sans 600 at 45/48 has an x-height of 23.9px, measured from the pixels, so the white is 24.1:
+   baselines on the step lines, x-heights on the half lines. As ratios, step = size x (lead ratio
+   - x-height ratio) = 45 x (1.067 - .531) = 24.1; another face or size checks that fit before it
+   is adopted. Check 12, "text keeps one step of white".
+5. **Put rules, dots and folio marks on the step, counted from the shared first baseline.** The
+   homepage caption's rule and dot sit at -24, one caption line above the row's first baseline,
+   written `top: calc(-1 * var(--row-step, 24px))`. A mark between steps reads as a slip beside
+   type that is on them. Check 11, "folio elements sit on the row step".
+6. **Set an eyebrow or a label on line 0 of its title, one lead above the first baseline, never
+   nearer.** With the big text sized to the step its x-height sits on a half line, so the safe
+   area above a title is exactly one of its leads: -48 for 45/48. An eyebrow at -30 is inside it,
+   18px short. Check 12.
+7. **Let annotations and one-line blocks keep their own lead.** Micro, label and ui text, and any
+   block that runs to one line, share the row's first baseline and nothing after it. They are not
+   part of the step, so a 9/12 note beside an 18/27 lede is no conflict.
+8. **Express the margins around big text in the row step, not in em.** A headline's margin-top and
+   margin-bottom are multiples of `var(--row-step)`, or of its own lead, so what follows starts on
+   the macrogrid. An em margin follows the size and lands between lines.
+9. **When a row's leads cannot divide, change the size, not the grid.** Nothing at render rounds a
+   lead; the check reports the row. The case study's hero, a lede at 39 beside a sub at 27, is the
+   standing example, listed as a known offender until the hero is re-sized.
+
 ## 3 · gridSnap.js -- what CSS cannot know
 
 The nudge is exact for a block whose BOX starts on a line. A block below an image, an embed, a
@@ -246,8 +301,12 @@ grid.css adds to `top`. Glyphs move, layout does not, so one pass is enough.
 - It **reruns** when fonts load, on `load`, when a root resizes, and on `window.wmGridSnap()`.
   Call that after a script of the page's own changes heights.
 - `window.wmGridSnap.blocks` is every block the last pass measured and `.firstLine(el)` the text
-  it measured by; `.refused` the row shifts it would not make. The CI spec reads these, so it
+  it measured by; `.refused` the row shifts it would not make; `.lines(el, lead)` how many lines a
+  block's text runs to (counted from its line boxes: a grid item is stretched to its row, so a
+  one-line label beside a paragraph has a box three lines tall). The CI spec reads these, so it
   judges exactly what the snapper judged.
+- **The row step**: after the row rule, every `.wm-baselines` row with side-by-side text gets
+  `--row-step` on its items (§2). It is only written, never used by the snapper itself.
 - `--snap` is declared `initial` in grid.css and set inline. Never list it (or `--chip-color`) as
   a runtime token: three consumers lint `shared/src` with their own lists.
 - **`?grid`** on any adopting page draws the columns (pink) and the 3px lines (blue) over each
@@ -326,6 +385,33 @@ in Chromium. After fonts load and one more snapper pass:
    value, which has no text node, is read from its content box with the same descent, the line
    centred in an input and top-aligned in a textarea. Offenders print as
    `unit tag.class: "text" at Ypx vs "first text" at Ypx (delta)`.
+10. **a row shares its lines** -- in every `.wm-baselines` row with side-by-side text (§2, the row
+   step), every block with a lead larger than the step has every baseline on the step's lines,
+   extended both ways from the row's shared first baseline, within 0.5px. Offenders print as
+   `div.hero-cols: p.hero-lede "..." at 39px beside p.hero-sub "..." at 27px: 3 of 4 lines off the step (39 is not a multiple of 27)`.
+11. **folio elements sit on the row step** -- in such a row, every box that is not text (a rule, a
+   dot, a figure's top; not `data-nosnap`, not `data-baseline="free"`) has its top or its centre
+   on a multiple of the step from the row's first baseline, within 0.5px (a rule sits by its top,
+   a dot hung on it by its centre), and every item carries the step as `--row-step`. Offenders
+   print as `b.rule top at -30.0px, centre at -29.5px from the row's first baseline: off its 24px step by 5.5px`.
+12. **text keeps one step of white** -- around a title (a heading, `h1`-`h6`, at 24px or more; not
+   an annotation), the nearest text above it in its column has its last baseline at least one step
+   above the title's first x-height, and the nearest text below has its first x-height at least
+   one step under the title's last baseline, within 0.5px. The step is the row's, or body's lead.
+   A specimen or a figure set big in a `p` (a role sample, a card's numeral over its caption) is
+   not a title. X-heights are measured from pixels, because Cal Sans's x runs from .515 em to .535
+   across its axes and canvas ignores the axes: an `x` in the element's own computed font is drawn
+   at up to 8x by a CSS transform (which leaves opsz alone), screenshot, and its top ink row found
+   at half coverage against a zero-size baseline probe -- under 0.15px of error; it reads 23.9 on
+   Cal Sans 600 at 45px, where fontTools gives 1062/2000 x 45 = 23.9.
+
+Checks 10 and 11 report; they never fix. A row that cannot be sized yet is listed in the spec's
+`KNOWN` by page and row selector, with why and what removes it, and printed as `KNOWN OFFENDER`:
+the case study's hero (lede 39 beside sub 27), the grid bench's hero (the same shape, lede 27
+beside notes 24) and the homepage's work rows (headline 39 beside caption 24, until the 45/48
+headline ships). `tests/fixtures/grid-step.html` (`/dial/grid-step.html`, in `PAGES`) holds a
+passing row, the exemptions and three negative cases marked `data-expect-offender`, which the
+page loop excuses and a test of its own requires each check to report.
 
 Check 6 exists because every baseline check was green while the first page on the grid was
 broken on a phone (below).
@@ -371,7 +457,9 @@ In this order. Each step names the trap it was written after.
     highlights doing it (2026-10-02). They show the current slide and `display: none` the rest.
 11. **Components move whole**: `--snap-unit: 1` on a slider row, a chip row, a pill with a mark.
 12. **Rows meet**: `.wm-baselines` on side-by-side text; `data-baseline="last"` on a caption that
-    should end on its neighbour's line.
+    should end on its neighbour's line. Wrapping text beside wrapping text has a step (§2): size
+    the big text so its lead is a multiple of it, hang rules and folio marks on
+    `var(--row-step)`, and keep one step of white around every title (the recommendations).
 13. **Load gridSnap.js** (`defer`), and call `wmGridSnap()` after any script of yours changes a
     height.
 14. **Lint**: add the stylesheet to `lines` (and `only: ["lines"]` if the site is not on the rest
@@ -387,9 +475,28 @@ In this order. Each step names the trap it was written after.
 
 ## 7 · Known limits
 
-- **Side-by-side columns with different leadings drift after line 1.** The row rule meets first
-  baselines; a body column beside a lede column shares every third line and no others. An open
-  design call (the case study's hero).
+- **Side-by-side text: a lead and size rule, not a grid change.** The baseline grid is 3px and
+  never changes. In a row of side-by-side text (text roles body, lede, title and display, each
+  wrapping), the smallest text lead is the row's step, and the larger text is sized so its lead
+  is a whole multiple of it: the homepage's headline 45/48 beside a 24 caption. Tiny lines next
+  to big lines become the macrogrid for rules and other folio elements, which sit on multiples
+  of the step from the row's shared first baseline (the homepage caption's rule and dot at -24).
+  Annotation roles (micro, label, ui) and one-line blocks are unchanged: on the 3px line, first
+  baseline shared by the row rule, not part of the step. It is enforced by the spec (checks 10 and
+  11), never by rounding at render; where a row's leads do not divide, the check reports it.
+- **One step of white around every line of the big text.** With the headline sized to two steps
+  (45/48 beside 24), Cal Sans's x-height (23.9px at 45, 600) leaves 24.1px from one baseline to
+  the next line's x-height: one step, so baselines fall on the step lines and x-heights on the
+  half lines. Between its lines, above the block (the previous element ends one step above its
+  first x-height) and below it (the next text's x-height sits one step under its last baseline).
+  So a headline's margin-top and margin-bottom are expressed in the row step (`var(--row-step)`
+  multiples), not in em. It holds for Cal Sans at the 2x sizing (lead / x-height ratio about
+  1.07 / .53); another face or size checks the x-height-to-step fit before adopting a size.
+  `tests/fixtures/grid-step.html` draws it: a 45/48 stage with the step lines, the half lines
+  and the x-height.
+- **Known offenders.** The case study's hero (lede 39 beside sub 27) stays as it is for now and is
+  listed in the spec's `KNOWN`; so are the grid bench's hero, which is drawn after it, and the
+  homepage's work rows until the 45/48 headline ships.
 - **The system page is on the line but not on the columns.** Its layout is still the rail and a
   1080px measure; only the README, the section numbers and the Grid part are on the line, and the
   other chapters are stages (docs/system/build.py, `OFF_LINE`, says what each would need).
