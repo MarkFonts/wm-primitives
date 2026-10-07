@@ -113,16 +113,17 @@ test('G62 · a selector that matches several boxes zooms each, anchored on its o
 
 test('G63 · a baseline in the target is exactly twice as far down at 200%', async ({ page }) => {
   /* No re-seat: the prototype re-seated absolutely placed paragraphs on its own marks, a page's
-     job. Here the probe sits on the first baseline of flowing text at a 24px leading, and the
-     zoomed line box is 48 with the font's ascent re-measured at 32px; on these faces that lands
-     exactly. A face whose rounded ascent does not scale can move it by under half a pixel
-     (the prototype's note), so the tolerance is .5, and the measured error is reported. */
+     job, and flowing text has no mark to re-seat on. Chrome rounds a face's ascent and descent
+     to whole pixels AT EACH SIZE, so the half-leading and the ascent at 32px are not exactly
+     twice those at 16px: on macOS's system-ui the probe lands exactly (0px); on the Linux
+     runner's face it lands 1px off (CI, 2026-10-07). So the bound is 1px, and the measured
+     error is reported. */
   const off = () => page.evaluate(() => document.getElementById('probe')!.getBoundingClientRect().top - document.getElementById('page')!.getBoundingClientRect().top)
   const a = await off()
   await set(page, 200)
   const b = await off()
   test.info().annotations.push({ type: 'baseline', description: `100%: ${a}px, 200%: ${b}px, error ${Math.abs(b - 2 * a)}px` })
-  expect(Math.abs(b - 2 * a)).toBeLessThanOrEqual(0.5)
+  expect(Math.abs(b - 2 * a)).toBeLessThanOrEqual(1)
 })
 
 test('G64 · the stack: one width and one right edge, both rows on the line', async ({ page, hasTouch }) => {

@@ -24,8 +24,9 @@ applies CSS `zoom` to the target. GESTURES.md §12, G58-G65; `tests/behaviour/zo
 - **Anchored top-left.** Plain `zoom` on a centred wrapper grows it both ways and its auto
   margins shrink, so the page slid left under the reader. The control pins the target's 100%
   width and divides its left margin by the zoom: it grows right and down, nothing reflows, the
-  document scrolls. A baseline at 200% is exactly twice as far down on the test faces; the
-  prototype's per-paragraph re-seat was a page's job for its absolutely placed text and is not here.
+  document scrolls. A baseline at 200% is exactly twice as far down on macOS and 1px off on the
+  Linux runner, where Chrome's whole-pixel ascent at each size does not double; the prototype's
+  per-paragraph re-seat was a page's job for its absolutely placed text and is not here.
 - **A target can be several boxes.** GliffDiff, the first host, keeps its theme switch in each
   view's sticky title row, so the control lives inside the view it zooms: its target is
   `.view > :not(.view-header)`, every block but the row, each zoomed and anchored on its own.
