@@ -12,6 +12,123 @@ Newest first.
 
 ---
 
+## 2026-10-07 -- the zoom control, and the theme switch's stacked alternate
+
+**A new primitive from a scratch prototype.** Two study pages grew a zoom slider under their
+Auto / Light / Dark chips; Mark asked for it as a primitive that can always sit under the theme
+switch, "like an alt version of that primitive". `src/zoomControl.js` + `.css` (plain script,
+like dialHandle.js; no React form): `<div class="wm-zoom" data-target="#page">` renders
+zoom_out · the dialHandle rail with the percentage in the lozenge · zoom_in · fit_screen, and
+applies CSS `zoom` to the target. GESTURES.md §12, G58-G65; `tests/behaviour/zoomControl.spec.ts`.
+
+- **Anchored top-left.** Plain `zoom` on a centred wrapper grows it both ways and its auto
+  margins shrink, so the page slid left under the reader. The control pins the target's 100%
+  width and divides its left margin by the zoom: it grows right and down, nothing reflows, the
+  document scrolls. A baseline at 200% is exactly twice as far down on macOS and 1px off on the
+  Linux runner, where Chrome's whole-pixel ascent at each size does not double; the prototype's
+  per-paragraph re-seat was a page's job for its absolutely placed text and is not here.
+- **A target can be several boxes.** GliffDiff, the first host, keeps its theme switch in each
+  view's sticky title row, so the control lives inside the view it zooms: its target is
+  `.view > :not(.view-header)`, every block but the row, each zoomed and anchored on its own.
+- **`sideEffects`.** package.json declared only `*.css` side-effectful, so a bundler that imports
+  the plain script for its effect (`import 'shared/src/zoomControl.js'`, GliffDiff's Vite build)
+  dropped it whole and `window.wmZoom` was undefined. `./src/zoomControl.js` is listed now.
+- **No invisible range input.** The prototype laid a zero-opacity `<input type=range>` over the
+  rail and sized its thumb to the lozenge with two measured variables. The rail is the slider
+  itself now (role=slider, as dialHandle.js does): press the lozenge and it does not jump, press
+  elsewhere and it jumps there; arrows, Home, End; no wheel (G33).
+- **Keys.** + − 0 from the control or from anywhere on the page that is not a field, never with
+  Cmd/Ctrl/Alt (the browser's own zoom). `data-keys="local"` limits a control to its own focus,
+  for a page with more than one -- the system page's demo is local.
+- **The stack is CSS.** `.wm-theme-stack` (themeSwitch.css) puts the theme row and the zoom row
+  in one `max-content` grid column: both stretch to the wider, so they share a width and a right
+  edge without the prototype's measured `width`. The rail is `flex: 1 1 0` with a 6rem floor, so
+  under the chips the zoom row takes their width; under the three marks, which are narrower than
+  that floor, the marks take the zoom row's. Rows 27 (33 on touch), `--spacing-02` apart. The
+  switch alone is unchanged.
+- **Touch.** icon.css floors every `.wm-icon-btn` at 44 in `@layer wm.icon`, which no
+  wm.controls rule can reach; the zoom row's marks are held to 33 in that same layer, so the
+  row is one control tall beside the chips, as the prototype was.
+
+**Round 2, the same day: it folds into one mark.** Mark asked whether it should rest behind one
+icon and transform out of it, and whether it should then sit under the theme switch or to its
+left. Both are built so he can choose (GESTURES G66-G71):
+- `data-collapse` rests as one 27px `.wm-icon-btn` showing `data-icon` -- frame_inspect
+  (default), pageview or feature_search. A press grows the box from the mark to the control over
+  `--dur-med`; Escape or a press outside folds it (round 3 below changes what the mark does). Reduced motion
+  swaps the states. Open/closed is stored with the value: `"170 open"`.
+- `.wm-zoom--left` in a `.wm-theme-row` (themeSwitch.css) opens leftwards over its own row from a
+  27px footprint, so nothing in the row or below it moves; its rail is a fixed 8rem. The open box
+  lies on `--zoom-ground` (transparent by default, a knob declared at :root like dialHandle's).
+- The rail's floor goes from 6rem to 10rem: at 6rem a 350-point range had about 46px of travel
+  under the chips. The stack is now wider than the chips when open, by 78px.
+
+**Round 3, the same day: the mark stays, and it is the reset.** Mark: clicking it "would collapse
+and return to default view". So the mark no longer fades into zoom_out: it sits at the control's
+RIGHT end, the control opens leftwards out of it, and it stays put, filled -- Material's FILL axis,
+0 -> 1 over `--dur-med`, which the subset already carried (all four axes survive the cut; nothing
+to pay). Pressed while open it closes AND goes back to 100; Escape and a press outside close and
+keep the value. With the mark as the reset, fit_screen left the control and the subset
+(cut-icon-subset.py grew a `-name` to drop one; lint-icons is the check that nothing still draws
+it). In the stack the mark keeps the right end of the zoom row; without `data-collapse` it is only
+the reset.
+
+**Round 4: the mark becomes the dial.** Mark's choreography, verbatim in spirit: "three magnifying
+glasses animating out of a box, one goes back into the button with a fill, the last two lead to
+the extremes and the 100% pill pulls out of a rule". The box no longer animates its width -- the
+layout jumps to the open state, and a 600ms Web Animations timeline (2.5 x `--dur-med`) plays over
+it on transform and opacity only: the mark fills in place; zoom_out and zoom_in rise out of it and
+fly to the ends and crossfade into the real buttons; the rule draws leftwards between them; the
+lozenge pulls out of the rule at 100 and slides to the saved value. Close ("close just brings the
+two magnifiers into box?") is one beat: the two fly home, the rule retracts under them, the mark
+unfills. A third magnifier that went back into the box was tried and dropped ("no need for the
+3rd one"); the `search` mark it needed left the subset with it. motion.css has no easing tokens, so the
+curve is the case study tester's unlock curve, cubic-bezier(0.2, 0.7, 0.2, 1), named in a comment.
+The docs chapter carries the choreography as an animated SVG composed from the live keyframes
+(docs/assets/zoom-morph.svg, scripts/zoom-morph-svg.mjs), not a recording.
+
+**Round 6: the mark keeps the zoom; the lozenge is the reset; capture.** Settled with Mark: the mark
+only opens and closes, and closing never changes the zoom. The reset moves to a press on the
+lozenge (its numerals count down as it slides home); `0` still resets. Shut at a zoom other than
+100 the value stays on show left of the mark (ui role, tabular, muted, no pill) and the mark stays
+filled, so a zoomed page is never mistaken for one at its own size. `data-capture` ("TAKE OVER the
+browser zoom/pinch when you're active/mousing the right column") cancels a pinch (ctrl+wheel;
+Safari's gesture events) and Cmd/Ctrl + - 0 over the target, or a region it names, and drives the
+control instead, opening it if shut. Listeners sit on the region, never the window: outside it
+the browser zooms as ever. Off by default; GliffDiff turns it on over its stage. G72-G75.
+
+**Round 5: one glass, split in two, pulling the rule.** Mark replaced the two-magnifier open with a
+strict sequence, now GESTURES G67: one magnifier (`search`, back in the subset, `?v=94`) leaves the
+mark as it fills and zips to the lozenge's place at 100; it becomes zoom_out and zoom_in, which
+travel to the ends pulling the rule out from the centre (a clip on the full-length hairline); the
+lozenge appears as a 6px dot and grows round the readout a numeral a beat, 1, 10, 100, 100%, then
+slides to the value. Close folds it back in 300ms. The lozenge and readout grow by clip-path (round
+ends), never layout. Two defects Mark saw in the SVG, both the SVG's: the filled mark showed the
+outlined mark's lens through its own (the two drawings were stacked, not cross-faded), and the
+rule showed through the "100%" (the readout was a knockout). The SVG now cross-fades the drawings
+and fills the numerals in the ground colour. The live control had neither: one glyph in the mark,
+the rule painted before the lozenge.
+
+**The rule runs the whole rail.** dialHandle's hairline runs from the lozenge's centre at min to
+its centre at max, which is right for a dial whose pill is mid-rail; in the zoom control the pill
+rests near the left end at 100%, so the rule read as a stub to its right that stopped short of
+zoom_in ("not wide enough"). The zoom's rule now spans the rail edge to edge, under the lozenge.
+dialHandle keeps its own convention.
+
+**The default mark is pageview.** Mark: frame_inspect "doesnt have a fill". Rendered at FILL 0 and
+1 from the subset: frame_inspect is byte-identical (no fill drawing), pageview and feature_search
+both fill. pageview is the default; feature_search stays as the alternative; frame_inspect left the
+subset.
+
+GliffDiff, testing at 350%: the actions panned away with the proof. That was the host's (its
+title row lives inside the scroller), fixed there: the cluster is pinned to the window's top-right.
+
+ (cut-icon-subset.py), then pageview, feature_search and
+frame_inspect, then fit_screen and frame_inspect left again: 93 ligatures, `?v=93`. The prototype had loaded them from Google as a second family, because a
+second face under the same name replaces the first. `dist/dial.css` rebuilt for the new URL and
+the stack rule (dial-entry imports themeSwitch.css). System page: a chapter in Interface after
+the chips -- the stack zooming a sample card, the markup, the keys.
+
 ## 2026-10-06 -- the bench hero follows its own rule
 
 **The grid bench was the one page in the docs that broke the row rule it teaches.** Its hero is

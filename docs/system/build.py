@@ -152,12 +152,13 @@ PRIMITIVE_CSS = {
     # chevron.css carries the stepper stroke and its rollover; without it the docs page
     # draws chevrons at the browser's default stroke-width of 1, thinner than anything
     # that ships, since the weight left the SVG attribute so it could answer :hover.
-    "controls": ("type.css", "chevron.css", "icon.css", "AxisSlider.css", "AxisTriplet.css", "chip.css", "dialHandle.css"),
+    "controls": ("type.css", "chevron.css", "icon.css", "AxisSlider.css", "AxisTriplet.css", "chip.css", "dialHandle.css",
+                 "themeSwitch.css", "zoomControl.css"),
 }
 # The same for scripts: a chapter that DEMONSTRATES a plain-script primitive runs the file
 # from src/, inlined ahead of its own code, so the demo is the shipped thing.
 PRIMITIVE_JS = {
-    "controls": ("dialHandle.js",),
+    "controls": ("dialHandle.js", "zoomControl.js"),
 }
 # A part folded into a section (an extra source) names its primitives by file, and they are
 # scoped to the part alone -- the grid's roles demo needs type.css's .t-* classes and the
@@ -262,6 +263,9 @@ def build_section(sid, label, path, kicker):
     html = re.sub(r'<title>.*?</title>', '', html, flags=re.S)
     html = re.sub(r'<!doctype[^>]*>', '', html, flags=re.I)
     html = re.sub(r'</?(html|head|body)[^>]*>', '', html, flags=re.I)
+    # an image the page itself shows (the zoom control's morph, docs/assets/zoom-morph.svg): the same
+    # rewrite as a part's, below
+    html = re.sub(r'src="\.\./\.\./assets/([\w.-]+)"', asset_src, html)
     if path.name in OFF_LINE_PART:
         html = f'<div data-nosnap>{html}</div>'
 

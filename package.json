@@ -6,7 +6,8 @@
   "main": "index.ts",
   "types": "index.ts",
   "sideEffects": [
-    "*.css"
+    "*.css",
+    "./src/zoomControl.js"
   ],
   "peerDependencies": {
     "@use-gesture/react": ">=10",
@@ -24,6 +25,7 @@
     "test:behaviour": "playwright test tests/behaviour",
     "test": "playwright test",
     "build:dial": "node scripts/build-dial.mjs",
+    "build:zoom-svg": "node scripts/zoom-morph-svg.mjs",
     "gen:index": "node scripts/gen-index.mjs"
   },
   "devDependencies": {

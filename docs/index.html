@@ -3646,6 +3646,60 @@ html,body{margin:0;padding:0;background:var(--bg)}
   }#s-controls .wm-hd-auto.on{ color: var(--ok, var(--accent, currentColor)); }#s-controls .wm-hd--vertical{ flex-direction: column; gap: var(--spacing-03, 8px); }#s-controls .wm-hd--vertical .wm-hd-id{ width: auto; }#s-controls .wm-hd--vertical .wm-hd-rail{ flex: none; width: 6rem; height: var(--hd-rail); cursor: ns-resize; touch-action: pan-x; }#s-controls .wm-hd--vertical .wm-hd-rail > i{ inset-inline: auto; left: 50%; inset-block: var(--hd-inset-v); width: 1px; height: auto; transform: translateX(-50%); }#s-controls .wm-hd--vertical .wm-hd-pill{ left: 50%; top: calc(var(--hd-inset-v) + (100% - 2 * var(--hd-inset-v)) * (1 - var(--p))); cursor: ns-resize; touch-action: pan-x; }@media (pointer: coarse){#s-controls .wm-hd:not(.wm-hd--vertical) .wm-hd-rail{ height: 48px; }#s-controls .wm-hd-pill input{ font-size: var(--type-body-size, 1rem); }   
   }#s-controls .touch .wm-hd:not(.wm-hd--vertical) .wm-hd-rail{ height: 48px; }#s-controls .touch .wm-hd-pill input{ font-size: var(--type-body-size, 1rem); }@media (prefers-reduced-motion: reduce){#s-controls .wm-hd-pill input{ transition: none; }
   }
+}@layer wm.controls{#s-controls .wm-theme{
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-01, 4px);
+  }
+}@layer wm.controls{#s-controls .wm-theme-stack{
+    display: inline-grid;
+    grid-template-columns: max-content;
+    justify-items: stretch;
+    row-gap: var(--spacing-02, 6px);
+  }#s-controls .wm-theme-stack > :first-child{ justify-content: flex-end; min-block-size: 27px; }#s-controls .wm-theme-stack > .wm-zoom[data-collapse]{ justify-self: end; }#s-controls .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]){ justify-self: stretch; }#s-controls .wm-theme-row{ display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }#s-controls .wm-theme-row > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }#s-controls .wm-theme-stack > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }@media (pointer: coarse){#s-controls .wm-theme-stack > :first-child{ min-block-size: 33px; }#s-controls .wm-theme-stack > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }#s-controls .wm-theme-row{ min-block-size: 33px; }#s-controls .wm-theme-row > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
+  }
+}@layer wm.icon{@media (pointer: coarse){#s-controls :is(.wm-theme-stack,#s-controls .wm-theme-row) > .wm-theme .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
+  }
+}@layer wm.controls{#s-controls .wm-zoom{
+    display: flex;
+    align-items: center;
+    block-size: 27px;   
+    font-family: var(--ui-font, system-ui, sans-serif);
+    color: var(--text-muted, rgba(232, 232, 232, .62));
+  }#s-controls .wm-zoom-box{ display: flex; align-items: center; justify-content: flex-end; flex: 1 1 auto; min-inline-size: 0; block-size: 100%; }#s-controls .wm-zoom .wm-icon-btn{
+    --icon-btn-pad: 0;   
+    flex: none;
+    inline-size: 27px;
+    block-size: 27px;
+  }#s-controls .wm-zoom .wm-icon,#s-controls .wm-zoom-fly{
+    font-size: 20px;   
+  }#s-controls .wm-zoom .wm-hd-rail{
+    flex: 1 1 0;
+    min-inline-size: 10rem;   
+    block-size: 27px;
+    margin-inline: var(--spacing-01, 4px);
+  }#s-controls .wm-zoom .wm-hd-rail > i{ inset-inline: 0; }#s-controls .wm-zoom .wm-hd-pill{ padding: var(--tick, 3px) var(--spacing-03, 8px); }#s-controls .wm-zoom .wm-hd-pill output{
+    display: block;
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 15px);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+  }#s-controls .wm-zoom-box{ position: relative; }#s-controls .wm-zoom[data-open="false"] .wm-zoom-box{ inline-size: 27px; overflow: clip; }#s-controls .wm-zoom[data-open="false"] :is(.wm-hd-pill,#s-controls .wm-hd-rail > i,#s-controls .wm-zoom-box > .wm-icon-btn:not(.wm-zoom-toggle)){ opacity: 0; pointer-events: none; }#s-controls .wm-zoom-fly{ position: absolute; pointer-events: none; transform: translate(-50%, -50%); }#s-controls .wm-zoom[data-moving] :is(.wm-zoom-fly,#s-controls .wm-hd-pill,#s-controls .wm-hd-rail > i,#s-controls .wm-zoom-box > .wm-icon-btn,#s-controls .wm-zoom-toggle .wm-icon){ will-change: transform, opacity; }#s-controls .wm-zoom{ position: relative; }#s-controls .wm-zoom-note{
+    position: absolute; inset-inline-end: calc(100% + var(--spacing-01, 4px)); inset-block-start: 50%;
+    translate: 0 -50%;
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 15px);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--text-muted, rgba(232, 232, 232, .62));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-med, 240ms) ease-out;
+  }#s-controls .wm-zoom[data-open="false"][data-zoomed]:not([data-moving]) .wm-zoom-note{ opacity: 1; }@media (prefers-reduced-motion: reduce){#s-controls .wm-zoom-note{ transition: none; } }#s-controls .wm-zoom--left{ position: relative; flex: none; inline-size: 27px; }#s-controls{ --zoom-ground: transparent; }#s-controls .wm-zoom--left .wm-zoom-box{ position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }#s-controls .wm-zoom--left .wm-hd-rail{ flex: 0 0 8rem; min-inline-size: 8rem; }@media (pointer: coarse){#s-controls .wm-zoom[data-open="false"] .wm-zoom-box,#s-controls .wm-zoom--left{ inline-size: 33px; }#s-controls .wm-zoom,#s-controls .wm-zoom .wm-hd-rail{ block-size: 33px; }#s-controls .wm-zoom .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
+  }
+}@layer wm.icon{@media (pointer: coarse){#s-controls .wm-zoom .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
+  }#s-controls .wm-zoom[data-collapse]:is([data-open="true"],#s-controls [data-zoomed]) .wm-zoom-toggle .wm-icon{ --icon-fill: 1; }#s-controls .wm-zoom[data-moving] .wm-zoom-toggle .wm-icon{ transition: none; }   
 }#s-controls{
   --bg: #fcfcfa; --panel: #f2f2ee; --sunk: #e8e8e3; --raised: #fff;
   --ink: #17181a; --ink-2: #4a4c50; --muted: #74767c;
@@ -3846,7 +3900,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--text-muted);
-}#s-controls .chip-demo{display:grid;gap:10px;margin:8px 0 40px}#s-controls .chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}#s-controls .chip-cap code{text-transform:none;letter-spacing:0}#s-controls .chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}#s-controls .chip-demo .wm-chip--switch{margin-left:8px}
+}#s-controls .chip-demo{display:grid;gap:10px;margin:8px 0 40px}#s-controls .chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}#s-controls .chip-cap code{text-transform:none;letter-spacing:0}#s-controls .chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}#s-controls .chip-demo .wm-chip--switch{margin-left:8px}#s-controls .zoom-demo{display:grid;gap:var(--spacing-04, 12px);margin:8px 0 40px}#s-controls .zoom-demo .wm-theme-stack{justify-self:end}#s-controls .zoom-demo > .wm-chip-row{justify-self:start}#s-controls .zoom-morph{justify-self:end;max-width:100%;height:auto;color:var(--text)}#s-controls .zoom-title{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-05, 16px)}#s-controls .zoom-title-h{font-size:var(--type-lede-size, 1.125rem);color:var(--text)}#s-controls .zoom-title-a{display:flex;align-items:center;gap:var(--spacing-04, 12px)}#s-controls .zoom-title-btn{font:inherit;font-size:var(--type-ui-size, .75rem);padding:var(--spacing-02, 6px) var(--spacing-04, 12px);border-radius:var(--radius, 8px);border:0;background:var(--text);color:var(--bg)}#s-controls .zoom-stage{height:240px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--surface)}#s-controls .zoom-sample{max-width:420px;padding:var(--spacing-05, 16px)}#s-controls .zoom-sample h3{margin:0 0 var(--spacing-03, 8px);font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .zoom-sample p{margin:0;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}#s-controls .zoom-demo pre{margin:0;font:var(--type-micro-size, .5625rem)/1.6 ui-monospace, Menlo, monospace;color:var(--text-muted);white-space:pre-wrap}
 #s-controls .wip{max-width:72ch}#s-controls .wip>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2)}#s-controls .wip>p b{color:var(--ink);font-weight:600}#s-controls .wip-list{display:grid;gap:16px;margin:0;padding:0;list-style:none}#s-controls .wip-card{display:block;position:relative;padding:22px 24px;text-decoration:none;color:inherit;
   border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
@@ -4924,7 +4978,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 </style>
 <div class="wm">
   <div class="wm-doc">
-  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in"><div class="wm-grp"><a class="wm-lvl0" href="#s-readme"><u>00</u>The package</a><a class="wm-lvl1" href="#readme-c1"><u>1</u><span>What you get</span></a><a class="wm-lvl1" href="#readme-c2"><u>2</u><span>What you must supply</span></a><a class="wm-lvl1" href="#readme-c3"><u>3</u><span>How to wire it in, and add a dial</span></a><a class="wm-lvl1" href="#readme-c4"><u>4</u><span>How to override</span></a><a class="wm-lvl1" href="#readme-c5"><u>5</u><span>How you know it shipped</span></a><a class="wm-lvl1" href="#readme-c6"><u></u><span>The rest</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a><a class="wm-lvl1" href="#type-c1"><u></u><span>Columns</span></a><a class="wm-lvl1" href="#type-c2"><u></u><span>Baseline</span></a><a class="wm-lvl1" href="#type-c3"><u></u><span>Recommendations</span></a><a class="wm-lvl1" href="#type-c4"><u></u><span>The seven roles</span></a><a class="wm-lvl1" href="#type-c5"><u></u><span>A row meets</span></a><a class="wm-lvl1" href="#type-c6"><u></u><span>A component moves whole</span></a><a class="wm-lvl1" href="#type-c7"><u></u><span>Breakers and tools</span></a><a class="wm-lvl1" href="#type-c8"><u></u><span>The favicons</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1"><u></u><span>The 5 pills</span></a><a class="wm-lvl1" href="#corners-c2"><u></u><span>The radius ladder</span></a><a class="wm-lvl1" href="#corners-c3"><u></u><span>Asymmetric corners</span></a><a class="wm-lvl1" href="#corners-c4"><u></u><span>The 13 circles</span></a><a class="wm-lvl1" href="#corners-c6"><u></u><span>The button</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u>03</u>Interface</a><a class="wm-lvl1" href="#controls-c1"><u></u><span>The marks</span></a><a class="wm-lvl1" href="#controls-c2"><u></u><span>The chips</span></a><a class="wm-lvl1" href="#controls-c3"><u></u><span>WIP primitives</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1"><u></u><span>The steps</span></a><a class="wm-lvl1" href="#space-c2"><u></u><span>The cap rule</span></a><a class="wm-lvl1" href="#space-c3"><u></u><span>Use a step</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1"><u></u><span>The vocabulary</span></a><a class="wm-lvl1" href="#color-c2"><u></u><span>Literal colors outside App.css</span></a><a class="wm-lvl1" href="#color-c3"><u></u><span>The GEOM zones</span></a><a class="wm-lvl1" href="#color-c4"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#color-c5"><u></u><span>The edge</span></a><a class="wm-lvl1" href="#color-c6"><u></u><span>Where you mix</span></a><a class="wm-lvl1" href="#color-c7"><u></u><span>Steering a channel</span></a><a class="wm-lvl1" href="#color-c8"><u></u><span>The blur</span></a><a class="wm-lvl1" href="#color-c9"><u></u><span>Banding</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div></div></div>
+  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in"><div class="wm-grp"><a class="wm-lvl0" href="#s-readme"><u>00</u>The package</a><a class="wm-lvl1" href="#readme-c1"><u>1</u><span>What you get</span></a><a class="wm-lvl1" href="#readme-c2"><u>2</u><span>What you must supply</span></a><a class="wm-lvl1" href="#readme-c3"><u>3</u><span>How to wire it in, and add a dial</span></a><a class="wm-lvl1" href="#readme-c4"><u>4</u><span>How to override</span></a><a class="wm-lvl1" href="#readme-c5"><u>5</u><span>How you know it shipped</span></a><a class="wm-lvl1" href="#readme-c6"><u></u><span>The rest</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a><a class="wm-lvl1" href="#type-c1"><u></u><span>Columns</span></a><a class="wm-lvl1" href="#type-c2"><u></u><span>Baseline</span></a><a class="wm-lvl1" href="#type-c3"><u></u><span>Recommendations</span></a><a class="wm-lvl1" href="#type-c4"><u></u><span>The seven roles</span></a><a class="wm-lvl1" href="#type-c5"><u></u><span>A row meets</span></a><a class="wm-lvl1" href="#type-c6"><u></u><span>A component moves whole</span></a><a class="wm-lvl1" href="#type-c7"><u></u><span>Breakers and tools</span></a><a class="wm-lvl1" href="#type-c8"><u></u><span>The favicons</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1"><u></u><span>The 5 pills</span></a><a class="wm-lvl1" href="#corners-c2"><u></u><span>The radius ladder</span></a><a class="wm-lvl1" href="#corners-c3"><u></u><span>Asymmetric corners</span></a><a class="wm-lvl1" href="#corners-c4"><u></u><span>The 13 circles</span></a><a class="wm-lvl1" href="#corners-c6"><u></u><span>The button</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u>03</u>Interface</a><a class="wm-lvl1" href="#controls-c1"><u></u><span>The marks</span></a><a class="wm-lvl1" href="#controls-c2"><u></u><span>The chips</span></a><a class="wm-lvl1" href="#controls-c3"><u></u><span>The zoom control</span></a><a class="wm-lvl1" href="#controls-c4"><u></u><span>WIP primitives</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1"><u></u><span>The steps</span></a><a class="wm-lvl1" href="#space-c2"><u></u><span>The cap rule</span></a><a class="wm-lvl1" href="#space-c3"><u></u><span>Use a step</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1"><u></u><span>The vocabulary</span></a><a class="wm-lvl1" href="#color-c2"><u></u><span>Literal colors outside App.css</span></a><a class="wm-lvl1" href="#color-c3"><u></u><span>The GEOM zones</span></a><a class="wm-lvl1" href="#color-c4"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#color-c5"><u></u><span>The edge</span></a><a class="wm-lvl1" href="#color-c6"><u></u><span>Where you mix</span></a><a class="wm-lvl1" href="#color-c7"><u></u><span>Steering a channel</span></a><a class="wm-lvl1" href="#color-c8"><u></u><span>The blur</span></a><a class="wm-lvl1" href="#color-c9"><u></u><span>Banding</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-usage"><u>06</u>Who uses what</a></div></div></div>
     <span class="wm-rail-foot">wm&#8209;primitives</span></nav></div>
   <main class="wm-main wm-lines">
   <header class="wm-head" data-nosnap>
@@ -5944,6 +5998,9 @@ of 168 corners, <b>87</b> take the law, 13 are circles carved out, and 32 sit in
 
 
 
+
+
+
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
 
@@ -6032,7 +6089,80 @@ of these. <code>src/chip.css</code>.</p>
   </div>
 </div>
 
-<h2 id="controls-c3">WIP primitives <span>pages to decide from</span></h2><div class="wip" id="controls-wip"><p><b>Nothing here ships.</b> A control above has a spec and a test; a page here has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline so it cannot pass for finished.</p><ul class="wip-list"><li><a class="wip-card" href="system/pages/buttons.html"><u>undecided</u><b>Six ways to say press</b><i>the button as six families, Keyline, Lozenge, Rule, Plate, Bracket, Menu, each drawing the same six specimens, with a coverage table of what each cannot do. Explorations: none chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; NEXT.md G says what a choice, if one is ever made, changes.</i></a></li><li><a class="wip-card" href="system/pages/play.html"><u>undecided</u><b>Seven ways to say play</b><i>the one control where a press does two things, drawn seven ways by what carries the difference: the mark, the ring, the word, the ground, the enclosure, the elevation, the surface. All live on one fake ninety-second clip. Superseded in scope by the transport page below &#8212; the bar, not the button, is the instrument &#8212; and kept as the record of the button question. TRANSPORT.md.</i></a></li><li><a class="wip-card" href="system/pages/transport.html"><u>undecided</u><b>Six ways to build the bar</b><i>one transport primitive &#8212; play, scrubber, readouts slot &#8212; in two registers, WORDMAKE's frames and Morf's builds, each schema drawn twice on the same live clocks: Deck, Slate, Ruler, Strip, Cells, Overlay. Decided: one primitive; no stage click; Morf's stops evenly by beat. Undecided: the schema. TRANSPORT.md has the coverage and what none has had.</i></a></li></ul></div></div>
+<h2 id="controls-c3" class="marks-h">The zoom control</h2>
+<p class="lede">The page&rsquo;s own zoom, as a control that sits under the theme switch:
+<b>zoom_out</b>, the rail of the value-in-the-handle dial with the percentage riding in the
+lozenge, <b>zoom_in</b>, and the mark, which is the default view: press it and the page is back at 100. It applies CSS <code>zoom</code> to a
+target anchored top-left, so the target grows right and down and scrolls, nothing reflows, and
+type stays type. 50&ndash;400%, steps of 10, kept in <code>localStorage</code>. Drag the lozenge,
+press the marks, or focus the rail and press <code>+</code> <code>&minus;</code> <code>0</code>.
+<code>src/zoomControl.js</code> + <code>.css</code>; GESTURES.md &sect;12.</p>
+<div class="zoom-demo">
+  <p class="chip-cap">The morph &middot; one glass leaves the box as it fills and zips to the lozenge&rsquo;s place; it splits into &minus; and +, which pull the rule out to the ends; the lozenge appears as a dot and grows round 1, 10, 100, 100%. Closing folds it back. Composed from the control&rsquo;s own keyframes by <code>scripts/zoom-morph-svg.mjs</code> (open 600ms, hold, close 300ms, hold)</p>
+  <img class="zoom-morph" src="assets/zoom-morph.svg" alt="The zoom control opening out of its mark and closing back into it" width="482" height="102">
+  <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and the control opens leftwards out of it while the mark stays put and fills (the morph above); press the mark again, Escape, or anywhere else, and it folds and keeps the zoom &mdash; shut at a zoom, the value stays on show beside the filled mark. The reset is a press on the lozenge (or <code>0</code>). The mark, <code>data-icon</code>:</p>
+  <div class="wm-chip-row zoom-icons">
+    <button type="button" class="wm-chip wm-chip--small" aria-pressed="true" data-zicon="pageview"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">pageview</span>pageview</button>
+    <button type="button" class="wm-chip wm-chip--small" aria-pressed="false" data-zicon="feature_search"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">feature_search</span>feature_search</button>
+  </div>
+
+  <p class="chip-cap">Left &middot; <code>.wm-zoom--left</code> in a <code>.wm-theme-row</code>: opens leftwards over its own row, from a 27px footprint; the marks, the action and the line below never move</p>
+  <div class="zoom-title">
+    <span class="zoom-title-h">Paragraph comparison</span>
+    <span class="zoom-title-a">
+      <span class="wm-theme-row">
+        <span class="wm-zoom wm-zoom--left" data-collapse data-capture data-target=".zoom-sample--left" data-key="wm-system-zoom-left" data-keys="local"></span>
+        <span class="wm-theme" role="group" aria-label="Colour scheme">
+          <button type="button" class="wm-icon-btn" data-theme-pick="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
+          <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
+          <button type="button" class="wm-icon-btn" data-theme-pick="dark" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
+        </span>
+      </span>
+      <button type="button" class="zoom-title-btn">Export PDF</button>
+    </span>
+  </div>
+  <div class="zoom-stage"><div class="zoom-sample zoom-sample--left">
+    <h3>Hamburgefonstiv</h3>
+    <p>Zoomed by the control in the title row, which captures the browser&rsquo;s zoom over this card (<code>data-capture</code>): pinch on a trackpad, or &#8984;/Ctrl + &minus; 0, with the pointer here. Elsewhere on the page the browser zooms as ever.</p>
+  </div></div>
+
+  <p class="chip-cap">Stack &middot; <code>.wm-theme-stack</code>: rests as one mark at the right edge under the theme chips; opens under them, one width and one right edge from one grid column (the rail&rsquo;s 10rem floor makes it the wider row)</p>
+  <div class="wm-theme-stack">
+    <div class="wm-chip-row" role="group" aria-label="Colour scheme">
+      <button type="button" class="wm-chip" data-theme-pick="auto" data-label="Auto" aria-pressed="true">Auto</button>
+      <button type="button" class="wm-chip" data-theme-pick="light" data-label="Light" aria-pressed="false">Light</button>
+      <button type="button" class="wm-chip" data-theme-pick="dark" data-label="Dark" aria-pressed="false">Dark</button>
+    </div>
+    <div class="wm-zoom" data-collapse data-target=".zoom-sample--stack" data-key="wm-system-zoom" data-keys="local"></div>
+  </div>
+  <div class="zoom-stage"><div class="zoom-sample zoom-sample--stack">
+    <h3>Hamburgefonstiv</h3>
+    <p>A sample card, zoomed by the control above. At 200% every length in it is twice as long and every baseline twice as far down; past the card&rsquo;s edge it scrolls.</p>
+  </div></div>
+
+  <p class="chip-cap">The markup &middot; mounted at DOMContentLoaded, or <code>wmZoom.mount(el)</code></p>
+<pre>&lt;span class="wm-theme-row"&gt;                                     left
+  &lt;span class="wm-zoom wm-zoom--left" data-collapse data-target="#page"&gt;&lt;/span&gt;
+  &lt;span class="wm-theme"&gt;&hellip;the three marks&hellip;&lt;/span&gt;
+&lt;/span&gt;
+
+&lt;div class="wm-theme-stack"&gt;                                   stack
+  &lt;div class="wm-chip-row" role="group" aria-label="Colour scheme"&gt;&hellip;Auto Light Dark&hellip;&lt;/div&gt;
+  &lt;div class="wm-zoom" data-collapse data-icon="pageview" data-target="#page"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+data-min / max / step   50 / 400 / 10        data-key   localStorage key (wm-zoom): "170 open"
+data-collapse           rest as one mark     data-icon  pageview | feature_search
+data-open="true"        start open           data-keys="local"  keys only with focus inside
+data-capture            take over pinch and &#8984;/Ctrl + &minus; 0 over the target (or a selector)
+events     wm-zoom (detail: the percent) &middot; wm-zoom-open (detail: true / false), bubbling
+keys       + or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; Escape folds, keeps the zoom &middot; never with Cmd/Ctrl/Alt
+the mark   shut: opens &middot; open: folds, keeps the zoom &middot; without data-collapse: back to 100
+the pill   press: back to 100 (it counts down and slides home) &middot; drag: drags</pre>
+  <p class="chip-cap">Without <code>data-collapse</code> it is always open, the mark is only the reset, and it needs no stack</p>
+</div>
+
+<h2 id="controls-c4">WIP primitives <span>pages to decide from</span></h2><div class="wip" id="controls-wip"><p><b>Nothing here ships.</b> A control above has a spec and a test; a page here has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline so it cannot pass for finished.</p><ul class="wip-list"><li><a class="wip-card" href="system/pages/buttons.html"><u>undecided</u><b>Six ways to say press</b><i>the button as six families, Keyline, Lozenge, Rule, Plate, Bracket, Menu, each drawing the same six specimens, with a coverage table of what each cannot do. Explorations: none chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; NEXT.md G says what a choice, if one is ever made, changes.</i></a></li><li><a class="wip-card" href="system/pages/play.html"><u>undecided</u><b>Seven ways to say play</b><i>the one control where a press does two things, drawn seven ways by what carries the difference: the mark, the ring, the word, the ground, the enclosure, the elevation, the surface. All live on one fake ninety-second clip. Superseded in scope by the transport page below &#8212; the bar, not the button, is the instrument &#8212; and kept as the record of the button question. TRANSPORT.md.</i></a></li><li><a class="wip-card" href="system/pages/transport.html"><u>undecided</u><b>Six ways to build the bar</b><i>one transport primitive &#8212; play, scrubber, readouts slot &#8212; in two registers, WORDMAKE's frames and Morf's builds, each schema drawn twice on the same live clocks: Deck, Slate, Ruler, Strip, Cells, Overlay. Decided: one primitive; no stage click; Morf's stops evenly by beat. Undecided: the schema. TRANSPORT.md has the coverage and what none has had.</i></a></li></ul></div></div>
 </section>
 <section class="wm-sec">
   <div class="wm-sec-head"><div class="wm-n">04 &middot; Space</div></div>
@@ -7396,6 +7526,497 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
   window.wmHandleDial = { mount };
 })();
 
+/* zoomControl.js -- the zoom control. Plain script, no React, like dialHandle.js.
+ *
+ *   <div class="wm-zoom" data-target="#page" data-min="50" data-max="400" data-step="10"></div>
+ *
+ * Every .wm-zoom in the document at DOMContentLoaded is mounted; one rendered later (React)
+ * is mounted by the host with wmZoom.mount(el, opts?) -- idempotent, opts override data-*:
+ *   target   selector, element or list the zoom is applied to (none: the control only emits).
+ *            A selector may match several boxes -- the blocks under a sticky header that holds
+ *            the control, say -- and each is zoomed and anchored on its own
+ *   min / max / step   percent, default 50 / 400 / 10; the value snaps to step from min
+ *   key      localStorage key (data-key), default 'wm-zoom'
+ *   keys     'local' (data-keys="local"): + \u2212 0 only while focus is inside this control
+ *   value    the start value when nothing is stored, default 100
+ *   icon     (data-icon) the mark at the right end: pageview (default) | feature_search -- both
+ *            have a FILL drawing (frame_inspect has none). Filled while open, and at rest whenever
+ *            the zoom is not 100, so a zoomed page is never mistaken for one at its own size.
+ *   capture  (data-capture) take over the browser's own zoom while the pointer is over the
+ *            target (or a selector given as the value), or focus is inside it: a trackpad pinch
+ *            (ctrl+wheel; Safari's gesture events) and Cmd/Ctrl + - 0 drive this control instead,
+ *            opening it if it is shut. Off by default. GESTURES.md G72-G74.
+ *            Pressed, it is the default view: back to 100.
+ *   collapse (data-collapse) rest as that ONE mark and open leftwards out of it on press; the
+ *            mark stays, filled, and pressing it again closes it. Closing never changes the zoom:
+ *            the reset is a press on the lozenge (or 0). Shut at a zoom other than 100, the value
+ *            stays on show left of the mark. Escape or a press outside closes too.
+ *            data-open="true" starts open; the open state is kept with the value.
+ * Returns { el, get, set(v), destroy }.
+ *
+ * What it does (GESTURES.md \u00A712):
+ *   - renders zoom_out \u00B7 the rail (dialHandle.css's hairline + lozenge, the % inside) \u00B7 zoom_in
+ *     \u00B7 the mark. The rail is the slider: role=slider, aria-valuemin/max/now, label "Zoom".
+ *   - applies CSS `zoom` to the target, anchored top-left: the target keeps its 100% width and
+ *     left edge, so it grows right and down, the page scrolls, nothing reflows, and the type is
+ *     re-rasterised at the new size rather than scaled as a bitmap. (A <canvas> inside the
+ *     target is the exception: its bitmap is scaled. Redraw it at canvas.currentCSSZoom on
+ *     the event below.)
+ *   - + / = in, \u2212 / - out, 0 back to 100 -- while focus is in the control, or anywhere on the
+ *     page that is not a field. Never with Cmd/Ctrl/Alt: those are the browser's own zoom.
+ *   - stores the value under the key, in try/catch (private mode, a sandboxed frame).
+ *   - fires `wm-zoom` on the control (bubbling) with detail = the percent, on every change and
+ *     once at mount.
+ *
+ * The control owns the target's inline zoom, width and margin-inline while it is not at 100%. */
+(() => {
+  const mk = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
+  const field = t => t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+  const live = new Set();
+
+  function mount(el, opts = {}) {
+    if (el.__wmZoom) return el.__wmZoom;
+    const ds = el.dataset;
+    const num = (a, b, d) => { const n = parseFloat(a ?? b); return Number.isFinite(n) ? n : d; };
+    const min = num(opts.min, ds.min, 50), max = num(opts.max, ds.max, 400), step = num(opts.step, ds.step, 10);
+    const key = opts.key ?? ds.key ?? 'wm-zoom';
+    const local = (opts.keys ?? ds.keys) === 'local';
+    const target = opts.target ?? ds.target ?? null;
+    const targets = typeof target === 'string' ? [...ROOT.querySelectorAll(target)]
+      : !target ? [] : target instanceof Element ? [target] : [...target];
+    const snap = v => Math.min(max, Math.max(min, Math.round((v - min) / step) * step + min));
+    const fmt = v => v + '%';
+
+    el.setAttribute('role', 'group');
+    if (!el.hasAttribute('aria-label')) el.setAttribute('aria-label', 'Zoom');
+    const btn = (icon, label, title) => {
+      const b = mk('button', 'wm-icon-btn'); b.type = 'button';
+      b.setAttribute('aria-label', label); b.title = title;
+      const m = mk('span', 'wm-icon'); m.textContent = icon;
+      m.setAttribute('aria-hidden', 'true'); m.setAttribute('translate', 'no');
+      b.appendChild(m); return b;
+    };
+    const out = btn('zoom_out', 'Zoom out', 'Zoom out (\u2212)');
+    const into = btn('zoom_in', 'Zoom in', 'Zoom in (+)');
+    const rail = mk('div', 'wm-hd-rail');
+    const pill = mk('span', 'wm-hd-pill');
+    const read = mk('output');
+    pill.appendChild(read);
+    rail.append(mk('i'), pill);
+    rail.tabIndex = 0;
+    rail.setAttribute('role', 'slider');
+    rail.setAttribute('aria-label', 'Zoom');
+    rail.setAttribute('aria-valuemin', String(min));
+    rail.setAttribute('aria-valuemax', String(max));
+    // the box is what grows: zoom_out, the rail, zoom_in, then THE MARK at the right end. The
+    // mark is the default view: pressed, it goes back to 100. When the control collapses it is
+    // also what it rests as -- the box shrinks to the mark alone, and opens leftwards out of it.
+    const collapse = !!(opts.collapse ?? ('collapse' in ds));
+    const box = mk('div', 'wm-zoom-box');
+    const toggle = btn(opts.icon ?? ds.icon ?? 'pageview', 'Back to 100%', 'Back to 100% (0)');   // relabelled by paint() when it collapses
+    toggle.classList.add('wm-zoom-toggle');
+    box.append(out, rail, into, toggle);
+    // shut at a zoom other than 100, the value stays on show beside the mark (no pill)
+    const note = mk('span', 'wm-zoom-note');
+    note.setAttribute('aria-hidden', 'true');
+    el.replaceChildren(box);
+    if (collapse) el.appendChild(note);
+
+    // the target, anchored top-left: its 100% width and left margin, measured with the zoom off
+    let base = null;
+    const clear = () => targets.forEach(t => { const s = t.style; s.zoom = ''; s.width = ''; s.marginLeft = ''; s.marginRight = ''; });
+    const measure = () => { clear(); base = targets.map(t => { const cs = getComputedStyle(t); return { w: cs.width, ml: parseFloat(cs.marginLeft) || 0 }; }); };
+    const zoomTarget = z => {
+      if (!targets.length) return;
+      if (z === 1) { clear(); base = null; return; }
+      if (!base) measure();
+      targets.forEach((t, i) => {
+        const s = t.style, b = base[i];
+        s.zoom = String(z);
+        s.width = b.w;                    // a length on a zoomed box is drawn x z: the 100% line, grown
+        s.marginLeft = b.ml / z + 'px';   // ... so the left edge is divided back to where it was
+        s.marginRight = '0';
+      });
+    };
+
+    let value = 100, open = !collapse;
+    // one key for both: "170", or "170 open" / "170 closed" when the control collapses -- a
+    // reader that only wants the number still gets it from parseFloat
+    const store = () => { try { localStorage.setItem(key, String(value) + (collapse ? (open ? ' open' : ' closed') : '')); } catch { /* private mode */ } };
+    const set = (v, save = true) => {
+      v = snap(Number(v));
+      if (!Number.isFinite(v)) return;
+      value = v;
+      read.textContent = fmt(v);
+      note.textContent = fmt(v);
+      el.toggleAttribute('data-zoomed', v !== 100);
+      rail.setAttribute('aria-valuenow', String(v));
+      rail.setAttribute('aria-valuetext', fmt(v));
+      pill.style.setProperty('--p', String((v - min) / (max - min)));   // dialHandle.css declares --p on the pill
+      zoomTarget(v / 100);
+      if (save) store();
+      el.dispatchEvent(new CustomEvent('wm-zoom', { detail: v, bubbles: true }));
+    };
+
+    // THE RESET, animated: the lozenge slides home to 100 over --dur-med while the readout counts
+    // down (or up) to it a step at a time. Reduced motion, a hidden page, or a shut control: at once.
+    let counting = 0, slide = null;
+    const reset = () => {
+      if (value === 100) return;
+      const from = value, still = document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches || !open;
+      const x0 = pill.getBoundingClientRect().left;
+      set(100);
+      if (still) return;
+      const dx = x0 - pill.getBoundingClientRect().left;
+      const dur = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
+      slide?.cancel();
+      slide = pill.animate([{ transform: `translate(calc(-50% + ${dx}px), -50%)` }, { transform: 'translate(-50%, -50%)' }], { duration: dur, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' });
+      cancelAnimationFrame(counting);
+      const t0 = performance.now(), n = Math.abs(from - 100) / step;
+      const tick = now => {
+        const k = Math.min(1, (now - t0) / dur), eased = 1 - Math.pow(1 - k, 3);
+        read.textContent = fmt(Math.round((from + (100 - from) * eased) / step) * step);   // display only: the value is already 100
+        if (k < 1 && n > 1) counting = requestAnimationFrame(tick); else read.textContent = fmt(value);
+      };
+      counting = requestAnimationFrame(tick);
+    };
+
+    // the lozenge is one width: its widest value, measured in the face it is drawn in; the
+    // hairline and the travel stop half of it from each end
+    const size = () => {
+      read.style.minInlineSize = '';
+      const now = read.textContent; let w = 0;
+      for (const v of [min, max, 100]) { read.textContent = fmt(v); w = Math.max(w, read.getBoundingClientRect().width); }
+      read.textContent = now;
+      read.style.minInlineSize = w + 'px';
+      rail.style.setProperty('--hd-inset', pill.getBoundingClientRect().width / 2 + 'px');
+    };
+
+    // the rail: a press on the lozenge grabs it where it is (no jump); a press elsewhere jumps
+    // there; either way the value follows until lift. Capture released from three places, as
+    // in dialHandle.js. No wheel (GESTURES.md G33).
+    let grab = null;
+    const at = x => {
+      const r = rail.getBoundingClientRect(), inset = pill.getBoundingClientRect().width / 2;
+      return min + ((x - r.left - inset) / Math.max(1, r.width - 2 * inset)) * (max - min);
+    };
+    let downX = 0, moved = false, onPill = false;
+    rail.addEventListener('pointerdown', e => {
+      const p = pill.getBoundingClientRect();
+      onPill = e.clientX >= p.left && e.clientX <= p.right;
+      downX = e.clientX; moved = false;
+      grab = onPill ? e.clientX - (p.left + p.width / 2) : 0;
+      if (!onPill) { moved = true; set(at(e.clientX - grab)); }
+      try { rail.setPointerCapture(e.pointerId); } catch {}
+      rail.focus({ preventScroll: true });
+      e.preventDefault();
+    });
+    rail.addEventListener('pointermove', e => { if (grab !== null) { if (Math.abs(e.clientX - downX) > 3) moved = true; if (moved) { const v = snap(at(e.clientX - grab)); if (v !== value) set(v); } } });
+    // A PRESS ON THE LOZENGE IS THE RESET (Mark, 2026-10-07): down and up on the pill without a
+    // drag snaps to 100 -- the pill slides home while its numerals count down. A drag from the
+    // pill still drags (no jump on down: it was grabbed where it is).
+    const end = e => {
+      if (grab !== null && onPill && !moved && e && e.type === 'pointerup') reset();
+      grab = null; onPill = false;
+    };
+    rail.addEventListener('pointerup', end);
+    ['pointercancel', 'lostpointercapture'].forEach(ev => rail.addEventListener(ev, () => { grab = null; onPill = false; }));
+    window.addEventListener('pointerup', end);
+    window.addEventListener('blur', end);
+    rail.addEventListener('keydown', e => {
+      const d = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
+      if (d !== undefined) set(value + d * step);
+      else if (e.key === 'Home') set(min);
+      else if (e.key === 'End') set(max);
+      else return;
+      e.preventDefault();
+    });
+
+    out.addEventListener('click', () => set(value - step));
+    into.addEventListener('click', () => set(value + step));
+    // OPEN AND CLOSE: ONE GLASS, SPLIT IN TWO, PULLING THE RULE (Mark, 2026-10-07). The layout
+    // jumps to its end state at once; everything that moves is transform, opacity and clip-path,
+    // on the Web Animations API, so the open is one seekable 600ms timeline (2.5 x --dur-med):
+    //     0-100   one magnifier (search) zips out of the mark to where the lozenge sits at 100;
+    //             the mark fills in place as it leaves (FILL 0 -> 1, 0-120)
+    //   100-120   at that centre it splits: zoom_out and zoom_in appear on top of each other
+    //   120-330   they travel outward to the ends, and the rule stretches with them -- a clip on
+    //             the full-length hairline, opening from the centre at the glyphs' pace
+    //   330-380   each crossfades into the real button it has arrived on
+    //   300       the lozenge appears as a DOT on the rule at the centre (6px, six hairlines)
+    //   340-490   it grows round the readout, a numeral a beat -- 1, 10, 100, 100% -- (a clip-path
+    //             with round ends, not layout)
+    //   500-600   it slides to the saved value, if that is not 100
+    // CLOSE (300ms) is the open folded back: the two glasses zip to the lozenge, merge, the rule
+    // retracting into them; the numerals collapse as the lozenge shrinks; the one glass zips
+    // home, and the mark unfills. Reduced motion, or a hidden page: the states, swapped.
+    const parts = [out, rail, into];
+    const paint = () => {
+      el.dataset.open = String(open);
+      if (!collapse) return;
+      toggle.setAttribute('aria-expanded', String(open));
+      const label = open ? 'Close zoom' : 'Zoom';
+      toggle.setAttribute('aria-label', label); toggle.title = label;
+      parts.forEach(p => { p.inert = !open; });
+    };
+    const EASE = 'cubic-bezier(0.2, 0.7, 0.2, 1)';   // the case study tester's unlock curve; motion.css holds durations, no easings
+    let morph = [], fly = [];
+    const stop = () => { morph.forEach(a => a.cancel()); morph = []; fly.forEach(f => f.remove()); fly = []; delete el.dataset.moving; };
+    // the shared geometry, measured from the end layout, in the box's coordinates
+    const measure2 = (centreAt) => {
+      const B = box.getBoundingClientRect();
+      const c = e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2 - B.left, y: r.top + r.height / 2 - B.top }; };
+      const R = rail.getBoundingClientRect(), P = pill.getBoundingClientRect();
+      const inset = P.width / 2, span = Math.max(1, R.width - 2 * inset);
+      const pAt = v => R.left - B.left + inset + span * ((v - min) / (max - min));
+      const now = pAt(value), cx = pAt(centreAt);
+      // the readout's prefixes: where each numeral ends, in the output's own box
+      const O = read.getBoundingClientRect(), tn = read.firstChild, rg = document.createRange();
+      const stops = [];
+      for (let i = 1; i <= tn.length; i++) { rg.setStart(tn, 0); rg.setEnd(tn, i); const rr = rg.getBoundingClientRect(); stops.push({ left: rr.left - O.left, w: rr.width }); }
+      return { mark: c(toggle.querySelector('.wm-icon')), out: c(out.querySelector('.wm-icon')), in: c(into.querySelector('.wm-icon')),
+        y: P.top + P.height / 2 - B.top, cx, now, rail: { l: R.left - B.left, r: R.right - B.left }, pw: P.width, ph: P.height,
+        ox: O.left - P.left, ow: O.width, stops };
+    };
+    const flyer = (name, at) => {
+      const f = mk('span', 'wm-icon wm-zoom-fly'); f.textContent = name; f.setAttribute('aria-hidden', 'true'); f.setAttribute('translate', 'no');
+      f.style.left = at.x + 'px'; f.style.top = at.y + 'px'; box.appendChild(f); fly.push(f); return f;
+    };
+    const T = (x, y, s = 1) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
+    // the lozenge at each numeral stage: its clip (round ends), the readout's clip and shift
+    const stage = (g, i) => {
+      const pad = (g.pw - g.ow) / 2 + (g.ow - (g.stops.at(-1).w)) / 2;   // the pill's air beside the full text
+      if (i < 0) {                                                      // a dot on the rule, six hairlines across: nothing showing
+        const h = (g.ph - 6) / 2, w = (g.pw - 6) / 2;
+        return { pill: `inset(${h}px ${w}px ${h}px ${w}px round 999px)`, read: `inset(0px ${g.ow}px 0px 0px)`, tx: 0 };
+      }
+      const s = g.stops[i], sw = Math.min(g.pw, s.w + 2 * Math.min(pad, 8)), side = (g.pw - sw) / 2;
+      const tx = g.pw / 2 - (g.ox + s.left + s.w / 2);
+      return { pill: `inset(-3px ${side - 3}px -3px ${side - 3}px round 999px)`, read: `inset(0px ${g.ow - (s.left + s.w)}px 0px 0px)`, tx };
+    };
+    const fvsOf = n => { const v = getComputedStyle(toggle.querySelector('.wm-icon')).fontVariationSettings; return v.replace(/"FILL" [\d.]+/, `"FILL" ${n}`); };
+    const choreograph = () => {
+      const beat = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
+      const total = 2.5 * beat, at = ms => Math.min(1, Math.max(0, ms / 600));   // the script is written in 600ths
+      const k = { duration: total, fill: 'both' }, g = measure2(100), C = { x: g.cx, y: g.y };
+      const rel = p => ({ x: p.x - g.mark.x, y: p.y - g.mark.y }), cR = rel(C);
+      const A = [];
+      // 1 . one glass zips from the mark to the centre; the mark fills
+      A.push(flyer('search', g.mark).animate([
+        { transform: T(0, 0, .6), opacity: 0, offset: 0, easing: EASE },
+        { transform: T(cR.x * .1, cR.y, .8), opacity: 1, offset: at(20), easing: EASE },
+        { transform: T(cR.x, cR.y, 1), opacity: 1, offset: at(100) },
+        { transform: T(cR.x, cR.y, 1), opacity: 0, offset: at(120) },
+        { transform: T(cR.x, cR.y, 1), opacity: 0, offset: 1 },
+      ], k));
+      A.push(toggle.querySelector('.wm-icon').animate([{ fontVariationSettings: fvsOf(value === 100 ? 0 : 1), offset: 0, easing: EASE }, { fontVariationSettings: fvsOf(1), offset: at(120) }, { fontVariationSettings: fvsOf(1), offset: 1 }], k));
+      // 2 . it splits; the two travel to the ends and cross into the real buttons
+      for (const [name, to, btn] of [['zoom_out', g.out, out], ['zoom_in', g.in, into]]) {
+        const d = rel(to);
+        A.push(flyer(name, g.mark).animate([
+          { transform: T(cR.x, cR.y), opacity: 0, offset: 0 },
+          { transform: T(cR.x, cR.y), opacity: 0, offset: at(100) },
+          { transform: T(cR.x, cR.y), opacity: 1, offset: at(120), easing: EASE },
+          { transform: T(d.x, d.y), opacity: 1, offset: at(330) },
+          { transform: T(d.x, d.y), opacity: 0, offset: at(380) },
+          { transform: T(d.x, d.y), opacity: 0, offset: 1 },
+        ], k));
+        A.push(btn.animate([{ opacity: 0, offset: 0 }, { opacity: 0, offset: at(330) }, { opacity: 1, offset: at(380) }, { opacity: 1, offset: 1 }], k));
+      }
+      // ... pulling the rule out of the centre with them (the rule's own box: the whole rail)
+      const rw = g.rail.r - g.rail.l, cl = g.cx - g.rail.l;
+      const ruleAt = (l, r) => `inset(-1px ${r}px -1px ${l}px)`;
+      A.push(rail.querySelector('i').animate([
+        { clipPath: ruleAt(cl, rw - cl), offset: 0 }, { clipPath: ruleAt(cl, rw - cl), offset: at(120), easing: EASE },
+        { clipPath: ruleAt(0, 0), offset: at(330) }, { clipPath: ruleAt(0, 0), offset: 1 },
+      ], k));
+      // 3 . the readout, a numeral at a time, the lozenge growing round it; then the slide
+      const d100 = g.cx - g.now, P = (x) => `translate(calc(-50% + ${x}px), -50%)`;
+      // 5 . a dot at the centre once the rule is out (300); 6 . a numeral a beat: 1, 10, 100, 100%
+      const times = [300, ...g.stops.map((_, i) => 340 + i * Math.min(50, 150 / Math.max(1, g.stops.length - 1)))];
+      const st = [-1, ...g.stops.map((_, i) => i)].map(i => stage(g, i));
+      A.push(pill.animate([
+        ...st.map((s, i) => ({ clipPath: s.pill, transform: P(d100), opacity: i ? 1 : 0, offset: at(times[i]) - (i ? 0 : 1e-6) * 0, easing: EASE })),
+        { clipPath: st.at(-1).pill, transform: P(d100), opacity: 1, offset: at(500), easing: EASE },
+        { clipPath: st.at(-1).pill, transform: P(0), opacity: 1, offset: 1 },
+      ].map((f, i, a) => i === 0 ? { ...f, offset: 0 } : f).flatMap((f, i) => i === 0 ? [f, { ...f, offset: at(times[0]) }] : [f]), k));
+      A.push(read.animate([
+        { clipPath: st[0].read, transform: `translateX(${st[0].tx}px)`, offset: 0 },
+        ...st.map((s, i) => ({ clipPath: s.read, transform: `translateX(${s.tx}px)`, offset: at(times[i]), easing: 'steps(1, end)' })),
+        { clipPath: st.at(-1).read, transform: `translateX(${st.at(-1).tx}px)`, offset: 1 },
+      ], k));
+      return A;
+    };
+    const closing = () => {
+      const total = 300, at = ms => ms / total, k = { duration: total, fill: 'both' };
+      const g = measure2(value), C = { x: g.now, y: g.y }, rel = p => ({ x: p.x - g.mark.x, y: p.y - g.mark.y }), cR = rel(C);
+      const A = [];
+      // the two glasses zip to the lozenge and merge, the rule retracting into them
+      for (const [name, from, btn] of [['zoom_out', g.out, out], ['zoom_in', g.in, into]]) {
+        const d = rel(from);
+        A.push(flyer(name, g.mark).animate([
+          { transform: T(d.x, d.y), opacity: 1, offset: 0, easing: 'ease-in-out' },
+          { transform: T(cR.x, cR.y), opacity: 1, offset: at(120) },
+          { transform: T(cR.x, cR.y), opacity: 0, offset: at(140) },
+          { transform: T(cR.x, cR.y), opacity: 0, offset: 1 },
+        ], k));
+        A.push(btn.animate([{ opacity: 0 }, { opacity: 0 }], k));
+      }
+      const rw = g.rail.r - g.rail.l, cl = g.now - g.rail.l, ruleAt = (l, r) => `inset(-1px ${r}px -1px ${l}px)`;
+      A.push(rail.querySelector('i').animate([{ clipPath: ruleAt(0, 0), offset: 0, easing: 'ease-in-out' }, { clipPath: ruleAt(cl, rw - cl), offset: at(120) }, { clipPath: ruleAt(cl, rw - cl), offset: 1 }], k));
+      // the numerals collapse as the lozenge shrinks to a dot on the rule
+      const st = [-1, ...g.stops.map((_, i) => i)].map(i => stage(g, i)).reverse(), n = st.length - 1;
+      const tt = st.map((_, i) => at(i * 140 / n));
+      A.push(pill.animate([
+        ...st.map((s, i) => ({ clipPath: s.pill, opacity: i === n ? 0 : 1, offset: tt[i], easing: EASE })),
+        { clipPath: st[n].pill, opacity: 0, offset: 1 },
+      ], k));
+      A.push(read.animate([
+        ...st.map((s, i) => ({ clipPath: s.read, transform: `translateX(${s.tx}px)`, offset: tt[i], easing: 'steps(1, end)' })),
+        { clipPath: st[n].read, transform: `translateX(${st[n].tx}px)`, offset: 1 },
+      ], k));
+      // the one glass zips home; the mark unfills as it lands
+      A.push(flyer('search', g.mark).animate([
+        { transform: T(cR.x, cR.y), opacity: 0, offset: 0 },
+        { transform: T(cR.x, cR.y), opacity: 0, offset: at(120) },
+        { transform: T(cR.x, cR.y), opacity: 1, offset: at(140), easing: EASE },
+        { transform: T(0, 0, .6), opacity: 1, offset: at(260) },
+        { transform: T(0, 0, .6), opacity: 0, offset: at(280) },
+        { transform: T(0, 0, .6), opacity: 0, offset: 1 },
+      ], k));
+      const restFill = value === 100 ? 0 : 1;   // shut at a zoom, the mark stays filled
+      A.push(toggle.querySelector('.wm-icon').animate([{ fontVariationSettings: fvsOf(1), offset: 0 }, { fontVariationSettings: fvsOf(1), offset: at(200), easing: EASE }, { fontVariationSettings: fvsOf(restFill), offset: 1 }], k));
+      return A;
+    };
+    const setOpen = (o, { animate = true, save = true } = {}) => {
+      if (!collapse || o === open && !morph.length) return;
+      const still = !animate || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches;
+      stop();
+      if (save) { const was = open; open = o; store(); open = was; }
+      el.dispatchEvent(new CustomEvent('wm-zoom-open', { detail: o, bubbles: true }));
+      const land = () => { stop(); open = o; paint(); };
+      if (still) { land(); return; }
+      if (o) { open = true; paint(); }                    // opening: the end layout at once
+      else parts.forEach(p => { p.inert = true; });       // closing: the layout holds until it lands
+      el.dataset.moving = '';
+      morph = o ? choreograph() : closing();
+      const mine = morph;
+      Promise.all(mine.map(a => a.finished)).then(() => { if (morph === mine) land(); }, () => {});
+    };
+    // the mark: shut, it opens; open, it closes -- and keeps the zoom. Never collapsing, it is the
+    // reset (there is nothing to open). Escape and a press outside close too.
+    toggle.addEventListener('click', () => {
+      if (!collapse) { reset(); return; }
+      if (!open) { setOpen(true); rail.focus({ preventScroll: true }); return; }
+      setOpen(false);
+    });
+    el.addEventListener('keydown', e => { if (e.key === 'Escape' && open && collapse) { setOpen(false); toggle.focus({ preventScroll: true }); e.preventDefault(); } });
+    const outside = e => { if (open && collapse && !el.contains(e.target)) setOpen(false); };
+    document.addEventListener('pointerdown', outside);
+
+    // CAPTURE (data-capture): over the target -- or the region its value names -- the browser's own
+    // zoom gestures drive this control instead. Listeners are on the region, not the window
+    // (wheel non-passive so it may be cancelled), so outside it the browser zooms as ever.
+    //   ctrl+wheel   a trackpad pinch in Chrome, Firefox and Edge (and ctrl + a mouse wheel):
+    //                continuous, x e^(-deltaY/100), snapped to the step
+    //   gesture*     Safari's pinch: the scale from gesturestart, applied to the value it began at
+    //   Cmd/Ctrl + - 0 while the pointer is over the region or focus is inside it -- in a text
+    //                field too: the chord types nothing, and the page zooming under a field you
+    //                are typing in is the thing this exists to stop
+    // A shut control opens (with its morph) on the first captured gesture.
+    const capSel = opts.capture ?? ds.capture;
+    const capture = capSel !== undefined && capSel !== false && capSel !== 'false';
+    const regions = !capture ? [] : (typeof capSel === 'string' && capSel.trim()) ? [...ROOT.querySelectorAll(capSel)] : targets;
+    let over = false, pinch = null, gestureFrom = 100;
+    const wake = () => { if (collapse && !open) setOpen(true); };
+    const onWheel = e => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      wake();
+      pinch = (pinch ?? value) * Math.exp(-e.deltaY / 100);
+      pinch = Math.min(max, Math.max(min, pinch));
+      if (snap(pinch) !== value) set(pinch);
+      clearTimeout(onWheel.t); onWheel.t = setTimeout(() => { pinch = null; }, 200);
+    };
+    const onGesture = e => {
+      e.preventDefault();
+      if (e.type === 'gesturestart') { gestureFrom = value; wake(); return; }
+      if (e.type === 'gesturechange') { const v = snap(gestureFrom * e.scale); if (v !== value) set(v); }
+    };
+    const enter = () => { over = true; }, leave = () => { over = false; };
+    regions.forEach(r => {
+      r.addEventListener('wheel', onWheel, { passive: false });
+      ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => r.addEventListener(ev, onGesture, { passive: false }));
+      r.addEventListener('pointerenter', enter); r.addEventListener('pointerleave', leave);
+    });
+    const onChord = e => {
+      if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+      const d = { '+': 1, '=': 1, '-': -1, '_': -1, '0': 0 }[e.key];
+      if (d === undefined) return;
+      if (!over && !regions.some(r => r.contains(document.activeElement))) return;
+      e.preventDefault();
+      wake();
+      if (d === 0) reset(); else set(value + d * step);
+    };
+    if (capture) document.addEventListener('keydown', onChord, true);
+
+    const resize = () => { if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
+    window.addEventListener('resize', resize);
+
+    const api = {
+      el, local, step,
+      get: () => value,
+      set: v => set(v),
+      reset,
+      isOpen: () => open,
+      morph: () => morph,   // the running timeline, for a test or a frame grab
+      setOpen: o => setOpen(!!o),
+      destroy: () => {
+        document.removeEventListener('pointerdown', outside); stop();
+        document.removeEventListener('keydown', onChord, true);
+        regions.forEach(r => { r.removeEventListener('wheel', onWheel); ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => r.removeEventListener(ev, onGesture)); r.removeEventListener('pointerenter', enter); r.removeEventListener('pointerleave', leave); });
+        window.removeEventListener('resize', resize); window.removeEventListener('pointerup', end); window.removeEventListener('blur', end);
+        clear();
+        live.delete(api); el.replaceChildren(); delete el.__wmZoom;
+      },
+    };
+    el.__wmZoom = api;
+    live.add(api);
+
+    let start = num(opts.value, ds.value, 100);
+    let o0 = collapse ? (opts.open ?? ds.open) === true || (opts.open ?? ds.open) === 'true' : true;
+    try {
+      const raw = localStorage.getItem(key) ?? '', s = parseFloat(raw);
+      if (Number.isFinite(s)) start = s;
+      if (collapse && /\b(open|closed)\b/.test(raw)) o0 = /\bopen\b/.test(raw);
+    } catch { /* private mode */ }
+    open = o0; paint();
+    set(start, false);
+    size();
+    if (document.fonts) document.fonts.ready.then(() => { if (el.__wmZoom === api) size(); });
+    return api;
+  }
+
+  // + \u2212 0: the control that holds focus, else the first page-level one. Not in a field, and
+  // never with a modifier -- Cmd/Ctrl + and \u2212 are the browser's zoom, and stay so.
+  document.addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey || field(e.target)) return;
+    const d = { '+': 1, '=': 1, '-': -1, '_': -1, '\u2212': -1, '0': 0 }[e.key];
+    if (d === undefined) return;
+    let c = null;
+    for (const z of live) if (z.el.contains(document.activeElement)) { c = z; break; }
+    if (!c) for (const z of live) if (!z.local) { c = z; break; }
+    if (!c) return;
+    if (d === 0) c.reset(); else c.set(c.get() + d * c.step);
+    e.preventDefault();
+  });
+
+  const auto = () => ROOT.querySelectorAll('.wm-zoom').forEach(el => mount(el));
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto);
+  else auto();
+  window.wmZoom = { mount };
+})();
+
 
 const $$ = s => ROOT.querySelector(s);
 const $$$ = s => ROOT.querySelectorAll(s);
@@ -8283,6 +8904,26 @@ ROOT.querySelectorAll('.chip-demo [data-one]').forEach(row => row.addEventListen
   const c = e.target.closest('.wm-chip'); if (!c) return;
   if (c.hasAttribute('data-toggle')) { c.classList.toggle('on'); return; }
   row.querySelectorAll('.wm-chip:not([data-toggle])').forEach(x => x.classList.toggle('on', x === c));
+}));
+
+
+// The zoom chapter's theme chips act on the page, as the switch would; the page does not store it.
+ROOT.querySelectorAll('[data-theme-pick]').forEach(b => b.addEventListener('click', () => {
+  ROOT.querySelectorAll('[data-theme-pick]').forEach(x => { const on = x.dataset.themePick === b.dataset.themePick; x.setAttribute('aria-pressed', String(on)); if (x.classList.contains('wm-icon-btn')) x.classList.toggle('active', on); });
+  if (b.dataset.themePick === 'auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.dataset.theme = b.dataset.themePick;
+}));
+
+// The zoom chapter's rest-mark chips: one icon for both demos, remounted with it.
+ROOT.querySelectorAll('.zoom-icons [data-zicon]').forEach(b => b.addEventListener('click', () => {
+  ROOT.querySelectorAll('.zoom-icons [data-zicon]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  ROOT.querySelectorAll('.zoom-demo .wm-zoom').forEach(z => {
+    const open = z.__wmZoom ? z.__wmZoom.isOpen() : false;
+    if (z.__wmZoom) z.__wmZoom.destroy();
+    z.dataset.icon = b.dataset.zicon;
+    const api = wmZoom.mount(z);
+    if (open) api.setOpen(true);
+  });
 }));
 
 })();

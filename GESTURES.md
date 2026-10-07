@@ -216,3 +216,47 @@ inside an open one, and `triplet.spec.ts` opens it the way a hand would.
 | --- | --- | --- | --- |
 | G56 | `open` flips | the box animates between 0 and its measured content height, then drops the cap so a label that wraps later is not clipped | `Collapse.tsx` |
 | G57 | content changes while open | the height follows the content; nothing is typed in | `Collapse.tsx` |
+
+## 12 · The zoom control
+
+`src/zoomControl.js` + `.css`: zoom_out · the dialHandle rail with the percentage in the
+lozenge · zoom_in · the mark (`data-icon`), applying CSS `zoom` to a target. Alone, or under the theme
+switch as `.wm-theme-stack` (themeSwitch.css). Prototyped on two scratch study pages
+(2026-10-06). Tested in `tests/behaviour/zoomControl.spec.ts`.
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G58 | any change, from anywhere | the value is clamped to `[min, max]` (default 50–400) and snapped to `step` (10) counted from `min`; the rail is `role=slider` with `aria-valuemin/max/now` and the label "Zoom"; the lozenge reads `N%` in tabular figures | zoom-control |
+| G59 | zoom_out / zoom_in / the mark | −step / +step; the mark, on a control that never collapses, goes back to **100** — the page's own size, not "fit the window". On a collapsing control the mark only opens and closes (G67), and the reset is the lozenge (G72). There is no fit_screen button | zoom-control |
+| G60 | `+` or `=` / `-`, `_` or `−` / `0` | in, out, back to 100: while focus is in the control, or anywhere on the page that is not a field (`input`, `textarea`, `select`, contenteditable). With Cmd/Ctrl/Alt: **nothing** — those are the browser's own zoom. A control with `data-keys="local"` answers only with focus inside it; otherwise the first page-level control does. On the rail, arrows ±step, Home/End min/max | zoom-control |
+| G61 | reload | the value is what it was, read from `localStorage[data-key]` (default `wm-zoom`) in try/catch; every change, and the mount, fires `wm-zoom` (bubbling, `detail` = the percent) | zoom-control |
+| G62 | a zoom other than 100 | the target is anchored **top-left**: it keeps its 100% width and left edge, so it grows right and down, nothing reflows, and the document scrolls to its new right edge. A selector that matches several boxes (the blocks under a sticky header that holds the control) zooms and anchors each on its own. The type is re-rasterised, not scaled; a `<canvas>` inside is the exception and redraws at `currentCSSZoom` on `wm-zoom` | zoom-control |
+| G63 | 200% | a baseline in the target is twice as far from the target's top, within 1px: exact on macOS's system-ui, 1px off on the Linux runner's face, because Chrome rounds ascent and descent to whole pixels at each size. Flowing text has no mark to re-seat on, so the control does not | zoom-control |
+| G64 | the stack | the theme row and the zoom row are **one width with one right edge** — CSS, one `max-content` grid column, no measurement — each 27px (33 on touch), `--spacing-02` apart | zoom-control |
+| G65 | press on the lozenge, then drag | the value does **not** jump on the press; it follows the pointer from where it was grabbed; a press elsewhere on the rail jumps there. The lozenge never leaves the rail. No wheel (G33) | zoom-control |
+
+**Collapse and placement** (`data-collapse`, `.wm-zoom--left`, `.wm-theme-stack`; round 2,
+2026-10-07). The same spec file.
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G66 | at rest, `data-collapse` | one 27px `.wm-icon-btn` (33 on touch), the mark, showing `data-icon` — `pageview` by default, or `feature_search`; both have a FILL drawing (frame_inspect, the first default, has none) — unfilled (FILL 0), with `aria-expanded="false"`; every other part is `inert` and clipped off its left | zoom-control |
+| G67 | press the mark | the control opens **leftwards out of it**, and the mark **stays where it is**. Layout jumps to the open state; the morph is transform, opacity and clip-path only, one 600ms timeline (2.5 × `--dur-med`), in Mark's order: **1** one magnifier leaves the mark, which fills in place (FILL 0 → 1, 0–120ms); **2** it zips to where the lozenge sits at 100% (0–100); **3** there it becomes two, `zoom_out` and `zoom_in`, which travel outward to the ends (120–330) and cross into the real buttons (330–380); **4** the rule stretches with them from the centre to both ends, under everything (a clip on the full-length hairline, 120–330); **5** the lozenge appears as a 6px dot on the rule at the centre (300); **6** it grows round the readout a numeral a beat — `1`, `10`, `100`, `100%` (340–490) — then slides to the saved value if that is not 100 (500–600). Focus goes to the rail. **Pressed again while open**, the mark closes the control and **keeps the zoom** (the reset is the lozenge, G72). **Closing** (300ms) is the open folded back: the two glasses zip to the lozenge and merge as the rule retracts into them, the numerals collapse as the lozenge shrinks to the dot, the one glass zips home and the mark unfills — unless the zoom is not 100, when it stays filled (G73). `Escape` (focus inside) and a press anywhere outside close the same way and **keep** the value; Escape returns focus to the mark. A hidden page swaps the states, as reduced motion does | zoom-control |
+| G68 | `prefers-reduced-motion: reduce` | the same two states, swapped, with no morph | zoom-control |
+| G69 | reload | open or closed is kept with the value under the one key: `"170 open"` / `"170 closed"` (`parseFloat` still reads the number); with nothing stored, `data-open="true"` starts it open | zoom-control |
+| G70 | `.wm-zoom--left`, open | the control opens **leftwards** on the theme switch's row from a 27px footprint, its right edge anchored to the footprint's; the open box lies over the row (ground: `--zoom-ground`), so the row stays 27 tall and nothing in it, beside it or below it moves; the rail is a fixed 8rem | zoom-control |
+| G71 | `.wm-theme-stack`, collapsing | at rest the mark sits at the stack's right edge under the switch; open, the zoom row and the switch row are one width with one right edge (G64); the rail's floor is 10rem, so the open stack is wider than the chips | zoom-control |
+
+**Reset, the shut readout, and capture** (round 6, 2026-10-07).
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G72 | press the lozenge (down and up, no drag) | **back to 100**: the lozenge slides home over `--dur-med` while its numerals count to 100 a step at a time; the control stays open. A drag that starts on the lozenge still drags (more than 3px). `0` (G60) is the same reset. Reduced motion or a shut control: at once | zoom-control |
+| G73 | shut, at a zoom other than 100 | the value stays on show **immediately left of the mark** — `150%`, the ui role (12/15), tabular, `--text-muted`, no pill — on the same row, out of the flow, so nothing moves; the mark stays **filled**. It fades in as the control shuts and out on a reset. At 100: no readout, the mark outlined | zoom-control |
+| G74 | `data-capture`, a pinch over the region | the region is the target, or the selector given as the value. A trackpad pinch there — `wheel` with `ctrlKey` (Chrome, Firefox, Edge; also ctrl + a mouse wheel), or Safari's `gesturestart`/`gesturechange` — is **cancelled** (listeners on the region, `passive: false`) and drives the control: continuous, × e^(−deltaY/100), snapped to the step; Safari's scale from the value the gesture began at. A shut control opens, with its morph. A plain wheel there still scrolls | zoom-control |
+| G75 | `data-capture`, Cmd/Ctrl `+` `−` `0` | while the pointer is over the region or focus is inside it: cancelled, and ±step / the reset on this control (opening it if shut) — **in a text field too**: the chord types nothing, and the page zooming under a field is what capture exists to stop. Elsewhere the chords are the browser's | zoom-control |
+
+**Not promised (capture).** The browser's own zoom outside the region — a page cannot reach it,
+and should not. A pinch the browser handles before the page sees it (some platforms' "smart zoom"
+double-tap, iOS Safari's page pinch) is not intercepted. Browser zoom applied before the control
+mounted stays applied.

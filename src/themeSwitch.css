@@ -7,3 +7,46 @@
     gap: var(--spacing-01, 4px);
   }
 }
+
+/* THE STACK -- the alternate: the theme switch on row 1, the zoom control (zoomControl.css)
+   on row 2, at ONE width and one right edge.
+
+     <div class="wm-theme-stack">
+       <div class="wm-chip-row" role="group" aria-label="Colour scheme">…</div>   (or .wm-theme, .ui-seg)
+       <div class="wm-zoom" data-target="#page"></div>
+     </div>
+
+   CSS, not measurement: both rows are items of one grid column sized max-content, so the
+   track is as wide as the wider row and both stretch to it. The zoom rail is flex 1 1 0
+   with a floor (zoomControl.css), so under chips the zoom row takes the chips' width; under
+   the three marks, which are narrower than the rail's floor, the marks take the zoom row's.
+   Row 1 packs to the right edge either way. Rows are 27 (33 on touch), --spacing-02 apart:
+   60px in all, twenty units. The switch alone (.wm-theme, outside a stack) is untouched. */
+@layer wm.controls {
+  .wm-theme-stack {
+    display: inline-grid;
+    grid-template-columns: max-content;
+    justify-items: stretch;
+    row-gap: var(--spacing-02, 6px);
+  }
+  .wm-theme-stack > :first-child { justify-content: flex-end; min-block-size: 27px; }
+  /* a collapsing zoom rests as one mark at the right edge, and stretches to the column once open */
+  .wm-theme-stack > .wm-zoom[data-collapse] { justify-self: end; }
+  .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]) { justify-self: stretch; }
+  /* THE ROW: the other placement. The zoom (.wm-zoom--left) before the switch, on its line. */
+  .wm-theme-row { display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }
+  .wm-theme-row > .wm-theme .wm-icon-btn { --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }
+  /* the marks at the row's 27, as the zoom row's are: a 20px drawing in a target that draws nothing */
+  .wm-theme-stack > .wm-theme .wm-icon-btn { --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }
+  @media (pointer: coarse) {
+    .wm-theme-stack > :first-child { min-block-size: 33px; }   /* chip.css's touch floor */
+    .wm-theme-stack > .wm-theme .wm-icon-btn { inline-size: 33px; block-size: 33px; }
+    .wm-theme-row { min-block-size: 33px; }
+    .wm-theme-row > .wm-theme .wm-icon-btn { inline-size: 33px; block-size: 33px; }
+  }
+}
+@layer wm.icon {
+  @media (pointer: coarse) {
+    :is(.wm-theme-stack, .wm-theme-row) > .wm-theme .wm-icon-btn { min-inline-size: 0; min-block-size: 0; }
+  }
+}

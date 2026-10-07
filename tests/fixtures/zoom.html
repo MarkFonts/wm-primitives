@@ -1,0 +1,76 @@
+<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><title>wmZoom contract</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css">
+<link rel="stylesheet" href="/dial/shared/src/space.css"><link rel="stylesheet" href="/dial/shared/src/icon.css">
+<link rel="stylesheet" href="/dial/shared/src/chip.css"><link rel="stylesheet" href="/dial/shared/src/dialHandle.css">
+<link rel="stylesheet" href="/dial/shared/src/themeSwitch.css"><link rel="stylesheet" href="/dial/shared/src/zoomControl.css">
+<style>
+  :root{--ui-font:system-ui;--text-rgb:232,232,232}
+  :root[data-theme="light"]{--text-rgb:22,22,22}
+  body{background:var(--bg);color:var(--text);margin:0;font-family:system-ui}
+  /* the target: a centred measure, as a page's wrapper is */
+  #page{max-width:720px;margin:192px auto 0;padding:0 24px}
+  #page p{font-size:16px;line-height:24px;margin:0 0 24px}
+  #probe{display:inline-block;width:0;height:0;vertical-align:baseline}
+  #ctl{position:fixed;top:12px;right:16px}
+  #marks{position:fixed;top:96px;right:16px}
+</style></head><body>
+<div id="ctl" class="wm-theme-stack">
+  <div class="wm-chip-row" role="group" aria-label="Colour scheme">
+    <button type="button" class="wm-chip" data-mode="auto" data-label="Auto" aria-pressed="false">Auto</button>
+    <button type="button" class="wm-chip" data-mode="light" data-label="Light" aria-pressed="false">Light</button>
+    <button type="button" class="wm-chip" data-mode="dark" data-label="Dark" aria-pressed="true">Dark</button>
+  </div>
+  <div class="wm-zoom" data-target="#page" data-min="50" data-max="400" data-step="10"></div>
+</div>
+<!-- the marks look under the stack: narrower than the zoom row, so the zoom row sets the width -->
+<div id="marks" class="wm-theme-stack">
+  <div class="wm-theme" role="group" aria-label="Colour scheme">
+    <button type="button" class="wm-icon-btn" data-mode="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true">brightness_auto</span></button>
+    <button type="button" class="wm-icon-btn" data-mode="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true">light_mode</span></button>
+    <button type="button" class="wm-icon-btn active" data-mode="dark" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true">dark_mode</span></button>
+  </div>
+  <div class="wm-zoom" data-key="wm-zoom-marks" data-keys="local"></div>
+</div>
+<!-- the two collapsing placements, with no target (the page is #ctl's). LEFT: on the theme row,
+     between a heading and an action, over a line of text that must not move. -->
+<div id="hdrwrap" style="position:fixed;left:16px;right:16px;bottom:96px">
+  <div id="hdr" style="display:flex;align-items:center;justify-content:space-between">
+    <span id="hdg">A heading on the left</span>
+    <span style="display:flex;align-items:center;gap:12px">
+      <span class="wm-theme-row" id="row">
+        <span class="wm-zoom wm-zoom--left" data-collapse data-key="wm-zoom-row" data-keys="local"></span>
+        <span class="wm-theme" role="group" aria-label="Colour scheme">
+          <button type="button" class="wm-icon-btn" data-mode="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true">brightness_auto</span></button>
+          <button type="button" class="wm-icon-btn" data-mode="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true">light_mode</span></button>
+          <button type="button" class="wm-icon-btn active" data-mode="dark" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true">dark_mode</span></button>
+        </span>
+      </span>
+      <button type="button" id="export">Export PDF</button>
+    </span>
+  </div>
+  <p id="under" style="margin:0">A line under the row.</p>
+</div>
+<!-- STACK, collapsing, starting open from markup -->
+<div id="cstack" class="wm-theme-stack" style="position:fixed;left:16px;top:12px">
+  <div class="wm-chip-row" role="group" aria-label="Colour scheme">
+    <button type="button" class="wm-chip" data-mode="auto" data-label="Auto" aria-pressed="false">Auto</button>
+    <button type="button" class="wm-chip" data-mode="light" data-label="Light" aria-pressed="false">Light</button>
+    <button type="button" class="wm-chip" data-mode="dark" data-label="Dark" aria-pressed="true">Dark</button>
+  </div>
+  <div class="wm-zoom" data-collapse data-icon="feature_search" data-open="true" data-key="wm-zoom-cstack" data-keys="local" data-capture="#capzone"></div>
+</div>
+<!-- the capture region of #cstack: a box the pointer can be over -->
+<div id="capzone" style="position:fixed;left:16px;bottom:16px;width:120px;height:60px;border:1px dashed var(--border)"></div>
+<main id="page">
+  <p><span id="probe"></span>Hamburgefonstiv. The target keeps its 100% measure and its left edge; at 200% every length in it is twice as long, so the page grows right and down and scrolls.</p>
+  <p>Second paragraph, on the next 24px line, so a zoomed page still steps by whole lines.</p>
+</main>
+<script src="/dial/shared/src/zoomControl.js"></script>
+<script>
+  document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
+    const g = b.parentElement; g.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    document.documentElement.dataset.theme = b.dataset.mode;
+  }));
+  window.events = []; document.addEventListener('wm-zoom', e => events.push(e.detail));
+</script></body></html>

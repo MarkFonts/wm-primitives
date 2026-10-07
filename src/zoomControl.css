@@ -1,0 +1,125 @@
+/* zoomControl.css -- the zoom control (zoomControl.js): zoom_out, the dialHandle rail with the
+ * percentage riding in the lozenge, zoom_in, and the mark (data-icon) that is the default view. One row, 27px, on the 3px line.
+ *
+ * Built from the house pieces, not beside them: the marks are .wm-icon-btn (icon.css), the rail
+ * and the lozenge are dialHandle.css's .wm-hd-rail / .wm-hd-pill (load it too), and the readout
+ * is the ui role (12/15) in tabular figures, so the pill does not breathe as the number moves.
+ * Prototyped on two scratch study pages (2026-10-06) under the theme chips; GESTURES.md §12.
+ *
+ * ON THE LINE. The row is 27 -- the controls' own height (chip.css, button.css). Each mark is a
+ * 20px drawing in a square 27px target that draws nothing. The lozenge is 21: the ui leading 15
+ * plus a --tick each side, and its 3px ground ring fills the row's 27. Touch: 33, chip.css's
+ * floor, for the row and its marks at once, so the control stays one row tall beside the chips.
+ *
+ * Tokens with fallbacks, in @layer wm.controls like dialHandle.css. Placement is the host's. */
+@layer wm.controls {
+  .wm-zoom {
+    display: flex;
+    align-items: center;
+    block-size: 27px;   /* nine units: the controls' own 27 */
+    font-family: var(--ui-font, system-ui, sans-serif);
+    color: var(--text-muted, rgba(232, 232, 232, .62));
+  }
+  /* the box is what grows; it packs to the END, so shut it shows the mark at its right and
+     clips the rest off its left */
+  .wm-zoom-box { display: flex; align-items: center; justify-content: flex-end; flex: 1 1 auto; min-inline-size: 0; block-size: 100%; }
+  .wm-zoom .wm-icon-btn {
+    --icon-btn-pad: 0;   /* icon.css's knob: the target is the square below, not padding round the mark */
+    flex: none;
+    inline-size: 27px;
+    block-size: 27px;
+  }
+  .wm-zoom .wm-icon, .wm-zoom-fly {
+    font-size: 20px;   /* token-lint: allow -- the mark's own opsz 20 drawing, not a text role (as dialHandle.css) */
+  }
+
+  /* the rail: dialHandle's hairline and lozenge at the row's height. It takes what the row has
+     left; its floor is the lozenge plus some travel, so a narrow host still gets a usable dial.
+     --hd-inset is set by zoomControl.js to half the lozenge: the hairline runs centre to centre
+     and the pill never leaves the rail. */
+  .wm-zoom .wm-hd-rail {
+    flex: 1 1 0;
+    min-inline-size: 10rem;   /* 350 points of zoom over 160px less the lozenge: ~2.4px a step */
+    block-size: 27px;
+    margin-inline: var(--spacing-01, 4px);
+  }
+  /* THE RULE RUNS THE WHOLE RAIL. dialHandle's hairline runs centre to centre (from the lozenge's
+     centre at min to its centre at max), so at the ends the pill covers it; here, where the
+     lozenge rests near the left end at 100%, that read as a rule on one side of it, stopping
+     short of zoom_in (Mark, 2026-10-07). The zoom's rule spans the rail edge to edge, beneath
+     the lozenge (the <i> paints first); the lozenge still travels centre to centre. */
+  .wm-zoom .wm-hd-rail > i { inset-inline: 0; }
+  .wm-zoom .wm-hd-pill { padding: var(--tick, 3px) var(--spacing-03, 8px); }
+  .wm-zoom .wm-hd-pill output {
+    display: block;
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 15px);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+
+  /* COLLAPSE (data-collapse): at rest the box is the mark alone, at the right end, the rest
+     clipped off its left. Open, the box is the control at once, and zoomControl.js plays the
+     morph over it -- three magnifiers out of the mark, the rule, the lozenge out of the rule --
+     on transform and opacity only (Web Animations; GESTURES.md G67). The flying magnifiers are
+     its own spans, made for the morph and removed after it. */
+  .wm-zoom-box { position: relative; }
+  .wm-zoom[data-open="false"] .wm-zoom-box { inline-size: 27px; overflow: clip; }
+  .wm-zoom[data-open="false"] :is(.wm-hd-pill, .wm-hd-rail > i, .wm-zoom-box > .wm-icon-btn:not(.wm-zoom-toggle)) { opacity: 0; pointer-events: none; }
+  .wm-zoom-fly { position: absolute; pointer-events: none; transform: translate(-50%, -50%); }
+  .wm-zoom[data-moving] :is(.wm-zoom-fly, .wm-hd-pill, .wm-hd-rail > i, .wm-zoom-box > .wm-icon-btn, .wm-zoom-toggle .wm-icon) { will-change: transform, opacity; }
+
+  /* THE NOTE: shut at a zoom other than 100, the value stays on show immediately left of the mark
+     -- the ui role, tabular, muted, no pill -- so the page's zoom is never hidden behind a shut
+     control. Outside the flow (absolute, right of it the mark), so it moves nothing. It fades in
+     as the control shuts and out on a reset. */
+  .wm-zoom { position: relative; }
+  .wm-zoom-note {
+    position: absolute; inset-inline-end: calc(100% + var(--spacing-01, 4px)); inset-block-start: 50%;
+    translate: 0 -50%;
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 15px);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--text-muted, rgba(232, 232, 232, .62));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-med, 240ms) ease-out;
+  }
+  .wm-zoom[data-open="false"][data-zoomed]:not([data-moving]) .wm-zoom-note { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .wm-zoom-note { transition: none; } }
+
+  /* LEFT (.wm-zoom--left): the control on the theme switch's row, opening leftwards from a
+     27px footprint. The open box lies OVER what is to its left, on the page ground, so
+     nothing in the row or below it moves; its right edge is the footprint's (the ground: --zoom-ground). The rail is a
+     fixed 8rem: real travel, and a width the host can plan for (217px open). */
+  .wm-zoom--left { position: relative; flex: none; inline-size: 27px; }
+  /* --zoom-ground: what the open box lies on. Transparent by default -- a host's row is rarely
+     the page's --bg exactly (the system page's is not) -- and a host whose row can hold text
+     under the box sets its own ground (GliffDiff: --bg). Declared at the root, as dialHandle's knobs. */
+  :root { --zoom-ground: transparent; }
+  .wm-zoom--left .wm-zoom-box { position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }
+  .wm-zoom--left .wm-hd-rail { flex: 0 0 8rem; min-inline-size: 8rem; }
+
+
+  @media (pointer: coarse) {
+    .wm-zoom[data-open="false"] .wm-zoom-box, .wm-zoom--left { inline-size: 33px; }
+    .wm-zoom, .wm-zoom .wm-hd-rail { block-size: 33px; }   /* eleven units, chip.css's touch floor */
+    .wm-zoom .wm-icon-btn { inline-size: 33px; block-size: 33px; }
+  }
+}
+/* icon.css gives every .wm-icon-btn a 44px floor on touch, in @layer wm.icon. A rule in
+   wm.controls cannot reach it, so the zoom row's marks say 33 in the same layer. */
+@layer wm.icon {
+  @media (pointer: coarse) {
+    .wm-zoom .wm-icon-btn { min-inline-size: 0; min-block-size: 0; }
+  }
+  /* OPEN, THE MARK IS FILLED -- and shut, while the zoom is not 100: Material's FILL axis (the subset keeps it), 0 -> 1. icon.css draws
+     FILL from --icon-fill and transitions font-variation-settings over --icon-dur, so the fill
+     is animated by the morph while it moves ([data-moving]) and then held here.
+     Here, not in wm.controls, because .wm-icon's own declarations are in this later layer. */
+  .wm-zoom[data-collapse]:is([data-open="true"], [data-zoomed]) .wm-zoom-toggle .wm-icon { --icon-fill: 1; }   /* open, or shut at a zoom */
+  .wm-zoom[data-moving] .wm-zoom-toggle .wm-icon { transition: none; }   /* the morph animates FILL itself */
+}

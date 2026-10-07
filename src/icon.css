@@ -68,7 +68,7 @@
   font-style: normal;
   font-weight: 100 700;
   font-display: block;   /* block, not swap: a fallback would print the ligature NAME */
-  src: url('../fonts/MaterialSymbolsOutlined.woff2?v=89') format('woff2');
+  src: url('../fonts/MaterialSymbolsOutlined.woff2?v=94') format('woff2');
 }
 
 /* --icon-hdr has to be REGISTERED or it cannot be transitioned: an unregistered custom
