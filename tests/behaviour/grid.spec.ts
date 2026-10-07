@@ -74,9 +74,6 @@ const KNOWN: Record<string, { row: string; why: string }[]> = {
   // at 39 for now (Cal Sans's short ascenders look spaced out at 54, 2026-10-06); the case study
   // re-sizes its hero to a multiple of its sub's lead, and this entry goes.
   'Cal Sans case study': [{ row: '.hero-cols', why: 'lede 39 beside sub 27 until the case study re-sizes its hero' }],
-  // The work rows on wordmark main are a 36/39 headline beside a 14/24 caption. The 45/48 sizing
-  // is decided (2026-10-06) and not yet shipped; wordmark's work-row change removes this entry.
-  'homepage': [{ row: '.work-item', why: 'headline 39 beside caption 24 until wordmark ships the 45/48 headline' }],
 }
 // 1024 is where the 24 columns begin (grid.css) and where the Cal Sans hero's two columns first
 // share a row; 900 is below it, 1440 above.
