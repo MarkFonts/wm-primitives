@@ -20,7 +20,8 @@ const FIX = (f: string) => fileURLToPath(new URL(`../fixtures/${f}`, import.meta
 const ROMAN = FIX('DMSans[opsz,wght].ttf')
 const ITALIC = FIX('DMSans-Italic[opsz,wght].ttf')
 const FLEX = FIX('GoogleSansFlex[GRAD,ROND,opsz,slnt,wdth,wght].ttf')
-/* App.jsx: the CSS family is the file's base name, alphanumerics only, + 'Preview'. */
+/* App.jsx: the CSS family is the file's base name, alphanumerics only, + 'Preview' + a sequence
+   number since font-proofer c063383 (FACES.md), so `DMSansPreview1`; match on the prefix. */
 const FAMILY = 'DMSansPreview'
 
 /* Errors the app throws or logs. Resource failures are excluded: sealed() aborts every
@@ -68,7 +69,7 @@ test.describe('font-proofer · the app around the primitive', () => {
     const errors = watch(page)
     await page.goto('/font-proofer/')
     await settle(page)
-    await page.locator('input[type="file"]').setInputFiles([FLEX])
+    await page.locator('.sidebar-section input[type="file"]').setInputFiles([FLEX])
     await expect(page.locator('.upload-name')).toHaveText(/GoogleSansFlex/)
     await settle(page)
     /* App.jsx labels a row from the font's own axis name (fvar → name table), falling
@@ -93,14 +94,15 @@ test.describe('font-proofer · the app around the primitive', () => {
     await page.goto('/font-proofer/')
     await settle(page)
 
-    /* The hidden <input type=file multiple> is the same path a drop takes (splitRomanItalic). */
-    await page.locator('input[type="file"]').setInputFiles([ROMAN, ITALIC])
+    /* The sidebar's hidden <input type=file multiple> is the same path a drop takes (splitRomanItalic);
+       the face palette has a second file input since font-proofer c063383, so the locator is scoped. */
+    await page.locator('.sidebar-section input[type="file"]').setInputFiles([ROMAN, ITALIC])
     await expect(page.locator('.upload-name')).toHaveText(/DMSans/)
     await settle(page)
 
     /* Both faces registered under ONE family: the italic is the companion, style italic. */
     const faces = await page.evaluate(fam =>
-      [...document.fonts].filter(f => f.family === fam).map(f => f.style).sort(), FAMILY)
+      [...document.fonts].filter(f => new RegExp(`^${fam}\\d+$`).test(f.family)).map(f => f.style).sort(), FAMILY)
     expect(faces).toEqual(['italic', 'normal'])
     await expect(page.locator('.roman-italic-toggle')).toBeVisible()
 
@@ -129,22 +131,31 @@ test.describe('font-proofer · the app around the primitive', () => {
     expect(errors, errors.join('\n')).toEqual([])
   })
 
-  test('a pair is a pair because the fonts say so; two strangers load the last one alone', async ({ page }) => {
+  test('a pair is a pair because the fonts say so; two strangers become two faces, the first active', async ({ page }) => {
     await sealed(page)
     const errors = watch(page)
     await page.goto('/font-proofer/')
     await settle(page)
-    const input = page.locator('input[type="file"]')
+    const input = page.locator('.sidebar-section input[type="file"]')
     const registered = () => page.evaluate(() =>
-      [...document.fonts].filter(f => f.family.endsWith('Preview')).map(f => `${f.family}:${f.style}`))
+      /* the sequence number is stripped so the assertions read as names */
+      [...document.fonts].filter(f => /Preview\d+$/.test(f.family)).map(f => `${f.family.replace(/\d+$/, '')}:${f.style}`))
 
-    /* Unrelated: DM Sans and Google Sans Flex. Not a pair, so the LAST file is the face
-       and nothing else is loaded -- no italic companion, no toggle (font-proofer#38). */
+    /* Unrelated: DM Sans and Google Sans Flex. Not a pair, so they are two faces in a set
+       (font-proofer c063383, FACES.md): one palette tile each, the FIRST group active. Before
+       the faces work the last file won alone (font-proofer#38). Neither has an italic
+       companion, so no toggle. */
     await input.setInputFiles([ROMAN, FLEX])
-    await expect(page.locator('.upload-name')).toHaveText(/GoogleSansFlex/)
+    await expect(page.locator('.upload-name')).toHaveText(/DMSans/)
     await settle(page)
-    expect(await registered()).toEqual(['GoogleSansFlexPreview:normal'])
+    expect((await registered()).sort()).toEqual(['DMSansPreview:normal', 'GoogleSansFlexPreview:normal'])
+    /* the palette's "+" tile (`.face-tile--add`, holding the second file input) is a .face-tile too */
+    await expect(page.locator('.face-tile:not(.face-tile--add)')).toHaveCount(2)
     await expect(page.locator('.roman-italic-toggle')).toHaveCount(0)
+
+    /* A fresh page, so the set above does not take part in the pairing below. */
+    await page.goto('/font-proofer/')
+    await settle(page)
 
     /* The same DM Sans pair under names that say nothing -- the fonts' own family name and
        italic flag pair them, in either order. */
@@ -164,7 +175,7 @@ test.describe('font-proofer · the app around the primitive', () => {
     const errors = watch(page)
     await page.goto('/font-proofer/')
     await settle(page)
-    await page.locator('input[type="file"]').setInputFiles([ROMAN])
+    await page.locator('.sidebar-section input[type="file"]').setInputFiles([ROMAN])
     await expect(page.locator('.upload-name')).toHaveText(/DMSans/)
     await page.locator('.mode-btn', { hasText: 'UI' }).first().click()
     const board = page.locator('.preview-ui')
