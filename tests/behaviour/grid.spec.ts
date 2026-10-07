@@ -69,13 +69,11 @@ const PAGES = [
 ]
 /* KNOWN OFFENDERS of checks 7 and 8, by page and row selector: reported in the log, not failed.
    Each says why and what removes it. Keep this list short; an entry is a debt, not a waiver. */
-const KNOWN: Record<string, { row: string; why: string; below?: number }[]> = {   // below: only at viewport widths under it
+const KNOWN: Record<string, { row: string; why: string }[]> = {
   // The hero is a 30/39 lede beside a 16/27 sub: 39 is not a multiple of 27. Mark kept the lede
   // at 39 for now (Cal Sans's short ascenders look spaced out at 54, 2026-10-06); the case study
   // re-sizes its hero to a multiple of its sub's lead, and this entry goes.
   'Cal Sans case study': [{ row: '.hero-cols', why: 'lede 39 beside sub 27 until the case study re-sizes its hero' }],
-  // 681-1023 is still fluid; remove when wordmark steps that range. At 1440 and 1024 the rows are live.
-  'homepage': [{ row: '.work-item', below: 1024, why: 'work headline 33 beside caption 24 below 1024, where wordmark has not stepped the range' }],
 }
 // 1024 is where the 24 columns begin (grid.css) and where the Cal Sans hero's two columns first
 // share a row; 900 is below it, 1440 above.
@@ -185,8 +183,9 @@ const ROWS = (known: string[]) => {   // runs in the page; stringified below
   /* THE ROW STEP (src/gridSnap.js). Rows are grouped as the snapper groups them (the box top less
      grid.css's nudge). A block counts toward a row's step if it is a measured text block in a
      text role -- not .t-micro/.t-ui/.t-label, a leading no smaller than body's (--lead-body
-     resolved in the root), not inside a --snap-unit component -- that wraps. A row with such
-     blocks in two items or more has a step: the smallest of their leads.
+     resolved in the root), not inside a --snap-unit component -- that wraps. An annotation or
+     sub-body block that wraps counts too when the row's largest lead is at most twice its own.
+     A row with such blocks in two items or more (one a text role) has a step: the smallest lead.
        lines: every counted block with a larger lead has every baseline on the step's lines,
               extended both ways from the row's shared first baseline;
        step:  every non-text box in the row has its top or its centre on those lines, and each
@@ -205,10 +204,12 @@ const ROWS = (known: string[]) => {   // runs in the page; stringified below
   for (const root of document.querySelectorAll('.wm-lines')) {
     const d = document.createElement('div'); d.style.cssText = 'position:absolute;visibility:hidden;height:0;padding:0;border:0;font-size:var(--type-body-size,1rem);line-height:var(--lead-body,24px)'
     root.appendChild(d); const body = parseFloat(getComputedStyle(d).lineHeight) || 24; d.remove()
-    const lead = (el: Element) => {
-      if (el.closest('.t-micro, .t-ui, .t-label') || getComputedStyle(el).getPropertyValue('--snap-unit').trim() === '1') return 0
-      const lh = parseFloat(getComputedStyle(el).lineHeight); if (!lh || lh < body - 0.5) return 0
-      return snap.lines(el, lh) > 1 ? lh : 0   // from the text: a grid item's box is stretched to its row
+    // [lead, conditional] of a wrapping block, or null; conditional = annotation role or a lead under body's
+    const lead = (el: Element): [number, boolean] | null => {
+      if (getComputedStyle(el).getPropertyValue('--snap-unit').trim() === '1') return null
+      const lh = parseFloat(getComputedStyle(el).lineHeight)
+      if (!lh || snap.lines(el, lh) < 2) return null   // from the text: a grid item's box is stretched to its row
+      return [lh, !!el.closest('.t-micro, .t-ui, .t-label') || lh < body - 0.5]
     }
     for (const box of root.querySelectorAll('.wm-baselines')) {
       if (box.closest('[data-nosnap]')) continue
@@ -217,7 +218,11 @@ const ROWS = (known: string[]) => {   // runs in the page; stringified below
       for (const c of box.children) { const r = c.getBoundingClientRect(); if (!r.height) continue; const cs = getComputedStyle(c); const k = Math.round(r.top - (cs.position === 'relative' ? parseFloat(cs.top) || 0 : 0)); const key = [...byTop.keys()].find(x => Math.abs(x - k) <= 1) ?? k; (byTop.get(key) ?? byTop.set(key, []).get(key)!).push(c) }
       for (const items of byTop.values()) {
         if (items.length < 2) continue
-        const found = items.map(c => blocks.filter(el => c === el || c.contains(el)).map(el => [el, lead(el)] as [Element, number]).filter(b => b[1]))
+        const raw = items.map(c => blocks.filter(el => c === el || c.contains(el)).map(el => [el, lead(el)] as [Element, [number, boolean] | null]).filter(b => b[1]))
+        const big = Math.max(0, ...raw.flat().map(b => b[1]![0]))
+        if (!raw.flat().some(b => !b[1]![1])) continue   // annotations alone are not a row of text
+        // a conditional block joins the step when the row's largest lead is at most twice its own
+        const found = raw.map(f => f.filter(b => !b[1]![1] || big <= 2 * b[1]![0] + 0.01).map(b => [b[0], b[1]![0]] as [Element, number]))
         if (found.filter(f => f.length).length < 2) continue
         rows++
         const L = Math.min(...found.flat().map(b => b[1])), small = found.flat().find(b => b[1] === L)![0]
@@ -464,7 +469,7 @@ for (const pg of PAGES) {
         expect(un.off, `text inside a unit that does not share the unit's baseline (mark the unit or run data-baseline="free" with a reason if it is meant to hang):\n${un.off.join('\n')}`).toEqual([])
 
         // ROWS: side-by-side text shares its lines (7), and the row's folio boxes sit on its step (8)
-        const known = (KNOWN[pg.name] ?? []).filter(k => !k.below || w < k.below).map(k => k.row)
+        const known = (KNOWN[pg.name] ?? []).map(k => k.row)
         const rw = await page.evaluate(([fn, k]) => new Function('return (' + fn + ')')()(k), [ROWS.toString(), known] as const) as { rows: number; judged: number; marks: number; out: { kind: string; row: string; msg: string; excused: string }[] }
         console.log(`rows ${pg.name} ${w}: ${rw.rows} rows of side-by-side text, ${rw.judged} larger-lead blocks, ${rw.marks} folio boxes judged`)
         for (const o of rw.out.filter(o => o.excused)) console.log(`  KNOWN OFFENDER (${o.excused}) ${o.row}: ${o.msg}`)

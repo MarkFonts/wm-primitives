@@ -5,7 +5,9 @@
      the row's rules and folio marks sit on multiples of it from the shared first baseline
      (checked: "folio elements sit on the row step"). gridSnap writes the step as --row-step on
      the row's items; data-expect-step says what it must be ("none": no side-by-side text, so no
-     step). Annotation roles and one-line blocks are not part of the step. A row marked
+     step). An annotation role or sub-body lead that wraps joins the step when the row's largest lead
+     is at most twice its own (12/24 or 12/15 beside the headline); beside bigger text, and as a
+     one-line block, it shares the first baseline only. A row marked
      data-expect-offender is a NEGATIVE case: the spec excuses it on the page and asserts, in a
      test of its own, that the named check reports it. Side by side from 1024; below, the
      columns stack and no row has a step. Served at /dial/grid-step.html. -->
@@ -31,6 +33,9 @@ section{margin-top:72px;row-gap:24px}   /* below 1024 the columns stack: the cap
 .xstage .ln.x{border-top:1px solid #ff288c}
 .xstage figcaption{font:12px/15px system-ui;margin-top:48px;color:#aaa}
 .cap{font-size:12px;--lh:24px}
+.lede28{font-size:28px;--lh:30px}
+.cap15{font-size:12px;--lh:15px}
+.lede22{font-size:22px;--lh:27px}
 .lede30{font-size:30px;--lh:39px}
 .sub{font-size:16px;--lh:27px}
 .byline{font-size:16px;--lh:27px;white-space:nowrap}
@@ -63,10 +68,24 @@ section{margin-top:72px;row-gap:24px}   /* below 1024 the columns stack: the cap
   <p id="b3" style="--span:14;--span-md:12">Running copy beside a byline that fits on one line, which keeps its own lead and shares only the first baseline with this paragraph, however long it runs.</p>
   <p class="byline" id="by3" style="--start:17;--span:8;--span-md:12">Sep 29, 2026</p>
 </section>
-<!-- 4. a lede beside a micro note: micro is an annotation, not part of a step -- no step -->
+<!-- 4. a lede beside a micro note: the lede's lead is over twice the note's, so the note is
+     exempt and shares only the first baseline -- no step -->
 <section class="wm-grid wm-baselines" id="micro" data-expect-step="none">
   <p class="t-lede" id="l4" style="--span:14;--span-md:12">Inter cuts almost every terminal at ninety degrees to its stroke and square to the baseline; the a is one of the few exceptions.</p>
   <p class="t-micro" id="m4" style="--start:17;--span:4;--span-md:12">Measured on the cap-height-normalised comparison, Inter runs about ten per cent taller.</p>
+</section>
+<!-- 8. a 28/30 headline beside a 12/15 caption (the homepage from 681 to 1023): the caption's
+     lead is under body's, but 30 is at most twice 15, so it counts -- step 15, every line on it -->
+<section class="wm-grid wm-baselines" id="stepped" data-expect-step="15">
+  <p class="lede28" id="h8" style="--span:14;--span-md:12">Brands tell unique stories with letters that fit them, every one of them.</p>
+  <p class="cap15" id="c8" style="--start:16;--span:8;--span-md:12">Typography for a museum&rsquo;s remodel: illuminated signage, with creative direction by a studio across the river.</p>
+</section>
+<!-- 9. a 22/27 lede beside the same 12/15 caption: 27 is within twice 15, so the caption counts
+     (step 15), and 27 is not a multiple of it -- "a row shares its lines" must report the lede.
+     (A 30/39 lede would not do: 39 is over twice 15, so the caption would be exempt.) -->
+<section class="wm-grid wm-baselines" id="stepped-off" data-expect-step="15" data-expect-offender="lines">
+  <p class="lede22" id="l9" style="--span:14;--span-md:12">Over five years the studio has sharpened one brand&rsquo;s type, from a single headline weight to the whole family.</p>
+  <p class="cap15" id="c9" style="--start:16;--span:8;--span-md:12">In 2021 the brand had no typographic voice of its own, from logo to website to marketing. One weight proved a custom face could replace a standard.</p>
 </section>
 <!-- 6. an eyebrow on the headline's line 0 (-48): one step of white over the x-height, passes.
      7. the same eyebrow at -30: inside the safe area -- "text keeps one step of white" must

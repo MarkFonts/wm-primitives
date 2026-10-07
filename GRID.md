@@ -211,7 +211,10 @@ render rewrites a leading, and [check 10](#5--the-ci-spec) reports a row whose l
 divide. The step is also the row's macrogrid: rules, dots, figure tops and folio marks sit on
 multiples of it from the shared first baseline, `top: calc(-1 * var(--row-step, 24px))` for the
 homepage caption's rule ([check 11](#5--the-ci-spec)). Write the fallback: below 1024 the
-columns stack and the row has no step. Annotation roles and one-line blocks are not part of it.
+columns stack and the row has no step. An annotation role (or a lead under body's) that wraps joins
+the step when the row's largest lead is at most twice its own -- the caption is the step the big text
+was sized to (45/48 beside 12/24, 28/30 beside 12/15); beside bigger text, and as a one-line block, it
+is not part of it.
 
 ### Components move whole: `--snap-unit: 1`
 
@@ -273,8 +276,9 @@ Big type beside small, as rules. Each is held by a spec check where one exists (
    area above a title is exactly one of its leads: -48 for 45/48. An eyebrow at -30 is inside it,
    18px short. Check 12.
 7. **Let annotations and one-line blocks keep their own lead.** Micro, label and ui text, and any
-   block that runs to one line, share the row's first baseline and nothing after it. They are not
-   part of the step, so a 9/12 note beside an 18/27 lede is no conflict.
+   block that runs to one line, share the row's first baseline and nothing after it, unless a wrapping annotation
+   or sub-body block sits beside text whose lead is at most twice its own: then it is the step (28/30 beside
+   12/15 counts; a 9/12 note beside an 18/27 lede, 27/12 = 2.25, is no conflict).
 8. **Express the margins around big text in the row step, not in em.** A headline's margin-top and
    margin-bottom are multiples of `var(--row-step)`, or of its own lead, so what follows starts on
    the macrogrid. An em margin follows the size and lands between lines.
@@ -408,8 +412,7 @@ in Chromium. After fonts load and one more snapper pass:
 
 Checks 10 and 11 report; they never fix. A row that cannot be sized yet is listed in the spec's
 `KNOWN` by page and row selector, with why and what removes it, and printed as `KNOWN OFFENDER`:
-the case study's hero (lede 39 beside sub 27) and the homepage's work rows (headline 39 beside caption 24, until the 45/48
-headline ships). `tests/fixtures/grid-step.html` (`/dial/grid-step.html`, in `PAGES`) holds a
+the case study's hero (lede 39 beside sub 27) is the one entry left. `tests/fixtures/grid-step.html` (`/dial/grid-step.html`, in `PAGES`) holds a
 passing row, the exemptions and three negative cases marked `data-expect-offender`, which the
 page loop excuses and a test of its own requires each check to report.
 
@@ -481,8 +484,8 @@ In this order. Each step names the trap it was written after.
   is a whole multiple of it: the homepage's headline 45/48 beside a 24 caption. Tiny lines next
   to big lines become the macrogrid for rules and other folio elements, which sit on multiples
   of the step from the row's shared first baseline (the homepage caption's rule and dot at -24).
-  Annotation roles (micro, label, ui) and one-line blocks are unchanged: on the 3px line, first
-  baseline shared by the row rule, not part of the step. It is enforced by the spec (checks 10 and
+  A one-line block, or an annotation beside text over twice its lead, is unchanged: on the 3px line,
+  first baseline shared by the row rule, not part of the step. It is enforced by the spec (checks 10 and
   11), never by rounding at render; where a row's leads do not divide, the check reports it.
 - **One step of white around every line of the big text.** With the headline sized to two steps
   (45/48 beside 24), Cal Sans's x-height (23.9px at 45, 600) leaves 24.1px from one baseline to
@@ -495,8 +498,8 @@ In this order. Each step names the trap it was written after.
   `tests/fixtures/grid-step.html` draws it: a 45/48 stage with the step lines, the half lines
   and the x-height.
 - **Known offenders.** The case study's hero (lede 39 beside sub 27) stays as it is for now and is
-  listed in the spec's `KNOWN`, and so are the homepage's work rows until the 45/48 headline
-  ships. The grid bench's hero is not: its 18/27 lede has 16/27 notes beside it, the same lead.
+  listed in the spec's `KNOWN`. The homepage's work rows left it when wordmark stepped them at
+  every width from 681 up. The grid bench's hero is not: its 18/27 lede has 16/27 notes beside it, the same lead.
 - **The system page is on the line but not on the columns.** Its layout is still the rail and a
   1080px measure; only the README, the section numbers and the Grid part are on the line, and the
   other chapters are stages (docs/system/build.py, `OFF_LINE`, says what each would need).
