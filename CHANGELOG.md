@@ -19,8 +19,16 @@ caption for 681-1023; 33/36 beside 12/18, 39/42 beside 12/21 and 45/48 beside 12
 `KNOWN` entry for `.work-item` ("681-1023 is still fluid") is gone, and with it the `below` field
 nothing else used. `KNOWN` holds one entry, the case study's hero. Checked against wordmark
 1311747 at 1440, 1024, 900, 390 and, once, 800 and 681; the suite stays at about 50s, so `WIDTHS`
-did not grow. Note the row check reports 0 side-by-side rows for the homepage below 1440, so the
-stepped range is held by wordmark's own numbers rather than by this check.
+did not grow. Dropping it showed a gap: the row check reported 0 rows for the homepage below 1440, because
+the stepped captions (12/18, 12/21, 12/15) have a lead under body's and were classed as annotations,
+so each work row collapsed to one text block and the stepped homepage had never been judged. The
+rule now: a wrapping annotation or sub-body block **joins the row's step when the row's largest
+lead is at most twice its own** (45/48 beside 12/24, 28/30 beside 12/15 count; a 27 lede beside a
+12/12 micro note, 2.25, stays exempt); one-line blocks stay exempt; annotations alone are not a row.
+gridSnap's `--row-step` and check 10/11 use the same rule. The homepage now reports 4 rows at
+1440, 1024, 900, 800 and 681, and passes. The fixture gained a 28/30 + 12/15 row (counts, passes)
+and a 22/27 + 12/15 row (counts, reported); the coordinator's 30/39 + 12/15 would not do, as 39 is
+over twice 15 and the caption is exempt there.
 
 ---
 

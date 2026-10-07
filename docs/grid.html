@@ -900,8 +900,10 @@ html.off-grid .wm-lines{--lead-body:24.8px}
      they sit on multiples of the step from the row's shared first baseline. This measures the
      step and writes it as --row-step on every item of the row, so page CSS can place a rule
      with `top: calc(-1 * var(--row-step, 24px))`; an item in no stepped row has it removed.
-     Annotation roles (.t-micro, .t-ui, .t-label, or a leading under --lead-body) and one-line
-     blocks are not part of the step: they share the first baseline only. */
+     An annotation role (.t-micro, .t-ui, .t-label, or a leading under --lead-body) that wraps
+     joins the step when the row's largest lead is at most twice its own (it is the step the big
+     text was sized to: 45/48 beside 12/24, 28/30 beside 12/15); beside bigger text it shares
+     the first baseline only, as does every one-line block. */
   // Lines are counted from the text, not the box: a grid item is stretched to its row's height,
   // so a one-line label beside a paragraph has a box three lines tall.
   function linesOf(el, lh) {
@@ -917,12 +919,13 @@ html.off-grid .wm-lines{--lead-body:24.8px}
     root.appendChild(d); const v = parseFloat(getComputedStyle(d).lineHeight); d.remove();
     return v || 24;
   }
-  // the lead of a block that counts toward a row's step, or 0
+  // a wrapping block's [lead, conditional], or null. Conditional: an annotation role or a lead under
+  // --lead-body; it joins a row's step only when the row's largest lead is at most twice its own.
   function textLead(el, body) {
-    if (el.matches(ANNOTATION) || el.closest(ANNOTATION) || isUnitEl(el)) return 0;
+    if (isUnitEl(el)) return null;
     const lh = parseFloat(getComputedStyle(el).lineHeight);
-    if (!lh || lh < body - 0.5) return 0;
-    return linesOf(el, lh) > 1 ? lh : 0;
+    if (!lh || linesOf(el, lh) < 2) return null;
+    return [lh, !!(el.closest(ANNOTATION) || lh < body - 0.5)];
   }
   const stepped = new Set();   // items carrying a --row-step from the last pass
   function rowSteps(root, blocks) {
@@ -931,7 +934,10 @@ html.off-grid .wm-lines{--lead-body:24.8px}
     const body = boxes.length ? bodyLead(root) : 0;
     for (const box of boxes) for (const items of rowsOf(box)) {
       if (items.length < 2) continue;
-      const leads = items.map(child => blocks.filter(el => child === el || child.contains(el)).map(el => textLead(el, body)).filter(Boolean));
+      const found = items.map(child => blocks.filter(el => child === el || child.contains(el)).map(el => textLead(el, body)).filter(Boolean));
+      const all = found.flat(), big = Math.max(...all.map(b => b[0]));
+      if (!all.some(b => !b[1])) continue;   // annotations alone are not a row of text
+      const leads = found.map(f => f.filter(b => !b[1] || big <= 2 * b[0] + 0.01).map(b => b[0]));
       // side-by-side text: wrapping text-role blocks in two items or more
       if (leads.filter(l => l.length).length < 2) continue;
       steps.push([items, Math.min(...leads.flat())]);

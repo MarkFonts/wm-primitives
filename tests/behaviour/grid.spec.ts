@@ -183,8 +183,9 @@ const ROWS = (known: string[]) => {   // runs in the page; stringified below
   /* THE ROW STEP (src/gridSnap.js). Rows are grouped as the snapper groups them (the box top less
      grid.css's nudge). A block counts toward a row's step if it is a measured text block in a
      text role -- not .t-micro/.t-ui/.t-label, a leading no smaller than body's (--lead-body
-     resolved in the root), not inside a --snap-unit component -- that wraps. A row with such
-     blocks in two items or more has a step: the smallest of their leads.
+     resolved in the root), not inside a --snap-unit component -- that wraps. An annotation or
+     sub-body block that wraps counts too when the row's largest lead is at most twice its own.
+     A row with such blocks in two items or more (one a text role) has a step: the smallest lead.
        lines: every counted block with a larger lead has every baseline on the step's lines,
               extended both ways from the row's shared first baseline;
        step:  every non-text box in the row has its top or its centre on those lines, and each
@@ -203,10 +204,12 @@ const ROWS = (known: string[]) => {   // runs in the page; stringified below
   for (const root of document.querySelectorAll('.wm-lines')) {
     const d = document.createElement('div'); d.style.cssText = 'position:absolute;visibility:hidden;height:0;padding:0;border:0;font-size:var(--type-body-size,1rem);line-height:var(--lead-body,24px)'
     root.appendChild(d); const body = parseFloat(getComputedStyle(d).lineHeight) || 24; d.remove()
-    const lead = (el: Element) => {
-      if (el.closest('.t-micro, .t-ui, .t-label') || getComputedStyle(el).getPropertyValue('--snap-unit').trim() === '1') return 0
-      const lh = parseFloat(getComputedStyle(el).lineHeight); if (!lh || lh < body - 0.5) return 0
-      return snap.lines(el, lh) > 1 ? lh : 0   // from the text: a grid item's box is stretched to its row
+    // [lead, conditional] of a wrapping block, or null; conditional = annotation role or a lead under body's
+    const lead = (el: Element): [number, boolean] | null => {
+      if (getComputedStyle(el).getPropertyValue('--snap-unit').trim() === '1') return null
+      const lh = parseFloat(getComputedStyle(el).lineHeight)
+      if (!lh || snap.lines(el, lh) < 2) return null   // from the text: a grid item's box is stretched to its row
+      return [lh, !!el.closest('.t-micro, .t-ui, .t-label') || lh < body - 0.5]
     }
     for (const box of root.querySelectorAll('.wm-baselines')) {
       if (box.closest('[data-nosnap]')) continue
@@ -215,7 +218,11 @@ const ROWS = (known: string[]) => {   // runs in the page; stringified below
       for (const c of box.children) { const r = c.getBoundingClientRect(); if (!r.height) continue; const cs = getComputedStyle(c); const k = Math.round(r.top - (cs.position === 'relative' ? parseFloat(cs.top) || 0 : 0)); const key = [...byTop.keys()].find(x => Math.abs(x - k) <= 1) ?? k; (byTop.get(key) ?? byTop.set(key, []).get(key)!).push(c) }
       for (const items of byTop.values()) {
         if (items.length < 2) continue
-        const found = items.map(c => blocks.filter(el => c === el || c.contains(el)).map(el => [el, lead(el)] as [Element, number]).filter(b => b[1]))
+        const raw = items.map(c => blocks.filter(el => c === el || c.contains(el)).map(el => [el, lead(el)] as [Element, [number, boolean] | null]).filter(b => b[1]))
+        const big = Math.max(0, ...raw.flat().map(b => b[1]![0]))
+        if (!raw.flat().some(b => !b[1]![1])) continue   // annotations alone are not a row of text
+        // a conditional block joins the step when the row's largest lead is at most twice its own
+        const found = raw.map(f => f.filter(b => !b[1]![1] || big <= 2 * b[1]![0] + 0.01).map(b => [b[0], b[1]![0]] as [Element, number]))
         if (found.filter(f => f.length).length < 2) continue
         rows++
         const L = Math.min(...found.flat().map(b => b[1])), small = found.flat().find(b => b[1] === L)![0]
