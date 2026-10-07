@@ -68,7 +68,7 @@ test.describe('font-proofer · the app around the primitive', () => {
     const errors = watch(page)
     await page.goto('/font-proofer/')
     await settle(page)
-    await page.locator('input[type="file"]').setInputFiles([FLEX])
+    await page.locator('.sidebar-section input[type="file"]').setInputFiles([FLEX])
     await expect(page.locator('.upload-name')).toHaveText(/GoogleSansFlex/)
     await settle(page)
     /* App.jsx labels a row from the font's own axis name (fvar → name table), falling
@@ -93,8 +93,9 @@ test.describe('font-proofer · the app around the primitive', () => {
     await page.goto('/font-proofer/')
     await settle(page)
 
-    /* The hidden <input type=file multiple> is the same path a drop takes (splitRomanItalic). */
-    await page.locator('input[type="file"]').setInputFiles([ROMAN, ITALIC])
+    /* The sidebar's hidden <input type=file multiple> is the same path a drop takes (splitRomanItalic);
+       the face palette has a second file input since font-proofer c063383, so the locator is scoped. */
+    await page.locator('.sidebar-section input[type="file"]').setInputFiles([ROMAN, ITALIC])
     await expect(page.locator('.upload-name')).toHaveText(/DMSans/)
     await settle(page)
 
@@ -134,7 +135,7 @@ test.describe('font-proofer · the app around the primitive', () => {
     const errors = watch(page)
     await page.goto('/font-proofer/')
     await settle(page)
-    const input = page.locator('input[type="file"]')
+    const input = page.locator('.sidebar-section input[type="file"]')
     const registered = () => page.evaluate(() =>
       [...document.fonts].filter(f => f.family.endsWith('Preview')).map(f => `${f.family}:${f.style}`))
 
@@ -164,7 +165,7 @@ test.describe('font-proofer · the app around the primitive', () => {
     const errors = watch(page)
     await page.goto('/font-proofer/')
     await settle(page)
-    await page.locator('input[type="file"]').setInputFiles([ROMAN])
+    await page.locator('.sidebar-section input[type="file"]').setInputFiles([ROMAN])
     await expect(page.locator('.upload-name')).toHaveText(/DMSans/)
     await page.locator('.mode-btn', { hasText: 'UI' }).first().click()
     const board = page.locator('.preview-ui')
