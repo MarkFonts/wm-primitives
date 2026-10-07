@@ -23,7 +23,7 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `EditableTextBlock` | Canonical contentEditable text-block lifecycle (raw-while-focused, commit-on-blur, caret capture/restore). Pairs with caret.ts + editRail.css. | font-proofer, ReCal, WORDMAKE | — |
 | `GlyphPicker` `measureGlyphMetrics` | Interactive glyph browser: equal-sized cell grid + viewer/U+ readout, search, copy-to-clipboard, ssXX alternate groups (wm-primitives #2). | font-proofer, ReCal, WORDMAKE | — |
 | `createLetterbox` `JEROME` | The letterbox: the house wordmark scanned and packed with prose (Charlie Clark's pretext effect). Plain-JS engine, because wordmark.nyc and this repo's system page script-tag it directly, and ReCal's landing pages load i… | ReCal | README (letterbox) |
-| `ROLES` `POSTER` `INK` `TRACK_CAPS` `LANDINGS` `typeStyle` `ink` | Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/ --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so importing it cannot reach existing markup. Apps import… | Kernpare, WORDMAKE, ReCal, opsz-proofer, GliffDiff | TYPOGRAPHY.md |
+| `ROLES` `POSTER` `INK` `TRACK_CAPS` `LANDINGS` `typeStyle` `ink` | Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/ --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so importing it cannot reach existing markup. Apps import… | Kernpare, WORDMAKE, font-proofer, ReCal, opsz-proofer, GliffDiff | TYPOGRAPHY.md |
 | `Collapse` | A disclosure box that measures its own content, so a section's height is never a number anyone has to keep up to date. Used by the fitting panel's two sections. | font-proofer, WORDMAKE | — |
 | `FittingControls` `fittingMode` `AlignmentButtons` `ALIGNMENTS` `FittedParagraph` | The line-fitting controls. The engine above is consumed directly by static pages; this is the interface both paragraph views render — font-proofer in its sidebar, ReCal in the floating Type panel. Alignment stays with th… | font-proofer, ReCal, WORDMAKE | FITTING-MAP.md |
 | `SpecimenNav` | Long public-domain works: authored whole in specimens/<slug>.txt, served as the chunks build-specimens.mjs cuts at each FORM FEED, fetched only as far as the reader asks. The tail control travels with the loader: both ap… | font-proofer, ReCal | — |
@@ -40,16 +40,17 @@ Material Symbols names each consumer draws (`<Icon name>` and raw ligatures), so
 
 | mark | drawn by |
 | --- | --- |
-| `add` | WORDMAKE |
+| `add` | font-proofer, WORDMAKE |
 | `add_photo_alternate` | WORDMAKE |
 | `blur_on` | WORDMAKE |
 | `brightness_auto` | ThemeSwitch (every host that mounts it) |
 | `calendar_month` | font-proofer |
-| `close` | WORDMAKE |
+| `close` | font-proofer, WORDMAKE |
 | `crop` | WORDMAKE |
 | `dark_mode` | ThemeSwitch (every host that mounts it) |
 | `delete` | WORDMAKE |
 | `discover_tune` | font-proofer |
+| `format_italic` | font-proofer |
 | `format_paragraph` | font-proofer |
 | `forms_add_on` | font-proofer |
 | `grid_view` | font-proofer |
