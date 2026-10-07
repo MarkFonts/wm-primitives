@@ -12,6 +12,24 @@ Newest first.
 
 ---
 
+## 2026-10-06 -- the bench hero follows its own rule
+
+**The grid bench was the one page in the docs that broke the row rule it teaches.** Its hero is
+a nine-line lede paragraph (18/27) beside 16/24 notes: 27 is not a multiple of 24, so four lines
+in five missed the notes' lines, and it sat in the spec's `KNOWN`. First fix tried: size the lede
+up to 45/48 like the homepage headline. Wrong for this block: a running paragraph at display size
+is a wall of type and the chapter opener loses its voice. The nuance, now in Recommendation 3: a
+headline beside text takes a multiple of two or more; two blocks of running text take one, the same
+lead. So the notes are 16/27 (page-local `.hero-notes`, lead 27, every line meets a lede line);
+the other candidate, the lede at body 16/24, meets too but flattens the opener, so the lede keeps
+its role. The `KNOWN` entry is gone.
+
+The homepage's `.work-item` entry narrows: wordmark #54 (34c0453) shipped the stepped headers
+(45/48, 39/42, 33/36 beside captions 24/21/18). Against that checkout the homepage passes checks
+10-12 at 1440, 1024 and 390; at 900 the work rows still report a 33 lead beside a 24 caption (the
+681-1023 range is still fluid). So the entry returns, scoped by a `below: 1024` width field, and the
+1440 and 1024 checks stay live; it goes when wordmark steps that range.
+
 ## 2026-10-06 -- the row step: sized leads, folio elements on the step
 
 **Side-by-side text drifted after line 1, and the fix was going to be a runtime rounding.** A
