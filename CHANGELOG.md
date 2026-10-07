@@ -12,6 +12,18 @@ Newest first.
 
 ---
 
+## 2026-10-07 -- the homepage's work rows leave `KNOWN`
+
+**Wordmark now steps the homepage work rows at every width from 681 up** (28/30 beside a 12/15
+caption for 681-1023; 33/36 beside 12/18, 39/42 beside 12/21 and 45/48 beside 12/24 above), so the
+`KNOWN` entry for `.work-item` ("681-1023 is still fluid") is gone, and with it the `below` field
+nothing else used. `KNOWN` holds one entry, the case study's hero. Checked against wordmark
+1311747 at 1440, 1024, 900, 390 and, once, 800 and 681; the suite stays at about 50s, so `WIDTHS`
+did not grow. Note the row check reports 0 side-by-side rows for the homepage below 1440, so the
+stepped range is held by wordmark's own numbers rather than by this check.
+
+---
+
 ## 2026-10-06 -- the bench hero follows its own rule
 
 **The grid bench was the one page in the docs that broke the row rule it teaches.** Its hero is
