@@ -77,11 +77,12 @@ the reset.
 glasses animating out of a box, one goes back into the button with a fill, the last two lead to
 the extremes and the 100% pill pulls out of a rule". The box no longer animates its width -- the
 layout jumps to the open state, and a 600ms Web Animations timeline (2.5 x `--dur-med`) plays over
-it on transform and opacity only: search goes back into the mark as it fills; zoom_out and zoom_in
+it on transform and opacity only: the mark fills in place; zoom_out and zoom_in rise out of it and
 fly to the ends and crossfade into the real buttons; the rule draws leftwards between them; the
 lozenge pulls out of the rule at 100 and slides to the saved value. Close ("close just brings the
 two magnifiers into box?") is one beat: the two fly home, the rule retracts under them, the mark
-unfills. `search` joins the subset for the third magnifier. motion.css has no easing tokens, so the
+unfills. A third magnifier that went back into the box was tried and dropped ("no need for the
+3rd one"); the `search` mark it needed left the subset with it. motion.css has no easing tokens, so the
 curve is the case study tester's unlock curve, cubic-bezier(0.2, 0.7, 0.2, 1), named in a comment.
 The docs chapter carries the choreography as an animated SVG composed from the live keyframes
 (docs/assets/zoom-morph.svg, scripts/zoom-morph-svg.mjs), not a recording.
@@ -95,7 +96,7 @@ GliffDiff, testing at 350%: the actions panned away with the proof. That was the
 title row lives inside the scroller), fixed there: the cluster is pinned to the window's top-right.
 
  (cut-icon-subset.py), then pageview, feature_search and
-frame_inspect, then fit_screen and frame_inspect left again, then search: 94 ligatures, `?v=94`. The prototype had loaded them from Google as a second family, because a
+frame_inspect, then fit_screen and frame_inspect left again: 93 ligatures, `?v=93`. The prototype had loaded them from Google as a second family, because a
 second face under the same name replaces the first. `dist/dial.css` rebuilt for the new URL and
 the stack rule (dial-entry imports themeSwitch.css). System page: a chapter in Interface after
 the chips -- the stack zooming a sample card, the markup, the keys.

@@ -6087,7 +6087,7 @@ type stays type. 50&ndash;400%, steps of 10, kept in <code>localStorage</code>. 
 press the marks, or focus the rail and press <code>+</code> <code>&minus;</code> <code>0</code>.
 <code>src/zoomControl.js</code> + <code>.css</code>; GESTURES.md &sect;12.</p>
 <div class="zoom-demo">
-  <p class="chip-cap">The morph &middot; three magnifiers out of the box: one goes back in as the mark fills, two lead to the ends, and the lozenge pulls out of the rule; closing, the two fly home. Composed from the control&rsquo;s own keyframes by <code>scripts/zoom-morph-svg.mjs</code> (open 600ms, hold, close 240ms, hold)</p>
+  <p class="chip-cap">The morph &middot; two magnifiers leave the box for the ends while the mark fills in place, and the lozenge pulls out of the rule; closing, the two fly home. Composed from the control&rsquo;s own keyframes by <code>scripts/zoom-morph-svg.mjs</code> (open 600ms, hold, close 240ms, hold)</p>
   <img class="zoom-morph" src="assets/zoom-morph.svg" alt="The zoom control opening out of its mark and closing back into it" width="482" height="102">
   <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and the control opens leftwards out of it while the mark stays put and fills (the morph above); press the mark again and it folds AND goes back to 100. Escape or a press elsewhere folds it and keeps the zoom. The mark, <code>data-icon</code>:</p>
   <div class="wm-chip-row zoom-icons">
@@ -7676,13 +7676,13 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
 
     out.addEventListener('click', () => set(value - step));
     into.addEventListener('click', () => set(value + step));
-    // OPEN AND CLOSE: THREE MAGNIFIERS OUT OF A BOX (Mark, 2026-10-07: "three magnifying glasses
-    // animating out of a box, one goes back into the button with a fill, the last two lead to
-    // the extremes and the 100% pill pulls out of a rule"). The layout jumps to its end state at
+    // OPEN AND CLOSE: MAGNIFIERS OUT OF A BOX (Mark, 2026-10-07: "the last two lead to the
+    // extremes and the 100% pill pulls out of a rule"; a third that went back into the box was
+    // dropped -- "no need for the 3rd one"). The layout jumps to its end state at
     // once; everything that moves is transform and opacity, on the Web Animations API, so the
     // whole open is one seekable timeline of 600ms (2.5 x --dur-med):
-    //     0-120   three small magnifiers (search, zoom_out, zoom_in) rise out of the mark, overlapping
-    //   120-300   search goes back into the box, and the mark fills (FILL 0 -> 1)
+    //    60-180   two small magnifiers (zoom_out, zoom_in) rise out of the mark, overlapping;
+    //   160-300   the mark fills in place (FILL 0 -> 1), its own lens never moving
     //    60-420   zoom_out flies left to the far end, crossfading into the real button on arrival
     //   100-380   zoom_in flies to the near end (left of the mark), likewise
     //   120-420   the hairline draws leftwards between them (scaleX from the right)
@@ -7713,13 +7713,6 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
         f.style.left = mx + 'px'; f.style.top = my + 'px'; box.appendChild(f); fly.push(f); return f; };
       const T = (x, y, s = 1) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
       const anims = [];
-      // the one that goes back into the box
-      anims.push(flyer('search').animate([
-        { transform: T(0, 0, .3), opacity: 0, offset: 0, easing: EASE },
-        { transform: T(-3, -9, .7), opacity: 1, offset: at(120), easing: EASE },
-        { transform: T(0, 0, .2), opacity: 0, offset: at(260) },
-        { transform: T(0, 0, .2), opacity: 0, offset: 1 },
-      ], k));
       // the two that lead to the extremes, landing on the real buttons
       const travel = (name, [tx, ty], start, arrive, btn) => {
         const dx = tx - mx, dy = ty - my, spread = name === 'zoom_out' ? -8 : 4;
@@ -7735,7 +7728,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       };
       travel('zoom_out', [ox, oy], 60, 420, out);
       travel('zoom_in', [ix, iy], 100, 380, into);
-      // the mark fills as the first one lands back in it
+      // the mark fills in place as they leave it
       const fvs = getComputedStyle(markIcon).fontVariationSettings, fill = n => fvs.replace(/"FILL" [\d.]+/, `"FILL" ${n}`);
       anims.push(markIcon.animate([{ fontVariationSettings: fill(0), offset: 0 }, { fontVariationSettings: fill(0), offset: at(160) }, { fontVariationSettings: fill(1), offset: at(300) }, { fontVariationSettings: fill(1), offset: 1 }], k));
       // the rule draws leftwards between them

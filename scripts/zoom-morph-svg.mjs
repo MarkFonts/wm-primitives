@@ -90,7 +90,7 @@ out = {}
 s = 20 / ms['head'].unitsPerEm
 for fill in (0, 1):
   gs = ms.getGlyphSet(location={'FILL': fill, 'wght': 300, 'opsz': 20, 'GRAD': 0})
-  for n in ('pageview', 'search', 'zoom_out', 'zoom_in'):
+  for n in ('pageview', 'zoom_out', 'zoom_in'):
     p = SVGPathPen(gs); gs[lig[n]].draw(TransformPen(p, (s, 0, 0, -s, -480 * s, 480 * s))); out[f'{n}:{fill}'] = p.getCommands()
 cal = TTFont(sys.argv[2]); gs = cal.getGlyphSet(); cm = cal.getBestCmap(); k = 12 / cal['head'].unitsPerEm
 x = 0; parts = []

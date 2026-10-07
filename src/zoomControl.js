@@ -161,13 +161,13 @@
 
     out.addEventListener('click', () => set(value - step));
     into.addEventListener('click', () => set(value + step));
-    // OPEN AND CLOSE: THREE MAGNIFIERS OUT OF A BOX (Mark, 2026-10-07: "three magnifying glasses
-    // animating out of a box, one goes back into the button with a fill, the last two lead to
-    // the extremes and the 100% pill pulls out of a rule"). The layout jumps to its end state at
+    // OPEN AND CLOSE: MAGNIFIERS OUT OF A BOX (Mark, 2026-10-07: "the last two lead to the
+    // extremes and the 100% pill pulls out of a rule"; a third that went back into the box was
+    // dropped -- "no need for the 3rd one"). The layout jumps to its end state at
     // once; everything that moves is transform and opacity, on the Web Animations API, so the
     // whole open is one seekable timeline of 600ms (2.5 x --dur-med):
-    //     0-120   three small magnifiers (search, zoom_out, zoom_in) rise out of the mark, overlapping
-    //   120-300   search goes back into the box, and the mark fills (FILL 0 -> 1)
+    //    60-180   two small magnifiers (zoom_out, zoom_in) rise out of the mark, overlapping;
+    //   160-300   the mark fills in place (FILL 0 -> 1), its own lens never moving
     //    60-420   zoom_out flies left to the far end, crossfading into the real button on arrival
     //   100-380   zoom_in flies to the near end (left of the mark), likewise
     //   120-420   the hairline draws leftwards between them (scaleX from the right)
@@ -198,13 +198,6 @@
         f.style.left = mx + 'px'; f.style.top = my + 'px'; box.appendChild(f); fly.push(f); return f; };
       const T = (x, y, s = 1) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
       const anims = [];
-      // the one that goes back into the box
-      anims.push(flyer('search').animate([
-        { transform: T(0, 0, .3), opacity: 0, offset: 0, easing: EASE },
-        { transform: T(-3, -9, .7), opacity: 1, offset: at(120), easing: EASE },
-        { transform: T(0, 0, .2), opacity: 0, offset: at(260) },
-        { transform: T(0, 0, .2), opacity: 0, offset: 1 },
-      ], k));
       // the two that lead to the extremes, landing on the real buttons
       const travel = (name, [tx, ty], start, arrive, btn) => {
         const dx = tx - mx, dy = ty - my, spread = name === 'zoom_out' ? -8 : 4;
@@ -220,7 +213,7 @@
       };
       travel('zoom_out', [ox, oy], 60, 420, out);
       travel('zoom_in', [ix, iy], 100, 380, into);
-      // the mark fills as the first one lands back in it
+      // the mark fills in place as they leave it
       const fvs = getComputedStyle(markIcon).fontVariationSettings, fill = n => fvs.replace(/"FILL" [\d.]+/, `"FILL" ${n}`);
       anims.push(markIcon.animate([{ fontVariationSettings: fill(0), offset: 0 }, { fontVariationSettings: fill(0), offset: at(160) }, { fontVariationSettings: fill(1), offset: at(300) }, { fontVariationSettings: fill(1), offset: 1 }], k));
       // the rule draws leftwards between them
