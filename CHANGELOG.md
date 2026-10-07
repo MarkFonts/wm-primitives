@@ -12,6 +12,43 @@ Newest first.
 
 ---
 
+## 2026-10-07 -- the zoom control, and the theme switch's stacked alternate
+
+**A new primitive from a scratch prototype.** Two study pages grew a zoom slider under their
+Auto / Light / Dark chips; Mark asked for it as a primitive that can always sit under the theme
+switch, "like an alt version of that primitive". `src/zoomControl.js` + `.css` (plain script,
+like dialHandle.js; no React form): `<div class="wm-zoom" data-target="#page">` renders
+zoom_out · the dialHandle rail with the percentage in the lozenge · zoom_in · fit_screen, and
+applies CSS `zoom` to the target. GESTURES.md §12, G58-G65; `tests/behaviour/zoomControl.spec.ts`.
+
+- **Anchored top-left.** Plain `zoom` on a centred wrapper grows it both ways and its auto
+  margins shrink, so the page slid left under the reader. The control pins the target's 100%
+  width and divides its left margin by the zoom: it grows right and down, nothing reflows, the
+  document scrolls. A baseline at 200% is exactly twice as far down on the test faces; the
+  prototype's per-paragraph re-seat was a page's job for its absolutely placed text and is not here.
+- **No invisible range input.** The prototype laid a zero-opacity `<input type=range>` over the
+  rail and sized its thumb to the lozenge with two measured variables. The rail is the slider
+  itself now (role=slider, as dialHandle.js does): press the lozenge and it does not jump, press
+  elsewhere and it jumps there; arrows, Home, End; no wheel (G33).
+- **Keys.** + − 0 from the control or from anywhere on the page that is not a field, never with
+  Cmd/Ctrl/Alt (the browser's own zoom). `data-keys="local"` limits a control to its own focus,
+  for a page with more than one -- the system page's demo is local.
+- **The stack is CSS.** `.wm-theme-stack` (themeSwitch.css) puts the theme row and the zoom row
+  in one `max-content` grid column: both stretch to the wider, so they share a width and a right
+  edge without the prototype's measured `width`. The rail is `flex: 1 1 0` with a 6rem floor, so
+  under the chips the zoom row takes their width; under the three marks, which are narrower than
+  that floor, the marks take the zoom row's. Rows 27 (33 on touch), `--spacing-02` apart. The
+  switch alone is unchanged.
+- **Touch.** icon.css floors every `.wm-icon-btn` at 44 in `@layer wm.icon`, which no
+  wm.controls rule can reach; the zoom row's marks are held to 33 in that same layer, so the
+  row is one control tall beside the chips, as the prototype was.
+
+**Icons.** zoom_in, zoom_out and fit_screen join the subset (cut-icon-subset.py): 92 ligatures,
+64,380 bytes, `?v=92`. The prototype had loaded them from Google as a second family, because a
+second face under the same name replaces the first. `dist/dial.css` rebuilt for the new URL and
+the stack rule (dial-entry imports themeSwitch.css). System page: a chapter in Interface after
+the chips -- the stack zooming a sample card, the markup, the keys.
+
 ## 2026-10-06 -- the bench hero follows its own rule
 
 **The grid bench was the one page in the docs that broke the row rule it teaches.** Its hero is

@@ -1,0 +1,64 @@
+/* zoomControl.css -- the zoom control (zoomControl.js): zoom_out, the dialHandle rail with the
+ * percentage riding in the lozenge, zoom_in, fit_screen. One row, 27px, on the 3px line.
+ *
+ * Built from the house pieces, not beside them: the marks are .wm-icon-btn (icon.css), the rail
+ * and the lozenge are dialHandle.css's .wm-hd-rail / .wm-hd-pill (load it too), and the readout
+ * is the ui role (12/15) in tabular figures, so the pill does not breathe as the number moves.
+ * Prototyped on two scratch study pages (2026-10-06) under the theme chips; GESTURES.md §12.
+ *
+ * ON THE LINE. The row is 27 -- the controls' own height (chip.css, button.css). Each mark is a
+ * 20px drawing in a square 27px target that draws nothing. The lozenge is 21: the ui leading 15
+ * plus a --tick each side, and its 3px ground ring fills the row's 27. Touch: 33, chip.css's
+ * floor, for the row and its marks at once, so the control stays one row tall beside the chips.
+ *
+ * Tokens with fallbacks, in @layer wm.controls like dialHandle.css. Placement is the host's. */
+@layer wm.controls {
+  .wm-zoom {
+    display: flex;
+    align-items: center;
+    block-size: 27px;   /* nine units: the controls' own 27 */
+    font-family: var(--ui-font, system-ui, sans-serif);
+    color: var(--text-muted, rgba(232, 232, 232, .62));
+  }
+  .wm-zoom .wm-icon-btn {
+    --icon-btn-pad: 0;   /* icon.css's knob: the target is the square below, not padding round the mark */
+    flex: none;
+    inline-size: 27px;
+    block-size: 27px;
+  }
+  .wm-zoom .wm-icon {
+    font-size: 20px;   /* token-lint: allow -- the mark's own opsz 20 drawing, not a text role (as dialHandle.css) */
+  }
+
+  /* the rail: dialHandle's hairline and lozenge at the row's height. It takes what the row has
+     left; its floor is the lozenge plus some travel, so a narrow host still gets a usable dial.
+     --hd-inset is set by zoomControl.js to half the lozenge: the hairline runs centre to centre
+     and the pill never leaves the rail. */
+  .wm-zoom .wm-hd-rail {
+    flex: 1 1 0;
+    min-inline-size: 6rem;
+    block-size: 27px;
+    margin-inline: var(--spacing-01, 4px);
+  }
+  .wm-zoom .wm-hd-pill { padding: var(--tick, 3px) var(--spacing-03, 8px); }
+  .wm-zoom .wm-hd-pill output {
+    display: block;
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 15px);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  @media (pointer: coarse) {
+    .wm-zoom, .wm-zoom .wm-hd-rail { block-size: 33px; }   /* eleven units, chip.css's touch floor */
+    .wm-zoom .wm-icon-btn { inline-size: 33px; block-size: 33px; }
+  }
+}
+/* icon.css gives every .wm-icon-btn a 44px floor on touch, in @layer wm.icon. A rule in
+   wm.controls cannot reach it, so the zoom row's marks say 33 in the same layer. */
+@layer wm.icon {
+  @media (pointer: coarse) {
+    .wm-zoom .wm-icon-btn { min-inline-size: 0; min-block-size: 0; }
+  }
+}
