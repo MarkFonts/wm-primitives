@@ -29,6 +29,9 @@ applies CSS `zoom` to the target. GESTURES.md §12, G58-G65; `tests/behaviour/zo
 - **A target can be several boxes.** GliffDiff, the first host, keeps its theme switch in each
   view's sticky title row, so the control lives inside the view it zooms: its target is
   `.view > :not(.view-header)`, every block but the row, each zoomed and anchored on its own.
+- **`sideEffects`.** package.json declared only `*.css` side-effectful, so a bundler that imports
+  the plain script for its effect (`import 'shared/src/zoomControl.js'`, GliffDiff's Vite build)
+  dropped it whole and `window.wmZoom` was undefined. `./src/zoomControl.js` is listed now.
 - **No invisible range input.** The prototype laid a zero-opacity `<input type=range>` over the
   rail and sized its thumb to the lozenge with two measured variables. The rail is the slider
   itself now (role=slider, as dialHandle.js does): press the lozenge and it does not jump, press

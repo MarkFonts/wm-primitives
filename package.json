@@ -6,7 +6,8 @@
   "main": "index.ts",
   "types": "index.ts",
   "sideEffects": [
-    "*.css"
+    "*.css",
+    "./src/zoomControl.js"
   ],
   "peerDependencies": {
     "@use-gesture/react": ">=10",
