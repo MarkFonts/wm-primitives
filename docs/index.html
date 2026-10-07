@@ -7482,7 +7482,9 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
  *
  * Every .wm-zoom in the document at DOMContentLoaded is mounted; one rendered later (React)
  * is mounted by the host with wmZoom.mount(el, opts?) -- idempotent, opts override data-*:
- *   target   selector or element the zoom is applied to (none: the control only emits)
+ *   target   selector, element or list the zoom is applied to (none: the control only emits).
+ *            A selector may match several boxes -- the blocks under a sticky header that holds
+ *            the control, say -- and each is zoomed and anchored on its own
  *   min / max / step   percent, default 50 / 400 / 10; the value snaps to step from min
  *   key      localStorage key (data-key), default 'wm-zoom'
  *   keys     'local' (data-keys="local"): + \u2212 0 only while focus is inside this control
@@ -7516,8 +7518,9 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     const min = num(opts.min, ds.min, 50), max = num(opts.max, ds.max, 400), step = num(opts.step, ds.step, 10);
     const key = opts.key ?? ds.key ?? 'wm-zoom';
     const local = (opts.keys ?? ds.keys) === 'local';
-    let target = opts.target ?? ds.target ?? null;
-    if (typeof target === 'string') target = ROOT.querySelector(target);
+    const target = opts.target ?? ds.target ?? null;
+    const targets = typeof target === 'string' ? [...ROOT.querySelectorAll(target)]
+      : !target ? [] : target instanceof Element ? [target] : [...target];
     const snap = v => Math.min(max, Math.max(min, Math.round((v - min) / step) * step + min));
     const fmt = v => v + '%';
 
@@ -7547,17 +7550,19 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
 
     // the target, anchored top-left: its 100% width and left margin, measured with the zoom off
     let base = null;
-    const clear = () => { const s = target.style; s.zoom = ''; s.width = ''; s.marginLeft = ''; s.marginRight = ''; };
-    const measure = () => { clear(); const cs = getComputedStyle(target); base = { w: cs.width, ml: parseFloat(cs.marginLeft) || 0 }; };
+    const clear = () => targets.forEach(t => { const s = t.style; s.zoom = ''; s.width = ''; s.marginLeft = ''; s.marginRight = ''; });
+    const measure = () => { clear(); base = targets.map(t => { const cs = getComputedStyle(t); return { w: cs.width, ml: parseFloat(cs.marginLeft) || 0 }; }); };
     const zoomTarget = z => {
-      if (!target) return;
+      if (!targets.length) return;
       if (z === 1) { clear(); base = null; return; }
       if (!base) measure();
-      const s = target.style;
-      s.zoom = String(z);
-      s.width = base.w;                    // a length on a zoomed box is drawn x z: the 100% line, grown
-      s.marginLeft = base.ml / z + 'px';   // ... so the left edge is divided back to where it was
-      s.marginRight = '0';
+      targets.forEach((t, i) => {
+        const s = t.style, b = base[i];
+        s.zoom = String(z);
+        s.width = b.w;                    // a length on a zoomed box is drawn x z: the 100% line, grown
+        s.marginLeft = b.ml / z + 'px';   // ... so the left edge is divided back to where it was
+        s.marginRight = '0';
+      });
     };
 
     let value = 100;
@@ -7618,7 +7623,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     out.addEventListener('click', () => set(value - step));
     into.addEventListener('click', () => set(value + step));
     fit.addEventListener('click', () => set(100));
-    const resize = () => { if (target && value !== 100) { base = null; zoomTarget(value / 100); } };
+    const resize = () => { if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
     window.addEventListener('resize', resize);
 
     const api = {
@@ -7627,7 +7632,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       set: v => set(v),
       destroy: () => {
         window.removeEventListener('resize', resize); window.removeEventListener('pointerup', end); window.removeEventListener('blur', end);
-        if (target) clear();
+        clear();
         live.delete(api); el.replaceChildren(); delete el.__wmZoom;
       },
     };

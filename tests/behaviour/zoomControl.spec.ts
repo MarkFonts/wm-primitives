@@ -95,6 +95,22 @@ test('G62 · anchored top-left: the left edge holds, the page grows right and sc
   expect(b.sw).toBeGreaterThan(b.cw)
 })
 
+test('G62 · a selector that matches several boxes zooms each, anchored on its own', async ({ page }) => {
+  const r = await page.evaluate(() => {
+    const el = document.createElement('div'); el.className = 'wm-zoom'; document.body.appendChild(el)
+    const ps = [...document.querySelectorAll('#page p')] as HTMLElement[]
+    const left = ps.map(p => p.getBoundingClientRect().left)
+    const z = (window as any).wmZoom.mount(el, { target: '#page p', key: 'wm-zoom-multi', keys: 'local' })
+    z.set(200)
+    const out = { zooms: ps.map(p => p.style.zoom), dl: ps.map((p, i) => Math.abs(p.getBoundingClientRect().left - left[i])) }
+    z.destroy()
+    return { ...out, after: ps.map(p => p.style.zoom) }
+  })
+  expect(r.zooms).toEqual(['2', '2'])
+  for (const d of r.dl) expect(d).toBeLessThanOrEqual(0.5)
+  expect(r.after).toEqual(['', ''])
+})
+
 test('G63 · a baseline in the target is exactly twice as far down at 200%', async ({ page }) => {
   /* No re-seat: the prototype re-seated absolutely placed paragraphs on its own marks, a page's
      job. Here the probe sits on the first baseline of flowing text at a 24px leading, and the

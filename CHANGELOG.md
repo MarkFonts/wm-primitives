@@ -26,6 +26,9 @@ applies CSS `zoom` to the target. GESTURES.md §12, G58-G65; `tests/behaviour/zo
   width and divides its left margin by the zoom: it grows right and down, nothing reflows, the
   document scrolls. A baseline at 200% is exactly twice as far down on the test faces; the
   prototype's per-paragraph re-seat was a page's job for its absolutely placed text and is not here.
+- **A target can be several boxes.** GliffDiff, the first host, keeps its theme switch in each
+  view's sticky title row, so the control lives inside the view it zooms: its target is
+  `.view > :not(.view-header)`, every block but the row, each zoomed and anchored on its own.
 - **No invisible range input.** The prototype laid a zero-opacity `<input type=range>` over the
   rail and sized its thumb to the lozenge with two measured variables. The rail is the slider
   itself now (role=slider, as dialHandle.js does): press the lozenge and it does not jump, press
