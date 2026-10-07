@@ -12,12 +12,18 @@
  *   keys     'local' (data-keys="local"): + − 0 only while focus is inside this control
  *   value    the start value when nothing is stored, default 100
  *   icon     (data-icon) the mark at the right end: pageview (default) | feature_search -- both
- *            have a FILL drawing, which the open state needs (frame_inspect has none).
+ *            have a FILL drawing (frame_inspect has none). Filled while open, and at rest whenever
+ *            the zoom is not 100, so a zoomed page is never mistaken for one at its own size.
+ *   capture  (data-capture) take over the browser's own zoom while the pointer is over the
+ *            target (or a selector given as the value), or focus is inside it: a trackpad pinch
+ *            (ctrl+wheel; Safari's gesture events) and Cmd/Ctrl + - 0 drive this control instead,
+ *            opening it if it is shut. Off by default. GESTURES.md G72-G74.
  *            Pressed, it is the default view: back to 100.
  *   collapse (data-collapse) rest as that ONE mark and open leftwards out of it on press; the
- *            mark stays, filled (FILL 1), and pressing it again closes AND goes back to 100.
- *            Escape or a press outside closes and keeps the value. data-open="true" starts open;
- *            the open state is kept with the value.
+ *            mark stays, filled, and pressing it again closes it. Closing never changes the zoom:
+ *            the reset is a press on the lozenge (or 0). Shut at a zoom other than 100, the value
+ *            stays on show left of the mark. Escape or a press outside closes too.
+ *            data-open="true" starts open; the open state is kept with the value.
  * Returns { el, get, set(v), destroy }.
  *
  * What it does (GESTURES.md §12):
@@ -79,10 +85,14 @@
     // also what it rests as -- the box shrinks to the mark alone, and opens leftwards out of it.
     const collapse = !!(opts.collapse ?? ('collapse' in ds));
     const box = mk('div', 'wm-zoom-box');
-    const toggle = btn(opts.icon ?? ds.icon ?? 'pageview', 'Back to 100%', 'Back to 100% (0)');
+    const toggle = btn(opts.icon ?? ds.icon ?? 'pageview', 'Back to 100%', 'Back to 100% (0)');   // relabelled by paint() when it collapses
     toggle.classList.add('wm-zoom-toggle');
     box.append(out, rail, into, toggle);
+    // shut at a zoom other than 100, the value stays on show beside the mark (no pill)
+    const note = mk('span', 'wm-zoom-note');
+    note.setAttribute('aria-hidden', 'true');
     el.replaceChildren(box);
+    if (collapse) el.appendChild(note);
 
     // the target, anchored top-left: its 100% width and left margin, measured with the zoom off
     let base = null;
@@ -110,12 +120,37 @@
       if (!Number.isFinite(v)) return;
       value = v;
       read.textContent = fmt(v);
+      note.textContent = fmt(v);
+      el.toggleAttribute('data-zoomed', v !== 100);
       rail.setAttribute('aria-valuenow', String(v));
       rail.setAttribute('aria-valuetext', fmt(v));
       pill.style.setProperty('--p', String((v - min) / (max - min)));   // dialHandle.css declares --p on the pill
       zoomTarget(v / 100);
       if (save) store();
       el.dispatchEvent(new CustomEvent('wm-zoom', { detail: v, bubbles: true }));
+    };
+
+    // THE RESET, animated: the lozenge slides home to 100 over --dur-med while the readout counts
+    // down (or up) to it a step at a time. Reduced motion, a hidden page, or a shut control: at once.
+    let counting = 0, slide = null;
+    const reset = () => {
+      if (value === 100) return;
+      const from = value, still = document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches || !open;
+      const x0 = pill.getBoundingClientRect().left;
+      set(100);
+      if (still) return;
+      const dx = x0 - pill.getBoundingClientRect().left;
+      const dur = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
+      slide?.cancel();
+      slide = pill.animate([{ transform: `translate(calc(-50% + ${dx}px), -50%)` }, { transform: 'translate(-50%, -50%)' }], { duration: dur, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' });
+      cancelAnimationFrame(counting);
+      const t0 = performance.now(), n = Math.abs(from - 100) / step;
+      const tick = now => {
+        const k = Math.min(1, (now - t0) / dur), eased = 1 - Math.pow(1 - k, 3);
+        read.textContent = fmt(Math.round((from + (100 - from) * eased) / step) * step);   // display only: the value is already 100
+        if (k < 1 && n > 1) counting = requestAnimationFrame(tick); else read.textContent = fmt(value);
+      };
+      counting = requestAnimationFrame(tick);
     };
 
     // the lozenge is one width: its widest value, measured in the face it is drawn in; the
@@ -137,17 +172,27 @@
       const r = rail.getBoundingClientRect(), inset = pill.getBoundingClientRect().width / 2;
       return min + ((x - r.left - inset) / Math.max(1, r.width - 2 * inset)) * (max - min);
     };
+    let downX = 0, moved = false, onPill = false;
     rail.addEventListener('pointerdown', e => {
       const p = pill.getBoundingClientRect();
-      grab = e.clientX >= p.left && e.clientX <= p.right ? e.clientX - (p.left + p.width / 2) : 0;
-      set(at(e.clientX - grab));
+      onPill = e.clientX >= p.left && e.clientX <= p.right;
+      downX = e.clientX; moved = false;
+      grab = onPill ? e.clientX - (p.left + p.width / 2) : 0;
+      if (!onPill) { moved = true; set(at(e.clientX - grab)); }
       try { rail.setPointerCapture(e.pointerId); } catch {}
       rail.focus({ preventScroll: true });
       e.preventDefault();
     });
-    rail.addEventListener('pointermove', e => { if (grab !== null) { const v = snap(at(e.clientX - grab)); if (v !== value) set(v); } });
-    const end = () => { grab = null; };
-    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => rail.addEventListener(ev, end));
+    rail.addEventListener('pointermove', e => { if (grab !== null) { if (Math.abs(e.clientX - downX) > 3) moved = true; if (moved) { const v = snap(at(e.clientX - grab)); if (v !== value) set(v); } } });
+    // A PRESS ON THE LOZENGE IS THE RESET (Mark, 2026-10-07): down and up on the pill without a
+    // drag snaps to 100 -- the pill slides home while its numerals count down. A drag from the
+    // pill still drags (no jump on down: it was grabbed where it is).
+    const end = e => {
+      if (grab !== null && onPill && !moved && e && e.type === 'pointerup') reset();
+      grab = null; onPill = false;
+    };
+    rail.addEventListener('pointerup', end);
+    ['pointercancel', 'lostpointercapture'].forEach(ev => rail.addEventListener(ev, () => { grab = null; onPill = false; }));
     window.addEventListener('pointerup', end);
     window.addEventListener('blur', end);
     rail.addEventListener('keydown', e => {
@@ -182,7 +227,7 @@
       el.dataset.open = String(open);
       if (!collapse) return;
       toggle.setAttribute('aria-expanded', String(open));
-      const label = open ? 'Close zoom, back to 100%' : 'Zoom';
+      const label = open ? 'Close zoom' : 'Zoom';
       toggle.setAttribute('aria-label', label); toggle.title = label;
       parts.forEach(p => { p.inert = !open; });
     };
@@ -236,7 +281,7 @@
         { transform: T(cR.x, cR.y, 1), opacity: 0, offset: at(120) },
         { transform: T(cR.x, cR.y, 1), opacity: 0, offset: 1 },
       ], k));
-      A.push(toggle.querySelector('.wm-icon').animate([{ fontVariationSettings: fvsOf(0), offset: 0, easing: EASE }, { fontVariationSettings: fvsOf(1), offset: at(120) }, { fontVariationSettings: fvsOf(1), offset: 1 }], k));
+      A.push(toggle.querySelector('.wm-icon').animate([{ fontVariationSettings: fvsOf(value === 100 ? 0 : 1), offset: 0, easing: EASE }, { fontVariationSettings: fvsOf(1), offset: at(120) }, { fontVariationSettings: fvsOf(1), offset: 1 }], k));
       // 2 . it splits; the two travel to the ends and cross into the real buttons
       for (const [name, to, btn] of [['zoom_out', g.out, out], ['zoom_in', g.in, into]]) {
         const d = rel(to);
@@ -311,7 +356,8 @@
         { transform: T(0, 0, .6), opacity: 0, offset: at(280) },
         { transform: T(0, 0, .6), opacity: 0, offset: 1 },
       ], k));
-      A.push(toggle.querySelector('.wm-icon').animate([{ fontVariationSettings: fvsOf(1), offset: 0 }, { fontVariationSettings: fvsOf(1), offset: at(200), easing: EASE }, { fontVariationSettings: fvsOf(0), offset: 1 }], k));
+      const restFill = value === 100 ? 0 : 1;   // shut at a zoom, the mark stays filled
+      A.push(toggle.querySelector('.wm-icon').animate([{ fontVariationSettings: fvsOf(1), offset: 0 }, { fontVariationSettings: fvsOf(1), offset: at(200), easing: EASE }, { fontVariationSettings: fvsOf(restFill), offset: 1 }], k));
       return A;
     };
     const setOpen = (o, { animate = true, save = true } = {}) => {
@@ -329,16 +375,62 @@
       const mine = morph;
       Promise.all(mine.map(a => a.finished)).then(() => { if (morph === mine) land(); }, () => {});
     };
-    // the mark: shut, it opens; open, it closes AND goes back to 100 (the default view);
-    // never collapsing, it only goes back to 100. Escape and a press outside close and keep.
+    // the mark: shut, it opens; open, it closes -- and keeps the zoom. Never collapsing, it is the
+    // reset (there is nothing to open). Escape and a press outside close too.
     toggle.addEventListener('click', () => {
-      if (collapse && !open) { setOpen(true); rail.focus({ preventScroll: true }); return; }
-      set(100);
-      if (collapse) setOpen(false);
+      if (!collapse) { reset(); return; }
+      if (!open) { setOpen(true); rail.focus({ preventScroll: true }); return; }
+      setOpen(false);
     });
     el.addEventListener('keydown', e => { if (e.key === 'Escape' && open && collapse) { setOpen(false); toggle.focus({ preventScroll: true }); e.preventDefault(); } });
     const outside = e => { if (open && collapse && !el.contains(e.target)) setOpen(false); };
     document.addEventListener('pointerdown', outside);
+
+    // CAPTURE (data-capture): over the target -- or the region its value names -- the browser's own
+    // zoom gestures drive this control instead. Listeners are on the region, not the window
+    // (wheel non-passive so it may be cancelled), so outside it the browser zooms as ever.
+    //   ctrl+wheel   a trackpad pinch in Chrome, Firefox and Edge (and ctrl + a mouse wheel):
+    //                continuous, x e^(-deltaY/100), snapped to the step
+    //   gesture*     Safari's pinch: the scale from gesturestart, applied to the value it began at
+    //   Cmd/Ctrl + - 0 while the pointer is over the region or focus is inside it -- in a text
+    //                field too: the chord types nothing, and the page zooming under a field you
+    //                are typing in is the thing this exists to stop
+    // A shut control opens (with its morph) on the first captured gesture.
+    const capSel = opts.capture ?? ds.capture;
+    const capture = capSel !== undefined && capSel !== false && capSel !== 'false';
+    const regions = !capture ? [] : (typeof capSel === 'string' && capSel.trim()) ? [...document.querySelectorAll(capSel)] : targets;
+    let over = false, pinch = null, gestureFrom = 100;
+    const wake = () => { if (collapse && !open) setOpen(true); };
+    const onWheel = e => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      wake();
+      pinch = (pinch ?? value) * Math.exp(-e.deltaY / 100);
+      pinch = Math.min(max, Math.max(min, pinch));
+      if (snap(pinch) !== value) set(pinch);
+      clearTimeout(onWheel.t); onWheel.t = setTimeout(() => { pinch = null; }, 200);
+    };
+    const onGesture = e => {
+      e.preventDefault();
+      if (e.type === 'gesturestart') { gestureFrom = value; wake(); return; }
+      if (e.type === 'gesturechange') { const v = snap(gestureFrom * e.scale); if (v !== value) set(v); }
+    };
+    const enter = () => { over = true; }, leave = () => { over = false; };
+    regions.forEach(r => {
+      r.addEventListener('wheel', onWheel, { passive: false });
+      ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => r.addEventListener(ev, onGesture, { passive: false }));
+      r.addEventListener('pointerenter', enter); r.addEventListener('pointerleave', leave);
+    });
+    const onChord = e => {
+      if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+      const d = { '+': 1, '=': 1, '-': -1, '_': -1, '0': 0 }[e.key];
+      if (d === undefined) return;
+      if (!over && !regions.some(r => r.contains(document.activeElement))) return;
+      e.preventDefault();
+      wake();
+      if (d === 0) reset(); else set(value + d * step);
+    };
+    if (capture) document.addEventListener('keydown', onChord, true);
 
     const resize = () => { if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
     window.addEventListener('resize', resize);
@@ -347,11 +439,14 @@
       el, local, step,
       get: () => value,
       set: v => set(v),
+      reset,
       isOpen: () => open,
       morph: () => morph,   // the running timeline, for a test or a frame grab
       setOpen: o => setOpen(!!o),
       destroy: () => {
         document.removeEventListener('pointerdown', outside); stop();
+        document.removeEventListener('keydown', onChord, true);
+        regions.forEach(r => { r.removeEventListener('wheel', onWheel); ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => r.removeEventListener(ev, onGesture)); r.removeEventListener('pointerenter', enter); r.removeEventListener('pointerleave', leave); });
         window.removeEventListener('resize', resize); window.removeEventListener('pointerup', end); window.removeEventListener('blur', end);
         clear();
         live.delete(api); el.replaceChildren(); delete el.__wmZoom;
@@ -384,7 +479,7 @@
     for (const z of live) if (z.el.contains(document.activeElement)) { c = z; break; }
     if (!c) for (const z of live) if (!z.local) { c = z; break; }
     if (!c) return;
-    c.set(d === 0 ? 100 : c.get() + d * c.step);
+    if (d === 0) c.reset(); else c.set(c.get() + d * c.step);
     e.preventDefault();
   });
 

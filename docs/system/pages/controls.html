@@ -747,7 +747,7 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
 <div class="zoom-demo">
   <p class="chip-cap">The morph &middot; one glass leaves the box as it fills and zips to the lozenge&rsquo;s place; it splits into &minus; and +, which pull the rule out to the ends; the lozenge appears as a dot and grows round 1, 10, 100, 100%. Closing folds it back. Composed from the control&rsquo;s own keyframes by <code>scripts/zoom-morph-svg.mjs</code> (open 600ms, hold, close 300ms, hold)</p>
   <img class="zoom-morph" src="../../assets/zoom-morph.svg" alt="The zoom control opening out of its mark and closing back into it" width="482" height="102">
-  <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and the control opens leftwards out of it while the mark stays put and fills (the morph above); press the mark again and it folds AND goes back to 100. Escape or a press elsewhere folds it and keeps the zoom. The mark, <code>data-icon</code>:</p>
+  <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and the control opens leftwards out of it while the mark stays put and fills (the morph above); press the mark again, Escape, or anywhere else, and it folds and keeps the zoom &mdash; shut at a zoom, the value stays on show beside the filled mark. The reset is a press on the lozenge (or <code>0</code>). The mark, <code>data-icon</code>:</p>
   <div class="wm-chip-row zoom-icons">
     <button type="button" class="wm-chip wm-chip--small" aria-pressed="true" data-zicon="pageview"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">pageview</span>pageview</button>
     <button type="button" class="wm-chip wm-chip--small" aria-pressed="false" data-zicon="feature_search"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">feature_search</span>feature_search</button>
@@ -758,7 +758,7 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
     <span class="zoom-title-h">Paragraph comparison</span>
     <span class="zoom-title-a">
       <span class="wm-theme-row">
-        <span class="wm-zoom wm-zoom--left" data-collapse data-target=".zoom-sample--left" data-key="wm-system-zoom-left" data-keys="local"></span>
+        <span class="wm-zoom wm-zoom--left" data-collapse data-capture data-target=".zoom-sample--left" data-key="wm-system-zoom-left" data-keys="local"></span>
         <span class="wm-theme" role="group" aria-label="Colour scheme">
           <button type="button" class="wm-icon-btn" data-theme-pick="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
           <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
@@ -770,7 +770,7 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
   </div>
   <div class="zoom-stage"><div class="zoom-sample zoom-sample--left">
     <h3>Hamburgefonstiv</h3>
-    <p>Zoomed by the control in the title row. Open, its rail has a fixed 8rem of travel, and its box lies over the row on the page ground.</p>
+    <p>Zoomed by the control in the title row, which captures the browser&rsquo;s zoom over this card (<code>data-capture</code>): pinch on a trackpad, or &#8984;/Ctrl + &minus; 0, with the pointer here. Elsewhere on the page the browser zooms as ever.</p>
   </div></div>
 
   <p class="chip-cap">Stack &middot; <code>.wm-theme-stack</code>: rests as one mark at the right edge under the theme chips; opens under them, one width and one right edge from one grid column (the rail&rsquo;s 10rem floor makes it the wider row)</p>
@@ -801,9 +801,11 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
 data-min / max / step   50 / 400 / 10        data-key   localStorage key (wm-zoom): "170 open"
 data-collapse           rest as one mark     data-icon  pageview | feature_search
 data-open="true"        start open           data-keys="local"  keys only with focus inside
+data-capture            take over pinch and &#8984;/Ctrl + &minus; 0 over the target (or a selector)
 events     wm-zoom (detail: the percent) &middot; wm-zoom-open (detail: true / false), bubbling
 keys       + or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; Escape folds, keeps the zoom &middot; never with Cmd/Ctrl/Alt
-the mark   shut: opens &middot; open: folds and goes back to 100 &middot; without data-collapse: back to 100</pre>
+the mark   shut: opens &middot; open: folds, keeps the zoom &middot; without data-collapse: back to 100
+the pill   press: back to 100 (it counts down and slides home) &middot; drag: drags</pre>
   <p class="chip-cap">Without <code>data-collapse</code> it is always open, the mark is only the reset, and it needs no stack</p>
 </div>
 

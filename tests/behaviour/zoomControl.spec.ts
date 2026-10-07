@@ -189,7 +189,7 @@ test('G66 · at rest a collapsing control is one 27px mark: data-icon, pageview 
   expect(fs).toBe('feature_search')
 })
 
-test('G67 · the morph: one glass out of the mark splits in two, pulling the rule; the readout a numeral at a time, the lozenge out of the rule, sliding to the value; the mark stays, filled; pressed again it closes to 100; Escape and outside close and keep', async ({ page, hasTouch }) => {
+test('G67 · the morph: one glass out of the mark splits in two, pulling the rule; the readout a numeral at a time, the lozenge out of the rule, sliding to the value; the mark stays, filled; the mark, Escape and outside all close and keep the zoom', async ({ page, hasTouch }) => {
   test.skip(hasTouch, 'the press and the keys are the same on touch; the timeline is checked here once')
   const api = (s = '#row .wm-zoom') => `document.querySelector('${s}').__wmZoom`
   const seek = (ms: number) => page.evaluate(([a, ms]) => (eval(a as string) as any).morph().forEach((x: Animation) => { x.pause(); x.currentTime = ms as number }), [api(), ms] as const)
@@ -197,7 +197,7 @@ test('G67 · the morph: one glass out of the mark splits in two, pulling the rul
   const pillX = () => page.evaluate(() => { const p = document.querySelector('#row .wm-hd-pill')!.getBoundingClientRect(); return p.left + p.width / 2 })
   await page.evaluate(() => localStorage.setItem('wm-zoom-row', '200 closed')); await page.reload(); await page.evaluate(() => document.fonts.ready)
   const mark0 = await rect(page, '#row .wm-zoom-toggle')
-  expect(await fill()).toContain('"FILL" 0')
+  expect(await fill()).toContain('"FILL" 1')   // shut at 200: filled (G73)
   await expect(page.locator('#cstack .wm-zoom')).toHaveAttribute('data-open', 'true')
   await page.locator('#row .wm-zoom-toggle').click()
   await page.evaluate(a => (eval(a) as any).morph().forEach((x: Animation) => x.pause()), api())
@@ -234,18 +234,18 @@ test('G67 · the morph: one glass out of the mark splits in two, pulling the rul
   expect(await value(page, '#row .wm-zoom')).toBe(200)
   expect(await page.evaluate(() => document.activeElement!.classList.contains('wm-zoom-toggle'))).toBe(true)
   expect((await rect(page, '#row .wm-zoom-box')).w).toBe(27)
-  expect(await fill()).toContain('"FILL" 0')
+  expect(await fill()).toContain('"FILL" 1')   // shut at 200 it stays filled
   // outside: closes and keeps
   await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(700)
   await page.mouse.click(600, 420); await page.waitForTimeout(400)
   await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'false')
   expect(await value(page, '#row .wm-zoom')).toBe(200)
-  // the mark, pressed while open: closes AND goes back to 100, the default view
+  // the mark, pressed while open: closes and KEEPS the zoom
   await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(700)
   await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(400)
   await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'false')
-  expect(await value(page, '#row .wm-zoom')).toBe(100)
-  expect(await page.evaluate(() => localStorage.getItem('wm-zoom-row'))).toBe('100 closed')
+  expect(await value(page, '#row .wm-zoom')).toBe(200)
+  expect(await page.evaluate(() => localStorage.getItem('wm-zoom-row'))).toBe('200 closed')
 })
 
 test('G68 · reduced motion: the same states, no transform', async ({ page, hasTouch }) => {
@@ -294,4 +294,78 @@ test('G71 · STACK: rests at the right edge under the switch; open, one width an
   await page.locator('#cstack [role="slider"]').focus(); await page.keyboard.press('Escape')
   r1 = await rect(page, '#cstack > :first-child'); r2 = await rect(page, '#cstack > .wm-zoom')
   expect(r2.w).toBe(H); expect(Math.abs(r1.r - r2.r)).toBeLessThanOrEqual(0.5); expect(r2.h).toBe(H)
+})
+
+/* ---- round 6: the reset is the lozenge; the zoom shows while shut; capture ---- */
+test('G72 · a press on the lozenge resets to 100 (it counts down and slides home); a drag from it still drags; 0 resets', async ({ page, hasTouch }) => {
+  test.skip(hasTouch, 'pointer press vs drag; the keys are covered on every profile by G60')
+  await page.evaluate(() => localStorage.setItem('wm-zoom-row', '200 open')); await page.reload(); await page.evaluate(() => document.fonts.ready)
+  const pill = (await page.locator('#row .wm-hd-pill').boundingBox())!
+  await page.mouse.click(pill.x + pill.width / 2, pill.y + pill.height / 2)
+  expect(await value(page, '#row .wm-zoom')).toBe(100)
+  await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'true')   // a reset is not a close
+  await page.waitForTimeout(400)
+  await expect(page.locator('#row output')).toHaveText('100%')
+  // a drag from the pill moves it
+  const p2 = (await page.locator('#row .wm-hd-pill').boundingBox())!
+  await page.mouse.move(p2.x + p2.width / 2, p2.y + p2.height / 2); await page.mouse.down()
+  await page.mouse.move(p2.x + p2.width / 2 + 40, p2.y + p2.height / 2, { steps: 5 }); await page.mouse.up()
+  expect(await value(page, '#row .wm-zoom')).toBeGreaterThan(100)
+  await page.locator('#row [role="slider"]').focus(); await page.keyboard.press('0')
+  expect(await value(page, '#row .wm-zoom')).toBe(100)
+})
+
+test('G73 · shut at a zoom, the value stays on show left of the mark, and the mark stays filled; at 100, neither', async ({ page, hasTouch }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const H = hasTouch ? 33 : 27
+  const state = () => page.evaluate(() => {
+    const z = document.querySelector('#row .wm-zoom')!, n = z.querySelector('.wm-zoom-note')!, m = z.querySelector('.wm-zoom-toggle')!
+    const nr = n.getBoundingClientRect(), mr = m.getBoundingClientRect()
+    return { text: n.textContent, op: getComputedStyle(n).opacity, gap: mr.left - nr.right, mid: Math.abs((nr.top + nr.bottom) / 2 - (mr.top + mr.bottom) / 2),
+      fill: getComputedStyle(m.querySelector('.wm-icon')!).fontVariationSettings, num: getComputedStyle(n).fontVariantNumeric, size: getComputedStyle(n).fontSize, lead: getComputedStyle(n).lineHeight }
+  })
+  let s = await state()
+  expect(s.op).toBe('0'); expect(s.fill).toContain('"FILL" 0')
+  await page.evaluate(() => (document.querySelector('#row .wm-zoom') as any).__wmZoom.set(150))
+  s = await state()
+  expect(s.text).toBe('150%'); expect(s.op).toBe('1'); expect(s.fill).toContain('"FILL" 1')
+  expect(s.gap).toBeGreaterThanOrEqual(0); expect(s.gap).toBeLessThanOrEqual(6); expect(s.mid).toBeLessThanOrEqual(1)
+  expect(s.num).toBe('tabular-nums'); expect(s.size).toBe('12px'); expect(s.lead).toBe('15px')
+  expect((await rect(page, '#row')).h).toBe(H)   // on the row, which does not grow
+  await page.evaluate(() => (document.querySelector('#row .wm-zoom') as any).__wmZoom.reset())
+  s = await state()
+  expect(s.op).toBe('0'); expect(s.fill).toContain('"FILL" 0')
+})
+
+test('G74 · capture: ctrl+wheel over the region drives the control and is cancelled; the page does not scroll; outside, untouched', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.locator('#cstack [role="slider"]').focus(); await page.keyboard.press('Escape')   // shut, so the first gesture opens it
+  const fire = (sel: string, dy: number) => page.evaluate(([s, dy]) => {
+    const e = new WheelEvent('wheel', { deltaY: dy as number, ctrlKey: true, bubbles: true, cancelable: true })
+    document.querySelector(s as string)!.dispatchEvent(e); return e.defaultPrevented
+  }, [sel, dy] as const)
+  const y0 = await page.evaluate(() => scrollY)
+  expect(await fire('#capzone', -40)).toBe(true)
+  await expect(page.locator('#cstack .wm-zoom')).toHaveAttribute('data-open', 'true')   // a captured gesture opens it
+  expect(await value(page, '#cstack .wm-zoom')).toBe(150)                             // 100 x e^0.4, snapped
+  expect(await fire('#capzone', 40)).toBe(true)
+  expect(await value(page, '#cstack .wm-zoom')).toBe(100)
+  expect(await page.evaluate(() => scrollY)).toBe(y0)
+  // outside the region: not ours
+  expect(await fire('#page p', -40)).toBe(false)
+  expect(await value(page, '#cstack .wm-zoom')).toBe(100)
+  // a plain wheel over the region is a scroll, not a zoom
+  expect(await page.evaluate(() => { const e = new WheelEvent('wheel', { deltaY: 40, bubbles: true, cancelable: true }); document.querySelector('#capzone')!.dispatchEvent(e); return e.defaultPrevented })).toBe(false)
+})
+
+test('G75 · capture: Cmd/Ctrl + - 0 over the region drive the control; elsewhere they are the browser\'s', async ({ page, hasTouch }) => {
+  test.skip(hasTouch, 'a hover; the touch profile has none')
+  const box = (await page.locator('#capzone').boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  const chord = (k: string) => page.evaluate(k => { const e = new KeyboardEvent('keydown', { key: k, ctrlKey: true, bubbles: true, cancelable: true }); document.body.dispatchEvent(e); return e.defaultPrevented }, k)
+  expect(await chord('=')).toBe(true); expect(await value(page, '#cstack .wm-zoom')).toBe(110)
+  expect(await chord('-')).toBe(true); expect(await chord('-')).toBe(true); expect(await value(page, '#cstack .wm-zoom')).toBe(90)
+  expect(await chord('0')).toBe(true); expect(await value(page, '#cstack .wm-zoom')).toBe(100)
+  await page.mouse.move(5, 300)
+  expect(await chord('=')).toBe(false); expect(await value(page, '#cstack .wm-zoom')).toBe(100)
 })

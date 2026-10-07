@@ -87,6 +87,16 @@ curve is the case study tester's unlock curve, cubic-bezier(0.2, 0.7, 0.2, 1), n
 The docs chapter carries the choreography as an animated SVG composed from the live keyframes
 (docs/assets/zoom-morph.svg, scripts/zoom-morph-svg.mjs), not a recording.
 
+**Round 6: the mark keeps the zoom; the lozenge is the reset; capture.** Settled with Mark: the mark
+only opens and closes, and closing never changes the zoom. The reset moves to a press on the
+lozenge (its numerals count down as it slides home); `0` still resets. Shut at a zoom other than
+100 the value stays on show left of the mark (ui role, tabular, muted, no pill) and the mark stays
+filled, so a zoomed page is never mistaken for one at its own size. `data-capture` ("TAKE OVER the
+browser zoom/pinch when you're active/mousing the right column") cancels a pinch (ctrl+wheel;
+Safari's gesture events) and Cmd/Ctrl + - 0 over the target, or a region it names, and drives the
+control instead, opening it if shut. Listeners sit on the region, never the window: outside it
+the browser zooms as ever. Off by default; GliffDiff turns it on over its stage. G72-G75.
+
 **Round 5: one glass, split in two, pulling the rule.** Mark replaced the two-magnifier open with a
 strict sequence, now GESTURES G67: one magnifier (`search`, back in the subset, `?v=94`) leaves the
 mark as it fills and zips to the lozenge's place at 100; it becomes zoom_out and zoom_in, which

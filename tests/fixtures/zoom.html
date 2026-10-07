@@ -58,8 +58,10 @@
     <button type="button" class="wm-chip" data-mode="light" data-label="Light" aria-pressed="false">Light</button>
     <button type="button" class="wm-chip" data-mode="dark" data-label="Dark" aria-pressed="true">Dark</button>
   </div>
-  <div class="wm-zoom" data-collapse data-icon="feature_search" data-open="true" data-key="wm-zoom-cstack" data-keys="local"></div>
+  <div class="wm-zoom" data-collapse data-icon="feature_search" data-open="true" data-key="wm-zoom-cstack" data-keys="local" data-capture="#capzone"></div>
 </div>
+<!-- the capture region of #cstack: a box the pointer can be over -->
+<div id="capzone" style="position:fixed;left:16px;bottom:16px;width:120px;height:60px;border:1px dashed var(--border)"></div>
 <main id="page">
   <p><span id="probe"></span>Hamburgefonstiv. The target keeps its 100% measure and its left edge; at 200% every length in it is twice as long, so the page grows right and down and scrolls.</p>
   <p>Second paragraph, on the next 24px line, so a zoomed page still steps by whole lines.</p>
