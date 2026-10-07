@@ -94,10 +94,16 @@ test('G78 · data-hide="swipe": up on the stack dismisses; short settles; the pr
   expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe('dark')   // the swipe did not pick Light
   await scrollBy(page, 300)                               // scroll-hide is off: down does nothing more
   expect(await hidden(page)).toBe(true)
-  await page.evaluate(() => { const t = document.querySelector('main')!; document.dispatchEvent(new PointerEvent('pointerup', { clientX: 100, clientY: 400, bubbles: true })); t.dispatchEvent(new PointerEvent('pointerup', { clientX: 100, clientY: 400, bubbles: true })) })
-  expect(await hidden(page)).toBe(true)                   // a tap below the band does nothing
-  await page.evaluate(() => document.querySelector('main')!.dispatchEvent(new PointerEvent('pointerup', { clientX: 200, clientY: 10, bubbles: true })))
-  expect(await hidden(page)).toBe(false)
+  const tap = (x: number, y: number, cancel = false) => page.evaluate(([x, y, cancel]) => {
+    const t = document.querySelector('main')!, e = new PointerEvent('pointerup', { clientX: x, clientY: y, bubbles: true, cancelable: true })
+    if (cancel) t.addEventListener('pointerup', ev => ev.preventDefault(), { once: true })
+    t.dispatchEvent(e)
+  }, [x, y, cancel] as const)
+  await tap(100, 400); expect(await hidden(page)).toBe(true)            // a tap elsewhere does nothing
+  await tap(200, 10); expect(await hidden(page)).toBe(true)             // nor the top edge outside the footprint (the host's tabs live there)
+  const f = await page.evaluate(s => { const e = document.querySelector(s) as HTMLElement; return { x: e.offsetLeft + e.offsetWidth / 2, y: e.offsetTop + 40 } }, stack)
+  await tap(f.x, f.y, true); expect(await hidden(page)).toBe(true)      // inside it, but the host cancelled the tap
+  await tap(f.x, f.y); expect(await hidden(page)).toBe(false)           // inside the rest footprint: back
   await swipe(page, from, -40)
   await scrollBy(page, -40)                               // scroll up also brings it back
   expect(await hidden(page)).toBe(false)
@@ -126,7 +132,9 @@ test('G79 · .wm-zoom--down: the rail runs down, max at the top; the box lies ov
   await expect(rail).toHaveAttribute('aria-orientation', 'vertical')
   const mark = await rect(page, '#zoom .wm-zoom-toggle'), inB = await rect(page, '#zoom [aria-label="Zoom in"]'), r = await rect(page, '#zoom .wm-hd-rail'), outB = await rect(page, '#zoom [aria-label="Zoom out"]')
   expect(inB.y).toBeGreaterThan(mark.y); expect(r.y).toBeGreaterThan(inB.y); expect(outB.y).toBeGreaterThan(r.y)
-  expect(Math.abs(inB.x - mark.x)).toBeLessThan(0.5)      // one column
+  const shift = await page.evaluate(() => parseFloat(getComputedStyle(document.getElementById('zoom')!).getPropertyValue('--zoom-shift')))
+  expect(shift % 3).toBe(0)
+  expect(Math.abs(inB.x + shift - mark.x)).toBeLessThan(0.5)      // one column, stepped inward by the lozenge's overhang
   expect(r.h % 3).toBe(0)
   expect(await rect(page, 'main p')).toEqual(page0)       // nothing moved
   // a press near the top is near max; near the bottom near min
@@ -139,7 +147,7 @@ test('G79 · .wm-zoom--down: the rail runs down, max at the top; the box lies ov
   expect(lo.y).toBeGreaterThan(hi.y + 60)                 // min is down the rail
   await page.keyboard.press('ArrowUp')
   expect(await z(`document.querySelector('#zoom').__wmZoom.get()`)).toBe(60)
-  expect(Math.abs((lo.x + lo.w / 2) - (mark.x + mark.w / 2))).toBeLessThan(0.5)   // the lozenge rides the column's centre
+  expect(Math.abs((lo.x + lo.w / 2) - (r.x + r.w / 2))).toBeLessThan(0.5)   // the lozenge rides the rail's centre
 })
 
 /* a two-finger pinch over the target, as events. Where the engine has gesture events (WebKit:
@@ -201,4 +209,51 @@ test('G81 · the host\'s data-hidden forces it hidden over scroll; removed, the 
   await page.evaluate(s => (window as any).wmThemeStack.hide(document.querySelector(s), false), stack)
   expect(await hidden(page)).toBe(true)                                        // removed: still hidden, by the scroll
   expect(await attr()).toBe(false)
+})
+
+/* ?chrome=2: two 54px rows of fixed chrome, the text in its own stage (#pan) from y 108, data-below
+   and data-scroller set as font-proofer sets them. */
+const restTop = (page: Page) => page.evaluate(s => (document.querySelector(s) as HTMLElement).offsetTop, stack)
+
+test('G82 · data-below: the stack rests under the lowest matching row + 6, on the line; follows a row that grows or goes; nothing matching, 6', async ({ page }) => {
+  await open(page, '?chrome=2&hide=')
+  expect(await restTop(page)).toBe(114)
+  const row1 = await rect(page, '#row2'), st = await rect(page, stack)
+  expect(st.y).toBeGreaterThanOrEqual(row1.b)                                  // never over the chrome
+  await page.evaluate(() => { document.getElementById('row2')!.style.height = '60px' }); await frames(page)
+  expect(await restTop(page)).toBe(120)                                        // 108 + 6 + 6
+  await page.evaluate(() => document.getElementById('row2')!.remove()); await frames(page)
+  expect(await restTop(page)).toBe(60)                                         // the chip row gone: under the tabs
+  await page.evaluate(() => document.getElementById('row1')!.remove()); await frames(page)
+  expect(await restTop(page)).toBe(6)                                          // nothing matches: the default
+})
+
+for (const h of [660, 700]) test(`G77 · stowed from a 114px rest at 375x${h}: clear of the top edge; the near-top exemption is the footprint over the stage`, async ({ page }) => {
+  await open(page, '?chrome=2&hide=scroll')
+  await page.setViewportSize({ width: 375, height: h }); await frames(page)
+  const under = await page.evaluate(s => { const e = document.querySelector(s) as HTMLElement; return e.offsetTop + e.offsetHeight - document.getElementById('pan')!.getBoundingClientRect().top }, stack)
+  expect(under).toBeGreaterThan(0)
+  const pan = (y: number) => page.evaluate(y => { document.getElementById('pan')!.scrollTop = y }, y).then(() => frames(page))
+  await pan(under - 4)
+  expect(await hidden(page)).toBe(false)                                       // content under the footprint not yet past
+  await pan(under + 6)
+  expect(await hidden(page)).toBe(true)
+  await page.waitForTimeout(300)
+  expect((await rect(page, stack)).b).toBeLessThanOrEqual(0)                   // the whole rest top cleared, not a fixed step
+})
+
+test('G79 · down: the lozenge keeps the 12px right margin; the rail shortens to the viewport, 96 at least', async ({ page }) => {
+  await open(page, '?chrome=2&hide=')
+  await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.set(400))
+  await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.setOpen(true)); await page.waitForTimeout(700)
+  expect((await rect(page, '#zoom .wm-hd-pill')).r).toBeLessThanOrEqual(375 - 12)
+  expect((await rect(page, '#zoom .wm-hd-rail')).h).toBe(126)                  // 812: room for the whole rail
+  await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.setOpen(false)); await page.waitForTimeout(400)
+  await page.setViewportSize({ width: 375, height: 400 }); await frames(page)
+  await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.setOpen(true)); await page.waitForTimeout(700)
+  const r = await rect(page, '#zoom .wm-hd-rail'), box = await rect(page, '#zoom .wm-zoom-box')
+  expect(r.h).toBeLessThan(126); expect(r.h % 3).toBe(0); expect(r.h).toBeGreaterThanOrEqual(96)
+  if (r.h > 96) expect(box.b).toBeLessThanOrEqual(400 - 12 + 0.5)
+  await page.setViewportSize({ width: 375, height: 360 }); await frames(page)
+  expect((await rect(page, '#zoom .wm-hd-rail')).h).toBe(96)                   // the floor
 })

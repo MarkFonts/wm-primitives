@@ -14,9 +14,21 @@
   #page{padding:12px 20px 1200px}
   #page h1{font-size:36px;line-height:42px;font-weight:600;margin:0 0 12px}
   #page p{font-size:18px;line-height:27px;margin:0 0 27px;color:var(--text-muted)}
+  /* ?chrome=2: a host's two rows of top chrome, fixed, 54px each; the text scrolls in its own
+     stage under them (as font-proofer's preview area does), and the stack rests below the rows
+     (data-below). */
+  #chrome{position:fixed;inset:0 0 auto 0;z-index:40;background:var(--bg);border-bottom:1px solid var(--border)}
+  #chrome .row{display:flex;align-items:center;gap:12px;height:54px;padding:0 20px;font-size:15px;color:var(--text-muted)}
+  #chrome .row b{color:var(--text);font-weight:600}
+  .chrome #pan{position:fixed;inset:108px 0 0 0;overflow:auto}
+  .chrome #page{padding-top:12px}
   /* THE DEMO OF THE RULE: the host puts the class on under its own phone query. CSS cannot add a
      class, so it is matchMedia here (an app with a mobile render branch puts it in that branch). */
 </style></head><body>
+<header id="chrome" hidden>
+  <div class="row" id="row1"><b>Paragraph</b><span>Big Word</span><span>Glyphs</span><span>Waterfall</span></div>
+  <div class="row" id="row2"><span>A Tale of Two Cities</span><span>Hamlet</span><span>Moby-Dick</span></div>
+</header>
 <div id="stack" class="wm-theme-stack" data-hide="scroll swipe">
   <div class="wm-theme" role="group" aria-label="Colour scheme">
     <button type="button" class="wm-icon-btn" data-mode="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
@@ -37,9 +49,13 @@
 </main>
 </div>
 <script>
-  // ?hide=scroll|swipe|"scroll swipe" (default both); ?theme=light
+  // ?hide=scroll|swipe|"scroll swipe" (default both); ?theme=light; ?chrome=2 (two rows over a stage)
   const q = new URLSearchParams(location.search), z = document.getElementById('zoom'), st = document.getElementById('stack');
   if (q.has('hide')) st.dataset.hide = q.get('hide');
+  if (q.get('chrome') === '2') {
+    document.getElementById('chrome').hidden = false; document.documentElement.classList.add('chrome');
+    st.dataset.below = '#chrome .row'; st.dataset.scroller = '#pan';
+  }
   if (q.get('theme')) { document.documentElement.dataset.theme = q.get('theme');
     st.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('active', b.dataset.mode === q.get('theme'))); }
   // mobile only: the class follows the host's phone query

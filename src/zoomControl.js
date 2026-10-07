@@ -172,7 +172,24 @@
       read.textContent = now;
       read.style.minInlineSize = w + 'px';
       rail.style.setProperty('--hd-inset', len(pill.getBoundingClientRect()) / 2 + 'px');
+      fit();
     };
+    // .wm-zoom--down only (G79): the lozenge's overhang past the column, in whole units with its
+    // 3px ring, is how far the rail and the glasses step inward (--zoom-shift), so the host's
+    // right margin holds for the lozenge; and the rail is --zoom-rail at most, shortened to what
+    // the viewport has under the open box less 12px, 96px at least, on the 3px line. The pill's
+    // travel is a percentage of the rail, so it scales with it. Run at mount, on open and resize.
+    function fit() {
+      if (!down) return;
+      const col = toggle.getBoundingClientRect().width, pw = pill.getBoundingClientRect().width;
+      el.style.setProperty('--zoom-shift', Math.max(0, Math.ceil((pw / 2 + 3 - col / 2) / 3) * 3) + 'px');
+      rail.style.blockSize = '';
+      const nominal = rail.offsetHeight;
+      const rest = toggle.offsetHeight + out.offsetHeight + into.offsetHeight + 6;   // the open box less the rail (3px each side of it)
+      const room = innerHeight - 12 - el.getBoundingClientRect().top - rest;
+      const n = Math.max(96, Math.min(nominal, Math.floor(room / 3) * 3));
+      if (n < nominal) rail.style.blockSize = n + 'px';
+    }
 
     // the rail: a press on the lozenge grabs it where it is (no jump); a press elsewhere jumps
     // there; either way the value follows until lift. Capture released from three places, as
@@ -376,6 +393,7 @@
     };
     const setOpen = (o, { animate = true, save = true } = {}) => {
       if (!collapse || o === open && !morph.length) return;
+      if (o) fit();
       const still = !animate || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches;
       stop();
       if (save) { const was = open; open = o; store(); open = was; }
@@ -489,7 +507,7 @@
     };
     if (capture) document.addEventListener('keydown', onChord, true);
 
-    const resize = () => { if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
+    const resize = () => { fit(); if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
     window.addEventListener('resize', resize);
 
     const api = {
@@ -499,6 +517,7 @@
       reset,
       isOpen: () => open,
       morph: () => morph,   // the running timeline, for a test or a frame grab
+      fit,                  // .wm-zoom--down: re-measure the shift and the rail (themeStack.js calls it when the stack moves)
       setOpen: o => setOpen(!!o),
       destroy: () => {
         document.removeEventListener('pointerdown', outside); stop();

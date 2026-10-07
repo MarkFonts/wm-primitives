@@ -46,7 +46,17 @@ and `data-*` stays for behaviour. Mobile-only is the host's rule, not the primit
 - **The host's hide** (font-proofer's phone sheet covers the corner): `data-hidden` on the stack,
   or `wmThemeStack.hide(el, on)`, forces it hidden over any scroll state; the script's own state
   moved to `data-stowed` so it can never clear the host's. G81.
-- GESTURES.md §13, G76-G81; `tests/behaviour/themeStack.spec.ts`; the system page's "The theme
+- **Under the chrome, not on it** (Mark, on his iPhone in font-proofer: "Primitive should position
+  under the two rows, not on top of all chrome"). `data-below="selector"` rests the stack 6px
+  under the lowest matching row, re-measured as rows come and go; `--stack-top` is the manual
+  form. Stowing now clears the whole rest top (a fixed 48px left the foot on the chrome from a
+  114px rest). From font-proofer's adoption, also: the near-top exemption measures the stack's
+  footprint over the scroller, not the scroller's scrollTop against the stack's height (an inner
+  stage at y 47 had to scroll 138px); the return tap is the stack's own rest footprint, and a
+  host can cancel it (the top 27px also switched font-proofer's tab); the down rail and glasses
+  step inward by the lozenge's overhang (it ended 4px from the edge); the rail shortens to the
+  viewport, 96px at least, with `--zoom-rail` for a shorter stage. G77-G79, G82.
+- GESTURES.md §13, G76-G82; `tests/behaviour/themeStack.spec.ts`; the system page's "The theme
   stack, vertical" chapter, two phone frames (`data-scroller` scopes each to its own box).
 
 ## 2026-10-07 -- the zoom control, and the theme switch's stacked alternate

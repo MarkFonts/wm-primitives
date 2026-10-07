@@ -99,7 +99,7 @@
   /* --zoom-ground: what the open box lies on. Transparent by default -- a host's row is rarely
      the page's --bg exactly (the system page's is not) -- and a host whose row can hold text
      under the box sets its own ground (GliffDiff: --bg). Declared at the root, as dialHandle's knobs. */
-  :root { --zoom-ground: transparent; }
+  :root { --zoom-ground: transparent; --zoom-rail: 126px; }   /* --zoom-rail: .wm-zoom--down's rail at most (forty-two units); below */
   .wm-zoom--left .wm-zoom-box { position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }
   .wm-zoom--left .wm-hd-rail { flex: 0 0 8rem; min-inline-size: 8rem; }
 
@@ -124,11 +124,15 @@
   .wm-zoom--down[data-open="false"] .wm-zoom-box { inline-size: 100%; block-size: 27px; }
   .wm-zoom.wm-zoom--down .wm-hd-rail {   /* doubled: beats the touch rule's 33 below */
     flex: none; min-inline-size: 0; inline-size: 100%;
-    block-size: 126px;   /* forty-two units */
+    block-size: var(--zoom-rail);   /* zoomControl.js may shorten it inline to fit the viewport (G79) */
     margin-inline: 0; margin-block: var(--tick, 3px);
     cursor: ns-resize; touch-action: none;
   }
   .wm-zoom--down .wm-hd-rail > i { inset-inline: auto; inset-inline-start: 50%; inset-block: 0; inline-size: 1px; block-size: auto; transform: translateX(-50%); }
+  /* the lozenge is wider than the column, so the rail and the two glasses step INWARD by its
+     overhang (--zoom-shift, set by zoomControl.js, whole units): the host's right margin holds
+     for the lozenge too. The mark stays in the column. */
+  .wm-zoom--down .wm-zoom-box > :is(.wm-hd-rail, .wm-icon-btn:not(.wm-zoom-toggle)) { translate: calc(-1 * var(--zoom-shift, 0px)) 0; }
   .wm-zoom--down .wm-hd-pill { left: 50%; top: calc(var(--hd-inset) + (100% - 2 * var(--hd-inset)) * (1 - var(--p))); cursor: ns-resize; touch-action: none; }
 
   @media (pointer: coarse) {

@@ -71,9 +71,14 @@
    the third: 4 x 33 + 6 = 138px on a phone, forty-six units.
    Dismissal is opt-in, data-hide on the stack: themeStack.js, GESTURES.md §13. */
 @layer wm.controls {
+  /* --stack-top: where the stack rests, from the viewport's top. 6px by default; data-below
+     (themeStack.js, G82) writes it on the stack from the host's chrome; a host may set it by
+     hand (a multiple of 3). Declared at the root, as dialHandle's knobs, so a host's own
+     unlayered :root rule beats it. */
+  :root { --stack-top: var(--spacing-02, 6px); }
   .wm-theme-stack--vertical {
     position: fixed;
-    inset-block-start: max(var(--spacing-02, 6px), env(safe-area-inset-top, 0px));
+    inset-block-start: max(var(--stack-top), env(safe-area-inset-top, 0px));
     inset-inline-end: max(var(--spacing-04, 12px), env(safe-area-inset-right, 0px));
     z-index: 30;
     display: flex;
@@ -92,7 +97,9 @@
      data-hidden   the HOST's (G81): forces it hidden whatever the scroll says, for as long as it
                    is there (a sheet over the corner). themeStack.js never adds or removes it, so
                    removing it leaves the stack wherever data-stowed says. */
-  .wm-theme-stack--vertical:is([data-stowed], [data-hidden]) { translate: 0 calc(-100% - var(--spacing-08, 48px)); pointer-events: none; }
+  /* the whole rest top, not a fixed step: from a rest under two rows of chrome (114px) a fixed
+     48px left the stack's foot on the chrome. Plus --spacing-02 for the focus ring. */
+  .wm-theme-stack--vertical:is([data-stowed], [data-hidden]) { translate: 0 calc(-100% - max(var(--stack-top), env(safe-area-inset-top, 0px)) - var(--spacing-02, 6px)); pointer-events: none; }
   .wm-theme-stack[data-hidden]:not(.wm-theme-stack--vertical) { visibility: hidden; }   /* the in-flow stack has no edge to leave by */
   /* a swipe in progress: the stack follows the finger, upwards only (--stack-drag, a length <= 0) */
   .wm-theme-stack--vertical[data-dragging] { translate: 0 var(--stack-drag, 0px); transition: none; }

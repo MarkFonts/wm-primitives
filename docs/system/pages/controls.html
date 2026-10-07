@@ -655,7 +655,11 @@
 .vstack-demo{display:flex;flex-wrap:wrap;gap:var(--spacing-06, 24px);margin:8px 0 24px}
 .vstack-demo figure{margin:0;display:grid;gap:var(--spacing-03, 8px)}
 .vstack-phone{position:relative;transform:translateZ(0);width:300px;height:396px;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--bg)}
-.vstack-scroll{height:100%;overflow:auto;padding:12px 20px}
+.vstack-phone{display:flex;flex-direction:column}
+.vstack-chrome{flex:none;border-bottom:1px solid var(--border)}
+.vstack-chrome div{display:flex;align-items:center;gap:var(--spacing-04, 12px);height:42px;padding:0 20px;font-size:var(--type-ui-size, .75rem);color:var(--text-muted)}
+.vstack-chrome b{color:var(--text);font-weight:600}
+.vstack-scroll{flex:1;min-height:0;overflow:auto;padding:12px 20px}
 .vstack-scroll h3{margin:0 0 12px;font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}
 .vstack-scroll p{margin:0 0 24px;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}
 </style>
@@ -825,12 +829,13 @@ over the text with no bar and no ground. The chosen mark is the house active mar
 swatch on a dark ground (HDR white; plain white on an SDR screen), full ink on light. Opt-in
 dismissal, <code>data-hide</code>: <b>scroll</b> hides it on the way down and shows it on the way up
 (24px before a direction counts); <b>swipe</b> dismisses it on an upward swipe that starts on it,
-and a tap at the top edge or a scroll up brings it back; both are on by default. A host that covers the corner sets <code>data-hidden</code> (or calls <code>wmThemeStack.hide(el, true)</code>) and the stack stays away until it is removed. The zoom opens <b>down</b> from its mark, and a pinch on the text (<code>data-capture</code>, touch too) opens it and drives it instead of zooming the page. <code>.wm-theme-stack--vertical</code>
+and a tap at the top edge or a scroll up brings it back; both are on by default. A host that covers the corner sets <code>data-hidden</code> (or calls <code>wmThemeStack.hide(el, true)</code>) and the stack stays away until it is removed. With top chrome, <code>data-below</code> names the last row and the stack rests under it, never on it. The zoom opens <b>down</b> from its mark, and a pinch on the text (<code>data-capture</code>, touch too) opens it and drives it instead of zooming the page. <code>.wm-theme-stack--vertical</code>
 (themeSwitch.css), <code>src/themeStack.js</code>; GESTURES.md &sect;13.</p>
 <div class="vstack-demo">
   <figure>
     <div class="vstack-phone">
-    <div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe" data-scroller=".vstack-scroll--down">
+    <div class="vstack-chrome"><div><b>Paragraph</b><span>Big Word</span><span>Glyphs</span></div><div><span>A Tale of Two Cities</span><span>Hamlet</span></div></div>
+    <div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe" data-scroller=".vstack-scroll--down" style="--stack-top: 90px">
       <div class="wm-theme" role="group" aria-label="Colour scheme">
         <button type="button" class="wm-icon-btn" data-theme-pick="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
         <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
@@ -853,7 +858,7 @@ and a tap at the top edge or a scroll up brings it back; both are on by default.
 </div>
 <div class="zoom-demo">
   <p class="chip-cap">The markup &middot; the class is the HOST&rsquo;s to put on, under its own phone rule; CSS cannot add a class, so it is the app&rsquo;s mobile branch or a matchMedia</p>
-<pre>&lt;div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe"&gt;
+<pre>&lt;div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe" data-below="header .row"&gt;
   &lt;div class="wm-theme" role="group" aria-label="Colour scheme"&gt;&hellip;the three marks&hellip;&lt;/div&gt;
   &lt;div class="wm-zoom wm-zoom--down" data-collapse data-capture data-target="#page"&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -864,6 +869,11 @@ orient(); phone.addEventListener('change', orient)
 
 data-hide       scroll | swipe | "scroll swipe"   (none: it stays)
 data-scroller   only this scroller counts (default: any vertical scroll on the page)
+data-below      the host's top chrome (a selector, commas allowed): rests 6px under the LOWEST match,
+                on the line, re-measured as rows come and go; nothing matching, the default 6px
+--stack-top     the same by hand (a multiple of 3), for a host with no selector to give.
+                Here: 90px, under the frame's two 42px rows -- a frame's rows are not the viewport's
+--zoom-rail     the down rail at most (126px); it also shortens itself to the viewport, 96 at least
 data-hidden     the HOST's: hidden whatever the scroll says, until removed (a sheet over the corner)
                 wmThemeStack.hide(el, true | false) toggles just that; the script's own state is data-stowed
 wmThemeStack.mount(el)   for a stack rendered after load; returns .hide() .show() .hidden(), the scroll state

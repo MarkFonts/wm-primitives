@@ -57,7 +57,8 @@
     "--gp-opsz",
     "--locked-pct",
     "--pct",
-    "--stack-drag"
+    "--stack-drag",
+    "--zoom-shift"
   ],
   "_hostTokenDocs": "Prose twin of hostTokens, one line each: [what it is, what happens without it]. gen-index.mjs renders HOST-CONTRACT.md from this; lint-tokens fails a hostToken with no entry.",
   "hostTokenDocs": {

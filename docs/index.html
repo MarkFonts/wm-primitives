@@ -3660,9 +3660,9 @@ html,body{margin:0;padding:0;background:var(--bg)}
   }
 }@layer wm.icon{@media (pointer: coarse){#s-controls :is(.wm-theme-stack,#s-controls .wm-theme-row) > .wm-theme .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
   }
-}@layer wm.controls{#s-controls .wm-theme-stack--vertical{
+}@layer wm.controls{#s-controls{ --stack-top: var(--spacing-02, 6px); }#s-controls .wm-theme-stack--vertical{
     position: fixed;
-    inset-block-start: max(var(--spacing-02, 6px), env(safe-area-inset-top, 0px));
+    inset-block-start: max(var(--stack-top), env(safe-area-inset-top, 0px));
     inset-inline-end: max(var(--spacing-04, 12px), env(safe-area-inset-right, 0px));
     z-index: 30;
     display: flex;
@@ -3673,7 +3673,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     
     touch-action: none;
     transition: translate 180ms cubic-bezier(0.2, 0.7, 0.2, 1);   
-  }#s-controls .wm-theme-stack--vertical > .wm-theme{ flex-direction: column; gap: 0; }#s-controls .wm-theme-stack--vertical > :first-child{ min-block-size: 0; }#s-controls .wm-theme-stack--vertical:is([data-stowed],#s-controls [data-hidden]){ translate: 0 calc(-100% - var(--spacing-08, 48px)); pointer-events: none; }#s-controls .wm-theme-stack[data-hidden]:not(.wm-theme-stack--vertical){ visibility: hidden; }#s-controls .wm-theme-stack--vertical[data-dragging]{ translate: 0 var(--stack-drag, 0px); transition: none; }@media (prefers-reduced-motion: reduce){#s-controls .wm-theme-stack--vertical{ transition: none; } }
+  }#s-controls .wm-theme-stack--vertical > .wm-theme{ flex-direction: column; gap: 0; }#s-controls .wm-theme-stack--vertical > :first-child{ min-block-size: 0; }#s-controls .wm-theme-stack--vertical:is([data-stowed],#s-controls [data-hidden]){ translate: 0 calc(-100% - max(var(--stack-top), env(safe-area-inset-top, 0px)) - var(--spacing-02, 6px)); pointer-events: none; }#s-controls .wm-theme-stack[data-hidden]:not(.wm-theme-stack--vertical){ visibility: hidden; }#s-controls .wm-theme-stack--vertical[data-dragging]{ translate: 0 var(--stack-drag, 0px); transition: none; }@media (prefers-reduced-motion: reduce){#s-controls .wm-theme-stack--vertical{ transition: none; } }
 }@layer wm.controls{#s-controls .wm-zoom{
     display: flex;
     align-items: center;
@@ -3710,17 +3710,17 @@ html,body{margin:0;padding:0;background:var(--bg)}
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--dur-med, 240ms) ease-out;
-  }#s-controls .wm-zoom[data-open="false"][data-zoomed]:not([data-moving]) .wm-zoom-note{ opacity: 1; }@media (prefers-reduced-motion: reduce){#s-controls .wm-zoom-note{ transition: none; } }#s-controls .wm-zoom--left{ position: relative; flex: none; inline-size: 27px; }#s-controls{ --zoom-ground: transparent; }#s-controls .wm-zoom--left .wm-zoom-box{ position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }#s-controls .wm-zoom--left .wm-hd-rail{ flex: 0 0 8rem; min-inline-size: 8rem; }#s-controls .wm-zoom--down{ position: relative; flex: none; inline-size: 27px; }#s-controls .wm-zoom--down .wm-zoom-box{
+  }#s-controls .wm-zoom[data-open="false"][data-zoomed]:not([data-moving]) .wm-zoom-note{ opacity: 1; }@media (prefers-reduced-motion: reduce){#s-controls .wm-zoom-note{ transition: none; } }#s-controls .wm-zoom--left{ position: relative; flex: none; inline-size: 27px; }#s-controls{ --zoom-ground: transparent; --zoom-rail: 126px; }#s-controls .wm-zoom--left .wm-zoom-box{ position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }#s-controls .wm-zoom--left .wm-hd-rail{ flex: 0 0 8rem; min-inline-size: 8rem; }#s-controls .wm-zoom--down{ position: relative; flex: none; inline-size: 27px; }#s-controls .wm-zoom--down .wm-zoom-box{
     position: absolute; inset-block-start: 0; inset-inline-end: 0; z-index: 1;
     flex-direction: column-reverse;   
     inline-size: 100%; block-size: auto;
     background: var(--zoom-ground);
   }#s-controls .wm-zoom--down[data-open="false"] .wm-zoom-box{ inline-size: 100%; block-size: 27px; }#s-controls .wm-zoom.wm-zoom--down .wm-hd-rail{   
     flex: none; min-inline-size: 0; inline-size: 100%;
-    block-size: 126px;   
+    block-size: var(--zoom-rail);   
     margin-inline: 0; margin-block: var(--tick, 3px);
     cursor: ns-resize; touch-action: none;
-  }#s-controls .wm-zoom--down .wm-hd-rail > i{ inset-inline: auto; inset-inline-start: 50%; inset-block: 0; inline-size: 1px; block-size: auto; transform: translateX(-50%); }#s-controls .wm-zoom--down .wm-hd-pill{ left: 50%; top: calc(var(--hd-inset) + (100% - 2 * var(--hd-inset)) * (1 - var(--p))); cursor: ns-resize; touch-action: none; }@media (pointer: coarse){#s-controls .wm-zoom[data-open="false"] .wm-zoom-box,#s-controls .wm-zoom--left,#s-controls .wm-zoom--down{ inline-size: 33px; }#s-controls .wm-zoom--down[data-open="false"] .wm-zoom-box{ inline-size: 100%; block-size: 33px; }#s-controls .wm-zoom,#s-controls .wm-zoom .wm-hd-rail{ block-size: 33px; }#s-controls .wm-zoom .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
+  }#s-controls .wm-zoom--down .wm-hd-rail > i{ inset-inline: auto; inset-inline-start: 50%; inset-block: 0; inline-size: 1px; block-size: auto; transform: translateX(-50%); }#s-controls .wm-zoom--down .wm-zoom-box > :is(.wm-hd-rail,#s-controls .wm-icon-btn:not(.wm-zoom-toggle)){ translate: calc(-1 * var(--zoom-shift, 0px)) 0; }#s-controls .wm-zoom--down .wm-hd-pill{ left: 50%; top: calc(var(--hd-inset) + (100% - 2 * var(--hd-inset)) * (1 - var(--p))); cursor: ns-resize; touch-action: none; }@media (pointer: coarse){#s-controls .wm-zoom[data-open="false"] .wm-zoom-box,#s-controls .wm-zoom--left,#s-controls .wm-zoom--down{ inline-size: 33px; }#s-controls .wm-zoom--down[data-open="false"] .wm-zoom-box{ inline-size: 100%; block-size: 33px; }#s-controls .wm-zoom,#s-controls .wm-zoom .wm-hd-rail{ block-size: 33px; }#s-controls .wm-zoom .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
   }
 }@layer wm.icon{@media (pointer: coarse){#s-controls .wm-zoom .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
   }#s-controls .wm-zoom[data-collapse]:is([data-open="true"],#s-controls [data-zoomed]) .wm-zoom-toggle .wm-icon{ --icon-fill: 1; }#s-controls .wm-zoom[data-moving] .wm-zoom-toggle .wm-icon{ transition: none; }   
@@ -3924,7 +3924,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--text-muted);
-}#s-controls .chip-demo{display:grid;gap:10px;margin:8px 0 40px}#s-controls .chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}#s-controls .chip-cap code{text-transform:none;letter-spacing:0}#s-controls .chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}#s-controls .chip-demo .wm-chip--switch{margin-left:8px}#s-controls .zoom-demo{display:grid;gap:var(--spacing-04, 12px);margin:8px 0 40px}#s-controls .zoom-demo .wm-theme-stack{justify-self:end}#s-controls .zoom-demo > .wm-chip-row{justify-self:start}#s-controls .zoom-morph{justify-self:end;max-width:100%;height:auto;color:var(--text)}#s-controls .zoom-title{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-05, 16px)}#s-controls .zoom-title-h{font-size:var(--type-lede-size, 1.125rem);color:var(--text)}#s-controls .zoom-title-a{display:flex;align-items:center;gap:var(--spacing-04, 12px)}#s-controls .zoom-title-btn{font:inherit;font-size:var(--type-ui-size, .75rem);padding:var(--spacing-02, 6px) var(--spacing-04, 12px);border-radius:var(--radius, 8px);border:0;background:var(--text);color:var(--bg)}#s-controls .zoom-stage{height:240px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--surface)}#s-controls .zoom-sample{max-width:420px;padding:var(--spacing-05, 16px)}#s-controls .zoom-sample h3{margin:0 0 var(--spacing-03, 8px);font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .zoom-sample p{margin:0;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}#s-controls .zoom-demo pre{margin:0;font:var(--type-micro-size, .5625rem)/1.6 ui-monospace, Menlo, monospace;color:var(--text-muted);white-space:pre-wrap}#s-controls .vstack-demo{display:flex;flex-wrap:wrap;gap:var(--spacing-06, 24px);margin:8px 0 24px}#s-controls .vstack-demo figure{margin:0;display:grid;gap:var(--spacing-03, 8px)}#s-controls .vstack-phone{position:relative;transform:translateZ(0);width:300px;height:396px;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--bg)}#s-controls .vstack-scroll{height:100%;overflow:auto;padding:12px 20px}#s-controls .vstack-scroll h3{margin:0 0 12px;font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .vstack-scroll p{margin:0 0 24px;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}
+}#s-controls .chip-demo{display:grid;gap:10px;margin:8px 0 40px}#s-controls .chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}#s-controls .chip-cap code{text-transform:none;letter-spacing:0}#s-controls .chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}#s-controls .chip-demo .wm-chip--switch{margin-left:8px}#s-controls .zoom-demo{display:grid;gap:var(--spacing-04, 12px);margin:8px 0 40px}#s-controls .zoom-demo .wm-theme-stack{justify-self:end}#s-controls .zoom-demo > .wm-chip-row{justify-self:start}#s-controls .zoom-morph{justify-self:end;max-width:100%;height:auto;color:var(--text)}#s-controls .zoom-title{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-05, 16px)}#s-controls .zoom-title-h{font-size:var(--type-lede-size, 1.125rem);color:var(--text)}#s-controls .zoom-title-a{display:flex;align-items:center;gap:var(--spacing-04, 12px)}#s-controls .zoom-title-btn{font:inherit;font-size:var(--type-ui-size, .75rem);padding:var(--spacing-02, 6px) var(--spacing-04, 12px);border-radius:var(--radius, 8px);border:0;background:var(--text);color:var(--bg)}#s-controls .zoom-stage{height:240px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--surface)}#s-controls .zoom-sample{max-width:420px;padding:var(--spacing-05, 16px)}#s-controls .zoom-sample h3{margin:0 0 var(--spacing-03, 8px);font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .zoom-sample p{margin:0;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}#s-controls .zoom-demo pre{margin:0;font:var(--type-micro-size, .5625rem)/1.6 ui-monospace, Menlo, monospace;color:var(--text-muted);white-space:pre-wrap}#s-controls .vstack-demo{display:flex;flex-wrap:wrap;gap:var(--spacing-06, 24px);margin:8px 0 24px}#s-controls .vstack-demo figure{margin:0;display:grid;gap:var(--spacing-03, 8px)}#s-controls .vstack-phone{position:relative;transform:translateZ(0);width:300px;height:396px;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--bg)}#s-controls .vstack-phone{display:flex;flex-direction:column}#s-controls .vstack-chrome{flex:none;border-bottom:1px solid var(--border)}#s-controls .vstack-chrome div{display:flex;align-items:center;gap:var(--spacing-04, 12px);height:42px;padding:0 20px;font-size:var(--type-ui-size, .75rem);color:var(--text-muted)}#s-controls .vstack-chrome b{color:var(--text);font-weight:600}#s-controls .vstack-scroll{flex:1;min-height:0;overflow:auto;padding:12px 20px}#s-controls .vstack-scroll h3{margin:0 0 12px;font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .vstack-scroll p{margin:0 0 24px;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}
 #s-controls .wip{max-width:72ch}#s-controls .wip>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2)}#s-controls .wip>p b{color:var(--ink);font-weight:600}#s-controls .wip-list{display:grid;gap:16px;margin:0;padding:0;list-style:none}#s-controls .wip-card{display:block;position:relative;padding:22px 24px;text-decoration:none;color:inherit;
   border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
@@ -6193,12 +6193,13 @@ over the text with no bar and no ground. The chosen mark is the house active mar
 swatch on a dark ground (HDR white; plain white on an SDR screen), full ink on light. Opt-in
 dismissal, <code>data-hide</code>: <b>scroll</b> hides it on the way down and shows it on the way up
 (24px before a direction counts); <b>swipe</b> dismisses it on an upward swipe that starts on it,
-and a tap at the top edge or a scroll up brings it back; both are on by default. A host that covers the corner sets <code>data-hidden</code> (or calls <code>wmThemeStack.hide(el, true)</code>) and the stack stays away until it is removed. The zoom opens <b>down</b> from its mark, and a pinch on the text (<code>data-capture</code>, touch too) opens it and drives it instead of zooming the page. <code>.wm-theme-stack--vertical</code>
+and a tap at the top edge or a scroll up brings it back; both are on by default. A host that covers the corner sets <code>data-hidden</code> (or calls <code>wmThemeStack.hide(el, true)</code>) and the stack stays away until it is removed. With top chrome, <code>data-below</code> names the last row and the stack rests under it, never on it. The zoom opens <b>down</b> from its mark, and a pinch on the text (<code>data-capture</code>, touch too) opens it and drives it instead of zooming the page. <code>.wm-theme-stack--vertical</code>
 (themeSwitch.css), <code>src/themeStack.js</code>; GESTURES.md &sect;13.</p>
 <div class="vstack-demo">
   <figure>
     <div class="vstack-phone">
-    <div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe" data-scroller=".vstack-scroll--down">
+    <div class="vstack-chrome"><div><b>Paragraph</b><span>Big Word</span><span>Glyphs</span></div><div><span>A Tale of Two Cities</span><span>Hamlet</span></div></div>
+    <div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe" data-scroller=".vstack-scroll--down" style="--stack-top: 90px">
       <div class="wm-theme" role="group" aria-label="Colour scheme">
         <button type="button" class="wm-icon-btn" data-theme-pick="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
         <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
@@ -6221,7 +6222,7 @@ and a tap at the top edge or a scroll up brings it back; both are on by default.
 </div>
 <div class="zoom-demo">
   <p class="chip-cap">The markup &middot; the class is the HOST&rsquo;s to put on, under its own phone rule; CSS cannot add a class, so it is the app&rsquo;s mobile branch or a matchMedia</p>
-<pre>&lt;div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe"&gt;
+<pre>&lt;div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe" data-below="header .row"&gt;
   &lt;div class="wm-theme" role="group" aria-label="Colour scheme"&gt;&hellip;the three marks&hellip;&lt;/div&gt;
   &lt;div class="wm-zoom wm-zoom--down" data-collapse data-capture data-target="#page"&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -6232,6 +6233,11 @@ orient(); phone.addEventListener('change', orient)
 
 data-hide       scroll | swipe | "scroll swipe"   (none: it stays)
 data-scroller   only this scroller counts (default: any vertical scroll on the page)
+data-below      the host's top chrome (a selector, commas allowed): rests 6px under the LOWEST match,
+                on the line, re-measured as rows come and go; nothing matching, the default 6px
+--stack-top     the same by hand (a multiple of 3), for a host with no selector to give.
+                Here: 90px, under the frame's two 42px rows -- a frame's rows are not the viewport's
+--zoom-rail     the down rail at most (126px); it also shortens itself to the viewport, 96 at least
 data-hidden     the HOST's: hidden whatever the scroll says, until removed (a sheet over the corner)
                 wmThemeStack.hide(el, true | false) toggles just that; the script's own state is data-stowed
 wmThemeStack.mount(el)   for a stack rendered after load; returns .hide() .show() .hidden(), the scroll state
@@ -7779,7 +7785,24 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       read.textContent = now;
       read.style.minInlineSize = w + 'px';
       rail.style.setProperty('--hd-inset', len(pill.getBoundingClientRect()) / 2 + 'px');
+      fit();
     };
+    // .wm-zoom--down only (G79): the lozenge's overhang past the column, in whole units with its
+    // 3px ring, is how far the rail and the glasses step inward (--zoom-shift), so the host's
+    // right margin holds for the lozenge; and the rail is --zoom-rail at most, shortened to what
+    // the viewport has under the open box less 12px, 96px at least, on the 3px line. The pill's
+    // travel is a percentage of the rail, so it scales with it. Run at mount, on open and resize.
+    function fit() {
+      if (!down) return;
+      const col = toggle.getBoundingClientRect().width, pw = pill.getBoundingClientRect().width;
+      el.style.setProperty('--zoom-shift', Math.max(0, Math.ceil((pw / 2 + 3 - col / 2) / 3) * 3) + 'px');
+      rail.style.blockSize = '';
+      const nominal = rail.offsetHeight;
+      const rest = toggle.offsetHeight + out.offsetHeight + into.offsetHeight + 6;   // the open box less the rail (3px each side of it)
+      const room = innerHeight - 12 - el.getBoundingClientRect().top - rest;
+      const n = Math.max(96, Math.min(nominal, Math.floor(room / 3) * 3));
+      if (n < nominal) rail.style.blockSize = n + 'px';
+    }
 
     // the rail: a press on the lozenge grabs it where it is (no jump); a press elsewhere jumps
     // there; either way the value follows until lift. Capture released from three places, as
@@ -7983,6 +8006,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     };
     const setOpen = (o, { animate = true, save = true } = {}) => {
       if (!collapse || o === open && !morph.length) return;
+      if (o) fit();
       const still = !animate || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches;
       stop();
       if (save) { const was = open; open = o; store(); open = was; }
@@ -8096,7 +8120,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     };
     if (capture) document.addEventListener('keydown', onChord, true);
 
-    const resize = () => { if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
+    const resize = () => { fit(); if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
     window.addEventListener('resize', resize);
 
     const api = {
@@ -8106,6 +8130,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       reset,
       isOpen: () => open,
       morph: () => morph,   // the running timeline, for a test or a frame grab
+      fit,                  // .wm-zoom--down: re-measure the shift and the rail (themeStack.js calls it when the stack moves)
       setOpen: o => setOpen(!!o),
       destroy: () => {
         document.removeEventListener('pointerdown', outside); stop();
@@ -8158,18 +8183,29 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
  *
  *   <div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe">\u2026</div>
  *
- * Every .wm-theme-stack[data-hide] in the document at DOMContentLoaded is mounted; one rendered
+ * Every .wm-theme-stack with data-hide or data-below in the document at DOMContentLoaded is mounted; one rendered
  * later (React) is mounted by the host with wmThemeStack.mount(el) -- idempotent. data-hide is
  * a list, either word or both:
  *   scroll   scrolling DOWN hides it, scrolling UP shows it. Any vertical scroller counts (one
  *            capture-phase listener on the document, read passively), so the app's own text
  *            pane works without being named. A direction has to run 24px (eight units) before
- *            it counts, so a jitter does not flap it; within one stack's height of the top it
- *            always shows. data-scroller="selector" narrows it to that one scroller (a page
+ *            it counts, so a jitter does not flap it. Near the top it always shows: until the
+ *            content that was under the stack's REST footprint has scrolled past -- the
+ *            footprint's bottom less the scroller's top, in viewport px (the page's own
+ *            scroller: top 0). An inner scroller that starts below the stack stows it after
+ *            the run alone. data-scroller="selector" narrows it to that one scroller (a page
  *            with several, or a demo inside a page that scrolls).
  *   swipe    an upward swipe that STARTS ON THE STACK dismisses it: the stack follows the
  *            finger up, and past 24px (and clearly vertical) it goes; short of that it settles
- *            back. A tap in the top 27px of the screen, or a scroll up, brings it back.
+ *            back. A tap inside the stack's rest footprint (its column x its rest height, at
+ *            its rest top), or a scroll up, brings it back -- unless the host cancelled the
+ *            tap (preventDefault on its pointerup) before it reached the document.
+ * data-below="selector" (commas allowed): the stack rests UNDER the host's top chrome. The
+ * script takes the LOWEST bottom among every element the selector matches and writes
+ * --stack-top = that + 6px, rounded up to the 3px line, onto the stack; nothing matching, it
+ * removes it and the default (6px) stands. Re-measured on resize, orientation, a resize of a
+ * match, any change to the DOM (a row added or removed, a class flipped) and the end of a
+ * scroll. --stack-top by hand is the escape hatch for a host without a selector to give.
  * Hidden by scroll or swipe: data-stowed on the stack -- CSS translates it off the top edge
  * over 180ms on the house curve -- and inert, so focus cannot land on a mark nobody can see. Hiding folds an open
  * zoom inside it. Only while the stack is vertical: without the class nothing hides.
@@ -8182,7 +8218,6 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
  * Returns { el, hide, show, hidden, destroy } -- hide/show/hidden are the scroll/swipe state. */
 (() => {
   const RUN = 24;    // px a direction must run before it counts: eight units
-  const EDGE = 27;   // px: the top band a tap brings the stack back from
 
   function mount(el) {
     if (el.__wmThemeStack) return el.__wmThemeStack;
@@ -8208,6 +8243,36 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     const watch = new MutationObserver(sync);
     watch.observe(el, { attributes: true, attributeFilter: ['data-hidden'] });
     sync();
+
+    // DATA-BELOW: rest under the host's chrome (G82). One rect per match; cheap enough to run on
+    // any DOM change. Mutations inside the stack itself (the zoom's morph) are ignored.
+    const below = el.dataset.below;
+    let ro = null, mo = null, raf = 0, seen = [];
+    const place = () => {
+      raf = 0;
+      if (!below) return;
+      let bottom = -Infinity, matches = [];
+      try { matches = [...ROOT.querySelectorAll(below)]; } catch { return; }
+      for (const m of matches) { const r = m.getBoundingClientRect(); if (r.width || r.height) bottom = Math.max(bottom, r.bottom); }
+      if (bottom === -Infinity) el.style.removeProperty('--stack-top');
+      else el.style.setProperty('--stack-top', Math.ceil((Math.max(0, bottom) + 6) / 3) * 3 + 'px');
+      // observe the matches -- re-observing only when the set changed, since observe() itself fires once
+      if (ro && (matches.length !== seen.length || matches.some((m, i) => m !== seen[i]))) { ro.disconnect(); matches.forEach(m => ro.observe(m)); seen = matches; }
+      el.querySelectorAll('.wm-zoom').forEach(z => z.__wmZoom?.fit?.());
+    };
+    const replace = () => { if (!raf) raf = requestAnimationFrame(place); };
+    if (below) {
+      if ('ResizeObserver' in window) ro = new ResizeObserver(replace);
+      mo = new MutationObserver(list => { if (list.some(m => !el.contains(m.target))) replace(); });
+      mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'hidden', 'style'] });
+      window.addEventListener('resize', replace);
+      window.addEventListener('orientationchange', replace);
+      place();
+    }
+    // the REST footprint, in viewport px: where the stack sits when it is not stowed or dragged.
+    // offsetTop/Left of a fixed box ignore its translate, which is the point.
+    const rest = () => ({ top: el.offsetTop, bottom: el.offsetTop + el.offsetHeight, left: el.offsetLeft, right: el.offsetLeft + el.offsetWidth });
+
     const hide = () => { if (vertical()) paint(true); };
     const show = () => paint(false);
 
@@ -8216,8 +8281,9 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     const last = new WeakMap();   // the page's own scroller (or the named one) is primed, so its first scroll counts; any other is learnt on its first event
     const first = only ?? document.scrollingElement;
     if (first) last.set(first, first.scrollTop);
-    let run = 0;
+    let run = 0, settle = 0;
     const scrolled = e => {
+      if (below) { clearTimeout(settle); settle = setTimeout(replace, 120); }   // the end of a scroll: the chrome may have moved
       const t = e.target === document ? document.scrollingElement : e.target;
       if (!t || typeof t.scrollTop !== 'number' || (only && t !== only)) return;
       const top = t.scrollTop, prev = last.get(t);
@@ -8225,7 +8291,8 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       if (prev === undefined || top === prev) return;   // first sight, or a sideways scroll
       const d = top - prev;
       run = Math.sign(d) === Math.sign(run) ? run + d : d;
-      if (top <= el.offsetHeight) { if (hidden) show(); return; }
+      const under = Math.max(0, rest().bottom - (t === document.scrollingElement ? 0 : t.getBoundingClientRect().top));
+      if (top <= under) { if (hidden) show(); return; }
       if (run >= RUN && onScroll) hide();
       else if (run <= -RUN) show();                     // scroll up shows, in either mode
     };
@@ -8264,8 +8331,13 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     el.addEventListener('pointermove', move);
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', up);
-    // the way back: a tap in the top band. Read on the document, never cancelled.
-    const edge = e => { if (hidden && e.clientY <= EDGE && !el.contains(e.target)) show(); };   // not the lift that ended the swipe
+    // the way back: a tap inside the rest footprint. Read on the document, never cancelled here;
+    // a host that cancelled it first (its own control under the footprint) keeps it.
+    const edge = e => {
+      if (!hidden || e.defaultPrevented || el.contains(e.target)) return;   // not the lift that ended the swipe
+      const f = rest();
+      if (e.clientX >= f.left && e.clientX <= f.right && e.clientY >= f.top && e.clientY <= f.bottom) show();
+    };
     if (onSwipe) document.addEventListener('pointerup', edge, { passive: true });
 
     const api = {
@@ -8275,14 +8347,16 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
         document.removeEventListener('scroll', scrolled, { capture: true });
         document.removeEventListener('pointerup', edge);
         ['pointerdown', 'pointermove', 'pointerup', 'pointercancel'].forEach((ev, i) => el.removeEventListener(ev, [down, move, up, up][i]));
-        watch.disconnect(); paint(false); delete el.__wmThemeStack;
+        watch.disconnect(); ro?.disconnect(); mo?.disconnect(); cancelAnimationFrame(raf); clearTimeout(settle);
+        window.removeEventListener('resize', replace); window.removeEventListener('orientationchange', replace);
+        paint(false); delete el.__wmThemeStack;
       },
     };
     el.__wmThemeStack = api;
     return api;
   }
 
-  const auto = () => ROOT.querySelectorAll('.wm-theme-stack[data-hide]').forEach(el => mount(el));
+  const auto = () => ROOT.querySelectorAll('.wm-theme-stack:is([data-hide], [data-below])').forEach(el => mount(el));
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto);
   else auto();
   // the host's hide (G81): only the attribute; mounted or not, the CSS does the rest
