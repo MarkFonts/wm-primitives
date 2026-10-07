@@ -1,0 +1,57 @@
+<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><title>wmThemeStack contract</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css">
+<link rel="stylesheet" href="/dial/shared/src/space.css"><link rel="stylesheet" href="/dial/shared/src/icon.css">
+<link rel="stylesheet" href="/dial/shared/src/dialHandle.css">
+<link rel="stylesheet" href="/dial/shared/src/themeSwitch.css"><link rel="stylesheet" href="/dial/shared/src/zoomControl.css">
+<style>
+  /* the real face, from the package's own fonts/ (served as /dial/shared/fonts/) */
+  @font-face { font-family: 'Cal Sans'; src: url('/dial/shared/fonts/CalSansVF.woff2') format('woff2'); font-weight: 100 900; font-display: block; }
+  :root{--ui-font:'Cal Sans';--text-rgb:232,232,232}
+  :root[data-theme="light"]{--text-rgb:22,22,22}
+  body{background:var(--bg);color:var(--text);margin:0;font-family:'Cal Sans'}
+  /* the page: text from the top edge, so the floating stack overlaps it, as Mark allows */
+  #page{padding:12px 20px 1200px}
+  #page h1{font-size:36px;line-height:42px;font-weight:600;margin:0 0 12px}
+  #page p{font-size:18px;line-height:27px;margin:0 0 27px;color:var(--text-muted)}
+  /* THE DEMO OF THE RULE: the host puts the class on under its own phone query. CSS cannot add a
+     class, so it is matchMedia here (an app with a mobile render branch puts it in that branch). */
+</style></head><body>
+<div id="stack" class="wm-theme-stack" data-hide="scroll swipe">
+  <div class="wm-theme" role="group" aria-label="Colour scheme">
+    <button type="button" class="wm-icon-btn" data-mode="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
+    <button type="button" class="wm-icon-btn" data-mode="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
+    <button type="button" class="wm-icon-btn active" data-mode="dark" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
+  </div>
+  <div id="zoom" class="wm-zoom wm-zoom--down" data-collapse data-capture data-target="#page" data-key="wm-zoom-vstack" data-keys="local"></div>
+</div>
+<!-- the zoomed page pans sideways in its OWN box: if the document itself grew wider, mobile
+     Chromium would widen the layout viewport to it and the fixed stack would go with it (G80) -->
+<div id="pan" style="overflow-x:auto;overflow-y:hidden">
+<main id="page">
+  <h1>Hamburgefonstiv</h1>
+  <p>The quick brown fox jumps over the lazy dog. Sphinx of black quartz, judge my vow; pack my box with five dozen liquor jugs. The stack floats over this text, top right, with no bar behind it.</p>
+  <p>Second paragraph, on the 27px line. How vexingly quick daft zebras jump; the five boxing wizards jump quickly. Jackdaws love my big sphinx of quartz.</p>
+  <p>Third paragraph. Waltz, bad nymph, for quick jigs vex. Glib jocks quiz nymph to vex dwarf. Bright vixens jump; dozy fowl quack.</p>
+  <p>Fourth paragraph, enough to scroll. Quick zephyrs blow, vexing daft Jim. Two driven jocks help fax my big quiz.</p>
+</main>
+</div>
+<script>
+  // ?hide=scroll|swipe|"scroll swipe" (default both); ?theme=light
+  const q = new URLSearchParams(location.search), z = document.getElementById('zoom'), st = document.getElementById('stack');
+  if (q.has('hide')) st.dataset.hide = q.get('hide');
+  if (q.get('theme')) { document.documentElement.dataset.theme = q.get('theme');
+    st.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('active', b.dataset.mode === q.get('theme'))); }
+  // mobile only: the class follows the host's phone query
+  const phone = matchMedia('(max-width: 768px), (pointer: coarse)');
+  const orient = () => st.classList.toggle('wm-theme-stack--vertical', phone.matches);
+  orient(); phone.addEventListener('change', orient);
+</script>
+<script src="/dial/shared/src/zoomControl.js"></script>
+<script src="/dial/shared/src/themeStack.js"></script>
+<script>
+  document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
+    b.parentElement.querySelectorAll('[data-mode]').forEach(x => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+    document.documentElement.dataset.theme = b.dataset.mode;
+  }));
+</script></body></html>

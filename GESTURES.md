@@ -260,3 +260,29 @@ switch as `.wm-theme-stack` (themeSwitch.css). Prototyped on two scratch study p
 and should not. A pinch the browser handles before the page sees it (some platforms' "smart zoom"
 double-tap, iOS Safari's page pinch) is not intercepted. Browser zoom applied before the control
 mounted stays applied.
+
+## 13 · The theme stack, vertical
+
+`.wm-theme-stack--vertical` (themeSwitch.css) + `src/themeStack.js`: the phone's version of the
+theme + zoom cluster (Mark, 2026-10-07: "run them vertically … exclusively for mobile versions of
+font-proofer and gliffdiff"). The class is unconditional; the HOST puts it on under its own phone
+rule — `(max-width: 768px), (pointer: coarse)` — through its mobile render branch or a `matchMedia`,
+because CSS cannot add a class. Tested in `tests/behaviour/themeStack.spec.ts` against
+`tests/fixtures/theme-stack.html`, which does exactly that.
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G76 | the class on, any scroll or pan of the page | the three theme marks and the zoom's mark run **top to bottom**, `position: fixed` at `--spacing-02` from the top and `--spacing-04` from the right (past the safe areas), so the cluster never moves with the page; no bar, no ground (transparent, no image). Each target a 27px square, 33 on touch, on the 3px line, one right edge; the zoom's mark `--spacing-02` under the third; the zoom is `.wm-zoom--down` (G79), the stack's only layout. The chosen mark is the house active mark (G52): the PQ swatch on dark, full ink on light. Without the class the stack is the ordinary one and nothing hides | theme-stack-vertical |
+| G77 | `data-hide="scroll"`, a vertical scroll anywhere (or only in `data-scroller`) | **down** hides it — `data-stowed`, `inert`, translated off the top edge over 180ms on `cubic-bezier(0.2,0.7,0.2,1)` — **up** shows it. A direction must run **24px** (eight units) before it counts, so a jitter cannot flap it; within the stack's own height of the top it always shows. Read passively, one capture-phase listener; the scroll is never cancelled. Hiding folds an open zoom | theme-stack-vertical |
+| G78 | `data-hide="swipe"`, a pointer down **on the stack**, then up | clearly vertical (dy > 1.5 dx) the stack follows the finger upwards; lifted past **24px** it is dismissed, short of that it settles back. The press that became a swipe is not also a press on the mark it began on. A drag that starts on the zoom's rail is the rail's. Back: a tap in the top **27px** of the screen (read on the document, never cancelled), or a scroll up of 24px | theme-stack-vertical |
+| G79 | `.wm-zoom--down`, open | the vertical stack's zoom (Mark, 2026-10-07: down, and only down; `.wm-zoom--left` stays the horizontal row's, G70) opens **downwards** from its mark: the mark on top, then zoom_in, a 126px rail with **max at the top** (`aria-orientation="vertical"`, ArrowUp is +step), zoom_out at the foot; one column, the lozenge on its centre, not rotated, overhanging the column by half its excess. The box lies over the text below it, so nothing moves. The open morph (G67) is the same timeline: the glasses travel between measured centres, so they go down by themselves; only the rule's stretch, the lozenge's slide and the rail's mapping change axis | theme-stack-vertical |
+| G81 | the host sets `data-hidden` on the `.wm-theme-stack` (or calls `wmThemeStack.hide(el, true)`, which only sets it) | hidden **whatever the scroll or swipe say** — the same translate off the top edge, `inert`, an open zoom folded — for as long as the attribute is there; a scroll up or a top-edge tap does not bring it back. Removed (`wmThemeStack.hide(el, false)`), the stack is where the scroll state puts it: shown, unless a scroll down stowed it meanwhile. themeStack.js **never adds or removes** `data-hidden`; its own state is `data-stowed`. For a sheet or overlay that covers the corner (font-proofer's phone sheet). Without the class, the in-flow stack is `visibility: hidden` | theme-stack-vertical |
+| G80 | `data-capture`, a **touch** pinch over the region | it opens the shut control (with its morph) and drives the value, × the ratio of the fingers' distance to their distance at the second touch-down, from the value it began at — as a desktop pinch does (G74). iOS Safari: `gesturestart`/`gesturechange`, cancelled. Elsewhere (Chrome Android): two touch pointers; the region gets `touch-action: pan-x pan-y` and a two-touch `touchmove` is cancelled, so the browser never pinch-zooms first; one finger still scrolls. Never both: where gesture events exist, the pointers do not count. A touch on the region while open closes the control on **lift**, and not at all if a second finger came down, so a pinch never folds and reopens it. The native zoom never happens, so the fixed stack stays top right (`visualViewport.scale` stays 1). **The host's half:** the zoomed target pans sideways in its own box (`overflow-x: auto` on its parent); if the document itself grows wider, mobile Chromium widens the layout viewport to it and a fixed element moves with it — measured: the stack's right edge went from 363 to 551 at 150% | theme-stack-vertical |
+
+**Not promised (§13).** No gesture outside the stack is captured: a swipe on the text is the
+page's, and the top-edge tap also reaches whatever is under it. The zoom control's own capture
+(`data-capture`, G74–G75, G80) is unchanged by the stack. With capture **off**, a page pinch
+moves a fixed element with the layout viewport (iOS Safari especially); the stack does not track
+`visualViewport`. With capture on, a pinch that starts outside the region is still the browser's. A scroller
+other than the page (or `data-scroller`) is learnt on its first scroll event, so that one event
+does not count.

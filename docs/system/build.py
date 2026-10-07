@@ -158,7 +158,7 @@ PRIMITIVE_CSS = {
 # The same for scripts: a chapter that DEMONSTRATES a plain-script primitive runs the file
 # from src/, inlined ahead of its own code, so the demo is the shipped thing.
 PRIMITIVE_JS = {
-    "controls": ("dialHandle.js", "zoomControl.js"),
+    "controls": ("dialHandle.js", "zoomControl.js", "themeStack.js"),
 }
 # A part folded into a section (an extra source) names its primitives by file, and they are
 # scoped to the part alone -- the grid's roles demo needs type.css's .t-* classes and the

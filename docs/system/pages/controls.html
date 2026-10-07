@@ -649,6 +649,15 @@
 .zoom-sample h3{margin:0 0 var(--spacing-03, 8px);font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}
 .zoom-sample p{margin:0;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}
 .zoom-demo pre{margin:0;font:var(--type-micro-size, .5625rem)/1.6 ui-monospace, Menlo, monospace;color:var(--text-muted);white-space:pre-wrap}
+/* The vertical stack's chapter: two phone frames. The frame is transformed, so the stack's
+   position: fixed anchors to the FRAME (as it anchors to the viewport on a phone), and the
+   text scrolls in an inner box under it -- themeStack.js reads any scroller. */
+.vstack-demo{display:flex;flex-wrap:wrap;gap:var(--spacing-06, 24px);margin:8px 0 24px}
+.vstack-demo figure{margin:0;display:grid;gap:var(--spacing-03, 8px)}
+.vstack-phone{position:relative;transform:translateZ(0);width:300px;height:396px;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--bg)}
+.vstack-scroll{height:100%;overflow:auto;padding:12px 20px}
+.vstack-scroll h3{margin:0 0 12px;font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}
+.vstack-scroll p{margin:0 0 24px;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}
 </style>
 
 <h1>Five ways to draw one dial</h1>
@@ -807,6 +816,61 @@ keys       + or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; a
 the mark   shut: opens &middot; open: folds, keeps the zoom &middot; without data-collapse: back to 100
 the pill   press: back to 100 (it counts down and slides home) &middot; drag: drags</pre>
   <p class="chip-cap">Without <code>data-collapse</code> it is always open, the mark is only the reset, and it needs no stack</p>
+</div>
+
+<h2 class="marks-h">The theme stack, vertical</h2>
+<p class="lede">The phone&rsquo;s version of the cluster: Auto, Light, Dark and the zoom&rsquo;s mark,
+<b>top to bottom</b>, fixed to the top right of the screen so it never pans with the page, floating
+over the text with no bar and no ground. The chosen mark is the house active mark &mdash; the PQ
+swatch on a dark ground (HDR white; plain white on an SDR screen), full ink on light. Opt-in
+dismissal, <code>data-hide</code>: <b>scroll</b> hides it on the way down and shows it on the way up
+(24px before a direction counts); <b>swipe</b> dismisses it on an upward swipe that starts on it,
+and a tap at the top edge or a scroll up brings it back; both are on by default. A host that covers the corner sets <code>data-hidden</code> (or calls <code>wmThemeStack.hide(el, true)</code>) and the stack stays away until it is removed. The zoom opens <b>down</b> from its mark, and a pinch on the text (<code>data-capture</code>, touch too) opens it and drives it instead of zooming the page. <code>.wm-theme-stack--vertical</code>
+(themeSwitch.css), <code>src/themeStack.js</code>; GESTURES.md &sect;13.</p>
+<div class="vstack-demo">
+  <figure>
+    <div class="vstack-phone">
+    <div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe" data-scroller=".vstack-scroll--down">
+      <div class="wm-theme" role="group" aria-label="Colour scheme">
+        <button type="button" class="wm-icon-btn" data-theme-pick="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
+        <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
+        <button type="button" class="wm-icon-btn" data-theme-pick="dark" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
+      </div>
+      <div class="wm-zoom wm-zoom--down" data-collapse data-capture data-target=".vstack-sample--down" data-key="wm-system-zoom-down" data-keys="local"></div>
+    </div>
+    <div class="vstack-scroll vstack-scroll--down"><div class="vstack-sample--down">
+      <h3>Hamburgefonstiv</h3>
+      <p>The stack floats over this text with no bar behind it. Scroll down and it slides off the top; scroll up and it is back. Swipe up on it and it goes; a tap at the top edge returns it.</p>
+      <p>Second paragraph, so the box scrolls. Sphinx of black quartz, judge my vow; pack my box with five dozen liquor jugs.</p>
+      <p>Third paragraph. How vexingly quick daft zebras jump; the five boxing wizards jump quickly.</p>
+      <p>Fourth. Jackdaws love my big sphinx of quartz. Waltz, bad nymph, for quick jigs vex.</p>
+      <p>Fifth. Glib jocks quiz nymph to vex dwarf. Bright vixens jump; dozy fowl quack.</p>
+      <p>Sixth, the foot of the box. Quick zephyrs blow, vexing daft Jim. Two driven jocks help fax my big quiz.</p>
+    </div></div>
+    </div>
+    <figcaption class="chip-cap"><code>.wm-zoom--down</code>, the stack&rsquo;s only layout: the rail runs down from the mark, max at the top; the lozenge does not rotate. <code>data-capture</code>: pinch the text (trackpad or fingers) and it opens</figcaption>
+  </figure>
+</div>
+<div class="zoom-demo">
+  <p class="chip-cap">The markup &middot; the class is the HOST&rsquo;s to put on, under its own phone rule; CSS cannot add a class, so it is the app&rsquo;s mobile branch or a matchMedia</p>
+<pre>&lt;div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe"&gt;
+  &lt;div class="wm-theme" role="group" aria-label="Colour scheme"&gt;&hellip;the three marks&hellip;&lt;/div&gt;
+  &lt;div class="wm-zoom wm-zoom--down" data-collapse data-capture data-target="#page"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+const phone = matchMedia('(max-width: 768px), (pointer: coarse)')
+const orient = () =&gt; stack.classList.toggle('wm-theme-stack--vertical', phone.matches)
+orient(); phone.addEventListener('change', orient)
+
+data-hide       scroll | swipe | "scroll swipe"   (none: it stays)
+data-scroller   only this scroller counts (default: any vertical scroll on the page)
+data-hidden     the HOST's: hidden whatever the scroll says, until removed (a sheet over the corner)
+                wmThemeStack.hide(el, true | false) toggles just that; the script's own state is data-stowed
+wmThemeStack.mount(el)   for a stack rendered after load; returns .hide() .show() .hidden(), the scroll state
+events          wm-theme-stack (detail: { hidden }), bubbling
+marks           27px squares, 33 on touch &middot; the zoom's mark --spacing-02 under the third
+place           fixed, --spacing-02 from the top, --spacing-04 from the right, past the safe areas
+the target      pans sideways in its own overflow-x: auto box, or a phone widens the viewport and the stack moves</pre>
 </div>
 
 <script>

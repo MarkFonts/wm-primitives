@@ -114,6 +114,10 @@ export type {
 // fit_screen, applying CSS zoom to a target. <div class="wm-zoom" data-target="#page"> is
 // mounted at DOMContentLoaded, or wmZoom.mount(el). Under the theme switch it is the stacked
 // alternate, .wm-theme-stack (themeSwitch.css): one width, one right edge. GESTURES.md §12.
+// The phone's version, .wm-theme-stack--vertical (themeSwitch.css): the marks top to bottom,
+// fixed top right, no ground; the zoom inside opens down (.wm-zoom--down). Dismissal is
+// src/themeStack.js, a plain script (data-hide="scroll swipe", wmThemeStack.mount(el)).
+// The host puts the class on under its own phone rule. GESTURES.md §13.
 // The house chip (src/chip.css -- no JS to export): one of a set, every option visible,
 // the chosen one filled. .wm-chip / .wm-chip-row, --small, --switch, --chip-color. A chip
 // chooses; .wm-btn does. Kernpare's context dial and font-proofer's preset bar draw it.

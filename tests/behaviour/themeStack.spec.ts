@@ -1,0 +1,204 @@
+import { test, expect, type Page } from '@playwright/test'
+
+/* GESTURES.md §13 -- the vertical theme stack (themeSwitch.css .wm-theme-stack--vertical) and
+   its dismissal (src/themeStack.js), with the zoom inside it as .wm-zoom--left or --down.
+   Fixture: tests/fixtures/theme-stack.html -- the stack over text, the class put on by the
+   page's own phone query (max-width: 768px, or a coarse pointer), as a host does it. Every
+   test runs at 375 x 812, so the desktop project is a narrow window and the phones are phones. */
+const stack = '#stack'
+const rect = (page: Page, sel: string) => page.evaluate(s => { const r = document.querySelector(s)!.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, r: r.right, b: r.bottom } }, sel)
+const hidden = (page: Page) => page.evaluate(s => document.querySelector(s)!.hasAttribute('data-stowed'), stack)
+const frames = (page: Page) => page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))))
+const scrollBy = async (page: Page, dy: number) => { await page.evaluate(d => window.scrollBy(0, d), dy); await frames(page) }
+/* a pointer gesture on the stack, as events: WebKit cannot be handed a touch drag (EVAL.md) */
+const swipe = (page: Page, from: { x: number, y: number }, dy: number, steps = 6) => page.evaluate(([x, y, dy, steps]) => {
+  const at = (yy: number) => document.elementFromPoint(x, yy) ?? document.body
+  const ev = (type: string, yy: number, t: Element) => t.dispatchEvent(new PointerEvent(type, { pointerId: 7, pointerType: 'touch', isPrimary: true, clientX: x, clientY: yy, bubbles: true, cancelable: true, composed: true }))
+  const t0 = at(y)
+  ev('pointerdown', y, t0)
+  for (let i = 1; i <= steps; i++) ev('pointermove', y + dy * i / steps, t0)
+  ev('pointerup', y + dy, t0)
+  t0.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: x, clientY: y + dy }))
+}, [from.x, from.y, dy, steps] as const)
+
+const open = async (page: Page, qs = '') => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.goto('/dial/theme-stack.html' + qs)
+  await page.evaluate(() => { try { localStorage.clear() } catch {} })
+  await page.reload()
+  await page.evaluate(() => document.fonts.ready)
+}
+
+test('G76 · vertical: fixed top right, marks top to bottom, no ground, targets on the line', async ({ page }) => {
+  await open(page, '?hide=')
+  await expect(page.locator(stack)).toHaveClass(/wm-theme-stack--vertical/)
+  const cs = await page.evaluate(s => { const c = getComputedStyle(document.querySelector(s)!); return { pos: c.position, bg: c.backgroundColor, img: c.backgroundImage } }, stack)
+  expect(cs.pos).toBe('fixed')
+  expect(cs.bg).toBe('rgba(0, 0, 0, 0)')
+  expect(cs.img).toBe('none')
+  const marks = await page.evaluate(() => [...document.querySelectorAll('#stack .wm-theme .wm-icon-btn, #zoom .wm-zoom-toggle')].map(b => { const r = b.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, r: r.right } }))
+  expect(marks).toHaveLength(4)
+  for (let i = 0; i < marks.length; i++) {
+    expect(marks[i].w).toBeGreaterThanOrEqual(27); expect(marks[i].h).toBeGreaterThanOrEqual(27)
+    expect(marks[i].w % 3).toBe(0); expect(marks[i].h % 3).toBe(0)
+    expect(Math.abs(marks[i].r - marks[0].r)).toBeLessThan(0.5)          // one right edge
+    if (i) expect(marks[i].y).toBeGreaterThanOrEqual(marks[i - 1].y + marks[i - 1].h - 0.5)   // top to bottom, no overlap
+  }
+  expect(375 - marks[0].r).toBe(12)   // --spacing-04 from the right edge
+  // the chosen mark is the house active mark: the PQ swatch, clipped to the glyph (dark ground)
+  const paint = await page.evaluate(() => { const c = getComputedStyle(document.querySelector('#stack .active .wm-icon')!); return { clip: c.backgroundClip || (c as any).webkitBackgroundClip, img: c.backgroundImage } })
+  expect(paint.img).toContain('image/avif')
+  // and it stays put when the page scrolls under it ("not move with the page as I pan")
+  const before = await rect(page, stack)
+  await scrollBy(page, 300)
+  expect(await rect(page, stack)).toEqual(before)
+})
+
+test('G76 · without the phone query the stack is the ordinary one', async ({ page, hasTouch }) => {
+  test.skip(hasTouch, 'a coarse pointer always matches the query')
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.goto('/dial/theme-stack.html')
+  await expect(page.locator(stack)).not.toHaveClass(/wm-theme-stack--vertical/)
+  await scrollBy(page, 600)
+  expect(await hidden(page)).toBe(false)   // nothing hides unless it is vertical
+})
+
+test('G77 · data-hide="scroll": down hides past the threshold, a jitter does not, up shows', async ({ page }) => {
+  await open(page, '?hide=scroll')
+  await scrollBy(page, 200)                               // past the stack's own height
+  expect(await hidden(page)).toBe(true)
+  await expect(page.locator(stack)).toHaveJSProperty('inert', true)
+  await scrollBy(page, -10); await scrollBy(page, 10); await scrollBy(page, -10)   // jitter: under 24px a way
+  expect(await hidden(page)).toBe(true)
+  await scrollBy(page, -30)
+  expect(await hidden(page)).toBe(false)
+  await scrollBy(page, 10); await scrollBy(page, 10)      // 20px down: under the run
+  expect(await hidden(page)).toBe(false)
+  await scrollBy(page, 10)                                // 30: over it
+  expect(await hidden(page)).toBe(true)
+  // the CSS: translated off the top edge
+  await page.waitForTimeout(300)
+  expect((await rect(page, stack)).b).toBeLessThanOrEqual(0)
+  await page.evaluate(() => window.scrollTo(0, 0)); await frames(page)
+  expect(await hidden(page)).toBe(false)                  // at the top it always shows
+})
+
+test('G78 · data-hide="swipe": up on the stack dismisses; short settles; the press is not a theme pick; top-edge tap returns', async ({ page }) => {
+  await open(page, '?hide=swipe')
+  const light = await rect(page, '#stack [data-mode="light"]')
+  const from = { x: light.x + light.w / 2, y: light.y + light.h / 2 }
+  await swipe(page, from, -12)                            // short: settles back
+  expect(await hidden(page)).toBe(false)
+  await swipe(page, from, -40)
+  expect(await hidden(page)).toBe(true)
+  expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe('dark')   // the swipe did not pick Light
+  await scrollBy(page, 300)                               // scroll-hide is off: down does nothing more
+  expect(await hidden(page)).toBe(true)
+  await page.evaluate(() => { const t = document.querySelector('main')!; document.dispatchEvent(new PointerEvent('pointerup', { clientX: 100, clientY: 400, bubbles: true })); t.dispatchEvent(new PointerEvent('pointerup', { clientX: 100, clientY: 400, bubbles: true })) })
+  expect(await hidden(page)).toBe(true)                   // a tap below the band does nothing
+  await page.evaluate(() => document.querySelector('main')!.dispatchEvent(new PointerEvent('pointerup', { clientX: 200, clientY: 10, bubbles: true })))
+  expect(await hidden(page)).toBe(false)
+  await swipe(page, from, -40)
+  await scrollBy(page, -40)                               // scroll up also brings it back
+  expect(await hidden(page)).toBe(false)
+})
+
+test('G78 · a drag on the zoom rail is the rail\'s, not a swipe; hiding folds an open zoom', async ({ page }) => {
+  await open(page, '?hide=scroll%20swipe')
+  await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.setOpen(true))
+  await page.waitForTimeout(700)
+  const r = await rect(page, '#zoom .wm-hd-rail')
+  await swipe(page, { x: r.x + r.w / 2, y: r.b - 4 }, -60)
+  expect(await hidden(page)).toBe(false)
+  await scrollBy(page, 300)
+  expect(await hidden(page)).toBe(true)
+  await expect(page.locator('#zoom')).toHaveAttribute('data-open', 'false')
+})
+
+test('G79 · .wm-zoom--down: the rail runs down, max at the top; the box lies over the text', async ({ page }) => {
+  await open(page, '?hide=')
+  const z = (s: string) => page.evaluate(s => eval(s), s)
+  const page0 = await rect(page, 'main p')
+  await page.locator('#zoom .wm-zoom-toggle').click()
+  await page.waitForTimeout(700)
+  await expect(page.locator('#zoom')).toHaveAttribute('data-open', 'true')
+  const rail = page.locator('#zoom [role="slider"]')
+  await expect(rail).toHaveAttribute('aria-orientation', 'vertical')
+  const mark = await rect(page, '#zoom .wm-zoom-toggle'), inB = await rect(page, '#zoom [aria-label="Zoom in"]'), r = await rect(page, '#zoom .wm-hd-rail'), outB = await rect(page, '#zoom [aria-label="Zoom out"]')
+  expect(inB.y).toBeGreaterThan(mark.y); expect(r.y).toBeGreaterThan(inB.y); expect(outB.y).toBeGreaterThan(r.y)
+  expect(Math.abs(inB.x - mark.x)).toBeLessThan(0.5)      // one column
+  expect(r.h % 3).toBe(0)
+  expect(await rect(page, 'main p')).toEqual(page0)       // nothing moved
+  // a press near the top is near max; near the bottom near min
+  await page.evaluate(([x, y]) => { const rl = document.querySelector('#zoom .wm-hd-rail')!; rl.dispatchEvent(new PointerEvent('pointerdown', { clientX: x, clientY: y, bubbles: true, pointerId: 3 })); rl.dispatchEvent(new PointerEvent('pointerup', { clientX: x, clientY: y, bubbles: true, pointerId: 3 })) }, [r.x + r.w / 2, r.y + 2])
+  expect(await z(`document.querySelector('#zoom').__wmZoom.get()`)).toBeGreaterThanOrEqual(380)
+  const hi = await rect(page, '#zoom .wm-hd-pill')
+  await rail.focus(); await page.keyboard.press('Home')
+  expect(await z(`document.querySelector('#zoom').__wmZoom.get()`)).toBe(50)
+  const lo = await rect(page, '#zoom .wm-hd-pill')
+  expect(lo.y).toBeGreaterThan(hi.y + 60)                 // min is down the rail
+  await page.keyboard.press('ArrowUp')
+  expect(await z(`document.querySelector('#zoom').__wmZoom.get()`)).toBe(60)
+  expect(Math.abs((lo.x + lo.w / 2) - (mark.x + mark.w / 2))).toBeLessThan(0.5)   // the lozenge rides the column's centre
+})
+
+/* a two-finger pinch over the target, as events. Where the engine has gesture events (WebKit:
+   iOS Safari) the control reads those, else two touch pointers; the test sends the kind it reads. */
+const pinch = (page: Page, scale: number) => page.evaluate(async scale => {
+  const t = document.getElementById('page')!, cx = 180, cy = 300, d0 = 60
+  const frame = () => new Promise(r => requestAnimationFrame(r))
+  if ('ongesturestart' in window) {
+    const g = (type: string, s: number) => { const e = new Event(type, { bubbles: true, cancelable: true }); Object.defineProperty(e, 'scale', { value: s }); t.dispatchEvent(e); return e.defaultPrevented }
+    const pd = [g('gesturestart', 1)]
+    for (let i = 1; i <= 8; i++) { pd.push(g('gesturechange', 1 + (scale - 1) * i / 8)); await frame() }
+    g('gestureend', scale)
+    return pd.every(Boolean)
+  }
+  const p = (type: string, id: number, x: number) => { const e = new PointerEvent(type, { pointerId: id, pointerType: 'touch', isPrimary: id === 1, clientX: x, clientY: cy, bubbles: true, cancelable: true }); t.dispatchEvent(e); return e.defaultPrevented }
+  p('pointerdown', 1, cx - d0 / 2); p('pointerdown', 2, cx + d0 / 2)
+  const pd: boolean[] = []
+  for (let i = 1; i <= 8; i++) { const d = d0 * (1 + (scale - 1) * i / 8); pd.push(p('pointermove', 1, cx - d / 2)); pd.push(p('pointermove', 2, cx + d / 2)); await frame() }
+  p('pointerup', 1, cx - d0 * scale / 2); p('pointerup', 2, cx + d0 * scale / 2)
+  return pd.slice(1).every(Boolean)
+}, scale)
+
+test('G80 · a touch pinch over the target opens the vertical control and drives it; the page does not zoom, the stack stays put', async ({ page }) => {
+  await open(page, '?hide=')
+  expect(await page.evaluate(() => getComputedStyle(document.getElementById('page')!).touchAction)).toBe('pan-x pan-y')
+  const before = await rect(page, stack)
+  await expect(page.locator('#zoom')).toHaveAttribute('data-open', 'false')
+  expect(await pinch(page, 1.5)).toBe(true)                // every step cancelled: no native zoom
+  await expect(page.locator('#zoom')).toHaveAttribute('data-open', 'true')
+  expect(await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.get())).toBe(150)
+  expect(await page.evaluate(() => document.getElementById('page')!.style.zoom)).toBe('1.5')
+  await page.waitForTimeout(700)
+  expect(await page.evaluate(() => window.visualViewport?.scale ?? 1)).toBe(1)
+  expect(await rect(page, stack)).toEqual(before)
+  await pinch(page, 0.5)                                    // a second pinch, while open, from 150: no close-and-reopen
+  await expect(page.locator('#zoom')).toHaveAttribute('data-open', 'true')
+  expect(await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.get())).toBe(80)
+})
+
+test('G81 · the host\'s data-hidden forces it hidden over scroll; removed, the scroll state stands; the script never touches it', async ({ page }) => {
+  await open(page, '?hide=scroll%20swipe')
+  const attr = () => page.evaluate(s => document.querySelector(s)!.hasAttribute('data-hidden'), stack)
+  await page.evaluate(s => document.querySelector(s)!.setAttribute('data-hidden', ''), stack)
+  await page.waitForTimeout(300)
+  expect((await rect(page, stack)).b).toBeLessThanOrEqual(0)                  // off the top edge
+  await expect(page.locator(stack)).toHaveJSProperty('inert', true)
+  await scrollBy(page, 300); await scrollBy(page, -60)                         // down then up: the scroll state says shown
+  expect(await hidden(page)).toBe(false)
+  expect(await attr()).toBe(true)                                              // ... and the host's hide holds
+  await page.waitForTimeout(300)
+  expect((await rect(page, stack)).b).toBeLessThanOrEqual(0)
+  await page.evaluate(s => (window as any).wmThemeStack.hide(document.querySelector(s), false), stack)
+  expect(await attr()).toBe(false)
+  await page.waitForTimeout(300)
+  expect((await rect(page, stack)).y).toBeGreaterThan(0)                       // shown: what the scroll says
+  await expect(page.locator(stack)).toHaveJSProperty('inert', false)
+  await page.evaluate(s => (window as any).wmThemeStack.hide(document.querySelector(s), true), stack)
+  await scrollBy(page, 300)                                                    // a scroll-down stows it under the host's hide
+  await page.evaluate(s => (window as any).wmThemeStack.hide(document.querySelector(s), false), stack)
+  expect(await hidden(page)).toBe(true)                                        // removed: still hidden, by the scroll
+  expect(await attr()).toBe(false)
+})

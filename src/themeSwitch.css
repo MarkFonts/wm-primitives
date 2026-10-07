@@ -50,3 +50,51 @@
     :is(.wm-theme-stack, .wm-theme-row) > .wm-theme .wm-icon-btn { min-inline-size: 0; min-block-size: 0; }
   }
 }
+
+/* THE VERTICAL STACK (.wm-theme-stack--vertical) -- the phone's version (Mark, 2026-10-07):
+   the three marks top to bottom, the zoom's mark under them, FIXED to the viewport's top
+   right so it never pans with the page, floating over the text with no bar and no ground.
+   The chosen mark is the house active mark (icon.css): the PQ swatch on a dark ground, full
+   ink on light; the rest sit at the rest rung.
+
+     <div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe">
+       <div class="wm-theme" role="group" aria-label="Colour scheme">…three .wm-icon-btn…</div>
+       <div class="wm-zoom wm-zoom--down" data-collapse data-capture data-target="#page"></div>
+     </div>
+
+   MOBILE ONLY, BY THE HOST. The class is unconditional here; the app puts it on where its own
+   phone layout begins -- `@media (max-width: 768px), (pointer: coarse)`, as matchMedia, or the
+   mobile render branch it already has (ADOPT, docs). The zoom inside collapses (data-collapse)
+   and opens DOWN from its mark, .wm-zoom--down -- the only layout here (Mark, 2026-10-07);
+   .wm-zoom--left stays the horizontal row's. data-capture makes a pinch on the text drive it,
+   touch included, and keeps the browser from zooming the page out from under the stack. Marks are 27px squares, 33 on touch; the zoom's mark --spacing-02 under
+   the third: 4 x 33 + 6 = 138px on a phone, forty-six units.
+   Dismissal is opt-in, data-hide on the stack: themeStack.js, GESTURES.md §13. */
+@layer wm.controls {
+  .wm-theme-stack--vertical {
+    position: fixed;
+    inset-block-start: max(var(--spacing-02, 6px), env(safe-area-inset-top, 0px));
+    inset-inline-end: max(var(--spacing-04, 12px), env(safe-area-inset-right, 0px));
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    row-gap: var(--spacing-02, 6px);
+    background: none;
+    /* the swipe is the stack's own (themeStack.js); the page's pan never starts on it */
+    touch-action: none;
+    transition: translate 180ms cubic-bezier(0.2, 0.7, 0.2, 1);   /* token-lint: allow -- between --dur-fast and --dur-med, Mark's 150-200; the house easing, as zoomControl.js's EASE */
+  }
+  .wm-theme-stack--vertical > .wm-theme { flex-direction: column; gap: 0; }
+  .wm-theme-stack--vertical > :first-child { min-block-size: 0; }
+  /* HIDDEN: off the top edge, past the safe area too. Two causes, two attributes, either hides:
+     data-stowed   themeStack.js's own -- scroll or swipe (G77, G78); never set by a host
+     data-hidden   the HOST's (G81): forces it hidden whatever the scroll says, for as long as it
+                   is there (a sheet over the corner). themeStack.js never adds or removes it, so
+                   removing it leaves the stack wherever data-stowed says. */
+  .wm-theme-stack--vertical:is([data-stowed], [data-hidden]) { translate: 0 calc(-100% - var(--spacing-08, 48px)); pointer-events: none; }
+  .wm-theme-stack[data-hidden]:not(.wm-theme-stack--vertical) { visibility: hidden; }   /* the in-flow stack has no edge to leave by */
+  /* a swipe in progress: the stack follows the finger, upwards only (--stack-drag, a length <= 0) */
+  .wm-theme-stack--vertical[data-dragging] { translate: 0 var(--stack-drag, 0px); transition: none; }
+  @media (prefers-reduced-motion: reduce) { .wm-theme-stack--vertical { transition: none; } }
+}
