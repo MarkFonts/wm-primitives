@@ -149,7 +149,8 @@ test.describe('font-proofer · the app around the primitive', () => {
     await expect(page.locator('.upload-name')).toHaveText(/DMSans/)
     await settle(page)
     expect((await registered()).sort()).toEqual(['DMSansPreview:normal', 'GoogleSansFlexPreview:normal'])
-    await expect(page.locator('.face-tile')).toHaveCount(2)
+    /* the palette's "+" tile (`.face-tile--add`, holding the second file input) is a .face-tile too */
+    await expect(page.locator('.face-tile:not(.face-tile--add)')).toHaveCount(2)
     await expect(page.locator('.roman-italic-toggle')).toHaveCount(0)
 
     /* A fresh page, so the set above does not take part in the pairing below. */
