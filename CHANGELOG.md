@@ -22,7 +22,7 @@ steps, the homepage headline's sizing, set page-local (`.hero-lede`; type.css ha
 display's 45/51 is not a multiple of 24). The other option, a notes lead that divides 27, only
 exists at 9, which is too tight to read. First baselines still meet; the eyebrow and labels stay
 outside the safe area (check 12 passes). The `KNOWN` entry is gone; the hero is now a passing
-example, 7 lines where there were 4, which is what 45px costs.
+example, nine lines at 1440 where there were four, which is what 45px costs.
 
 ## 2026-10-06 -- the row step: sized leads, folio elements on the step
 
