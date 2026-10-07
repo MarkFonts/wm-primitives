@@ -27,6 +27,21 @@ import { resolve } from 'node:path'
         unless the unit is data-baseline="free". The row rule (2) aligns siblings of a
         .wm-baselines grid; nothing held the text INSIDE one component together, and a rail
         row's value field drifted below its label with every other check green.
+     7. a row shares its lines: in a .wm-baselines row of side-by-side text that wraps (roles
+        body and up, in two items or more), the smallest text lead is the row's STEP, and every
+        baseline of a larger-lead block lands on the step's lines from the row's shared first
+        baseline -- the larger text is sized so its lead is a whole multiple (Mark 2026-10-06).
+        A design rule, not a runtime one: nothing rewrites a leading, this reports.
+     8. folio elements sit on the row step: in such a row, every box that is not text (a rule, a
+        dot, a figure's top, a folio mark; not data-nosnap, not data-baseline="free") has its top
+        or its centre on a multiple of the step from that baseline, within 0.5px, and gridSnap
+        published the step as --row-step on the row's items.
+        Annotation roles (micro, ui, label) and one-line blocks are not part of a step.
+     9. text keeps one step of white: the text just above a title (a heading at 24px and up)
+        in its column has its last baseline at least one step above the big text's first
+        x-height, and the text just below has its first x-height at least one step under the
+        title's last baseline. The step is the row's, or body's lead; x-heights are measured
+        from pixels (xHeights, below).
    It judges window.wmGridSnap.blocks, exactly what the snapper judged, so ornaments placed
    on purpose (a pill's arrow, a deck counter) drop out by the same rule that skips them,
    not by a list kept here. */
@@ -48,7 +63,24 @@ const PAGES = [
   // Columns that ARE text blocks, with different leads: each carries its own baseline nudge as
   // a `top`, so a row is only found if it is grouped by the box, before the nudge.
   { name: 'row of unlike leads fixture', url: '/dial/grid-row.html' },
+  // The row step: a 45/48 headline beside a 12/24 caption with its rule one step up, the
+  // exemptions, and two negative cases (data-expect-offender) the test below holds to account.
+  { name: 'row step fixture', url: '/dial/grid-step.html' },
 ]
+/* KNOWN OFFENDERS of checks 7 and 8, by page and row selector: reported in the log, not failed.
+   Each says why and what removes it. Keep this list short; an entry is a debt, not a waiver. */
+const KNOWN: Record<string, { row: string; why: string }[]> = {
+  // The hero is a 30/39 lede beside a 16/27 sub: 39 is not a multiple of 27. Mark kept the lede
+  // at 39 for now (Cal Sans's short ascenders look spaced out at 54, 2026-10-06); the case study
+  // re-sizes its hero to a multiple of its sub's lead, and this entry goes.
+  'Cal Sans case study': [{ row: '.hero-cols', why: 'lede 39 beside sub 27 until the case study re-sizes its hero' }],
+  // The bench's hero is the case study's, drawn small: a lede (27) beside body notes (24). It
+  // changes with the case study's hero, so the two keep showing the same thing.
+  'grid demo': [{ row: 'main > .wm-grid.wm-baselines', why: 'lede 27 beside notes 24, the case-study hero in miniature' }],
+  // The work rows on wordmark main are a 36/39 headline beside a 14/24 caption. The 45/48 sizing
+  // is decided (2026-10-06) and not yet shipped; wordmark's work-row change removes this entry.
+  'homepage': [{ row: '.work-item', why: 'headline 39 beside caption 24 until wordmark ships the 45/48 headline' }],
+}
 // 1024 is where the 24 columns begin (grid.css) and where the Cal Sans hero's two columns first
 // share a row; 900 is below it, 1440 above.
 const WIDTHS = [1440, 1024, 900, 390]
@@ -153,6 +185,187 @@ const UNITS = () => {   // runs in the page; stringified below
   return { units, runs, off }
 }
 
+const ROWS = (known: string[]) => {   // runs in the page; stringified below
+  /* THE ROW STEP (src/gridSnap.js). Rows are grouped as the snapper groups them (the box top less
+     grid.css's nudge). A block counts toward a row's step if it is a measured text block in a
+     text role -- not .t-micro/.t-ui/.t-label, a leading no smaller than body's (--lead-body
+     resolved in the root), not inside a --snap-unit component -- that wraps. A row with such
+     blocks in two items or more has a step: the smallest of their leads.
+       lines: every counted block with a larger lead has every baseline on the step's lines,
+              extended both ways from the row's shared first baseline;
+       step:  every non-text box in the row has its top or its centre on those lines, and each
+              item carries the step as --row-step.
+     A row that matches a `known` selector, or sits in [data-expect-offender], is reported but
+     excused; the fixture test asserts its expected offenders ARE found. */
+  const snap = (window as any).wmGridSnap, blocks = snap.blocks as Element[]
+  const probe = document.createElement('span'); probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline'
+  const first = (el: Element) => { const t = snap.firstLine(el) as Node; if (!t) return NaN; t.parentNode!.insertBefore(probe, t); const y = probe.getBoundingClientRect().top; probe.remove(); return y }
+  const name = (e: Element) => `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : '.' + (e.getAttribute('class') || '').split(' ')[0]}` + ((e.textContent || '').trim() ? ` "${(e.textContent || '').trim().slice(0, 20)}"` : '')
+  const rowName = (b: Element) => `${b.tagName.toLowerCase()}${b.id ? '#' + b.id : '.' + (b.getAttribute('class') || '').split(' ')[0]}`
+  const out: { kind: 'lines' | 'step'; row: string; msg: string; excused: string }[] = []
+  const hasText = (e: Element) => { const w = document.createTreeWalker(e, NodeFilter.SHOW_TEXT, { acceptNode: n => n.textContent!.trim() ? 1 : 3 }); return !!w.nextNode() }
+  const off = (L: number, y0: number, y: number) => { const m = (((y - y0) % L) + L) % L; return Math.min(m, L - m) }
+  let rows = 0, judged = 0, marks = 0
+  for (const root of document.querySelectorAll('.wm-lines')) {
+    const d = document.createElement('div'); d.style.cssText = 'position:absolute;visibility:hidden;height:0;padding:0;border:0;font-size:var(--type-body-size,1rem);line-height:var(--lead-body,24px)'
+    root.appendChild(d); const body = parseFloat(getComputedStyle(d).lineHeight) || 24; d.remove()
+    const lead = (el: Element) => {
+      if (el.closest('.t-micro, .t-ui, .t-label') || getComputedStyle(el).getPropertyValue('--snap-unit').trim() === '1') return 0
+      const lh = parseFloat(getComputedStyle(el).lineHeight); if (!lh || lh < body - 0.5) return 0
+      return snap.lines(el, lh) > 1 ? lh : 0   // from the text: a grid item's box is stretched to its row
+    }
+    for (const box of root.querySelectorAll('.wm-baselines')) {
+      if (box.closest('[data-nosnap]')) continue
+      const excused = known.find(k => box.matches(k)) ?? (box.closest('[data-expect-offender]') ? 'data-expect-offender' : '')
+      const byTop = new Map<number, Element[]>()
+      for (const c of box.children) { const r = c.getBoundingClientRect(); if (!r.height) continue; const cs = getComputedStyle(c); const k = Math.round(r.top - (cs.position === 'relative' ? parseFloat(cs.top) || 0 : 0)); const key = [...byTop.keys()].find(x => Math.abs(x - k) <= 1) ?? k; (byTop.get(key) ?? byTop.set(key, []).get(key)!).push(c) }
+      for (const items of byTop.values()) {
+        if (items.length < 2) continue
+        const found = items.map(c => blocks.filter(el => c === el || c.contains(el)).map(el => [el, lead(el)] as [Element, number]).filter(b => b[1]))
+        if (found.filter(f => f.length).length < 2) continue
+        rows++
+        const L = Math.min(...found.flat().map(b => b[1])), small = found.flat().find(b => b[1] === L)![0]
+        // the row's shared first baseline: the first block of an item that meets the row by its first line
+        const lead0 = items.filter(c => c.getAttribute('data-baseline') !== 'last').map(c => blocks.find(el => c === el || c.contains(el))).find(Boolean)
+        const y0 = first(lead0 ?? small)
+        const push = (kind: 'lines' | 'step', msg: string) => out.push({ kind, row: rowName(box), msg, excused })
+        // LINES: a larger lead is a multiple of the step, and its lines are the step's
+        for (const [el, lh] of found.flat()) {
+          if (lh <= L + 0.01) continue
+          judged++
+          const n = snap.lines(el, lh), y = first(el)
+          const bad = Array.from({ length: n }, (_, k) => y + k * lh).filter(b => off(L, y0, b) > 0.5)
+          if (bad.length) push('lines', `${name(el)} at ${lh}px beside ${name(small)} at ${L}px: ${bad.length} of ${n} lines off the step` + (Math.abs(lh / L - Math.round(lh / L)) > 0.01 ? ` (${lh} is not a multiple of ${L})` : ` (first baseline ${(y - y0).toFixed(1)}px from the row's)`))
+        }
+        // STEP: the step is published, and the row's non-text boxes sit on it
+        for (const c of items) {
+          const v = parseFloat((c as HTMLElement).style.getPropertyValue('--row-step'))
+          if (Math.abs((v || 0) - L) > 0.01) push('step', `${name(c)} carries --row-step ${(c as HTMLElement).style.getPropertyValue('--row-step') || 'none'}, the row's step is ${L}px`)
+          const walk = (e: Element) => {
+            if (e.matches('[data-nosnap], [data-baseline="free"], script, style, br, wbr')) return
+            const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden') return
+            if (hasText(e)) { for (const k of e.children) walk(k); return }
+            if (cs.display === 'inline' || e.closest('svg') !== null && e.tagName.toLowerCase() !== 'svg') return
+            const r = e.getBoundingClientRect()
+            if (r.width < 0.5 || r.height < 0.5) { for (const k of e.children) walk(k); return }
+            marks++
+            const t = off(L, y0, r.top), m = off(L, y0, (r.top + r.bottom) / 2)
+            if (Math.min(t, m) > 0.51) push('step', `${name(e)} top at ${(r.top - y0).toFixed(1)}px, centre at ${((r.top + r.bottom) / 2 - y0).toFixed(1)}px from the row's first baseline: off its ${L}px step by ${Math.min(t, m).toFixed(1)}px`)
+          }
+          walk(c)
+        }
+      }
+    }
+  }
+  return { rows, judged, marks, out }
+}
+
+const SAFE = () => {   // runs in the page; stringified below
+  /* TEXT KEEPS ONE STEP OF WHITE (the safe area). Big text is a TITLE: a measured heading
+     (h1-h6) set at 24px or more, never an annotation (.t-micro, .t-ui, .t-label). A specimen or
+     a figure set big in a <p> (a role sample, a card's numeral over its caption) is not a title
+     and keeps its own spacing. Its step is the --row-step of the row it sits in, or else body's lead.
+     The text just above it in its column (the nearest measured block that overlaps it
+     horizontally and whose last baseline is above its first) must have its last baseline at
+     least one step above the big text's first x-height; the text just below must have its
+     first x-height at least one step under the big text's last baseline. Rules, dots and figures are not text: check 8 places
+     them. Returns the geometry; the x-heights are measured from pixels by the caller. */
+  const snap = (window as any).wmGridSnap, blocks = (snap.blocks as Element[]).filter(e => !e.closest('[data-nosnap]'))
+  const probe = document.createElement('span'); probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline'
+  const at = (t: Node, after = false) => { after ? t.parentNode!.insertBefore(probe, t.nextSibling) : t.parentNode!.insertBefore(probe, t); const y = probe.getBoundingClientRect().top; probe.remove(); return y }
+  const lastText = (el: Element) => { const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => n.textContent!.trim() ? 1 : 3 }); let t, l = null; while ((t = w.nextNode())) l = t; return l }
+  const name = (e: Element) => `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : (e.getAttribute('class') ? '.' + e.getAttribute('class')!.split(' ')[0] : '')} "${(e.textContent || '').trim().slice(0, 20)}"`
+  const keyOf = (e: Element) => { const c = getComputedStyle(e); return [c.fontFamily, c.fontSize, c.fontWeight, c.fontStyle, c.fontStretch, c.fontVariationSettings, c.fontOpticalSizing].join('|') }
+  const sample: Record<string, string> = {}
+  const tag = (e: Element) => { const k = keyOf(e); if (!(k in sample)) { e.setAttribute('data-xh-sample', String(Object.keys(sample).length)); sample[k] = String(Object.keys(sample).length) } return sample[k] }
+  const ANN = '.t-micro, .t-ui, .t-label'
+  const geo = (e: Element) => { const rg = document.createRange(); rg.selectNodeContents(e); const rs = [...rg.getClientRects()].filter(r => r.width > 0 && r.height > 0); return rs.length ? { left: Math.min(...rs.map(r => r.left)), right: Math.max(...rs.map(r => r.right)), top: Math.min(...rs.map(r => r.top)), bottom: Math.max(...rs.map(r => r.bottom)) } : null }
+  // measured once per block: the system page has thousands of blocks and a dozen titles
+  const memo = <T,>(f: (e: Element) => T) => { const m = new Map<Element, T>(); return (e: Element) => { if (!m.has(e)) m.set(e, f(e)); return m.get(e)! } }
+  const firstB = memo((e: Element) => { const t = snap.firstLine(e) as Node; return t ? at(t) : NaN })
+  const lastB = memo((e: Element) => { const t = lastText(e); return t ? at(t, true) : NaN })
+  const geoOf = memo(geo)
+  const pairs: { big: string; other: string; side: 'above' | 'below'; step: number; bigFirst: number; bigLast: number; otherFirst: number; otherLast: number; bigX: string; otherX: string; excused: boolean }[] = []
+  for (const big of blocks) {
+    const cs = getComputedStyle(big)
+    if (!/^H[1-6]$/.test(big.tagName) || big.closest(ANN) || parseFloat(cs.fontSize) < 24 || cs.getPropertyValue('--snap-unit').trim() === '1') continue
+    const g = geoOf(big); if (!g) continue
+    const root = big.closest('.wm-lines')!
+    let step = 0
+    for (let a: Element | null = big; a && a !== root; a = a.parentElement) { const v = parseFloat((a as HTMLElement).style?.getPropertyValue('--row-step') || ''); if (v) { step = v; break } }
+    if (!step) { const d = document.createElement('div'); d.style.cssText = 'position:absolute;visibility:hidden;height:0;font-size:var(--type-body-size,1rem);line-height:var(--lead-body,24px)'; root.appendChild(d); step = parseFloat(getComputedStyle(d).lineHeight) || 24; d.remove() }
+    const bf = firstB(big), bl = lastB(big)
+    let above: [Element, number] | null = null, below: [Element, number] | null = null
+    for (const o of blocks) {
+      if (o === big || o.contains(big) || big.contains(o) || o.closest('.wm-lines') !== root) continue
+      const go = geoOf(o); if (!go || go.right <= g.left + 1 || go.left >= g.right - 1) continue
+      const of = firstB(o), ol = lastB(o)
+      // by baselines, not boxes: a label pulled up into a title's line box is the case to catch
+      if (ol < bf - 0.5) { if (!above || ol > above[1]) above = [o, ol] }
+      else if (of > bl + 0.5) { if (!below || of < below[1]) below = [o, of] }
+    }
+    for (const [o, side] of [[above?.[0], 'above'], [below?.[0], 'below']] as const) {
+      if (!o) continue
+      pairs.push({ big: name(big), other: name(o), side, step, bigFirst: bf, bigLast: bl, otherFirst: firstB(o), otherLast: lastB(o), bigX: tag(big), otherX: tag(o), excused: !!(o.closest('[data-expect-offender="safe"]') || big.closest('[data-expect-offender="safe"]')) })
+    }
+  }
+  return pairs
+}
+
+/* X-HEIGHT, from pixels. Neither the OS/2 table nor canvas will do: Cal Sans's x runs from
+   .515 em (opsz 14, wght 400) to .535 (opsz 45, wght 700, GEOM 50), and canvas ignores
+   variable axes. So an "x" is set in the sample element's own computed font (size, weight,
+   variations and optical sizing copied, so opsz is the same), drawn at 8x by a CSS transform
+   (which leaves opsz alone), screenshot, and scanned for its top ink row at half coverage
+   against a zero-size baseline probe. 1 screenshot px = 1/8 CSS px, so the error is under
+   0.15px; on Cal Sans 45px wght 600 it reads 23.9 against fontTools' 1062/2000 x 45 = 23.9. */
+async function xHeights(page: import('@playwright/test').Page): Promise<Record<string, number>> {
+  const ids = await page.evaluate(() => [...document.querySelectorAll('[data-xh-sample]')].map(e => e.getAttribute('data-xh-sample')!))
+  const out: Record<string, number> = {}
+  for (const id of ids) {
+    const box = await page.evaluate(id => {
+      const e = document.querySelector(`[data-xh-sample="${id}"]`)!, c = getComputedStyle(e)
+      // 8x, or less for type so big that 8x would not fit the 900px viewport
+      const K = Math.max(1, Math.min(8, Math.floor(760 / (parseFloat(c.fontSize) * 1.5))))
+      const p = document.createElement('div'); p.id = 'xh-probe'
+      p.style.cssText = `position:fixed;left:0;top:0;z-index:2147483647;background:#fff;color:#000;padding:0 4px;line-height:normal;white-space:nowrap;transform-origin:0 0;transform:scale(${K});font-family:${c.fontFamily};font-size:${c.fontSize};font-weight:${c.fontWeight};font-style:${c.fontStyle};font-stretch:${c.fontStretch};font-variation-settings:${c.fontVariationSettings};font-optical-sizing:${c.fontOpticalSizing};letter-spacing:0`
+      p.innerHTML = 'x<span style="display:inline-block;width:0;height:0;vertical-align:baseline"></span>'
+      document.body.appendChild(p)
+      const r = p.getBoundingClientRect(), b = p.querySelector('span')!.getBoundingClientRect().top
+      return { K, x: Math.floor(r.left), y: Math.floor(r.top), w: Math.ceil(r.width), h: Math.ceil(r.height), base: b - Math.floor(r.top) }
+    }, id)
+    const png = await page.screenshot({ clip: { x: box.x, y: box.y, width: Math.min(box.w, 2000), height: Math.min(box.h, 2000) }, animations: 'disabled', scale: 'css' })
+    const top = await page.evaluate(async b64 => {
+      const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode()
+      const c = document.createElement('canvas'); c.width = img.width; c.height = img.height
+      const g = c.getContext('2d')!; g.drawImage(img, 0, 0); const d = g.getImageData(0, 0, c.width, c.height).data
+      // columns at the edges are skipped: the clip rounds out to whole px and takes in the page beside the probe
+      for (let y = 0; y < c.height; y++) { let ink = 0; for (let x = 2; x < c.width - 3; x++) ink = Math.max(ink, 255 - d[(y * c.width + x) * 4]); if (ink >= 128) return y }
+      return NaN
+    }, png.toString('base64'))
+    await page.evaluate(() => document.getElementById('xh-probe')?.remove())
+    out[id] = (box.base - top) / box.K
+  }
+  await page.evaluate(() => document.querySelectorAll('[data-xh-sample]').forEach(e => e.removeAttribute('data-xh-sample')))
+  return out
+}
+
+/* Check 9 (GRID.md §5, 12) from the geometry SAFE returned and the measured x-heights: the offender list. */
+function safeArea(pairs: Awaited<ReturnType<typeof SAFE>>, xh: Record<string, number>) {
+  const off: { msg: string; excused: boolean }[] = []
+  const push = (p: { excused: boolean }, msg: string) => off.push({ msg, excused: p.excused })
+  for (const p of pairs) {
+    if (p.side === 'above') {
+      const limit = p.bigFirst - xh[p.bigX] - p.step, short = p.otherLast - limit
+      if (short > 0.5) push(p, `${p.other} above ${p.big}: last baseline ${(p.bigFirst - p.otherLast).toFixed(1)}px over its first baseline, inside the safe area (x-height ${xh[p.bigX].toFixed(1)} + step ${p.step} = ${(xh[p.bigX] + p.step).toFixed(1)}), ${short.toFixed(1)}px short`)
+    } else {
+      const nextX = p.otherFirst - xh[p.otherX], short = p.bigLast + p.step - nextX
+      if (short > 0.5) push(p, `${p.other} below ${p.big}: its x-height ${(nextX - p.bigLast).toFixed(1)}px under the last baseline, inside the safe area (step ${p.step}), ${short.toFixed(1)}px short`)
+    }
+  }
+  return off
+}
+
 const MARGIN = () => {   // runs in the page; stringified below
   // the house margin, resolved: --grid-margin is a clamp(), so measure it with a probe
   // Resolved INSIDE each root, not on <html>: a tool's .wm-grid--bleed on main or body sets it
@@ -254,6 +467,23 @@ for (const pg of PAGES) {
         console.log(`units ${pg.name} ${w}: ${un.units} units, ${un.runs} text runs`)
         expect(un.off, `text inside a unit that does not share the unit's baseline (mark the unit or run data-baseline="free" with a reason if it is meant to hang):\n${un.off.join('\n')}`).toEqual([])
 
+        // ROWS: side-by-side text shares its lines (7), and the row's folio boxes sit on its step (8)
+        const known = (KNOWN[pg.name] ?? []).map(k => k.row)
+        const rw = await page.evaluate(([fn, k]) => new Function('return (' + fn + ')')()(k), [ROWS.toString(), known] as const) as { rows: number; judged: number; marks: number; out: { kind: string; row: string; msg: string; excused: string }[] }
+        console.log(`rows ${pg.name} ${w}: ${rw.rows} rows of side-by-side text, ${rw.judged} larger-lead blocks, ${rw.marks} folio boxes judged`)
+        for (const o of rw.out.filter(o => o.excused)) console.log(`  KNOWN OFFENDER (${o.excused}) ${o.row}: ${o.msg}`)
+        const lines = rw.out.filter(o => !o.excused && o.kind === 'lines').map(o => `${o.row}: ${o.msg}`)
+        const steps = rw.out.filter(o => !o.excused && o.kind === 'step').map(o => `${o.row}: ${o.msg}`)
+        expect(lines, `a row that does not share its lines (size the larger text so its lead is a multiple of the row's smallest text lead):\n${lines.join('\n')}`).toEqual([])
+        expect(steps, `folio elements off the row step (place them at multiples of var(--row-step) from the shared first baseline, or data-baseline="free" with a reason):\n${steps.join('\n')}`).toEqual([])
+
+        // SAFE: one step of white around big text (data-expect-offender="safe" rows are the fixture's negative case)
+        const pairs = await page.evaluate(fn => new Function('return (' + fn + ')()')(fn), SAFE.toString()) as Awaited<ReturnType<typeof SAFE>>
+        const sf = safeArea(pairs, await xHeights(page))
+        console.log(`safe ${pg.name} ${w}: ${pairs.length} neighbours of big text judged` + sf.map(o => `\n  ${o.excused ? 'EXPECTED OFFENDER ' : ''}${o.msg}`).join(''))
+        const unsafe = sf.filter(o => !o.excused).map(o => o.msg)
+        expect(unsafe, `text inside the safe area of big text (one step of white from its x-height; set the margin in var(--row-step) or the lead):\n${unsafe.join('\n')}`).toEqual([])
+
         // MARGIN: the copy sits inside the house margin, both sides (a page with ownEdges answers to its shell)
         const m = await page.evaluate(fn => new Function('return (' + fn + ')()')(fn), MARGIN.toString()) as { raw: string; margin: number; n: number; nBleed: number; gutter: number; pageBleed: boolean; minLeft: number; maxRight: number; vw: number; off: string[] }
         if (pg.ownEdges) return
@@ -326,6 +556,39 @@ test.describe('bleed, breakers, mac shot · geometry', () => {
       near(g.win.left, g.cell.left, 'the window\'s left edge on the column'); near(g.win.right, g.cell.right, 'the window\'s right edge on the column')
       near(g.win.top, g.cell.top, 'the window\'s top is the cell\'s'); near(g.win.bottom, g.cell.bottom, 'the window\'s bottom is the cell\'s')
       expect(g.after.top - g.win.bottom, 'the next line follows the window, not the shadow').toBeGreaterThanOrEqual(23)
+    })
+  }
+})
+
+/* THE ROW STEP, by number (tests/fixtures/grid-step.html). Where the columns sit side by side
+   (from 1024), each row's items carry the --row-step its data-expect-step names ("none": no
+   side-by-side text, so none), and each data-expect-offender row IS reported by the check it
+   names -- the page loop above excuses those rows, so this is what keeps the checks honest.
+   The eyebrow pair is the safe area's: on line 0 it passes, 30px up it is reported. */
+test.describe('row step · by number', () => {
+  test.skip(({ hasTouch }) => hasTouch, 'widths are the axis here, not the input')
+  for (const w of [1440, 1024]) {
+    test(`fixture · ${w}px`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: 900 })
+      await page.goto('/dial/grid-step.html')
+      await page.evaluate(() => document.fonts.ready)
+      await page.waitForFunction(() => typeof (window as any).wmGridSnap === 'function')
+      await page.evaluate(() => (window as any).wmGridSnap())
+      await page.waitForTimeout(300)
+      const got = await page.evaluate(() => [...document.querySelectorAll('[data-expect-step]')].map(s => ({
+        id: s.id, want: s.getAttribute('data-expect-step')!, offender: s.getAttribute('data-expect-offender') ?? '',
+        got: [...new Set([...s.children].map(c => (c as HTMLElement).style.getPropertyValue('--row-step') || 'none'))].join('|') })))
+      const rw = await page.evaluate(([fn, k]) => new Function('return (' + fn + ')')()(k), [ROWS.toString(), [] as string[]] as const) as { out: { kind: string; row: string; msg: string; excused: string }[] }
+      console.log(`row step fixture ${w}: ` + got.map(g => `#${g.id} ${g.got}`).join(', ') + '\n' + rw.out.map(o => `  ${o.kind} ${o.row}: ${o.msg}`).join('\n'))
+      expect(got.filter(g => g.got.replace(/px$/, '') !== g.want).map(g => `#${g.id}: --row-step ${g.got}, want ${g.want}`)).toEqual([])
+      for (const g of got.filter(g => g.offender))
+        expect(rw.out.filter(o => o.row === 'section#' + g.id && o.kind === g.offender).length, `#${g.id} should be reported by the "${g.offender}" check`).toBeGreaterThan(0)
+      // and nothing else is: the passing rows pass
+      expect(rw.out.filter(o => !got.some(g => g.offender && o.row === 'section#' + g.id && o.kind === g.offender)).map(o => `${o.row}: ${o.msg}`)).toEqual([])
+      // the safe area: the eyebrow on line 0 (#e6, -48) passes, the one at -30 (#e7) is reported
+      const sf = safeArea(await page.evaluate(fn => new Function('return (' + fn + ')()')(fn), SAFE.toString()) as Awaited<ReturnType<typeof SAFE>>, await xHeights(page))
+      expect(sf.filter(o => /^p#e7 /.test(o.msg)).length, '#e7 (an eyebrow 30px over a 45/48 headline) should be reported by "text keeps one step of white"').toBe(1)
+      expect(sf.filter(o => !/^p#e7 /.test(o.msg)).map(o => o.msg)).toEqual([])
     })
   }
 })

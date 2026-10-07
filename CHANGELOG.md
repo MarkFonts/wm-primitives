@@ -12,6 +12,44 @@ Newest first.
 
 ---
 
+## 2026-10-06 -- the row step: sized leads, folio elements on the step
+
+**Side-by-side text drifted after line 1, and the fix was going to be a runtime rounding.** A
+lede at 39 beside a sub at 27 shares one line in three; the homepage's headline at 39 beside its
+caption at 24 shares almost none. The draft before this (#96) rounded the larger lead up to a
+multiple of the smaller at render, and the Cal Sans lede went to 54, which spaced out a face with
+short ascenders and tight letters. Settled instead as a lead and size rule: the baseline grid is
+3px and never changes; in a row of side-by-side text the smallest text lead is the row's step,
+and the larger text is SIZED so its lead is a whole multiple of it (the homepage headline 36/39 ->
+45/48 beside a 24 caption, not 36/48). Nothing rewrites a leading. The small lines are the row's
+macrogrid: rules, dots and folio marks sit on multiples of the step from the shared first
+baseline (the caption's rule and dot at -24).
+
+`gridSnap.js` measures the step on every pass and writes it as `--row-step` on each item of a
+`.wm-baselines` row with side-by-side text (grid.css declares it unset per item, so a nested row
+never inherits). `grid.spec.ts` gains three checks: **a row shares its lines** (#96's check, kept
+as the enforcement, with the step taken from the row and its lines from the row's shared first
+baseline), **folio elements sit on the row step** (a non-text box's top or centre within 0.5px of
+a step line, and `--row-step` published), and **text keeps one step of white** (around a
+title, the text above and below keeps one step from its x-height). The x-height is read from
+pixels: Cal Sans's x runs .515-.535 em across its axes and canvas ignores axes, so an `x` in the
+element's own font is drawn at 8x by a transform, screenshot and scanned; it reads 23.9 at 45px
+600, as fontTools does (1062/2000). With 45/48 that leaves 24.1 of white between a baseline and
+the next x-height: one step, x-heights on the half lines. The recommendations that follow from it
+are nine numbered rules, in GRID.md §2 and in the system page's Grid part as a chapter after
+Baseline.
+
+Known offenders, listed by page and row in the spec's `KNOWN` and printed, not failed: the Cal
+Sans hero (39 beside 27; it stays for now), the grid bench's hero (drawn after it, 27 beside 24)
+and the homepage's work rows (39 beside 24 until wordmark ships 45/48). On the docs the safe-area
+check finds nothing to move: no title on the system page or the bench has text inside one step.
+`tests/fixtures/grid-step.html` replaces #96's grid-lead fixture: a passing 45/48 row with its
+rule and dot, a one-line byline and a micro note (no step), and negative cases the spec requires
+it to report -- 39 beside 27, a rule at -30 in a 24 row, an eyebrow 30px over a 45/48 title --
+plus a drawn stage of the step lines, half lines and x-height. Docs rebuilt (`docs/grid.html` and
+`docs/index.html` inline gridSnap and grid.css); the system page also gains the chapter, which
+shifts the Type part's later chapter anchors by one.
+
 ## 2026-10-06 -- the row rule grouped columns by where the nudge left them
 
 **The Cal Sans hero's lede and sub sat three px apart at 1024 and the row rule never ran.**

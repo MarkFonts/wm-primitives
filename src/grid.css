@@ -26,6 +26,7 @@
  *   --grid-col          one column's width, as a length, inside either container
  *   --bl                the line; .wm-lines puts text's baselines on it (below)
  *   --snap              the remainder a builder or gridSnap.js measured (below)
+ *   --row-step          a .wm-baselines row's smallest text lead, on its items (gridSnap.js)
  *
  * PAGES AND TOOLS (Mark 2026-10-04). A page has the margin; a tool has none, ever.
  *   .wm-grid--bleed     no margin: on a .wm-grid, or once on main/body for a whole app.
@@ -152,6 +153,14 @@
             calc(var(--_shot-k) * var(--shot-mac-l) * var(--shot-scale) * -1);
   }
   .wm-grid:has([data-shot="mac"]) { overflow-x: clip; }
+
+  /* THE ROW STEP. In a row of side-by-side text the smallest text lead is the row's step, and
+     the row's rules and folio marks sit on multiples of it from the shared first baseline.
+     gridSnap.js measures it and writes it inline on each item of the row; declared and unset
+     here (not a runtime token: consumers lint shared/src with their own lists), and unset on
+     every item so a nested row never inherits an outer one's. Read it with a fallback:
+     top: calc(-1 * var(--row-step, 24px)). */
+  .wm-baselines > * { --row-step: initial; }
 }
 
 /* BASELINES ON THE LINE -- UNLAYERED, on purpose. type.css's .t-* classes are unlayered (they

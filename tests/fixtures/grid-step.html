@@ -1,0 +1,112 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>grid: the row step</title>
+<!-- grid.spec.ts's fixture for the row step (src/gridSnap.js, GRID.md §2 "The row step"). In a
+     row of side-by-side text that wraps, the smallest text lead is the row's step: the larger
+     text is SIZED so its lead is a whole multiple of it (checked: "a row shares its lines"), and
+     the row's rules and folio marks sit on multiples of it from the shared first baseline
+     (checked: "folio elements sit on the row step"). gridSnap writes the step as --row-step on
+     the row's items; data-expect-step says what it must be ("none": no side-by-side text, so no
+     step). Annotation roles and one-line blocks are not part of the step. A row marked
+     data-expect-offender is a NEGATIVE case: the spec excuses it on the page and asserts, in a
+     test of its own, that the named check reports it. Side by side from 1024; below, the
+     columns stack and no row has a step. Served at /dial/grid-step.html. -->
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css"><link rel="stylesheet" href="/dial/shared/src/grid.css">
+<script src="/dial/shared/src/gridSnap.js" defer></script>
+<style>
+@font-face{font-family:"Face";src:url("/dial/shared/fonts/CalSansVF.woff2") format("woff2");font-weight:400 700}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui;background:#111;color:#e8e8e8;--ui-font:system-ui}
+main :is(p,h2){margin:0}
+section{margin-top:72px;row-gap:24px}   /* below 1024 the columns stack: the caption keeps a step of white under the headline */
+.head{font-family:"Face";font-weight:600;font-size:45px;--lh:48px}
+/* an eyebrow: the label role (12/15) above a 45/48 headline in one column. Its baseline goes on
+   the headline's line 0, one lead (48) above the first baseline: 4px of the label's line below
+   its baseline, this margin, then 39 of the headline's line above its baseline (Cal Sans) */
+.eyebrow{font-family:"Face";margin-bottom:5px}
+.eyebrow.near{margin-bottom:-12px}   /* line 0 + 18: the baseline 30 over the headline's, inside the safe area */
+/* THE SAFE AREA, drawn (a stage: nothing here is snapped or judged) */
+.xstage{position:relative;margin-top:72px;padding:24px 0;font-family:"Face";font-weight:600;font-size:45px;line-height:48px}
+.xstage p{margin:0;max-width:11em}
+.xstage .ln{position:absolute;left:0;right:0;height:0;border-top:1px solid #2878ff}
+.xstage .ln.half{border-top:1px dashed rgba(40,120,255,.55)}
+.xstage .ln.x{border-top:1px solid #ff288c}
+.xstage figcaption{font:12px/15px system-ui;margin-top:48px;color:#aaa}
+.cap{font-size:12px;--lh:24px}
+.lede30{font-size:30px;--lh:39px}
+.sub{font-size:16px;--lh:27px}
+.byline{font-size:16px;--lh:27px;white-space:nowrap}
+/* the homepage caption's rule and dot, hung from the caption's first BASELINE: a zero-size
+   inline-block sits with its bottom on the baseline, and the marks are placed from it */
+.anchor{display:inline-block;width:0;height:0;vertical-align:baseline;position:relative}
+.rule{position:absolute;left:0;width:160px;height:1px;background:currentColor;top:calc(-1 * var(--row-step, 24px))}
+.dot{position:absolute;left:156px;width:7px;height:7px;border-radius:50%;background:currentColor;top:calc(-1 * var(--row-step, 24px) + .5px - 3.5px)}
+/* the negative case: one step plus 6px, off the macrogrid */
+.rule.off{top:calc(-1 * var(--row-step, 24px) - 6px)}
+</style>
+<main class="wm-lines">
+<!-- 1. a 45/48 headline beside a 12/24 caption: step 24, every headline line on a caption line,
+     the rule and dot one step above the shared first baseline -->
+<section class="wm-grid wm-baselines" id="museum" data-expect-step="24">
+  <p class="head" id="h1" style="--span:13;--span-md:12">Brands tell unique stories with letters that fit.</p>
+  <div style="--start:16;--span:8;--span-md:12">
+    <p class="cap" id="c1"><i class="anchor" aria-hidden="true"><b class="rule"></b><b class="dot"></b></i>Typography for a museum&rsquo;s remodel: illuminated signage, with creative direction by a studio across the river.</p>
+  </div>
+</section>
+<!-- 2. a 30/39 lede beside a 16/27 sub: step 27, and 39 is not a multiple of it -- "a row shares
+     its lines" must report the lede (the Cal Sans hero's shape) -->
+<section class="wm-grid wm-baselines" id="hero" data-expect-step="27" data-expect-offender="lines">
+  <p class="lede30" id="l2" style="--span:14;--span-md:12">Over five years the studio has sharpened one brand&rsquo;s type, from a single headline weight to the whole family.</p>
+  <p class="sub" id="s2" style="--start:16;--span:9;--span-md:12">In 2021 the brand had no typographic voice of its own, from logo to website to marketing. One weight proved a custom face could replace a standard.</p>
+</section>
+<!-- 3. body beside a one-line byline at 27: the byline is one line, so it is not part of a step,
+     and there is no side-by-side text -- no step -->
+<section class="wm-grid wm-baselines" id="byline" data-expect-step="none">
+  <p id="b3" style="--span:14;--span-md:12">Running copy beside a byline that fits on one line, which keeps its own lead and shares only the first baseline with this paragraph, however long it runs.</p>
+  <p class="byline" id="by3" style="--start:17;--span:8;--span-md:12">Sep 29, 2026</p>
+</section>
+<!-- 4. a lede beside a micro note: micro is an annotation, not part of a step -- no step -->
+<section class="wm-grid wm-baselines" id="micro" data-expect-step="none">
+  <p class="t-lede" id="l4" style="--span:14;--span-md:12">Inter cuts almost every terminal at ninety degrees to its stroke and square to the baseline; the a is one of the few exceptions.</p>
+  <p class="t-micro" id="m4" style="--start:17;--span:4;--span-md:12">Measured on the cap-height-normalised comparison, Inter runs about ten per cent taller.</p>
+</section>
+<!-- 6. an eyebrow on the headline's line 0 (-48): one step of white over the x-height, passes.
+     7. the same eyebrow at -30: inside the safe area -- "text keeps one step of white" must
+     report it (data-expect-offender="safe") -->
+<section class="wm-grid" id="eyebrow">
+  <div style="--span:14;--span-md:12"><p class="t-label eyebrow" id="e6">The museum</p><h2 class="head" id="h6">Brands tell unique stories with letters that fit.</h2></div>
+</section>
+<section class="wm-grid" id="safe-off" data-expect-offender="safe">
+  <div style="--span:14;--span-md:12"><p class="t-label eyebrow near" id="e7">The museum</p><h2 class="head" id="h7">Brands tell unique stories with letters that fit.</h2></div>
+</section>
+<!-- 5. the museum row with its rule at -30: step 24, so the rule is off the macrogrid --
+     "folio elements sit on the row step" must report it -->
+<section class="wm-grid wm-baselines" id="off-step" data-expect-step="24" data-expect-offender="step">
+  <p class="head" id="h5" style="--span:13;--span-md:12">One font file. Every size, weight, and mood.</p>
+  <div style="--start:16;--span:8;--span-md:12">
+    <p class="cap" id="c5"><i class="anchor" aria-hidden="true"><b class="rule off"></b></i>A bespoke replacement for an open-source face, built inside a product team: six variable axes tuned to their type scale.</p>
+  </div>
+</section>
+<!-- THE SAFE AREA, drawn: a 45/48 Cal Sans 600 headline with its baselines (the 24 step, solid),
+     the half lines (dashed) and its x-height (pink). The x-height is grid.spec.ts's pixel
+     measurement (xHeights): 23.9px, so the white from a baseline to the next line's x-height is
+     48 - 23.9 = 24.1, one step -- baselines on the step lines, x-heights on the half lines.
+     step = size x (lead ratio - x-height ratio) = 45 x (1.067 - .531) = 24.1. -->
+<figure class="wm-grid" data-nosnap style="margin:0">
+  <div class="xstage" id="xstage" data-xh="23.9" style="--span:14;--span-md:12">
+    <p>Brands tell unique stories with letters that fit.</p>
+    <figcaption>45/48 Cal Sans 600 beside a 24 step: x-height 23.9, white 24.1 from each baseline to the next x-height. Blue: baselines every 24 (solid) and the half lines (dashed); pink: the x-height.</figcaption>
+  </div>
+</figure>
+</main>
+<script>
+// draw the stage's lines from its first baseline, measured with a zero-size probe
+addEventListener('load', () => document.fonts.ready.then(() => {
+  const st = document.getElementById('xstage'), p = st.querySelector('p'), pr = document.createElement('span')
+  pr.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline'
+  p.prepend(pr); const b0 = pr.getBoundingClientRect().top - st.getBoundingClientRect().top; pr.remove()
+  const last = b0 + (Math.round(p.getBoundingClientRect().height / 48) - 1) * 48, xh = +st.dataset.xh
+  const line = (y, c) => { const i = document.createElement('i'); i.className = 'ln ' + c; i.style.top = y + 'px'; st.append(i) }
+  // from line 0 (one lead above the first baseline) to one step under the last
+  for (let y = b0 - 48; y <= last + 24; y += 12) line(y, (y - b0) % 24 ? 'half' : '')
+  for (let y = b0; y <= last; y += 48) line(y - xh, 'x')
+}))
+</script>
