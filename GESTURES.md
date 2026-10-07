@@ -234,3 +234,15 @@ switch as `.wm-theme-stack` (themeSwitch.css). Prototyped on two scratch study p
 | G63 | 200% | a baseline in the target is twice as far from the target's top, within 1px: exact on macOS's system-ui, 1px off on the Linux runner's face, because Chrome rounds ascent and descent to whole pixels at each size. Flowing text has no mark to re-seat on, so the control does not | zoom-control |
 | G64 | the stack | the theme row and the zoom row are **one width with one right edge** — CSS, one `max-content` grid column, no measurement — each 27px (33 on touch), `--spacing-02` apart | zoom-control |
 | G65 | press on the lozenge, then drag | the value does **not** jump on the press; it follows the pointer from where it was grabbed; a press elsewhere on the rail jumps there. The lozenge never leaves the rail. No wheel (G33) | zoom-control |
+
+**Collapse and placement** (`data-collapse`, `.wm-zoom--left`, `.wm-theme-stack`; round 2,
+2026-10-07). The same spec file.
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G66 | at rest, `data-collapse` | one 27px `.wm-icon-btn` (33 on touch) showing `data-icon` — `frame_inspect` by default, `pageview` or `feature_search` — with `aria-expanded="false"`; every other part is `inert` and clipped | zoom-control |
+| G67 | press the mark | it **transforms**: the box's width runs from the mark to the control over `--dur-med` (240ms), the mark cross-fades into zoom_out where it stands, the lozenge, zoom_in and fit fade in; focus goes to the rail. `Escape` (focus inside) folds it and returns focus to the mark; so does a press anywhere outside the control. There is no second press on the mark, because zoom_out takes its place | zoom-control |
+| G68 | `prefers-reduced-motion: reduce` | the same two states, swapped with no transition | zoom-control |
+| G69 | reload | open or closed is kept with the value under the one key: `"170 open"` / `"170 closed"` (`parseFloat` still reads the number); with nothing stored, `data-open="true"` starts it open | zoom-control |
+| G70 | `.wm-zoom--left`, open | the control opens **leftwards** on the theme switch's row from a 27px footprint, its right edge anchored to the footprint's; the open box lies over the row (ground: `--zoom-ground`), so the row stays 27 tall and nothing in it, beside it or below it moves; the rail is a fixed 8rem | zoom-control |
+| G71 | `.wm-theme-stack`, collapsing | at rest the mark sits at the stack's right edge under the switch; open, the zoom row and the switch row are one width with one right edge (G64); the rail's floor is 10rem, so the open stack is wider than the chips | zoom-control |

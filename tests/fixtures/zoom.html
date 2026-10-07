@@ -32,6 +32,34 @@
   </div>
   <div class="wm-zoom" data-key="wm-zoom-marks" data-keys="local"></div>
 </div>
+<!-- the two collapsing placements, with no target (the page is #ctl's). LEFT: on the theme row,
+     between a heading and an action, over a line of text that must not move. -->
+<div id="hdrwrap" style="position:fixed;left:16px;right:16px;bottom:96px">
+  <div id="hdr" style="display:flex;align-items:center;justify-content:space-between">
+    <span id="hdg">A heading on the left</span>
+    <span style="display:flex;align-items:center;gap:12px">
+      <span class="wm-theme-row" id="row">
+        <span class="wm-zoom wm-zoom--left" data-collapse data-key="wm-zoom-row" data-keys="local"></span>
+        <span class="wm-theme" role="group" aria-label="Colour scheme">
+          <button type="button" class="wm-icon-btn" data-mode="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true">brightness_auto</span></button>
+          <button type="button" class="wm-icon-btn" data-mode="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true">light_mode</span></button>
+          <button type="button" class="wm-icon-btn active" data-mode="dark" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true">dark_mode</span></button>
+        </span>
+      </span>
+      <button type="button" id="export">Export PDF</button>
+    </span>
+  </div>
+  <p id="under" style="margin:0">A line under the row.</p>
+</div>
+<!-- STACK, collapsing, starting open from markup -->
+<div id="cstack" class="wm-theme-stack" style="position:fixed;left:16px;top:12px">
+  <div class="wm-chip-row" role="group" aria-label="Colour scheme">
+    <button type="button" class="wm-chip" data-mode="auto" data-label="Auto" aria-pressed="false">Auto</button>
+    <button type="button" class="wm-chip" data-mode="light" data-label="Light" aria-pressed="false">Light</button>
+    <button type="button" class="wm-chip" data-mode="dark" data-label="Dark" aria-pressed="true">Dark</button>
+  </div>
+  <div class="wm-zoom" data-collapse data-icon="pageview" data-open="true" data-key="wm-zoom-cstack" data-keys="local"></div>
+</div>
 <main id="page">
   <p><span id="probe"></span>Hamburgefonstiv. The target keeps its 100% measure and its left edge; at 200% every length in it is twice as long, so the page grows right and down and scrolls.</p>
   <p>Second paragraph, on the next 24px line, so a zoomed page still steps by whole lines.</p>

@@ -3656,9 +3656,9 @@ html,body{margin:0;padding:0;background:var(--bg)}
     grid-template-columns: max-content;
     justify-items: stretch;
     row-gap: var(--spacing-02, 6px);
-  }#s-controls .wm-theme-stack > :first-child{ justify-content: flex-end; min-block-size: 27px; }#s-controls .wm-theme-stack > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }@media (pointer: coarse){#s-controls .wm-theme-stack > :first-child{ min-block-size: 33px; }#s-controls .wm-theme-stack > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
+  }#s-controls .wm-theme-stack > :first-child{ justify-content: flex-end; min-block-size: 27px; }#s-controls .wm-theme-stack > .wm-zoom[data-collapse]{ justify-self: end; }#s-controls .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]){ justify-self: stretch; }#s-controls .wm-theme-row{ display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }#s-controls .wm-theme-row > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }#s-controls .wm-theme-stack > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }@media (pointer: coarse){#s-controls .wm-theme-stack > :first-child{ min-block-size: 33px; }#s-controls .wm-theme-stack > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }#s-controls .wm-theme-row{ min-block-size: 33px; }#s-controls .wm-theme-row > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
   }
-}@layer wm.icon{@media (pointer: coarse){#s-controls .wm-theme-stack > .wm-theme .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
+}@layer wm.icon{@media (pointer: coarse){#s-controls :is(.wm-theme-stack,#s-controls .wm-theme-row) > .wm-theme .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
   }
 }@layer wm.controls{#s-controls .wm-zoom{
     display: flex;
@@ -3666,7 +3666,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     block-size: 27px;   
     font-family: var(--ui-font, system-ui, sans-serif);
     color: var(--text-muted, rgba(232, 232, 232, .62));
-  }#s-controls .wm-zoom .wm-icon-btn{
+  }#s-controls .wm-zoom-box{ display: flex; align-items: center; flex: 1 1 auto; min-inline-size: 0; block-size: 100%; }#s-controls .wm-zoom-slot{ position: relative; flex: none; display: flex; }#s-controls .wm-zoom-slot > .wm-zoom-toggle{ position: absolute; inset: 0; }#s-controls .wm-zoom .wm-icon-btn{
     --icon-btn-pad: 0;   
     flex: none;
     inline-size: 27px;
@@ -3675,7 +3675,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     font-size: 20px;   
   }#s-controls .wm-zoom .wm-hd-rail{
     flex: 1 1 0;
-    min-inline-size: 6rem;
+    min-inline-size: 10rem;   
     block-size: 27px;
     margin-inline: var(--spacing-01, 4px);
   }#s-controls .wm-zoom .wm-hd-pill{ padding: var(--tick, 3px) var(--spacing-03, 8px); }#s-controls .wm-zoom .wm-hd-pill output{
@@ -3685,7 +3685,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
     font-variant-numeric: tabular-nums;
     text-align: center;
     white-space: nowrap;
-  }@media (pointer: coarse){#s-controls .wm-zoom,#s-controls .wm-zoom .wm-hd-rail{ block-size: 33px; }#s-controls .wm-zoom .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
+  }#s-controls .wm-zoom[data-collapse]{ --zoom-dur: var(--dur-med, 240ms); }#s-controls .wm-zoom[data-open="false"] .wm-zoom-box{ inline-size: 27px; }#s-controls .wm-zoom[data-open="false"] .wm-zoom-box,#s-controls .wm-zoom[data-moving] .wm-zoom-box{ overflow: clip; }#s-controls .wm-zoom[data-moving] .wm-zoom-box{ transition: inline-size var(--zoom-dur) ease-out; }#s-controls .wm-zoom[data-collapse] :is(.wm-zoom-slot > .wm-icon-btn,#s-controls .wm-hd-pill,#s-controls .wm-hd-rail > i,#s-controls .wm-zoom-box > .wm-icon-btn){
+    transition: opacity var(--zoom-dur) ease-out;
+  }#s-controls .wm-zoom[data-open="false"] :is(.wm-zoom-slot > :not(.wm-zoom-toggle),#s-controls .wm-hd-pill,#s-controls .wm-hd-rail > i,#s-controls .wm-zoom-box > .wm-icon-btn),#s-controls .wm-zoom[data-open="true"] .wm-zoom-toggle{ opacity: 0; pointer-events: none; }#s-controls .wm-zoom--left{ position: relative; flex: none; inline-size: 27px; }#s-controls{ --zoom-ground: transparent; }#s-controls .wm-zoom--left .wm-zoom-box{ position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }#s-controls .wm-zoom--left .wm-hd-rail{ flex: 0 0 8rem; min-inline-size: 8rem; }@media (prefers-reduced-motion: reduce){#s-controls .wm-zoom .wm-zoom-box,#s-controls .wm-zoom *{ transition: none !important; }
+  }@media (pointer: coarse){#s-controls .wm-zoom[data-open="false"] .wm-zoom-box,#s-controls .wm-zoom--left{ inline-size: 33px; }#s-controls .wm-zoom,#s-controls .wm-zoom .wm-hd-rail{ block-size: 33px; }#s-controls .wm-zoom .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
   }
 }@layer wm.icon{@media (pointer: coarse){#s-controls .wm-zoom .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
   }
@@ -3889,7 +3892,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--text-muted);
-}#s-controls .chip-demo{display:grid;gap:10px;margin:8px 0 40px}#s-controls .chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}#s-controls .chip-cap code{text-transform:none;letter-spacing:0}#s-controls .chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}#s-controls .chip-demo .wm-chip--switch{margin-left:8px}#s-controls .zoom-demo{display:grid;gap:var(--spacing-04, 12px);margin:8px 0 40px}#s-controls .zoom-demo .wm-theme-stack{justify-self:end}#s-controls .zoom-stage{height:240px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--surface)}#s-controls .zoom-sample{max-width:420px;padding:var(--spacing-05, 16px)}#s-controls .zoom-sample h3{margin:0 0 var(--spacing-03, 8px);font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .zoom-sample p{margin:0;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}#s-controls .zoom-demo pre{margin:0;font:var(--type-micro-size, .5625rem)/1.6 ui-monospace, Menlo, monospace;color:var(--text-muted);white-space:pre-wrap}
+}#s-controls .chip-demo{display:grid;gap:10px;margin:8px 0 40px}#s-controls .chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}#s-controls .chip-cap code{text-transform:none;letter-spacing:0}#s-controls .chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}#s-controls .chip-demo .wm-chip--switch{margin-left:8px}#s-controls .zoom-demo{display:grid;gap:var(--spacing-04, 12px);margin:8px 0 40px}#s-controls .zoom-demo .wm-theme-stack{justify-self:end}#s-controls .zoom-demo > .wm-chip-row{justify-self:start}#s-controls .zoom-title{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-05, 16px)}#s-controls .zoom-title-h{font-size:var(--type-lede-size, 1.125rem);color:var(--text)}#s-controls .zoom-title-a{display:flex;align-items:center;gap:var(--spacing-04, 12px)}#s-controls .zoom-title-btn{font:inherit;font-size:var(--type-ui-size, .75rem);padding:var(--spacing-02, 6px) var(--spacing-04, 12px);border-radius:var(--radius, 8px);border:0;background:var(--text);color:var(--bg)}#s-controls .zoom-stage{height:240px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--surface)}#s-controls .zoom-sample{max-width:420px;padding:var(--spacing-05, 16px)}#s-controls .zoom-sample h3{margin:0 0 var(--spacing-03, 8px);font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .zoom-sample p{margin:0;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}#s-controls .zoom-demo pre{margin:0;font:var(--type-micro-size, .5625rem)/1.6 ui-monospace, Menlo, monospace;color:var(--text-muted);white-space:pre-wrap}
 #s-controls .wip{max-width:72ch}#s-controls .wip>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2)}#s-controls .wip>p b{color:var(--ink);font-weight:600}#s-controls .wip-list{display:grid;gap:16px;margin:0;padding:0;list-style:none}#s-controls .wip-card{display:block;position:relative;padding:22px 24px;text-decoration:none;color:inherit;
   border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
@@ -6087,29 +6090,64 @@ type stays type. 50&ndash;400%, steps of 10, kept in <code>localStorage</code>. 
 press the marks, or focus the rail and press <code>+</code> <code>&minus;</code> <code>0</code>.
 <code>src/zoomControl.js</code> + <code>.css</code>; GESTURES.md &sect;12.</p>
 <div class="zoom-demo">
-  <p class="chip-cap">The stack &middot; <code>.wm-theme-stack</code>: the theme chips on row 1, the zoom on row 2, one width and one right edge from one grid column</p>
+  <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and it transforms into the control; Escape or a press elsewhere folds it back. The rest mark, <code>data-icon</code>:</p>
+  <div class="wm-chip-row zoom-icons">
+    <button type="button" class="wm-chip wm-chip--small" aria-pressed="true" data-zicon="frame_inspect"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">frame_inspect</span>frame_inspect</button>
+    <button type="button" class="wm-chip wm-chip--small" aria-pressed="false" data-zicon="pageview"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">pageview</span>pageview</button>
+    <button type="button" class="wm-chip wm-chip--small" aria-pressed="false" data-zicon="feature_search"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">feature_search</span>feature_search</button>
+  </div>
+
+  <p class="chip-cap">Left &middot; <code>.wm-zoom--left</code> in a <code>.wm-theme-row</code>: opens leftwards over its own row, from a 27px footprint; the marks, the action and the line below never move</p>
+  <div class="zoom-title">
+    <span class="zoom-title-h">Paragraph comparison</span>
+    <span class="zoom-title-a">
+      <span class="wm-theme-row">
+        <span class="wm-zoom wm-zoom--left" data-collapse data-target=".zoom-sample--left" data-key="wm-system-zoom-left" data-keys="local"></span>
+        <span class="wm-theme" role="group" aria-label="Colour scheme">
+          <button type="button" class="wm-icon-btn" data-theme-pick="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
+          <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
+          <button type="button" class="wm-icon-btn" data-theme-pick="dark" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
+        </span>
+      </span>
+      <button type="button" class="zoom-title-btn">Export PDF</button>
+    </span>
+  </div>
+  <div class="zoom-stage"><div class="zoom-sample zoom-sample--left">
+    <h3>Hamburgefonstiv</h3>
+    <p>Zoomed by the control in the title row. Open, its rail has a fixed 8rem of travel, and its box lies over the row on the page ground.</p>
+  </div></div>
+
+  <p class="chip-cap">Stack &middot; <code>.wm-theme-stack</code>: rests as one mark at the right edge under the theme chips; opens under them, one width and one right edge from one grid column (the rail&rsquo;s 10rem floor makes it the wider row)</p>
   <div class="wm-theme-stack">
     <div class="wm-chip-row" role="group" aria-label="Colour scheme">
       <button type="button" class="wm-chip" data-theme-pick="auto" data-label="Auto" aria-pressed="true">Auto</button>
       <button type="button" class="wm-chip" data-theme-pick="light" data-label="Light" aria-pressed="false">Light</button>
       <button type="button" class="wm-chip" data-theme-pick="dark" data-label="Dark" aria-pressed="false">Dark</button>
     </div>
-    <div class="wm-zoom" data-target=".zoom-sample" data-key="wm-system-zoom" data-keys="local"></div>
+    <div class="wm-zoom" data-collapse data-target=".zoom-sample--stack" data-key="wm-system-zoom" data-keys="local"></div>
   </div>
-  <div class="zoom-stage"><div class="zoom-sample">
+  <div class="zoom-stage"><div class="zoom-sample zoom-sample--stack">
     <h3>Hamburgefonstiv</h3>
     <p>A sample card, zoomed by the control above. At 200% every length in it is twice as long and every baseline twice as far down; past the card&rsquo;s edge it scrolls.</p>
   </div></div>
+
   <p class="chip-cap">The markup &middot; mounted at DOMContentLoaded, or <code>wmZoom.mount(el)</code></p>
-<pre>&lt;div class="wm-theme-stack"&gt;
+<pre>&lt;span class="wm-theme-row"&gt;                                     left
+  &lt;span class="wm-zoom wm-zoom--left" data-collapse data-target="#page"&gt;&lt;/span&gt;
+  &lt;span class="wm-theme"&gt;&hellip;the three marks&hellip;&lt;/span&gt;
+&lt;/span&gt;
+
+&lt;div class="wm-theme-stack"&gt;                                   stack
   &lt;div class="wm-chip-row" role="group" aria-label="Colour scheme"&gt;&hellip;Auto Light Dark&hellip;&lt;/div&gt;
-  &lt;div class="wm-zoom" data-target="#page" data-min="50" data-max="400" data-step="10"&gt;&lt;/div&gt;
+  &lt;div class="wm-zoom" data-collapse data-icon="pageview" data-target="#page"&gt;&lt;/div&gt;
 &lt;/div&gt;
 
-data-key   localStorage key (wm-zoom)      data-keys="local"  keys only with focus inside
-event      wm-zoom, bubbling, detail = the percent, on every change and at mount
-keys       + or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; never with Cmd/Ctrl/Alt</pre>
-  <p class="chip-cap">Alone &middot; <code>.wm-zoom</code> needs no stack; under the theme marks (<code>.wm-theme</code>) the zoom row is the wider and sets the width instead</p>
+data-min / max / step   50 / 400 / 10        data-key   localStorage key (wm-zoom): "170 open"
+data-collapse           rest as one mark     data-icon  frame_inspect | pageview | feature_search
+data-open="true"        start open           data-keys="local"  keys only with focus inside
+events     wm-zoom (detail: the percent) &middot; wm-zoom-open (detail: true / false), bubbling
+keys       + or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; Escape folds &middot; never with Cmd/Ctrl/Alt</pre>
+  <p class="chip-cap">Without <code>data-collapse</code> it is always open, and needs no stack</p>
 </div>
 
 <h2 id="controls-c4">WIP primitives <span>pages to decide from</span></h2><div class="wip" id="controls-wip"><p><b>Nothing here ships.</b> A control above has a spec and a test; a page here has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline so it cannot pass for finished.</p><ul class="wip-list"><li><a class="wip-card" href="system/pages/buttons.html"><u>undecided</u><b>Six ways to say press</b><i>the button as six families, Keyline, Lozenge, Rule, Plate, Bracket, Menu, each drawing the same six specimens, with a coverage table of what each cannot do. Explorations: none chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; NEXT.md G says what a choice, if one is ever made, changes.</i></a></li><li><a class="wip-card" href="system/pages/play.html"><u>undecided</u><b>Seven ways to say play</b><i>the one control where a press does two things, drawn seven ways by what carries the difference: the mark, the ring, the word, the ground, the enclosure, the elevation, the surface. All live on one fake ninety-second clip. Superseded in scope by the transport page below &#8212; the bar, not the button, is the instrument &#8212; and kept as the record of the button question. TRANSPORT.md.</i></a></li><li><a class="wip-card" href="system/pages/transport.html"><u>undecided</u><b>Six ways to build the bar</b><i>one transport primitive &#8212; play, scrubber, readouts slot &#8212; in two registers, WORDMAKE's frames and Morf's builds, each schema drawn twice on the same live clocks: Deck, Slate, Ruler, Strip, Cells, Overlay. Decided: one primitive; no stage click; Morf's stops evenly by beat. Undecided: the schema. TRANSPORT.md has the coverage and what none has had.</i></a></li></ul></div></div>
@@ -7489,6 +7527,9 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
  *   key      localStorage key (data-key), default 'wm-zoom'
  *   keys     'local' (data-keys="local"): + \u2212 0 only while focus is inside this control
  *   value    the start value when nothing is stored, default 100
+ *   collapse (data-collapse) rest as ONE mark, data-icon (frame_inspect | pageview |
+ *            feature_search), and transform out of it on press; data-open="true" starts open.
+ *            Escape or a press outside closes it. The open state is kept with the value.
  * Returns { el, get, set(v), destroy }.
  *
  * What it does (GESTURES.md \u00A712):
@@ -7546,7 +7587,17 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     rail.setAttribute('aria-label', 'Zoom');
     rail.setAttribute('aria-valuemin', String(min));
     rail.setAttribute('aria-valuemax', String(max));
-    el.replaceChildren(out, rail, into, fit);
+    // the box is what grows: one 27px slot (zoom_out, with the rest mark over it when the
+    // control collapses), the rail, zoom_in, fit. Collapsed, the box is the slot alone.
+    const collapse = !!(opts.collapse ?? ('collapse' in ds));
+    const box = mk('div', 'wm-zoom-box'), slot = mk('span', 'wm-zoom-slot');
+    const toggle = btn(opts.icon ?? ds.icon ?? 'frame_inspect', 'Zoom', 'Zoom');
+    toggle.classList.add('wm-zoom-toggle');
+    toggle.setAttribute('aria-expanded', 'false');
+    slot.append(out);
+    if (collapse) slot.append(toggle);
+    box.append(slot, rail, into, fit);
+    el.replaceChildren(box);
 
     // the target, anchored top-left: its 100% width and left margin, measured with the zoom off
     let base = null;
@@ -7565,7 +7616,10 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       });
     };
 
-    let value = 100;
+    let value = 100, open = !collapse;
+    // one key for both: "170", or "170 open" / "170 closed" when the control collapses -- a
+    // reader that only wants the number still gets it from parseFloat
+    const store = () => { try { localStorage.setItem(key, String(value) + (collapse ? (open ? ' open' : ' closed') : '')); } catch { /* private mode */ } };
     const set = (v, save = true) => {
       v = snap(Number(v));
       if (!Number.isFinite(v)) return;
@@ -7575,7 +7629,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       rail.setAttribute('aria-valuetext', fmt(v));
       pill.style.setProperty('--p', String((v - min) / (max - min)));   // dialHandle.css declares --p on the pill
       zoomTarget(v / 100);
-      if (save) { try { localStorage.setItem(key, String(v)); } catch { /* private mode */ } }
+      if (save) store();
       el.dispatchEvent(new CustomEvent('wm-zoom', { detail: v, bubbles: true }));
     };
 
@@ -7623,6 +7677,39 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     out.addEventListener('click', () => set(value - step));
     into.addEventListener('click', () => set(value + step));
     fit.addEventListener('click', () => set(100));
+    // OPEN AND CLOSE: the box's width runs from the slot to its open width (measured, then
+    // released, so a stretched row keeps stretching); the marks cross-fade in CSS. Reduced
+    // motion: the same states, no transition.
+    const parts = [out, rail, into, fit];
+    const paint = () => {
+      el.dataset.open = String(open);
+      toggle.setAttribute('aria-expanded', String(open));
+      parts.forEach(p => { p.inert = !open; });
+      toggle.inert = open;
+    };
+    let settle = 0;
+    const setOpen = (o, { animate = true, save = true } = {}) => {
+      if (!collapse || o === open) return;
+      const still = !animate || matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const from = box.getBoundingClientRect().width;
+      clearTimeout(settle); box.style.inlineSize = ''; delete el.dataset.moving;
+      open = o; paint();
+      if (save) store();
+      el.dispatchEvent(new CustomEvent('wm-zoom-open', { detail: open, bubbles: true }));
+      if (still) return;
+      const to = box.getBoundingClientRect().width;
+      el.dataset.moving = '';
+      box.style.inlineSize = from + 'px';
+      box.getBoundingClientRect();   // commit the start, so the change below transitions
+      box.style.inlineSize = to + 'px';
+      const done = () => { box.style.inlineSize = ''; delete el.dataset.moving; };
+      settle = setTimeout(done, (parseFloat(getComputedStyle(box).transitionDuration) || 0) * 1000 + 40);
+    };
+    toggle.addEventListener('click', () => { setOpen(true); rail.focus({ preventScroll: true }); });
+    el.addEventListener('keydown', e => { if (e.key === 'Escape' && open && collapse) { setOpen(false); toggle.focus({ preventScroll: true }); e.preventDefault(); } });
+    const outside = e => { if (open && collapse && !el.contains(e.target)) setOpen(false); };
+    document.addEventListener('pointerdown', outside);
+
     const resize = () => { if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
     window.addEventListener('resize', resize);
 
@@ -7630,7 +7717,10 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       el, local, step,
       get: () => value,
       set: v => set(v),
+      isOpen: () => open,
+      setOpen: o => setOpen(!!o),
       destroy: () => {
+        document.removeEventListener('pointerdown', outside); clearTimeout(settle);
         window.removeEventListener('resize', resize); window.removeEventListener('pointerup', end); window.removeEventListener('blur', end);
         clear();
         live.delete(api); el.replaceChildren(); delete el.__wmZoom;
@@ -7640,7 +7730,13 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     live.add(api);
 
     let start = num(opts.value, ds.value, 100);
-    try { const s = parseFloat(localStorage.getItem(key)); if (Number.isFinite(s)) start = s; } catch { /* private mode */ }
+    let o0 = collapse ? (opts.open ?? ds.open) === true || (opts.open ?? ds.open) === 'true' : true;
+    try {
+      const raw = localStorage.getItem(key) ?? '', s = parseFloat(raw);
+      if (Number.isFinite(s)) start = s;
+      if (collapse && /\b(open|closed)\b/.test(raw)) o0 = /\bopen\b/.test(raw);
+    } catch { /* private mode */ }
+    open = o0; paint();
     set(start, false);
     size();
     if (document.fonts) document.fonts.ready.then(() => { if (el.__wmZoom === api) size(); });
@@ -8559,9 +8655,21 @@ ROOT.querySelectorAll('.chip-demo [data-one]').forEach(row => row.addEventListen
 
 // The zoom chapter's theme chips act on the page, as the switch would; the page does not store it.
 ROOT.querySelectorAll('[data-theme-pick]').forEach(b => b.addEventListener('click', () => {
-  ROOT.querySelectorAll('[data-theme-pick]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  ROOT.querySelectorAll('[data-theme-pick]').forEach(x => { const on = x.dataset.themePick === b.dataset.themePick; x.setAttribute('aria-pressed', String(on)); if (x.classList.contains('wm-icon-btn')) x.classList.toggle('active', on); });
   if (b.dataset.themePick === 'auto') document.documentElement.removeAttribute('data-theme');
   else document.documentElement.dataset.theme = b.dataset.themePick;
+}));
+
+// The zoom chapter's rest-mark chips: one icon for both demos, remounted with it.
+ROOT.querySelectorAll('.zoom-icons [data-zicon]').forEach(b => b.addEventListener('click', () => {
+  ROOT.querySelectorAll('.zoom-icons [data-zicon]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  ROOT.querySelectorAll('.zoom-demo .wm-zoom').forEach(z => {
+    const open = z.__wmZoom ? z.__wmZoom.isOpen() : false;
+    if (z.__wmZoom) z.__wmZoom.destroy();
+    z.dataset.icon = b.dataset.zicon;
+    const api = wmZoom.mount(z);
+    if (open) api.setOpen(true);
+  });
 }));
 
 })();

@@ -11,6 +11,9 @@
  *   key      localStorage key (data-key), default 'wm-zoom'
  *   keys     'local' (data-keys="local"): + − 0 only while focus is inside this control
  *   value    the start value when nothing is stored, default 100
+ *   collapse (data-collapse) rest as ONE mark, data-icon (frame_inspect | pageview |
+ *            feature_search), and transform out of it on press; data-open="true" starts open.
+ *            Escape or a press outside closes it. The open state is kept with the value.
  * Returns { el, get, set(v), destroy }.
  *
  * What it does (GESTURES.md §12):
@@ -68,7 +71,17 @@
     rail.setAttribute('aria-label', 'Zoom');
     rail.setAttribute('aria-valuemin', String(min));
     rail.setAttribute('aria-valuemax', String(max));
-    el.replaceChildren(out, rail, into, fit);
+    // the box is what grows: one 27px slot (zoom_out, with the rest mark over it when the
+    // control collapses), the rail, zoom_in, fit. Collapsed, the box is the slot alone.
+    const collapse = !!(opts.collapse ?? ('collapse' in ds));
+    const box = mk('div', 'wm-zoom-box'), slot = mk('span', 'wm-zoom-slot');
+    const toggle = btn(opts.icon ?? ds.icon ?? 'frame_inspect', 'Zoom', 'Zoom');
+    toggle.classList.add('wm-zoom-toggle');
+    toggle.setAttribute('aria-expanded', 'false');
+    slot.append(out);
+    if (collapse) slot.append(toggle);
+    box.append(slot, rail, into, fit);
+    el.replaceChildren(box);
 
     // the target, anchored top-left: its 100% width and left margin, measured with the zoom off
     let base = null;
@@ -87,7 +100,10 @@
       });
     };
 
-    let value = 100;
+    let value = 100, open = !collapse;
+    // one key for both: "170", or "170 open" / "170 closed" when the control collapses -- a
+    // reader that only wants the number still gets it from parseFloat
+    const store = () => { try { localStorage.setItem(key, String(value) + (collapse ? (open ? ' open' : ' closed') : '')); } catch { /* private mode */ } };
     const set = (v, save = true) => {
       v = snap(Number(v));
       if (!Number.isFinite(v)) return;
@@ -97,7 +113,7 @@
       rail.setAttribute('aria-valuetext', fmt(v));
       pill.style.setProperty('--p', String((v - min) / (max - min)));   // dialHandle.css declares --p on the pill
       zoomTarget(v / 100);
-      if (save) { try { localStorage.setItem(key, String(v)); } catch { /* private mode */ } }
+      if (save) store();
       el.dispatchEvent(new CustomEvent('wm-zoom', { detail: v, bubbles: true }));
     };
 
@@ -145,6 +161,39 @@
     out.addEventListener('click', () => set(value - step));
     into.addEventListener('click', () => set(value + step));
     fit.addEventListener('click', () => set(100));
+    // OPEN AND CLOSE: the box's width runs from the slot to its open width (measured, then
+    // released, so a stretched row keeps stretching); the marks cross-fade in CSS. Reduced
+    // motion: the same states, no transition.
+    const parts = [out, rail, into, fit];
+    const paint = () => {
+      el.dataset.open = String(open);
+      toggle.setAttribute('aria-expanded', String(open));
+      parts.forEach(p => { p.inert = !open; });
+      toggle.inert = open;
+    };
+    let settle = 0;
+    const setOpen = (o, { animate = true, save = true } = {}) => {
+      if (!collapse || o === open) return;
+      const still = !animate || matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const from = box.getBoundingClientRect().width;
+      clearTimeout(settle); box.style.inlineSize = ''; delete el.dataset.moving;
+      open = o; paint();
+      if (save) store();
+      el.dispatchEvent(new CustomEvent('wm-zoom-open', { detail: open, bubbles: true }));
+      if (still) return;
+      const to = box.getBoundingClientRect().width;
+      el.dataset.moving = '';
+      box.style.inlineSize = from + 'px';
+      box.getBoundingClientRect();   // commit the start, so the change below transitions
+      box.style.inlineSize = to + 'px';
+      const done = () => { box.style.inlineSize = ''; delete el.dataset.moving; };
+      settle = setTimeout(done, (parseFloat(getComputedStyle(box).transitionDuration) || 0) * 1000 + 40);
+    };
+    toggle.addEventListener('click', () => { setOpen(true); rail.focus({ preventScroll: true }); });
+    el.addEventListener('keydown', e => { if (e.key === 'Escape' && open && collapse) { setOpen(false); toggle.focus({ preventScroll: true }); e.preventDefault(); } });
+    const outside = e => { if (open && collapse && !el.contains(e.target)) setOpen(false); };
+    document.addEventListener('pointerdown', outside);
+
     const resize = () => { if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
     window.addEventListener('resize', resize);
 
@@ -152,7 +201,10 @@
       el, local, step,
       get: () => value,
       set: v => set(v),
+      isOpen: () => open,
+      setOpen: o => setOpen(!!o),
       destroy: () => {
+        document.removeEventListener('pointerdown', outside); clearTimeout(settle);
         window.removeEventListener('resize', resize); window.removeEventListener('pointerup', end); window.removeEventListener('blur', end);
         clear();
         live.delete(api); el.replaceChildren(); delete el.__wmZoom;
@@ -162,7 +214,13 @@
     live.add(api);
 
     let start = num(opts.value, ds.value, 100);
-    try { const s = parseFloat(localStorage.getItem(key)); if (Number.isFinite(s)) start = s; } catch { /* private mode */ }
+    let o0 = collapse ? (opts.open ?? ds.open) === true || (opts.open ?? ds.open) === 'true' : true;
+    try {
+      const raw = localStorage.getItem(key) ?? '', s = parseFloat(raw);
+      if (Number.isFinite(s)) start = s;
+      if (collapse && /\b(open|closed)\b/.test(raw)) o0 = /\bopen\b/.test(raw);
+    } catch { /* private mode */ }
+    open = o0; paint();
     set(start, false);
     size();
     if (document.fonts) document.fonts.ready.then(() => { if (el.__wmZoom === api) size(); });

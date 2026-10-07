@@ -164,3 +164,95 @@ test('G65 · press the lozenge and it does not jump; drag to the end reaches max
   const p2 = (await page.locator(`${ctl} .wm-hd-pill`).boundingBox())!
   expect(p2.x - rail.x).toBeGreaterThanOrEqual(-0.5)   // the lozenge never leaves the rail
 })
+
+/* ---- collapse (data-collapse): rest as one mark, transform out of it on press ---- */
+const rect = (page: Page, s: string) => page.evaluate(s => { const b = document.querySelector(s)!.getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, w: b.width, h: Math.round(b.height * 100) / 100 } }, s)
+const press = (page: Page, s: string, hasTouch: boolean) => hasTouch ? page.locator(s).dispatchEvent('click') : page.locator(s).click()
+
+test('G66 · at rest a collapsing control is one 27px mark: data-icon, frame_inspect by default', async ({ page, hasTouch }) => {
+  const H = hasTouch ? 33 : 27
+  const row = await page.evaluate(() => {
+    const z = document.querySelector('#row .wm-zoom')!
+    return { open: (z as HTMLElement).dataset.open, mark: z.querySelector('.wm-zoom-toggle .wm-icon')!.textContent,
+      inert: [...z.querySelectorAll('.wm-zoom-box > .wm-icon-btn, .wm-hd-rail, .wm-zoom-slot > :not(.wm-zoom-toggle)')].map(e => (e as HTMLElement).inert),
+      expanded: z.querySelector('.wm-zoom-toggle')!.getAttribute('aria-expanded') }
+  })
+  expect(row.open).toBe('false'); expect(row.mark).toBe('frame_inspect'); expect(row.expanded).toBe('false')
+  expect(row.inert.every(Boolean)).toBe(true)
+  const box = await rect(page, '#row .wm-zoom-box'), t = await rect(page, '#row .wm-zoom-toggle')
+  expect(box.w).toBe(H); expect(box.h).toBe(H); expect(t.w).toBe(H); expect(t.h).toBe(H)
+  // the other two rest marks, as data-icon picks them
+  expect(await page.locator('#cstack .wm-zoom-toggle .wm-icon').textContent()).toBe('pageview')
+  const fs = await page.evaluate(() => { const el = document.createElement('div'); el.className = 'wm-zoom'; el.dataset.collapse = ''; el.dataset.icon = 'feature_search'; el.dataset.key = 'wm-zoom-x'; el.dataset.keys = 'local'; document.body.appendChild(el); (window as any).wmZoom.mount(el); return el.querySelector('.wm-zoom-toggle .wm-icon')!.textContent })
+  expect(fs).toBe('feature_search')
+})
+
+test('G67 · press transforms the mark into the control; Escape and a press outside close it', async ({ page, hasTouch }) => {
+  test.skip(hasTouch, 'the press and the keys are the same on touch; the transform is timed here once')
+  await expect(page.locator('#cstack .wm-zoom')).toHaveAttribute('data-open', 'true')
+  await page.locator('#row .wm-zoom-toggle').click()
+  await expect(page.locator('#cstack .wm-zoom')).toHaveAttribute('data-open', 'false')   // that press was outside the stack
+  await page.waitForTimeout(60)
+  const mid = await rect(page, '#row .wm-zoom-box')
+  expect(mid.w).toBeGreaterThan(27); expect(mid.w).toBeLessThan(217)   // it is moving, not swapped
+  await page.waitForTimeout(400)
+  const open = await rect(page, '#row .wm-zoom-box')
+  expect(open.w).toBe(217)
+  await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'true')
+  await expect(page.locator('#row .wm-zoom-toggle')).toHaveAttribute('aria-expanded', 'true')
+  expect(await page.evaluate(() => document.activeElement!.getAttribute('role'))).toBe('slider')
+  await page.keyboard.press('Escape'); await page.waitForTimeout(400)
+  await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'false')
+  expect(await page.evaluate(() => document.activeElement!.classList.contains('wm-zoom-toggle'))).toBe(true)
+  expect((await rect(page, '#row .wm-zoom-box')).w).toBe(27)
+  // a press on the page closes it too
+  await page.locator('#row .wm-zoom-toggle').click()
+  await page.mouse.click(600, 420)
+  await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'false')
+})
+
+test('G68 · reduced motion: the same states, no transform', async ({ page, hasTouch }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await press(page, '#row .wm-zoom-toggle', hasTouch)
+  const w = await page.evaluate(() => [document.querySelector('#row .wm-zoom-box')!.getBoundingClientRect().width, 'moving' in (document.querySelector('#row .wm-zoom') as HTMLElement).dataset])
+  expect(w[1]).toBe(false)
+  expect(w[0]).toBeGreaterThan(200)
+})
+
+test('G69 · the open state is kept with the value, under the one key', async ({ page, hasTouch }) => {
+  await press(page, '#row .wm-zoom-toggle', hasTouch)
+  await page.evaluate(() => (document.querySelector('#row .wm-zoom') as any).__wmZoom.set(180))
+  expect(await page.evaluate(() => localStorage.getItem('wm-zoom-row'))).toBe('180 open')
+  await page.reload(); await page.evaluate(() => document.fonts.ready)
+  await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'true')
+  expect(await value(page, '#row .wm-zoom')).toBe(180)
+  await page.keyboard.press('Tab')   // focus somewhere, then close from inside
+  await page.locator('#row [role="slider"]').focus(); await page.keyboard.press('Escape')
+  expect(await page.evaluate(() => localStorage.getItem('wm-zoom-row'))).toBe('180 closed')
+})
+
+test('G70 · LEFT: opens leftwards over its row; right edge, row height and everything else stay', async ({ page, hasTouch }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const H = hasTouch ? 33 : 27
+  const snap = async () => ({ z: await rect(page, '#row .wm-zoom'), box: await rect(page, '#row .wm-zoom-box'), theme: await rect(page, '#row .wm-theme'),
+    exp: await rect(page, '#export'), under: await rect(page, '#under'), hdg: await rect(page, '#hdg'), row: await rect(page, '#row') })
+  const a = await snap()
+  await press(page, '#row .wm-zoom-toggle', hasTouch)
+  const b = await snap()
+  expect(Math.abs(b.box.r - a.box.r)).toBeLessThanOrEqual(0.5)   // the right edge is anchored
+  expect(b.box.h).toBe(H); expect(b.row.h).toBe(H)
+  expect(b.box.w).toBeGreaterThanOrEqual(3 * H + 128)             // the rail has 8rem of travel
+  for (const k of ['z', 'theme', 'exp', 'under', 'hdg', 'row'] as const) expect(b[k], k).toEqual(a[k])
+})
+
+test('G71 · STACK: rests at the right edge under the switch; open, one width and one right edge', async ({ page, hasTouch }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const H = hasTouch ? 33 : 27
+  let r1 = await rect(page, '#cstack > :first-child'), r2 = await rect(page, '#cstack > .wm-zoom')
+  expect(Math.abs(r1.w - r2.w)).toBeLessThanOrEqual(0.5); expect(Math.abs(r1.r - r2.r)).toBeLessThanOrEqual(0.5)
+  expect(r2.h).toBe(H)
+  expect((await rect(page, '#cstack .wm-hd-rail')).w).toBeGreaterThanOrEqual(160)   // the 10rem floor
+  await page.locator('#cstack [role="slider"]').focus(); await page.keyboard.press('Escape')
+  r1 = await rect(page, '#cstack > :first-child'); r2 = await rect(page, '#cstack > .wm-zoom')
+  expect(r2.w).toBe(H); expect(Math.abs(r1.r - r2.r)).toBeLessThanOrEqual(0.5); expect(r2.h).toBe(H)
+})

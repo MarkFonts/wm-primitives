@@ -20,6 +20,10 @@
     font-family: var(--ui-font, system-ui, sans-serif);
     color: var(--text-muted, rgba(232, 232, 232, .62));
   }
+  .wm-zoom-box { display: flex; align-items: center; flex: 1 1 auto; min-inline-size: 0; block-size: 100%; }
+  /* the first slot holds zoom_out, and the rest mark over it when the control collapses */
+  .wm-zoom-slot { position: relative; flex: none; display: flex; }
+  .wm-zoom-slot > .wm-zoom-toggle { position: absolute; inset: 0; }
   .wm-zoom .wm-icon-btn {
     --icon-btn-pad: 0;   /* icon.css's knob: the target is the square below, not padding round the mark */
     flex: none;
@@ -36,7 +40,7 @@
      and the pill never leaves the rail. */
   .wm-zoom .wm-hd-rail {
     flex: 1 1 0;
-    min-inline-size: 6rem;
+    min-inline-size: 10rem;   /* 350 points of zoom over 160px less the lozenge: ~2.4px a step */
     block-size: 27px;
     margin-inline: var(--spacing-01, 4px);
   }
@@ -50,7 +54,39 @@
     white-space: nowrap;
   }
 
+
+  /* COLLAPSE (data-collapse): at rest the box is the slot alone, showing the rest mark; open,
+     the box grows to the control and the rest mark cross-fades into zoom_out where it stands.
+     zoomControl.js animates the width ([data-moving]); everything else is opacity. Clipped
+     only while shut or moving, so the open control's focus rings are never cut. */
+  .wm-zoom[data-collapse] { --zoom-dur: var(--dur-med, 240ms); }
+  .wm-zoom[data-open="false"] .wm-zoom-box { inline-size: 27px; }
+  .wm-zoom[data-open="false"] .wm-zoom-box, .wm-zoom[data-moving] .wm-zoom-box { overflow: clip; }
+  .wm-zoom[data-moving] .wm-zoom-box { transition: inline-size var(--zoom-dur) ease-out; }
+  .wm-zoom[data-collapse] :is(.wm-zoom-slot > .wm-icon-btn, .wm-hd-pill, .wm-hd-rail > i, .wm-zoom-box > .wm-icon-btn) {
+    transition: opacity var(--zoom-dur) ease-out;
+  }
+  .wm-zoom[data-open="false"] :is(.wm-zoom-slot > :not(.wm-zoom-toggle), .wm-hd-pill, .wm-hd-rail > i, .wm-zoom-box > .wm-icon-btn),
+  .wm-zoom[data-open="true"] .wm-zoom-toggle { opacity: 0; pointer-events: none; }
+
+  /* LEFT (.wm-zoom--left): the control on the theme switch's row, opening leftwards from a
+     27px footprint. The open box lies OVER what is to its left, on the page ground, so
+     nothing in the row or below it moves; its right edge is the footprint's (the ground: --zoom-ground). The rail is a
+     fixed 8rem: real travel, and a width the host can plan for (217px open). */
+  .wm-zoom--left { position: relative; flex: none; inline-size: 27px; }
+  /* --zoom-ground: what the open box lies on. Transparent by default -- a host's row is rarely
+     the page's --bg exactly (the system page's is not) -- and a host whose row can hold text
+     under the box sets its own ground (GliffDiff: --bg). Declared at the root, as dialHandle's knobs. */
+  :root { --zoom-ground: transparent; }
+  .wm-zoom--left .wm-zoom-box { position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }
+  .wm-zoom--left .wm-hd-rail { flex: 0 0 8rem; min-inline-size: 8rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wm-zoom .wm-zoom-box, .wm-zoom * { transition: none !important; }
+  }
+
   @media (pointer: coarse) {
+    .wm-zoom[data-open="false"] .wm-zoom-box, .wm-zoom--left { inline-size: 33px; }
     .wm-zoom, .wm-zoom .wm-hd-rail { block-size: 33px; }   /* eleven units, chip.css's touch floor */
     .wm-zoom .wm-icon-btn { inline-size: 33px; block-size: 33px; }
   }

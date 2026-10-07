@@ -638,6 +638,11 @@
    sample grows right and down inside it the way a page would in the window. */
 .zoom-demo{display:grid;gap:var(--spacing-04, 12px);margin:8px 0 40px}
 .zoom-demo .wm-theme-stack{justify-self:end}
+.zoom-demo > .wm-chip-row{justify-self:start}
+.zoom-title{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-05, 16px)}
+.zoom-title-h{font-size:var(--type-lede-size, 1.125rem);color:var(--text)}
+.zoom-title-a{display:flex;align-items:center;gap:var(--spacing-04, 12px)}
+.zoom-title-btn{font:inherit;font-size:var(--type-ui-size, .75rem);padding:var(--spacing-02, 6px) var(--spacing-04, 12px);border-radius:var(--radius, 8px);border:0;background:var(--text);color:var(--bg)}
 .zoom-stage{height:240px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--surface)}
 .zoom-sample{max-width:420px;padding:var(--spacing-05, 16px)}
 .zoom-sample h3{margin:0 0 var(--spacing-03, 8px);font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}
@@ -739,29 +744,64 @@ type stays type. 50&ndash;400%, steps of 10, kept in <code>localStorage</code>. 
 press the marks, or focus the rail and press <code>+</code> <code>&minus;</code> <code>0</code>.
 <code>src/zoomControl.js</code> + <code>.css</code>; GESTURES.md &sect;12.</p>
 <div class="zoom-demo">
-  <p class="chip-cap">The stack &middot; <code>.wm-theme-stack</code>: the theme chips on row 1, the zoom on row 2, one width and one right edge from one grid column</p>
+  <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and it transforms into the control; Escape or a press elsewhere folds it back. The rest mark, <code>data-icon</code>:</p>
+  <div class="wm-chip-row zoom-icons">
+    <button type="button" class="wm-chip wm-chip--small" aria-pressed="true" data-zicon="frame_inspect"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">frame_inspect</span>frame_inspect</button>
+    <button type="button" class="wm-chip wm-chip--small" aria-pressed="false" data-zicon="pageview"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">pageview</span>pageview</button>
+    <button type="button" class="wm-chip wm-chip--small" aria-pressed="false" data-zicon="feature_search"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">feature_search</span>feature_search</button>
+  </div>
+
+  <p class="chip-cap">Left &middot; <code>.wm-zoom--left</code> in a <code>.wm-theme-row</code>: opens leftwards over its own row, from a 27px footprint; the marks, the action and the line below never move</p>
+  <div class="zoom-title">
+    <span class="zoom-title-h">Paragraph comparison</span>
+    <span class="zoom-title-a">
+      <span class="wm-theme-row">
+        <span class="wm-zoom wm-zoom--left" data-collapse data-target=".zoom-sample--left" data-key="wm-system-zoom-left" data-keys="local"></span>
+        <span class="wm-theme" role="group" aria-label="Colour scheme">
+          <button type="button" class="wm-icon-btn" data-theme-pick="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
+          <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
+          <button type="button" class="wm-icon-btn" data-theme-pick="dark" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
+        </span>
+      </span>
+      <button type="button" class="zoom-title-btn">Export PDF</button>
+    </span>
+  </div>
+  <div class="zoom-stage"><div class="zoom-sample zoom-sample--left">
+    <h3>Hamburgefonstiv</h3>
+    <p>Zoomed by the control in the title row. Open, its rail has a fixed 8rem of travel, and its box lies over the row on the page ground.</p>
+  </div></div>
+
+  <p class="chip-cap">Stack &middot; <code>.wm-theme-stack</code>: rests as one mark at the right edge under the theme chips; opens under them, one width and one right edge from one grid column (the rail&rsquo;s 10rem floor makes it the wider row)</p>
   <div class="wm-theme-stack">
     <div class="wm-chip-row" role="group" aria-label="Colour scheme">
       <button type="button" class="wm-chip" data-theme-pick="auto" data-label="Auto" aria-pressed="true">Auto</button>
       <button type="button" class="wm-chip" data-theme-pick="light" data-label="Light" aria-pressed="false">Light</button>
       <button type="button" class="wm-chip" data-theme-pick="dark" data-label="Dark" aria-pressed="false">Dark</button>
     </div>
-    <div class="wm-zoom" data-target=".zoom-sample" data-key="wm-system-zoom" data-keys="local"></div>
+    <div class="wm-zoom" data-collapse data-target=".zoom-sample--stack" data-key="wm-system-zoom" data-keys="local"></div>
   </div>
-  <div class="zoom-stage"><div class="zoom-sample">
+  <div class="zoom-stage"><div class="zoom-sample zoom-sample--stack">
     <h3>Hamburgefonstiv</h3>
     <p>A sample card, zoomed by the control above. At 200% every length in it is twice as long and every baseline twice as far down; past the card&rsquo;s edge it scrolls.</p>
   </div></div>
+
   <p class="chip-cap">The markup &middot; mounted at DOMContentLoaded, or <code>wmZoom.mount(el)</code></p>
-<pre>&lt;div class="wm-theme-stack"&gt;
+<pre>&lt;span class="wm-theme-row"&gt;                                     left
+  &lt;span class="wm-zoom wm-zoom--left" data-collapse data-target="#page"&gt;&lt;/span&gt;
+  &lt;span class="wm-theme"&gt;&hellip;the three marks&hellip;&lt;/span&gt;
+&lt;/span&gt;
+
+&lt;div class="wm-theme-stack"&gt;                                   stack
   &lt;div class="wm-chip-row" role="group" aria-label="Colour scheme"&gt;&hellip;Auto Light Dark&hellip;&lt;/div&gt;
-  &lt;div class="wm-zoom" data-target="#page" data-min="50" data-max="400" data-step="10"&gt;&lt;/div&gt;
+  &lt;div class="wm-zoom" data-collapse data-icon="pageview" data-target="#page"&gt;&lt;/div&gt;
 &lt;/div&gt;
 
-data-key   localStorage key (wm-zoom)      data-keys="local"  keys only with focus inside
-event      wm-zoom, bubbling, detail = the percent, on every change and at mount
-keys       + or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; never with Cmd/Ctrl/Alt</pre>
-  <p class="chip-cap">Alone &middot; <code>.wm-zoom</code> needs no stack; under the theme marks (<code>.wm-theme</code>) the zoom row is the wider and sets the width instead</p>
+data-min / max / step   50 / 400 / 10        data-key   localStorage key (wm-zoom): "170 open"
+data-collapse           rest as one mark     data-icon  frame_inspect | pageview | feature_search
+data-open="true"        start open           data-keys="local"  keys only with focus inside
+events     wm-zoom (detail: the percent) &middot; wm-zoom-open (detail: true / false), bubbling
+keys       + or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; Escape folds &middot; never with Cmd/Ctrl/Alt</pre>
+  <p class="chip-cap">Without <code>data-collapse</code> it is always open, and needs no stack</p>
 </div>
 
 <script>
@@ -1656,8 +1696,20 @@ document.querySelectorAll('.chip-demo [data-one]').forEach(row => row.addEventLi
 
 // The zoom chapter's theme chips act on the page, as the switch would; the page does not store it.
 document.querySelectorAll('[data-theme-pick]').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('[data-theme-pick]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  document.querySelectorAll('[data-theme-pick]').forEach(x => { const on = x.dataset.themePick === b.dataset.themePick; x.setAttribute('aria-pressed', String(on)); if (x.classList.contains('wm-icon-btn')) x.classList.toggle('active', on); });
   if (b.dataset.themePick === 'auto') document.documentElement.removeAttribute('data-theme');
   else document.documentElement.dataset.theme = b.dataset.themePick;
+}));
+
+// The zoom chapter's rest-mark chips: one icon for both demos, remounted with it.
+document.querySelectorAll('.zoom-icons [data-zicon]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.zoom-icons [data-zicon]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  document.querySelectorAll('.zoom-demo .wm-zoom').forEach(z => {
+    const open = z.__wmZoom ? z.__wmZoom.isOpen() : false;
+    if (z.__wmZoom) z.__wmZoom.destroy();
+    z.dataset.icon = b.dataset.zicon;
+    const api = wmZoom.mount(z);
+    if (open) api.setOpen(true);
+  });
 }));
 </script>

@@ -50,8 +50,22 @@ applies CSS `zoom` to the target. GESTURES.md §12, G58-G65; `tests/behaviour/zo
   wm.controls rule can reach; the zoom row's marks are held to 33 in that same layer, so the
   row is one control tall beside the chips, as the prototype was.
 
-**Icons.** zoom_in, zoom_out and fit_screen join the subset (cut-icon-subset.py): 92 ligatures,
-64,380 bytes, `?v=92`. The prototype had loaded them from Google as a second family, because a
+**Round 2, the same day: it folds into one mark.** Mark asked whether it should rest behind one
+icon and transform out of it, and whether it should then sit under the theme switch or to its
+left. Both are built so he can choose (GESTURES G66-G71):
+- `data-collapse` rests as one 27px `.wm-icon-btn` showing `data-icon` -- frame_inspect
+  (default), pageview or feature_search. A press grows the box from the mark to the control over
+  `--dur-med` while the mark cross-fades into zoom_out where it stands; Escape or a press outside
+  folds it. zoom_out takes the mark's place, so there is no second press on it. Reduced motion
+  swaps the states. Open/closed is stored with the value: `"170 open"`.
+- `.wm-zoom--left` in a `.wm-theme-row` (themeSwitch.css) opens leftwards over its own row from a
+  27px footprint, so nothing in the row or below it moves; its rail is a fixed 8rem. The open box
+  lies on `--zoom-ground` (transparent by default, a knob declared at :root like dialHandle's).
+- The rail's floor goes from 6rem to 10rem: at 6rem a 350-point range had about 46px of travel
+  under the chips. The stack is now wider than the chips when open, by 78px.
+
+**Icons.** zoom_in, zoom_out and fit_screen join the subset (cut-icon-subset.py), then pageview, feature_search and
+frame_inspect: 95 ligatures, 67,356 bytes, `?v=95`. The prototype had loaded them from Google as a second family, because a
 second face under the same name replaces the first. `dist/dial.css` rebuilt for the new URL and
 the stack rule (dial-entry imports themeSwitch.css). System page: a chapter in Interface after
 the chips -- the stack zooming a sample card, the markup, the keys.

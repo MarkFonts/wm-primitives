@@ -30,15 +30,23 @@
     row-gap: var(--spacing-02, 6px);
   }
   .wm-theme-stack > :first-child { justify-content: flex-end; min-block-size: 27px; }
+  /* a collapsing zoom rests as one mark at the right edge, and stretches to the column once open */
+  .wm-theme-stack > .wm-zoom[data-collapse] { justify-self: end; }
+  .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]) { justify-self: stretch; }
+  /* THE ROW: the other placement. The zoom (.wm-zoom--left) before the switch, on its line. */
+  .wm-theme-row { display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }
+  .wm-theme-row > .wm-theme .wm-icon-btn { --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }
   /* the marks at the row's 27, as the zoom row's are: a 20px drawing in a target that draws nothing */
   .wm-theme-stack > .wm-theme .wm-icon-btn { --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }
   @media (pointer: coarse) {
     .wm-theme-stack > :first-child { min-block-size: 33px; }   /* chip.css's touch floor */
     .wm-theme-stack > .wm-theme .wm-icon-btn { inline-size: 33px; block-size: 33px; }
+    .wm-theme-row { min-block-size: 33px; }
+    .wm-theme-row > .wm-theme .wm-icon-btn { inline-size: 33px; block-size: 33px; }
   }
 }
 @layer wm.icon {
   @media (pointer: coarse) {
-    .wm-theme-stack > .wm-theme .wm-icon-btn { min-inline-size: 0; min-block-size: 0; }
+    :is(.wm-theme-stack, .wm-theme-row) > .wm-theme .wm-icon-btn { min-inline-size: 0; min-block-size: 0; }
   }
 }
