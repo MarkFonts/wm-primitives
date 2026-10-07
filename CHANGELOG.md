@@ -24,10 +24,11 @@ lead. So the notes are 16/27 (page-local `.hero-notes`, lead 27, every line meet
 the other candidate, the lede at body 16/24, meets too but flattens the opener, so the lede keeps
 its role. The `KNOWN` entry is gone.
 
-The homepage's `.work-item` entry goes too: wordmark #54 (34c0453) shipped the stepped headers
+The homepage's `.work-item` entry narrows: wordmark #54 (34c0453) shipped the stepped headers
 (45/48, 39/42, 33/36 beside captions 24/21/18). Against that checkout the homepage passes checks
 10-12 at 1440, 1024 and 390; at 900 the work rows still report a 33 lead beside a 24 caption (the
-681-1023 range is still fluid), a wordmark follow-up, not a reason to keep the entry.
+681-1023 range is still fluid). So the entry returns, scoped by a `below: 1024` width field, and the
+1440 and 1024 checks stay live; it goes when wordmark steps that range.
 
 ## 2026-10-06 -- the row step: sized leads, folio elements on the step
 

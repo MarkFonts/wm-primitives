@@ -69,11 +69,13 @@ const PAGES = [
 ]
 /* KNOWN OFFENDERS of checks 7 and 8, by page and row selector: reported in the log, not failed.
    Each says why and what removes it. Keep this list short; an entry is a debt, not a waiver. */
-const KNOWN: Record<string, { row: string; why: string }[]> = {
+const KNOWN: Record<string, { row: string; why: string; below?: number }[]> = {   // below: only at viewport widths under it
   // The hero is a 30/39 lede beside a 16/27 sub: 39 is not a multiple of 27. Mark kept the lede
   // at 39 for now (Cal Sans's short ascenders look spaced out at 54, 2026-10-06); the case study
   // re-sizes its hero to a multiple of its sub's lead, and this entry goes.
   'Cal Sans case study': [{ row: '.hero-cols', why: 'lede 39 beside sub 27 until the case study re-sizes its hero' }],
+  // 681-1023 is still fluid; remove when wordmark steps that range. At 1440 and 1024 the rows are live.
+  'homepage': [{ row: '.work-item', below: 1024, why: 'work headline 33 beside caption 24 below 1024, where wordmark has not stepped the range' }],
 }
 // 1024 is where the 24 columns begin (grid.css) and where the Cal Sans hero's two columns first
 // share a row; 900 is below it, 1440 above.
@@ -462,7 +464,7 @@ for (const pg of PAGES) {
         expect(un.off, `text inside a unit that does not share the unit's baseline (mark the unit or run data-baseline="free" with a reason if it is meant to hang):\n${un.off.join('\n')}`).toEqual([])
 
         // ROWS: side-by-side text shares its lines (7), and the row's folio boxes sit on its step (8)
-        const known = (KNOWN[pg.name] ?? []).map(k => k.row)
+        const known = (KNOWN[pg.name] ?? []).filter(k => !k.below || w < k.below).map(k => k.row)
         const rw = await page.evaluate(([fn, k]) => new Function('return (' + fn + ')')()(k), [ROWS.toString(), known] as const) as { rows: number; judged: number; marks: number; out: { kind: string; row: string; msg: string; excused: string }[] }
         console.log(`rows ${pg.name} ${w}: ${rw.rows} rows of side-by-side text, ${rw.judged} larger-lead blocks, ${rw.marks} folio boxes judged`)
         for (const o of rw.out.filter(o => o.excused)) console.log(`  KNOWN OFFENDER (${o.excused}) ${o.row}: ${o.msg}`)
