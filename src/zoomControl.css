@@ -114,7 +114,7 @@
      rule's stretch and the lozenge's slide on the block axis; the glasses travel between
      measured centres, so the morph needs no rotation. Rail 126px + 3 each side: the open box
      is 3 x 27 + 132 = 213px (231 on touch), on the line. */
-  .wm-zoom--down { position: relative; flex: none; inline-size: 27px; }
+  .wm-zoom--down { position: relative; flex: none; inline-size: 27px; --zoom-shift: initial; }   /* --zoom-shift declared, unset: zoomControl.js sets it inline (as --hd-chars) */
   .wm-zoom--down .wm-zoom-box {
     position: absolute; inset-block-start: 0; inset-inline-end: 0; z-index: 1;
     flex-direction: column-reverse;   /* DOM order out, rail, in, mark: the mark on top */

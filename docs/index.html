@@ -3672,6 +3672,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     background: none;
     
     touch-action: none;
+    --stack-drag: initial;   
     transition: translate 180ms cubic-bezier(0.2, 0.7, 0.2, 1);   
   }#s-controls .wm-theme-stack--vertical > .wm-theme{ flex-direction: column; gap: 0; }#s-controls .wm-theme-stack--vertical > :first-child{ min-block-size: 0; }#s-controls .wm-theme-stack--vertical:is([data-stowed],#s-controls [data-hidden]){ translate: 0 calc(-100% - max(var(--stack-top), env(safe-area-inset-top, 0px)) - var(--spacing-02, 6px)); pointer-events: none; }#s-controls .wm-theme-stack[data-hidden]:not(.wm-theme-stack--vertical){ visibility: hidden; }#s-controls .wm-theme-stack--vertical[data-dragging]{ translate: 0 var(--stack-drag, 0px); transition: none; }@media (prefers-reduced-motion: reduce){#s-controls .wm-theme-stack--vertical{ transition: none; } }
 }@layer wm.controls{#s-controls .wm-zoom{
@@ -3710,7 +3711,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--dur-med, 240ms) ease-out;
-  }#s-controls .wm-zoom[data-open="false"][data-zoomed]:not([data-moving]) .wm-zoom-note{ opacity: 1; }@media (prefers-reduced-motion: reduce){#s-controls .wm-zoom-note{ transition: none; } }#s-controls .wm-zoom--left{ position: relative; flex: none; inline-size: 27px; }#s-controls{ --zoom-ground: transparent; --zoom-rail: 126px; }#s-controls .wm-zoom--left .wm-zoom-box{ position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }#s-controls .wm-zoom--left .wm-hd-rail{ flex: 0 0 8rem; min-inline-size: 8rem; }#s-controls .wm-zoom--down{ position: relative; flex: none; inline-size: 27px; }#s-controls .wm-zoom--down .wm-zoom-box{
+  }#s-controls .wm-zoom[data-open="false"][data-zoomed]:not([data-moving]) .wm-zoom-note{ opacity: 1; }@media (prefers-reduced-motion: reduce){#s-controls .wm-zoom-note{ transition: none; } }#s-controls .wm-zoom--left{ position: relative; flex: none; inline-size: 27px; }#s-controls{ --zoom-ground: transparent; --zoom-rail: 126px; }#s-controls .wm-zoom--left .wm-zoom-box{ position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }#s-controls .wm-zoom--left .wm-hd-rail{ flex: 0 0 8rem; min-inline-size: 8rem; }#s-controls .wm-zoom--down{ position: relative; flex: none; inline-size: 27px; --zoom-shift: initial; }#s-controls .wm-zoom--down .wm-zoom-box{
     position: absolute; inset-block-start: 0; inset-inline-end: 0; z-index: 1;
     flex-direction: column-reverse;   
     inline-size: 100%; block-size: auto;
