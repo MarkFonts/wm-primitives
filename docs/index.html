@@ -3671,7 +3671,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     flex: none;
     inline-size: 27px;
     block-size: 27px;
-  }#s-controls .wm-zoom .wm-icon{
+  }#s-controls .wm-zoom .wm-icon,#s-controls .wm-zoom-fly{
     font-size: 20px;   
   }#s-controls .wm-zoom .wm-hd-rail{
     flex: 1 1 0;
@@ -3685,13 +3685,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
     font-variant-numeric: tabular-nums;
     text-align: center;
     white-space: nowrap;
-  }#s-controls .wm-zoom[data-collapse]{ --zoom-dur: var(--dur-med, 240ms); }#s-controls .wm-zoom[data-open="false"] .wm-zoom-box{ inline-size: 27px; }#s-controls .wm-zoom[data-open="false"] .wm-zoom-box,#s-controls .wm-zoom[data-moving] .wm-zoom-box{ overflow: clip; }#s-controls .wm-zoom[data-moving] .wm-zoom-box{ transition: inline-size var(--zoom-dur) ease-out; }#s-controls .wm-zoom[data-collapse] :is(.wm-hd-pill,#s-controls .wm-hd-rail > i,#s-controls .wm-zoom-box > .wm-icon-btn:not(.wm-zoom-toggle)){
-    transition: opacity var(--zoom-dur) ease-out;
-  }#s-controls .wm-zoom[data-open="false"] :is(.wm-hd-pill,#s-controls .wm-hd-rail > i,#s-controls .wm-zoom-box > .wm-icon-btn:not(.wm-zoom-toggle)){ opacity: 0; pointer-events: none; }#s-controls .wm-zoom--left{ position: relative; flex: none; inline-size: 27px; }#s-controls{ --zoom-ground: transparent; }#s-controls .wm-zoom--left .wm-zoom-box{ position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }#s-controls .wm-zoom--left .wm-hd-rail{ flex: 0 0 8rem; min-inline-size: 8rem; }@media (prefers-reduced-motion: reduce){#s-controls .wm-zoom .wm-zoom-box,#s-controls .wm-zoom *{ transition: none !important; }
-  }@media (pointer: coarse){#s-controls .wm-zoom[data-open="false"] .wm-zoom-box,#s-controls .wm-zoom--left{ inline-size: 33px; }#s-controls .wm-zoom,#s-controls .wm-zoom .wm-hd-rail{ block-size: 33px; }#s-controls .wm-zoom .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
+  }#s-controls .wm-zoom-box{ position: relative; }#s-controls .wm-zoom[data-open="false"] .wm-zoom-box{ inline-size: 27px; overflow: clip; }#s-controls .wm-zoom[data-open="false"] :is(.wm-hd-pill,#s-controls .wm-hd-rail > i,#s-controls .wm-zoom-box > .wm-icon-btn:not(.wm-zoom-toggle)){ opacity: 0; pointer-events: none; }#s-controls .wm-zoom-fly{ position: absolute; pointer-events: none; transform: translate(-50%, -50%); }#s-controls .wm-zoom[data-moving] :is(.wm-zoom-fly,#s-controls .wm-hd-pill,#s-controls .wm-hd-rail > i,#s-controls .wm-zoom-box > .wm-icon-btn,#s-controls .wm-zoom-toggle .wm-icon){ will-change: transform, opacity; }#s-controls .wm-zoom--left{ position: relative; flex: none; inline-size: 27px; }#s-controls{ --zoom-ground: transparent; }#s-controls .wm-zoom--left .wm-zoom-box{ position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }#s-controls .wm-zoom--left .wm-hd-rail{ flex: 0 0 8rem; min-inline-size: 8rem; }@media (pointer: coarse){#s-controls .wm-zoom[data-open="false"] .wm-zoom-box,#s-controls .wm-zoom--left{ inline-size: 33px; }#s-controls .wm-zoom,#s-controls .wm-zoom .wm-hd-rail{ block-size: 33px; }#s-controls .wm-zoom .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
   }
 }@layer wm.icon{@media (pointer: coarse){#s-controls .wm-zoom .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
-  }#s-controls .wm-zoom[data-collapse][data-open="true"] .wm-zoom-toggle .wm-icon{ --icon-fill: 1; }#s-controls .wm-zoom[data-moving] .wm-zoom-toggle .wm-icon{ --icon-dur: var(--zoom-dur, 240ms); }
+  }#s-controls .wm-zoom[data-collapse][data-open="true"] .wm-zoom-toggle .wm-icon{ --icon-fill: 1; }#s-controls .wm-zoom[data-moving] .wm-zoom-toggle .wm-icon{ transition: none; }   
 }#s-controls{
   --bg: #fcfcfa; --panel: #f2f2ee; --sunk: #e8e8e3; --raised: #fff;
   --ink: #17181a; --ink-2: #4a4c50; --muted: #74767c;
@@ -3892,7 +3889,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--text-muted);
-}#s-controls .chip-demo{display:grid;gap:10px;margin:8px 0 40px}#s-controls .chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}#s-controls .chip-cap code{text-transform:none;letter-spacing:0}#s-controls .chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}#s-controls .chip-demo .wm-chip--switch{margin-left:8px}#s-controls .zoom-demo{display:grid;gap:var(--spacing-04, 12px);margin:8px 0 40px}#s-controls .zoom-demo .wm-theme-stack{justify-self:end}#s-controls .zoom-demo > .wm-chip-row{justify-self:start}#s-controls .zoom-title{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-05, 16px)}#s-controls .zoom-title-h{font-size:var(--type-lede-size, 1.125rem);color:var(--text)}#s-controls .zoom-title-a{display:flex;align-items:center;gap:var(--spacing-04, 12px)}#s-controls .zoom-title-btn{font:inherit;font-size:var(--type-ui-size, .75rem);padding:var(--spacing-02, 6px) var(--spacing-04, 12px);border-radius:var(--radius, 8px);border:0;background:var(--text);color:var(--bg)}#s-controls .zoom-stage{height:240px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--surface)}#s-controls .zoom-sample{max-width:420px;padding:var(--spacing-05, 16px)}#s-controls .zoom-sample h3{margin:0 0 var(--spacing-03, 8px);font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .zoom-sample p{margin:0;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}#s-controls .zoom-demo pre{margin:0;font:var(--type-micro-size, .5625rem)/1.6 ui-monospace, Menlo, monospace;color:var(--text-muted);white-space:pre-wrap}
+}#s-controls .chip-demo{display:grid;gap:10px;margin:8px 0 40px}#s-controls .chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}#s-controls .chip-cap code{text-transform:none;letter-spacing:0}#s-controls .chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}#s-controls .chip-demo .wm-chip--switch{margin-left:8px}#s-controls .zoom-demo{display:grid;gap:var(--spacing-04, 12px);margin:8px 0 40px}#s-controls .zoom-demo .wm-theme-stack{justify-self:end}#s-controls .zoom-demo > .wm-chip-row{justify-self:start}#s-controls .zoom-morph{justify-self:end;max-width:100%;height:auto;color:var(--text)}#s-controls .zoom-title{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-05, 16px)}#s-controls .zoom-title-h{font-size:var(--type-lede-size, 1.125rem);color:var(--text)}#s-controls .zoom-title-a{display:flex;align-items:center;gap:var(--spacing-04, 12px)}#s-controls .zoom-title-btn{font:inherit;font-size:var(--type-ui-size, .75rem);padding:var(--spacing-02, 6px) var(--spacing-04, 12px);border-radius:var(--radius, 8px);border:0;background:var(--text);color:var(--bg)}#s-controls .zoom-stage{height:240px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--surface)}#s-controls .zoom-sample{max-width:420px;padding:var(--spacing-05, 16px)}#s-controls .zoom-sample h3{margin:0 0 var(--spacing-03, 8px);font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .zoom-sample p{margin:0;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}#s-controls .zoom-demo pre{margin:0;font:var(--type-micro-size, .5625rem)/1.6 ui-monospace, Menlo, monospace;color:var(--text-muted);white-space:pre-wrap}
 #s-controls .wip{max-width:72ch}#s-controls .wip>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2)}#s-controls .wip>p b{color:var(--ink);font-weight:600}#s-controls .wip-list{display:grid;gap:16px;margin:0;padding:0;list-style:none}#s-controls .wip-card{display:block;position:relative;padding:22px 24px;text-decoration:none;color:inherit;
   border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
@@ -6090,7 +6087,9 @@ type stays type. 50&ndash;400%, steps of 10, kept in <code>localStorage</code>. 
 press the marks, or focus the rail and press <code>+</code> <code>&minus;</code> <code>0</code>.
 <code>src/zoomControl.js</code> + <code>.css</code>; GESTURES.md &sect;12.</p>
 <div class="zoom-demo">
-  <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and the control opens leftwards out of it while the mark stays put and fills; press the mark again and it folds AND goes back to 100. Escape or a press elsewhere folds it and keeps the zoom. The mark, <code>data-icon</code>:</p>
+  <p class="chip-cap">The morph &middot; three magnifiers out of the box: one goes back in as the mark fills, two lead to the ends, and the lozenge pulls out of the rule; closing, the two fly home. Composed from the control&rsquo;s own keyframes by <code>scripts/zoom-morph-svg.mjs</code> (open 600ms, hold, close 240ms, hold)</p>
+  <img class="zoom-morph" src="assets/zoom-morph.svg" alt="The zoom control opening out of its mark and closing back into it" width="482" height="102">
+  <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and the control opens leftwards out of it while the mark stays put and fills (the morph above); press the mark again and it folds AND goes back to 100. Escape or a press elsewhere folds it and keeps the zoom. The mark, <code>data-icon</code>:</p>
   <div class="wm-chip-row zoom-icons">
     <button type="button" class="wm-chip wm-chip--small" aria-pressed="true" data-zicon="pageview"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">pageview</span>pageview</button>
     <button type="button" class="wm-chip wm-chip--small" aria-pressed="false" data-zicon="feature_search"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">feature_search</span>feature_search</button>
@@ -7677,9 +7676,20 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
 
     out.addEventListener('click', () => set(value - step));
     into.addEventListener('click', () => set(value + step));
-    // OPEN AND CLOSE: the box's width runs from the mark to its open width (measured, then
-    // released, so a stretched row keeps stretching); the marks cross-fade in CSS. Reduced
-    // motion: the same states, no transition.
+    // OPEN AND CLOSE: THREE MAGNIFIERS OUT OF A BOX (Mark, 2026-10-07: "three magnifying glasses
+    // animating out of a box, one goes back into the button with a fill, the last two lead to
+    // the extremes and the 100% pill pulls out of a rule"). The layout jumps to its end state at
+    // once; everything that moves is transform and opacity, on the Web Animations API, so the
+    // whole open is one seekable timeline of 600ms (2.5 x --dur-med):
+    //     0-120   three small magnifiers (search, zoom_out, zoom_in) rise out of the mark, overlapping
+    //   120-300   search goes back into the box, and the mark fills (FILL 0 -> 1)
+    //    60-420   zoom_out flies left to the far end, crossfading into the real button on arrival
+    //   100-380   zoom_in flies to the near end (left of the mark), likewise
+    //   120-420   the hairline draws leftwards between them (scaleX from the right)
+    //   360-480   the lozenge pulls out of the rule at 100%: a thickened stretch of the hairline
+    //             that inflates to the lozenge, its readout fading in
+    //   480-600   it slides to the saved value, if that is not 100
+    // Closing is its own single beat (below). Reduced motion: the states, swapped.
     const parts = [out, rail, into];
     const paint = () => {
       el.dataset.open = String(open);
@@ -7689,30 +7699,118 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       toggle.setAttribute('aria-label', label); toggle.title = label;
       parts.forEach(p => { p.inert = !open; });
     };
-    let settle = 0;
+    const EASE = 'cubic-bezier(0.2, 0.7, 0.2, 1)';   // the case study tester's unlock curve; motion.css holds durations, no easings
+    let morph = [], fly = [];
+    const stop = () => { morph.forEach(a => a.cancel()); morph = []; fly.forEach(f => f.remove()); fly = []; delete el.dataset.moving; };
+    const choreograph = () => {
+      const beat = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
+      const total = 2.5 * beat, at = ms => Math.min(1, Math.max(0, ms / 600));   // the script below is written in 600ths
+      const k = { duration: total, fill: 'both' };
+      const B = box.getBoundingClientRect(), c = e => { const r = e.getBoundingClientRect(); return [r.left + r.width / 2 - B.left, r.top + r.height / 2 - B.top]; };
+      const markIcon = toggle.querySelector('.wm-icon');
+      const [mx, my] = c(markIcon), [ox, oy] = c(out.querySelector('.wm-icon')), [ix, iy] = c(into.querySelector('.wm-icon'));
+      const flyer = name => { const f = mk('span', 'wm-icon wm-zoom-fly'); f.textContent = name; f.setAttribute('aria-hidden', 'true'); f.setAttribute('translate', 'no');
+        f.style.left = mx + 'px'; f.style.top = my + 'px'; box.appendChild(f); fly.push(f); return f; };
+      const T = (x, y, s = 1) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
+      const anims = [];
+      // the one that goes back into the box
+      anims.push(flyer('search').animate([
+        { transform: T(0, 0, .3), opacity: 0, offset: 0, easing: EASE },
+        { transform: T(-3, -9, .7), opacity: 1, offset: at(120), easing: EASE },
+        { transform: T(0, 0, .2), opacity: 0, offset: at(260) },
+        { transform: T(0, 0, .2), opacity: 0, offset: 1 },
+      ], k));
+      // the two that lead to the extremes, landing on the real buttons
+      const travel = (name, [tx, ty], start, arrive, btn) => {
+        const dx = tx - mx, dy = ty - my, spread = name === 'zoom_out' ? -8 : 4;
+        anims.push(flyer(name).animate([
+          { transform: T(0, 0, .3), opacity: 0, offset: 0 },
+          { transform: T(0, 0, .3), opacity: 0, offset: at(start), easing: EASE },
+          { transform: T(spread, -8, .7), opacity: 1, offset: at(start + 80), easing: EASE },
+          { transform: T(dx, dy, 1), opacity: 1, offset: at(arrive), easing: 'ease-out' },
+          { transform: T(dx, dy, 1), opacity: 0, offset: at(arrive + 60) },
+          { transform: T(dx, dy, 1), opacity: 0, offset: 1 },
+        ], k));
+        anims.push(btn.animate([{ opacity: 0, offset: 0 }, { opacity: 0, offset: at(arrive) }, { opacity: 1, offset: at(arrive + 60) }, { opacity: 1, offset: 1 }], k));
+      };
+      travel('zoom_out', [ox, oy], 60, 420, out);
+      travel('zoom_in', [ix, iy], 100, 380, into);
+      // the mark fills as the first one lands back in it
+      const fvs = getComputedStyle(markIcon).fontVariationSettings, fill = n => fvs.replace(/"FILL" [\d.]+/, `"FILL" ${n}`);
+      anims.push(markIcon.animate([{ fontVariationSettings: fill(0), offset: 0 }, { fontVariationSettings: fill(0), offset: at(160) }, { fontVariationSettings: fill(1), offset: at(300) }, { fontVariationSettings: fill(1), offset: 1 }], k));
+      // the rule draws leftwards between them
+      const rule = { transformOrigin: '100% 50%' };
+      anims.push(rail.querySelector('i').animate([
+        { ...rule, transform: 'scaleX(0)', offset: 0 }, { ...rule, transform: 'scaleX(0)', offset: at(120), easing: EASE },
+        { ...rule, transform: 'scaleX(1)', offset: at(420) }, { ...rule, transform: 'scaleX(1)', offset: 1 },
+      ], k));
+      // the lozenge pulls out of the rule at 100, then slides to the value
+      const r = rail.getBoundingClientRect(), pr = pill.getBoundingClientRect();
+      const inset = pr.width / 2, span = Math.max(1, r.width - 2 * inset);
+      const d100 = span * ((100 - min) / (max - min) - (value - min) / (max - min));
+      const P = (x, sx, sy) => `translate(calc(-50% + ${x}px), -50%) scale(${sx}, ${sy})`;
+      const thin = 3 / pr.height;
+      anims.push(pill.animate([
+        { transform: P(d100, .6, thin), opacity: 0, offset: 0 },
+        { transform: P(d100, .6, thin), opacity: 0, offset: at(340) },
+        { transform: P(d100, .6, thin), opacity: 1, offset: at(360), easing: EASE },
+        { transform: P(d100, 1, 1), opacity: 1, offset: at(480), easing: EASE },
+        { transform: P(0, 1, 1), opacity: 1, offset: 1 },
+      ], k));
+      anims.push(read.animate([{ opacity: 0, offset: 0 }, { opacity: 0, offset: at(420) }, { opacity: 1, offset: at(500) }, { opacity: 1, offset: 1 }], k));
+      return anims;
+    };
+    // CLOSE is one beat (--dur-med), not the open backwards: the two end magnifiers lift off
+    // their buttons and fly back into the mark while the rule retracts and the lozenge fades
+    // under them, and the mark unfills as they arrive.
+    const closing = () => {
+      const beat = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
+      const k = { duration: beat, fill: 'both' };
+      const B = box.getBoundingClientRect(), c = e => { const r = e.getBoundingClientRect(); return [r.left + r.width / 2 - B.left, r.top + r.height / 2 - B.top]; };
+      const markIcon = toggle.querySelector('.wm-icon');
+      const [mx, my] = c(markIcon);
+      const T = (x, y, s = 1) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
+      const anims = [];
+      for (const [btn, lag] of [[out, 0], [into, .12]]) {
+        const ic = btn.querySelector('.wm-icon'), [x, y] = c(ic);
+        const f = mk('span', 'wm-icon wm-zoom-fly'); f.textContent = ic.textContent; f.setAttribute('aria-hidden', 'true');
+        f.style.left = mx + 'px'; f.style.top = my + 'px'; box.appendChild(f); fly.push(f);
+        anims.push(f.animate([
+          { transform: T(x - mx, y - my), opacity: 1, offset: 0 },
+          { transform: T(x - mx, y - my - 4), opacity: 1, offset: lag, easing: 'ease-in-out' },
+          { transform: T((x - mx) * .2, y - my - 6, .85), opacity: 1, offset: .7, easing: 'ease-in' },
+          { transform: T(0, 0, .3), opacity: 1, offset: .9 },
+          { transform: T(0, 0, .2), opacity: 0, offset: 1 },
+        ], k));
+        anims.push(btn.animate([{ opacity: 0 }, { opacity: 0 }], k));
+      }
+      anims.push(rail.querySelector('i').animate([{ transform: 'scaleX(1)', transformOrigin: '100% 50%', easing: EASE }, { transform: 'scaleX(0)', transformOrigin: '100% 50%' }], k));
+      anims.push(pill.animate([{ opacity: 1 }, { opacity: 0, offset: .5 }, { opacity: 0 }], k));
+      const fvs = getComputedStyle(markIcon).fontVariationSettings, fill = n => fvs.replace(/"FILL" [\d.]+/, `"FILL" ${n}`);
+      anims.push(markIcon.animate([{ fontVariationSettings: fill(1), offset: 0 }, { fontVariationSettings: fill(1), offset: .7 }, { fontVariationSettings: fill(0), offset: 1 }], k));
+      return anims;
+    };
     const setOpen = (o, { animate = true, save = true } = {}) => {
-      if (!collapse || o === open) return;
+      if (!collapse || o === open && !morph.length) return;
       const still = !animate || matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const from = box.getBoundingClientRect().width;
-      clearTimeout(settle); box.style.inlineSize = ''; delete el.dataset.moving;
-      if (!still) el.dataset.moving = '';   // BEFORE the state, so the mark's fill eases with the box
-      open = o; paint();
-      if (save) store();
-      el.dispatchEvent(new CustomEvent('wm-zoom-open', { detail: open, bubbles: true }));
-      if (still) return;
-      const to = box.getBoundingClientRect().width;
-      box.style.inlineSize = from + 'px';
-      box.getBoundingClientRect();   // commit the start, so the change below transitions
-      box.style.inlineSize = to + 'px';
-      const done = () => { box.style.inlineSize = ''; delete el.dataset.moving; };
-      settle = setTimeout(done, (parseFloat(getComputedStyle(box).transitionDuration) || 0) * 1000 + 40);
+      stop();
+      if (save) { const was = open; open = o; store(); open = was; }
+      el.dispatchEvent(new CustomEvent('wm-zoom-open', { detail: o, bubbles: true }));
+      const land = () => { stop(); open = o; paint(); };
+      if (still) { land(); return; }
+      if (o) { open = true; paint(); }                    // opening: the end layout at once
+      else parts.forEach(p => { p.inert = true; });       // closing: the layout holds until it lands
+      el.dataset.moving = '';
+      morph = o ? choreograph() : closing();
+      const mine = morph;
+      Promise.all(mine.map(a => a.finished)).then(() => { if (morph === mine) land(); }, () => {});
     };
     // the mark: shut, it opens; open, it closes AND goes back to 100 (the default view);
     // never collapsing, it only goes back to 100. Escape and a press outside close and keep.
     toggle.addEventListener('click', () => {
       if (collapse && !open) { setOpen(true); rail.focus({ preventScroll: true }); return; }
-      if (collapse) setOpen(false);
       set(100);
+      if (collapse) setOpen(false);
     });
     el.addEventListener('keydown', e => { if (e.key === 'Escape' && open && collapse) { setOpen(false); toggle.focus({ preventScroll: true }); e.preventDefault(); } });
     const outside = e => { if (open && collapse && !el.contains(e.target)) setOpen(false); };
@@ -7726,9 +7824,10 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       get: () => value,
       set: v => set(v),
       isOpen: () => open,
+      morph: () => morph,   // the running timeline, for a test or a frame grab
       setOpen: o => setOpen(!!o),
       destroy: () => {
-        document.removeEventListener('pointerdown', outside); clearTimeout(settle);
+        document.removeEventListener('pointerdown', outside); stop();
         window.removeEventListener('resize', resize); window.removeEventListener('pointerup', end); window.removeEventListener('blur', end);
         clear();
         live.delete(api); el.replaceChildren(); delete el.__wmZoom;

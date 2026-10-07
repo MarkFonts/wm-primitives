@@ -161,9 +161,20 @@
 
     out.addEventListener('click', () => set(value - step));
     into.addEventListener('click', () => set(value + step));
-    // OPEN AND CLOSE: the box's width runs from the mark to its open width (measured, then
-    // released, so a stretched row keeps stretching); the marks cross-fade in CSS. Reduced
-    // motion: the same states, no transition.
+    // OPEN AND CLOSE: THREE MAGNIFIERS OUT OF A BOX (Mark, 2026-10-07: "three magnifying glasses
+    // animating out of a box, one goes back into the button with a fill, the last two lead to
+    // the extremes and the 100% pill pulls out of a rule"). The layout jumps to its end state at
+    // once; everything that moves is transform and opacity, on the Web Animations API, so the
+    // whole open is one seekable timeline of 600ms (2.5 x --dur-med):
+    //     0-120   three small magnifiers (search, zoom_out, zoom_in) rise out of the mark, overlapping
+    //   120-300   search goes back into the box, and the mark fills (FILL 0 -> 1)
+    //    60-420   zoom_out flies left to the far end, crossfading into the real button on arrival
+    //   100-380   zoom_in flies to the near end (left of the mark), likewise
+    //   120-420   the hairline draws leftwards between them (scaleX from the right)
+    //   360-480   the lozenge pulls out of the rule at 100%: a thickened stretch of the hairline
+    //             that inflates to the lozenge, its readout fading in
+    //   480-600   it slides to the saved value, if that is not 100
+    // Closing is its own single beat (below). Reduced motion: the states, swapped.
     const parts = [out, rail, into];
     const paint = () => {
       el.dataset.open = String(open);
@@ -173,30 +184,118 @@
       toggle.setAttribute('aria-label', label); toggle.title = label;
       parts.forEach(p => { p.inert = !open; });
     };
-    let settle = 0;
+    const EASE = 'cubic-bezier(0.2, 0.7, 0.2, 1)';   // the case study tester's unlock curve; motion.css holds durations, no easings
+    let morph = [], fly = [];
+    const stop = () => { morph.forEach(a => a.cancel()); morph = []; fly.forEach(f => f.remove()); fly = []; delete el.dataset.moving; };
+    const choreograph = () => {
+      const beat = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
+      const total = 2.5 * beat, at = ms => Math.min(1, Math.max(0, ms / 600));   // the script below is written in 600ths
+      const k = { duration: total, fill: 'both' };
+      const B = box.getBoundingClientRect(), c = e => { const r = e.getBoundingClientRect(); return [r.left + r.width / 2 - B.left, r.top + r.height / 2 - B.top]; };
+      const markIcon = toggle.querySelector('.wm-icon');
+      const [mx, my] = c(markIcon), [ox, oy] = c(out.querySelector('.wm-icon')), [ix, iy] = c(into.querySelector('.wm-icon'));
+      const flyer = name => { const f = mk('span', 'wm-icon wm-zoom-fly'); f.textContent = name; f.setAttribute('aria-hidden', 'true'); f.setAttribute('translate', 'no');
+        f.style.left = mx + 'px'; f.style.top = my + 'px'; box.appendChild(f); fly.push(f); return f; };
+      const T = (x, y, s = 1) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
+      const anims = [];
+      // the one that goes back into the box
+      anims.push(flyer('search').animate([
+        { transform: T(0, 0, .3), opacity: 0, offset: 0, easing: EASE },
+        { transform: T(-3, -9, .7), opacity: 1, offset: at(120), easing: EASE },
+        { transform: T(0, 0, .2), opacity: 0, offset: at(260) },
+        { transform: T(0, 0, .2), opacity: 0, offset: 1 },
+      ], k));
+      // the two that lead to the extremes, landing on the real buttons
+      const travel = (name, [tx, ty], start, arrive, btn) => {
+        const dx = tx - mx, dy = ty - my, spread = name === 'zoom_out' ? -8 : 4;
+        anims.push(flyer(name).animate([
+          { transform: T(0, 0, .3), opacity: 0, offset: 0 },
+          { transform: T(0, 0, .3), opacity: 0, offset: at(start), easing: EASE },
+          { transform: T(spread, -8, .7), opacity: 1, offset: at(start + 80), easing: EASE },
+          { transform: T(dx, dy, 1), opacity: 1, offset: at(arrive), easing: 'ease-out' },
+          { transform: T(dx, dy, 1), opacity: 0, offset: at(arrive + 60) },
+          { transform: T(dx, dy, 1), opacity: 0, offset: 1 },
+        ], k));
+        anims.push(btn.animate([{ opacity: 0, offset: 0 }, { opacity: 0, offset: at(arrive) }, { opacity: 1, offset: at(arrive + 60) }, { opacity: 1, offset: 1 }], k));
+      };
+      travel('zoom_out', [ox, oy], 60, 420, out);
+      travel('zoom_in', [ix, iy], 100, 380, into);
+      // the mark fills as the first one lands back in it
+      const fvs = getComputedStyle(markIcon).fontVariationSettings, fill = n => fvs.replace(/"FILL" [\d.]+/, `"FILL" ${n}`);
+      anims.push(markIcon.animate([{ fontVariationSettings: fill(0), offset: 0 }, { fontVariationSettings: fill(0), offset: at(160) }, { fontVariationSettings: fill(1), offset: at(300) }, { fontVariationSettings: fill(1), offset: 1 }], k));
+      // the rule draws leftwards between them
+      const rule = { transformOrigin: '100% 50%' };
+      anims.push(rail.querySelector('i').animate([
+        { ...rule, transform: 'scaleX(0)', offset: 0 }, { ...rule, transform: 'scaleX(0)', offset: at(120), easing: EASE },
+        { ...rule, transform: 'scaleX(1)', offset: at(420) }, { ...rule, transform: 'scaleX(1)', offset: 1 },
+      ], k));
+      // the lozenge pulls out of the rule at 100, then slides to the value
+      const r = rail.getBoundingClientRect(), pr = pill.getBoundingClientRect();
+      const inset = pr.width / 2, span = Math.max(1, r.width - 2 * inset);
+      const d100 = span * ((100 - min) / (max - min) - (value - min) / (max - min));
+      const P = (x, sx, sy) => `translate(calc(-50% + ${x}px), -50%) scale(${sx}, ${sy})`;
+      const thin = 3 / pr.height;
+      anims.push(pill.animate([
+        { transform: P(d100, .6, thin), opacity: 0, offset: 0 },
+        { transform: P(d100, .6, thin), opacity: 0, offset: at(340) },
+        { transform: P(d100, .6, thin), opacity: 1, offset: at(360), easing: EASE },
+        { transform: P(d100, 1, 1), opacity: 1, offset: at(480), easing: EASE },
+        { transform: P(0, 1, 1), opacity: 1, offset: 1 },
+      ], k));
+      anims.push(read.animate([{ opacity: 0, offset: 0 }, { opacity: 0, offset: at(420) }, { opacity: 1, offset: at(500) }, { opacity: 1, offset: 1 }], k));
+      return anims;
+    };
+    // CLOSE is one beat (--dur-med), not the open backwards: the two end magnifiers lift off
+    // their buttons and fly back into the mark while the rule retracts and the lozenge fades
+    // under them, and the mark unfills as they arrive.
+    const closing = () => {
+      const beat = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
+      const k = { duration: beat, fill: 'both' };
+      const B = box.getBoundingClientRect(), c = e => { const r = e.getBoundingClientRect(); return [r.left + r.width / 2 - B.left, r.top + r.height / 2 - B.top]; };
+      const markIcon = toggle.querySelector('.wm-icon');
+      const [mx, my] = c(markIcon);
+      const T = (x, y, s = 1) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
+      const anims = [];
+      for (const [btn, lag] of [[out, 0], [into, .12]]) {
+        const ic = btn.querySelector('.wm-icon'), [x, y] = c(ic);
+        const f = mk('span', 'wm-icon wm-zoom-fly'); f.textContent = ic.textContent; f.setAttribute('aria-hidden', 'true');
+        f.style.left = mx + 'px'; f.style.top = my + 'px'; box.appendChild(f); fly.push(f);
+        anims.push(f.animate([
+          { transform: T(x - mx, y - my), opacity: 1, offset: 0 },
+          { transform: T(x - mx, y - my - 4), opacity: 1, offset: lag, easing: 'ease-in-out' },
+          { transform: T((x - mx) * .2, y - my - 6, .85), opacity: 1, offset: .7, easing: 'ease-in' },
+          { transform: T(0, 0, .3), opacity: 1, offset: .9 },
+          { transform: T(0, 0, .2), opacity: 0, offset: 1 },
+        ], k));
+        anims.push(btn.animate([{ opacity: 0 }, { opacity: 0 }], k));
+      }
+      anims.push(rail.querySelector('i').animate([{ transform: 'scaleX(1)', transformOrigin: '100% 50%', easing: EASE }, { transform: 'scaleX(0)', transformOrigin: '100% 50%' }], k));
+      anims.push(pill.animate([{ opacity: 1 }, { opacity: 0, offset: .5 }, { opacity: 0 }], k));
+      const fvs = getComputedStyle(markIcon).fontVariationSettings, fill = n => fvs.replace(/"FILL" [\d.]+/, `"FILL" ${n}`);
+      anims.push(markIcon.animate([{ fontVariationSettings: fill(1), offset: 0 }, { fontVariationSettings: fill(1), offset: .7 }, { fontVariationSettings: fill(0), offset: 1 }], k));
+      return anims;
+    };
     const setOpen = (o, { animate = true, save = true } = {}) => {
-      if (!collapse || o === open) return;
+      if (!collapse || o === open && !morph.length) return;
       const still = !animate || matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const from = box.getBoundingClientRect().width;
-      clearTimeout(settle); box.style.inlineSize = ''; delete el.dataset.moving;
-      if (!still) el.dataset.moving = '';   // BEFORE the state, so the mark's fill eases with the box
-      open = o; paint();
-      if (save) store();
-      el.dispatchEvent(new CustomEvent('wm-zoom-open', { detail: open, bubbles: true }));
-      if (still) return;
-      const to = box.getBoundingClientRect().width;
-      box.style.inlineSize = from + 'px';
-      box.getBoundingClientRect();   // commit the start, so the change below transitions
-      box.style.inlineSize = to + 'px';
-      const done = () => { box.style.inlineSize = ''; delete el.dataset.moving; };
-      settle = setTimeout(done, (parseFloat(getComputedStyle(box).transitionDuration) || 0) * 1000 + 40);
+      stop();
+      if (save) { const was = open; open = o; store(); open = was; }
+      el.dispatchEvent(new CustomEvent('wm-zoom-open', { detail: o, bubbles: true }));
+      const land = () => { stop(); open = o; paint(); };
+      if (still) { land(); return; }
+      if (o) { open = true; paint(); }                    // opening: the end layout at once
+      else parts.forEach(p => { p.inert = true; });       // closing: the layout holds until it lands
+      el.dataset.moving = '';
+      morph = o ? choreograph() : closing();
+      const mine = morph;
+      Promise.all(mine.map(a => a.finished)).then(() => { if (morph === mine) land(); }, () => {});
     };
     // the mark: shut, it opens; open, it closes AND goes back to 100 (the default view);
     // never collapsing, it only goes back to 100. Escape and a press outside close and keep.
     toggle.addEventListener('click', () => {
       if (collapse && !open) { setOpen(true); rail.focus({ preventScroll: true }); return; }
-      if (collapse) setOpen(false);
       set(100);
+      if (collapse) setOpen(false);
     });
     el.addEventListener('keydown', e => { if (e.key === 'Escape' && open && collapse) { setOpen(false); toggle.focus({ preventScroll: true }); e.preventDefault(); } });
     const outside = e => { if (open && collapse && !el.contains(e.target)) setOpen(false); };
@@ -210,9 +309,10 @@
       get: () => value,
       set: v => set(v),
       isOpen: () => open,
+      morph: () => morph,   // the running timeline, for a test or a frame grab
       setOpen: o => setOpen(!!o),
       destroy: () => {
-        document.removeEventListener('pointerdown', outside); clearTimeout(settle);
+        document.removeEventListener('pointerdown', outside); stop();
         window.removeEventListener('resize', resize); window.removeEventListener('pointerup', end); window.removeEventListener('blur', end);
         clear();
         live.delete(api); el.replaceChildren(); delete el.__wmZoom;

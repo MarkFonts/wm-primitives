@@ -189,40 +189,54 @@ test('G66 · at rest a collapsing control is one 27px mark: data-icon, pageview 
   expect(fs).toBe('feature_search')
 })
 
-test('G67 · press opens leftwards out of the mark, which stays, filled; pressed again it closes and goes back to 100; Escape and outside close and keep', async ({ page, hasTouch }) => {
-  test.skip(hasTouch, 'the press and the keys are the same on touch; the transform is timed here once')
-  const mark0 = await rect(page, '#row .wm-zoom-toggle')
+test('G67 · the morph: three magnifiers out of the mark, the lozenge out of the rule, sliding to the value; the mark stays, filled; pressed again it closes to 100; Escape and outside close and keep', async ({ page, hasTouch }) => {
+  test.skip(hasTouch, 'the press and the keys are the same on touch; the timeline is checked here once')
+  const api = (s = '#row .wm-zoom') => `document.querySelector('${s}').__wmZoom`
+  const seek = (ms: number) => page.evaluate(([a, ms]) => (eval(a as string) as any).morph().forEach((x: Animation) => { x.pause(); x.currentTime = ms as number }), [api(), ms] as const)
   const fill = () => page.evaluate(() => getComputedStyle(document.querySelector('#row .wm-zoom-toggle .wm-icon')!).fontVariationSettings)
+  const pillX = () => page.evaluate(() => { const p = document.querySelector('#row .wm-hd-pill')!.getBoundingClientRect(); return p.left + p.width / 2 })
+  await page.evaluate(() => localStorage.setItem('wm-zoom-row', '200 closed')); await page.reload(); await page.evaluate(() => document.fonts.ready)
+  const mark0 = await rect(page, '#row .wm-zoom-toggle')
   expect(await fill()).toContain('"FILL" 0')
   await expect(page.locator('#cstack .wm-zoom')).toHaveAttribute('data-open', 'true')
   await page.locator('#row .wm-zoom-toggle').click()
   await expect(page.locator('#cstack .wm-zoom')).toHaveAttribute('data-open', 'false')   // that press was outside the stack
-  await page.waitForTimeout(60)
-  const mid = await rect(page, '#row .wm-zoom-box')
-  expect(mid.w).toBeGreaterThan(27); expect(mid.w).toBeLessThan(217)   // it is moving, not swapped
-  await page.waitForTimeout(400)
+  // the timeline: 600ms at the house 240, and three magnifiers in flight
+  const tl = await page.evaluate(a => { const m = (eval(a) as any).morph(); return { n: m.length, end: Math.max(...m.map((x: Animation) => x.effect!.getComputedTiming().endTime as number)), fly: [...document.querySelectorAll('#row .wm-zoom-fly')].map(f => f.textContent) } }, api())
+  expect(tl.end).toBe(600); expect(tl.fly).toEqual(['search', 'zoom_out', 'zoom_in'])
+  await seek(0)
+  expect(await page.evaluate(() => getComputedStyle(document.querySelector('#row .wm-hd-pill')!).opacity)).toBe('0')
+  await seek(480)                                                     // inflated, still at 100
+  const at100 = await pillX()
+  await seek(600)                                                     // slid to the value
+  const atValue = await pillX()
+  expect(atValue).toBeGreaterThan(at100 + 10)
+  await page.evaluate(a => (eval(a) as any).morph().forEach((x: Animation) => x.finish()), api())
+  await page.waitForTimeout(50)
+  expect(await page.evaluate(() => document.querySelectorAll('#row .wm-zoom-fly').length)).toBe(0)
   expect((await rect(page, '#row .wm-zoom-box')).w).toBe(217)
   expect(await rect(page, '#row .wm-zoom-toggle')).toEqual(mark0)       // the mark never moved
   expect(await fill()).toContain('"FILL" 1')
-  await expect(page.locator('#row .wm-zoom-toggle')).toHaveAttribute('aria-expanded', 'true')
+  expect(Math.abs(await pillX() - atValue)).toBeLessThanOrEqual(0.5)   // the lozenge ends at the value
   expect(await page.evaluate(() => document.activeElement!.getAttribute('role'))).toBe('slider')
-  // Escape: closes, keeps the value, focus back on the mark
-  await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight')
-  expect(await value(page, '#row .wm-zoom')).toBe(120)
-  await page.keyboard.press('Escape'); await page.waitForTimeout(400)
+  // Escape: one beat, the two end magnifiers fly home; closed, value kept, focus on the mark
+  await page.keyboard.press('Escape')
+  const c = await page.evaluate(a => { const m = (eval(a) as any).morph(); return { end: Math.max(...m.map((x: Animation) => x.effect!.getComputedTiming().endTime as number)), fly: [...document.querySelectorAll('#row .wm-zoom-fly')].map(f => f.textContent) } }, api())
+  expect(c.end).toBe(240); expect(c.fly).toEqual(['zoom_out', 'zoom_in'])
+  await page.waitForTimeout(400)
   await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'false')
-  expect(await value(page, '#row .wm-zoom')).toBe(120)
+  expect(await value(page, '#row .wm-zoom')).toBe(200)
   expect(await page.evaluate(() => document.activeElement!.classList.contains('wm-zoom-toggle'))).toBe(true)
   expect((await rect(page, '#row .wm-zoom-box')).w).toBe(27)
   expect(await fill()).toContain('"FILL" 0')
   // outside: closes and keeps
-  await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(300)
-  await page.mouse.click(600, 420)
+  await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(700)
+  await page.mouse.click(600, 420); await page.waitForTimeout(400)
   await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'false')
-  expect(await value(page, '#row .wm-zoom')).toBe(120)
+  expect(await value(page, '#row .wm-zoom')).toBe(200)
   // the mark, pressed while open: closes AND goes back to 100, the default view
-  await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(300)
-  await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(300)
+  await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(700)
+  await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(400)
   await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'false')
   expect(await value(page, '#row .wm-zoom')).toBe(100)
   expect(await page.evaluate(() => localStorage.getItem('wm-zoom-row'))).toBe('100 closed')

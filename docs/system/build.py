@@ -263,6 +263,9 @@ def build_section(sid, label, path, kicker):
     html = re.sub(r'<title>.*?</title>', '', html, flags=re.S)
     html = re.sub(r'<!doctype[^>]*>', '', html, flags=re.I)
     html = re.sub(r'</?(html|head|body)[^>]*>', '', html, flags=re.I)
+    # an image the page itself shows (the zoom control's morph, docs/assets/zoom-morph.svg): the same
+    # rewrite as a part's, below
+    html = re.sub(r'src="\.\./\.\./assets/([\w.-]+)"', asset_src, html)
     if path.name in OFF_LINE_PART:
         html = f'<div data-nosnap>{html}</div>'
 
