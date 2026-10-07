@@ -12,6 +12,18 @@ Newest first.
 
 ---
 
+## 2026-10-06 -- the bench hero follows its own rule
+
+**The grid bench was the one page in the docs that broke the row rule it teaches.** Its hero is
+a lede (18/27) beside 16/24 notes: 27 is not a multiple of 24, so four lines in five missed the
+notes' lines, and it sat in the spec's `KNOWN` as "the case-study hero in miniature". Fixed the way
+the Recommendations say (3: size the big text, do not loosen a lead): the lede is now 45/48, two
+steps, the homepage headline's sizing, set page-local (`.hero-lede`; type.css has no 48 role and
+display's 45/51 is not a multiple of 24). The other option, a notes lead that divides 27, only
+exists at 9, which is too tight to read. First baselines still meet; the eyebrow and labels stay
+outside the safe area (check 12 passes). The `KNOWN` entry is gone; the hero is now a passing
+example, 7 lines where there were 4, which is what 45px costs.
+
 ## 2026-10-06 -- the row step: sized leads, folio elements on the step
 
 **Side-by-side text drifted after line 1, and the fix was going to be a runtime rounding.** A

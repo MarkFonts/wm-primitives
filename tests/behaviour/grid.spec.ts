@@ -74,9 +74,6 @@ const KNOWN: Record<string, { row: string; why: string }[]> = {
   // at 39 for now (Cal Sans's short ascenders look spaced out at 54, 2026-10-06); the case study
   // re-sizes its hero to a multiple of its sub's lead, and this entry goes.
   'Cal Sans case study': [{ row: '.hero-cols', why: 'lede 39 beside sub 27 until the case study re-sizes its hero' }],
-  // The bench's hero is the case study's, drawn small: a lede (27) beside body notes (24). It
-  // changes with the case study's hero, so the two keep showing the same thing.
-  'grid demo': [{ row: 'main > .wm-grid.wm-baselines', why: 'lede 27 beside notes 24, the case-study hero in miniature' }],
   // The work rows on wordmark main are a 36/39 headline beside a 14/24 caption. The 45/48 sizing
   // is decided (2026-10-06) and not yet shipped; wordmark's work-row change removes this entry.
   'homepage': [{ row: '.work-item', why: 'headline 39 beside caption 24 until wordmark ships the 45/48 headline' }],

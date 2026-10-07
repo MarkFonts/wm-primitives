@@ -665,6 +665,10 @@ main.wm-lines h2, main.wm-lines h3{--lh:30px}
 h1.t-display{font-size:clamp(2.5rem,6vw,6rem);font-weight:700;margin:0;font-variation-settings:'opsz' 45}
 h2{font-size:var(--type-title-size,1.625rem);font-weight:700;margin:0 0 24px;font-variation-settings:'opsz' 26}
 .t-lede{font-size:var(--type-lede-size,1.125rem);color:var(--text)}
+/* the hero's lede, sized to the row (GRID.md, Recommendations 3): beside 16/24 notes the row's step is
+   24, so the lede is 45/48 -- two steps, the homepage headline's sizing -- not the 18/27 role, whose 27
+   never lands on a notes line. Page-local: type.css has no 45/48 role. */
+main.wm-lines .t-lede.hero-lede{font-size:var(--type-display-size,2.8125rem);--lh:48px;font-weight:600}
 p{font-size:var(--type-body-size,1rem);color:var(--text-muted)}
 p b{color:var(--text);font-weight:600}
 .t-ui{font-size:var(--type-ui-size,.75rem);color:var(--text-muted);margin:0}
@@ -729,7 +733,7 @@ html.off-grid .wm-lines{--lead-body:24.8px}
     <p class="eyebrow t-micro" style="--span:24;margin-bottom:24px">WM Primitives · the grid</p>
     <h1 class="t-display" style="--span:20;--span-md:12;margin-bottom:48px">Twenty-four columns, three-pixel lines</h1>
     <div style="--span:13;--span-md:12">
-      <p class="t-lede">One margin, one gutter and one set of columns for every WORDMARK page, and a baseline cut from the leading the way 12/15 type sits on a 3pt grid. Turn on the columns (G) and the lines (L), then flip the body leading (B) to see why 24.8 cannot stay.</p>
+      <p class="t-lede hero-lede">One margin, one gutter and one set of columns for every WORDMARK page, and a baseline cut from the leading the way 12/15 type sits on a 3pt grid. Turn on the columns (G) and the lines (L), then flip the body leading (B) to see why 24.8 cannot stay.</p>
     </div>
     <div style="--start:15;--span:10;--span-md:12">
       <p><b>13 | skip | 10.</b> The hero is calsans's: thirteen columns of lede, one empty column, ten of notes. The empty column and two gutters make the 77px gap the page had chosen by eye (72).</p>

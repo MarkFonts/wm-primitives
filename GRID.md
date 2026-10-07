@@ -407,8 +407,7 @@ in Chromium. After fonts load and one more snapper pass:
 
 Checks 10 and 11 report; they never fix. A row that cannot be sized yet is listed in the spec's
 `KNOWN` by page and row selector, with why and what removes it, and printed as `KNOWN OFFENDER`:
-the case study's hero (lede 39 beside sub 27), the grid bench's hero (the same shape, lede 27
-beside notes 24) and the homepage's work rows (headline 39 beside caption 24, until the 45/48
+the case study's hero (lede 39 beside sub 27) and the homepage's work rows (headline 39 beside caption 24, until the 45/48
 headline ships). `tests/fixtures/grid-step.html` (`/dial/grid-step.html`, in `PAGES`) holds a
 passing row, the exemptions and three negative cases marked `data-expect-offender`, which the
 page loop excuses and a test of its own requires each check to report.
@@ -495,8 +494,8 @@ In this order. Each step names the trap it was written after.
   `tests/fixtures/grid-step.html` draws it: a 45/48 stage with the step lines, the half lines
   and the x-height.
 - **Known offenders.** The case study's hero (lede 39 beside sub 27) stays as it is for now and is
-  listed in the spec's `KNOWN`; so are the grid bench's hero, which is drawn after it, and the
-  homepage's work rows until the 45/48 headline ships.
+  listed in the spec's `KNOWN`, and so are the homepage's work rows until the 45/48 headline
+  ships. The grid bench's hero is not: its lede is 45/48 beside 24 notes, as the rule says.
 - **The system page is on the line but not on the columns.** Its layout is still the rail and a
   1080px measure; only the README, the section numbers and the Grid part are on the line, and the
   other chapters are stages (docs/system/build.py, `OFF_LINE`, says what each would need).
