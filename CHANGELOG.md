@@ -87,6 +87,12 @@ curve is the case study tester's unlock curve, cubic-bezier(0.2, 0.7, 0.2, 1), n
 The docs chapter carries the choreography as an animated SVG composed from the live keyframes
 (docs/assets/zoom-morph.svg, scripts/zoom-morph-svg.mjs), not a recording.
 
+**The rule runs the whole rail.** dialHandle's hairline runs from the lozenge's centre at min to
+its centre at max, which is right for a dial whose pill is mid-rail; in the zoom control the pill
+rests near the left end at 100%, so the rule read as a stub to its right that stopped short of
+zoom_in ("not wide enough"). The zoom's rule now spans the rail edge to edge, under the lozenge.
+dialHandle keeps its own convention.
+
 **The default mark is pageview.** Mark: frame_inspect "doesnt have a fill". Rendered at FILL 0 and
 1 from the subset: frame_inspect is byte-identical (no fill drawing), pageview and feature_search
 both fill. pageview is the default; feature_search stays as the alternative; frame_inspect left the

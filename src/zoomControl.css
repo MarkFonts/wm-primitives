@@ -43,6 +43,12 @@
     block-size: 27px;
     margin-inline: var(--spacing-01, 4px);
   }
+  /* THE RULE RUNS THE WHOLE RAIL. dialHandle's hairline runs centre to centre (from the lozenge's
+     centre at min to its centre at max), so at the ends the pill covers it; here, where the
+     lozenge rests near the left end at 100%, that read as a rule on one side of it, stopping
+     short of zoom_in (Mark, 2026-10-07). The zoom's rule spans the rail edge to edge, beneath
+     the lozenge (the <i> paints first); the lozenge still travels centre to centre. */
+  .wm-zoom .wm-hd-rail > i { inset-inline: 0; }
   .wm-zoom .wm-hd-pill { padding: var(--tick, 3px) var(--spacing-03, 8px); }
   .wm-zoom .wm-hd-pill output {
     display: block;
