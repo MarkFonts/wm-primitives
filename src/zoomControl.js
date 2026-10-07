@@ -177,7 +177,7 @@
     // .wm-zoom--down only (G79): the lozenge's overhang past the column, in whole units with its
     // 3px ring, is how far the rail and the glasses step inward (--zoom-shift), so the host's
     // right margin holds for the lozenge; and the rail is --zoom-rail at most, shortened to what
-    // the viewport has under the open box less 12px, 96px at least, on the 3px line. The pill's
+    // the viewport -- and the stack's data-scroller, if named -- has under the open box less 12px, 96px at least, on the 3px line. The pill's
     // travel is a percentage of the rail, so it scales with it. Run at mount, on open and resize.
     function fit() {
       if (!down) return;
@@ -186,7 +186,10 @@
       rail.style.blockSize = '';
       const nominal = rail.offsetHeight;
       const rest = toggle.offsetHeight + out.offsetHeight + into.offsetHeight + 6;   // the open box less the rail (3px each side of it)
-      const room = innerHeight - 12 - el.getBoundingClientRect().top - rest;
+      // the viewport's foot, and the stack's scroller's foot if it names one (data-scroller)
+      const sel = el.closest('.wm-theme-stack')?.dataset.scroller, sc = sel && document.querySelector(sel);
+      const foot = Math.min(innerHeight, sc ? sc.getBoundingClientRect().bottom : Infinity);
+      const room = foot - 12 - el.getBoundingClientRect().top - rest;
       const n = Math.max(96, Math.min(nominal, Math.floor(room / 3) * 3));
       if (n < nominal) rail.style.blockSize = n + 'px';
     }

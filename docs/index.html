@@ -7791,7 +7791,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     // .wm-zoom--down only (G79): the lozenge's overhang past the column, in whole units with its
     // 3px ring, is how far the rail and the glasses step inward (--zoom-shift), so the host's
     // right margin holds for the lozenge; and the rail is --zoom-rail at most, shortened to what
-    // the viewport has under the open box less 12px, 96px at least, on the 3px line. The pill's
+    // the viewport -- and the stack's data-scroller, if named -- has under the open box less 12px, 96px at least, on the 3px line. The pill's
     // travel is a percentage of the rail, so it scales with it. Run at mount, on open and resize.
     function fit() {
       if (!down) return;
@@ -7800,7 +7800,10 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       rail.style.blockSize = '';
       const nominal = rail.offsetHeight;
       const rest = toggle.offsetHeight + out.offsetHeight + into.offsetHeight + 6;   // the open box less the rail (3px each side of it)
-      const room = innerHeight - 12 - el.getBoundingClientRect().top - rest;
+      // the viewport's foot, and the stack's scroller's foot if it names one (data-scroller)
+      const sel = el.closest('.wm-theme-stack')?.dataset.scroller, sc = sel && ROOT.querySelector(sel);
+      const foot = Math.min(innerHeight, sc ? sc.getBoundingClientRect().bottom : Infinity);
+      const room = foot - 12 - el.getBoundingClientRect().top - rest;
       const n = Math.max(96, Math.min(nominal, Math.floor(room / 3) * 3));
       if (n < nominal) rail.style.blockSize = n + 'px';
     }
@@ -8190,23 +8193,22 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
  *   scroll   scrolling DOWN hides it, scrolling UP shows it. Any vertical scroller counts (one
  *            capture-phase listener on the document, read passively), so the app's own text
  *            pane works without being named. A direction has to run 24px (eight units) before
- *            it counts, so a jitter does not flap it. Near the top it always shows: until the
- *            content that was under the stack's REST footprint has scrolled past -- the
- *            footprint's bottom less the scroller's top, in viewport px (the page's own
- *            scroller: top 0). An inner scroller that starts below the stack stows it after
- *            the run alone. data-scroller="selector" narrows it to that one scroller (a page
+ *            it counts, so a jitter does not flap it. On the PAGE's own scroller it always shows
+ *            near the top (until the content under its rest footprint has scrolled past); on a
+ *            named or inner scroller -- which holds the stack inside its box -- the run alone. data-scroller="selector" narrows it to that one scroller (a page
  *            with several, or a demo inside a page that scrolls).
  *   swipe    an upward swipe that STARTS ON THE STACK dismisses it: the stack follows the
  *            finger up, and past 24px (and clearly vertical) it goes; short of that it settles
- *            back. A tap inside the stack's rest footprint (its column x its rest height, at
- *            its rest top), or a scroll up, brings it back -- unless the host cancelled the
- *            tap (preventDefault on its pointerup) before it reached the document.
+ *            back. A press inside the stack's rest footprint (its column x its rest height, at
+ *            its rest top), or a scroll up, brings it back. While stowed the footprint is the
+ *            STACK's: the press is taken on the document's capture phase and nothing under it
+ *            sees it (no focus, no click).
  * data-below="selector" (commas allowed): the stack rests UNDER the host's top chrome. The
  * script takes the LOWEST bottom among every element the selector matches and writes
  * --stack-top = that + 6px, rounded up to the 3px line, onto the stack; nothing matching, it
  * removes it and the default (6px) stands. Re-measured on resize, orientation, a resize of a
- * match, any change to the DOM (a row added or removed, a class flipped) and the end of a
- * scroll. --stack-top by hand is the escape hatch for a host without a selector to give.
+ * match, a class/hidden/style change on a match, a child added or removed beside one, the end
+ * of a scroll, and a tap. --stack-top by hand is the escape hatch for a host without a selector to give.
  * Hidden by scroll or swipe: data-stowed on the stack -- CSS translates it off the top edge
  * over 180ms on the house curve -- and inert, so focus cannot land on a mark nobody can see. Hiding folds an open
  * zoom inside it. Only while the stack is vertical: without the class nothing hides.
@@ -8245,10 +8247,15 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     watch.observe(el, { attributes: true, attributeFilter: ['data-hidden'] });
     sync();
 
-    // DATA-BELOW: rest under the host's chrome (G82). One rect per match; cheap enough to run on
-    // any DOM change. Mutations inside the stack itself (the zoom's morph) are ignored.
+    // DATA-BELOW: rest under the host's chrome (G82). One rect per match. Watched narrowly -- a
+    // contentEditable host restyles inline all the time, so nothing body-wide: a ResizeObserver on
+    // each match, attributes (class, hidden, style) on the matches themselves, childList on their
+    // parents (a row added or removed beside them); every parent ever seen stays watched, so a row
+    // that leaves and comes back is caught. A row that appears where none ever was is caught on
+    // resize, orientation, scroll end, or the next tap (a mode switch is a tap).
     const below = el.dataset.below;
     let ro = null, mo = null, raf = 0, seen = [];
+    const parents = new Set();
     const place = () => {
       raf = 0;
       if (!below) return;
@@ -8258,14 +8265,19 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       if (bottom === -Infinity) el.style.removeProperty('--stack-top');
       else el.style.setProperty('--stack-top', Math.ceil((Math.max(0, bottom) + 6) / 3) * 3 + 'px');
       // observe the matches -- re-observing only when the set changed, since observe() itself fires once
-      if (ro && (matches.length !== seen.length || matches.some((m, i) => m !== seen[i]))) { ro.disconnect(); matches.forEach(m => ro.observe(m)); seen = matches; }
+      if (matches.length !== seen.length || matches.some((m, i) => m !== seen[i])) {
+        ro?.disconnect(); mo.disconnect();
+        matches.forEach(m => { ro?.observe(m); mo.observe(m, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }); if (m.parentNode) parents.add(m.parentNode); });
+        parents.forEach(p => { if (p.isConnected) mo.observe(p, { childList: true }); else parents.delete(p); });
+        seen = matches;
+      }
       el.querySelectorAll('.wm-zoom').forEach(z => z.__wmZoom?.fit?.());
     };
     const replace = () => { if (!raf) raf = requestAnimationFrame(place); };
     if (below) {
       if ('ResizeObserver' in window) ro = new ResizeObserver(replace);
-      mo = new MutationObserver(list => { if (list.some(m => !el.contains(m.target))) replace(); });
-      mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'hidden', 'style'] });
+      mo = new MutationObserver(replace);
+      document.addEventListener('pointerup', replace, { passive: true });
       window.addEventListener('resize', replace);
       window.addEventListener('orientationchange', replace);
       place();
@@ -8292,8 +8304,9 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       if (prev === undefined || top === prev) return;   // first sight, or a sideways scroll
       const d = top - prev;
       run = Math.sign(d) === Math.sign(run) ? run + d : d;
-      const under = Math.max(0, rest().bottom - (t === document.scrollingElement ? 0 : t.getBoundingClientRect().top));
-      if (top <= under) { if (hidden) show(); return; }
+      // near the top it shows -- for the PAGE's own scroller only. A named scroller (data-scroller),
+      // or any inner one, holds the stack inside its box (data-below puts it there): the run alone.
+      if (t === document.scrollingElement && !only && top <= rest().bottom) { if (hidden) show(); return; }
       if (run >= RUN && onScroll) hide();
       else if (run <= -RUN) show();                     // scroll up shows, in either mode
     };
@@ -8332,21 +8345,27 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     el.addEventListener('pointermove', move);
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', up);
-    // the way back: a tap inside the rest footprint. Read on the document, never cancelled here;
-    // a host that cancelled it first (its own control under the footprint) keeps it.
+    // the way back: a press inside the rest footprint. While stowed (by scroll or swipe -- not the
+    // host's data-hidden) the footprint is the STACK's: taken on the document's capture phase, so
+    // nothing under it sees the press -- no focus, no keyboard, no click -- and the stack returns.
+    const swallowClick = e => { e.stopPropagation(); e.preventDefault(); };
     const edge = e => {
-      if (!hidden || e.defaultPrevented || el.contains(e.target)) return;   // not the lift that ended the swipe
+      if (!hidden || el.hasAttribute('data-hidden') || el.contains(e.target)) return;
       const f = rest();
-      if (e.clientX >= f.left && e.clientX <= f.right && e.clientY >= f.top && e.clientY <= f.bottom) show();
+      if (!(e.clientX >= f.left && e.clientX <= f.right && e.clientY >= f.top && e.clientY <= f.bottom)) return;
+      e.preventDefault(); e.stopPropagation();
+      ['click', 'mousedown', 'mouseup', 'focusin'].forEach(ev => document.addEventListener(ev, swallowClick, { capture: true, once: true }));
+      setTimeout(() => ['click', 'mousedown', 'mouseup', 'focusin'].forEach(ev => document.removeEventListener(ev, swallowClick, { capture: true })), 500);
+      show();
     };
-    if (onSwipe) document.addEventListener('pointerup', edge, { passive: true });
+    if (onSwipe) document.addEventListener('pointerdown', edge, { capture: true });
 
     const api = {
       el, hide, show,
       hidden: () => hidden,
       destroy: () => {
         document.removeEventListener('scroll', scrolled, { capture: true });
-        document.removeEventListener('pointerup', edge);
+        document.removeEventListener('pointerdown', edge, { capture: true }); document.removeEventListener('pointerup', replace);
         ['pointerdown', 'pointermove', 'pointerup', 'pointercancel'].forEach((ev, i) => el.removeEventListener(ev, [down, move, up, up][i]));
         watch.disconnect(); ro?.disconnect(); mo?.disconnect(); cancelAnimationFrame(raf); clearTimeout(settle);
         window.removeEventListener('resize', replace); window.removeEventListener('orientationchange', replace);
