@@ -1,0 +1,30 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>grid: a row of columns with different leads</title>
+<!-- grid.spec.ts's fixture for the row rule (src/gridSnap.js). Two columns of a .wm-baselines
+     grid that are the text blocks themselves -- a lede (27px lead) beside a body paragraph (24px)
+     -- so each carries grid.css's own baseline nudge as a `top`, and the two nudges differ. Their
+     boxes start on one row; gridSnap has to group them by the box, not by where the nudge
+     left it, or the row rule never runs and line 1 sits a few px apart (the Cal Sans case
+     study's hero at 1024px). Served at /dial/grid-row.html. -->
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css"><link rel="stylesheet" href="/dial/shared/src/grid.css">
+<script src="/dial/shared/src/gridSnap.js" defer></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui;background:#111;color:#e8e8e8;--ui-font:system-ui}
+main p{margin:0}
+</style>
+<main class="wm-lines">
+<!-- the first row is the Cal Sans hero's shape (lede beside notes); the others are pairs whose
+     first baselines differ, so a row that is not recognised shows as a spread -->
+<section class="wm-grid wm-baselines" id="hero">
+  <p class="t-lede" id="a" style="--span:13;--span-md:12">One margin, one gutter and one set of columns for every page, and a baseline cut from the leading.</p>
+  <p class="t-micro" id="b" style="--start:15;--span:10;--start-md:1;--span-md:12">The hero is thirteen columns of lede, one empty column, ten of notes. Each is a text block of its own.</p>
+</section>
+<section class="wm-grid wm-baselines" id="row2" style="margin-top:48px">
+  <p class="t-title" style="--span:12;--span-md:12">A title beside a paragraph</p>
+  <p style="--span:12;--span-md:12">Body copy at its own leading, in a column the title does not share.</p>
+</section>
+<section class="wm-grid wm-baselines" id="row3" style="margin-top:48px">
+  <p class="t-display" style="--span:12;--span-md:12">Display</p>
+  <p class="t-ui" style="--span:12;--span-md:12">A small interface line set beside a large word, as a caption.</p>
+</section>
+</main>

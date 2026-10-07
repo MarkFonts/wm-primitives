@@ -8843,7 +8843,12 @@ ctl('dither', v => {
       for (const child of box.children) {
         const r = child.getBoundingClientRect(); if (!r.height) continue;
         const f = firstOf(child); if (!f) continue;
-        const key = Math.round(r.top);
+        // the row is the BOX's top, before grid.css's baseline nudge: a column that is itself the
+        // text block carries the nudge as a relative `top` (up to 2px, and unlike for unlike
+        // leads), which would otherwise split two columns that start on one row (the Cal Sans
+        // hero at 1024px, line 1 three px apart)
+        const cs = getComputedStyle(child);
+        const key = Math.round(r.top - (cs.position === 'relative' ? parseFloat(cs.top) || 0 : 0));
         const row = [...rows.keys()].find(k => Math.abs(k - key) <= 1) ?? key;
         if (!rows.has(row)) rows.set(row, []);
         // data-baseline="last": the item meets the row by its LAST line (a two-line caption
