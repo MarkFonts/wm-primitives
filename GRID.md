@@ -255,7 +255,8 @@ Big type beside small, as rules. Each is held by a spec check where one exists (
 3. **Size the big text so its lead is a whole multiple of the step; do not loosen a lead to make
    it fit.** The homepage headline went from 36/39 to 45/48 beside a 24 caption, not to 36/48: a
    lead opened by a third looks spaced out, a size one token larger does not. Each headline line
-   then lands on every other caption line. Check 10, "a row shares its lines".
+   then lands on every other caption line. Check 10, "a row shares its lines". Between a headline and text the multiple is two or more;
+   between two blocks of running text it is one -- give them the same lead.
 4. **Keep one step of white around every line of the big text.** Between its lines (a baseline to
    the next line's x-height), above the block (what precedes it ends one step above its first
    x-height) and below it (the next text's x-height sits one step under its last baseline). Cal
@@ -495,7 +496,7 @@ In this order. Each step names the trap it was written after.
   and the x-height.
 - **Known offenders.** The case study's hero (lede 39 beside sub 27) stays as it is for now and is
   listed in the spec's `KNOWN`, and so are the homepage's work rows until the 45/48 headline
-  ships. The grid bench's hero is not: its lede is 45/48 beside 24 notes, as the rule says.
+  ships. The grid bench's hero is not: its 18/27 lede has 16/27 notes beside it, the same lead.
 - **The system page is on the line but not on the columns.** Its layout is still the rail and a
   1080px measure; only the README, the section numbers and the Grid part are on the line, and the
   other chapters are stages (docs/system/build.py, `OFF_LINE`, says what each would need).
