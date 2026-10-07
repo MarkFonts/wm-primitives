@@ -56,6 +56,10 @@ and `data-*` stays for behaviour. Mobile-only is the host's rule, not the primit
   host can cancel it (the top 27px also switched font-proofer's tab); the down rail and glasses
   step inward by the lozenge's overhang (it ended 4px from the edge); the rail shortens to the
   viewport, 96px at least, with `--zoom-rail` for a shorter stage. G77-G79, G82.
+  Second round: a named scroller stows on the 24px run alone (the footprint exemption was ~145px
+  of stage); the return press is taken on the capture phase so the paragraph under the footprint
+  no longer takes focus; the rail also stops 12px above the `data-scroller` box's foot; and
+  `data-below` no longer observes all of body (font-proofer restyles inline on every keystroke).
 - GESTURES.md §13, G76-G82; `tests/behaviour/themeStack.spec.ts`; the system page's "The theme
   stack, vertical" chapter, two phone frames (`data-scroller` scopes each to its own box).
 
