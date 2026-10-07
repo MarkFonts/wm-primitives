@@ -87,6 +87,18 @@ curve is the case study tester's unlock curve, cubic-bezier(0.2, 0.7, 0.2, 1), n
 The docs chapter carries the choreography as an animated SVG composed from the live keyframes
 (docs/assets/zoom-morph.svg, scripts/zoom-morph-svg.mjs), not a recording.
 
+**Round 5: one glass, split in two, pulling the rule.** Mark replaced the two-magnifier open with a
+strict sequence, now GESTURES G67: one magnifier (`search`, back in the subset, `?v=94`) leaves the
+mark as it fills and zips to the lozenge's place at 100; it becomes zoom_out and zoom_in, which
+travel to the ends pulling the rule out from the centre (a clip on the full-length hairline); the
+lozenge appears as a 6px dot and grows round the readout a numeral a beat, 1, 10, 100, 100%, then
+slides to the value. Close folds it back in 300ms. The lozenge and readout grow by clip-path (round
+ends), never layout. Two defects Mark saw in the SVG, both the SVG's: the filled mark showed the
+outlined mark's lens through its own (the two drawings were stacked, not cross-faded), and the
+rule showed through the "100%" (the readout was a knockout). The SVG now cross-fades the drawings
+and fills the numerals in the ground colour. The live control had neither: one glyph in the mark,
+the rule painted before the lozenge.
+
 **The rule runs the whole rail.** dialHandle's hairline runs from the lozenge's centre at min to
 its centre at max, which is right for a dial whose pill is mid-rail; in the zoom control the pill
 rests near the left end at 100%, so the rule read as a stub to its right that stopped short of

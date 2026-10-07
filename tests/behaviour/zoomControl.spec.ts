@@ -189,7 +189,7 @@ test('G66 · at rest a collapsing control is one 27px mark: data-icon, pageview 
   expect(fs).toBe('feature_search')
 })
 
-test('G67 · the morph: two magnifiers out of the mark, the lozenge out of the rule, sliding to the value; the mark stays, filled; pressed again it closes to 100; Escape and outside close and keep', async ({ page, hasTouch }) => {
+test('G67 · the morph: one glass out of the mark splits in two, pulling the rule; the readout a numeral at a time, the lozenge out of the rule, sliding to the value; the mark stays, filled; pressed again it closes to 100; Escape and outside close and keep', async ({ page, hasTouch }) => {
   test.skip(hasTouch, 'the press and the keys are the same on touch; the timeline is checked here once')
   const api = (s = '#row .wm-zoom') => `document.querySelector('${s}').__wmZoom`
   const seek = (ms: number) => page.evaluate(([a, ms]) => (eval(a as string) as any).morph().forEach((x: Animation) => { x.pause(); x.currentTime = ms as number }), [api(), ms] as const)
@@ -200,17 +200,23 @@ test('G67 · the morph: two magnifiers out of the mark, the lozenge out of the r
   expect(await fill()).toContain('"FILL" 0')
   await expect(page.locator('#cstack .wm-zoom')).toHaveAttribute('data-open', 'true')
   await page.locator('#row .wm-zoom-toggle').click()
-  await expect(page.locator('#cstack .wm-zoom')).toHaveAttribute('data-open', 'false')   // that press was outside the stack
+  await page.evaluate(a => (eval(a) as any).morph().forEach((x: Animation) => x.pause()), api())
   // the timeline: 600ms at the house 240, and three magnifiers in flight
   const tl = await page.evaluate(a => { const m = (eval(a) as any).morph(); return { n: m.length, end: Math.max(...m.map((x: Animation) => x.effect!.getComputedTiming().endTime as number)), fly: [...document.querySelectorAll('#row .wm-zoom-fly')].map(f => f.textContent) } }, api())
-  expect(tl.end).toBe(600); expect(tl.fly).toEqual(['zoom_out', 'zoom_in'])
+  expect(tl.end).toBe(600); expect(tl.fly).toEqual(['search', 'zoom_out', 'zoom_in'])
   await seek(0)
   expect(await page.evaluate(() => getComputedStyle(document.querySelector('#row .wm-hd-pill')!).opacity)).toBe('0')
-  await seek(480)                                                     // inflated, still at 100
+  await seek(300)                                                     // a dot on the rule
+  const dot = await page.evaluate(() => { const p = document.querySelector('#row .wm-hd-pill')!; return getComputedStyle(p).clipPath })
+  expect(dot).toMatch(/round/)
+  await seek(345)                                                     // the first numeral only
+  expect(await page.evaluate(() => getComputedStyle(document.querySelector('#row output')!).clipPath)).not.toBe('none')
+  await seek(495)                                                     // all four numerals, still at 100
   const at100 = await pillX()
   await seek(600)                                                     // slid to the value
   const atValue = await pillX()
   expect(atValue).toBeGreaterThan(at100 + 10)
+  await expect(page.locator('#cstack .wm-zoom')).toHaveAttribute('data-open', 'false')   // that press was outside the stack
   await page.evaluate(a => (eval(a) as any).morph().forEach((x: Animation) => x.finish()), api())
   await page.waitForTimeout(50)
   expect(await page.evaluate(() => document.querySelectorAll('#row .wm-zoom-fly').length)).toBe(0)
@@ -222,7 +228,7 @@ test('G67 · the morph: two magnifiers out of the mark, the lozenge out of the r
   // Escape: one beat, the two end magnifiers fly home; closed, value kept, focus on the mark
   await page.keyboard.press('Escape')
   const c = await page.evaluate(a => { const m = (eval(a) as any).morph(); return { end: Math.max(...m.map((x: Animation) => x.effect!.getComputedTiming().endTime as number)), fly: [...document.querySelectorAll('#row .wm-zoom-fly')].map(f => f.textContent) } }, api())
-  expect(c.end).toBe(240); expect(c.fly).toEqual(['zoom_out', 'zoom_in'])
+  expect(c.end).toBe(300); expect(c.fly).toEqual(['zoom_out', 'zoom_in', 'search'])
   await page.waitForTimeout(400)
   await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'false')
   expect(await value(page, '#row .wm-zoom')).toBe(200)

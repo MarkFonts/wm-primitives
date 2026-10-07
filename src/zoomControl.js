@@ -161,20 +161,22 @@
 
     out.addEventListener('click', () => set(value - step));
     into.addEventListener('click', () => set(value + step));
-    // OPEN AND CLOSE: MAGNIFIERS OUT OF A BOX (Mark, 2026-10-07: "the last two lead to the
-    // extremes and the 100% pill pulls out of a rule"; a third that went back into the box was
-    // dropped -- "no need for the 3rd one"). The layout jumps to its end state at
-    // once; everything that moves is transform and opacity, on the Web Animations API, so the
-    // whole open is one seekable timeline of 600ms (2.5 x --dur-med):
-    //    60-180   two small magnifiers (zoom_out, zoom_in) rise out of the mark, overlapping;
-    //   160-300   the mark fills in place (FILL 0 -> 1), its own lens never moving
-    //    60-420   zoom_out flies left to the far end, crossfading into the real button on arrival
-    //   100-380   zoom_in flies to the near end (left of the mark), likewise
-    //   120-420   the hairline draws leftwards between them (scaleX from the right)
-    //   360-480   the lozenge pulls out of the rule at 100%: a thickened stretch of the hairline
-    //             that inflates to the lozenge, its readout fading in
-    //   480-600   it slides to the saved value, if that is not 100
-    // Closing is its own single beat (below). Reduced motion: the states, swapped.
+    // OPEN AND CLOSE: ONE GLASS, SPLIT IN TWO, PULLING THE RULE (Mark, 2026-10-07). The layout
+    // jumps to its end state at once; everything that moves is transform, opacity and clip-path,
+    // on the Web Animations API, so the open is one seekable 600ms timeline (2.5 x --dur-med):
+    //     0-100   one magnifier (search) zips out of the mark to where the lozenge sits at 100;
+    //             the mark fills in place as it leaves (FILL 0 -> 1, 0-120)
+    //   100-120   at that centre it splits: zoom_out and zoom_in appear on top of each other
+    //   120-330   they travel outward to the ends, and the rule stretches with them -- a clip on
+    //             the full-length hairline, opening from the centre at the glyphs' pace
+    //   330-380   each crossfades into the real button it has arrived on
+    //   300       the lozenge appears as a DOT on the rule at the centre (6px, six hairlines)
+    //   340-490   it grows round the readout, a numeral a beat -- 1, 10, 100, 100% -- (a clip-path
+    //             with round ends, not layout)
+    //   500-600   it slides to the saved value, if that is not 100
+    // CLOSE (300ms) is the open folded back: the two glasses zip to the lozenge, merge, the rule
+    // retracting into them; the numerals collapse as the lozenge shrinks; the one glass zips
+    // home, and the mark unfills. Reduced motion, or a hidden page: the states, swapped.
     const parts = [out, rail, into];
     const paint = () => {
       el.dataset.open = String(open);
@@ -187,90 +189,134 @@
     const EASE = 'cubic-bezier(0.2, 0.7, 0.2, 1)';   // the case study tester's unlock curve; motion.css holds durations, no easings
     let morph = [], fly = [];
     const stop = () => { morph.forEach(a => a.cancel()); morph = []; fly.forEach(f => f.remove()); fly = []; delete el.dataset.moving; };
+    // the shared geometry, measured from the end layout, in the box's coordinates
+    const measure2 = (centreAt) => {
+      const B = box.getBoundingClientRect();
+      const c = e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2 - B.left, y: r.top + r.height / 2 - B.top }; };
+      const R = rail.getBoundingClientRect(), P = pill.getBoundingClientRect();
+      const inset = P.width / 2, span = Math.max(1, R.width - 2 * inset);
+      const pAt = v => R.left - B.left + inset + span * ((v - min) / (max - min));
+      const now = pAt(value), cx = pAt(centreAt);
+      // the readout's prefixes: where each numeral ends, in the output's own box
+      const O = read.getBoundingClientRect(), tn = read.firstChild, rg = document.createRange();
+      const stops = [];
+      for (let i = 1; i <= tn.length; i++) { rg.setStart(tn, 0); rg.setEnd(tn, i); const rr = rg.getBoundingClientRect(); stops.push({ left: rr.left - O.left, w: rr.width }); }
+      return { mark: c(toggle.querySelector('.wm-icon')), out: c(out.querySelector('.wm-icon')), in: c(into.querySelector('.wm-icon')),
+        y: P.top + P.height / 2 - B.top, cx, now, rail: { l: R.left - B.left, r: R.right - B.left }, pw: P.width, ph: P.height,
+        ox: O.left - P.left, ow: O.width, stops };
+    };
+    const flyer = (name, at) => {
+      const f = mk('span', 'wm-icon wm-zoom-fly'); f.textContent = name; f.setAttribute('aria-hidden', 'true'); f.setAttribute('translate', 'no');
+      f.style.left = at.x + 'px'; f.style.top = at.y + 'px'; box.appendChild(f); fly.push(f); return f;
+    };
+    const T = (x, y, s = 1) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
+    // the lozenge at each numeral stage: its clip (round ends), the readout's clip and shift
+    const stage = (g, i) => {
+      const pad = (g.pw - g.ow) / 2 + (g.ow - (g.stops.at(-1).w)) / 2;   // the pill's air beside the full text
+      if (i < 0) {                                                      // a dot on the rule, six hairlines across: nothing showing
+        const h = (g.ph - 6) / 2, w = (g.pw - 6) / 2;
+        return { pill: `inset(${h}px ${w}px ${h}px ${w}px round 999px)`, read: `inset(0px ${g.ow}px 0px 0px)`, tx: 0 };
+      }
+      const s = g.stops[i], sw = Math.min(g.pw, s.w + 2 * Math.min(pad, 8)), side = (g.pw - sw) / 2;
+      const tx = g.pw / 2 - (g.ox + s.left + s.w / 2);
+      return { pill: `inset(-3px ${side - 3}px -3px ${side - 3}px round 999px)`, read: `inset(0px ${g.ow - (s.left + s.w)}px 0px 0px)`, tx };
+    };
+    const fvsOf = n => { const v = getComputedStyle(toggle.querySelector('.wm-icon')).fontVariationSettings; return v.replace(/"FILL" [\d.]+/, `"FILL" ${n}`); };
     const choreograph = () => {
       const beat = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
-      const total = 2.5 * beat, at = ms => Math.min(1, Math.max(0, ms / 600));   // the script below is written in 600ths
-      const k = { duration: total, fill: 'both' };
-      const B = box.getBoundingClientRect(), c = e => { const r = e.getBoundingClientRect(); return [r.left + r.width / 2 - B.left, r.top + r.height / 2 - B.top]; };
-      const markIcon = toggle.querySelector('.wm-icon');
-      const [mx, my] = c(markIcon), [ox, oy] = c(out.querySelector('.wm-icon')), [ix, iy] = c(into.querySelector('.wm-icon'));
-      const flyer = name => { const f = mk('span', 'wm-icon wm-zoom-fly'); f.textContent = name; f.setAttribute('aria-hidden', 'true'); f.setAttribute('translate', 'no');
-        f.style.left = mx + 'px'; f.style.top = my + 'px'; box.appendChild(f); fly.push(f); return f; };
-      const T = (x, y, s = 1) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
-      const anims = [];
-      // the two that lead to the extremes, landing on the real buttons
-      const travel = (name, [tx, ty], start, arrive, btn) => {
-        const dx = tx - mx, dy = ty - my, spread = name === 'zoom_out' ? -8 : 4;
-        anims.push(flyer(name).animate([
-          { transform: T(0, 0, .3), opacity: 0, offset: 0 },
-          { transform: T(0, 0, .3), opacity: 0, offset: at(start), easing: EASE },
-          { transform: T(spread, -8, .7), opacity: 1, offset: at(start + 80), easing: EASE },
-          { transform: T(dx, dy, 1), opacity: 1, offset: at(arrive), easing: 'ease-out' },
-          { transform: T(dx, dy, 1), opacity: 0, offset: at(arrive + 60) },
-          { transform: T(dx, dy, 1), opacity: 0, offset: 1 },
-        ], k));
-        anims.push(btn.animate([{ opacity: 0, offset: 0 }, { opacity: 0, offset: at(arrive) }, { opacity: 1, offset: at(arrive + 60) }, { opacity: 1, offset: 1 }], k));
-      };
-      travel('zoom_out', [ox, oy], 60, 420, out);
-      travel('zoom_in', [ix, iy], 100, 380, into);
-      // the mark fills in place as they leave it
-      const fvs = getComputedStyle(markIcon).fontVariationSettings, fill = n => fvs.replace(/"FILL" [\d.]+/, `"FILL" ${n}`);
-      anims.push(markIcon.animate([{ fontVariationSettings: fill(0), offset: 0 }, { fontVariationSettings: fill(0), offset: at(160) }, { fontVariationSettings: fill(1), offset: at(300) }, { fontVariationSettings: fill(1), offset: 1 }], k));
-      // the rule draws leftwards between them
-      const rule = { transformOrigin: '100% 50%' };
-      anims.push(rail.querySelector('i').animate([
-        { ...rule, transform: 'scaleX(0)', offset: 0 }, { ...rule, transform: 'scaleX(0)', offset: at(120), easing: EASE },
-        { ...rule, transform: 'scaleX(1)', offset: at(420) }, { ...rule, transform: 'scaleX(1)', offset: 1 },
+      const total = 2.5 * beat, at = ms => Math.min(1, Math.max(0, ms / 600));   // the script is written in 600ths
+      const k = { duration: total, fill: 'both' }, g = measure2(100), C = { x: g.cx, y: g.y };
+      const rel = p => ({ x: p.x - g.mark.x, y: p.y - g.mark.y }), cR = rel(C);
+      const A = [];
+      // 1 . one glass zips from the mark to the centre; the mark fills
+      A.push(flyer('search', g.mark).animate([
+        { transform: T(0, 0, .6), opacity: 0, offset: 0, easing: EASE },
+        { transform: T(cR.x * .1, cR.y, .8), opacity: 1, offset: at(20), easing: EASE },
+        { transform: T(cR.x, cR.y, 1), opacity: 1, offset: at(100) },
+        { transform: T(cR.x, cR.y, 1), opacity: 0, offset: at(120) },
+        { transform: T(cR.x, cR.y, 1), opacity: 0, offset: 1 },
       ], k));
-      // the lozenge pulls out of the rule at 100, then slides to the value
-      const r = rail.getBoundingClientRect(), pr = pill.getBoundingClientRect();
-      const inset = pr.width / 2, span = Math.max(1, r.width - 2 * inset);
-      const d100 = span * ((100 - min) / (max - min) - (value - min) / (max - min));
-      const P = (x, sx, sy) => `translate(calc(-50% + ${x}px), -50%) scale(${sx}, ${sy})`;
-      const thin = 3 / pr.height;
-      anims.push(pill.animate([
-        { transform: P(d100, .6, thin), opacity: 0, offset: 0 },
-        { transform: P(d100, .6, thin), opacity: 0, offset: at(340) },
-        { transform: P(d100, .6, thin), opacity: 1, offset: at(360), easing: EASE },
-        { transform: P(d100, 1, 1), opacity: 1, offset: at(480), easing: EASE },
-        { transform: P(0, 1, 1), opacity: 1, offset: 1 },
-      ], k));
-      anims.push(read.animate([{ opacity: 0, offset: 0 }, { opacity: 0, offset: at(420) }, { opacity: 1, offset: at(500) }, { opacity: 1, offset: 1 }], k));
-      return anims;
-    };
-    // CLOSE is one beat (--dur-med), not the open backwards: the two end magnifiers lift off
-    // their buttons and fly back into the mark while the rule retracts and the lozenge fades
-    // under them, and the mark unfills as they arrive.
-    const closing = () => {
-      const beat = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
-      const k = { duration: beat, fill: 'both' };
-      const B = box.getBoundingClientRect(), c = e => { const r = e.getBoundingClientRect(); return [r.left + r.width / 2 - B.left, r.top + r.height / 2 - B.top]; };
-      const markIcon = toggle.querySelector('.wm-icon');
-      const [mx, my] = c(markIcon);
-      const T = (x, y, s = 1) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
-      const anims = [];
-      for (const [btn, lag] of [[out, 0], [into, .12]]) {
-        const ic = btn.querySelector('.wm-icon'), [x, y] = c(ic);
-        const f = mk('span', 'wm-icon wm-zoom-fly'); f.textContent = ic.textContent; f.setAttribute('aria-hidden', 'true');
-        f.style.left = mx + 'px'; f.style.top = my + 'px'; box.appendChild(f); fly.push(f);
-        anims.push(f.animate([
-          { transform: T(x - mx, y - my), opacity: 1, offset: 0 },
-          { transform: T(x - mx, y - my - 4), opacity: 1, offset: lag, easing: 'ease-in-out' },
-          { transform: T((x - mx) * .2, y - my - 6, .85), opacity: 1, offset: .7, easing: 'ease-in' },
-          { transform: T(0, 0, .3), opacity: 1, offset: .9 },
-          { transform: T(0, 0, .2), opacity: 0, offset: 1 },
+      A.push(toggle.querySelector('.wm-icon').animate([{ fontVariationSettings: fvsOf(0), offset: 0, easing: EASE }, { fontVariationSettings: fvsOf(1), offset: at(120) }, { fontVariationSettings: fvsOf(1), offset: 1 }], k));
+      // 2 . it splits; the two travel to the ends and cross into the real buttons
+      for (const [name, to, btn] of [['zoom_out', g.out, out], ['zoom_in', g.in, into]]) {
+        const d = rel(to);
+        A.push(flyer(name, g.mark).animate([
+          { transform: T(cR.x, cR.y), opacity: 0, offset: 0 },
+          { transform: T(cR.x, cR.y), opacity: 0, offset: at(100) },
+          { transform: T(cR.x, cR.y), opacity: 1, offset: at(120), easing: EASE },
+          { transform: T(d.x, d.y), opacity: 1, offset: at(330) },
+          { transform: T(d.x, d.y), opacity: 0, offset: at(380) },
+          { transform: T(d.x, d.y), opacity: 0, offset: 1 },
         ], k));
-        anims.push(btn.animate([{ opacity: 0 }, { opacity: 0 }], k));
+        A.push(btn.animate([{ opacity: 0, offset: 0 }, { opacity: 0, offset: at(330) }, { opacity: 1, offset: at(380) }, { opacity: 1, offset: 1 }], k));
       }
-      anims.push(rail.querySelector('i').animate([{ transform: 'scaleX(1)', transformOrigin: '100% 50%', easing: EASE }, { transform: 'scaleX(0)', transformOrigin: '100% 50%' }], k));
-      anims.push(pill.animate([{ opacity: 1 }, { opacity: 0, offset: .5 }, { opacity: 0 }], k));
-      const fvs = getComputedStyle(markIcon).fontVariationSettings, fill = n => fvs.replace(/"FILL" [\d.]+/, `"FILL" ${n}`);
-      anims.push(markIcon.animate([{ fontVariationSettings: fill(1), offset: 0 }, { fontVariationSettings: fill(1), offset: .7 }, { fontVariationSettings: fill(0), offset: 1 }], k));
-      return anims;
+      // ... pulling the rule out of the centre with them (the rule's own box: the whole rail)
+      const rw = g.rail.r - g.rail.l, cl = g.cx - g.rail.l;
+      const ruleAt = (l, r) => `inset(-1px ${r}px -1px ${l}px)`;
+      A.push(rail.querySelector('i').animate([
+        { clipPath: ruleAt(cl, rw - cl), offset: 0 }, { clipPath: ruleAt(cl, rw - cl), offset: at(120), easing: EASE },
+        { clipPath: ruleAt(0, 0), offset: at(330) }, { clipPath: ruleAt(0, 0), offset: 1 },
+      ], k));
+      // 3 . the readout, a numeral at a time, the lozenge growing round it; then the slide
+      const d100 = g.cx - g.now, P = (x) => `translate(calc(-50% + ${x}px), -50%)`;
+      // 5 . a dot at the centre once the rule is out (300); 6 . a numeral a beat: 1, 10, 100, 100%
+      const times = [300, ...g.stops.map((_, i) => 340 + i * Math.min(50, 150 / Math.max(1, g.stops.length - 1)))];
+      const st = [-1, ...g.stops.map((_, i) => i)].map(i => stage(g, i));
+      A.push(pill.animate([
+        ...st.map((s, i) => ({ clipPath: s.pill, transform: P(d100), opacity: i ? 1 : 0, offset: at(times[i]) - (i ? 0 : 1e-6) * 0, easing: EASE })),
+        { clipPath: st.at(-1).pill, transform: P(d100), opacity: 1, offset: at(500), easing: EASE },
+        { clipPath: st.at(-1).pill, transform: P(0), opacity: 1, offset: 1 },
+      ].map((f, i, a) => i === 0 ? { ...f, offset: 0 } : f).flatMap((f, i) => i === 0 ? [f, { ...f, offset: at(times[0]) }] : [f]), k));
+      A.push(read.animate([
+        { clipPath: st[0].read, transform: `translateX(${st[0].tx}px)`, offset: 0 },
+        ...st.map((s, i) => ({ clipPath: s.read, transform: `translateX(${s.tx}px)`, offset: at(times[i]), easing: 'steps(1, end)' })),
+        { clipPath: st.at(-1).read, transform: `translateX(${st.at(-1).tx}px)`, offset: 1 },
+      ], k));
+      return A;
+    };
+    const closing = () => {
+      const total = 300, at = ms => ms / total, k = { duration: total, fill: 'both' };
+      const g = measure2(value), C = { x: g.now, y: g.y }, rel = p => ({ x: p.x - g.mark.x, y: p.y - g.mark.y }), cR = rel(C);
+      const A = [];
+      // the two glasses zip to the lozenge and merge, the rule retracting into them
+      for (const [name, from, btn] of [['zoom_out', g.out, out], ['zoom_in', g.in, into]]) {
+        const d = rel(from);
+        A.push(flyer(name, g.mark).animate([
+          { transform: T(d.x, d.y), opacity: 1, offset: 0, easing: 'ease-in-out' },
+          { transform: T(cR.x, cR.y), opacity: 1, offset: at(120) },
+          { transform: T(cR.x, cR.y), opacity: 0, offset: at(140) },
+          { transform: T(cR.x, cR.y), opacity: 0, offset: 1 },
+        ], k));
+        A.push(btn.animate([{ opacity: 0 }, { opacity: 0 }], k));
+      }
+      const rw = g.rail.r - g.rail.l, cl = g.now - g.rail.l, ruleAt = (l, r) => `inset(-1px ${r}px -1px ${l}px)`;
+      A.push(rail.querySelector('i').animate([{ clipPath: ruleAt(0, 0), offset: 0, easing: 'ease-in-out' }, { clipPath: ruleAt(cl, rw - cl), offset: at(120) }, { clipPath: ruleAt(cl, rw - cl), offset: 1 }], k));
+      // the numerals collapse as the lozenge shrinks to a dot on the rule
+      const st = [-1, ...g.stops.map((_, i) => i)].map(i => stage(g, i)).reverse(), n = st.length - 1;
+      const tt = st.map((_, i) => at(i * 140 / n));
+      A.push(pill.animate([
+        ...st.map((s, i) => ({ clipPath: s.pill, opacity: i === n ? 0 : 1, offset: tt[i], easing: EASE })),
+        { clipPath: st[n].pill, opacity: 0, offset: 1 },
+      ], k));
+      A.push(read.animate([
+        ...st.map((s, i) => ({ clipPath: s.read, transform: `translateX(${s.tx}px)`, offset: tt[i], easing: 'steps(1, end)' })),
+        { clipPath: st[n].read, transform: `translateX(${st[n].tx}px)`, offset: 1 },
+      ], k));
+      // the one glass zips home; the mark unfills as it lands
+      A.push(flyer('search', g.mark).animate([
+        { transform: T(cR.x, cR.y), opacity: 0, offset: 0 },
+        { transform: T(cR.x, cR.y), opacity: 0, offset: at(120) },
+        { transform: T(cR.x, cR.y), opacity: 1, offset: at(140), easing: EASE },
+        { transform: T(0, 0, .6), opacity: 1, offset: at(260) },
+        { transform: T(0, 0, .6), opacity: 0, offset: at(280) },
+        { transform: T(0, 0, .6), opacity: 0, offset: 1 },
+      ], k));
+      A.push(toggle.querySelector('.wm-icon').animate([{ fontVariationSettings: fvsOf(1), offset: 0 }, { fontVariationSettings: fvsOf(1), offset: at(200), easing: EASE }, { fontVariationSettings: fvsOf(0), offset: 1 }], k));
+      return A;
     };
     const setOpen = (o, { animate = true, save = true } = {}) => {
       if (!collapse || o === open && !morph.length) return;
-      const still = !animate || matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const still = !animate || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches;
       stop();
       if (save) { const was = open; open = o; store(); open = was; }
       el.dispatchEvent(new CustomEvent('wm-zoom-open', { detail: o, bubbles: true }));
