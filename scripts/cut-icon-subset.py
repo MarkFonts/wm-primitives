@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """cut-icon-subset -- the shipped Material Symbols face, from the full one, by name.
 
-    python3 scripts/cut-icon-subset.py [name ...]
+    python3 scripts/cut-icon-subset.py [name ...] [-name ...]
 
 fonts/MaterialSymbolsOutlined.woff2 is a subset: the ligatures the apps draw, nothing
 else (lint-icons.py holds every consumer to it). Growing it is not `pyftsubset --text`:
@@ -12,7 +12,7 @@ subtables, keeps only the entries that spell a wanted name, then cuts with the w
 names' letters and the surviving ligature glyphs. 25 names, 54 glyphs, 16KB.
 
 The wanted set is what the shipped face already holds plus every name on the command
-line. Writes fonts/, sets ?v=<count> on the face's URL in src/*.css, and the synced copy in docs/fonts/ (build.py SYNCED_FACES; the faces
+line, less every -name. Writes fonts/, sets ?v=<count> on the face's URL in src/*.css, and the synced copy in docs/fonts/ (build.py SYNCED_FACES; the faces
 job in lint.yml holds them equal). Needs fonttools + brotli, like lint-icons.py."""
 import glob, os, re, subprocess, sys, tempfile
 from fontTools.ttLib import TTFont
@@ -25,7 +25,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FULL = os.path.join(ROOT, 'docs', 'fonts', 'MaterialSymbolsOutlined-full.woff2')
 OUT = [os.path.join(ROOT, 'fonts', 'MaterialSymbolsOutlined.woff2'), os.path.join(ROOT, 'docs', 'fonts', 'MaterialSymbolsOutlined.woff2')]
 
-want = li.shipped_names() | {n for arg in sys.argv[1:] for n in arg.split()}   # names, however the shell grouped them
+args = [n for arg in sys.argv[1:] for n in arg.split()]   # names, however the shell grouped them
+# -name drops a name the code no longer draws (fit_screen left the zoom control, 2026-10-07);
+# lint-icons fails if anything still uses it, which is the check that the drop was safe
+want = (li.shipped_names() | {n for n in args if not n.startswith('-')}) - {n[1:] for n in args if n.startswith('-')}
 full = TTFont(FULL)
 cmap = full.getBestCmap(); g2c = {g: chr(c) for c, g in cmap.items()}
 kept = set()

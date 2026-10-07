@@ -738,13 +738,13 @@ of these. <code>src/chip.css</code>.</p>
 <h2 class="marks-h">The zoom control</h2>
 <p class="lede">The page&rsquo;s own zoom, as a control that sits under the theme switch:
 <b>zoom_out</b>, the rail of the value-in-the-handle dial with the percentage riding in the
-lozenge, <b>zoom_in</b>, and <b>fit_screen</b> back to 100. It applies CSS <code>zoom</code> to a
+lozenge, <b>zoom_in</b>, and the mark, which is the default view: press it and the page is back at 100. It applies CSS <code>zoom</code> to a
 target anchored top-left, so the target grows right and down and scrolls, nothing reflows, and
 type stays type. 50&ndash;400%, steps of 10, kept in <code>localStorage</code>. Drag the lozenge,
 press the marks, or focus the rail and press <code>+</code> <code>&minus;</code> <code>0</code>.
 <code>src/zoomControl.js</code> + <code>.css</code>; GESTURES.md &sect;12.</p>
 <div class="zoom-demo">
-  <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and it transforms into the control; Escape or a press elsewhere folds it back. The rest mark, <code>data-icon</code>:</p>
+  <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and the control opens leftwards out of it while the mark stays put and fills; press the mark again and it folds AND goes back to 100. Escape or a press elsewhere folds it and keeps the zoom. The mark, <code>data-icon</code>:</p>
   <div class="wm-chip-row zoom-icons">
     <button type="button" class="wm-chip wm-chip--small" aria-pressed="true" data-zicon="frame_inspect"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">frame_inspect</span>frame_inspect</button>
     <button type="button" class="wm-chip wm-chip--small" aria-pressed="false" data-zicon="pageview"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">pageview</span>pageview</button>
@@ -800,8 +800,9 @@ data-min / max / step   50 / 400 / 10        data-key   localStorage key (wm-zoo
 data-collapse           rest as one mark     data-icon  frame_inspect | pageview | feature_search
 data-open="true"        start open           data-keys="local"  keys only with focus inside
 events     wm-zoom (detail: the percent) &middot; wm-zoom-open (detail: true / false), bubbling
-keys       + or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; Escape folds &middot; never with Cmd/Ctrl/Alt</pre>
-  <p class="chip-cap">Without <code>data-collapse</code> it is always open, and needs no stack</p>
+keys       + or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; Escape folds, keeps the zoom &middot; never with Cmd/Ctrl/Alt
+the mark   shut: opens &middot; open: folds and goes back to 100 &middot; without data-collapse: back to 100</pre>
+  <p class="chip-cap">Without <code>data-collapse</code> it is always open, the mark is only the reset, and it needs no stack</p>
 </div>
 
 <script>

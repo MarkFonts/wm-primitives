@@ -220,14 +220,14 @@ inside an open one, and `triplet.spec.ts` opens it the way a hand would.
 ## 12 · The zoom control
 
 `src/zoomControl.js` + `.css`: zoom_out · the dialHandle rail with the percentage in the
-lozenge · zoom_in · fit_screen, applying CSS `zoom` to a target. Alone, or under the theme
+lozenge · zoom_in · the mark (`data-icon`), applying CSS `zoom` to a target. Alone, or under the theme
 switch as `.wm-theme-stack` (themeSwitch.css). Prototyped on two scratch study pages
 (2026-10-06). Tested in `tests/behaviour/zoomControl.spec.ts`.
 
 | id | gesture | promise | commit |
 | --- | --- | --- | --- |
 | G58 | any change, from anywhere | the value is clamped to `[min, max]` (default 50–400) and snapped to `step` (10) counted from `min`; the rail is `role=slider` with `aria-valuemin/max/now` and the label "Zoom"; the lozenge reads `N%` in tabular figures | zoom-control |
-| G59 | zoom_out / zoom_in / fit_screen | −step / +step / back to **100** — fit means the page's own size, not "fit the window" | zoom-control |
+| G59 | zoom_out / zoom_in / the mark | −step / +step / back to **100**, the default view — the page's own size, not "fit the window". There is no fit_screen button: the mark is the reset | zoom-control |
 | G60 | `+` or `=` / `-`, `_` or `−` / `0` | in, out, back to 100: while focus is in the control, or anywhere on the page that is not a field (`input`, `textarea`, `select`, contenteditable). With Cmd/Ctrl/Alt: **nothing** — those are the browser's own zoom. A control with `data-keys="local"` answers only with focus inside it; otherwise the first page-level control does. On the rail, arrows ±step, Home/End min/max | zoom-control |
 | G61 | reload | the value is what it was, read from `localStorage[data-key]` (default `wm-zoom`) in try/catch; every change, and the mount, fires `wm-zoom` (bubbling, `detail` = the percent) | zoom-control |
 | G62 | a zoom other than 100 | the target is anchored **top-left**: it keeps its 100% width and left edge, so it grows right and down, nothing reflows, and the document scrolls to its new right edge. A selector that matches several boxes (the blocks under a sticky header that holds the control) zooms and anchors each on its own. The type is re-rasterised, not scaled; a `<canvas>` inside is the exception and redraws at `currentCSSZoom` on `wm-zoom` | zoom-control |
@@ -240,8 +240,8 @@ switch as `.wm-theme-stack` (themeSwitch.css). Prototyped on two scratch study p
 
 | id | gesture | promise | commit |
 | --- | --- | --- | --- |
-| G66 | at rest, `data-collapse` | one 27px `.wm-icon-btn` (33 on touch) showing `data-icon` — `frame_inspect` by default, `pageview` or `feature_search` — with `aria-expanded="false"`; every other part is `inert` and clipped | zoom-control |
-| G67 | press the mark | it **transforms**: the box's width runs from the mark to the control over `--dur-med` (240ms), the mark cross-fades into zoom_out where it stands, the lozenge, zoom_in and fit fade in; focus goes to the rail. `Escape` (focus inside) folds it and returns focus to the mark; so does a press anywhere outside the control. There is no second press on the mark, because zoom_out takes its place | zoom-control |
+| G66 | at rest, `data-collapse` | one 27px `.wm-icon-btn` (33 on touch), the mark, showing `data-icon` — `frame_inspect` by default, `pageview` or `feature_search` — unfilled (FILL 0), with `aria-expanded="false"`; every other part is `inert` and clipped off its left | zoom-control |
+| G67 | press the mark | the control opens **leftwards out of it**: the box's width runs from the mark to the control over `--dur-med` (240ms) while zoom_out, the rail with its lozenge and zoom_in fade in; the mark **stays where it is** at the right end and fills (Material's FILL axis, 0 → 1, over the same 240ms) and stays filled while open; focus goes to the rail. Pressed again while open, the mark **closes the control and goes back to 100**, the default view. `Escape` (focus inside) and a press anywhere outside close it and **keep** the value; Escape returns focus to the mark. Closing unfills it | zoom-control |
 | G68 | `prefers-reduced-motion: reduce` | the same two states, swapped with no transition | zoom-control |
 | G69 | reload | open or closed is kept with the value under the one key: `"170 open"` / `"170 closed"` (`parseFloat` still reads the number); with nothing stored, `data-open="true"` starts it open | zoom-control |
 | G70 | `.wm-zoom--left`, open | the control opens **leftwards** on the theme switch's row from a 27px footprint, its right edge anchored to the footprint's; the open box lies over the row (ground: `--zoom-ground`), so the row stays 27 tall and nothing in it, beside it or below it moves; the rail is a fixed 8rem | zoom-control |

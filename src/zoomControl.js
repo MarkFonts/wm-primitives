@@ -11,14 +11,17 @@
  *   key      localStorage key (data-key), default 'wm-zoom'
  *   keys     'local' (data-keys="local"): + − 0 only while focus is inside this control
  *   value    the start value when nothing is stored, default 100
- *   collapse (data-collapse) rest as ONE mark, data-icon (frame_inspect | pageview |
- *            feature_search), and transform out of it on press; data-open="true" starts open.
- *            Escape or a press outside closes it. The open state is kept with the value.
+ *   icon     (data-icon) the mark at the right end: frame_inspect | pageview | feature_search.
+ *            Pressed, it is the default view: back to 100.
+ *   collapse (data-collapse) rest as that ONE mark and open leftwards out of it on press; the
+ *            mark stays, filled (FILL 1), and pressing it again closes AND goes back to 100.
+ *            Escape or a press outside closes and keeps the value. data-open="true" starts open;
+ *            the open state is kept with the value.
  * Returns { el, get, set(v), destroy }.
  *
  * What it does (GESTURES.md §12):
  *   - renders zoom_out · the rail (dialHandle.css's hairline + lozenge, the % inside) · zoom_in
- *     · fit_screen. The rail is the slider: role=slider, aria-valuemin/max/now, label "Zoom".
+ *     · the mark. The rail is the slider: role=slider, aria-valuemin/max/now, label "Zoom".
  *   - applies CSS `zoom` to the target, anchored top-left: the target keeps its 100% width and
  *     left edge, so it grows right and down, the page scrolls, nothing reflows, and the type is
  *     re-rasterised at the new size rather than scaled as a bitmap. (A <canvas> inside the
@@ -60,7 +63,6 @@
     };
     const out = btn('zoom_out', 'Zoom out', 'Zoom out (−)');
     const into = btn('zoom_in', 'Zoom in', 'Zoom in (+)');
-    const fit = btn('fit_screen', 'Back to 100%', 'Back to 100% (0)');
     const rail = mk('div', 'wm-hd-rail');
     const pill = mk('span', 'wm-hd-pill');
     const read = mk('output');
@@ -71,16 +73,14 @@
     rail.setAttribute('aria-label', 'Zoom');
     rail.setAttribute('aria-valuemin', String(min));
     rail.setAttribute('aria-valuemax', String(max));
-    // the box is what grows: one 27px slot (zoom_out, with the rest mark over it when the
-    // control collapses), the rail, zoom_in, fit. Collapsed, the box is the slot alone.
+    // the box is what grows: zoom_out, the rail, zoom_in, then THE MARK at the right end. The
+    // mark is the default view: pressed, it goes back to 100. When the control collapses it is
+    // also what it rests as -- the box shrinks to the mark alone, and opens leftwards out of it.
     const collapse = !!(opts.collapse ?? ('collapse' in ds));
-    const box = mk('div', 'wm-zoom-box'), slot = mk('span', 'wm-zoom-slot');
-    const toggle = btn(opts.icon ?? ds.icon ?? 'frame_inspect', 'Zoom', 'Zoom');
+    const box = mk('div', 'wm-zoom-box');
+    const toggle = btn(opts.icon ?? ds.icon ?? 'frame_inspect', 'Back to 100%', 'Back to 100% (0)');
     toggle.classList.add('wm-zoom-toggle');
-    toggle.setAttribute('aria-expanded', 'false');
-    slot.append(out);
-    if (collapse) slot.append(toggle);
-    box.append(slot, rail, into, fit);
+    box.append(out, rail, into, toggle);
     el.replaceChildren(box);
 
     // the target, anchored top-left: its 100% width and left margin, measured with the zoom off
@@ -160,16 +160,17 @@
 
     out.addEventListener('click', () => set(value - step));
     into.addEventListener('click', () => set(value + step));
-    fit.addEventListener('click', () => set(100));
-    // OPEN AND CLOSE: the box's width runs from the slot to its open width (measured, then
+    // OPEN AND CLOSE: the box's width runs from the mark to its open width (measured, then
     // released, so a stretched row keeps stretching); the marks cross-fade in CSS. Reduced
     // motion: the same states, no transition.
-    const parts = [out, rail, into, fit];
+    const parts = [out, rail, into];
     const paint = () => {
       el.dataset.open = String(open);
+      if (!collapse) return;
       toggle.setAttribute('aria-expanded', String(open));
+      const label = open ? 'Close zoom, back to 100%' : 'Zoom';
+      toggle.setAttribute('aria-label', label); toggle.title = label;
       parts.forEach(p => { p.inert = !open; });
-      toggle.inert = open;
     };
     let settle = 0;
     const setOpen = (o, { animate = true, save = true } = {}) => {
@@ -177,19 +178,25 @@
       const still = !animate || matchMedia('(prefers-reduced-motion: reduce)').matches;
       const from = box.getBoundingClientRect().width;
       clearTimeout(settle); box.style.inlineSize = ''; delete el.dataset.moving;
+      if (!still) el.dataset.moving = '';   // BEFORE the state, so the mark's fill eases with the box
       open = o; paint();
       if (save) store();
       el.dispatchEvent(new CustomEvent('wm-zoom-open', { detail: open, bubbles: true }));
       if (still) return;
       const to = box.getBoundingClientRect().width;
-      el.dataset.moving = '';
       box.style.inlineSize = from + 'px';
       box.getBoundingClientRect();   // commit the start, so the change below transitions
       box.style.inlineSize = to + 'px';
       const done = () => { box.style.inlineSize = ''; delete el.dataset.moving; };
       settle = setTimeout(done, (parseFloat(getComputedStyle(box).transitionDuration) || 0) * 1000 + 40);
     };
-    toggle.addEventListener('click', () => { setOpen(true); rail.focus({ preventScroll: true }); });
+    // the mark: shut, it opens; open, it closes AND goes back to 100 (the default view);
+    // never collapsing, it only goes back to 100. Escape and a press outside close and keep.
+    toggle.addEventListener('click', () => {
+      if (collapse && !open) { setOpen(true); rail.focus({ preventScroll: true }); return; }
+      if (collapse) setOpen(false);
+      set(100);
+    });
     el.addEventListener('keydown', e => { if (e.key === 'Escape' && open && collapse) { setOpen(false); toggle.focus({ preventScroll: true }); e.preventDefault(); } });
     const outside = e => { if (open && collapse && !el.contains(e.target)) setOpen(false); };
     document.addEventListener('pointerdown', outside);

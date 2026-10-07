@@ -1,5 +1,5 @@
 /* zoomControl.css -- the zoom control (zoomControl.js): zoom_out, the dialHandle rail with the
- * percentage riding in the lozenge, zoom_in, fit_screen. One row, 27px, on the 3px line.
+ * percentage riding in the lozenge, zoom_in, and the mark (data-icon) that is the default view. One row, 27px, on the 3px line.
  *
  * Built from the house pieces, not beside them: the marks are .wm-icon-btn (icon.css), the rail
  * and the lozenge are dialHandle.css's .wm-hd-rail / .wm-hd-pill (load it too), and the readout
@@ -20,10 +20,9 @@
     font-family: var(--ui-font, system-ui, sans-serif);
     color: var(--text-muted, rgba(232, 232, 232, .62));
   }
-  .wm-zoom-box { display: flex; align-items: center; flex: 1 1 auto; min-inline-size: 0; block-size: 100%; }
-  /* the first slot holds zoom_out, and the rest mark over it when the control collapses */
-  .wm-zoom-slot { position: relative; flex: none; display: flex; }
-  .wm-zoom-slot > .wm-zoom-toggle { position: absolute; inset: 0; }
+  /* the box is what grows; it packs to the END, so shut it shows the mark at its right and
+     clips the rest off its left */
+  .wm-zoom-box { display: flex; align-items: center; justify-content: flex-end; flex: 1 1 auto; min-inline-size: 0; block-size: 100%; }
   .wm-zoom .wm-icon-btn {
     --icon-btn-pad: 0;   /* icon.css's knob: the target is the square below, not padding round the mark */
     flex: none;
@@ -55,19 +54,18 @@
   }
 
 
-  /* COLLAPSE (data-collapse): at rest the box is the slot alone, showing the rest mark; open,
-     the box grows to the control and the rest mark cross-fades into zoom_out where it stands.
-     zoomControl.js animates the width ([data-moving]); everything else is opacity. Clipped
-     only while shut or moving, so the open control's focus rings are never cut. */
+  /* COLLAPSE (data-collapse): at rest the box is the mark alone, at the right end; open, the
+     box grows LEFTWARDS out of it to the control and the mark stays where it is, filled.
+     zoomControl.js animates the width ([data-moving]); the parts fade, the mark's FILL eases
+     (icon.css layer, below). Clipped only while shut or moving, so focus rings are never cut. */
   .wm-zoom[data-collapse] { --zoom-dur: var(--dur-med, 240ms); }
   .wm-zoom[data-open="false"] .wm-zoom-box { inline-size: 27px; }
   .wm-zoom[data-open="false"] .wm-zoom-box, .wm-zoom[data-moving] .wm-zoom-box { overflow: clip; }
   .wm-zoom[data-moving] .wm-zoom-box { transition: inline-size var(--zoom-dur) ease-out; }
-  .wm-zoom[data-collapse] :is(.wm-zoom-slot > .wm-icon-btn, .wm-hd-pill, .wm-hd-rail > i, .wm-zoom-box > .wm-icon-btn) {
+  .wm-zoom[data-collapse] :is(.wm-hd-pill, .wm-hd-rail > i, .wm-zoom-box > .wm-icon-btn:not(.wm-zoom-toggle)) {
     transition: opacity var(--zoom-dur) ease-out;
   }
-  .wm-zoom[data-open="false"] :is(.wm-zoom-slot > :not(.wm-zoom-toggle), .wm-hd-pill, .wm-hd-rail > i, .wm-zoom-box > .wm-icon-btn),
-  .wm-zoom[data-open="true"] .wm-zoom-toggle { opacity: 0; pointer-events: none; }
+  .wm-zoom[data-open="false"] :is(.wm-hd-pill, .wm-hd-rail > i, .wm-zoom-box > .wm-icon-btn:not(.wm-zoom-toggle)) { opacity: 0; pointer-events: none; }
 
   /* LEFT (.wm-zoom--left): the control on the theme switch's row, opening leftwards from a
      27px footprint. The open box lies OVER what is to its left, on the page ground, so
@@ -97,4 +95,10 @@
   @media (pointer: coarse) {
     .wm-zoom .wm-icon-btn { min-inline-size: 0; min-block-size: 0; }
   }
+  /* OPEN, THE MARK IS FILLED: Material's FILL axis (the subset keeps it), 0 -> 1. icon.css draws
+     FILL from --icon-fill and transitions font-variation-settings over --icon-dur, so the fill
+     eases with the box while it moves ([data-moving], set before the state) and stays filled.
+     Here, not in wm.controls, because .wm-icon's own declarations are in this later layer. */
+  .wm-zoom[data-collapse][data-open="true"] .wm-zoom-toggle .wm-icon { --icon-fill: 1; }
+  .wm-zoom[data-moving] .wm-zoom-toggle .wm-icon { --icon-dur: var(--zoom-dur, 240ms); }
 }

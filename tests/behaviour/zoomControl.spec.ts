@@ -30,7 +30,7 @@ test('G58 · the value clamps to min and max, and snaps to the step', async ({ p
   await expect(page.locator(`${ctl} output`)).toHaveText('130%')
 })
 
-test('G59 · zoom_in / zoom_out step by 10, fit_screen goes back to 100', async ({ page, hasTouch }) => {
+test('G59 · zoom_in / zoom_out step by 10; the mark goes back to 100', async ({ page, hasTouch }) => {
   /* On the phone profile a zoomed target is wider than the viewport, and mobile Chromium
      shrinks the visual viewport to it, so a coordinate click lands beside the fixed control.
      The press is the button's own click either way. */
@@ -43,6 +43,8 @@ test('G59 · zoom_in / zoom_out step by 10, fit_screen goes back to 100', async 
   await set(page, 250); expect(await zoomOf(page)).toBe('2.5')
   await press('Back to 100%')
   expect(await value(page)).toBe(100)
+  expect(await page.locator(`${ctl} .wm-icon-btn`).count()).toBe(3)   // zoom_out, zoom_in, the mark: no fit_screen
+  expect(await page.locator(`${ctl} .wm-zoom-toggle .wm-icon`).textContent()).toBe('frame_inspect')
   expect(await zoomOf(page)).toBe('')
 })
 
@@ -174,7 +176,7 @@ test('G66 · at rest a collapsing control is one 27px mark: data-icon, frame_ins
   const row = await page.evaluate(() => {
     const z = document.querySelector('#row .wm-zoom')!
     return { open: (z as HTMLElement).dataset.open, mark: z.querySelector('.wm-zoom-toggle .wm-icon')!.textContent,
-      inert: [...z.querySelectorAll('.wm-zoom-box > .wm-icon-btn, .wm-hd-rail, .wm-zoom-slot > :not(.wm-zoom-toggle)')].map(e => (e as HTMLElement).inert),
+      inert: [...z.querySelectorAll('.wm-zoom-box > .wm-icon-btn:not(.wm-zoom-toggle), .wm-hd-rail')].map(e => (e as HTMLElement).inert),
       expanded: z.querySelector('.wm-zoom-toggle')!.getAttribute('aria-expanded') }
   })
   expect(row.open).toBe('false'); expect(row.mark).toBe('frame_inspect'); expect(row.expanded).toBe('false')
@@ -187,8 +189,11 @@ test('G66 · at rest a collapsing control is one 27px mark: data-icon, frame_ins
   expect(fs).toBe('feature_search')
 })
 
-test('G67 · press transforms the mark into the control; Escape and a press outside close it', async ({ page, hasTouch }) => {
+test('G67 · press opens leftwards out of the mark, which stays, filled; pressed again it closes and goes back to 100; Escape and outside close and keep', async ({ page, hasTouch }) => {
   test.skip(hasTouch, 'the press and the keys are the same on touch; the transform is timed here once')
+  const mark0 = await rect(page, '#row .wm-zoom-toggle')
+  const fill = () => page.evaluate(() => getComputedStyle(document.querySelector('#row .wm-zoom-toggle .wm-icon')!).fontVariationSettings)
+  expect(await fill()).toContain('"FILL" 0')
   await expect(page.locator('#cstack .wm-zoom')).toHaveAttribute('data-open', 'true')
   await page.locator('#row .wm-zoom-toggle').click()
   await expect(page.locator('#cstack .wm-zoom')).toHaveAttribute('data-open', 'false')   // that press was outside the stack
@@ -196,19 +201,31 @@ test('G67 · press transforms the mark into the control; Escape and a press outs
   const mid = await rect(page, '#row .wm-zoom-box')
   expect(mid.w).toBeGreaterThan(27); expect(mid.w).toBeLessThan(217)   // it is moving, not swapped
   await page.waitForTimeout(400)
-  const open = await rect(page, '#row .wm-zoom-box')
-  expect(open.w).toBe(217)
-  await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'true')
+  expect((await rect(page, '#row .wm-zoom-box')).w).toBe(217)
+  expect(await rect(page, '#row .wm-zoom-toggle')).toEqual(mark0)       // the mark never moved
+  expect(await fill()).toContain('"FILL" 1')
   await expect(page.locator('#row .wm-zoom-toggle')).toHaveAttribute('aria-expanded', 'true')
   expect(await page.evaluate(() => document.activeElement!.getAttribute('role'))).toBe('slider')
+  // Escape: closes, keeps the value, focus back on the mark
+  await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight')
+  expect(await value(page, '#row .wm-zoom')).toBe(120)
   await page.keyboard.press('Escape'); await page.waitForTimeout(400)
   await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'false')
+  expect(await value(page, '#row .wm-zoom')).toBe(120)
   expect(await page.evaluate(() => document.activeElement!.classList.contains('wm-zoom-toggle'))).toBe(true)
   expect((await rect(page, '#row .wm-zoom-box')).w).toBe(27)
-  // a press on the page closes it too
-  await page.locator('#row .wm-zoom-toggle').click()
+  expect(await fill()).toContain('"FILL" 0')
+  // outside: closes and keeps
+  await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(300)
   await page.mouse.click(600, 420)
   await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'false')
+  expect(await value(page, '#row .wm-zoom')).toBe(120)
+  // the mark, pressed while open: closes AND goes back to 100, the default view
+  await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(300)
+  await page.locator('#row .wm-zoom-toggle').click(); await page.waitForTimeout(300)
+  await expect(page.locator('#row .wm-zoom')).toHaveAttribute('data-open', 'false')
+  expect(await value(page, '#row .wm-zoom')).toBe(100)
+  expect(await page.evaluate(() => localStorage.getItem('wm-zoom-row'))).toBe('100 closed')
 })
 
 test('G68 · reduced motion: the same states, no transform', async ({ page, hasTouch }) => {
@@ -252,6 +269,8 @@ test('G71 · STACK: rests at the right edge under the switch; open, one width an
   expect(Math.abs(r1.w - r2.w)).toBeLessThanOrEqual(0.5); expect(Math.abs(r1.r - r2.r)).toBeLessThanOrEqual(0.5)
   expect(r2.h).toBe(H)
   expect((await rect(page, '#cstack .wm-hd-rail')).w).toBeGreaterThanOrEqual(160)   // the 10rem floor
+  const m = await rect(page, '#cstack .wm-zoom-toggle')
+  expect(Math.abs(m.r - r2.r)).toBeLessThanOrEqual(0.5)   // the mark keeps the right end of the zoom row
   await page.locator('#cstack [role="slider"]').focus(); await page.keyboard.press('Escape')
   r1 = await rect(page, '#cstack > :first-child'); r2 = await rect(page, '#cstack > .wm-zoom')
   expect(r2.w).toBe(H); expect(Math.abs(r1.r - r2.r)).toBeLessThanOrEqual(0.5); expect(r2.h).toBe(H)

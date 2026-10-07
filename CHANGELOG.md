@@ -55,8 +55,7 @@ icon and transform out of it, and whether it should then sit under the theme swi
 left. Both are built so he can choose (GESTURES G66-G71):
 - `data-collapse` rests as one 27px `.wm-icon-btn` showing `data-icon` -- frame_inspect
   (default), pageview or feature_search. A press grows the box from the mark to the control over
-  `--dur-med` while the mark cross-fades into zoom_out where it stands; Escape or a press outside
-  folds it. zoom_out takes the mark's place, so there is no second press on it. Reduced motion
+  `--dur-med`; Escape or a press outside folds it (round 3 below changes what the mark does). Reduced motion
   swaps the states. Open/closed is stored with the value: `"170 open"`.
 - `.wm-zoom--left` in a `.wm-theme-row` (themeSwitch.css) opens leftwards over its own row from a
   27px footprint, so nothing in the row or below it moves; its rail is a fixed 8rem. The open box
@@ -64,8 +63,21 @@ left. Both are built so he can choose (GESTURES G66-G71):
 - The rail's floor goes from 6rem to 10rem: at 6rem a 350-point range had about 46px of travel
   under the chips. The stack is now wider than the chips when open, by 78px.
 
-**Icons.** zoom_in, zoom_out and fit_screen join the subset (cut-icon-subset.py), then pageview, feature_search and
-frame_inspect: 95 ligatures, 67,356 bytes, `?v=95`. The prototype had loaded them from Google as a second family, because a
+**Round 3, the same day: the mark stays, and it is the reset.** Mark: clicking it "would collapse
+and return to default view". So the mark no longer fades into zoom_out: it sits at the control's
+RIGHT end, the control opens leftwards out of it, and it stays put, filled -- Material's FILL axis,
+0 -> 1 over `--dur-med`, which the subset already carried (all four axes survive the cut; nothing
+to pay). Pressed while open it closes AND goes back to 100; Escape and a press outside close and
+keep the value. With the mark as the reset, fit_screen left the control and the subset
+(cut-icon-subset.py grew a `-name` to drop one; lint-icons is the check that nothing still draws
+it). In the stack the mark keeps the right end of the zoom row; without `data-collapse` it is only
+the reset.
+
+GliffDiff, testing at 350%: the actions panned away with the proof. That was the host's (its
+title row lives inside the scroller), fixed there: the cluster is pinned to the window's top-right.
+
+ (cut-icon-subset.py), then pageview, feature_search and
+frame_inspect, then fit_screen left again: 94 ligatures, 66,688 bytes, `?v=94`. The prototype had loaded them from Google as a second family, because a
 second face under the same name replaces the first. `dist/dial.css` rebuilt for the new URL and
 the stack rule (dial-entry imports themeSwitch.css). System page: a chapter in Interface after
 the chips -- the stack zooming a sample card, the markup, the keys.
