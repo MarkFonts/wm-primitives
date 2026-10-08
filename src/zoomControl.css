@@ -99,13 +99,43 @@
   /* --zoom-ground: what the open box lies on. Transparent by default -- a host's row is rarely
      the page's --bg exactly (the system page's is not) -- and a host whose row can hold text
      under the box sets its own ground (GliffDiff: --bg). Declared at the root, as dialHandle's knobs. */
-  :root { --zoom-ground: transparent; }
+  :root { --zoom-ground: transparent; --zoom-rail: 126px; }   /* --zoom-rail: .wm-zoom--down's rail at most (forty-two units); below */
   .wm-zoom--left .wm-zoom-box { position: absolute; inset-block: 0; inset-inline-end: 0; z-index: 1; background: var(--zoom-ground); }
   .wm-zoom--left .wm-hd-rail { flex: 0 0 8rem; min-inline-size: 8rem; }
 
 
+  /* DOWN (.wm-zoom--down): the vertical stack's zoom, and its only layout (themeSwitch.css; Mark, 2026-10-07). The control
+     opens DOWNWARDS from a 27px footprint: the mark stays at the top, then zoom_in, the rail
+     running down (max at the top, as a vertical dial reads), zoom_out at the foot. The open
+     box lies over the text below it, on --zoom-ground, so nothing moves. The column is the
+     mark's width, and the glasses and the rail sit on the mark's own axis (Mark, 2026-10-07: a
+     bigger target from the edge and from slide drawers). The lozenge never rotates
+     (dialHandle's rule), so it overhangs the column; centred on the axis, unless that would put
+     it past the viewport's right edge -- then it alone is nudged inward by the least that keeps
+     it on screen (zoomControl.js, an inline margin). zoomControl.js reads the class and runs the rail, the
+     rule's stretch and the lozenge's slide on the block axis; the glasses travel between
+     measured centres, so the morph needs no rotation. Rail 126px + 3 each side: the open box
+     is 3 x 27 + 132 = 213px (231 on touch), on the line. */
+  .wm-zoom--down { position: relative; flex: none; inline-size: 27px; }
+  .wm-zoom--down .wm-zoom-box {
+    position: absolute; inset-block-start: 0; inset-inline-end: 0; z-index: 1;
+    flex-direction: column-reverse;   /* DOM order out, rail, in, mark: the mark on top */
+    inline-size: 100%; block-size: auto;
+    background: var(--zoom-ground);
+  }
+  .wm-zoom--down[data-open="false"] .wm-zoom-box { inline-size: 100%; block-size: 27px; }
+  .wm-zoom.wm-zoom--down .wm-hd-rail {   /* doubled: beats the touch rule's 33 below */
+    flex: none; min-inline-size: 0; inline-size: 100%;
+    block-size: var(--zoom-rail);   /* zoomControl.js may shorten it inline to fit the viewport (G79) */
+    margin-inline: 0; margin-block: var(--tick, 3px);
+    cursor: ns-resize; touch-action: none;
+  }
+  .wm-zoom--down .wm-hd-rail > i { inset-inline: auto; inset-inline-start: 50%; inset-block: 0; inline-size: 1px; block-size: auto; transform: translateX(-50%); }
+  .wm-zoom--down .wm-hd-pill { left: 50%; top: calc(var(--hd-inset) + (100% - 2 * var(--hd-inset)) * (1 - var(--p))); cursor: ns-resize; touch-action: none; }
+
   @media (pointer: coarse) {
-    .wm-zoom[data-open="false"] .wm-zoom-box, .wm-zoom--left { inline-size: 33px; }
+    .wm-zoom[data-open="false"] .wm-zoom-box, .wm-zoom--left, .wm-zoom--down { inline-size: 33px; }
+    .wm-zoom--down[data-open="false"] .wm-zoom-box { inline-size: 100%; block-size: 33px; }
     .wm-zoom, .wm-zoom .wm-hd-rail { block-size: 33px; }   /* eleven units, chip.css's touch floor */
     .wm-zoom .wm-icon-btn { inline-size: 33px; block-size: 33px; }
   }

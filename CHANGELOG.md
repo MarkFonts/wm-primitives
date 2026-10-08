@@ -12,6 +12,58 @@ Newest first.
 
 ---
 
+## 2026-10-07 -- the theme stack, vertical (phones)
+
+**Mark: "a different version of the auto/light/dark zoom toggles, but run them vertically …
+exclusively for mobile versions of font-proofer and gliffdiff."** `.wm-theme-stack--vertical`
+(themeSwitch.css): the three marks and the zoom's mark top to bottom, `position: fixed` top
+right ("i need these to stay top right not move with the page as i pan"), floating over the text
+with no bar or ground; the chosen mark is the existing active mark, so the PQ swatch paints it HDR
+white on dark (icon.css, nothing new). A class, not a prop: it is a layout modifier like
+`.wm-zoom--left` and `.wm-hd--vertical`, it works the same on the plain-script pages as in React,
+and `data-*` stays for behaviour. Mobile-only is the host's rule, not the primitive's.
+
+- **Dismissal, opt-in.** `src/themeStack.js`, `data-hide="scroll"` / `"swipe"` / both. Scroll is
+  read from any scroller through one passive capture-phase listener, so an app's own text pane
+  needs no wiring; a 24px run per direction keeps a jitter from flapping it. Swipe is on the stack
+  only. Nothing outside the stack is captured. Found on the way: the first scroll after load was
+  dropped (no previous top to diff), so the page's scroller is primed at mount.
+- **The zoom opens down.** Both rails were built and rendered; Mark chose `.wm-zoom--down` as the
+  vertical stack's only layout (`.wm-zoom--left` stays the horizontal row's). The rail runs down
+  from the mark, max at the top. zoomControl.js reads the class and puts the
+  pointer mapping, the reset slide, the rule's stretch and the lozenge's slide on the block axis;
+  the glasses already travel between measured centres, so the morph is not rotated, and the
+  lozenge's count never rotates (dialHandle's rule). The cost: the lozenge (~50px) is wider than
+  the 27/33 column, so the stack sits `--spacing-04` from the edge to leave it room.
+- **A touch pinch is captured too** (Mark: "it may open if people pinch/zoom no?"). `data-capture`
+  read ctrl+wheel and Safari's gesture events only; a phone pinch zoomed the page natively, and
+  that is what carries a fixed control away. Now: iOS's gesture events cancelled, two touch
+  pointers elsewhere with `touch-action: pan-x pan-y` on the region. The first finger of a pinch
+  on an open control used to count as a press outside and fold it; the close now waits for the
+  lift. Measured on the way: a zoomed target that widens the DOCUMENT makes mobile Chromium widen
+  the layout viewport, and the fixed stack moved 188px right at 150% -- the target must pan in its
+  own `overflow-x: auto` box (G80).
+- **The host's hide** (font-proofer's phone sheet covers the corner): `data-hidden` on the stack,
+  or `wmThemeStack.hide(el, on)`, forces it hidden over any scroll state; the script's own state
+  moved to `data-stowed` so it can never clear the host's. G81.
+- **Under the chrome, not on it** (Mark, on his iPhone in font-proofer: "Primitive should position
+  under the two rows, not on top of all chrome"). `data-below="selector"` rests the stack 6px
+  under the lowest matching row, re-measured as rows come and go; `--stack-top` is the manual
+  form. Stowing now clears the whole rest top (a fixed 48px left the foot on the chrome from a
+  114px rest). From font-proofer's adoption, also: the near-top exemption measures the stack's
+  footprint over the scroller, not the scroller's scrollTop against the stack's height (an inner
+  stage at y 47 had to scroll 138px); the return tap is the stack's own rest footprint, and a
+  host can cancel it (the top 27px also switched font-proofer's tab); the down rail and glasses
+  stayed on the mark's axis after a brief inward step (Mark: the axis is the bigger target from
+  the edge; only the lozenge moves in, and only if it would leave the screen); the rail shortens to the
+  viewport, 96px at least, with `--zoom-rail` for a shorter stage. G77-G79, G82.
+  Second round: a named scroller stows on the 24px run alone (the footprint exemption was ~145px
+  of stage); the return press is taken on the capture phase so the paragraph under the footprint
+  no longer takes focus; the rail also stops 12px above the `data-scroller` box's foot; and
+  `data-below` no longer observes all of body (font-proofer restyles inline on every keystroke).
+- GESTURES.md §13, G76-G82; `tests/behaviour/themeStack.spec.ts`; the system page's "The theme
+  stack, vertical" chapter, two phone frames (`data-scroller` scopes each to its own box).
+
 ## 2026-10-07 -- the zoom control, and the theme switch's stacked alternate
 
 **A new primitive from a scratch prototype.** Two study pages grew a zoom slider under their

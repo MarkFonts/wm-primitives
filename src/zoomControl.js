@@ -19,6 +19,9 @@
  *            (ctrl+wheel; Safari's gesture events) and Cmd/Ctrl + - 0 drive this control instead,
  *            opening it if it is shut. Off by default. GESTURES.md G72-G74.
  *            Pressed, it is the default view: back to 100.
+ *   .wm-zoom--down  (class) the rail runs DOWN from the mark, max at the top: the vertical
+ *            theme stack's zoom (zoomControl.css). The rail, the rule's stretch
+ *            and the lozenge's slide go on the block axis; the lozenge's count does not rotate.
  *   collapse (data-collapse) rest as that ONE mark and open leftwards out of it on press; the
  *            mark stays, filled, and pressing it again closes it. Closing never changes the zoom:
  *            the reset is a press on the lozenge (or 0). Shut at a zoom other than 100, the value
@@ -58,6 +61,12 @@
       : !target ? [] : target instanceof Element ? [target] : [...target];
     const snap = v => Math.min(max, Math.max(min, Math.round((v - min) / step) * step + min));
     const fmt = v => v + '%';
+    // .wm-zoom--down: the rail is vertical, max at the top. Every along-the-rail measure below
+    // goes through these: the pointer's coordinate, a rect's start / length on the axis.
+    const down = el.classList.contains('wm-zoom--down');
+    const along = e => down ? e.clientY : e.clientX;
+    const lo = r => down ? r.top : r.left, len = r => down ? r.height : r.width;
+    const shift = d => down ? `translate(-50%, calc(-50% + ${d}px))` : `translate(calc(-50% + ${d}px), -50%)`;
 
     el.setAttribute('role', 'group');
     if (!el.hasAttribute('aria-label')) el.setAttribute('aria-label', 'Zoom');
@@ -80,6 +89,7 @@
     rail.setAttribute('aria-label', 'Zoom');
     rail.setAttribute('aria-valuemin', String(min));
     rail.setAttribute('aria-valuemax', String(max));
+    if (down) rail.setAttribute('aria-orientation', 'vertical');
     // the box is what grows: zoom_out, the rail, zoom_in, then THE MARK at the right end. The
     // mark is the default view: pressed, it goes back to 100. When the control collapses it is
     // also what it rests as -- the box shrinks to the mark alone, and opens leftwards out of it.
@@ -136,13 +146,13 @@
     const reset = () => {
       if (value === 100) return;
       const from = value, still = document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches || !open;
-      const x0 = pill.getBoundingClientRect().left;
+      const x0 = lo(pill.getBoundingClientRect());
       set(100);
       if (still) return;
-      const dx = x0 - pill.getBoundingClientRect().left;
+      const dx = x0 - lo(pill.getBoundingClientRect());
       const dur = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
       slide?.cancel();
-      slide = pill.animate([{ transform: `translate(calc(-50% + ${dx}px), -50%)` }, { transform: 'translate(-50%, -50%)' }], { duration: dur, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' });
+      slide = pill.animate([{ transform: shift(dx) }, { transform: 'translate(-50%, -50%)' }], { duration: dur, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' });
       cancelAnimationFrame(counting);
       const t0 = performance.now(), n = Math.abs(from - 100) / step;
       const tick = now => {
@@ -161,29 +171,52 @@
       for (const v of [min, max, 100]) { read.textContent = fmt(v); w = Math.max(w, read.getBoundingClientRect().width); }
       read.textContent = now;
       read.style.minInlineSize = w + 'px';
-      rail.style.setProperty('--hd-inset', pill.getBoundingClientRect().width / 2 + 'px');
+      rail.style.setProperty('--hd-inset', len(pill.getBoundingClientRect()) / 2 + 'px');
+      fit();
     };
+    // .wm-zoom--down only (G79): the glasses and the rail stay on the mark's axis; the lozenge is
+    // centred on it unless that would cross the viewport's right edge (its 3px ring included),
+    // when it ALONE moves inward by the least that keeps it on screen (an inline margin, so the
+    // morph's transforms are untouched); and the rail is --zoom-rail at most, shortened to what
+    // the viewport -- and the stack's data-scroller, if named -- has under the open box less 12px, on the 3px line, down to the floor: 45px, the least at which the lozenge (21px) still travels min to max with the glasses clear of its ring. A host's --zoom-rail is the nominal, honoured as-is, the floor its only minimum. The pill's
+    // travel is a percentage of the rail, so it scales with it. Run at mount, on open and resize.
+    function fit() {
+      if (!down) return;
+      const T = toggle.getBoundingClientRect(), pw = pill.getBoundingClientRect().width;
+      const over = T.left + T.width / 2 + pw / 2 + 3 - document.documentElement.clientWidth;
+      pill.style.marginInlineStart = over > 0 ? -Math.ceil(over) + 'px' : '';
+      rail.style.blockSize = '';
+      const nominal = rail.offsetHeight;
+      const rest = toggle.offsetHeight + out.offsetHeight + into.offsetHeight + 6;   // the open box less the rail (3px each side of it)
+      // the viewport's foot, and the stack's scroller's foot if it names one (data-scroller)
+      const sel = el.closest('.wm-theme-stack')?.dataset.scroller, sc = sel && document.querySelector(sel);
+      const foot = Math.min(innerHeight, sc ? sc.getBoundingClientRect().bottom : Infinity);
+      const room = foot - 12 - el.getBoundingClientRect().top - rest;
+      const n = Math.max(45, Math.min(nominal, Math.floor(room / 3) * 3));   // the floor, fifteen units
+      if (n !== nominal) rail.style.blockSize = n + 'px';
+    }
 
     // the rail: a press on the lozenge grabs it where it is (no jump); a press elsewhere jumps
     // there; either way the value follows until lift. Capture released from three places, as
     // in dialHandle.js. No wheel (GESTURES.md G33).
     let grab = null;
     const at = x => {
-      const r = rail.getBoundingClientRect(), inset = pill.getBoundingClientRect().width / 2;
-      return min + ((x - r.left - inset) / Math.max(1, r.width - 2 * inset)) * (max - min);
+      const r = rail.getBoundingClientRect(), inset = len(pill.getBoundingClientRect()) / 2;
+      const f = (x - lo(r) - inset) / Math.max(1, len(r) - 2 * inset);
+      return min + (down ? 1 - f : f) * (max - min);
     };
     let downX = 0, moved = false, onPill = false;
     rail.addEventListener('pointerdown', e => {
       const p = pill.getBoundingClientRect();
-      onPill = e.clientX >= p.left && e.clientX <= p.right;
-      downX = e.clientX; moved = false;
-      grab = onPill ? e.clientX - (p.left + p.width / 2) : 0;
-      if (!onPill) { moved = true; set(at(e.clientX - grab)); }
+      onPill = along(e) >= lo(p) && along(e) <= lo(p) + len(p);
+      downX = along(e); moved = false;
+      grab = onPill ? along(e) - (lo(p) + len(p) / 2) : 0;
+      if (!onPill) { moved = true; set(at(along(e) - grab)); }
       try { rail.setPointerCapture(e.pointerId); } catch {}
       rail.focus({ preventScroll: true });
       e.preventDefault();
     });
-    rail.addEventListener('pointermove', e => { if (grab !== null) { if (Math.abs(e.clientX - downX) > 3) moved = true; if (moved) { const v = snap(at(e.clientX - grab)); if (v !== value) set(v); } } });
+    rail.addEventListener('pointermove', e => { if (grab !== null) { if (Math.abs(along(e) - downX) > 3) moved = true; if (moved) { const v = snap(at(along(e) - grab)); if (v !== value) set(v); } } });
     // A PRESS ON THE LOZENGE IS THE RESET (Mark, 2026-10-07): down and up on the pill without a
     // drag snaps to 100 -- the pill slides home while its numerals count down. A drag from the
     // pill still drags (no jump on down: it was grabbed where it is).
@@ -239,21 +272,25 @@
       const B = box.getBoundingClientRect();
       const c = e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2 - B.left, y: r.top + r.height / 2 - B.top }; };
       const R = rail.getBoundingClientRect(), P = pill.getBoundingClientRect();
-      const inset = P.width / 2, span = Math.max(1, R.width - 2 * inset);
-      const pAt = v => R.left - B.left + inset + span * ((v - min) / (max - min));
+      const inset = len(P) / 2, span = Math.max(1, len(R) - 2 * inset);
+      const f = v => (v - min) / (max - min);
+      const pAt = v => lo(R) - lo(B) + inset + span * (down ? 1 - f(v) : f(v));   // a position on the rail's axis
       const now = pAt(value), cx = pAt(centreAt);
       // the readout's prefixes: where each numeral ends, in the output's own box
       const O = read.getBoundingClientRect(), tn = read.firstChild, rg = document.createRange();
       const stops = [];
       for (let i = 1; i <= tn.length; i++) { rg.setStart(tn, 0); rg.setEnd(tn, i); const rr = rg.getBoundingClientRect(); stops.push({ left: rr.left - O.left, w: rr.width }); }
       return { mark: c(toggle.querySelector('.wm-icon')), out: c(out.querySelector('.wm-icon')), in: c(into.querySelector('.wm-icon')),
-        y: P.top + P.height / 2 - B.top, cx, now, rail: { l: R.left - B.left, r: R.right - B.left }, pw: P.width, ph: P.height,
+        y: P.top + P.height / 2 - B.top, x: P.left + P.width / 2 - B.left, cx, now, rail: { l: lo(R) - lo(B), r: lo(R) + len(R) - lo(B) }, pw: P.width, ph: P.height,
         ox: O.left - P.left, ow: O.width, stops };
     };
     const flyer = (name, at) => {
       const f = mk('span', 'wm-icon wm-zoom-fly'); f.textContent = name; f.setAttribute('aria-hidden', 'true'); f.setAttribute('translate', 'no');
       f.style.left = at.x + 'px'; f.style.top = at.y + 'px'; box.appendChild(f); fly.push(f); return f;
     };
+    // a point on the rail at axis position a, in the box's coordinates; the rule's clip, open from l to r on the axis
+    const onRail = (g, a) => down ? { x: g.x, y: a } : { x: a, y: g.y };
+    const ruleAt = (l, r) => down ? `inset(${l}px -1px ${r}px -1px)` : `inset(-1px ${r}px -1px ${l}px)`;
     const T = (x, y, s = 1) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
     // the lozenge at each numeral stage: its clip (round ends), the readout's clip and shift
     const stage = (g, i) => {
@@ -270,7 +307,7 @@
     const choreograph = () => {
       const beat = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
       const total = 2.5 * beat, at = ms => Math.min(1, Math.max(0, ms / 600));   // the script is written in 600ths
-      const k = { duration: total, fill: 'both' }, g = measure2(100), C = { x: g.cx, y: g.y };
+      const k = { duration: total, fill: 'both' }, g = measure2(100), C = onRail(g, g.cx);
       const rel = p => ({ x: p.x - g.mark.x, y: p.y - g.mark.y }), cR = rel(C);
       const A = [];
       // 1 . one glass zips from the mark to the centre; the mark fills
@@ -297,13 +334,12 @@
       }
       // ... pulling the rule out of the centre with them (the rule's own box: the whole rail)
       const rw = g.rail.r - g.rail.l, cl = g.cx - g.rail.l;
-      const ruleAt = (l, r) => `inset(-1px ${r}px -1px ${l}px)`;
       A.push(rail.querySelector('i').animate([
         { clipPath: ruleAt(cl, rw - cl), offset: 0 }, { clipPath: ruleAt(cl, rw - cl), offset: at(120), easing: EASE },
         { clipPath: ruleAt(0, 0), offset: at(330) }, { clipPath: ruleAt(0, 0), offset: 1 },
       ], k));
       // 3 . the readout, a numeral at a time, the lozenge growing round it; then the slide
-      const d100 = g.cx - g.now, P = (x) => `translate(calc(-50% + ${x}px), -50%)`;
+      const d100 = g.cx - g.now, P = shift;
       // 5 . a dot at the centre once the rule is out (300); 6 . a numeral a beat: 1, 10, 100, 100%
       const times = [300, ...g.stops.map((_, i) => 340 + i * Math.min(50, 150 / Math.max(1, g.stops.length - 1)))];
       const st = [-1, ...g.stops.map((_, i) => i)].map(i => stage(g, i));
@@ -321,7 +357,7 @@
     };
     const closing = () => {
       const total = 300, at = ms => ms / total, k = { duration: total, fill: 'both' };
-      const g = measure2(value), C = { x: g.now, y: g.y }, rel = p => ({ x: p.x - g.mark.x, y: p.y - g.mark.y }), cR = rel(C);
+      const g = measure2(value), C = onRail(g, g.now), rel = p => ({ x: p.x - g.mark.x, y: p.y - g.mark.y }), cR = rel(C);
       const A = [];
       // the two glasses zip to the lozenge and merge, the rule retracting into them
       for (const [name, from, btn] of [['zoom_out', g.out, out], ['zoom_in', g.in, into]]) {
@@ -334,7 +370,7 @@
         ], k));
         A.push(btn.animate([{ opacity: 0 }, { opacity: 0 }], k));
       }
-      const rw = g.rail.r - g.rail.l, cl = g.now - g.rail.l, ruleAt = (l, r) => `inset(-1px ${r}px -1px ${l}px)`;
+      const rw = g.rail.r - g.rail.l, cl = g.now - g.rail.l;
       A.push(rail.querySelector('i').animate([{ clipPath: ruleAt(0, 0), offset: 0, easing: 'ease-in-out' }, { clipPath: ruleAt(cl, rw - cl), offset: at(120) }, { clipPath: ruleAt(cl, rw - cl), offset: 1 }], k));
       // the numerals collapse as the lozenge shrinks to a dot on the rule
       const st = [-1, ...g.stops.map((_, i) => i)].map(i => stage(g, i)).reverse(), n = st.length - 1;
@@ -362,6 +398,7 @@
     };
     const setOpen = (o, { animate = true, save = true } = {}) => {
       if (!collapse || o === open && !morph.length) return;
+      if (o) fit();
       const still = !animate || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches;
       stop();
       if (save) { const was = open; open = o; store(); open = was; }
@@ -383,7 +420,14 @@
       setOpen(false);
     });
     el.addEventListener('keydown', e => { if (e.key === 'Escape' && open && collapse) { setOpen(false); toggle.focus({ preventScroll: true }); e.preventDefault(); } });
-    const outside = e => { if (open && collapse && !el.contains(e.target)) setOpen(false); };
+    // a touch on a capture region may be the first finger of a pinch: the close waits for the lift
+    // and is dropped if a second finger came down (onTouchDown / onTouchUp, below)
+    let pendingClose = false;
+    const outside = e => {
+      if (!open || !collapse || el.contains(e.target)) return;
+      if (e.pointerType === 'touch' && regions.some(r => r.contains(e.target))) { if (touches.size < 2) pendingClose = true; return; }
+      setOpen(false);
+    };
     document.addEventListener('pointerdown', outside);
 
     // CAPTURE (data-capture): over the target -- or the region its value names -- the browser's own
@@ -391,7 +435,16 @@
     // (wheel non-passive so it may be cancelled), so outside it the browser zooms as ever.
     //   ctrl+wheel   a trackpad pinch in Chrome, Firefox and Edge (and ctrl + a mouse wheel):
     //                continuous, x e^(-deltaY/100), snapped to the step
-    //   gesture*     Safari's pinch: the scale from gesturestart, applied to the value it began at
+    //   gesture*     Safari's pinch -- the trackpad on a Mac, two fingers on iOS: the scale from
+    //                gesturestart, applied to the value it began at; cancelled, so the page does not zoom
+    //   two touches  a pinch on a touch screen elsewhere (Chrome Android, ...): two pointers on the
+    //                region, the ratio of their distance to the distance at the second touch-down,
+    //                applied to the value it began at. The region gets touch-action: pan-x pan-y
+    //                so the browser never claims the pinch first (a one-finger pan still scrolls),
+    //                and a two-touch touchmove is cancelled as well, for engines that ignore it.
+    //                Where gesture events exist (iOS) they drive it and the pointers do not, so a
+    //                pinch is never counted twice. Because the native zoom never happens, a
+    //                position: fixed control stays where it is (GESTURES.md G80).
     //   Cmd/Ctrl + - 0 while the pointer is over the region or focus is inside it -- in a text
     //                field too: the chord types nothing, and the page zooming under a field you
     //                are typing in is the thing this exists to stop
@@ -412,11 +465,38 @@
     };
     const onGesture = e => {
       e.preventDefault();
-      if (e.type === 'gesturestart') { gestureFrom = value; wake(); return; }
+      if (e.type === 'gesturestart') { gestureFrom = value; pendingClose = false; wake(); return; }
       if (e.type === 'gesturechange') { const v = snap(gestureFrom * e.scale); if (v !== value) set(v); }
     };
+    const touches = new Map(), gestures = 'ongesturestart' in window;
+    let pinchFrom = null;   // { d, v }: the distance at the second touch-down, and the value then
+    const dist = () => { const [a, b] = [...touches.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+    const onTouchDown = e => {
+      if (e.pointerType !== 'touch') return;
+      touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (touches.size === 2) { pendingClose = false; if (!gestures) { pinchFrom = { d: Math.max(1, dist()), v: value }; wake(); } }
+    };
+    const onTouchMove = e => {
+      if (!touches.has(e.pointerId)) return;
+      touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (touches.size !== 2 || !pinchFrom || gestures) return;
+      e.preventDefault();
+      const v = snap(pinchFrom.v * dist() / pinchFrom.d);
+      if (v !== value) set(v);
+    };
+    const onTouchUp = e => {
+      touches.delete(e.pointerId);
+      if (touches.size < 2) pinchFrom = null;
+      if (!touches.size && pendingClose) { pendingClose = false; setOpen(false); }
+    };
+    const noNativePinch = e => { if (e.touches.length > 1) e.preventDefault(); };
     const enter = () => { over = true; }, leave = () => { over = false; };
     regions.forEach(r => {
+      r.style.touchAction = 'pan-x pan-y';
+      r.addEventListener('pointerdown', onTouchDown);
+      r.addEventListener('pointermove', onTouchMove);
+      ['pointerup', 'pointercancel'].forEach(ev => r.addEventListener(ev, onTouchUp));
+      r.addEventListener('touchmove', noNativePinch, { passive: false });
       r.addEventListener('wheel', onWheel, { passive: false });
       ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => r.addEventListener(ev, onGesture, { passive: false }));
       r.addEventListener('pointerenter', enter); r.addEventListener('pointerleave', leave);
@@ -432,7 +512,7 @@
     };
     if (capture) document.addEventListener('keydown', onChord, true);
 
-    const resize = () => { if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
+    const resize = () => { fit(); if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
     window.addEventListener('resize', resize);
 
     const api = {
@@ -442,11 +522,12 @@
       reset,
       isOpen: () => open,
       morph: () => morph,   // the running timeline, for a test or a frame grab
+      fit,                  // .wm-zoom--down: re-measure the shift and the rail (themeStack.js calls it when the stack moves)
       setOpen: o => setOpen(!!o),
       destroy: () => {
         document.removeEventListener('pointerdown', outside); stop();
         document.removeEventListener('keydown', onChord, true);
-        regions.forEach(r => { r.removeEventListener('wheel', onWheel); ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => r.removeEventListener(ev, onGesture)); r.removeEventListener('pointerenter', enter); r.removeEventListener('pointerleave', leave); });
+        regions.forEach(r => { r.removeEventListener('wheel', onWheel); ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => r.removeEventListener(ev, onGesture)); r.removeEventListener('pointerenter', enter); r.removeEventListener('pointerleave', leave); r.style.touchAction = ''; r.removeEventListener('pointerdown', onTouchDown); r.removeEventListener('pointermove', onTouchMove); ['pointerup', 'pointercancel'].forEach(ev => r.removeEventListener(ev, onTouchUp)); r.removeEventListener('touchmove', noNativePinch); });
         window.removeEventListener('resize', resize); window.removeEventListener('pointerup', end); window.removeEventListener('blur', end);
         clear();
         live.delete(api); el.replaceChildren(); delete el.__wmZoom;
