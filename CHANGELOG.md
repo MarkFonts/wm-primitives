@@ -12,6 +12,15 @@ Newest first.
 
 ---
 
+## 2026-10-07 -- zoom: data-fit, the box the open rail ends inside
+
+font-proofer's chevron bar between the stage and the rail becomes a centred flap two-thirds wide,
+which frees the right sixth of that row under the zoom column. Mark: "we should buy some space
+for the max length on that with the flap not bar take". `data-fit="selector"` on the
+`.wm-zoom--down` (or its stack) names the box the open control ends 12px inside, lowest match
+first, never past the viewport; without it, or matching nothing, it is the `data-scroller` box
+as before. About 51px more rail on font-proofer's phone. G83.
+
 ## 2026-10-07 -- the theme stack, vertical (phones)
 
 **Mark: "a different version of the auto/light/dark zoom toggles, but run them vertically …

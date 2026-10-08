@@ -70,16 +70,21 @@
     // that leaves and comes back is caught. A row that appears where none ever was is caught on
     // resize, orientation, scroll end, or the next tap (a mode switch is a tap).
     const below = el.dataset.below;
+    // data-fit (the zoom's foot, G83) is watched the same way: its boxes move, the open rail re-fits
+    const fitSel = el.dataset.fit ?? el.querySelector('.wm-zoom[data-fit]')?.dataset.fit;
+    const watched = [below, fitSel].filter(Boolean).join(', ');
     let ro = null, mo = null, raf = 0, seen = [];
     const parents = new Set();
     const place = () => {
       raf = 0;
-      if (!below) return;
+      if (!watched) return;
       let bottom = -Infinity, matches = [];
-      try { matches = [...document.querySelectorAll(below)]; } catch { return; }
-      for (const m of matches) { const r = m.getBoundingClientRect(); if (r.width || r.height) bottom = Math.max(bottom, r.bottom); }
-      if (bottom === -Infinity) el.style.removeProperty('--stack-top');
-      else el.style.setProperty('--stack-top', Math.ceil((Math.max(0, bottom) + 6) / 3) * 3 + 'px');
+      try { matches = [...document.querySelectorAll(watched)]; } catch { return; }
+      if (below) {
+        for (const m of matches) { if (!m.matches(below)) continue; const r = m.getBoundingClientRect(); if (r.width || r.height) bottom = Math.max(bottom, r.bottom); }
+        if (bottom === -Infinity) el.style.removeProperty('--stack-top');
+        else el.style.setProperty('--stack-top', Math.ceil((Math.max(0, bottom) + 6) / 3) * 3 + 'px');
+      }
       // observe the matches -- re-observing only when the set changed, since observe() itself fires once
       if (matches.length !== seen.length || matches.some((m, i) => m !== seen[i])) {
         ro?.disconnect(); mo.disconnect();
@@ -90,7 +95,7 @@
       el.querySelectorAll('.wm-zoom').forEach(z => z.__wmZoom?.fit?.());
     };
     const replace = () => { if (!raf) raf = requestAnimationFrame(place); };
-    if (below) {
+    if (watched) {
       if ('ResizeObserver' in window) ro = new ResizeObserver(replace);
       mo = new MutationObserver(replace);
       document.addEventListener('pointerup', replace, { passive: true });
@@ -112,7 +117,7 @@
     if (first) last.set(first, first.scrollTop);
     let run = 0, settle = 0;
     const scrolled = e => {
-      if (below) { clearTimeout(settle); settle = setTimeout(replace, 120); }   // the end of a scroll: the chrome may have moved
+      if (watched) { clearTimeout(settle); settle = setTimeout(replace, 120); }   // the end of a scroll: the chrome may have moved
       const t = e.target === document ? document.scrollingElement : e.target;
       if (!t || typeof t.scrollTop !== 'number' || (only && t !== only)) return;
       const top = t.scrollTop, prev = last.get(t);
@@ -192,7 +197,7 @@
     return api;
   }
 
-  const auto = () => document.querySelectorAll('.wm-theme-stack:is([data-hide], [data-below])').forEach(el => mount(el));
+  const auto = () => document.querySelectorAll('.wm-theme-stack:is([data-hide], [data-below], [data-fit]), .wm-theme-stack:has(.wm-zoom[data-fit])').forEach(el => mount(el));
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto);
   else auto();
   // the host's hide (G81): only the attribute; mounted or not, the CSS does the rest
