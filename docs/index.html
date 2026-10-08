@@ -6240,6 +6240,8 @@ data-below      the host's top chrome (a selector, commas allowed): rests 6px un
                 Here: 90px, under the frame's two 42px rows -- a frame's rows are not the viewport's
 --zoom-rail     the down rail at most (126px); it shortens itself so the box ends 12px inside the viewport
                 or the data-scroller box, 45px at least
+data-fit        (on the zoom or the stack) a lower box to end inside instead -- a row below the stage
+                that is free under the zoom column; the lowest match wins, nothing matching falls back
 data-hidden     the HOST's: hidden whatever the scroll says, until removed (a sheet over the corner)
                 wmThemeStack.hide(el, true | false) toggles just that; the script's own state is data-stowed
 wmThemeStack.mount(el)   for a stack rendered after load; returns .hide() .show() .hidden(), the scroll state
@@ -7634,6 +7636,9 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
  *            (ctrl+wheel; Safari's gesture events) and Cmd/Ctrl + - 0 drive this control instead,
  *            opening it if it is shut. Off by default. GESTURES.md G72-G74.
  *            Pressed, it is the default view: back to 100.
+ *   fit      (data-fit, here or on the enclosing .wm-theme-stack) .wm-zoom--down only: a selector
+ *            for the box the open control ends 12px inside -- the lowest match; default the
+ *            stack's data-scroller box, else the viewport. GESTURES.md G83.
  *   .wm-zoom--down  (class) the rail runs DOWN from the mark, max at the top: the vertical
  *            theme stack's zoom (zoomControl.css). The rail, the rule's stretch
  *            and the lozenge's slide go on the block axis; the lozenge's count does not rotate.
@@ -7803,9 +7808,14 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       rail.style.blockSize = '';
       const nominal = rail.offsetHeight;
       const rest = toggle.offsetHeight + out.offsetHeight + into.offsetHeight + 6;   // the open box less the rail (3px each side of it)
-      // the viewport's foot, and the stack's scroller's foot if it names one (data-scroller)
-      const sel = el.closest('.wm-theme-stack')?.dataset.scroller, sc = sel && ROOT.querySelector(sel);
-      const foot = Math.min(innerHeight, sc ? sc.getBoundingClientRect().bottom : Infinity);
+      // the foot the open box ends 12px inside: data-fit (on the control, or on its stack) -- the
+      // LOWEST bottom among its matches; else the stack's data-scroller box; else the viewport.
+      // Never past the viewport. A data-fit that matches nothing falls back the same way.
+      const stack = el.closest('.wm-theme-stack'), fitSel = ds.fit ?? stack?.dataset.fit;
+      let box = -Infinity;
+      if (fitSel) { try { ROOT.querySelectorAll(fitSel).forEach(m => { const r = m.getBoundingClientRect(); if (r.width || r.height) box = Math.max(box, r.bottom); }); } catch {} }
+      if (box === -Infinity) { const sel = stack?.dataset.scroller, sc = sel && ROOT.querySelector(sel); box = sc ? sc.getBoundingClientRect().bottom : Infinity; }
+      const foot = Math.min(innerHeight, box);
       const room = foot - 12 - el.getBoundingClientRect().top - rest;
       const n = Math.max(45, Math.min(nominal, Math.floor(room / 3) * 3));   // the floor, fifteen units
       if (n !== nominal) rail.style.blockSize = n + 'px';
@@ -8257,16 +8267,21 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     // that leaves and comes back is caught. A row that appears where none ever was is caught on
     // resize, orientation, scroll end, or the next tap (a mode switch is a tap).
     const below = el.dataset.below;
+    // data-fit (the zoom's foot, G83) is watched the same way: its boxes move, the open rail re-fits
+    const fitSel = el.dataset.fit ?? el.querySelector('.wm-zoom[data-fit]')?.dataset.fit;
+    const watched = [below, fitSel].filter(Boolean).join(', ');
     let ro = null, mo = null, raf = 0, seen = [];
     const parents = new Set();
     const place = () => {
       raf = 0;
-      if (!below) return;
+      if (!watched) return;
       let bottom = -Infinity, matches = [];
-      try { matches = [...ROOT.querySelectorAll(below)]; } catch { return; }
-      for (const m of matches) { const r = m.getBoundingClientRect(); if (r.width || r.height) bottom = Math.max(bottom, r.bottom); }
-      if (bottom === -Infinity) el.style.removeProperty('--stack-top');
-      else el.style.setProperty('--stack-top', Math.ceil((Math.max(0, bottom) + 6) / 3) * 3 + 'px');
+      try { matches = [...ROOT.querySelectorAll(watched)]; } catch { return; }
+      if (below) {
+        for (const m of matches) { if (!m.matches(below)) continue; const r = m.getBoundingClientRect(); if (r.width || r.height) bottom = Math.max(bottom, r.bottom); }
+        if (bottom === -Infinity) el.style.removeProperty('--stack-top');
+        else el.style.setProperty('--stack-top', Math.ceil((Math.max(0, bottom) + 6) / 3) * 3 + 'px');
+      }
       // observe the matches -- re-observing only when the set changed, since observe() itself fires once
       if (matches.length !== seen.length || matches.some((m, i) => m !== seen[i])) {
         ro?.disconnect(); mo.disconnect();
@@ -8277,7 +8292,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
       el.querySelectorAll('.wm-zoom').forEach(z => z.__wmZoom?.fit?.());
     };
     const replace = () => { if (!raf) raf = requestAnimationFrame(place); };
-    if (below) {
+    if (watched) {
       if ('ResizeObserver' in window) ro = new ResizeObserver(replace);
       mo = new MutationObserver(replace);
       document.addEventListener('pointerup', replace, { passive: true });
@@ -8299,7 +8314,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     if (first) last.set(first, first.scrollTop);
     let run = 0, settle = 0;
     const scrolled = e => {
-      if (below) { clearTimeout(settle); settle = setTimeout(replace, 120); }   // the end of a scroll: the chrome may have moved
+      if (watched) { clearTimeout(settle); settle = setTimeout(replace, 120); }   // the end of a scroll: the chrome may have moved
       const t = e.target === document ? document.scrollingElement : e.target;
       if (!t || typeof t.scrollTop !== 'number' || (only && t !== only)) return;
       const top = t.scrollTop, prev = last.get(t);
@@ -8379,7 +8394,7 @@ ROOT.querySelectorAll('.bar button[data-k]').forEach(x=>x.onclick=()=>{
     return api;
   }
 
-  const auto = () => ROOT.querySelectorAll('.wm-theme-stack:is([data-hide], [data-below])').forEach(el => mount(el));
+  const auto = () => ROOT.querySelectorAll('.wm-theme-stack:is([data-hide], [data-below], [data-fit]), .wm-theme-stack:has(.wm-zoom[data-fit])').forEach(el => mount(el));
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto);
   else auto();
   // the host's hide (G81): only the attribute; mounted or not, the CSS does the rest

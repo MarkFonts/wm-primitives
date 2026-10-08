@@ -19,6 +19,9 @@
  *            (ctrl+wheel; Safari's gesture events) and Cmd/Ctrl + - 0 drive this control instead,
  *            opening it if it is shut. Off by default. GESTURES.md G72-G74.
  *            Pressed, it is the default view: back to 100.
+ *   fit      (data-fit, here or on the enclosing .wm-theme-stack) .wm-zoom--down only: a selector
+ *            for the box the open control ends 12px inside -- the lowest match; default the
+ *            stack's data-scroller box, else the viewport. GESTURES.md G83.
  *   .wm-zoom--down  (class) the rail runs DOWN from the mark, max at the top: the vertical
  *            theme stack's zoom (zoomControl.css). The rail, the rule's stretch
  *            and the lozenge's slide go on the block axis; the lozenge's count does not rotate.
@@ -188,9 +191,14 @@
       rail.style.blockSize = '';
       const nominal = rail.offsetHeight;
       const rest = toggle.offsetHeight + out.offsetHeight + into.offsetHeight + 6;   // the open box less the rail (3px each side of it)
-      // the viewport's foot, and the stack's scroller's foot if it names one (data-scroller)
-      const sel = el.closest('.wm-theme-stack')?.dataset.scroller, sc = sel && document.querySelector(sel);
-      const foot = Math.min(innerHeight, sc ? sc.getBoundingClientRect().bottom : Infinity);
+      // the foot the open box ends 12px inside: data-fit (on the control, or on its stack) -- the
+      // LOWEST bottom among its matches; else the stack's data-scroller box; else the viewport.
+      // Never past the viewport. A data-fit that matches nothing falls back the same way.
+      const stack = el.closest('.wm-theme-stack'), fitSel = ds.fit ?? stack?.dataset.fit;
+      let box = -Infinity;
+      if (fitSel) { try { document.querySelectorAll(fitSel).forEach(m => { const r = m.getBoundingClientRect(); if (r.width || r.height) box = Math.max(box, r.bottom); }); } catch {} }
+      if (box === -Infinity) { const sel = stack?.dataset.scroller, sc = sel && document.querySelector(sel); box = sc ? sc.getBoundingClientRect().bottom : Infinity; }
+      const foot = Math.min(innerHeight, box);
       const room = foot - 12 - el.getBoundingClientRect().top - rest;
       const n = Math.max(45, Math.min(nominal, Math.floor(room / 3) * 3));   // the floor, fifteen units
       if (n !== nominal) rail.style.blockSize = n + 'px';

@@ -327,3 +327,30 @@ test('G79 · a host --zoom-rail of 59px is honoured as-is, and the lozenge still
   expect(lo.y - hi.y).toBeGreaterThan(30)                                       // real travel
   expect(hi.y).toBeGreaterThanOrEqual(r.y - 0.5); expect(lo.b).toBeLessThanOrEqual(r.b + 0.5)
 })
+
+test('G83 · data-fit: a box lower than the scroller lets the open rail run past the stage foot, 12px inside that box', async ({ page }) => {
+  await open(page, '?chrome=2&hide=')
+  await page.setViewportSize({ width: 375, height: 660 }); await frames(page)
+  // the stage ends at 383; below it a 51px row whose right sixth is free under the zoom column
+  await page.evaluate(() => {
+    document.getElementById('pan')!.style.bottom = (660 - 383) + 'px'
+    const row = document.createElement('div'); row.id = 'flaprow'
+    Object.assign(row.style, { position: 'fixed', left: '0', right: '0', top: '383px', height: '51px' })
+    document.body.appendChild(row)
+  })
+  const api = (f: string) => page.evaluate(f => eval(`(document.querySelector('#zoom')).__wmZoom.${f}`), f)
+  await api('setOpen(true)'); await page.waitForTimeout(700)
+  const short = (await rect(page, '#zoom .wm-hd-rail')).h
+  await api('setOpen(false)'); await page.waitForTimeout(400)
+  await page.evaluate(() => { document.getElementById('stack')!.dataset.fit = '#flaprow, #nothing-here' })
+  await api('setOpen(true)'); await page.waitForTimeout(700)
+  const r = await rect(page, '#zoom .wm-hd-rail'), box = await rect(page, '#zoom .wm-zoom-box')
+  expect(r.h).toBeGreaterThan(short)
+  expect(r.h % 3).toBe(0)
+  expect(box.b).toBeLessThanOrEqual(434 - 12 + 0.5)
+  expect(box.b).toBeGreaterThan(383)                                            // past the stage foot, into the row
+  await api('setOpen(false)'); await page.waitForTimeout(400)
+  await page.evaluate(() => { document.getElementById('stack')!.dataset.fit = '#nothing-here' })   // nothing matches: the scroller again
+  await api('setOpen(true)'); await page.waitForTimeout(700)
+  expect((await rect(page, '#zoom .wm-hd-rail')).h).toBe(short)
+})
