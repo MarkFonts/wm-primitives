@@ -1,6 +1,6 @@
 # Fonts
 
-Cal Sans 2.010 (5a149ee7), built in `calbuild`, kept here so the repos that already
+Cal Sans 2.011 (5a149ee7), built in `calbuild`, kept here so the repos that already
 track `shared/` get it from one place instead of their own copies. Every house face an
 app renders from lives here -- a consumer holding its own copy is the bug, because the
 copy is what stops the app noticing this file went stale.
