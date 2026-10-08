@@ -873,7 +873,8 @@ data-below      the host's top chrome (a selector, commas allowed): rests 6px un
                 on the line, re-measured as rows come and go; nothing matching, the default 6px
 --stack-top     the same by hand (a multiple of 3), for a host with no selector to give.
                 Here: 90px, under the frame's two 42px rows -- a frame's rows are not the viewport's
---zoom-rail     the down rail at most (126px); it also shortens itself to the viewport, 96 at least
+--zoom-rail     the down rail at most (126px); it shortens itself so the box ends 12px inside the viewport
+                or the data-scroller box, 45px at least
 data-hidden     the HOST's: hidden whatever the scroll says, until removed (a sheet over the corner)
                 wmThemeStack.hide(el, true | false) toggles just that; the script's own state is data-stowed
 wmThemeStack.mount(el)   for a stack rendered after load; returns .hide() .show() .hidden(), the scroll state

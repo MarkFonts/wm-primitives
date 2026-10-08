@@ -54,7 +54,8 @@ and `data-*` stays for behaviour. Mobile-only is the host's rule, not the primit
   footprint over the scroller, not the scroller's scrollTop against the stack's height (an inner
   stage at y 47 had to scroll 138px); the return tap is the stack's own rest footprint, and a
   host can cancel it (the top 27px also switched font-proofer's tab); the down rail and glasses
-  step inward by the lozenge's overhang (it ended 4px from the edge); the rail shortens to the
+  stayed on the mark's axis after a brief inward step (Mark: the axis is the bigger target from
+  the edge; only the lozenge moves in, and only if it would leave the screen); the rail shortens to the
   viewport, 96px at least, with `--zoom-rail` for a shorter stage. G77-G79, G82.
   Second round: a named scroller stows on the 24px run alone (the footprint exemption was ~145px
   of stage); the return press is taken on the capture phase so the paragraph under the footprint

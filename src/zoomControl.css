@@ -108,13 +108,15 @@
      opens DOWNWARDS from a 27px footprint: the mark stays at the top, then zoom_in, the rail
      running down (max at the top, as a vertical dial reads), zoom_out at the foot. The open
      box lies over the text below it, on --zoom-ground, so nothing moves. The column is the
-     mark's width; the lozenge never rotates (dialHandle's rule), so it overhangs the column by
-     half its excess each side -- the host keeps that much room at the screen edge (the
-     vertical stack's --spacing-04). zoomControl.js reads the class and runs the rail, the
+     mark's width, and the glasses and the rail sit on the mark's own axis (Mark, 2026-10-07: a
+     bigger target from the edge and from slide drawers). The lozenge never rotates
+     (dialHandle's rule), so it overhangs the column; centred on the axis, unless that would put
+     it past the viewport's right edge -- then it alone is nudged inward by the least that keeps
+     it on screen (zoomControl.js, an inline margin). zoomControl.js reads the class and runs the rail, the
      rule's stretch and the lozenge's slide on the block axis; the glasses travel between
      measured centres, so the morph needs no rotation. Rail 126px + 3 each side: the open box
      is 3 x 27 + 132 = 213px (231 on touch), on the line. */
-  .wm-zoom--down { position: relative; flex: none; inline-size: 27px; --zoom-shift: initial; }   /* --zoom-shift declared, unset: zoomControl.js sets it inline (as --hd-chars) */
+  .wm-zoom--down { position: relative; flex: none; inline-size: 27px; }
   .wm-zoom--down .wm-zoom-box {
     position: absolute; inset-block-start: 0; inset-inline-end: 0; z-index: 1;
     flex-direction: column-reverse;   /* DOM order out, rail, in, mark: the mark on top */
@@ -129,10 +131,6 @@
     cursor: ns-resize; touch-action: none;
   }
   .wm-zoom--down .wm-hd-rail > i { inset-inline: auto; inset-inline-start: 50%; inset-block: 0; inline-size: 1px; block-size: auto; transform: translateX(-50%); }
-  /* the lozenge is wider than the column, so the rail and the two glasses step INWARD by its
-     overhang (--zoom-shift, set by zoomControl.js, whole units): the host's right margin holds
-     for the lozenge too. The mark stays in the column. */
-  .wm-zoom--down .wm-zoom-box > :is(.wm-hd-rail, .wm-icon-btn:not(.wm-zoom-toggle)) { translate: calc(-1 * var(--zoom-shift, 0px)) 0; }
   .wm-zoom--down .wm-hd-pill { left: 50%; top: calc(var(--hd-inset) + (100% - 2 * var(--hd-inset)) * (1 - var(--p))); cursor: ns-resize; touch-action: none; }
 
   @media (pointer: coarse) {

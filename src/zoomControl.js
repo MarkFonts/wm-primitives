@@ -174,15 +174,17 @@
       rail.style.setProperty('--hd-inset', len(pill.getBoundingClientRect()) / 2 + 'px');
       fit();
     };
-    // .wm-zoom--down only (G79): the lozenge's overhang past the column, in whole units with its
-    // 3px ring, is how far the rail and the glasses step inward (--zoom-shift), so the host's
-    // right margin holds for the lozenge; and the rail is --zoom-rail at most, shortened to what
-    // the viewport -- and the stack's data-scroller, if named -- has under the open box less 12px, 96px at least, on the 3px line. The pill's
+    // .wm-zoom--down only (G79): the glasses and the rail stay on the mark's axis; the lozenge is
+    // centred on it unless that would cross the viewport's right edge (its 3px ring included),
+    // when it ALONE moves inward by the least that keeps it on screen (an inline margin, so the
+    // morph's transforms are untouched); and the rail is --zoom-rail at most, shortened to what
+    // the viewport -- and the stack's data-scroller, if named -- has under the open box less 12px, on the 3px line, down to the floor: 45px, the least at which the lozenge (21px) still travels min to max with the glasses clear of its ring. A host's --zoom-rail is the nominal, honoured as-is, the floor its only minimum. The pill's
     // travel is a percentage of the rail, so it scales with it. Run at mount, on open and resize.
     function fit() {
       if (!down) return;
-      const col = toggle.getBoundingClientRect().width, pw = pill.getBoundingClientRect().width;
-      el.style.setProperty('--zoom-shift', Math.max(0, Math.ceil((pw / 2 + 3 - col / 2) / 3) * 3) + 'px');
+      const T = toggle.getBoundingClientRect(), pw = pill.getBoundingClientRect().width;
+      const over = T.left + T.width / 2 + pw / 2 + 3 - document.documentElement.clientWidth;
+      pill.style.marginInlineStart = over > 0 ? -Math.ceil(over) + 'px' : '';
       rail.style.blockSize = '';
       const nominal = rail.offsetHeight;
       const rest = toggle.offsetHeight + out.offsetHeight + into.offsetHeight + 6;   // the open box less the rail (3px each side of it)
@@ -190,8 +192,8 @@
       const sel = el.closest('.wm-theme-stack')?.dataset.scroller, sc = sel && document.querySelector(sel);
       const foot = Math.min(innerHeight, sc ? sc.getBoundingClientRect().bottom : Infinity);
       const room = foot - 12 - el.getBoundingClientRect().top - rest;
-      const n = Math.max(96, Math.min(nominal, Math.floor(room / 3) * 3));
-      if (n < nominal) rail.style.blockSize = n + 'px';
+      const n = Math.max(45, Math.min(nominal, Math.floor(room / 3) * 3));   // the floor, fifteen units
+      if (n !== nominal) rail.style.blockSize = n + 'px';
     }
 
     // the rail: a press on the lozenge grabs it where it is (no jump); a press elsewhere jumps

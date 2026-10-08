@@ -45,4 +45,4 @@ Every token below is the consuming app's to define on its root. `color.css`, `ty
 | `--w-default` | default weight number (UiKitBoard only) | gallery only |
 | `--warn` | warning signal colour | a literal amber |
 
-Runtime tokens (`--chevron-stroke`, `--gp-asc`, `--gp-desc`, `--gp-ffs`, `--gp-font`, `--gp-fvs`, `--gp-opsz`, `--locked-pct`, `--pct`, `--stack-drag`, `--zoom-shift`) are set by this package's own JS on its own elements and are not a contract with anybody.
+Runtime tokens (`--chevron-stroke`, `--gp-asc`, `--gp-desc`, `--gp-ffs`, `--gp-font`, `--gp-fvs`, `--gp-opsz`, `--locked-pct`, `--pct`, `--stack-drag`) are set by this package's own JS on its own elements and are not a contract with anybody.

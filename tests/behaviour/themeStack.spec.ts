@@ -129,9 +129,10 @@ test('G79 · .wm-zoom--down: the rail runs down, max at the top; the box lies ov
   await expect(rail).toHaveAttribute('aria-orientation', 'vertical')
   const mark = await rect(page, '#zoom .wm-zoom-toggle'), inB = await rect(page, '#zoom [aria-label="Zoom in"]'), r = await rect(page, '#zoom .wm-hd-rail'), outB = await rect(page, '#zoom [aria-label="Zoom out"]')
   expect(inB.y).toBeGreaterThan(mark.y); expect(r.y).toBeGreaterThan(inB.y); expect(outB.y).toBeGreaterThan(r.y)
-  const shift = await page.evaluate(() => parseFloat(getComputedStyle(document.getElementById('zoom')!).getPropertyValue('--zoom-shift')))
-  expect(shift % 3).toBe(0)
-  expect(Math.abs(inB.x + shift - mark.x)).toBeLessThan(0.5)      // one column, stepped inward by the lozenge's overhang
+  const cx = (b: { x: number, w: number }) => b.x + b.w / 2
+  expect(Math.abs(cx(inB) - cx(mark))).toBeLessThan(0.5)          // one axis: the glasses and the rail on the mark's
+  expect(Math.abs(cx(outB) - cx(mark))).toBeLessThan(0.5)
+  expect(Math.abs(cx(r) - cx(mark))).toBeLessThan(0.5)
   expect(r.h % 3).toBe(0)
   expect(await rect(page, 'main p')).toEqual(page0)       // nothing moved
   // a press near the top is near max; near the bottom near min
@@ -144,7 +145,7 @@ test('G79 · .wm-zoom--down: the rail runs down, max at the top; the box lies ov
   expect(lo.y).toBeGreaterThan(hi.y + 60)                 // min is down the rail
   await page.keyboard.press('ArrowUp')
   expect(await z(`document.querySelector('#zoom').__wmZoom.get()`)).toBe(60)
-  expect(Math.abs((lo.x + lo.w / 2) - (r.x + r.w / 2))).toBeLessThan(0.5)   // the lozenge rides the rail's centre
+  expect(lo.r + 3).toBeLessThanOrEqual(375)                       // the lozenge on screen
 })
 
 /* a two-finger pinch over the target, as events. Where the engine has gesture events (WebKit:
@@ -239,20 +240,29 @@ for (const h of [660, 700]) test(`G77 · stowed from a 114px rest at 375x${h} af
   expect((await rect(page, stack)).b).toBeLessThanOrEqual(0)                   // the whole rest top cleared, not a fixed step
 })
 
-test('G79 · down: the lozenge keeps the 12px right margin; the rail shortens to the viewport, 96 at least', async ({ page }) => {
+for (const w of [375, 390]) test(`G79 · down at ${w}: the lozenge is fully on screen, centred on the axis unless the edge needs it in`, async ({ page }) => {
   await open(page, '?chrome=2&hide=')
+  await page.setViewportSize({ width: w, height: 812 }); await frames(page)
   await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.set(400))
   await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.setOpen(true)); await page.waitForTimeout(700)
-  expect((await rect(page, '#zoom .wm-hd-pill')).r).toBeLessThanOrEqual(375 - 12)
+  const p = await rect(page, '#zoom .wm-hd-pill'), m = await rect(page, '#zoom .wm-zoom-toggle')
+  expect(p.r + 3).toBeLessThanOrEqual(w)                                       // ring included
+  if (p.r + 3 < w - 1) expect(Math.abs(p.x + p.w / 2 - (m.x + m.w / 2))).toBeLessThan(0.5)
+  for (const s of ['[aria-label="Zoom in"]', '[aria-label="Zoom out"]', '.wm-hd-rail']) { const b = await rect(page, '#zoom ' + s); expect(Math.abs(b.x + b.w / 2 - (m.x + m.w / 2))).toBeLessThan(0.5) }
+})
+
+test('G79 · down: the rail shortens to the viewport, 45 at least', async ({ page }) => {
+  await open(page, '?chrome=2&hide=')
+  await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.setOpen(true)); await page.waitForTimeout(700)
   expect((await rect(page, '#zoom .wm-hd-rail')).h).toBe(126)                  // 812: room for the whole rail
   await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.setOpen(false)); await page.waitForTimeout(400)
   await page.setViewportSize({ width: 375, height: 400 }); await frames(page)
   await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.setOpen(true)); await page.waitForTimeout(700)
   const r = await rect(page, '#zoom .wm-hd-rail'), box = await rect(page, '#zoom .wm-zoom-box')
-  expect(r.h).toBeLessThan(126); expect(r.h % 3).toBe(0); expect(r.h).toBeGreaterThanOrEqual(96)
-  if (r.h > 96) expect(box.b).toBeLessThanOrEqual(400 - 12 + 0.5)
-  await page.setViewportSize({ width: 375, height: 360 }); await frames(page)
-  expect((await rect(page, '#zoom .wm-hd-rail')).h).toBe(96)                   // the floor
+  expect(r.h).toBeLessThan(126); expect(r.h % 3).toBe(0); expect(r.h).toBeGreaterThanOrEqual(45)
+  if (r.h > 45) expect(box.b).toBeLessThanOrEqual(400 - 12 + 0.5)
+  await page.setViewportSize({ width: 375, height: 300 }); await frames(page)
+  expect((await rect(page, '#zoom .wm-hd-rail')).h).toBe(45)                   // the floor
 })
 
 test('G78 · stowed, the rest footprint is the stack\'s: a press there returns it and the field under it gets no focus', async ({ page, hasTouch }) => {
@@ -279,7 +289,41 @@ test('G79 · the open rail also stops 12px above the foot of the data-scroller b
   await page.evaluate(() => { document.getElementById('pan')!.style.bottom = '400px' })   // a stage ending at 412 on 812
   await page.evaluate(() => (document.querySelector('#zoom') as any).__wmZoom.setOpen(true)); await page.waitForTimeout(700)
   const r = await rect(page, '#zoom .wm-hd-rail'), box = await rect(page, '#zoom .wm-zoom-box'), pan = await rect(page, '#pan')
-  expect(r.h % 3).toBe(0); expect(r.h).toBeGreaterThanOrEqual(96)
-  if (r.h > 96) expect(box.b).toBeLessThanOrEqual(pan.b - 12 + 0.5)
+  expect(r.h % 3).toBe(0); expect(r.h).toBeGreaterThanOrEqual(45)
+  if (r.h > 45) expect(box.b).toBeLessThanOrEqual(pan.b - 12 + 0.5)
   expect(r.h).toBeLessThan(126)
+})
+
+test('G79 · ¶ at 375x660: rest 114, stage foot 383 -- the box ends 12px inside the stage; the lozenge reaches both ends clear of the glasses', async ({ page }) => {
+  await open(page, '?chrome=2&hide=')
+  await page.setViewportSize({ width: 375, height: 660 }); await frames(page)
+  await page.evaluate(() => { document.getElementById('pan')!.style.bottom = (660 - 383) + 'px' }); await frames(page)
+  expect(await restTop(page)).toBe(114)
+  const z = '#zoom', api = (f: string) => page.evaluate(f => eval(`(document.querySelector('#zoom')).__wmZoom.${f}`), f)
+  await api('setOpen(true)'); await page.waitForTimeout(700)
+  const r = await rect(page, z + ' .wm-hd-rail'), box = await rect(page, z + ' .wm-zoom-box')
+  expect(r.h % 3).toBe(0); expect(r.h).toBeGreaterThanOrEqual(45)
+  if (r.h > 45) expect(box.b).toBeLessThanOrEqual(383 - 12 + 0.5)
+  const inB = await rect(page, z + ' [aria-label="Zoom in"]'), outB = await rect(page, z + ' [aria-label="Zoom out"]')
+  await api('set(400)'); await frames(page)
+  const hi = await rect(page, z + ' .wm-hd-pill')
+  await api('set(50)'); await frames(page)
+  const lo = await rect(page, z + ' .wm-hd-pill')
+  expect(hi.y - 3).toBeGreaterThanOrEqual(inB.b - 0.5)                          // max: the ring clear of zoom_in
+  expect(lo.b + 3).toBeLessThanOrEqual(outB.y + 0.5)                            // min: clear of zoom_out
+  expect(Math.abs(hi.y - r.y - (r.b - lo.b))).toBeLessThan(1)                   // both ends of the rail reached
+  expect(box.b).toBeLessThanOrEqual(383 - 12 + 0.5)                            // and here even the floor fits
+})
+
+test('G79 · a host --zoom-rail of 59px is honoured as-is, and the lozenge still reaches both ends', async ({ page }) => {
+  await open(page, '?chrome=2&hide=')
+  await page.evaluate(() => document.getElementById('stack')!.style.setProperty('--zoom-rail', '59px'))
+  const api = (f: string) => page.evaluate(f => eval(`(document.querySelector('#zoom')).__wmZoom.${f}`), f)
+  await api('setOpen(true)'); await page.waitForTimeout(700)
+  const r = await rect(page, '#zoom .wm-hd-rail')
+  expect(r.h).toBe(59)
+  await api('set(400)'); await frames(page); const hi = await rect(page, '#zoom .wm-hd-pill')
+  await api('set(50)'); await frames(page); const lo = await rect(page, '#zoom .wm-hd-pill')
+  expect(lo.y - hi.y).toBeGreaterThan(30)                                       // real travel
+  expect(hi.y).toBeGreaterThanOrEqual(r.y - 0.5); expect(lo.b).toBeLessThanOrEqual(r.b + 0.5)
 })
