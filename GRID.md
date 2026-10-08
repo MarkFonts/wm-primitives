@@ -497,6 +497,11 @@ In this order. Each step names the trap it was written after.
 - **Known offenders.** The case study's hero (lede 39 beside sub 27) stays as it is for now and is
   listed in the spec's `KNOWN`, and so are the homepage's work rows until the 45/48 headline
   ships. The grid bench's hero is not: its 18/27 lede has 16/27 notes beside it, the same lead.
-- **The system page is on the line but not on the columns.** Its layout is still the rail and a
-  1080px measure; only the README, the section numbers and the Grid part are on the line, and the
-  other chapters are stages (docs/system/build.py, `OFF_LINE`, says what each would need).
+- **The system page is on the columns; most of it is not on the line.** The shell is the house
+  grid with the house margin -- the rail on 5 of the 24, one empty column, the content from column 7
+  to the margin (12 and a top bar below 1024) -- with sections still capped at a 1080px measure.
+  Only the README, the section numbers and the Grid part are on the line; the other chapters are
+  stages (docs/system/build.py, `OFF_LINE`, says what each would need). The spec still opts it out of
+  the margin check (`ownEdges`), and the check would judge nothing there now anyway: `<main>` sits
+  in the zoom control's `overflow-x: auto` pan box, which the check treats as an inset scroller.
+  G and L toggle the columns and the lines on it at any time.

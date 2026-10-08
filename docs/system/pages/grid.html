@@ -130,9 +130,12 @@ code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-h
 <p class="gx-lede">Twenty-four columns, a 3px line and one margin for every page &#8212; a standard the
 way InDesign has one, not a convention. Text beside text shares a first baseline, a two-line label meets
 its sample by its last line, a component moves whole. Everything on this page outside a stage is on it:
-<code>main</code> is the <code>.wm-lines</code> root. Its columns are not yet: the page is still laid out
-as the rail and a 1080px measure, so the sheets below show the columns rather than this page sitting on them. <a href="https://github.com/MarkFonts/wm-primitives/blob/main/GRID.md">GRID.md</a>
+<code>main</code> is the <code>.wm-lines</code> root. So are its columns: the rail spans five of the 24, one stays
+empty, and everything else starts on the seventh line and runs to the margin (below 1024 the rail is a bar
+and the copy takes all 12). <a href="https://github.com/MarkFonts/wm-primitives/blob/main/GRID.md">GRID.md</a>
 is the standard in words; <a href="grid.html">grid.html</a> is the bench it was cut on.</p>
+<p class="wm-try">Try it now: press <button type="button" class="wm-key" data-overlay="cols" aria-pressed="false">G</button> for the columns,
+<button type="button" class="wm-key" data-overlay="lines" aria-pressed="false">L</button> for the baseline &#8212; anywhere on this page, at any scroll.</p>
 
 <h2>Columns <span>24, and 12 below 1024</span></h2>
 <p><b>24.</b> It halves, thirds, quarters, sixths and eighths, and calsans splits its sections 5:7 three

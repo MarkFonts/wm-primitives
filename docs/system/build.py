@@ -158,7 +158,10 @@ PRIMITIVE_CSS = {
 # The same for scripts: a chapter that DEMONSTRATES a plain-script primitive runs the file
 # from src/, inlined ahead of its own code, so the demo is the shipped thing.
 PRIMITIVE_JS = {
-    "controls": ("dialHandle.js", "zoomControl.js", "themeStack.js"),
+    # zoomControl.js and themeStack.js are the SHELL's now (CHROME_JS below): the page's own zoom
+    # uses them, and one copy mounts every control on the page, the chapter's demos included.
+    # Two copies would each run a page-level + - 0 handler over their own controls.
+    "controls": ("dialHandle.js",),
 }
 # A part folded into a section (an extra source) names its primitives by file, and they are
 # scoped to the part alone -- the grid's roles demo needs type.css's .t-* classes and the
@@ -829,10 +832,13 @@ SHELL = """
   --ink-3:rgba(232,232,232,.38); --ink-3:oklch(from var(--ink) l c h / var(--a-3));
   --line:rgba(232,232,232,.14);  --line:oklch(from var(--ink) l c h / var(--a-line));
   --ui-font:"Face","CalSansVF",system-ui,sans-serif;
-  /* the column's own geometry. The colophon breaks OUT of it by exactly these, so
-     they are tokens rather than three copies of 202 -- the alignment rule applies to
-     a negative margin the same way it applies to padding: the sum has to agree. */
-  --rail-w:202px; --edge-l:0px; --edge-r:28px;
+  /* The shell on the house columns (grid.css: 24, 12 below 1024, its gutter and its margin).
+     The rail spans --rail-span columns, --rail-gap columns stay empty, and the content starts
+     on the next column line and runs to the margin: 5 | 1 | 18 of the 24. Five, because the
+     rail was 202px with 40 of it the axis: five columns are 165px at 1024 and 239 at 1440, so
+     its words keep the measure they had. The axis rule and its ticks hang in the page margin
+     (--rail-hang, the axis's own 40px) so the words sit on the column line. */
+  --rail-span:5; --rail-gap:1; --rail-hang:40px;
   /* How far the colophon's glyphs may fly before the canvas raster cuts them off.
      letterbox.js READS this value and grows the canvas by it, then the negative
      margin below takes the same amount back out of the layout -- so the drawing
@@ -1026,7 +1032,8 @@ html,body{margin:0;padding:0;background:var(--bg)}
    faded it; the wordmark is full-bleed structurally, with no negative margins to keep
    in sync; and neither can overlap the other, because they are no longer siblings in
    the same column. */
-.wm-doc{display:grid;grid-template-columns:var(--rail-w) minmax(0,1fr)}
+.wm-doc{display:grid;grid-template-columns:repeat(var(--grid-cols),minmax(0,1fr));
+  column-gap:var(--grid-gutter);padding-inline:var(--grid-margin)}
 /* Where the index stops. The rail travels the sections it indexes and no further: the
    closing note is not in the outline, so the outline has no business riding it down.
    That is what .wm-railcol is for -- a sticky box is bounded by its nearest ancestor's
@@ -1041,8 +1048,12 @@ html,body{margin:0;padding:0;background:var(--bg)}
    drive the axis. This lives in the shell because the trigger is the UA sheet, which
    reaches every section: fixing it per page fixed one page. */
 .wm em,.wm i,.wm cite,.wm dfn,.wm var{font-style:normal;font-variation-settings:'ital' 1}
-.wm-foot{grid-column:2}
-.wm-railcol{grid-row:1;min-height:100%}
+.wm-foot{grid-column:calc(var(--rail-span) + var(--rail-gap) + 1) / -1}
+.wm-railcol{grid-column:1 / span var(--rail-span);grid-row:1;min-height:100%}
+/* The content column, and the box the zoom control pans it in (GESTURES G80): zoomed, <main>
+   keeps its 100% width and left edge and grows right, so it scrolls sideways HERE rather than
+   widening the document -- which on a phone would drag the fixed theme stack with it. */
+.wm-pan{grid-column:calc(var(--rail-span) + var(--rail-gap) + 1) / -1;grid-row:1;min-width:0;overflow-x:auto}
 /* A column: the index scrolls when it is taller than the viewport, and the foot sits
    BELOW it in flow. It used to be pinned to the scroller's bottom edge and the rule was
    drawn on the scroller too -- so once the index outgrew 88vh (Color took the ramps'
@@ -1050,10 +1061,11 @@ html,body{margin:0;padding:0;background:var(--bg)}
    on top of them. The rule now lives on the inner box, which is as tall as the index. */
 .wm-rail{position:sticky;top:0;height:100vh;z-index:90;
   display:flex;flex-direction:column;justify-content:center;pointer-events:none}
-.wm-axis{width:100%;max-height:calc(100vh - 56px);overflow-y:auto;flex:0 1 auto;
+.wm-axis{width:calc(100% + var(--rail-hang));margin-left:calc(-1 * var(--rail-hang));
+  max-height:calc(100vh - 56px);overflow-y:auto;flex:0 1 auto;
   scrollbar-width:none;pointer-events:auto}
 .wm-axis::-webkit-scrollbar{display:none}
-.wm-axis-in{position:relative;padding:0 0 0 40px}
+.wm-axis-in{position:relative;padding:0 0 0 var(--rail-hang)}
 /* the rule itself, and the travelled portion of it */
 .wm-axis-in::before{content:"";position:absolute;left:22px;top:6px;bottom:6px;width:2px;
   background:var(--line)}
@@ -1093,7 +1105,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   border-radius:50%;corner-shape:round;background:var(--ink)}
 .wm-lvl0.on::before{left:-24px}
 .wm-lvl1.on::before{left:-42px}
-.wm-rail-foot{flex:0 0 auto;margin:14px 0 0 40px;font-size:9px;letter-spacing:.14em;
+.wm-rail-foot{flex:0 0 auto;margin:14px 0 0;font-size:9px;letter-spacing:.14em;
   text-transform:uppercase;color:var(--ink-3);pointer-events:auto}
 
 /* content-visibility:auto was tried here and reverted. It implies contain: layout
@@ -1179,12 +1191,13 @@ html,body{margin:0;padding:0;background:var(--bg)}
   pointer-events:none}
 .wm-foot a{color:var(--ink-2)}
 
-/* The page sits to the right of the rail. Below the breakpoint the rail becomes a
+/* The page sits on the columns right of the rail; its edges are the grid's margin, not a
+   padding of its own. Below 1024 -- where the columns go to 12 -- the rail becomes a
    horizontal scroller pinned to the top, because a fixed column would eat the width the
-   demos need. */
-.wm-main{min-width:0;padding:0 var(--edge-r) 0 var(--edge-l)}
-@media (max-width:1080px){
-  .wm-doc{display:block}
+   demos need: it breaks out of the margin to both window edges, and the content takes all 12. */
+.wm-main{min-width:0;padding:0}
+@media (max-width:1023px){
+  .wm-pan{grid-column:1 / -1;grid-row:auto}
   /* the rail is a top bar here, and a bar that stops at the end of the sections would
      stop being a bar -- display:contents takes the wrapper back out of the layout */
   .wm-railcol{display:contents}
@@ -1192,17 +1205,17 @@ html,body{margin:0;padding:0;background:var(--bg)}
      frame, and behind this one is a 59,000px document -- the most expensive thing on
      the page, buying a frosting nobody asked for. An opaque ground is what the blur
      was faking anyway. */
-  .wm-rail{position:sticky;top:0;height:auto;width:auto;
+  .wm-rail{position:sticky;top:0;height:auto;width:auto;grid-column:1 / -1;grid-row:1;
+    margin-inline:calc(-1 * var(--grid-margin));
     background:var(--bg);
     border-bottom:1px solid var(--line)}
-  .wm-axis{max-height:none;overflow-x:auto;overflow-y:hidden}
+  .wm-axis{width:auto;margin-left:0;max-height:none;overflow-x:auto;overflow-y:hidden}
   .wm-axis-in{display:flex;gap:0;padding:0 20px}
   .wm-axis-in::before,.wm-axis-in::after,.wm-rail-foot{display:none}
   .wm-grp{margin:0;display:flex;align-items:center;flex:0 0 auto}
   .wm-lvl1{display:none}
   .wm-lvl0{padding:14px 15px}
   .wm-lvl0::before,.wm-lvl0.on::before{display:none}
-  :root{--rail-w:0px;--edge-l:20px;--edge-r:20px}
   .wm-head{padding:32px 0 0}
   .wm-lb{margin-top:8vh}
 }
@@ -1211,6 +1224,61 @@ html,body{margin:0;padding:0;background:var(--bg)}
 @media (max-width:720px){
   .wm-mr-asc u,.wm-mr-cap u,.wm-mr-desc u{display:none}
 }
+
+/* ---- The page's own marks: colour scheme and zoom (CHROME_CSS below, scoped to .wm-chrome).
+   GliffDiff's arrangement: the zoom (.wm-zoom--left) folded into one mark LEFT of the three
+   theme marks, on one 27px row (.wm-theme-row), opening leftwards over its own row. Fixed, so it
+   is never inside the region it zooms; its right edge is the page margin, the content's own right
+   edge. One row, not the two-row stack: the poster's eyebrow runs down the same edge from 44px,
+   and a second row would sit on it. Under the top bar (below 1024) themeStack.js's data-below
+   writes --stack-top from the bar. On a phone the shell's script makes it the vertical stack
+   (themeSwitch.css), which places itself. The chips read --text*; the page writes --ink*. */
+.wm-chrome{--text:var(--ink);--text-muted:var(--ink-2);--text-dim:var(--ink-3);--border:var(--line);
+  --zoom-ground:var(--bg)}
+/* the marks' alpha ink is rgba(var(--text-rgb), a): the page's ink as channels, oklch 93.10% and
+   20.02% with no chroma (232 and 22) */
+.wm-chrome{--text-rgb:232,232,232}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .wm-chrome{--text-rgb:22,22,22}}
+:root[data-theme="light"] .wm-chrome{--text-rgb:22,22,22}
+/* On the page's ground, with a halo of it (a shadow, so the row stays 27 and on its edge): the
+   row floats over the content column as the page scrolls, and marks over running text read as
+   part of it. */
+.wm-chrome .wm-theme-row{position:fixed;z-index:95;top:var(--stack-top);right:var(--grid-margin);
+  background:var(--bg);box-shadow:0 0 0 var(--spacing-02,6px) var(--bg)}
+
+/* ---- Try it: the overlays' keys, said where they are used. The keys are buttons as well, so a
+   phone without a keyboard can press them. Ui-size words on body's 24 (eight units): the key
+   cap is 18px, six units, and fits inside that line -- in a 15px ui line it would open the line
+   box and push the baseline off the grid. */
+.wm-try{margin:0;font-size:var(--type-ui-size,.75rem);--lh:var(--lead-body);line-height:var(--lh);color:var(--ink-3)}
+/* On the poster it hangs at the top of the content column, across from the eyebrow (which
+   runs down the right edge from the same 44px): out of the flow, so the poster keeps its
+   composition and the line is on screen when the page opens. */
+.wm-head > .wm-try{position:absolute;top:44px;left:0;z-index:4}
+/* Below 1024 the column is too narrow to hang it over the statement: it takes the poster's first
+   line in the flow. On a phone the vertical stack rests at the top right, where the eyebrow
+   begins, so the line stops short of it and the eyebrow starts under the stack (its 138px at
+   rest, from 6px under the bar). */
+@media (max-width:1023px){.wm-head > .wm-try{position:static;margin:0}}
+.wm:has(.wm-theme-stack--vertical) .wm-head > .wm-try{padding-right:30px}
+.wm:has(.wm-theme-stack--vertical) .wm-eyebrow{top:156px}
+.wm-key{display:inline-block;box-sizing:border-box;min-width:18px;height:18px;margin:0 1px;padding:0 5px;
+  vertical-align:baseline;font:inherit;font-size:11px;line-height:14px;font-weight:600;
+  font-variation-settings:"GEOM" 100;color:var(--ink-2);background:none;cursor:pointer;
+  border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;transition:color .15s,border-color .15s}
+.wm-key:hover{color:var(--ink);border-color:var(--ink-3)}
+.wm-key[aria-pressed="true"]{color:var(--bg);background:var(--ink);border-color:var(--ink)}
+
+/* ---- The overlays, G and L, on the whole page: the columns (pink) are the shell's own grid,
+   drawn from the same three tokens; the lines (blue) are one viewport-sized canvas at the
+   screen's pixel density, one every --bl from <main>'s top -- gridSnap.js's ?grid drawing, made
+   a toggle. Over everything, under nothing that takes a click. */
+.wm-ov-cols{position:fixed;inset:0;z-index:2147483646;pointer-events:none;display:none;
+  grid-template-columns:repeat(var(--grid-cols),minmax(0,1fr));column-gap:var(--grid-gutter);padding-inline:var(--grid-margin)}
+.wm-ov-cols>i{background:rgba(255,40,140,.06);border-inline:1px solid rgba(255,40,140,.4)}
+.wm-show-cols .wm-ov-cols{display:grid}
+.wm-ov-lines{position:fixed;left:0;top:0;z-index:2147483646;pointer-events:none;display:none}
+.wm-show-lines .wm-ov-lines{display:block}
 """
 
 # No cap. There was one (7), on the thought that past it a page's headings stop being
@@ -1852,6 +1920,87 @@ GRID_JS  = (HERE.parent.parent / "src" / "gridSnap.js").read_text()
 assert not [c for c in GRID_CSS + GRID_JS if ord(c) > 127], "grid.css and gridSnap.js must stay ASCII"
 assert not [c for c in LETTERBOX if ord(c) > 127], "letterbox.js must stay ASCII"
 
+# THE PAGE'S OWN MARKS: the colour scheme and the zoom control, as GliffDiff has them. The
+# primitives' CSS is read from src/ and scoped to the cluster's wrapper (.wm-chrome), so it
+# reaches nothing else; their scripts are the shell's, unscoped (build_section would rewrite
+# their document queries to one section). The section-scoped copies the Interface chapter
+# carries for its demos are unchanged.
+CHROME_CSS = scope_css(re.sub(r'/\*.*?\*/', '', "".join(
+    (HERE.parent.parent / "src" / f).read_text()
+    for f in ("icon.css", "dialHandle.css", "zoomControl.css", "themeSwitch.css")), flags=re.S)
+    .replace("url('../fonts/", "url('fonts/").replace('url("../fonts/', 'url("fonts/'), ".wm-chrome")
+CHROME_CSS = "".join(c if ord(c) < 128 else f"\\{ord(c):04X} " for c in CHROME_CSS)
+CHROME_JS = "".join((HERE.parent.parent / "src" / f).read_text() + "\n" for f in ("zoomControl.js", "themeStack.js"))
+CHROME_JS = "".join(c if ord(c) < 128 else f"\\u{ord(c):04X}" for c in CHROME_JS)
+
+# The marks' placement. A row on a desktop; on a phone -- its own rule, as themeSwitch.css asks of
+# a host -- the vertical stack, the zoom opening down, hidden by a scroll down or a swipe up.
+# Under the top bar (below 1024) the cluster rests under it (data-below). The zoom's class is
+# read when it mounts, so a change of layout remounts both; the value is in localStorage.
+CHROME = """
+(function(){
+  var st=document.querySelector('.wm-chrome > [data-hide]'); if(!st||!window.wmZoom) return;
+  var th=st.querySelector('.wm-theme'), z=st.querySelector('.wm-zoom');
+  var phone=matchMedia('(max-width: 768px), (pointer: coarse)'), bar=matchMedia('(max-width: 1023px)');
+  function orient(){
+    if(z.__wmZoom) z.__wmZoom.destroy();
+    if(st.__wmThemeStack) st.__wmThemeStack.destroy();
+    if(phone.matches){ st.className='wm-theme-stack wm-theme-stack--vertical'; st.append(th,z); z.className='wm-zoom wm-zoom--down'; }
+    else{ st.className='wm-theme-row'; st.append(z,th); z.className='wm-zoom wm-zoom--left'; }
+    if(bar.matches) st.setAttribute('data-below','.wm-rail'); else{ st.removeAttribute('data-below'); st.style.removeProperty('--stack-top'); }
+    wmZoom.mount(z); wmThemeStack.mount(st);
+  }
+  orient();
+  phone.addEventListener('change',orient); bar.addEventListener('change',orient);
+  /* the scheme: every [data-theme-pick] on the page agrees -- these and the Interface chapter's */
+  st.querySelectorAll('[data-theme-pick]').forEach(function(b){ b.addEventListener('click',function(){
+    var v=b.getAttribute('data-theme-pick');
+    if(v==='auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme',v);
+    document.querySelectorAll('[data-theme-pick]').forEach(function(x){ var on=x.getAttribute('data-theme-pick')===v;
+      x.setAttribute('aria-pressed',String(on)); if(x.classList.contains('wm-icon-btn')) x.classList.toggle('active',on); });
+  }); });
+})();
+/* G and L: the columns and the 3px lines over the whole page, at any scroll, from anywhere
+   that is not a field. The keys are the grid bench's (docs/grid.html). */
+(function(){
+  var root=document.documentElement, main=document.querySelector('.wm-main');
+  var cols=document.createElement('div'); cols.className='wm-ov-cols'; cols.setAttribute('aria-hidden','true');
+  var cv=document.createElement('canvas'); cv.className='wm-ov-lines'; cv.setAttribute('aria-hidden','true');
+  document.body.append(cols,cv);
+  var on={cols:false,lines:false}, raf=0;
+  function drawCols(){ var n=+getComputedStyle(root).getPropertyValue('--grid-cols')||24;
+    if(cols.childElementCount!==n) cols.innerHTML=new Array(n+1).join('<i></i>'); }
+  /* one viewport-sized canvas, redrawn on scroll: a canvas the page's height goes blank past
+     65,535 device px. Line k sits on the device row just above k x --bl from <main>'s top, and
+     a zoomed <main> spaces them by its zoom. */
+  function drawLines(){ raf=0; if(!on.lines||!main) return;
+    var dpr=devicePixelRatio||1, vw=root.clientWidth, vh=innerHeight, r=main.getBoundingClientRect();
+    var bl=(parseFloat(getComputedStyle(main).getPropertyValue('--bl'))||3)*(main.currentCSSZoom||1);
+    cv.style.width=vw+'px'; cv.style.height=vh+'px';
+    if(cv.width!==Math.round(vw*dpr)||cv.height!==Math.round(vh*dpr)){ cv.width=Math.round(vw*dpr); cv.height=Math.round(vh*dpr); }
+    var g=cv.getContext('2d'); g.clearRect(0,0,cv.width,cv.height); g.fillStyle='rgba(40,120,255,.45)';
+    var x0=Math.max(0,r.left), x1=Math.min(vw,r.right), y0=Math.max(0,r.top), y1=Math.min(vh,r.bottom);
+    if(x1<=x0||y1<=y0) return;
+    for(var k=Math.max(0,Math.ceil((y0-r.top)/bl)); r.top+k*bl<y1; k++)
+      g.fillRect(Math.round(x0*dpr), Math.round((r.top+k*bl)*dpr)-1, Math.round((x1-x0)*dpr), 1);
+  }
+  function redraw(){ if(!raf) raf=requestAnimationFrame(drawLines); }
+  function set(k,v){ on[k]=v; root.classList.toggle('wm-show-'+k,v);
+    document.querySelectorAll('.wm-key[data-overlay="'+k+'"]').forEach(function(b){ b.setAttribute('aria-pressed',String(v)); });
+    if(k==='cols') drawCols(); else redraw(); }
+  document.querySelectorAll('.wm-key[data-overlay]').forEach(function(b){ b.addEventListener('click',function(){ var k=b.getAttribute('data-overlay'); set(k,!on[k]); }); });
+  addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey) return;
+    var t=e.target; if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    var k=(e.key||'').toLowerCase();
+    if(k==='g') set('cols',!on.cols); else if(k==='l') set('lines',!on.lines);
+  });
+  addEventListener('scroll',redraw,{passive:true}); addEventListener('resize',function(){ drawCols(); redraw(); });
+  addEventListener('wm-zoom',redraw);
+  if(main&&'ResizeObserver' in window) new ResizeObserver(redraw).observe(main);
+})();
+"""
+
 LB_BOOT = """
 var lb = createLetterbox(document.getElementById('lb-footer'), {
   words:           ['WORDMARK'],
@@ -1930,16 +2079,19 @@ TAIL = ("" if not LINKED else "\n</body></html>")
 
 page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 <style>{FONTS}{GRID_CSS}{SHELL}
+{CHROME_CSS}
 {css_parts}
 </style>
 <div class="wm">
   <div class="wm-doc">
   <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in">{rail}</div></div>
     <span class="wm-rail-foot">wm&#8209;primitives</span></nav></div>
-  <main class="wm-main wm-lines">
+  <div class="wm-pan"><main class="wm-main wm-lines">
   <header class="wm-head" data-nosnap>
     <svg class="wm-six" id="wm6" viewBox="{SIX_VB}" aria-hidden="true"></svg>
     <p class="wm-eyebrow">wm-primitives &middot; the house system</p>
+    <p class="wm-try">Try it now: press <button type="button" class="wm-key" data-overlay="cols" aria-pressed="false">G</button> for the columns,
+      <button type="button" class="wm-key" data-overlay="lines" aria-pressed="false">L</button> for the baseline &mdash; anywhere on the page.</p>
     <h1 class="wm-stack"><span class="wm-l1">Six<i></i></span><span
       class="wm-l2">laws.</span><span class="wm-l3">Every<i></i><svg class="wm-bendsvg" id="wmbend"
       viewBox="0 0 300 560" aria-hidden="true"></svg><u class="wm-bendlbl" id="wmbendlbl"></u></span><span
@@ -1960,14 +2112,24 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
     </div>
   </header>
   {''.join(body_parts)}
-  </main>
+  </main></div>
   </div>
   <div class="wm-lb"><canvas id="lb-footer" aria-label="WORDMARK"></canvas></div>
+  <div class="wm-chrome"><div data-hide="scroll swipe">
+    <div class="wm-theme" role="group" aria-label="Colour scheme">
+      <button type="button" class="wm-icon-btn active" data-theme-pick="auto" aria-pressed="true" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
+      <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-pressed="false" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
+      <button type="button" class="wm-icon-btn" data-theme-pick="dark" aria-pressed="false" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
+    </div>
+    <div class="wm-zoom wm-zoom--left" data-collapse data-capture data-target=".wm-main" data-key="wm-system-page-zoom"></div>
+  </div></div>
 </div>
 <script>{js_parts}
 {HERO}
 {SPY}</script>
 <script>{GRID_JS}</script>
+<script>{CHROME_JS}
+{CHROME}</script>
 <script type="module">{LETTERBOX}
 {LB_BOOT}</script>{GLOSS}{TAIL}
 """
