@@ -12,6 +12,33 @@ Newest first.
 
 ---
 
+## 2026-10-08 -- the system page: grid keys everywhere, the rail on the columns, the zoom
+
+Mark: "can i use the baseline and grid shortcuts on that page permanently?", "add the column system
+margin to the page, make the left side column fit to columns, then add a SINGLE column between the
+column and all the text/diagrams", "ship that zoom primitive to wm primitives page".
+
+- **G and L, on the whole page.** The grid bench's keys (docs/grid.html: G columns, L lines) now
+  toggle the overlays anywhere on the system page, from any scroll: the columns are the shell's own
+  grid from the same three tokens, the lines one viewport-sized canvas from `<main>`'s top (a
+  zoomed `<main>` spaces them by its zoom). A "Try it now" line names them at the top of the poster
+  and in the Grid chapter; its key caps are buttons too, for a phone. B stays the bench's leading flip.
+- **The shell on the columns.** `.wm-doc` is the house grid with the house margin: the rail spans 5
+  of the 24 (165px at 1024, 239 at 1440: the 202 it had, less the 40 of axis, is the words' old
+  measure), one column stays empty, the content starts on column 7 and runs to the margin. The
+  axis rule and its ticks hang in the margin so the rail's words sit on the column line. The rail
+  now stays a column down to 1024 (it was a bar below 1080), where the columns go to 12 and it
+  becomes the bar, breaking out of the margin to both edges; the copy takes all 12. `--rail-w`,
+  `--edge-l` and `--edge-r` are gone; `--rail-span`, `--rail-gap`, `--rail-hang` replace them.
+- **The zoom control**, as GliffDiff has it: `.wm-zoom--left` folded left of three theme marks on
+  one row, fixed at the top right on the margin line, `data-capture` over `<main>`, which pans
+  sideways in its own `overflow-x: auto` box (G80). One row, not the two-row stack: the poster's
+  eyebrow runs down the same edge. The page had no theme marks of its own; it has them now (Auto,
+  Light, Dark, in sync with the Interface chapter's). On a phone (`(max-width: 768px), (pointer:
+  coarse)`) it is the vertical stack, the zoom opening down, `data-hide="scroll swipe"`, resting
+  under the top bar (`data-below=".wm-rail"`). zoomControl.js and themeStack.js load once, in the
+  shell; the Interface chapter no longer carries its own copies, so one page-level + - 0 handler.
+
 ## 2026-10-07 -- zoom: data-fit, the box the open rail ends inside
 
 font-proofer's chevron bar between the stage and the rail becomes a centred flap two-thirds wide,
