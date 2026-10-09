@@ -81,8 +81,45 @@ SECTIONS = [
     # scripts/build-ramps.mjs from the engine, so no figure can go stale.
     ("color",  "Color",        [SD/"color-audit.html", SD/"ramps.html"],
                                "every declaration, audited; and the ramps"),
+    # 06 is Motion (2026-10-08): the durations, the curve, and the two reasons to move. It is on
+    # the line -- a page written for the shell, not a stage.
+    ("motion",  "Motion",        SD/"motion.html",       "three durations, one curve"),
+    # Who uses what is not a law: it is the evidence under Color, so it is the APPENDIX, after
+    # 06, shut until pressed (APPENDIX below). The poster's count stays six laws.
     ("usage",   "Who uses what", SD/"color-usage.html",      "the usage map"),
 ]
+# Sections that are appendices: marked "A", not numbered, and shut behind a Collapse.
+APPENDIX = {"usage"}
+
+# ---------------------------------------------------------------- the openers
+# EVERY SECTION OPENS THE SAME WAY (Mark, 2026-10-08): the marker "0N . Name" in the title role
+# -- the largest heading on the page, and the only heading in that role -- then ONE lede, then,
+# where the section has one, its numbers. Under it there are two heading levels and no others:
+# h2, the chapter (label caps, a 1px rule, in the rail), and h3, the sub-subject (the lede role,
+# sentence case, never in the rail). Nothing display-sized is a heading; display lives in figures.
+# A page's own h1 is not a fourth level: it is dropped where it repeats the section's name and
+# becomes an h2 chapter where it names a part (build_section).
+OPENERS = {
+    "readme":   "The promise: every control works and renders the same, from one source.",
+    "type":     "Seven roles, one signal each. Every size on this page is set by the token it documents, "
+                "and nothing differs from its neighbour in more than one way at a time.",
+    "corners":  "One curve, superellipse(1.2), and a radius ladder of 2\u1d4f. The circles are the exceptions, "
+                "listed so nothing else can claim to be one.",
+    "controls": "One dial, drawn five ways, and the controls that grew around it. Each answers a press "
+                "the same way: acknowledge, then confirm.",
+    "space":    "A pad scale in steps, a cap so small radii never pinch, and alignment that falls out of "
+                "the step rather than being set.",
+    "color":    "Every declaration audited against the vocabulary, and the ramps, which are colour under a curve.",
+    "motion":   "Three durations, one curve, and two reasons to move: to acknowledge, or to confirm. "
+                "Nothing on this page animates for any other reason.",
+    # usage: its page's own lede, lifted out of the page (build_section)
+}
+# The numbers figure, for a section that has one: (value, caption, is-a-goal). Type's strip,
+# which used to sit in the type page's header.
+NUMBERS = {
+    "type": [("44", "sizes before", False), ("7", "text roles", True),
+             ("5", "poster steps", True), ("3", "inks, from four", True)],
+}
 
 # ---------------------------------------------------------------- css scoping
 def split_rules(css):
@@ -281,7 +318,7 @@ def build_section(sid, label, path, kicker):
     # rewrite as a part's, below
     html = re.sub(r'src="\.\./\.\./assets/([\w.-]+)"', asset_src, html)
     if path.name in OFF_LINE_PART:
-        html = f'<div data-nosnap>{html}</div>'
+        html = f'<div data-nosnap data-stage>{html}</div>'
 
     root = f"#s-{sid}"
     css = scope_css(css, root)
@@ -311,16 +348,31 @@ def build_section(sid, label, path, kicker):
         js  += "\n" + ex_js
 
 
+    # A PAGE'S H1 IS NOT A HEADING LEVEL HERE. The section's marker is the opener; a page h1
+    # that repeats it ("The corner law" under "02 . The corner law") goes, and one that names a
+    # part ("Ramps" inside Color, "Five ways to draw one dial" inside Interface) is a chapter.
+    def page_h1(m):
+        text = re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', m.group(1))).strip()
+        return '' if text.lower() == label.lower() else f'<h2>{m.group(1)}</h2>'
+    html = re.sub(r'<h1[^>]*>(.*?)</h1>', page_h1, html, flags=re.S)
+    lede = OPENERS.get(sid, "")
+    if not lede:
+        # the appendix keeps its page's own lede, as its opener's
+        m = re.search(r'<p class="lede">(.*?)</p>', html, re.S)
+        assert m, f"build: {sid} has no opener lede and no page lede to lift"
+        lede = re.sub(r'\s+', ' ', m.group(1)).strip()
+        html = html[:m.start()] + html[m.end():]
+
     if sid == "type":
         # the page and the favicons are stages; the Grid part between them is on the line
         assert html.count('<div class="wrap"') == 1
-        html = html.replace('<div class="wrap"', '<div class="wrap" data-nosnap', 1)
-        html += '<div data-nosnap>' + favicons_html() + '</div>'
+        html = html.replace('<div class="wrap"', '<div class="wrap" data-nosnap data-stage', 1)
+        html += '<div data-nosnap data-stage>' + favicons_html() + '</div>'
 
         css += scope_css(FAV_CSS, root)
 
     if sid == "controls":
-        html += '<div data-nosnap>' + wip_html() + '</div>'   # a stage, like the chapter's own page
+        html += '<div data-nosnap data-stage>' + wip_html() + '</div>'   # a stage, like the chapter's own page
         css += scope_css(WIP_CSS, root)
 
     # ids are document-global: prefix them, and every reference to them.
@@ -355,8 +407,9 @@ def build_section(sid, label, path, kicker):
             return m.group(0)
         cid = f"{sid}-c{len(chapters)+1}"
         chapters.append((cid, text))
-        return f'<h2 id="{cid}"{m.group(1)}>{m.group(2)}</h2>'
+        return f'<h2 id="{cid}"{heading_class(m.group(1), "wm-h2")}>{m.group(2)}</h2>'
     html = re.sub(r'<h2([^>]*)>(.*?)</h2>', tag_h2, html, flags=re.S)
+    html = re.sub(r'<h3([^>]*)>(.*?)</h3>', tag_h3, html, flags=re.S)
 
     # each script gets its own scope, and its document queries are rebound to the section
     if js.strip():
@@ -381,8 +434,27 @@ def build_section(sid, label, path, kicker):
     chapters = [(cid, "".join(c if ord(c) < 128 else f"&#{ord(c)};" for c in txt))
                 for cid, txt in chapters]
 
+    lede = "".join(c if ord(c) < 128 else f"&#{ord(c)};" for c in lede)
     return dict(sid=sid, label=label, title=title, kicker=kicker,
-                css=css, html=html, js=js, chapters=chapters)
+                css=css, html=html, js=js, chapters=chapters, lede=lede)
+
+
+# THE TWO HEADING LEVELS, as classes the shell styles (SHELL, "the openers"). Every h2 is a
+# chapter, whatever class its page gave it -- the shell rule outranks the page's own -- except
+# the favicons' old override, which goes. An h3 is a sub-subject unless it is a figure's words:
+# the try-it cards' display lines and the dial demos' specimen.
+FIGURE_H3 = re.compile(r'-tc-big\b')
+def heading_class(attrs, cls):
+    attrs = re.sub(r'\s*class="fav-h"', '', attrs)
+    if 'class="' in attrs:
+        return re.sub(r'class="([^"]*)"', lambda c: f'class="{cls} {c.group(1)}"', attrs, count=1)
+    return f'{attrs} class="{cls}"'
+
+def tag_h3(m):
+    text = re.sub(r'<[^>]+>', '', m.group(2)).strip()
+    if FIGURE_H3.search(m.group(1)) or text == "Hamburgefonstiv":
+        return m.group(0)
+    return f'<h3{heading_class(m.group(1), "wm-h3")}>{m.group(2)}</h3>'
 
 
 GEOM_TOKENS = """<style>
@@ -593,28 +665,31 @@ def render_md(text):
 # tokens, and every vertical space is whole 3px units -- 39 / 9 / 15 / 3 were 40 / 8 / 14 / 4.
 README_CSS = """
 .readme{max-width:72ch;font-size:var(--type-body-size,1rem)}
-.readme h2{font-size:var(--type-lede-size,1.125rem);--lh:var(--lead-lede);margin:39px 0 9px}
-.readme h3{font-size:var(--type-body-size,1rem);margin:24px 0 3px}
 .readme p{margin:0 0 15px}
 .readme ul,.readme ol{margin:0 0 15px;padding-left:1.3em}
 .readme li{margin:0 0 6px}
 .readme code{font-family:"PaperMono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
 .readme a{color:inherit;text-decoration:underline;text-underline-offset:.15em;text-decoration-color:var(--dim,currentColor)}
 .readme a:hover{text-decoration-color:currentColor}
-.readme>p:first-child{font-size:var(--type-lede-size,1.125rem);--lh:var(--lead-lede)}
 """
 
 def build_readme():
     html = f'<div class="readme">{render_md((PKG/"README.md").read_text())}</div>'
+    # The promise is the opener's lede (OPENERS); the paragraph it opened keeps the rest, as body.
+    promise = f'<p><b>{OPENERS["readme"]}</b> '
+    assert promise in html, "build: README no longer opens with the promise the opener quotes"
+    html = html.replace(promise, '<p>', 1)
+    html = re.sub(r'<h3>(.*?)</h3>', r'<h3 class="wm-h3">\1</h3>', html, flags=re.S)
     chapters = []
     def tag_h2(m):
         text = re.sub(r'<[^>]+>', '', m.group(1)).strip()
         cid = f"readme-c{len(chapters)+1}"
         chapters.append((cid, text if len(text) <= 38 else text[:37].rstrip(" ,.;:-") + "…"))
-        return f'<h2 id="{cid}">{m.group(1)}</h2>'
+        return f'<h2 id="{cid}" class="wm-h2">{m.group(1)}</h2>'
     html = re.sub(r'<h2>(.*?)</h2>', tag_h2, html, flags=re.S)
     esc = lambda t: "".join(c if ord(c) < 128 else f"&#{ord(c)};" for c in t)
     return dict(sid="readme", label="The package", title="README", kicker="the promise, and what you owe it",
+                lede=esc(OPENERS["readme"]),
                 css=scope_css(README_CSS, "#s-readme"), html=esc(html), js="",
                 chapters=[(c, esc(t)) for c, t in chapters])
 
@@ -690,7 +765,6 @@ FAV_CSS = """
 .fav-cap i{font-style:normal;font-size:var(--type-ui-size,.75rem);color:var(--ink-2)}
 .fav-cap u{text-decoration:none;font-size:var(--type-micro-size,.5625rem);color:var(--ink-3);width:100%}
 .fav-tag{display:flex;justify-content:space-between;margin-top:6px;font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}
-.fav-h span{display:block;margin-top:6px;font-size:var(--type-ui-size,.75rem);font-weight:400;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}
 .fav>p.fav-sub{margin:48px 0 16px;line-height:1.4;max-width:none;font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}
 .fav-caps{display:grid;grid-template-columns:repeat(13,1fr);gap:18px 10px;margin:0;padding:0;list-style:none;color:var(--ink)}
 .fav-caps li{display:flex;flex-direction:column;align-items:center;gap:8px}
@@ -1114,13 +1188,48 @@ html,body{margin:0;padding:0;background:var(--bg)}
    galleries beside them read as a page that had got wider. 1080px, Mark's number,
    2026-09-20. The hero stays full-bleed: it is composed for the viewport, not a column. */
 .wm-sec{padding:0;max-width:1080px}
-/* On the line: 63 and 15 of padding and 57 above (were 64 / 16 / 56). The number is the
-   shell's own copy, so it is snapped like any other; the stage below it starts where the
-   1px rule leaves it, and gridSnap.js puts the next copy back on a line. */
-.wm-sec-head{padding:63px 0 15px;border-top:1px solid var(--line);margin-top:57px}
-.wm-sec:first-of-type .wm-sec-head{border-top:none;margin-top:8px}
-.wm-n{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
-  font-variation-settings:"GEOM" 100;font-variant-numeric:tabular-nums}
+/* THE OPENER (build.py OPENERS): the marker, one lede, the numbers. On the line: 63 and 24 of
+   padding and 57 above, the marker's box 30 (title), 9 to the lede's 27, 24 to the figure. The
+   rule above is an inset shadow, not a border, so it adds no height and the opener stays whole units.
+   The marker is the title role, 26/30 at 400, and the largest heading on the page: its number
+   in faint ink, its name in full. 9 + the lede's ascent keeps one body step (24) of white under
+   the marker's baseline to the lede's x-height (GRID.md recommendation 4, check 12). */
+.wm-sec-head{padding:63px 0 24px;margin-top:57px;box-shadow:inset 0 1px var(--line)}
+.wm-sec:first-of-type .wm-sec-head{box-shadow:none;margin-top:9px}
+/* the heading inks, resolved HERE, outside the page: a stage restates --ink for its own ground,
+   and a chapter head is the shell's, not the stage's */
+.wm-sec{--h-ink:var(--ink);--h-ink-3:var(--ink-3);--h-line:var(--line)}
+.wm-mark{margin:0;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);font-weight:400;
+  letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums}
+.wm-mark u{text-decoration:none;color:var(--ink-3)}
+.wm-lede{margin:9px 0 0;max-width:60ch;font-size:var(--type-lede-size,1.125rem);--lh:var(--lead-lede);
+  color:var(--ink);text-wrap:pretty}
+/* code in a lede (the appendix's holo.css) at line-height 1, so a second face cannot grow the line */
+.wm-lede code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-height:1}
+/* THE NUMBERS: a caption in the label role, then one row of value over caption -- the title role
+   over the ui role, 15 + 30 + 6 + 15 + 15 = 81, so the row is 27 units and every cell shares its
+   first baseline (.wm-baselines). Dividers are shadows: a 1px border would put the row off the unit. */
+.wm-nums{margin:24px 0 0}
+.wm-nums figcaption{font-size:var(--type-label-size,.75rem);--lh:var(--lead-ui);letter-spacing:var(--track-caps,.12em);
+  text-transform:uppercase;font-variation-settings:"GEOM" 100;color:var(--ink)}
+.wm-nums-row{display:grid;grid-template-columns:repeat(4,1fr);margin-top:9px;background:var(--surface);border-radius:8px;overflow:hidden}
+.wm-num{display:flex;flex-direction:column;gap:6px;padding:15px 18px;box-shadow:inset 1px 0 var(--line)}
+.wm-num:first-child{box-shadow:none}
+.wm-num b{font-weight:400;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title);font-variant-numeric:tabular-nums}
+.wm-num.is-goal b{color:var(--signal)}
+.wm-num span{font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);line-height:var(--lead-ui);color:var(--ink-2)}
+@media (max-width:600px){
+  .wm-nums-row{grid-template-columns:repeat(2,1fr)}
+  .wm-num:nth-child(3){box-shadow:inset 0 1px var(--line)}
+  .wm-num:nth-child(4){box-shadow:inset 1px 0 var(--line),inset 0 1px var(--line)}
+}
+/* THE APPENDIX: shut until pressed. The press is a label-role control, 6 + 15 + 6 = 27. */
+.wm-appx-btn{display:inline-flex;align-items:baseline;gap:9px;margin:15px 0 0;padding:6px 0;border:0;background:none;
+  cursor:pointer;font:inherit;font-size:var(--type-label-size,.75rem);line-height:var(--lead-ui,15px);
+  letter-spacing:var(--track-caps,.12em);text-transform:uppercase;font-variation-settings:"GEOM" 100;color:var(--ink);
+  transition:color var(--dur-fast,140ms)}
+.wm-appx-btn:hover{color:var(--ink-2)}
+.wm-appx-btn i{font-style:normal;letter-spacing:0;font-variant-numeric:tabular-nums}
 /* No full-bleed: breaking the page out of the column pushed its wider demos past the
    viewport, where overflow clipped them. It stays in the column and scrolls its own
    overflow instead. */
@@ -1295,22 +1404,54 @@ def dedupe(chapters):
         seen.add(key); out.append((cid, txt))
     return out
 
-rail = []
+# A section's number: 00-06 in order, "A" for an appendix (which follows them all).
 for i, s in enumerate(secs):
+    s["num"] = "A" if s["sid"] in APPENDIX else f"{i:02d}"
+
+rail = []
+for s in secs:
     chapters = "".join(rail_chapter(cid, txt) for cid, txt in dedupe(s["chapters"])[:CHAPTER_CAP])
+    # the appendix is named as one, its letter standing in the numeral's column
+    name = f'Appendix &middot; {s["label"]}' if s["sid"] in APPENDIX else s["label"]
+    href = "appendix" if s["sid"] in APPENDIX else f's-{s["sid"]}'
     rail.append(
-        f'<div class="wm-grp"><a class="wm-lvl0" href="#s-{s["sid"]}">'
-        f'<u>{i:02d}</u>{s["label"]}</a>{chapters}</div>')
+        f'<div class="wm-grp"><a class="wm-lvl0" href="#{href}">'
+        f'<u>{s["num"]}</u>{name}</a>{chapters}</div>')
 rail = "".join(rail)
 
+def numbers_html(sid):
+    """The opener's numbers figure: value over caption, one row, side by side (.wm-baselines)."""
+    rows = NUMBERS.get(sid)
+    if not rows:
+        return ""
+    cells = "".join(f'<div class="wm-num{" is-goal" if goal else ""}"><b>{v}</b><span>{c}</span></div>'
+                    for v, c, goal in rows)
+    return (f'<figure class="wm-nums"><figcaption>By the numbers</figcaption>'
+            f'<div class="wm-nums-row wm-baselines">{cells}</div></figure>')
+
 body_parts = []
-for i, s in enumerate(secs):
-    # Only a number and a rule. Every page already opens with its own H1, and printing the
-    # title again above it read as a stutter.
-    body_parts.append(f"""
+for s in secs:
+    # THE OPENER: the marker, one lede, the numbers. The page below it starts with its first
+    # chapter -- a page's own h1 is gone or demoted (build_section), so nothing stutters.
+    sid = s["sid"]
+    stage = ' data-nosnap data-stage' if sid in OFF_LINE else ''
+    body = f'<div class="wm-body" id="s-{sid}"{stage}>{s["html"]}</div>'
+    head = (f'<h1 class="wm-mark"><u>{s["num"]} &middot;</u> {s["label"]}</h1>'
+            f'<p class="wm-lede">{s["lede"]}</p>{numbers_html(sid)}')
+    if sid in APPENDIX:
+        # shut until pressed: the Collapse primitive's box (collapse.css), measured by the
+        # shell's script below rather than Collapse.tsx, since this page has no React
+        body_parts.append(f"""
+<section class="wm-sec wm-appx" id="appendix">
+  <header class="wm-sec-head">{head}
+    <button type="button" class="wm-appx-btn" aria-expanded="false" aria-controls="appx-body"><span>Show the usage map</span><i aria-hidden="true">+</i></button></header>
+  <div class="wm-collapse" id="appx-body" style="max-height:0px;visibility:hidden" inert><div>{body}</div></div>
+</section>""")
+    else:
+        body_parts.append(f"""
 <section class="wm-sec">
-  <div class="wm-sec-head"><div class="wm-n">{i:02d} &middot; {s['label']}</div></div>
-  <div class="wm-body" id="s-{s['sid']}"{' data-nosnap' if s['sid'] in OFF_LINE else ''}>{s['html']}</div>
+  <header class="wm-sec-head">{head}</header>
+  {body}
 </section>""")
 
 # Each source page styled its own <body> — max-width, auto margins, page padding, a
@@ -2084,10 +2225,95 @@ HEAD = ("" if not LINKED else
   )
 TAIL = ("" if not LINKED else "\n</body></html>")
 
+# THE TWO HEADING LEVELS (OPENERS above). Scoped through every section's id, so a page's own
+# `#s-x h2` cannot outrank them, and emitted after the sections' CSS, so a tie is the shell's.
+#   h2  the chapter: label 12/15 caps at 400, full ink, a 1px rule. 15 + 5 + 1 = 21, seven
+#       units; 48 above and 15 below, so what follows starts on a line. A note in a nested span
+#       rides the same baseline, sentence case, faint.
+#   h3  the sub-subject: lede 18/27 at 400, sentence case, no rule, 24 above and 9 below.
+# The same margins wherever a head sits: the first chapter is 24 + 48 under its opener.
+HEADS_CSS = """
+.wm-main :is(__IDS__) h2.wm-h2{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;
+  gap:0 24px;margin:48px 0 15px;padding:0 0 5px;border:0;border-bottom:1px solid var(--h-line);background:none;
+  font-family:var(--ui-font);font-size:var(--type-label-size,.75rem);--lh:var(--lead-ui);line-height:var(--lead-ui,15px);
+  font-weight:400;font-style:normal;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;
+  font-variation-settings:"GEOM" 100;color:var(--h-ink);opacity:1;text-align:left;max-width:none;width:auto;min-height:0}
+.wm-main :is(__IDS__) h2.wm-h2 > *{font:inherit;line-height:inherit;font-weight:400;letter-spacing:0;text-transform:none;
+  font-variation-settings:"GEOM" 25;color:var(--h-ink-3);margin:0;padding:0;background:none;border:0}
+.wm-main :is(__IDS__) h3.wm-h3{display:block;margin:24px 0 9px;padding:0;border:0;background:none;
+  font-family:var(--ui-font);font-size:var(--type-lede-size,1.125rem);--lh:var(--lead-lede);line-height:var(--lead-lede,27px);
+  font-weight:400;font-style:normal;letter-spacing:0;text-transform:none;font-variation-settings:normal;
+  color:var(--h-ink);opacity:1;max-width:none}
+.wm-main :is(__IDS__) h3.wm-h3 > span{margin-left:12px;font-size:var(--type-ui-size,.75rem);font-weight:400;color:var(--h-ink-3)}
+""".replace("__IDS__", ",".join(f"#s-{s['sid']}" for s in secs)) \
+  + (HERE.parent.parent / "src" / "collapse.css").read_text()
+
+# STAGES KEEP THEIR TYPE; THEIR HEADS ARE THE SHELL'S. A stage ([data-nosnap], build.py OFF_LINE)
+# sets its own leadings, so the snapper leaves it alone -- and that used to take its chapter heads
+# with it. Here the stage is opened down to its heads: every child that holds no h2 or h3 is
+# marked data-nosnap itself, a child that does is opened the same way, and the heads are left on
+# the line. Before gridSnap.js's first pass, so it never measures the stage as a whole. A box that
+# has text of its own cannot be opened (it would be measured, and moved, as one block): it stays
+# a stage, and says so in the console.
+STAGES = """
+(function(){
+  var HEADS='h2.wm-h2,h3.wm-h3';
+  function own(el){ for(var n=el.firstChild;n;n=n.nextSibling) if(n.nodeType===3&&n.textContent.trim()) return true; return false; }
+  function open(el){
+    if(own(el)){ console.warn('stage kept whole (it has text of its own):', el); return; }
+    el.removeAttribute('data-nosnap');
+    [].forEach.call(el.children,function(c){
+      if(c.matches(HEADS)) return;
+      if(c.querySelector(HEADS)) open(c); else c.setAttribute('data-nosnap','');
+    });
+  }
+  [].forEach.call(document.querySelectorAll('[data-stage]'),function(s){ if(!s.parentElement.closest('[data-stage]')) open(s); });
+  // A HEAD'S FIRST PARAGRAPH joins it on the line when its own leading is already whole units
+  // (the type page's t-body, 16/24): it moves by the snap, under 3px, and nothing else changes.
+  // A leading off the unit (13 x 1.5) keeps the paragraph a stage -- moving it onto the line
+  // would mean changing that page's type, which is OFF_LINE's debt, not the heads'.
+  [].forEach.call(document.querySelectorAll('[data-stage] :is(h2.wm-h2,h3.wm-h3) + p[data-nosnap]'),function(p){
+    var lh=getComputedStyle(p).lineHeight, v=parseFloat(lh);
+    if(!v||Math.abs(v/3-Math.round(v/3))>0.001) return;
+    p.removeAttribute('data-nosnap');
+    if(getComputedStyle(p).lineHeight!==lh) p.setAttribute('data-nosnap','');
+  });
+})();
+"""
+
+# THE APPENDIX's box: collapse.css's .wm-collapse, driven the way Collapse.tsx drives it -- the
+# height measured from the content, never a guessed number, and no cap once it has opened, so
+# nothing that grows later is clipped. Shut, it is hidden and inert. A link into it opens it.
+APPX = """
+(function(){
+  var b=document.querySelector('.wm-appx-btn'), box=document.getElementById('appx-body'); if(!b||!box) return;
+  var inner=box.firstElementChild, t;
+  function snap(){ if(window.wmGridSnap) window.wmGridSnap(); }
+  function set(open, now){
+    clearTimeout(t); b.setAttribute('aria-expanded', String(open)); box.inert=!open;
+    b.firstElementChild.textContent = open ? 'Hide the usage map' : 'Show the usage map';
+    b.lastElementChild.textContent = open ? '\\u2212' : '+';
+    if(open){
+      box.style.visibility=''; box.style.maxHeight=inner.scrollHeight+'px';
+      t=setTimeout(function(){ box.style.maxHeight='none'; box.classList.add('wm-collapse--open'); snap(); }, now?0:400);
+    } else {
+      box.classList.remove('wm-collapse--open'); box.style.maxHeight=box.scrollHeight+'px';
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ box.style.maxHeight='0px'; }); });
+      t=setTimeout(function(){ box.style.visibility='hidden'; snap(); }, 400);
+    }
+  }
+  b.addEventListener('click', function(){ set(b.getAttribute('aria-expanded')!=='true'); });
+  function hash(){ var id=location.hash.slice(1), el=id&&document.getElementById(id);
+    if(el&&box.contains(el)&&b.getAttribute('aria-expanded')!=='true') set(true,true); }
+  addEventListener('hashchange', hash); hash();
+})();
+"""
+
 page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 <style>{FONTS}{GRID_CSS}{SHELL}
 {CHROME_CSS}
 {css_parts}
+{HEADS_CSS}
 </style>
 <div class="wm">
   <div class="wm-doc">
@@ -2132,6 +2358,7 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 <script>{js_parts}
 {HERO}
 {SPY}</script>
+<script>{STAGES}{APPX}</script>
 <script>{GRID_JS}</script>
 <script>{CHROME_JS}
 {CHROME}</script>

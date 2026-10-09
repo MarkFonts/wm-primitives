@@ -103,19 +103,10 @@
   .wrap { max-width: 1000px; margin: 0 auto; padding: 72px 32px 120px; }
   .tnum { font-variant-numeric: tabular-nums; }
 
-  header { display: flex; flex-direction: column; gap: 18px; padding-bottom: 40px; }
-  h1 { margin: 0; text-wrap: balance; }
-  .thesis { margin: 0; max-width: 60ch; text-wrap: pretty; }
 
-  .audit { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px;
-    background: var(--border-subtle); border: 1px solid var(--border-subtle);
-    border-radius: var(--radius); overflow: hidden; margin-top: 8px; }
-  .audit div { background: var(--surface-1); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
-  .audit b { font-weight: 400; }
-  .audit .is-goal b { color: var(--signal); }
 
-  section { padding-top: 56px; }
-  .sec-head { display: flex; flex-direction: column; gap: 10px; padding-bottom: 26px; }
+  section { padding-top: 0; }   /* the chapter h2 brings its own 48 (the shell) */
+  .sec-head { display: flex; flex-direction: column; gap: 0; padding-bottom: 26px;   /* the h2 brings its own 15 */ }
   .sec-head p { margin: 0; max-width: 66ch; text-wrap: pretty; }
 
   .ledgers { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1px;
@@ -234,24 +225,10 @@
 </style>
 
 <div class="wrap">
-  <header>
-    <div class="t-label ink-quiet">WORDMARK &#183; type tokens</div>
-    <h1 class="t-display">Seven roles.<br>One signal each.</h1>
-    <p class="t-lede thesis">
-      Every size in this section is set by the token it documents, and nothing here differs from its neighbours in more than one way at a time.
-    </p>
-
-    <div class="audit tnum">
-      <div><b class="t-title">44</b><span class="t-ui ink-quiet">sizes before</span></div>
-      <div class="is-goal"><b class="t-title">7</b><span class="t-ui ink-quiet">text roles</span></div>
-      <div class="is-goal"><b class="t-title">5</b><span class="t-ui ink-quiet">poster steps</span></div>
-      <div class="is-goal"><b class="t-title">3</b><span class="t-ui ink-quiet">inks, from four</span></div>
-    </div>
-  </header>
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">The budget</div>
+      <h2>The budget</h2>
       <p class="t-body">
         Some changes the type <em>requires</em> to stay itself at a new setting. They
         carry no meaning and cost nothing. Others are made in order to say something,
@@ -288,8 +265,8 @@
         compensation. It is a signal, and it is spent.</p>
     </div>
 
-    <div class="sec-head" style="padding-top:26px;">
-      <div class="t-label ink-quiet">The sixth signal: geom</div>
+    <div class="sec-head">
+      <h2>The sixth signal: geom</h2>
       <p class="t-ui ink-quiet">Same size, weight, color, and case &#8212; the letters are
         simply built differently. Four landings, at <b class="tnum" style="font-weight:400;color:var(--signal);">0
         &#183; 25 &#183; 50 &#183; 100</b>. Each sits in the middle of a pad the font holds
@@ -362,7 +339,7 @@
       distinction you were making anyway, and it is never the thing doing the work alone.</p>
 
     <div style="margin-top:34px;">
-      <div class="t-label ink-quiet">The whole axis, drawn</div>
+      <h3>The whole axis, drawn</h3>
       <div class="geom-map" id="geom">__GEOMSVG__</div>
       <p class="t-ui ink-quiet" style="margin-top:12px;">Every glyph Cal Sans swaps across
         GEOM, and the range each swap holds for. The four landings are the columns; the
@@ -393,7 +370,7 @@
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">The waterfall</div>
+      <h2>The waterfall</h2>
       <p class="t-body">
         Each row at its real size with its real settings. Every role spends size and
         nothing else &#8212; except <code>label</code>, which spends case instead and
@@ -462,7 +439,7 @@
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">The poster scale</div>
+      <h2>The poster scale</h2>
       <p class="t-body">
         The seven roles stop at 45px &#8212; the largest size chrome has any business
         being. Above it is a different instrument: the monster sample. And up there the
@@ -533,7 +510,7 @@
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">Ink</div>
+      <h2>Ink</h2>
       <p class="t-body">
         Grey is a signal, and we were spending it like punctuation. Four levels resolved
         to 1.00 &#183; 0.64 &#183; 0.40 &#183; 0.24 on our ground &#8212; a finer
@@ -584,7 +561,7 @@
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">The correction</div>
+      <h2>The correction</h2>
       <p class="t-body">
         The label role as it stood said &#8220;minor&#8221; four times. A label is not
         less important than the thing it labels; it is a different kind of thing &#8212;
@@ -618,7 +595,7 @@
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">Why opsz is free</div>
+      <h2>Why opsz is free</h2>
       <p class="t-body">
         Both lines are set at exactly 34px in the same font. Only the optical size
         differs. This is what the type does to stay itself across sizes &#8212; a
@@ -640,7 +617,7 @@
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">The boundary</div>
+      <h2>The boundary</h2>
       <p class="t-body">
         The one rule that keeps a type tool honest: the system dresses the interface,
         never the artifact under test.
@@ -665,7 +642,7 @@
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">Getting there</div>
+      <h2>Getting there</h2>
       <p class="t-body">
         Smallest surface first. An AxisSlider row is label, value, tag, and track in one
         line &#8212; under the budget most of them must differ by ink alone. If the rule

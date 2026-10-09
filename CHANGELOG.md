@@ -12,6 +12,31 @@ Newest first.
 
 ---
 
+## 2026-10-08 -- the system page: one opener, one h2, one h3
+
+**Five heading treatments became three levels.** Type alone had a 45px bold h1, a 26px semibold
+h1 for the grid, nine 12px quiet label heads, seven 600-weight caps heads with a rule and an
+unstyled 24px bold favicon head -- and the section's own number was 9px, the smallest type in it.
+Now every section opens the same way: the marker in the title role (26/30, 400, the number in
+faint ink), one lede (18/27), and Type's numbers under a "By the numbers" label. Under it, h2 is
+the chapter (label caps, 400, full ink, one rule: 15 + 5 + 1 = 21, so what follows starts on a
+line) and h3 the sub-subject (lede, sentence case). Every h2 is in the rail. A page's h1 goes
+where it repeats the section's name and becomes a chapter where it names a part.
+
+**Stages keep their type; their heads are on the line.** A stage (OFF_LINE) used to take its
+chapter heads off the line with it. The shell now opens a stage down to its heads before the
+snapper's first pass, and a head's first paragraph joins it when its leading is already whole
+units. Paragraphs at 13 x 1.5 stay stages -- that is OFF_LINE's debt, not the heads'.
+
+**06 is Motion; Who uses what is the appendix.** Motion gathers what the files already said
+(the durations, --icon-dur, the morph, the stow, the confirm, reduced motion). It adds one
+token, `--ease` in motion.css, the curve the zoom control and the theme stack had each typed
+out. zoomControl.js reads it when a morph is built, not at mount: a style read at mount
+flushed the mark's FILL before it was set and transitioned it (G67 caught it). The appendix
+is shut until pressed, in collapse.css's box, its height measured, as Collapse.tsx does.
+
+---
+
 ## 2026-10-08 -- a press acknowledgement for chips, marks and the lozenge
 
 **The confirm had nothing to undo on them.** A chip, a mark and the lozenge had no `:active`

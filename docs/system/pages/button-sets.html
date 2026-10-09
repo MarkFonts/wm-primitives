@@ -61,7 +61,7 @@
   color: var(--text-dim); margin: 0 0 .75rem; }
 
 /* ── the study's furniture (buttons.html .bt-fam / .bt-rack / .bt-panel), restated ── */
-.bs-fam-head{ display: flex; align-items: baseline; gap: .75rem; margin: 2.5rem 0 .5rem; }
+.bs-fam-head{ margin: 0; }   /* the h3 inside is the shell's sub-subject: its margins, its note in a span */
 .bs-fam-head h3{ margin: 0; font-size: 1.125rem; font-weight: 500; }
 .bs-thesis{ max-width: 44em; font-size: .9375rem; line-height: 1.55; margin: 0 0 1.25rem; opacity: .8; }
 .bs-rack{ display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
@@ -135,7 +135,7 @@ secondary</b>, in <code>src/button-sets.css</code>. They are not a pair &mdash; 
 own place, and one panel never holds both. Beside <code>.wm-btn</code> rather than on top of
 it, so nothing that ships today moves.</p>
 
-<div class="bs-fam-head"><h3>The primary</h3><code>.wm-menu</code> <code>.wm-menu--row</code> <code>.wm-menu-list</code></div>
+<div class="bs-fam-head"><h3>The primary <span><code>.wm-menu</code> <code>.wm-menu--row</code> <code>.wm-menu-list</code></span></h3></div>
 <p class="bs-thesis"><b>An enclosure means chosen, not pressable.</b> It is what
 font-proofer&rsquo;s rail already does, and what that is, is a <b>menu</b> &mdash; preview
 modes of equal weight, picked between rather than read, which is the one place where a mark
@@ -244,7 +244,7 @@ there.</p>
   <p class="bs-cap">every figure in this chapter, one theme</p>
 </div>
 
-<div class="bs-fam-head"><h3>The secondary</h3><code>.wm-rule</code></div>
+<div class="bs-fam-head"><h3>The secondary <span><code>.wm-rule</code></span></h3></div>
 <p class="bs-thesis"><b>The type is the control.</b> No box in any state. An action is
 ink-full with a solid rule at <code>1px</code>, thickening to the same two numbers the press
 law uses &mdash; 1.2 under the pointer, 1.8 held. An editable is the identical rule,

@@ -51,6 +51,9 @@
   const mk = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
   const field = t => t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
   const live = new Set();
+  // THE CURVE: motion.css's --ease, read where the control sits, as --dur-med is; the literal is
+  // for a host that has not loaded motion.css.
+  const easeOf = el => getComputedStyle(el).getPropertyValue('--ease').trim() || 'cubic-bezier(0.2, 0.7, 0.2, 1)';
 
   function mount(el, opts = {}) {
     if (el.__wmZoom) return el.__wmZoom;
@@ -158,7 +161,7 @@
       const dx = x0 - lo(pill.getBoundingClientRect());
       const dur = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
       slide?.cancel();
-      slide = pill.animate([{ transform: shift(dx) }, { transform: 'translate(-50%, -50%)' }], { duration: dur, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' });
+      slide = pill.animate([{ transform: shift(dx) }, { transform: 'translate(-50%, -50%)' }], { duration: dur, easing: easeOf(el) });
       cancelAnimationFrame(counting);
       const t0 = performance.now(), n = Math.abs(from - 100) / step;
       const tick = now => {
@@ -275,7 +278,9 @@
       toggle.setAttribute('aria-label', label); toggle.title = label;
       parts.forEach(p => { p.inert = !open; });
     };
-    const EASE = 'cubic-bezier(0.2, 0.7, 0.2, 1)';   // the case study tester's unlock curve; motion.css holds durations, no easings
+    // motion.css's --ease, the case study tester's unlock curve -- read when a morph is built, never
+    // at mount: a style read there flushed the mark's FILL before it was set and transitioned it
+    let EASE = '';
     let morph = [], fly = [];
     const stop = () => { morph.forEach(a => a.cancel()); morph = []; fly.forEach(f => f.remove()); fly = []; delete el.dataset.moving; };
     // the shared geometry, measured from the end layout, in the box's coordinates
@@ -316,6 +321,7 @@
     };
     const fvsOf = n => { const v = getComputedStyle(toggle.querySelector('.wm-icon')).fontVariationSettings; return v.replace(/"FILL" [\d.]+/, `"FILL" ${n}`); };
     const choreograph = () => {
+      EASE = easeOf(el);
       const beat = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
       const total = 2.5 * beat, at = ms => Math.min(1, Math.max(0, ms / 600));   // the script is written in 600ths
       const k = { duration: total, fill: 'both' }, g = measure2(100), C = onRail(g, g.cx);
@@ -367,6 +373,7 @@
       return A;
     };
     const closing = () => {
+      EASE = easeOf(el);
       const total = 300, at = ms => ms / total, k = { duration: total, fill: 'both' };
       const g = measure2(value), C = onRail(g, g.now), rel = p => ({ x: p.x - g.mark.x, y: p.y - g.mark.y }), cR = rel(C);
       const A = [];
