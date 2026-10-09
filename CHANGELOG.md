@@ -12,6 +12,30 @@ Newest first.
 
 ---
 
+## 2026-10-08 -- the Grid chapter: the try-it card
+
+Mark: "was thinking about this in the 'grids and columns' section as a full screen or interestingly
+gridded card with large text also aligned to the grid to its side", then "not teased at the top of the page".
+
+- **The poster's "Try it now" line is gone**, and its CSS. G and L still work anywhere on the page; the
+  Grid chapter is the one place they are offered.
+- **The chapter's small line is a card that demonstrates the grid.** A box on the page's own columns --
+  18 stripes from 1024, numbered 7-24 as the page numbers them, 12 below -- so pressing G lands the
+  overlay exactly on them; a canvas draws the 3px lines faintly and the row's step stronger from the
+  shared first baseline. The words are display weight 600 stepping with the column as the homepage's
+  headline does: 45/48 from 1312, 39/42, 33/36 from 1024, 28/30 from 681, 22/24 on a phone; the ui
+  column beside them is 12 on 24 / 21 / 18 / 15, half the big lead at every step (12/18 stacked under
+  them on a phone). The caps G and L are the shell's .wm-key buttons drawn at 42/36/30/24/21px.
+- **What it cost.** A button's baseline is its letter's, whatever its box, so a 42px cap set on the
+  baseline opened its line (two lines of 48 measured 116): the caps sit on the line's top and are moved
+  down with `top`. The ui column first had a margin-top to meet the words' baseline, which gave the two
+  items different box tops: the snapper and the spec then saw two rows and check 10 judged nothing. It is
+  padding now, one row, and check 10 judges it at 1312 and up (below, 12 on 21/18/15 is under body's lead
+  and, as on the homepage, not part of a step).
+- **`?card=full`** sets it one screen tall. It cannot run to the window's edges from inside a chapter: every
+  `.wm-body` is `position: relative; overflow-x: auto`, so anything leaving the content column is clipped
+  -- the full bleed over the rail would be a shell change.
+
 ## 2026-10-08 -- the system page: grid keys everywhere, the rail on the columns, the zoom
 
 Mark: "can i use the baseline and grid shortcuts on that page permanently?", "add the column system

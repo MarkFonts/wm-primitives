@@ -1246,21 +1246,11 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-chrome .wm-theme-row{position:fixed;z-index:95;top:var(--stack-top);right:var(--grid-margin);
   background:var(--bg);box-shadow:0 0 0 var(--spacing-02,6px) var(--bg)}
 
-/* ---- Try it: the overlays' keys, said where they are used. The keys are buttons as well, so a
-   phone without a keyboard can press them. Ui-size words on body's 24 (eight units): the key
-   cap is 18px, six units, and fits inside that line -- in a 15px ui line it would open the line
-   box and push the baseline off the grid. */
-.wm-try{margin:0;font-size:var(--type-ui-size,.75rem);--lh:var(--lead-body);line-height:var(--lh);color:var(--ink-3)}
-/* On the poster it hangs at the top of the content column, across from the eyebrow (which
-   runs down the right edge from the same 44px): out of the flow, so the poster keeps its
-   composition and the line is on screen when the page opens. */
-.wm-head > .wm-try{position:absolute;top:44px;left:0;z-index:4}
-/* Below 1024 the column is too narrow to hang it over the statement: it takes the poster's first
-   line in the flow. On a phone the vertical stack rests at the top right, where the eyebrow
-   begins, so the line stops short of it and the eyebrow starts under the stack (its 138px at
-   rest, from 6px under the bar). */
-@media (max-width:1023px){.wm-head > .wm-try{position:static;margin:0}}
-.wm:has(.wm-theme-stack--vertical) .wm-head > .wm-try{padding-right:30px}
+/* ---- The overlays' keys, drawn as caps. The keys are buttons as well, so a phone without a
+   keyboard can press them; the Grid chapter's try-it card is where they are offered (Mark: "not
+   teased at the top of the page"), and the wiring below takes every .wm-key[data-overlay]. */
+/* On a phone the vertical stack rests at the top right, where the eyebrow begins, so the eyebrow
+   starts under the stack (its 138px at rest, from 6px under the bar). */
 .wm:has(.wm-theme-stack--vertical) .wm-eyebrow{top:156px}
 .wm-key{display:inline-block;box-sizing:border-box;min-width:18px;height:18px;margin:0 1px;padding:0 5px;
   vertical-align:baseline;font:inherit;font-size:11px;line-height:14px;font-weight:600;
@@ -2090,8 +2080,6 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
   <header class="wm-head" data-nosnap>
     <svg class="wm-six" id="wm6" viewBox="{SIX_VB}" aria-hidden="true"></svg>
     <p class="wm-eyebrow">wm-primitives &middot; the house system</p>
-    <p class="wm-try">Try it now: press <button type="button" class="wm-key" data-overlay="cols" aria-pressed="false">G</button> for the columns,
-      <button type="button" class="wm-key" data-overlay="lines" aria-pressed="false">L</button> for the baseline &mdash; anywhere on the page.</p>
     <h1 class="wm-stack"><span class="wm-l1">Six<i></i></span><span
       class="wm-l2">laws.</span><span class="wm-l3">Every<i></i><svg class="wm-bendsvg" id="wmbend"
       viewBox="0 0 300 560" aria-hidden="true"></svg><u class="wm-bendlbl" id="wmbendlbl"></u></span><span

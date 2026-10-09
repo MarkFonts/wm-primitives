@@ -670,21 +670,11 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-chrome .wm-theme-row{position:fixed;z-index:95;top:var(--stack-top);right:var(--grid-margin);
   background:var(--bg);box-shadow:0 0 0 var(--spacing-02,6px) var(--bg)}
 
-/* ---- Try it: the overlays' keys, said where they are used. The keys are buttons as well, so a
-   phone without a keyboard can press them. Ui-size words on body's 24 (eight units): the key
-   cap is 18px, six units, and fits inside that line -- in a 15px ui line it would open the line
-   box and push the baseline off the grid. */
-.wm-try{margin:0;font-size:var(--type-ui-size,.75rem);--lh:var(--lead-body);line-height:var(--lh);color:var(--ink-3)}
-/* On the poster it hangs at the top of the content column, across from the eyebrow (which
-   runs down the right edge from the same 44px): out of the flow, so the poster keeps its
-   composition and the line is on screen when the page opens. */
-.wm-head > .wm-try{position:absolute;top:44px;left:0;z-index:4}
-/* Below 1024 the column is too narrow to hang it over the statement: it takes the poster's first
-   line in the flow. On a phone the vertical stack rests at the top right, where the eyebrow
-   begins, so the line stops short of it and the eyebrow starts under the stack (its 138px at
-   rest, from 6px under the bar). */
-@media (max-width:1023px){.wm-head > .wm-try{position:static;margin:0}}
-.wm:has(.wm-theme-stack--vertical) .wm-head > .wm-try{padding-right:30px}
+/* ---- The overlays' keys, drawn as caps. The keys are buttons as well, so a phone without a
+   keyboard can press them; the Grid chapter's try-it card is where they are offered (Mark: "not
+   teased at the top of the page"), and the wiring below takes every .wm-key[data-overlay]. */
+/* On a phone the vertical stack rests at the top right, where the eyebrow begins, so the eyebrow
+   starts under the stack (its 138px at rest, from 6px under the bar). */
 .wm:has(.wm-theme-stack--vertical) .wm-eyebrow{top:156px}
 .wm-key{display:inline-block;box-sizing:border-box;min-width:18px;height:18px;margin:0 1px;padding:0 5px;
   vertical-align:baseline;font:inherit;font-size:11px;line-height:14px;font-weight:600;
@@ -1266,7 +1256,20 @@ html,body{margin:0;padding:0;background:var(--bg)}
   font-size:var(--type-label-size,.75rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;font-weight:600;
   font-variation-settings:"GEOM" 100;--lh:var(--lead-ui)}#s-type .part-1 h2 span{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-3,rgba(23,24,26,.38));font-variation-settings:"GEOM" 25}#s-type .part-1 p{margin:0 0 24px;max-width:64ch;color:var(--ink-2,rgba(23,24,26,.62))}#s-type .part-1 p b{color:var(--ink,#17181a);font-weight:600}#s-type .part-1 a{color:inherit;text-decoration:underline;text-underline-offset:.15em;text-decoration-color:var(--ink-3,currentColor)}#s-type .part-1 a:hover{text-decoration-color:currentColor}#s-type .part-1 code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-height:1}#s-type .part-1 .gx-lede{color:var(--ink,#17181a)}#s-type .part-1 .gx-cap{font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);color:var(--ink-3,rgba(23,24,26,.38));margin:6px 0 24px}#s-type .part-1 .gx-frame{position:relative;overflow:hidden;height:calc(var(--h) * var(--k,1) * 1px)}#s-type .part-1 .gx-scale{position:absolute;left:0;top:0;transform-origin:0 0;transform:scale(var(--k,1))}#s-type .part-1 .gx-sheet{height:calc(var(--h) * 1px);grid-template-rows:var(--rows);background:var(--surface,#f2f2f2);border-radius:6px}#s-type .part-1 .gx-sheet > i{grid-row:1 / -1;background:var(--ov-col);border-inline:1px solid var(--ov-col-edge)}#s-type .part-1 .gx-card{position:relative;background:var(--surface-hi,#e6e6e6);border:1px solid var(--line,rgba(23,24,26,.16));border-radius:6px}#s-type .part-1 .gx-card b{display:block;height:100%;background:repeating-linear-gradient(135deg,var(--ink-3,#999) 0 .5px,transparent .5px 4px);opacity:.7}#s-type .part-1 [data-ov]{position:relative}#s-type .part-1 [data-ov] > canvas{position:absolute;left:0;top:0;pointer-events:none}#s-type .part-1 .gx-box{padding:24px 0}#s-type .part-1 .gx-try{--snap-unit:1;margin:0 0 15px}#s-type .part-1 .gx-walk{max-width:52ch}#s-type .part-1 .gx-walk.off{--lh:24.8px}#s-type .part-1 .gx-roles{display:grid;grid-template-columns:minmax(0,9rem) minmax(0,1fr);column-gap:24px;row-gap:24px}#s-type .part-1 .gx-roles > div > p{margin:0;max-width:none}#s-type .part-1 .gx-roles .lbl p{font-size:var(--type-ui-size,.75rem);color:var(--ink-3,rgba(23,24,26,.38))}#s-type .part-1 .gx-roles .smp p{color:var(--ink,#17181a)}#s-type .part-1 .gx-roles .t-title,#s-type .part-1 .gx-roles .t-display{font-weight:600}#s-type .part-1 .gx-roles .body p{font-size:var(--type-body-size,1rem);max-width:48ch}@media (max-width:599px){#s-type .part-1 .gx-roles{grid-template-columns:minmax(0,1fr);row-gap:6px}#s-type .part-1 .gx-roles .smp{margin-bottom:15px}}#s-type .part-1 .gx-row{margin:0 0 24px}#s-type .part-1 .gx-row > *{--span:8;--span-md:4}@media (max-width:599px){#s-type .part-1 .gx-row > *{--span-md:12}#s-type .part-1 .gx-row{row-gap:24px}}#s-type .part-1 .gx-row .wm-card{background:var(--surface,#f2f2f2);border-radius:var(--radius,6px)}#s-type .part-1 .gx-row p{margin:0;max-width:none}#s-type .part-1 .gx-row .t-display{font-weight:600;color:var(--ink,#17181a)}#s-type .part-1 .gx-row .t-ui{color:var(--ink-2,rgba(23,24,26,.62))}#s-type .part-1 .gx-odd{--sp:51px;height:var(--sp);margin:0;border-top:1px solid var(--line,rgba(23,24,26,.16));
   font-size:var(--type-micro-size,.75rem);line-height:var(--lead-micro,12px);color:var(--ink-3,rgba(23,24,26,.38))}#s-type .part-1 .gx-odd span{display:block;padding-top:6px;font-variant-numeric:tabular-nums}#s-type .part-1 .gx-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px;row-gap:24px;margin:24px 0}@media (max-width:599px){#s-type .part-1 .gx-pair{grid-template-columns:minmax(0,1fr)}}#s-type .part-1 .gx-cell{min-width:0}#s-type .part-1 .gx-cell > p{margin:0;max-width:none}#s-type .part-1 .gx-cell .gx-k{font-size:var(--type-micro-size,.75rem);--lh:var(--lead-micro);color:var(--ink-3,rgba(23,24,26,.38));margin:0 0 9px}#s-type .part-1 .gx-srow{position:relative;display:flex;align-items:center;gap:12px;
-  font-size:var(--type-title-size,1.625rem);line-height:var(--lead-title,30px);font-weight:600;color:var(--ink,#17181a)}#s-type .part-1 .gx-srow.whole{--snap-unit:1}#s-type .part-1 .gx-srow.whole > span,#s-type .part-1 .gx-srow.whole > output{align-self:baseline}#s-type .part-1 .gx-srow::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#ff4d8d;opacity:.8;z-index:2;pointer-events:none}#s-type .part-1 .gx-srow input{flex:1;min-width:0;accent-color:var(--ink,#17181a);margin:0;position:relative;z-index:1}#s-type .part-1 .gx-srow output{min-width:3ch;text-align:right;font-variant-numeric:tabular-nums;font-size:var(--type-ui-size,.75rem);font-weight:400;color:var(--ink-2,rgba(23,24,26,.62))}#s-type .part-1 .gx-moved{font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);color:var(--ink-3,rgba(23,24,26,.38));margin:9px 0 0;font-variant-numeric:tabular-nums}#s-type .part-1 .gx-chips{--snap-unit:1;margin:0 0 15px}#s-type .part-1 .gx-over > i{position:relative;z-index:2;pointer-events:none}#s-type .part-1 .gx-sheet p{margin:0;font-size:21px;line-height:27px;color:var(--ink,#17181a)}#s-type .part-1 .gx-sheet p small{display:block;font-size:15px;color:var(--ink-2,rgba(23,24,26,.62))}#s-type .part-1 .gx-strip{grid-row:2;background:repeating-linear-gradient(135deg,var(--ink-3,#999) 0 1px,transparent 1px 7px);opacity:.55}#s-type .part-1 .gx-band{grid-row:3;align-self:stretch;display:flex;flex-direction:column;justify-content:center;background:var(--surface-hi,#e6e6e6)}#s-type .part-1 .gx-note{grid-row:4;align-self:start}#s-type .part-1 .gx-shotcell{grid-row:4;align-self:start}#s-type .part-1 .gx-panel{grid-row:2 / 4;background:var(--surface-hi,#e6e6e6);padding-block:24px}#s-type .part-1 .gx-stage{grid-row:2 / 4;background:repeating-linear-gradient(135deg,var(--ink-3,#999) 0 1px,transparent 1px 7px);opacity:.55}#s-type .part-1 .gx-wide{grid-row:4;align-self:center}
+  font-size:var(--type-title-size,1.625rem);line-height:var(--lead-title,30px);font-weight:600;color:var(--ink,#17181a)}#s-type .part-1 .gx-srow.whole{--snap-unit:1}#s-type .part-1 .gx-srow.whole > span,#s-type .part-1 .gx-srow.whole > output{align-self:baseline}#s-type .part-1 .gx-srow::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#ff4d8d;opacity:.8;z-index:2;pointer-events:none}#s-type .part-1 .gx-srow input{flex:1;min-width:0;accent-color:var(--ink,#17181a);margin:0;position:relative;z-index:1}#s-type .part-1 .gx-srow output{min-width:3ch;text-align:right;font-variant-numeric:tabular-nums;font-size:var(--type-ui-size,.75rem);font-weight:400;color:var(--ink-2,rgba(23,24,26,.62))}#s-type .part-1 .gx-moved{font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);color:var(--ink-3,rgba(23,24,26,.38));margin:9px 0 0;font-variant-numeric:tabular-nums}#s-type .part-1 .gx-chips{--snap-unit:1;margin:0 0 15px}#s-type .part-1 .gx-over > i{position:relative;z-index:2;pointer-events:none}#s-type .part-1 .gx-sheet p{margin:0;font-size:21px;line-height:27px;color:var(--ink,#17181a)}#s-type .part-1 .gx-sheet p small{display:block;font-size:15px;color:var(--ink-2,rgba(23,24,26,.62))}#s-type .part-1 .gx-strip{grid-row:2;background:repeating-linear-gradient(135deg,var(--ink-3,#999) 0 1px,transparent 1px 7px);opacity:.55}#s-type .part-1 .gx-band{grid-row:3;align-self:stretch;display:flex;flex-direction:column;justify-content:center;background:var(--surface-hi,#e6e6e6)}#s-type .part-1 .gx-note{grid-row:4;align-self:start}#s-type .part-1 .gx-shotcell{grid-row:4;align-self:start}#s-type .part-1 .gx-panel{grid-row:2 / 4;background:var(--surface-hi,#e6e6e6);padding-block:24px}#s-type .part-1 .gx-stage{grid-row:2 / 4;background:repeating-linear-gradient(135deg,var(--ink-3,#999) 0 1px,transparent 1px 7px);opacity:.55}#s-type .part-1 .gx-wide{grid-row:4;align-self:center}#s-type .part-1 .gx-tc{margin:0 0 48px;--tc-key:21px;--tc-key-fs:12px;--tc-top:1px;--tc-n:12;--tc-first:1}#s-type .part-1 .gx-tc-in{position:relative;overflow:hidden;background:var(--surface,#fff);border-radius:var(--radius,6px);padding-block:24px 36px}#s-type .part-1 .gx-tc-cv{position:absolute;left:0;top:0;pointer-events:none}#s-type .part-1 .gx-tc-cols{position:absolute;inset:0;padding-inline:inherit;display:grid;pointer-events:none;
+  grid-template-columns:repeat(var(--tc-n),minmax(0,1fr));column-gap:var(--grid-gutter,24px)}#s-type .part-1 .gx-tc-cols > span{background:rgba(255,40,140,.045);border-inline:1px solid rgba(255,40,140,.22)}#s-type .part-1 .gx-tc-cols u{display:block;padding-top:6px;text-align:center;text-decoration:none;font-size:9px;line-height:12px;
+  font-variant-numeric:tabular-nums;color:rgba(255,40,140,.7)}#s-type .part-1 .gx-tc-row{position:relative;z-index:1;display:grid;align-items:start;padding-top:24px;
+  grid-template-columns:repeat(var(--tc-n),minmax(0,1fr));column-gap:var(--grid-gutter,24px)}#s-type .part-1 .gx-tc-big{grid-column:2 / span 10;margin:0;font-size:22px;--lh:24px;line-height:var(--lh);font-weight:600;
+  font-variation-settings:"GEOM" 50;letter-spacing:0;color:var(--ink,#17181a);text-wrap:balance}#s-type .part-1 .gx-tc-side{grid-column:2 / span 10;margin-top:24px}#s-type .part-1 .gx-tc-side p{margin:0 0 18px;max-width:34ch;font-size:var(--type-ui-size,.75rem);--lh:18px;color:var(--ink-2,rgba(23,24,26,.62))}#s-type .part-1 .gx-tc-side p:last-child{margin-bottom:0}#s-type .part-1 .gx-tc-side b{color:var(--ink,#17181a);font-weight:600}#s-type .part-1 .gx-tc .gx-key{display:inline-block;box-sizing:border-box;height:var(--tc-key);min-width:var(--tc-key);margin:0 .06em;
+  padding:0 calc(var(--tc-key) / 4);vertical-align:top;position:relative;top:var(--tc-top);
+  font:inherit;font-size:var(--tc-key-fs);line-height:calc(var(--tc-key) - 4px);font-weight:600;font-variation-settings:"GEOM" 100;
+  text-align:center;color:var(--ink,#17181a);background:var(--surface-hi,#ebebeb);cursor:pointer;
+  border:1px solid var(--ink-3,rgba(23,24,26,.38));border-bottom-width:3px;border-radius:calc(var(--tc-key) / 5);
+  transition:color .15s,background-color .15s,border-color .15s}#s-type .part-1 .gx-tc .gx-key:hover{border-color:var(--ink,#17181a)}#s-type .part-1 .gx-tc .gx-key[aria-pressed="true"]{color:var(--bg,#f4f4f4);background:var(--ink,#17181a);border-color:var(--ink,#17181a)}@media (min-width:681px){#s-type .part-1 .gx-tc{--tc-key:24px;--tc-key-fs:15px;--tc-top:3px}#s-type .part-1 .gx-tc-big{grid-column:2 / span 7;font-size:28px;--lh:30px}#s-type .part-1 .gx-tc-side{grid-column:9 / span 3;margin-top:0;padding-top:12px}#s-type .part-1 .gx-tc-side p{--lh:15px;margin-bottom:15px}
+}@media (min-width:1024px){#s-type .part-1 .gx-tc{--tc-key:30px;--tc-key-fs:18px;--tc-top:5px;--tc-n:18;--tc-first:7}#s-type .part-1 .gx-tc-in{padding-block:24px 48px}#s-type .part-1 .gx-tc-big{grid-column:2 / span 10;font-size:33px;--lh:36px}#s-type .part-1 .gx-tc-side{grid-column:13 / span 5;padding-top:15px}#s-type .part-1 .gx-tc-side p{--lh:18px;margin-bottom:18px}
+}@media (min-width:1152px){#s-type .part-1 .gx-tc{--tc-key:36px;--tc-key-fs:21px;--tc-top:3px}#s-type .part-1 .gx-tc-big{font-size:39px;--lh:42px}#s-type .part-1 .gx-tc-side{padding-top:18px}#s-type .part-1 .gx-tc-side p{--lh:21px;margin-bottom:21px}
+}@media (min-width:1312px){#s-type .part-1 .gx-tc{--tc-key:42px;--tc-key-fs:24px;--tc-top:2px}#s-type .part-1 .gx-tc-in{padding-block:24px 72px}#s-type .part-1 .gx-tc-big{font-size:45px;--lh:48px}#s-type .part-1 .gx-tc-side{padding-top:21px}#s-type .part-1 .gx-tc-side p{--lh:24px;margin-bottom:24px}
+}#s-type .part-1 .gx-tc--full .gx-tc-in{height:round(down,100svh,3px);border-radius:0;display:flex;flex-direction:column;justify-content:center}
 #s-type .fav{max-width:1080px}#s-type .fav>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2);max-width:72ch}#s-type .fav>p b{color:var(--ink);font-weight:600}#s-type .fav-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:0;padding:0;list-style:none}@media (max-width:900px){#s-type .fav-grid{grid-template-columns:repeat(2,1fr)}}@media (max-width:520px){#s-type .fav-grid{grid-template-columns:1fr}}#s-type .fav-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}#s-type .fav-tile{display:grid;place-items:center;aspect-ratio:1;border-radius:var(--radius,8px);border:1px solid var(--line)}#s-type .fav-tile--light{background:#fff}#s-type .fav-tile--dark{background:#0f0f0f}#s-type .fav-tile img{width:58%;height:auto;display:block}#s-type .fav-cap{margin-top:10px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}#s-type .fav-cap b{font-size:var(--type-ui-size,.75rem);font-weight:600;letter-spacing:var(--track-caps,.12em);color:var(--ink)}#s-type .fav-cap i{font-style:normal;font-size:var(--type-ui-size,.75rem);color:var(--ink-2)}#s-type .fav-cap u{text-decoration:none;font-size:var(--type-micro-size,.5625rem);color:var(--ink-3);width:100%}#s-type .fav-tag{display:flex;justify-content:space-between;margin-top:6px;font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}#s-type .fav-h span{display:block;margin-top:6px;font-size:var(--type-ui-size,.75rem);font-weight:400;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}#s-type .fav>p.fav-sub{margin:48px 0 16px;line-height:1.4;max-width:none;font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}#s-type .fav-caps{display:grid;grid-template-columns:repeat(13,1fr);gap:18px 10px;margin:0;padding:0;list-style:none;color:var(--ink)}#s-type .fav-caps li{display:flex;flex-direction:column;align-items:center;gap:8px}#s-type .fav-caps svg{width:100%;height:auto;display:block;fill:currentColor;overflow:visible}#s-type .fav-caps u{text-decoration:none;font-size:var(--type-micro-size,.5625rem);color:var(--ink-3);border-top:2px solid transparent;padding-top:4px;min-width:18px;text-align:center}#s-type .fav-caps .alt u{border-top-color:var(--accent,currentColor);color:var(--ink-2)}#s-type .fav-caps i{font-style:normal;font-size:var(--type-micro-size,.5625rem);color:var(--ink-3);margin-top:-4px}@media (max-width:720px){#s-type .fav-caps{grid-template-columns:repeat(7,1fr)}}
 
 /* ===== corners ===== */
@@ -5365,8 +5368,6 @@ html,body{margin:0;padding:0;background:var(--bg)}
   <header class="wm-head" data-nosnap>
     <svg class="wm-six" id="wm6" viewBox="41 -1510 1102 1606" aria-hidden="true"></svg>
     <p class="wm-eyebrow">wm-primitives &middot; the house system</p>
-    <p class="wm-try">Try it now: press <button type="button" class="wm-key" data-overlay="cols" aria-pressed="false">G</button> for the columns,
-      <button type="button" class="wm-key" data-overlay="lines" aria-pressed="false">L</button> for the baseline &mdash; anywhere on the page.</p>
     <h1 class="wm-stack"><span class="wm-l1">Six<i></i></span><span
       class="wm-l2">laws.</span><span class="wm-l3">Every<i></i><svg class="wm-bendsvg" id="wmbend"
       viewBox="0 0 300 560" aria-hidden="true"></svg><u class="wm-bendlbl" id="wmbendlbl"></u></span><span
@@ -6137,8 +6138,21 @@ its sample by its last line, a component moves whole. Everything on this page ou
 empty, and everything else starts on the seventh line and runs to the margin (below 1024 the rail is a bar
 and the copy takes all 12). <a href="https://github.com/MarkFonts/wm-primitives/blob/main/GRID.md">GRID.md</a>
 is the standard in words; <a href="grid.html">grid.html</a> is the bench it was cut on.</p>
-<p class="wm-try">Try it now: press <button type="button" class="wm-key" data-overlay="cols" aria-pressed="false">G</button> for the columns,
-<button type="button" class="wm-key" data-overlay="lines" aria-pressed="false">L</button> for the baseline &#8212; anywhere on this page, at any scroll.</p>
+
+<div class="gx-tc" data-tc>
+  <div class="gx-tc-in">
+    <div class="gx-tc-cols" aria-hidden="true" data-nosnap></div>
+    <div class="gx-tc-row wm-baselines">
+      <h3 class="gx-tc-big">Press <button type="button" class="wm-key gx-key" data-overlay="cols" aria-pressed="false" aria-label="G, show the columns">G</button> for the columns, <button type="button" class="wm-key gx-key" data-overlay="lines" aria-pressed="false" aria-label="L, show the baseline">L</button> for the baseline &#8212; anywhere on the page.</h3>
+      <div class="gx-tc-side">
+        <p><b>G</b> lays the house columns over the page in pink &#8212; 24 from 1024, 12 below &#8212; from
+        the same three tokens as these stripes, so they land on them.</p>
+        <p><b>L</b> draws a hairline every 3px down the page. The words beside this lead at twice this
+        column&#8217;s lead, so each of their lines lands on every other one of these. Press again to hide.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <h2 id="type-c1">Columns <span>24, and 12 below 1024</span></h2>
 <p><b>24.</b> It halves, thirds, quarters, sixths and eighths, and calsans splits its sections 5:7 three
@@ -6267,6 +6281,7 @@ of columns 11 and 24.</p>
 <div class="gx-frame" data-nosnap data-w="1440" style="--h:312"><div class="gx-scale" style="width:1440px">
   <div class="wm-grid wm-grid--bleed gx-sheet gx-over" style="--grid-cols:24;--grid-gutter:24px;--rows:24px 1fr 1fr 72px 24px;row-gap:24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><i style="grid-column:13"></i><i style="grid-column:14"></i><i style="grid-column:15"></i><i style="grid-column:16"></i><i style="grid-column:17"></i><i style="grid-column:18"></i><i style="grid-column:19"></i><i style="grid-column:20"></i><i style="grid-column:21"></i><i style="grid-column:22"></i><i style="grid-column:23"></i><i style="grid-column:24"></i><div class="gx-panel" style="--start:1;--span:5;--start-md:1;--span-md:5"><p>Rail<small>column 1: one gutter in from the window</small></p></div><div class="gx-stage" data-nosnap style="--start:6;--span:14;--start-md:6;--span-md:14"></div><div class="gx-panel" style="--start:20;--span:5;--start-md:20;--span-md:5"><p>Inspector<small>column 24: one gutter from the right</small></p></div><p class="gx-wide" style="--start:1;--span:24;--start-md:1;--span-md:24">.wm-grid--bleed: no margin, ever &#8212; but never flush.</p></div></div></div>
 <p class="gx-cap">1440, a tool &#183; .wm-grid--bleed &#183; columns of 37 to the window's edges &#183; text one gutter (24) in where a box touches an edge</p>
+
 
 
 
@@ -7732,6 +7747,56 @@ the ones a value-to-token sweep would silently merge.</p>
   </div></div>
 </div>
 <script>(function(){var ROOT=document.getElementById('s-type');if(!ROOT)return;
+
+
+(function(){
+  // THE TRY-IT CARD: its stripes (the page's columns, numbered as the page numbers them) and its
+  // lines -- every 3px from the root's top, where ?grid and L draw them, and the row's step
+  // stronger, counted both ways from the big text's first baseline.
+  var tc = ROOT.querySelector('[data-tc]'); if (!tc) return;
+  if (/[?&]card=full\b/.test(location.search)) tc.classList.add('gx-tc--full');
+  var box = tc.querySelector('.gx-tc-in'), cols = tc.querySelector('.gx-tc-cols');
+  var big = tc.querySelector('.gx-tc-big'), side = tc.querySelector('.gx-tc-side p');
+  var cv = document.createElement('canvas'); cv.className = 'gx-tc-cv'; cv.setAttribute('aria-hidden', 'true');
+  box.insertBefore(cv, box.firstChild);
+  var probe = document.createElement('span'); probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+  function stripes(){
+    var cs = getComputedStyle(tc), n = parseInt(cs.getPropertyValue('--tc-n'), 10) || 12, f = parseInt(cs.getPropertyValue('--tc-first'), 10) || 1;
+    if (cols.getAttribute('data-k') === n + '/' + f) return;
+    cols.setAttribute('data-k', n + '/' + f);
+    var h = ''; for (var i = 0; i < n; i++) h += '<span><u>' + (f + i) + '</u></span>';
+    cols.innerHTML = h;
+  }
+  function draw(){
+    stripes();
+    var dpr = window.devicePixelRatio || 1, root = box.closest('.wm-lines') || box;
+    var r = box.getBoundingClientRect(), off = r.top - root.getBoundingClientRect().top;
+    var bl = parseFloat(getComputedStyle(root).getPropertyValue('--bl')) || 3;
+    cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px';
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    var g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height);
+    g.fillStyle = 'rgba(40,120,255,.11)';
+    for (var k = Math.ceil(off / bl); (k * bl - off) < r.height + bl; k++)
+      g.fillRect(0, Math.round(k * bl * dpr) - Math.round(off * dpr) - 1, cv.width, 1);
+    // the step: the ui column's lead where it stands beside the words, the words' own lead where it stacks
+    var t = big.firstChild; while (t && !(t.nodeType === 3 && t.textContent.trim())) t = t.nextSibling;
+    if (!t) return;
+    big.insertBefore(probe, t); var y0 = probe.getBoundingClientRect().top - r.top; probe.remove();
+    var sb = side.getBoundingClientRect(), bb = big.getBoundingClientRect();
+    var step = parseFloat(getComputedStyle(sb.top < bb.bottom - 1 ? side : big).lineHeight) || 24;
+    g.fillStyle = 'rgba(40,120,255,.42)';
+    for (var y = y0 - Math.floor(y0 / step) * step; y < r.height; y += step)
+      g.fillRect(0, Math.round(y * dpr) - 1, cv.width, Math.max(1, Math.round(dpr / 2)));
+  }
+  var raf = 0;
+  function redraw(){ cancelAnimationFrame(raf); raf = requestAnimationFrame(draw); }
+  addEventListener('resize', redraw);
+  if (document.fonts) document.fonts.ready.then(redraw);
+  if ('ResizeObserver' in window) new ResizeObserver(redraw).observe(box.closest('.wm-lines') || box);
+  // the snapper writes its remainder inline on the words: redraw from where it put them
+  new MutationObserver(redraw).observe(big, { attributes: true, attributeFilter: ['style'] });
+  draw();
+})();
 
 
 (function(){
