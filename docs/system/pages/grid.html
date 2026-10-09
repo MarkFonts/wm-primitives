@@ -192,6 +192,20 @@ code{font-family:var(--ui-font,"Face",system-ui,sans-serif);font-variation-setti
    (the shell's), so a box that leaves the content column is clipped by it -- the full bleed over
    the rail is a shell change. */
 .gx-tc--full .gx-tc-in{height:round(down,100svh,3px);border-radius:0;display:flex;flex-direction:column;justify-content:center}
+
+/* the live tool sheet, which is the try-it card: the content's columns, numbered, not a scaled drawing */
+.gx-live{--grid-cols:18;--rows:24px auto 72px 24px;height:auto;padding:0;overflow:hidden}
+/* no bleed pad on a stripe: grid.css pads a bleed grid's children by where they stand, and a stripe without a --start
+   counted as a column-1 box 24 wide -- 24 + 7 x 24 of padding, 194px in a 29px track */
+.gx-live > i{grid-row:1 / -1;font-style:normal;padding-inline:0}
+.gx-live > i u{display:block;padding-top:6px;text-align:center;text-decoration:none;font-size:9px;line-height:12px;font-variant-numeric:tabular-nums;color:rgba(255,40,140,.7)}
+.gx-live > i:nth-child(n+13){display:block}
+.gx-live .gx-tc-cell{grid-row:2;padding:24px var(--grid-gutter,24px);position:relative;z-index:1}
+.gx-live .gx-tc-big{grid-column:auto}
+.gx-live .gx-tc-side{grid-column:auto;margin:0}
+.gx-live .gx-wide{grid-row:3;align-self:end;position:relative;z-index:1}
+@media (max-width:1023px){ .gx-live{--grid-cols:12;--rows:24px auto auto 72px 24px} .gx-live > i:nth-child(n+13){display:none}
+  .gx-live .gx-tc-sidecell{grid-row:3} .gx-live .gx-wide{grid-row:4} }
 </style>
 <body class="wm-lines">
 
@@ -204,26 +218,8 @@ seventh and runs to the margin (below 1024 the rail is a bar and the copy takes 
 demo with type of its own, like the sheets below &#8212; keeps its own room, and is never half on the line.
 <a href="https://github.com/MarkFonts/wm-primitives/blob/main/GRID.md">GRID.md</a> is the standard in
 words; <a href="grid.html">the bench</a> is where it was cut.</p>
-<!-- THE TRY-IT CARD. The keys' invitation, set as a demonstration of what they draw: a box on
-     the page's own columns (its stripes are the page's columns, numbered as the page numbers
-     them, so G lands exactly on them), lines every 3px and the row's step drawn stronger, the
-     words in the display role beside a ui column that shares their first baseline. The caps are
-     the shell's .wm-key buttons, drawn big: the shell wires every .wm-key[data-overlay] and keeps
-     their aria-pressed in step with the keyboard. ?card=full sets the full-screen version. -->
-<div class="gx-tc" data-tc>
-  <div class="gx-tc-in">
-    <div class="gx-tc-cols" aria-hidden="true" data-nosnap></div>
-    <div class="gx-tc-row wm-baselines">
-      <h3 class="gx-tc-big">Press <button type="button" class="wm-key gx-key" data-overlay="cols" aria-pressed="false" aria-label="G, show the columns">G</button> for the columns, <button type="button" class="wm-key gx-key" data-overlay="lines" aria-pressed="false" aria-label="L, show the baseline">L</button> for the baseline &#8212; anywhere on the page.</h3>
-      <div class="gx-tc-side">
-        <p><b>G</b> lays the house columns over the page in pink &#8212; 24 from 1024, 12 below &#8212; from
-        the same three tokens as these stripes, so they land on them.</p>
-        <p><b>L</b> draws a hairline every 3px down the page. The words beside this lead at twice this
-        column&#8217;s lead, so each of their lines lands on every other one of these. Press again to hide.</p>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- The try-it invitation lives in the tool sheet under Breakers and tools (2026-10-09): one component, the
+     page's live columns numbered in its top row, the words and the keys in its panels. -->
 
 <h2>Columns <span>24, and 12 below 1024</span></h2>
 <p><b>24.</b> It halves, thirds, quarters, sixths and eighths, and the Cal Sans case study splits its
@@ -314,9 +310,15 @@ and 24.</p>
 <div class="gx-frame" data-nosnap data-w="1440" style="--h:760"><div class="gx-scale" style="width:1440px">
   <div class="wm-grid gx-sheet gx-over" style="--grid-cols:24;--grid-gutter:24px;--grid-margin:100.8px;--rows:24px 48px 120px 1fr 24px;row-gap:24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><i style="grid-column:13"></i><i style="grid-column:14"></i><i style="grid-column:15"></i><i style="grid-column:16"></i><i style="grid-column:17"></i><i style="grid-column:18"></i><i style="grid-column:19"></i><i style="grid-column:20"></i><i style="grid-column:21"></i><i style="grid-column:22"></i><i style="grid-column:23"></i><i style="grid-column:24"></i><div class="wm-break gx-strip" data-nosnap></div><div class="wm-break gx-band"><p>A breaker: the ground meets the window, the words stay on the margin.<small>the padding it took back is the margin</small></p></div><div class="gx-note" style="--start:1;--span:10;--start-md:1;--span-md:10"><p>The window, not the image, on the columns.<small>columns 11 to 24</small></p></div><div class="gx-shotcell" style="--start:11;--span:14;--start-md:11;--span-md:14"><img data-shot="mac" src="../../assets/shot-mac-font-proofer.webp" width="2000" height="1305" style="--shot-scale:.643" alt="font-proofer's window, a macOS screenshot with its shadow"></div></div></div></div>
 <p class="gx-cap">A page, drawn to scale &#183; a breaker strip, a text breaker, and a window screenshot whose edges meet columns 11 and 24</p>
-<div class="gx-frame" data-nosnap data-w="1440" style="--h:312"><div class="gx-scale" style="width:1440px">
-  <div class="wm-grid wm-grid--bleed gx-sheet gx-over" style="--grid-cols:24;--grid-gutter:24px;--rows:24px 1fr 1fr 72px 24px;row-gap:24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><i style="grid-column:13"></i><i style="grid-column:14"></i><i style="grid-column:15"></i><i style="grid-column:16"></i><i style="grid-column:17"></i><i style="grid-column:18"></i><i style="grid-column:19"></i><i style="grid-column:20"></i><i style="grid-column:21"></i><i style="grid-column:22"></i><i style="grid-column:23"></i><i style="grid-column:24"></i><div class="gx-panel" style="--start:1;--span:5;--start-md:1;--span-md:5"><p>Left panel<small>column 1: one gutter in from the window</small></p></div><div class="gx-stage" data-nosnap style="--start:6;--span:14;--start-md:6;--span-md:14"></div><div class="gx-panel" style="--start:20;--span:5;--start-md:20;--span-md:5"><p>Right panel<small>column 24: one gutter from the right</small></p></div><p class="gx-wide" style="--start:1;--span:24;--start-md:1;--span-md:24">No margin, ever &#8212; but never flush.</p></div></div></div>
-<p class="gx-cap">A tool, drawn to scale &#183; columns to the window's edges, and text one gutter in where a box touches an edge</p>
+<!-- THE TOOL, LIVE, AND THE TRY-IT (Mark, 2026-10-09): one component. Not a 1440 drawing scaled down but the
+     page's own columns, the content's 18 (12 below 1024) at the live gutter, numbered in the top row as the page
+     numbers them, so its stripes ARE the grid and G lands on them; its canvas draws the 3px lines and the row's
+     step. The left panel carries the invitation and the keys, the right panel what each key does; a tool bleeds,
+     and a box that touches the window holds its words one gutter in. -->
+<div class="gx-tc" data-tc>
+<div class="gx-tc-in wm-grid wm-grid--bleed gx-sheet gx-over gx-live" style="row-gap:24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><i style="grid-column:13"></i><i style="grid-column:14"></i><i style="grid-column:15"></i><i style="grid-column:16"></i><i style="grid-column:17"></i><i style="grid-column:18"></i><div class="gx-panel gx-tc-cell" style="--start:1;--span:11;--start-md:1;--span-md:12"><h3 class="gx-tc-big">Press <button type="button" class="wm-key gx-key" data-overlay="cols" aria-pressed="false" aria-label="G, show the columns">G</button> for the columns, <button type="button" class="wm-key gx-key" data-overlay="lines" aria-pressed="false" aria-label="L, show the baseline">L</button> for the baseline &#8212; anywhere on the page.</h3></div><div class="gx-panel gx-tc-cell gx-tc-sidecell" style="--start:13;--span:6;--start-md:1;--span-md:12"><div class="gx-tc-side"><p><b>G</b> lays the house columns over the page in pink &#8212; 24 from 1024, 12 below &#8212; from the same three tokens as these stripes, so they land on them.</p><p><b>L</b> draws a hairline every 3px down the page. The words beside this lead at twice this column&#8217;s lead, so each of their lines lands on every other one of these. Press again to hide.</p></div></div><p class="gx-wide" style="--start:1;--span:18;--start-md:1;--span-md:12">No margin, ever &#8212; but never flush.</p></div>
+</div>
+<p class="gx-cap">A tool, on this page's own columns, numbered as the page numbers them &#183; columns to the window's edges, and text one gutter in where a box touches an edge</p>
 
 <script>
 (function(){
@@ -332,10 +334,11 @@ and 24.</p>
   var probe = document.createElement('span'); probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
   function stripes(){
     var cs = getComputedStyle(tc), n = parseInt(cs.getPropertyValue('--tc-n'), 10) || 12, f = parseInt(cs.getPropertyValue('--tc-first'), 10) || 1;
-    if (cols.getAttribute('data-k') === n + '/' + f) return;
-    cols.setAttribute('data-k', n + '/' + f);
-    var h = ''; for (var i = 0; i < n; i++) h += '<span><u>' + (f + i) + '</u></span>';
-    cols.innerHTML = h;
+    var tgt = cols || box;
+    if (tgt.getAttribute('data-k') === n + '/' + f) return;
+    tgt.setAttribute('data-k', n + '/' + f);
+    if (cols) { var h = ''; for (var i = 0; i < n; i++) h += '<span><u>' + (f + i) + '</u></span>'; cols.innerHTML = h; }
+    else { var is = box.querySelectorAll(':scope > i'); for (var k = 0; k < is.length; k++) is[k].innerHTML = '<u>' + (f + k) + '</u>'; }
   }
   function draw(){
     stripes();

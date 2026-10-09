@@ -309,7 +309,12 @@ html,body{margin:0;padding:0;background:var(--bg)}
       disabled, WATERMARKS". opsz rides auto to its ceiling up there, which is the
       documented behaviour. The eyebrow runs vertical at the right margin. */
 .wm-head{position:relative;min-height:100svh;box-sizing:border-box;display:flex;
-  flex-direction:column;padding:44px 0 0;overflow:hidden}
+  flex-direction:column;padding:44px 0 0;overflow:visible clip}
+/* visible x, clip y (Mark, 2026-10-09: "fix how the 6 is cropped"). The header ends at
+   column 24 and overflow:hidden cropped the 6 at the MARGIN, which is the picture-cut-by-
+   the-margin reading the negative inset below exists to avoid. The sheet's edge does the
+   horizontal crop now (the pan's clip-margin is the page margin); the header still crops
+   the 6's 4svh of vertical overrun. */
 /* The 6 is not a picture of the Face -- it is the Face: real contours extracted at
    GEOM 100, shown the way the editor shows them. Everything at FULL ink, outlines
    only. The nodes are live: hover gets the grab hand and the signal hue -- the
@@ -351,7 +356,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   margin:clamp(16px,7vh,84px) 24px 0 0;font-size:clamp(2.4rem,8.6vw,10rem);line-height:1.07;
   font-weight:400;letter-spacing:.12em;text-transform:uppercase;
   font-variation-settings:"GEOM" 100}
-.wm-stack span{display:flex;align-items:center;gap:.38em}
+.wm-stack span{display:flex;align-items:center;gap:.38em;white-space:nowrap}
 /* ONE STROKE, THREE DRAWINGS. The rule, the bend and the chevron are a single line
    that happens to be drawn by an element and two SVGs, so they must render at one
    thickness -- and matching the NUMBERS does not do it, because each has its own CTM.
@@ -360,20 +365,22 @@ html,body{margin:0;padding:0;background:var(--bg)}
 :root{ --wm-stroke:8px; }
 /* the rule-fill runs each open line out to the shared right rail; its weight sits
    near the caps' stroke and its seat at the optical mid of a 720 cap */
-.wm-stack i{flex:1 1 0;height:var(--wm-stroke,8px);background:currentColor;
+/* min-width 0 and the word kept whole (nowrap, above): when the bend's margin squeezes the line the RULE
+   gives way, to nothing if it must, and never runs back over the type (the EVERY rule crossed the Y, 2026-10-09) */
+.wm-stack i{flex:1 1 0;min-width:0;height:var(--wm-stroke,8px);background:currentColor;
   transform:translateY(calc(var(--wm-stroke,8px) / -2));position:relative;z-index:3}
 /* the rules and the bend ride ABOVE the blend layer: a hairline crossing a rule
    inverted it into a visible chop, and a rule is furniture, not type */
 .wm-l2{margin-left:11vw}
-.wm-l3{margin-left:3.5vw;position:relative}
+.wm-l3{margin-left:0;position:relative}   /* un-indented (Mark, 2026-10-09): the line that carries the bend gets the room */
 .wm-l4{margin-left:16vw}
 /* the EVERY rule does not stop at the rail: it bends and runs down the page, and
    the corner it turns is a lecture: a looping G0 -> G1 -> G2 morph wearing its own
    curvature comb, teeth on the outside, envelope in the signal hue -- position,
    tangent, curvature, the house law landing on G2. The label reads along the
    descender. The chevron now lives in the 6's counter and rides it. */
-.wm-l3 i{margin-right:3em}
-.wm-bendsvg{position:absolute;right:0;top:calc(50% - .071em);width:3em;height:5.6em;
+.wm-l3 i{margin-right:1em}   /* the tail is only the corner now: .85em of bend + the stroke (Mark, 2026-10-09: the corner lands on the chevron) */
+.wm-bendsvg{position:absolute;right:0;top:calc(50% - .071em);width:1em;height:5.6em;
   overflow:visible;pointer-events:none;z-index:3}
 /* 8 is .wm6-chev's stroke-width. The bend runs INTO the chevron, so a 7.2 stroke
    meeting an 8 one drew a join rather than an arrow. */
@@ -477,7 +484,18 @@ html,body{margin:0;padding:0;background:var(--bg)}
 /* The content column, and the box the zoom control pans it in (GESTURES G80): zoomed, <main>
    keeps its 100% width and left edge and grows right, so it scrolls sideways HERE rather than
    widening the document -- which on a phone would drag the fixed theme stack with it. */
-.wm-pan{grid-column:calc(var(--rail-span) + var(--rail-gap) + 1) / -1;grid-row:1;min-width:0;overflow-x:auto}
+.wm-pan{grid-column:calc(var(--rail-span) + var(--rail-gap) + 1) / -1;grid-row:1;min-width:0;
+  overflow:clip;overflow-clip-margin:112px}
+/* BOTH axes clip: Chrome honours overflow-clip-margin only when x and y are clip, so
+   `overflow-x:clip` alone still cut the 6 at column 24. And a LITERAL length: Chromium 153
+   rejects calc(), clamp() and a var() resolving to either (computed 0px, measured
+   2026-10-09), so this is --grid-margin's ceiling written out; past the margin the viewport
+   is the crop anyway. */
+/* clip, not auto, at 100%: a scroll container crops at its own box and the 6 has to run to
+   the sheet's edge, so at rest the pan clips a page-margin out (the viewport edge, exactly)
+   and nothing can scroll it sideways. The zoom control fires wm-zoom; at any value but 100
+   the pan goes back to being the scroller G80 wants. */
+.wm-pan[data-zoomed]{overflow:auto}
 /* A column: the index scrolls when it is taller than the viewport, and the foot sits
    BELOW it in flow. It used to be pinned to the scroller's bottom edge and the rule was
    drawn on the scroller too -- so once the index outgrew 88vh (Color took the ramps'
@@ -1343,7 +1361,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 }@media (min-width:1024px){#s-type .part-1 .gx-tc{--tc-key:30px;--tc-key-fs:18px;--tc-top:5px;--tc-n:18;--tc-first:7}#s-type .part-1 .gx-tc-in{padding-block:24px 48px}#s-type .part-1 .gx-tc-big{grid-column:2 / span 10;font-size:33px;--lh:36px}#s-type .part-1 .gx-tc-side{grid-column:13 / span 5;padding-top:15px}#s-type .part-1 .gx-tc-side p{--lh:18px;margin-bottom:18px}
 }@media (min-width:1152px){#s-type .part-1 .gx-tc{--tc-key:36px;--tc-key-fs:21px;--tc-top:3px}#s-type .part-1 .gx-tc-big{font-size:39px;--lh:42px}#s-type .part-1 .gx-tc-side{padding-top:18px}#s-type .part-1 .gx-tc-side p{--lh:21px;margin-bottom:21px}
 }@media (min-width:1312px){#s-type .part-1 .gx-tc{--tc-key:42px;--tc-key-fs:24px;--tc-top:2px}#s-type .part-1 .gx-tc-in{padding-block:24px 72px}#s-type .part-1 .gx-tc-big{font-size:45px;--lh:48px}#s-type .part-1 .gx-tc-side{padding-top:21px}#s-type .part-1 .gx-tc-side p{--lh:24px;margin-bottom:24px}
-}#s-type .part-1 .gx-tc--full .gx-tc-in{height:round(down,100svh,3px);border-radius:0;display:flex;flex-direction:column;justify-content:center}
+}#s-type .part-1 .gx-tc--full .gx-tc-in{height:round(down,100svh,3px);border-radius:0;display:flex;flex-direction:column;justify-content:center}#s-type .part-1 .gx-live{--grid-cols:18;--rows:24px auto 72px 24px;height:auto;padding:0;overflow:hidden}#s-type .part-1 .gx-live > i{grid-row:1 / -1;font-style:normal;padding-inline:0}#s-type .part-1 .gx-live > i u{display:block;padding-top:6px;text-align:center;text-decoration:none;font-size:9px;line-height:12px;font-variant-numeric:tabular-nums;color:rgba(255,40,140,.7)}#s-type .part-1 .gx-live > i:nth-child(n+13){display:block}#s-type .part-1 .gx-live .gx-tc-cell{grid-row:2;padding:24px var(--grid-gutter,24px);position:relative;z-index:1}#s-type .part-1 .gx-live .gx-tc-big{grid-column:auto}#s-type .part-1 .gx-live .gx-tc-side{grid-column:auto;margin:0}#s-type .part-1 .gx-live .gx-wide{grid-row:3;align-self:end;position:relative;z-index:1}@media (max-width:1023px){#s-type .part-1 .gx-live{--grid-cols:12;--rows:24px auto auto 72px 24px}#s-type .part-1 .gx-live > i:nth-child(n+13){display:none}#s-type .part-1 .gx-live .gx-tc-sidecell{grid-row:3}#s-type .part-1 .gx-live .gx-wide{grid-row:4} }
 #s-type .fav{max-width:1080px}#s-type .fav>p{font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px);margin:0 0 24px;color:var(--ink-2);max-width:66ch}#s-type .fav>p b{color:var(--ink);font-weight:400}#s-type .fav>p.fav-note{font-size:var(--type-ui-size,.75rem);line-height:var(--type-ui-lead,15px);color:var(--ink-3);margin:15px 0 0;max-width:none}#s-type .fav-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:0;padding:0;list-style:none}@media (max-width:900px){#s-type .fav-grid{grid-template-columns:repeat(2,1fr)}}@media (max-width:520px){#s-type .fav-grid{grid-template-columns:1fr}}#s-type .fav-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}#s-type .fav-tile{display:grid;place-items:center;aspect-ratio:1;border-radius:var(--radius,8px);border:1px solid var(--line)}#s-type .fav-tile--light{background:#fff}#s-type .fav-tile--dark{background:#0f0f0f}#s-type .fav-tile img{width:58%;height:auto;display:block}#s-type .fav-cap{margin-top:10px;display:flex;gap:4px 8px;align-items:baseline;flex-wrap:wrap}#s-type .fav-cap b{font-size:var(--type-ui-size,.75rem);font-weight:400;color:var(--ink)}#s-type .fav-cap span{font-size:var(--type-ui-size,.75rem);color:var(--ink-3)}#s-type .fav-tag{display:flex;justify-content:space-between;margin-top:6px;font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}#s-type .fav>h3{margin-top:48px}#s-type .fav-caps{display:grid;grid-template-columns:repeat(13,1fr);gap:18px 10px;margin:0;padding:0;list-style:none;color:var(--ink)}#s-type .fav-caps li{display:flex;flex-direction:column;align-items:center;gap:8px}#s-type .fav-caps svg{width:100%;height:auto;display:block;fill:currentColor;overflow:visible}#s-type .fav-caps u{text-decoration:none;font-size:var(--type-micro-size,.5625rem);color:var(--ink-3);border-top:2px solid transparent;padding-top:4px;min-width:18px;text-align:center}#s-type .fav-caps .alt u{border-top-color:var(--accent,currentColor);color:var(--ink-2)}@media (max-width:720px){#s-type .fav-caps{grid-template-columns:repeat(7,1fr)}}
 
 /* ===== corners ===== */
@@ -4826,7 +4844,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--text-muted);
-}#s-controls .chip-demo{display:grid;gap:10px;margin:8px 0 40px}#s-controls .chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}#s-controls .chip-cap code{text-transform:none;letter-spacing:0}#s-controls .chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}#s-controls .chip-demo .wm-chip--switch{margin-left:8px}#s-controls .zoom-demo{display:grid;gap:var(--spacing-04, 12px);margin:8px 0 40px}#s-controls .zoom-demo .wm-theme-stack{justify-self:end}#s-controls .zoom-demo > .wm-chip-row{justify-self:start}#s-controls .zoom-morph{justify-self:end;max-width:100%;height:auto;color:var(--text)}#s-controls .zoom-title{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-05, 16px)}#s-controls .zoom-title-h{font-size:var(--type-lede-size, 1.125rem);color:var(--text)}#s-controls .zoom-title-a{display:flex;align-items:center;gap:var(--spacing-04, 12px)}#s-controls .zoom-title-btn{font:inherit;font-size:var(--type-ui-size, .75rem);padding:var(--spacing-02, 6px) var(--spacing-04, 12px);border-radius:var(--radius, 8px);border:0;background:var(--text);color:var(--bg)}#s-controls .zoom-stage{height:240px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--surface)}#s-controls .zoom-sample{max-width:420px;padding:var(--spacing-05, 16px)}#s-controls .zoom-sample h3{margin:0 0 var(--spacing-03, 8px);font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .zoom-sample p{margin:0;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}#s-controls .zoom-demo pre{margin:0;font:var(--type-micro-size, .5625rem)/1.6 ui-monospace, Menlo, monospace;color:var(--text-muted);white-space:pre-wrap}#s-controls .vstack-demo{display:flex;flex-wrap:wrap;gap:var(--spacing-06, 24px);margin:8px 0 24px}#s-controls .vstack-demo figure{margin:0;display:grid;gap:var(--spacing-03, 8px)}#s-controls .vstack-phone{position:relative;transform:translateZ(0);width:300px;height:396px;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--bg)}#s-controls .vstack-phone{display:flex;flex-direction:column}#s-controls .vstack-chrome{flex:none;border-bottom:1px solid var(--border)}#s-controls .vstack-chrome div{display:flex;align-items:center;gap:var(--spacing-04, 12px);height:42px;padding:0 20px;font-size:var(--type-ui-size, .75rem);color:var(--text-muted)}#s-controls .vstack-chrome b{color:var(--text);font-weight:600}#s-controls .vstack-scroll{flex:1;min-height:0;overflow:auto;padding:12px 20px}#s-controls .vstack-scroll h3{margin:0 0 12px;font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .vstack-scroll p{margin:0 0 24px;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}
+}#s-controls .chip-demo{display:grid;gap:10px;margin:8px 0 40px}#s-controls .chip-cap{margin:14px 0 0;font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-dim, #888)}#s-controls .chip-cap code{text-transform:none;letter-spacing:0}#s-controls .chip-lbl{font-size:var(--type-micro-size, .5625rem);letter-spacing:var(--track-caps, .12em);text-transform:uppercase;color:var(--text-muted, #aaa);margin-right:4px}#s-controls .chip-demo .wm-chip--switch{margin-left:8px}#s-controls .zoom-demo{display:grid;gap:var(--spacing-04, 12px);margin:8px 0 40px}#s-controls .zoom-demo .wm-theme-stack{justify-self:end}#s-controls .zoom-demo > .wm-chip-row{justify-self:start}#s-controls .zoom-morph{justify-self:end;max-width:100%;height:auto;color:var(--text)}#s-controls .zoom-title{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-05, 16px)}#s-controls .zoom-title-h{font-size:var(--type-lede-size, 1.125rem);color:var(--text)}#s-controls .zoom-title-a{display:flex;align-items:center;gap:var(--spacing-04, 12px)}#s-controls .zoom-title-btn{font:inherit;font-size:var(--type-ui-size, .75rem);padding:var(--spacing-02, 6px) var(--spacing-04, 12px);border-radius:var(--radius, 8px);border:0;background:var(--text);color:var(--bg)}#s-controls .zoom-stage{height:240px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--surface)}#s-controls .zoom-sample{max-width:420px;padding:var(--spacing-05, 16px)}#s-controls .zoom-sample h3{margin:0 0 var(--spacing-03, 8px);font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .zoom-sample p{margin:0;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}#s-controls .zoom-demo pre{margin:0;font:var(--type-micro-size, .5625rem)/1.6 ui-monospace, Menlo, monospace;color:var(--text-muted);white-space:pre-wrap}#s-controls .vstack-demo{display:flex;flex-wrap:wrap;gap:var(--spacing-06, 24px);margin:8px 0 24px}#s-controls .vstack-demo figure{margin:0;display:grid;gap:var(--spacing-03, 8px)}#s-controls .vstack-phone{position:relative;transform:translateZ(0);width:300px;height:396px;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius, 8px);background:var(--bg)}#s-controls .vstack-phone{display:flex;flex-direction:column}#s-controls .vstack-chrome{flex:none;border-bottom:1px solid var(--border)}#s-controls .vstack-chrome div{display:flex;align-items:center;gap:var(--spacing-04, 12px);height:42px;padding:0 20px;font-size:var(--type-ui-size, .75rem);color:var(--text-muted)}#s-controls .vstack-chrome b{color:var(--text);font-weight:600}#s-controls .vstack-scroll{flex:1;min-height:0;overflow:auto;padding:12px 20px}#s-controls .vstack-scroll h3{margin:0 0 12px;font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}#s-controls .vstack-scroll p{margin:0 0 24px;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}#s-controls .pair{display:grid;grid-template-columns:calc(5 * var(--col) + 4 * var(--grid-gutter)) minmax(0,1fr);column-gap:var(--grid-gutter);align-items:start;margin:48px 0 0}#s-controls .pair:first-child{margin-top:24px}#s-controls .pair-t{margin:0;font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px);color:var(--text-muted)}#s-controls .pair-t code{font-size:.875em}#s-controls .pair > .wm-chip-row,#s-controls .pair > .wm-theme-stack,#s-controls .pair-r{justify-self:start;min-width:0;width:100%}#s-controls .pair > .zoom-morph{justify-self:start}#s-controls .chip-demo,#s-controls .zoom-demo{display:block;margin:0 0 40px}#s-controls .zoom-demo .wm-theme-stack{justify-self:start}#s-controls .z-body{margin:48px 0 0;max-width:calc(10 * var(--col) + 9 * var(--grid-gutter));font-size:var(--type-body-size,1rem);line-height:24px;color:var(--text-muted)}#s-controls .z-code{position:relative;margin:24px 0 0;max-width:calc(10 * var(--col) + 9 * var(--grid-gutter));padding:12px 18px;box-shadow:inset 0 0 0 1px var(--border);border-radius:var(--radius,8px);background:var(--surface)}#s-controls .z-code figcaption{position:absolute;right:calc(100% + var(--grid-gutter));top:12px;width:calc(2 * var(--col) + var(--grid-gutter));text-align:right;
+  font-size:var(--type-label-size,.75rem);line-height:24px;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--text-dim)}#s-controls .z-code pre{margin:0;font:var(--type-ui-size,.75rem)/24px ui-monospace,Menlo,monospace;color:var(--text-muted);white-space:pre;overflow-x:auto}#s-controls .z-spec{margin:24px 0 0;max-width:calc(10 * var(--col) + 9 * var(--grid-gutter));width:100%;border-collapse:collapse;font-size:var(--type-ui-size,.75rem);line-height:15px}#s-controls .z-spec th,#s-controls .z-spec td{padding:6px 12px 6px 0;text-align:left;vertical-align:baseline;box-shadow:inset 0 -1px var(--border);font-weight:400}#s-controls .z-spec th{width:calc(3 * var(--col) + 2 * var(--grid-gutter));color:var(--text);white-space:nowrap}#s-controls .z-spec th code,#s-controls .z-spec td code{font-size:1em}#s-controls .z-spec td{color:var(--text-muted)}#s-controls .marks-h3{margin-bottom:0}#s-controls .marks-h3 + .lede{margin:0}#s-controls .marks-wrap{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--grid-gutter) var(--grid-gutter);margin-top:16px;align-items:stretch}#s-controls .marks-wrap > .lede{grid-column:1 / span 2;grid-row:1 / span 2;align-self:start;margin:0;padding-right:var(--grid-gutter)}#s-controls .marks-wrap > .marks{display:contents}#s-controls .marks .mark{display:flex;flex-direction:column;align-items:flex-start;text-align:left;box-sizing:border-box;margin:0;padding:16px 12px}#s-controls .marks .mark .mark-name{word-break:break-word}@media (max-width:1023px){#s-controls .marks-wrap{grid-template-columns:repeat(3,minmax(0,1fr))}#s-controls .marks-wrap > .lede{grid-column:1 / -1;grid-row:auto}
+}#s-controls .toolbar{position:relative;padding:0;background:none;border:0;margin:24px 0 0}#s-controls .toolbar > span{position:absolute;right:calc(100% + var(--grid-gutter));top:0;width:calc(2 * var(--col) + var(--grid-gutter));text-align:right;margin:0;line-height:27px}@media (max-width:1023px){#s-controls .pair{display:block}#s-controls .pair-t{margin-bottom:12px}#s-controls .marks-h3 + .lede{float:none;width:auto;margin:0}#s-controls .z-code figcaption{position:static;width:auto;text-align:left;line-height:15px;margin-bottom:6px}#s-controls .toolbar > span{position:static;width:auto;text-align:left;display:block}
+}
 @layer wm.type{#s-controls .part-1{
     
     --type-micro-size: 0.5625rem;   --type-micro-lead: round(nearest, 1.3em, var(--bl));    
@@ -6301,8 +6322,8 @@ html,body{margin:0;padding:0;background:var(--bg)}
   --acc:var(--signal);
 }@media (prefers-color-scheme: light){#s-color{} }:root[data-theme=dark] #s-color{}:root[data-theme=light] #s-color{}#s-color{}#s-color h1{ font-size:30px; margin:0 0 6px; letter-spacing:-.01em }#s-color .lede{ color:var(--ink2); max-width:70ch; margin:0 0 24px; font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px) }#s-color h2{ font-size:13px; text-transform:uppercase; letter-spacing:.11em; margin:44px 0 4px }#s-color h3{ font-size:12px; font-weight:500; color:var(--ink2); margin:22px 0 7px; font-family:ui-monospace,Menlo,monospace }#s-color .note{ color:var(--ink2); max-width:74ch; margin:0 0 6px; font-size:var(--type-ui-size,.75rem);line-height:var(--type-ui-lead,15px) }#s-color .n{ color:var(--acc); font-variant-numeric:tabular-nums; font-weight:400 }#s-color .chips{ display:flex; flex-wrap:wrap; gap:7px; margin:0 0 10px }#s-color .chip{ display:inline-flex; align-items:center; gap:6px; background:var(--card);
   border:1px solid var(--line); border-radius:999px; padding:4px 10px 4px 5px; font-size:12px }#s-color .chip b{ color:var(--ink3); font-weight:400; font-variant-numeric:tabular-nums }#s-color .sw{ width:13px; height:13px; border-radius:3px; display:inline-block; flex:none;
-  border:1px solid rgba(128,128,128,.45); vertical-align:-2px }#s-color section{ overflow-x:auto }#s-color table{ width:100%; min-width:760px; border-collapse:collapse; font-size:12.5px;
-  margin-bottom:4px; table-layout:fixed }#s-color th:nth-child(1){width:21%}#s-color th:nth-child(2){width:23%}#s-color th:nth-child(3){width:18%}#s-color th:nth-child(4){width:38%}#s-color th:nth-child(5),#s-color td.l{ display:none }#s-color th{ text-align:left; font-weight:400; color:var(--ink3); font-size:10.5px; text-transform:uppercase;
+  border:1px solid rgba(128,128,128,.45); vertical-align:-2px }#s-color section{ overflow-x:auto }#s-color table{ width:100%; min-width:0; border-collapse:collapse; font-size:12.5px;
+  margin-bottom:4px; table-layout:fixed }#s-color section > table th,#s-color section > table td{ box-sizing:border-box }#s-color section > table th:nth-child(1){width:calc(4 * var(--col) + 4 * var(--grid-gutter))}#s-color section > table th:nth-child(2){width:calc(5 * var(--col) + 5 * var(--grid-gutter))}#s-color section > table th:nth-child(3){width:calc(5 * var(--col) + 5 * var(--grid-gutter))}#s-color section > table th:nth-child(4){width:calc(4 * var(--col) + 3 * var(--grid-gutter))}@media (max-width:1023px){#s-color section > table th:nth-child(1){width:21%}#s-color section > table th:nth-child(2){width:23%}#s-color section > table th:nth-child(3){width:18%}#s-color section > table th:nth-child(4){width:38%} }#s-color th:nth-child(5),#s-color td.l{ display:none }#s-color th{ text-align:left; font-weight:400; color:var(--ink3); font-size:10.5px; text-transform:uppercase;
   letter-spacing:.09em; padding:5px 10px 5px 0; border-bottom:1px solid var(--line); white-space:nowrap }#s-color td{ padding:4px 10px 4px 0; border-bottom:1px solid var(--line); vertical-align:top }#s-color code{ font-family:ui-monospace,Menlo,monospace; font-size:11.5px }#s-color .c{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }#s-color .c code{ margin-left:7px }#s-color td.c:hover{ white-space:normal; overflow:visible; word-break:break-all }#s-color .m{ color:var(--ink); white-space:nowrap }#s-color .p code,#s-color .s{ color:var(--ink2) }#s-color .s{ font-family:ui-monospace,Menlo,monospace; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }#s-color td.s:hover{ white-space:normal; overflow:visible; word-break:break-all }#s-color .l{ color:var(--ink3); font-family:ui-monospace,Menlo,monospace; font-size:11px; white-space:nowrap }#s-color .hs{ color:var(--ink3); font-size:10.5px; margin-left:7px; font-family:ui-monospace,Menlo,monospace }
 #s-color .part-1 *{box-sizing:border-box}#s-color .part-1{margin:0;background:#0f0f0f;color:#c9c9c9;font-family:"CalSansVF",system-ui,sans-serif;
  font-optical-sizing:auto;font-variation-settings:"GEOM" 25;padding:32px 28px 8px}#s-color .part-1 h1{font-size:23px;margin:0 0 5px}#s-color .part-1 .lede{color:#9a9a9a;font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px);margin:0 0 24px;max-width:84ch}#s-color .part-1 h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:34px 0 12px;padding-bottom:7px;
@@ -6325,25 +6346,25 @@ html,body{margin:0;padding:0;background:var(--bg)}
 }@media(prefers-color-scheme:light){#s-usage{}}:root[data-theme=dark] #s-usage{}:root[data-theme=light] #s-usage{}#s-usage{}#s-usage h1{font-size:29px;margin:0 0 6px;letter-spacing:-.01em}#s-usage .lede{color:var(--ink2);max-width:76ch;margin:0 0 26px}#s-usage details{background:var(--card);border:1px solid var(--line);border-radius:9px;margin-bottom:7px;overflow:hidden}#s-usage summary{cursor:pointer;padding:11px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;list-style:none}#s-usage summary::-webkit-details-marker{display:none}#s-usage .sw{width:15px;height:15px;border-radius:4px;display:inline-block;flex:none;border:1px solid rgba(128,128,128,.45)}#s-usage summary code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}#s-usage .warn{color:var(--warn);font-weight:400;font-size:11.5px}#s-usage .ok{color:var(--ink3);font-weight:400;font-size:11.5px}#s-usage .n{color:var(--ink3);font-size:11.5px;font-variant-numeric:tabular-nums}#s-usage .tags{display:flex;gap:5px;flex-wrap:wrap}#s-usage .tag{font-size:10.5px;border:1px solid var(--line);border-radius:99px;padding:1px 7px;color:var(--ink2)}#s-usage .meta{flex-basis:100%;color:var(--ink3);font-size:11px}#s-usage table{width:100%;border-collapse:collapse;font-size:12px;border-top:1px solid var(--line)}#s-usage td{padding:4px 12px 4px 14px;border-bottom:1px solid var(--line);vertical-align:top}#s-usage .r{color:var(--ink);white-space:nowrap}#s-usage .p code,#s-usage .s{color:var(--ink2)}#s-usage .s{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;max-width:34ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#s-usage .t{color:var(--ink3);font-size:11px;white-space:nowrap}#s-usage .l{color:var(--ink3);font-family:ui-monospace,Menlo,monospace;font-size:10.5px;white-space:nowrap;text-align:right}
 
 /* ===== page-furniture resets ===== */
-#s-readme{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
-#s-type{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
-#s-corners{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
-#s-controls{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
-#s-space{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
-#s-color{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
-#s-motion{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
-#s-usage{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto}
+#s-readme{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto;overflow:visible}
+#s-type{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto;overflow:visible}
+#s-corners{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto;overflow:visible}
+#s-controls{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto;overflow:visible}
+#s-space{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto;overflow:visible}
+#s-color{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto;overflow:visible}
+#s-motion{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto;overflow:visible}
+#s-usage{max-width:none;margin:0;padding:0;background:none;min-height:0;display:block;place-items:normal;width:auto;overflow:visible}
 #s-type>.wrap{max-width:none;margin:0;padding:0;width:auto}
 #s-corners .grid.g3,#s-circles .grid.g3,#s-space .grid.g3{grid-template-columns:repeat(auto-fit,minmax(430px,1fr))}
 
 .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) h2.wm-h2{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;
-  gap:0 24px;margin:48px 0 15px;padding:0 0 5px;border:0;border-bottom:1px solid var(--h-line);background:none;
-  font-family:var(--ui-font);font-size:var(--type-label-size,.75rem);--lh:var(--lead-ui);line-height:var(--lead-ui,15px);
-  font-weight:400;font-style:normal;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;
-  font-variation-settings:"GEOM" 100;color:var(--h-ink);opacity:1;text-align:left;max-width:none;width:auto;min-height:0}
+  gap:0 24px;margin:72px 0 12px;padding:0;border:0;background:none;
+  font-family:var(--ui-font);font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title,30px);
+  font-weight:400;font-style:normal;letter-spacing:0;text-transform:none;
+  font-variation-settings:normal;color:var(--h-ink);opacity:1;text-align:left;max-width:none;width:auto;min-height:0}
 .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) h2.wm-h2 > *{font:inherit;line-height:inherit;font-weight:400;letter-spacing:0;text-transform:none;
-  font-variation-settings:"GEOM" 25;color:var(--h-ink-3);margin:0;padding:0;background:none;border:0}
-.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) h3.wm-h3{display:block;margin:24px 0 9px;padding:0;border:0;background:none;
+  font-size:var(--type-ui-size,.75rem);font-variation-settings:normal;color:var(--h-ink-3);margin:0;padding:0;background:none;border:0}
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) h3.wm-h3{display:block;margin:48px 0 6px;padding:0;border:0;background:none;
   font-family:var(--ui-font);font-size:var(--type-lede-size,1.125rem);--lh:var(--lead-lede);line-height:var(--lead-lede,27px);
   font-weight:400;font-style:normal;letter-spacing:0;text-transform:none;font-variation-settings:normal;
   color:var(--h-ink);opacity:1;max-width:none}
@@ -6371,10 +6392,99 @@ html,body{margin:0;padding:0;background:var(--bg)}
   .wm-collapse { transition: none; }
 }
 
+
+.wm-main{container-type:inline-size;--col:calc((100cqw - 17 * var(--grid-gutter)) / 18);--hangw:calc(var(--col) + var(--grid-gutter))}
+.wm-sec{max-width:none}
+/* no 1080 cap (Mark, 2026-10-09: nothing reached column 24): a figure runs to the last column, prose keeps its ten */
+.wm-main .wm-body:is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage){padding-left:0;max-width:none}
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) :is(p,ul,ol,h2.wm-h2,h3.wm-h3,figcaption,pre){max-width:calc(10 * var(--col) + 9 * var(--grid-gutter))}
+/* a code block keeps the measure too and scrolls inside it, rather than running out to the window (the zoom's markup did) */
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) pre{overflow-x:auto;box-sizing:border-box}
+/* the opener */
+/* a fifth of the viewport from the section above's last edge to the name's baseline: 30 + 23.5 of it is the kicker line */
+.wm-sec-head{padding:0 0 24px;margin-top:round(nearest, calc(20vh - 54px), 3px);box-shadow:none}
+.wm-sec:first-of-type .wm-sec-head{margin-top:round(nearest, calc(20vh - 54px), 3px)}
+.wm-open{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));column-gap:var(--grid-gutter);align-items:baseline}
+.wm-open-l{grid-column:1 / span 4;position:relative}
+.wm-open-r{grid-column:5 / span 6}
+.wm-kick,.wm-mark{margin:0;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title,30px);
+  font-weight:400;letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums}
+.wm-kick{color:var(--ink-3)}
+.wm-mark{color:var(--ink)}
+.wm-lede.wm-open-r{margin:0;max-width:none;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title,30px);color:var(--ink)}
+/* the numeral: p4 136 in 135, baseline on the name's (the left column's second line) */
+.wm-dg{position:absolute;right:calc(100% + var(--grid-gutter) - 1em * var(--dt,0));top:-59px;
+  font-size:var(--poster-4,8.5rem);line-height:135px;color:var(--ink-3);font-weight:400;white-space:nowrap;letter-spacing:0}
+.wm-dg[data-d="0"]{--dt:0.0176}.wm-dg[data-d="1"]{--dt:0.0801}.wm-dg[data-d="2"]{--dt:0.0489}.wm-dg[data-d="3"]{--dt:0.0562}
+.wm-dg[data-d="4"]{--dt:0.0176}.wm-dg[data-d="5"]{--dt:0.0544}.wm-dg[data-d="6"]{--dt:0.0452}.wm-dg[data-d="7"]{--dt:0.0599}
+.wm-dg[data-d="8"]{--dt:0.0581}.wm-dg[data-d="9"]{--dt:0.0526}
+.wm-nums{margin:24px 0 0;max-width:calc(10 * var(--col) + 9 * var(--grid-gutter))}
+/* the hang: the pan clips at its padding edge, so it reaches back over column 6, column 5 and the three gutters
+   and gives the width back as padding; <main> does not move. A big numeral may touch column 5 at 1280. */
+@media (min-width:1024px){
+  .wm-pan{--hang:calc(2 * (100vw - 2 * var(--grid-margin) - 23 * var(--grid-gutter)) / 24 + 3 * var(--grid-gutter));
+    margin-left:calc(-1 * var(--hang));padding-left:var(--hang)}
+}
+@media (min-width:1024px) and (max-width:1279px){ .wm-dg{font-size:var(--poster-3,6rem);line-height:96px;top:-26px} }
+/* the run-in: the words in the label role, right-aligned on the hang column's edge, on the paragraph's first line */
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) p.wm-run{position:relative}
+/* top: the label's baseline in a 24 line sits 1.31 above the body's by the metrics, 1px as Chrome lays it (measured) */
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) .wm-hang{position:absolute;right:calc(100% + var(--grid-gutter));top:1px;width:calc(2 * var(--col) + var(--grid-gutter));
+  text-align:right;font-weight:400;font-size:var(--type-label-size,.75rem);line-height:inherit;letter-spacing:var(--track-caps,.12em);
+  text-transform:uppercase;font-variation-settings:"GEOM" 100;color:var(--ink-3);text-wrap:balance}
+/* a chapter's number, hung: the head's own size, ink-3, its ink on the edge (the poster trim map, nearer 26 than 12's) */
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) h2.wm-h2{position:relative}
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) h2.wm-h2 > u.wm-hang{position:absolute;right:calc(100% + var(--grid-gutter) - 1em * var(--dt,0));top:0;width:auto;
+  font:inherit;line-height:inherit;letter-spacing:0;text-transform:none;font-variation-settings:normal;color:var(--ink-3);
+  text-decoration:none;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.wm-hang-t[data-d="0"]{--dt:0.0176}.wm-hang-t[data-d="1"]{--dt:0.0801}.wm-hang-t[data-d="2"]{--dt:0.0489}.wm-hang-t[data-d="3"]{--dt:0.0562}
+.wm-hang-t[data-d="4"]{--dt:0.0176}.wm-hang-t[data-d="5"]{--dt:0.0544}.wm-hang-t[data-d="6"]{--dt:0.0452}.wm-hang-t[data-d="7"]{--dt:0.0599}
+.wm-hang-t[data-d="8"]{--dt:0.0581}.wm-hang-t[data-d="9"]{--dt:0.0526}
+/* lists: the numeral or the dot hangs, the text hugs the column */
+/* prose lists only: a stage's lists (the pad scale's do / don't) keep their own */
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) :is(ol,ul):not(.t-ui,[data-stage] *){list-style:none;margin-left:0;padding-left:0}
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) :is(ol,ul):not(.t-ui,[data-stage] *) > li{position:relative;padding-left:0}
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) ol:not(.t-ui,[data-stage] *){counter-reset:wm-li}
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) ol:not(.t-ui,[data-stage] *) > li::before{counter-increment:wm-li;content:counter(wm-li);position:absolute;right:calc(100% + var(--grid-gutter) - 1em * .0787);top:0;
+  font-size:var(--type-label-size,.75rem);line-height:inherit;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) ul:not(.t-ui,[data-stage] *) > li::before{content:"";position:absolute;right:calc(100% + var(--grid-gutter));top:calc(.5lh - 1.5px);width:3px;height:3px;border-radius:50%;background:var(--ink-3)}
+/* captions: the ui role, sentence case, ink-3, six columns at most */
+.wm-main .wm-body:is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) :is(figcaption,.chip-cap,.gx-cap,.bs-cap,.bt-hdr-cap){font-family:var(--ui-font);font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);line-height:var(--lead-ui,15px);
+  letter-spacing:0;text-transform:none;font-variation-settings:normal;color:var(--ink-3);max-width:calc(6 * var(--col) + 5 * var(--grid-gutter))}
+/* THE RAIL ON THE COLUMNS: numerals hang right-aligned in the rail's first column, ink on the edge (--dt); labels start
+   on its second column, section and chapter sharing that edge (depth is case, not indent); the axis and the dot sit on
+   the first column's left edge */
+@media (min-width:1024px){
+  .wm-railcol{container-type:inline-size;--rc:calc((100cqw - 4 * var(--grid-gutter)) / 5)}
+  .wm-axis-in::before,.wm-axis-in::after{left:calc(var(--rail-hang) - 1px)}
+  .wm-lvl0,.wm-lvl1{display:grid;grid-template-columns:var(--rc) minmax(0,1fr);column-gap:var(--grid-gutter);align-items:baseline;margin-left:0}
+  .wm-lvl0 u,.wm-lvl1 u{justify-self:end;text-align:right;margin:0 calc(-1em * var(--dt,0)) 0 0;letter-spacing:0}
+  .wm-lvl0::before{left:-7px;width:14px}
+  .wm-lvl1::before{left:3px;width:6px}
+  .wm-lvl0.on::before,.wm-lvl1.on::before{left:-7px;width:14px}
+}
+u[data-d="0"]{--dt:0.0579}u[data-d="1"]{--dt:0.0995}u[data-d="4"]{--dt:0.037}
+u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="8"],u[data-d="9"]{--dt:0.0787}
+/* below 1024: no hang column to speak of; the numeral is a label before the kicker, the run-in a line above */
+@media (max-width:1023px){
+  .wm-main{--col:calc((100cqw - 11 * var(--grid-gutter)) / 12)}
+  .wm-main .wm-body:is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage){max-width:none}
+  .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) :is(p,ul,ol,h2.wm-h2,h3.wm-h3,figcaption,pre){max-width:none}
+  .wm-sec-head,.wm-sec:first-of-type .wm-sec-head{margin-top:72px}
+  .wm-open{display:block}
+  .wm-open-r{margin-top:24px}
+  .wm-dg{position:static;font-size:var(--type-label-size,.75rem);line-height:inherit;margin-right:.5em;font-variation-settings:"GEOM" 100}
+  .wm-nums{max-width:none}
+  .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) .wm-hang{position:static;display:block;width:auto;text-align:left;text-wrap:normal}
+  .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) h2.wm-h2 > u.wm-hang{position:static;display:inline;margin-right:.4em}
+  .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) :is(ol,ul):not(.t-ui,[data-stage] *){padding-left:var(--hangw)}
+  .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) :is(ol,ul):not(.t-ui,[data-stage] *) > li::before{right:calc(100% + var(--grid-gutter))}
+}
+
 </style>
 <div class="wm">
   <div class="wm-doc">
-  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in"><div class="wm-grp"><a class="wm-lvl0" href="#s-readme"><u>00</u>The package</a><a class="wm-lvl1" href="#readme-c1"><u>1</u><span>What you get</span></a><a class="wm-lvl1" href="#readme-c2"><u>2</u><span>What you must supply</span></a><a class="wm-lvl1" href="#readme-c3"><u>3</u><span>How to wire it in, and add a dial</span></a><a class="wm-lvl1" href="#readme-c4"><u>4</u><span>How to override</span></a><a class="wm-lvl1" href="#readme-c5"><u>5</u><span>How you know it shipped</span></a><a class="wm-lvl1" href="#readme-c6"><u></u><span>The rest</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u>01</u>Type</a><a class="wm-lvl1" href="#type-c1"><u></u><span>The budget</span></a><a class="wm-lvl1" href="#type-c2"><u></u><span>The sixth signal: geom</span></a><a class="wm-lvl1" href="#type-c3"><u></u><span>The seven roles</span></a><a class="wm-lvl1" href="#type-c4"><u></u><span>The poster scale</span></a><a class="wm-lvl1" href="#type-c5"><u></u><span>Ink</span></a><a class="wm-lvl1" href="#type-c6"><u></u><span>Why opsz is free</span></a><a class="wm-lvl1" href="#type-c7"><u></u><span>The boundary</span></a><a class="wm-lvl1" href="#type-c8"><u></u><span>The grid</span></a><a class="wm-lvl1" href="#type-c9"><u></u><span>Columns</span></a><a class="wm-lvl1" href="#type-c10"><u></u><span>Baseline</span></a><a class="wm-lvl1" href="#type-c11"><u></u><span>Big type beside small</span></a><a class="wm-lvl1" href="#type-c12"><u></u><span>A row meets</span></a><a class="wm-lvl1" href="#type-c13"><u></u><span>A component moves whole</span></a><a class="wm-lvl1" href="#type-c14"><u></u><span>Breakers and tools</span></a><a class="wm-lvl1" href="#type-c15"><u></u><span>The favicons</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u>02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1"><u></u><span>The 5 pills</span></a><a class="wm-lvl1" href="#corners-c2"><u></u><span>The radius ladder</span></a><a class="wm-lvl1" href="#corners-c3"><u></u><span>Asymmetric corners</span></a><a class="wm-lvl1" href="#corners-c4"><u></u><span>Corners &#8212; ReCal only</span></a><a class="wm-lvl1" href="#corners-c5"><u></u><span>The 13 circles</span></a><a class="wm-lvl1" href="#corners-c7"><u></u><span>The button</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u>03</u>Interface</a><a class="wm-lvl1" href="#controls-c1"><u></u><span>Five ways to draw one dial</span></a><a class="wm-lvl1" href="#controls-c2"><u></u><span>The marks</span></a><a class="wm-lvl1" href="#controls-c3"><u></u><span>The chips</span></a><a class="wm-lvl1" href="#controls-c4"><u></u><span>The zoom control</span></a><a class="wm-lvl1" href="#controls-c5"><u></u><span>The theme stack, vertical</span></a><a class="wm-lvl1" href="#controls-c6"><u></u><span>WIP primitives</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u>04</u>Space</a><a class="wm-lvl1" href="#space-c1"><u></u><span>The padding scale</span></a><a class="wm-lvl1" href="#space-c2"><u></u><span>The steps</span></a><a class="wm-lvl1" href="#space-c3"><u></u><span>The cap rule</span></a><a class="wm-lvl1" href="#space-c4"><u></u><span>Use a step</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u>05</u>Color</a><a class="wm-lvl1" href="#color-c1"><u></u><span>Color audit</span></a><a class="wm-lvl1" href="#color-c2"><u></u><span>The vocabulary</span></a><a class="wm-lvl1" href="#color-c3"><u></u><span>Literal colors outside App.css</span></a><a class="wm-lvl1" href="#color-c4"><u></u><span>The GEOM zones</span></a><a class="wm-lvl1" href="#color-c5"><u></u><span>Ramps</span></a><a class="wm-lvl1" href="#color-c6"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#color-c7"><u></u><span>The edge</span></a><a class="wm-lvl1" href="#color-c8"><u></u><span>Where you mix</span></a><a class="wm-lvl1" href="#color-c9"><u></u><span>Steering a channel</span></a><a class="wm-lvl1" href="#color-c10"><u></u><span>The blur</span></a><a class="wm-lvl1" href="#color-c11"><u></u><span>Banding</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-motion"><u>06</u>Motion</a><a class="wm-lvl1" href="#motion-c1"><u></u><span>The durations</span></a><a class="wm-lvl1" href="#motion-c2"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#motion-c3"><u></u><span>Acknowledge and confirm</span></a><a class="wm-lvl1" href="#motion-c4"><u></u><span>The morph</span></a><a class="wm-lvl1" href="#motion-c5"><u></u><span>Reduced motion</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#appendix"><u>A</u>Appendix &middot; Who uses what</a></div></div></div>
+  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in"><div class="wm-grp"><a class="wm-lvl0" href="#s-readme"><u data-d="0">00</u>The package</a><a class="wm-lvl1" href="#readme-c1"><u>1</u><span>What you get</span></a><a class="wm-lvl1" href="#readme-c2"><u>2</u><span>What you must supply</span></a><a class="wm-lvl1" href="#readme-c3"><u>3</u><span>How to wire it in, and add a dial</span></a><a class="wm-lvl1" href="#readme-c4"><u>4</u><span>How to override</span></a><a class="wm-lvl1" href="#readme-c5"><u>5</u><span>How you know it shipped</span></a><a class="wm-lvl1" href="#readme-c6"><u></u><span>The rest</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-type"><u data-d="1">01</u>Type</a><a class="wm-lvl1" href="#type-c1"><u></u><span>The budget</span></a><a class="wm-lvl1" href="#type-c2"><u></u><span>The sixth signal: geom</span></a><a class="wm-lvl1" href="#type-c3"><u></u><span>The seven roles</span></a><a class="wm-lvl1" href="#type-c4"><u></u><span>The poster scale</span></a><a class="wm-lvl1" href="#type-c5"><u></u><span>Ink</span></a><a class="wm-lvl1" href="#type-c6"><u></u><span>Why opsz is free</span></a><a class="wm-lvl1" href="#type-c7"><u></u><span>The boundary</span></a><a class="wm-lvl1" href="#type-c8"><u></u><span>The grid</span></a><a class="wm-lvl1" href="#type-c9"><u></u><span>Columns</span></a><a class="wm-lvl1" href="#type-c10"><u></u><span>Baseline</span></a><a class="wm-lvl1" href="#type-c11"><u></u><span>Big type beside small</span></a><a class="wm-lvl1" href="#type-c12"><u></u><span>A row meets</span></a><a class="wm-lvl1" href="#type-c13"><u></u><span>A component moves whole</span></a><a class="wm-lvl1" href="#type-c14"><u></u><span>Breakers and tools</span></a><a class="wm-lvl1" href="#type-c15"><u></u><span>The favicons</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-corners"><u data-d="2">02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1"><u></u><span>The 5 pills</span></a><a class="wm-lvl1" href="#corners-c2"><u></u><span>The radius ladder</span></a><a class="wm-lvl1" href="#corners-c3"><u></u><span>Asymmetric corners</span></a><a class="wm-lvl1" href="#corners-c4"><u></u><span>Corners &#8212; ReCal only</span></a><a class="wm-lvl1" href="#corners-c5"><u></u><span>The 13 circles</span></a><a class="wm-lvl1" href="#corners-c7"><u></u><span>The button</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-controls"><u data-d="3">03</u>Interface</a><a class="wm-lvl1" href="#controls-c1"><u></u><span>Five ways to draw one dial</span></a><a class="wm-lvl1" href="#controls-c2"><u></u><span>The marks</span></a><a class="wm-lvl1" href="#controls-c3"><u></u><span>The chips</span></a><a class="wm-lvl1" href="#controls-c4"><u></u><span>The zoom control</span></a><a class="wm-lvl1" href="#controls-c5"><u></u><span>The theme stack, vertical</span></a><a class="wm-lvl1" href="#controls-c6"><u></u><span>WIP primitives</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-space"><u data-d="4">04</u>Space</a><a class="wm-lvl1" href="#space-c1"><u></u><span>The padding scale</span></a><a class="wm-lvl1" href="#space-c2"><u></u><span>The steps</span></a><a class="wm-lvl1" href="#space-c3"><u></u><span>The cap rule</span></a><a class="wm-lvl1" href="#space-c4"><u></u><span>Use a step</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-color"><u data-d="5">05</u>Color</a><a class="wm-lvl1" href="#color-c1"><u></u><span>Color audit</span></a><a class="wm-lvl1" href="#color-c2"><u></u><span>The vocabulary</span></a><a class="wm-lvl1" href="#color-c3"><u></u><span>Literal colors outside App.css</span></a><a class="wm-lvl1" href="#color-c4"><u></u><span>The GEOM zones</span></a><a class="wm-lvl1" href="#color-c5"><u></u><span>Ramps</span></a><a class="wm-lvl1" href="#color-c6"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#color-c7"><u></u><span>The edge</span></a><a class="wm-lvl1" href="#color-c8"><u></u><span>Where you mix</span></a><a class="wm-lvl1" href="#color-c9"><u></u><span>Steering a channel</span></a><a class="wm-lvl1" href="#color-c10"><u></u><span>The blur</span></a><a class="wm-lvl1" href="#color-c11"><u></u><span>Banding</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#s-motion"><u data-d="6">06</u>Motion</a><a class="wm-lvl1" href="#motion-c1"><u></u><span>The durations</span></a><a class="wm-lvl1" href="#motion-c2"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#motion-c3"><u></u><span>Acknowledge and confirm</span></a><a class="wm-lvl1" href="#motion-c4"><u></u><span>The morph</span></a><a class="wm-lvl1" href="#motion-c5"><u></u><span>Reduced motion</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#appendix"><u data-d="A">A</u>Appendix &middot; Who uses what</a></div></div></div>
     <span class="wm-rail-foot">wm&#8209;primitives</span></nav></div>
   <div class="wm-pan"><main class="wm-main wm-lines">
   <header class="wm-head" data-nosnap>
@@ -6382,7 +6492,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     <p class="wm-eyebrow">wm-primitives &middot; the house system</p>
     <h1 class="wm-stack"><span class="wm-l1">Six<i></i></span><span
       class="wm-l2">laws.</span><span class="wm-l3">Every<i></i><svg class="wm-bendsvg" id="wmbend"
-      viewBox="0 0 300 560" aria-hidden="true"></svg><u class="wm-bendlbl" id="wmbendlbl"></u></span><span
+      viewBox="0 0 100 560" aria-hidden="true"></svg><u class="wm-bendlbl" id="wmbendlbl"></u></span><span
       class="wm-l4">surface.</span></h1>
     <div class="wm-close">
       <p class="wm-dek">Type, corners, circles, space, and color, each decided once and written
@@ -6401,20 +6511,20 @@ html,body{margin:0;padding:0;background:var(--bg)}
   </header>
   
 <section class="wm-sec">
-  <header class="wm-sec-head"><h1 class="wm-mark"><u>00 &middot;</u> The package</h1><p class="wm-lede">The promise: every control works and renders the same, from one source.</p></header>
+  <header class="wm-sec-head"><div class="wm-open"><div class="wm-open-l"><p class="wm-kick"><span class="wm-dg" data-d="0"><span>0</span></span>The promise</p><h1 class="wm-mark">The package</h1></div><p class="wm-open-r wm-lede">The promise: every control works and renders the same, from one source.</p></div></header>
   <div class="wm-body" id="s-readme"><div class="readme"><p>A dial in font-proofer, in ReCal, in opsz-proofer and in Kernpare is the same file, and a change to it reaches all four only after every one of them has been built, driven with a finger, and screenshotted against a baseline. If something here is inconsistent, that is a bug with a test missing, not a style choice.</p>
 <p>This page is in the order you meet things. Everything it links to is the source; if this page and a linked file disagree, the file is right.</p>
-<h2 id="readme-c1" class="wm-h2">1 &#183; What you get</h2>
+<h2 id="readme-c1" class="wm-h2"><u class="wm-hang wm-hang-t" data-d="1">1</u>What you get</h2>
 <p><a href="https://github.com/MarkFonts/wm-primitives/blob/main/COMPONENTS.md">COMPONENTS.md</a> &#8212; every export, one line each, which apps draw it, and where its spec lives. Generated from <code>index.ts</code>, never hand-kept.</p>
 <p>The ones people come for:</p>
 <ul><li><b><code>AxisSlider</code></b> &#8212; the dial. One number on one axis; rail, field, stepper; four variants. Spec <a href="https://github.com/MarkFonts/wm-primitives/blob/main/DIAL.md">DIAL.md</a>, promises <a href="https://github.com/MarkFonts/wm-primitives/blob/main/GESTURES.md">GESTURES.md</a>.</li><li><b><code>ThemeSwitch</code></b> &#8212; Auto / Light / Dark, one engine, two looks.</li><li><b><code>Icon</code></b> and <b><code>Chevron</code></b> &#8212; the one mark, the one chevron.</li><li><b><code>dist/dial.js</code></b> &#8212; the dial for a page with no React, same source, as a script tag.</li><li>Tokens, in four sheets that style nothing until you use them: <code>color.css</code>, <code>type.css</code> (<a href="https://github.com/MarkFonts/wm-primitives/blob/main/TYPOGRAPHY.md">TYPOGRAPHY.md</a>), <code>space.css</code>, <code>motion.css</code>.</li><li><b>The grid</b> &#8212; <code>grid.css</code> + <code>gridSnap.js</code>: 24 columns, a 3px line, one margin. A standard, with a lint and a CI check: <a href="https://github.com/MarkFonts/wm-primitives/blob/main/GRID.md">GRID.md</a>.</li></ul>
-<h2 id="readme-c2" class="wm-h2">2 &#183; What you must supply</h2>
+<h2 id="readme-c2" class="wm-h2"><u class="wm-hang wm-hang-t" data-d="2">2</u>What you must supply</h2>
 <p><a href="https://github.com/MarkFonts/wm-primitives/blob/main/HOST-CONTRACT.md">HOST-CONTRACT.md</a> &#8212; the tokens the consuming app defines, what each is, and what breaks without it. Two have no safe fallback: without <code>--border</code> the rail is invisible; without a theme stamped as <code>data-theme</code> a dark page is black on black. Both were found by wiring a bare app and are the first two steps of the HOWTO.</p>
-<h2 id="readme-c3" class="wm-h2">3 &#183; How to wire it in, and add a dial</h2>
+<h2 id="readme-c3" class="wm-h2"><u class="wm-hang wm-hang-t" data-d="3">3</u>How to wire it in, and add a dial</h2>
 <p><a href="https://github.com/MarkFonts/wm-primitives/blob/main/HOWTO.md">HOWTO.md</a>. Part A: a submodule at <code>shared/</code>, the peer deps, the three token sheets, the contract, <code>data-theme</code>, one dial rendered &#8212; ten steps, each one a trap that was hit once. Part B: a new dial design is a <i>variant</i>, and how the receiving app takes it.</p>
-<h2 id="readme-c4" class="wm-h2">4 &#183; How to override</h2>
+<h2 id="readme-c4" class="wm-h2"><u class="wm-hang wm-hang-t" data-d="4">4</u>How to override</h2>
 <p>Every rule this package writes is inside <code>@layer wm.*</code>. <b>An unlayered rule in your app beats any of them, at any specificity, first try.</b> Theme through tokens (<code>--accent: var(--signal)</code>), choose behaviour through props, and reach in with a selector only as a last resort &#8212; where the layer guarantees you win. The header of <code>src/AxisSlider.css</code> is the long form.</p>
-<h2 id="readme-c5" class="wm-h2">5 &#183; How you know it shipped</h2>
+<h2 id="readme-c5" class="wm-h2"><u class="wm-hang wm-hang-t" data-d="5">5</u>How you know it shipped</h2>
 <p>Push to <code>main</code>. <a href="https://github.com/MarkFonts/wm-primitives/blob/main/.github/workflows/consumers.yml"><code>consumers.yml</code></a> checks out every consumer, puts your commit in its <code>shared/</code>, runs its lint and build, drives the gestures in Chromium and WebKit, screenshots every row, and only then tells the apps to deploy. Each app's deploy then waits until wordmark.nyc serves the bundle it built. Green means <i>live</i>, not pushed. <a href="https://github.com/MarkFonts/wm-primitives/blob/main/EVAL.md">EVAL.md</a> is the methodology; <a href="https://github.com/MarkFonts/wm-primitives/blob/main/tests/README.md">tests/README.md</a> the suites.</p>
 <p><b>Tags.</b> A change to what a consumer can see &#8212; a prop, a token name in <a href="https://github.com/MarkFonts/wm-primitives/blob/main/HOST-CONTRACT.md">HOST-CONTRACT.md</a>, <code>wmDial</code>'s API, a CSS class a host is told to use &#8212; gets a tag: <code>v0.&lt;minor&gt;.&lt;patch&gt;</code>, minor for a contract change, patch for anything else that ships, and the CHANGELOG entry names it. The deploys build against <code>main</code> today (<code>git submodule update --remote</code>), which is why "what is live" needed its own check; a consumer that wants to stand still pins the tag instead. <code>v0.1.0</code> is the contract as of 2026-09-19.</p>
 <h2 id="readme-c6" class="wm-h2">The rest</h2>
@@ -6422,7 +6532,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 <p>Consumed as a git submodule, not an npm package; each app's Vite/tsc compiles the TSX directly. Typed TSX; token-based CSS with fallbacks; font identity only &#8212; props carry family and axes, never proofing size.</p></div></div>
 </section>
 <section class="wm-sec">
-  <header class="wm-sec-head"><h1 class="wm-mark"><u>01 &middot;</u> Type</h1><p class="wm-lede">Seven roles, one signal each, and nothing differs from its neighbour in more than one way at a time. The prose and the chrome on this page are set in them; a figure drawn to scale says so.</p><figure class="wm-nums"><figcaption>By the numbers</figcaption><div class="wm-nums-row wm-baselines"><div class="wm-num"><b>44</b><span>sizes before</span></div><div class="wm-num is-goal"><b>7</b><span>text roles</span></div><div class="wm-num is-goal"><b>5</b><span>poster steps</span></div><div class="wm-num is-goal"><b>3</b><span>inks, from four</span></div></div></figure></header>
+  <header class="wm-sec-head"><div class="wm-open"><div class="wm-open-l"><p class="wm-kick"><span class="wm-dg" data-d="1"><span>1</span></span>Seven roles</p><h1 class="wm-mark">Type</h1></div><p class="wm-open-r wm-lede">Seven roles, one signal each, and nothing differs from its neighbour in more than one way at a time. The prose and the chrome on this page are set in them; a figure drawn to scale says so.</p></div><figure class="wm-nums"><figcaption>By the numbers</figcaption><div class="wm-nums-row wm-baselines"><div class="wm-num"><b>44</b><span>sizes before</span></div><div class="wm-num is-goal"><b>7</b><span>text roles</span></div><div class="wm-num is-goal"><b>5</b><span>poster steps</span></div><div class="wm-num is-goal"><b>3</b><span>inks, from four</span></div></div></figure></header>
   <div class="wm-body" id="s-type">
 
 
@@ -7037,23 +7147,9 @@ demo with type of its own, like the sheets below &#8212; keeps its own room, and
 <a href="https://github.com/MarkFonts/wm-primitives/blob/main/GRID.md">GRID.md</a> is the standard in
 words; <a href="grid.html">the bench</a> is where it was cut.</p>
 
-<div class="gx-tc" data-tc>
-  <div class="gx-tc-in">
-    <div class="gx-tc-cols" aria-hidden="true" data-nosnap></div>
-    <div class="gx-tc-row wm-baselines">
-      <h3 class="gx-tc-big">Press <button type="button" class="wm-key gx-key" data-overlay="cols" aria-pressed="false" aria-label="G, show the columns">G</button> for the columns, <button type="button" class="wm-key gx-key" data-overlay="lines" aria-pressed="false" aria-label="L, show the baseline">L</button> for the baseline &#8212; anywhere on the page.</h3>
-      <div class="gx-tc-side">
-        <p><b>G</b> lays the house columns over the page in pink &#8212; 24 from 1024, 12 below &#8212; from
-        the same three tokens as these stripes, so they land on them.</p>
-        <p><b>L</b> draws a hairline every 3px down the page. The words beside this lead at twice this
-        column&#8217;s lead, so each of their lines lands on every other one of these. Press again to hide.</p>
-      </div>
-    </div>
-  </div>
-</div>
 
 <h2 id="type-c9" class="wm-h2">Columns <span>24, and 12 below 1024</span></h2>
-<p><b>24.</b> It halves, thirds, quarters, sixths and eighths, and the Cal Sans case study splits its
+<p class="wm-run"><b class="wm-hang">24</b>It halves, thirds, quarters, sixths and eighths, and the Cal Sans case study splits its
 sections 5:7 three times, which is 10 and 14 in whole columns. <b>12 below 1024</b>, because the phone's
 count has to divide the desktop's: a half is still a half and a third still a third when the columns fold.
 The gutter is the pad scale's 24, 12 on a phone; the margin is the case study's, and it is everyone's. A
@@ -7141,9 +7237,11 @@ and 24.</p>
 <div class="gx-frame" data-nosnap data-w="1440" style="--h:760"><div class="gx-scale" style="width:1440px">
   <div class="wm-grid gx-sheet gx-over" style="--grid-cols:24;--grid-gutter:24px;--grid-margin:100.8px;--rows:24px 48px 120px 1fr 24px;row-gap:24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><i style="grid-column:13"></i><i style="grid-column:14"></i><i style="grid-column:15"></i><i style="grid-column:16"></i><i style="grid-column:17"></i><i style="grid-column:18"></i><i style="grid-column:19"></i><i style="grid-column:20"></i><i style="grid-column:21"></i><i style="grid-column:22"></i><i style="grid-column:23"></i><i style="grid-column:24"></i><div class="wm-break gx-strip" data-nosnap></div><div class="wm-break gx-band"><p>A breaker: the ground meets the window, the words stay on the margin.<small>the padding it took back is the margin</small></p></div><div class="gx-note" style="--start:1;--span:10;--start-md:1;--span-md:10"><p>The window, not the image, on the columns.<small>columns 11 to 24</small></p></div><div class="gx-shotcell" style="--start:11;--span:14;--start-md:11;--span-md:14"><img data-shot="mac" src="assets/shot-mac-font-proofer.webp" width="2000" height="1305" style="--shot-scale:.643" alt="font-proofer's window, a macOS screenshot with its shadow"></div></div></div></div>
 <p class="gx-cap">A page, drawn to scale &#183; a breaker strip, a text breaker, and a window screenshot whose edges meet columns 11 and 24</p>
-<div class="gx-frame" data-nosnap data-w="1440" style="--h:312"><div class="gx-scale" style="width:1440px">
-  <div class="wm-grid wm-grid--bleed gx-sheet gx-over" style="--grid-cols:24;--grid-gutter:24px;--rows:24px 1fr 1fr 72px 24px;row-gap:24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><i style="grid-column:13"></i><i style="grid-column:14"></i><i style="grid-column:15"></i><i style="grid-column:16"></i><i style="grid-column:17"></i><i style="grid-column:18"></i><i style="grid-column:19"></i><i style="grid-column:20"></i><i style="grid-column:21"></i><i style="grid-column:22"></i><i style="grid-column:23"></i><i style="grid-column:24"></i><div class="gx-panel" style="--start:1;--span:5;--start-md:1;--span-md:5"><p>Left panel<small>column 1: one gutter in from the window</small></p></div><div class="gx-stage" data-nosnap style="--start:6;--span:14;--start-md:6;--span-md:14"></div><div class="gx-panel" style="--start:20;--span:5;--start-md:20;--span-md:5"><p>Right panel<small>column 24: one gutter from the right</small></p></div><p class="gx-wide" style="--start:1;--span:24;--start-md:1;--span-md:24">No margin, ever &#8212; but never flush.</p></div></div></div>
-<p class="gx-cap">A tool, drawn to scale &#183; columns to the window's edges, and text one gutter in where a box touches an edge</p>
+
+<div class="gx-tc" data-tc>
+<div class="gx-tc-in wm-grid wm-grid--bleed gx-sheet gx-over gx-live" style="row-gap:24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><i style="grid-column:13"></i><i style="grid-column:14"></i><i style="grid-column:15"></i><i style="grid-column:16"></i><i style="grid-column:17"></i><i style="grid-column:18"></i><div class="gx-panel gx-tc-cell" style="--start:1;--span:11;--start-md:1;--span-md:12"><h3 class="gx-tc-big">Press <button type="button" class="wm-key gx-key" data-overlay="cols" aria-pressed="false" aria-label="G, show the columns">G</button> for the columns, <button type="button" class="wm-key gx-key" data-overlay="lines" aria-pressed="false" aria-label="L, show the baseline">L</button> for the baseline &#8212; anywhere on the page.</h3></div><div class="gx-panel gx-tc-cell gx-tc-sidecell" style="--start:13;--span:6;--start-md:1;--span-md:12"><div class="gx-tc-side"><p><b>G</b> lays the house columns over the page in pink &#8212; 24 from 1024, 12 below &#8212; from the same three tokens as these stripes, so they land on them.</p><p><b>L</b> draws a hairline every 3px down the page. The words beside this lead at twice this column&#8217;s lead, so each of their lines lands on every other one of these. Press again to hide.</p></div></div><p class="gx-wide" style="--start:1;--span:18;--start-md:1;--span-md:12">No margin, ever &#8212; but never flush.</p></div>
+</div>
+<p class="gx-cap">A tool, on this page's own columns, numbered as the page numbers them &#183; columns to the window's edges, and text one gutter in where a box touches an edge</p>
 
 
 
@@ -7151,7 +7249,7 @@ and 24.</p>
 </div><div data-nosnap data-stage><h2 id="type-c15" class="wm-h2">The favicons <span>WM Mono, light and dark</span></h2><div class="fav" id="type-favicons"><p><b>The drawn WM over two letters.</b> Every app&#8217;s icon is the drawn WM above its own two letters, set in WM Mono at one scale and each letter widened to its cell &#8212; mostly the square set 1.</p><h3 class="wm-h3">The capitals</h3><ul class="fav-caps"><li class="alt"><svg viewBox="0 -780 800 860" aria-label="A.ss01"><path d="M489 -700H735V0H489ZM65 -700H310V0H65ZM65 -375H735V-165H65ZM65 -700H735V-490H65Z"/></svg><u>A</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="B.ss01"><path d="M55 -700H300V-159H55ZM55 -220H725V0H55ZM480 -364H725V0H480ZM155 -700H655V-500H155ZM554 -700H799L568 -363H323Z"/></svg><u>B</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="C.ss01"><path d="M55 -700H735V-397H490V-480H300V-220H500V-331H745V0H55Z"/></svg><u>C</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="D.ss01"><path d="M55 -700H300V-286H55ZM55 -220H745V0H55ZM500 -600H745V0H500ZM155 -700H745V-480H155Z"/></svg><u>D</u></li><li class=""><svg viewBox="0 -780 800 860" aria-label="E"><path d="M90 -700H335V0H90ZM90 -200H710V0H90ZM90 -700H707V-500H90ZM320 -436H692V-266H320Z"/></svg><u>E</u></li><li class=""><svg viewBox="0 -780 800 860" aria-label="F"><path d="M90 -700H335V0H90ZM90 -700H735V-483H90ZM320 -399H720V-182H320Z"/></svg><u>F</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="G.ss01"><path d="M55 -700H300V0H55ZM55 -220H745V0H55ZM500 -700H745V-397H500ZM55 -700H745V-480H55ZM389 -160V-331H745V-110Z"/></svg><u>G</u></li><li class=""><svg viewBox="0 -780 800 860" aria-label="H"><path d="M489 -700H735V0H489ZM65 -700H310V0H65ZM65 -465H735V-245H65Z"/></svg><u>H</u></li><li class=""><svg viewBox="0 -780 800 860" aria-label="I"><path d="M278 -700H523V0H278ZM90 -217H710V0H90ZM90 -700H710V-483H90Z"/></svg><u>I</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="J.ss01"><path d="M65 -700H748V-483H65ZM502 -700H748V0H502ZM65 -352H310V-66H65ZM65 -220H748V0H65Z"/></svg><u>J</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="K.ss06"><path d="M264 -500H508V-700H768V-500L473 -339L475 -382L773 -199V0H510V-199L243 -200ZM65 -700H310V0H65Z"/></svg><u>K</u></li><li class=""><svg viewBox="0 -780 800 860" aria-label="L"><path d="M80 -700H325V0H80ZM80 -217H732V0H80ZM487 -352H737V0H487Z"/></svg><u>L</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="M.ss06"><path d="M575 -277H226L300 -550V0H55V-700H254L421 -342L385 -341L546 -700H745V0H500V-550Z"/></svg><u>M</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="N.ss06"><path d="M53 -700H259L502 -382V-700H747V0H502V-277H298V0H53Z"/></svg><u>N</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="O.ss01"><path d="M55 -700H300V0H55ZM55 -220H745V0H55ZM500 -700H745V0H500ZM55 -700H745V-480H55Z"/></svg><u>O</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="P.ss01"><path d="M65 -700H310V0H65ZM200 -377H510V-490H200V-700H745V-167H200Z"/></svg><u>P</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="Q.ss01"><path d="M55 -700H745V-480H300V-220H800V0H55ZM500 -700H745V0H500Z"/></svg><u>Q</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="R.ss06"><path d="M55 -700H300V0H55ZM145 -700H655V-500H145ZM543 -700H788L553 -280H308ZM747 -280V0H502V-280Z"/></svg><u>R</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="S.ss01"><path d="M67 -700H737V-460H492V-520H161L292 -565V-430L67 -523L750 -390V0H60V-250H305V-190H680L535 -145V-281L750 -188L67 -321Z"/></svg><u>S</u></li><li class=""><svg viewBox="0 -780 800 860" aria-label="T"><path d="M278 -700H523V0H278ZM50 -700H750V-483H50Z"/></svg><u>T</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="U.ss01"><path d="M55 -700H300V0H55ZM55 -220H745V0H55ZM500 -700H745V0H500Z"/></svg><u>U</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="V.ss06"><path d="M747 -369 467 4H333L53 -370V-700H298V-423H502V-700H747Z"/></svg><u>V</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="W.ss06"><path d="M225 -423H574L500 -150V-700H745V0H546L379 -358L415 -359L254 0H55V-700H300V-150Z"/></svg><u>W</u></li><li class="alt"><svg viewBox="0 -780 800 860" aria-label="X.ss06"><path d="M311 -194V0H27V-46L263 -405L264 -331L32 -654V-700H313V-518H487V-700H768V-654L536 -331L537 -405L773 -46V0H489V-193Z"/></svg><u>X</u></li><li class=""><svg viewBox="0 -780 800 860" aria-label="Y"><path d="M-12 -655V-700H255L430 -415H363L551 -700H812V-654L433 -106H367ZM278 -307H523V0H278ZM65 -217H748V0H65Z"/></svg><u>Y</u></li><li class=""><svg viewBox="0 -780 800 860" aria-label="Z"><path d="M280 -200H735V0H156ZM65 -700H735L571 -500H65ZM58 -46 493 -700H742V-654L307 0H58Z"/></svg><u>Z</u></li></ul><p class="fav-note">Stylistic sets, marked by the rule above a letter: set 6 (ss06) for K M N R V W X, whose M and W are the drawn WM; set 1 (ss01) for A B C D G J O P Q S U; the rest default.</p><h3 class="wm-h3">The lockups</h3><p>Light and dark are the two fixed colourways, each shown on the ground it is for. A page links one file, which turns itself white under a dark scheme.</p><ul class="fav-grid"><li><div class="fav-pair"><div class="fav-tile fav-tile--light"><img alt="WMFP, light" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjMDAwOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNMC4wIDc3MS4wSDI2Ny40MTA4NTI3MTMxNzgyNlYxNDg1LjBIMC4wWk0wLjAgNzcxLjBINzA0LjBWOTkyLjMzOTk5OTk5OTk5OTlIMC4wWk0yNTEuMDM4NzU5Njg5OTIyNDcgMTA3OC4wMkg2ODcuNjI3OTA2OTc2NzQ0M1YxMjk5LjM2SDI1MS4wMzg3NTk2ODk5MjI0N1oiLz4KICA8cGF0aCBkPSJNNzgwLjk5OTk5OTk5OTk5OTkgNzcxLjBIMTAzNC42NDcwNTg4MjM1MjkzVjE0ODUuMEg3ODAuOTk5OTk5OTk5OTk5OVpNOTIwLjc2NDcwNTg4MjM1MjkgMTEwMC40NkgxMjQxLjcwNTg4MjM1Mjk0MVY5ODUuMkg5MjAuNzY0NzA1ODgyMzUyOVY3NzEuMEgxNDg1LjBWMTMxNC42Nkg5MjAuNzY0NzA1ODgyMzUyOVoiLz4KPC9zdmc+Cg=="></div><div class="fav-tile fav-tile--dark"><img alt="WMFP, dark" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjZmZmOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNMC4wIDc3MS4wSDI2Ny40MTA4NTI3MTMxNzgyNlYxNDg1LjBIMC4wWk0wLjAgNzcxLjBINzA0LjBWOTkyLjMzOTk5OTk5OTk5OTlIMC4wWk0yNTEuMDM4NzU5Njg5OTIyNDcgMTA3OC4wMkg2ODcuNjI3OTA2OTc2NzQ0M1YxMjk5LjM2SDI1MS4wMzg3NTk2ODk5MjI0N1oiLz4KICA8cGF0aCBkPSJNNzgwLjk5OTk5OTk5OTk5OTkgNzcxLjBIMTAzNC42NDcwNTg4MjM1MjkzVjE0ODUuMEg3ODAuOTk5OTk5OTk5OTk5OVpNOTIwLjc2NDcwNTg4MjM1MjkgMTEwMC40NkgxMjQxLjcwNTg4MjM1Mjk0MVY5ODUuMkg5MjAuNzY0NzA1ODgyMzUyOVY3NzEuMEgxNDg1LjBWMTMxNC42Nkg5MjAuNzY0NzA1ODgyMzUyOVoiLz4KPC9zdmc+Cg=="></div></div><div class="fav-tag"><span>light</span><span>dark</span></div><div class="fav-cap"><b>font-proofer</b><span>F default, P set 1</span></div></li><li><div class="fav-pair"><div class="fav-tile fav-tile--light"><img alt="WMGD, light" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjMDAwOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNMC4wIDc3MS4wSDI0OS45NzEwMTQ0OTI3NTM2MlYxNDg1LjBIMC4wWk0wLjAgMTI2MC42SDcwNC4wVjE0ODUuMEgwLjBaTTQ1NC4wMjg5ODU1MDcyNDY0IDc3MS4wSDcwNC4wVjEwODAuMDZINDU0LjAyODk4NTUwNzI0NjRaTTAuMCA3NzEuMEg3MDQuMFY5OTUuNEgwLjBaTTM0MC43NzY4MTE1OTQyMDI5IDEzMjEuOFYxMTQ3LjM4SDcwNC4wVjEzNzIuOFoiLz4KICA8cGF0aCBkPSJNNzgxLjAgNzcxLjBIMTAzMC45NzEwMTQ0OTI3NTM1VjExOTMuMjhINzgxLjBaTTc4MS4wIDEyNjAuNkgxNDg1LjBWMTQ4NS4wSDc4MS4wWk0xMjM1LjAyODk4NTUwNzI0NjUgODczLjBIMTQ4NS4wVjE0ODUuMEgxMjM1LjAyODk4NTUwNzI0NjVaTTg4My4wMjg5ODU1MDcyNDY0IDc3MS4wSDE0ODUuMFY5OTUuNEg4ODMuMDI4OTg1NTA3MjQ2NFoiLz4KPC9zdmc+Cg=="></div><div class="fav-tile fav-tile--dark"><img alt="WMGD, dark" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjZmZmOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNMC4wIDc3MS4wSDI0OS45NzEwMTQ0OTI3NTM2MlYxNDg1LjBIMC4wWk0wLjAgMTI2MC42SDcwNC4wVjE0ODUuMEgwLjBaTTQ1NC4wMjg5ODU1MDcyNDY0IDc3MS4wSDcwNC4wVjEwODAuMDZINDU0LjAyODk4NTUwNzI0NjRaTTAuMCA3NzEuMEg3MDQuMFY5OTUuNEgwLjBaTTM0MC43NzY4MTE1OTQyMDI5IDEzMjEuOFYxMTQ3LjM4SDcwNC4wVjEzNzIuOFoiLz4KICA8cGF0aCBkPSJNNzgxLjAgNzcxLjBIMTAzMC45NzEwMTQ0OTI3NTM1VjExOTMuMjhINzgxLjBaTTc4MS4wIDEyNjAuNkgxNDg1LjBWMTQ4NS4wSDc4MS4wWk0xMjM1LjAyODk4NTUwNzI0NjUgODczLjBIMTQ4NS4wVjE0ODUuMEgxMjM1LjAyODk4NTUwNzI0NjVaTTg4My4wMjg5ODU1MDcyNDY0IDc3MS4wSDE0ODUuMFY5OTUuNEg4ODMuMDI4OTg1NTA3MjQ2NFoiLz4KPC9zdmc+Cg=="></div></div><div class="fav-tag"><span>light</span><span>dark</span></div><div class="fav-cap"><b>GliffDiff</b><span>G set 1, D set 1</span></div></li><li><div class="fav-pair"><div class="fav-tile fav-tile--light"><img alt="WMOP, light" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjMDAwOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNMC4wIDc3MS4wSDI0OS45NzEwMTQ0OTI3NTM2MlYxNDg1LjBIMC4wWk0wLjAgMTI2MC42SDcwNC4wVjE0ODUuMEgwLjBaTTQ1NC4wMjg5ODU1MDcyNDY0IDc3MS4wSDcwNC4wVjE0ODUuMEg0NTQuMDI4OTg1NTA3MjQ2NFpNMC4wIDc3MS4wSDcwNC4wVjk5NS40SDAuMFoiLz4KICA8cGF0aCBkPSJNNzgwLjk5OTk5OTk5OTk5OTkgNzcxLjBIMTAzNC42NDcwNTg4MjM1MjkzVjE0ODUuMEg3ODAuOTk5OTk5OTk5OTk5OVpNOTIwLjc2NDcwNTg4MjM1MjkgMTEwMC40NkgxMjQxLjcwNTg4MjM1Mjk0MVY5ODUuMkg5MjAuNzY0NzA1ODgyMzUyOVY3NzEuMEgxNDg1LjBWMTMxNC42Nkg5MjAuNzY0NzA1ODgyMzUyOVoiLz4KPC9zdmc+Cg=="></div><div class="fav-tile fav-tile--dark"><img alt="WMOP, dark" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjZmZmOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNMC4wIDc3MS4wSDI0OS45NzEwMTQ0OTI3NTM2MlYxNDg1LjBIMC4wWk0wLjAgMTI2MC42SDcwNC4wVjE0ODUuMEgwLjBaTTQ1NC4wMjg5ODU1MDcyNDY0IDc3MS4wSDcwNC4wVjE0ODUuMEg0NTQuMDI4OTg1NTA3MjQ2NFpNMC4wIDc3MS4wSDcwNC4wVjk5NS40SDAuMFoiLz4KICA8cGF0aCBkPSJNNzgwLjk5OTk5OTk5OTk5OTkgNzcxLjBIMTAzNC42NDcwNTg4MjM1MjkzVjE0ODUuMEg3ODAuOTk5OTk5OTk5OTk5OVpNOTIwLjc2NDcwNTg4MjM1MjkgMTEwMC40NkgxMjQxLjcwNTg4MjM1Mjk0MVY5ODUuMkg5MjAuNzY0NzA1ODgyMzUyOVY3NzEuMEgxNDg1LjBWMTMxNC42Nkg5MjAuNzY0NzA1ODgyMzUyOVoiLz4KPC9zdmc+Cg=="></div></div><div class="fav-tag"><span>light</span><span>dark</span></div><div class="fav-cap"><b>opsz-proofer</b><span>O set 1, P set 1</span></div></li><li><div class="fav-pair"><div class="fav-tile fav-tile--light"><img alt="WMPR, light" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjMDAwOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNMC4wIDc3MS4wSDI1My42NDcwNTg4MjM1Mjk0NVYxNDg1LjBIMC4wWk0xMzkuNzY0NzA1ODgyMzUyOTggMTEwMC40Nkg0NjAuNzA1ODgyMzUyOTQxMTZWOTg1LjJIMTM5Ljc2NDcwNTg4MjM1Mjk4Vjc3MS4wSDcwNC4wMDAwMDAwMDAwMDAxVjEzMTQuNjZIMTM5Ljc2NDcwNTg4MjM1Mjk4WiIvPgogIDxwYXRoIGQ9Ik03ODEuMCA3NzEuMEgxMDE2LjMwNjk1NzcwODA0OTFWMTQ4NS4wSDc4MS4wWk04NjcuNDM5MjkwNTg2NjMwMiA3NzEuMEgxMzU3LjI2MTkzNzI0NDIwMThWOTc1LjBIODY3LjQzOTI5MDU4NjYzMDJaTTEyNDkuNjkzMDQyMjkxOTUwOSA3NzEuMEgxNDg1LjBMMTI1OS4yOTc0MDc5MTI2ODc1IDExOTkuNEgxMDIzLjk5MDQ1MDIwNDYzODRaTTE0NDUuNjIyMTAwOTU0OTc5NSAxMTk5LjRWMTQ4NS4wSDEyMTAuMzE1MTQzMjQ2OTMwM1YxMTk5LjRaIi8+Cjwvc3ZnPgo="></div><div class="fav-tile fav-tile--dark"><img alt="WMPR, dark" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjZmZmOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNMC4wIDc3MS4wSDI1My42NDcwNTg4MjM1Mjk0NVYxNDg1LjBIMC4wWk0xMzkuNzY0NzA1ODgyMzUyOTggMTEwMC40Nkg0NjAuNzA1ODgyMzUyOTQxMTZWOTg1LjJIMTM5Ljc2NDcwNTg4MjM1Mjk4Vjc3MS4wSDcwNC4wMDAwMDAwMDAwMDAxVjEzMTQuNjZIMTM5Ljc2NDcwNTg4MjM1Mjk4WiIvPgogIDxwYXRoIGQ9Ik03ODEuMCA3NzEuMEgxMDE2LjMwNjk1NzcwODA0OTFWMTQ4NS4wSDc4MS4wWk04NjcuNDM5MjkwNTg2NjMwMiA3NzEuMEgxMzU3LjI2MTkzNzI0NDIwMThWOTc1LjBIODY3LjQzOTI5MDU4NjYzMDJaTTEyNDkuNjkzMDQyMjkxOTUwOSA3NzEuMEgxNDg1LjBMMTI1OS4yOTc0MDc5MTI2ODc1IDExOTkuNEgxMDIzLjk5MDQ1MDIwNDYzODRaTTE0NDUuNjIyMTAwOTU0OTc5NSAxMTk5LjRWMTQ4NS4wSDEyMTAuMzE1MTQzMjQ2OTMwM1YxMTk5LjRaIi8+Cjwvc3ZnPgo="></div></div><div class="fav-tag"><span>light</span><span>dark</span></div><div class="fav-cap"><b>wm-primitives</b><span>P set 1, R set 6</span></div></li><li><div class="fav-pair"><div class="fav-tile fav-tile--light"><img alt="WMWM, light" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjMDAwOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNNDU4LjEyNTM3MzEzNDMyODM2IDc3MS4wSDcwNC4wVjE0ODUuMEg0OTguMDUzNzMxMzQzMjgzNjNMMzM0LjEzNzMxMzQzMjgzNTg3IDEyNzcuOTRMMzYxLjQ1NjcxNjQxNzkxMDQ2IDEyNzguOTZMMTkzLjMzNzMxMzQzMjgzNTgzIDE0ODUuMEgwLjBWNzcxLjBIMjUxLjEyODM1ODIwODk1NTIzTDI0NS44NzQ2MjY4NjU2NzE2MiAxMjQ1LjNMMTI3LjE0MDI5ODUwNzQ2MjY5IDEyMzUuMUwzNTQuMTAxNDkyNTM3MzEzNDUgOTQ1LjQyTDU4Mi4xMTM0MzI4MzU4MjEgMTIzNS4xTDQ2My4zNzkxMDQ0Nzc2MTE5IDEyNDUuM1oiLz4KICA8cGF0aCBkPSJNMTAyNi44NzQ2MjY4NjU2NzE2IDE0ODUuMEg3ODEuMFY3NzEuMEg5ODYuOTQ2MjY4NjU2NzE2NUwxMTUwLjg2MjY4NjU2NzE2NDIgOTc4LjA2TDExMjMuNTQzMjgzNTgyMDg5NSA5NzcuMDRMMTI5MS42NjI2ODY1NjcxNjQyIDc3MS4wSDE0ODUuMFYxNDg1LjBIMTIzMy44NzE2NDE3OTEwNDQ4TDEyMzkuMTI1MzczMTM0MzI4NCAxMDEwLjdMMTM1Ny44NTk3MDE0OTI1MzcyIDEwMjAuOUwxMTMwLjg5ODUwNzQ2MjY4NjcgMTMxMC41OEw5MDIuODg2NTY3MTY0MTc5MiAxMDIwLjlMMTAyMS42MjA4OTU1MjIzODgxIDEwMTAuN1oiLz4KPC9zdmc+Cg=="></div><div class="fav-tile fav-tile--dark"><img alt="WMWM, dark" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjZmZmOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNNDU4LjEyNTM3MzEzNDMyODM2IDc3MS4wSDcwNC4wVjE0ODUuMEg0OTguMDUzNzMxMzQzMjgzNjNMMzM0LjEzNzMxMzQzMjgzNTg3IDEyNzcuOTRMMzYxLjQ1NjcxNjQxNzkxMDQ2IDEyNzguOTZMMTkzLjMzNzMxMzQzMjgzNTgzIDE0ODUuMEgwLjBWNzcxLjBIMjUxLjEyODM1ODIwODk1NTIzTDI0NS44NzQ2MjY4NjU2NzE2MiAxMjQ1LjNMMTI3LjE0MDI5ODUwNzQ2MjY5IDEyMzUuMUwzNTQuMTAxNDkyNTM3MzEzNDUgOTQ1LjQyTDU4Mi4xMTM0MzI4MzU4MjEgMTIzNS4xTDQ2My4zNzkxMDQ0Nzc2MTE5IDEyNDUuM1oiLz4KICA8cGF0aCBkPSJNMTAyNi44NzQ2MjY4NjU2NzE2IDE0ODUuMEg3ODEuMFY3NzEuMEg5ODYuOTQ2MjY4NjU2NzE2NUwxMTUwLjg2MjY4NjU2NzE2NDIgOTc4LjA2TDExMjMuNTQzMjgzNTgyMDg5NSA5NzcuMDRMMTI5MS42NjI2ODY1NjcxNjQyIDc3MS4wSDE0ODUuMFYxNDg1LjBIMTIzMy44NzE2NDE3OTEwNDQ4TDEyMzkuMTI1MzczMTM0MzI4NCAxMDEwLjdMMTM1Ny44NTk3MDE0OTI1MzcyIDEwMjAuOUwxMTMwLjg5ODUwNzQ2MjY4NjcgMTMxMC41OEw5MDIuODg2NTY3MTY0MTc5MiAxMDIwLjlMMTAyMS42MjA4OTU1MjIzODgxIDEwMTAuN1oiLz4KPC9zdmc+Cg=="></div></div><div class="fav-tag"><span>light</span><span>dark</span></div><div class="fav-cap"><b>WORDMAKE</b><span>W default, M set 5</span></div></li><li><div class="fav-pair"><div class="fav-tile fav-tile--light"><img alt="WMCS, light" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjMDAwOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNMC4wIDc3MS4wSDY5My43OTcxMDE0NDkyNzU0VjEwODAuMDZINDQzLjgyNjA4Njk1NjUyMTc1Vjk5NS40SDI0OS45NzEwMTQ0OTI3NTM2MlYxMjYwLjZINDU0LjAyODk4NTUwNzI0NjRWMTE0Ny4zOEg3MDQuMFYxNDg1LjBIMC4wWiIvPgogIDxwYXRoIGQ9Ik03ODguMTQyMDI4OTg1NTA3MyA3NzEuMEgxNDcxLjczNjIzMTg4NDA1OFYxMDE1LjhIMTIyMS43NjUyMTczOTEzMDQzVjk1NC42SDg4NC4wNDkyNzUzNjIzMTg5TDEwMTcuNzA3MjQ2Mzc2ODExNyA5MDguN1YxMDQ2LjRMNzg4LjE0MjAyODk4NTUwNzMgOTUxLjU0TDE0ODUuMCAxMDg3LjJWMTQ4NS4wSDc4MS4wMDAwMDAwMDAwMDAxVjEyMzAuMEgxMDMwLjk3MTAxNDQ5Mjc1MzdWMTI5MS4ySDE0MTMuNTc5NzEwMTQ0OTI3NUwxMjY1LjYzNzY4MTE1OTQyMDUgMTMzNy4xVjExOTguMzhMMTQ4NS4wIDEyOTMuMjRMNzg4LjE0MjAyODk4NTUwNzMgMTE1Ny41OFoiLz4KPC9zdmc+Cg=="></div><div class="fav-tile fav-tile--dark"><img alt="WMCS, dark" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg1IDE0ODUiPgogIDxzdHlsZT4KICAgIHBhdGgsIHBvbHlnb24geyBmaWxsOiAjZmZmOyB9CiAgPC9zdHlsZT4KICA8cG9seWdvbiBwb2ludHM9IjI0My44NTAwNCA0ODEuMTAwMDEgMjQ5Ljk1MDAxIDAgLjA0OTk5IDAgLjA0OTk5IDcxNC4wOTk5OCAyMDMuMDQ5OTkgNzE0LjA5OTk4IDM2Ny4zNTAwNCAzNDkuNSAzMzAuNTQ5OTkgMzUwLjUgNTAwLjk1MDAxIDcxNC4wOTk5OCA3MDMuOTUwMDEgNzE0LjA5OTk4IDcwMy45NTAwMSAwIDQ1NC4wNDk5OSAwIDQ2MC4xNDk5NiA0ODEuMTAwMDEgNTI5LjU0OTk5IDI4Mi42MDAwMSAxNzMuNDUwMDEgMjgyLjYwMDAxIDI0My44NTAwNCA0ODEuMTAwMDEiLz4KICA8cG9seWdvbiBwb2ludHM9IjEyNDEuMDk5OTkgMjMzIDEyMzQuOTAwMDEgNzE0LjA5OTk4IDE0ODQuODk5OTggNzE0LjA5OTk4IDE0ODQuODk5OTggMCAxMjgxLjkwMDAxIDAgMTExNy41OTk5OSAzNjQuNjAwMDEgMTE1NC4zIDM2My42MDAwMSA5ODQgMCA3ODEgMCA3ODEgNzE0LjA5OTk4IDEwMzAuOTAwMDEgNzE0LjA5OTk4IDEwMjQuOCAyMzMgOTU1LjQwMDAxIDQzMS41IDEzMTEuMzk5OTggNDMxLjUgMTI0MS4wOTk5OSAyMzMiLz4KICA8cGF0aCBkPSJNMC4wIDc3MS4wSDY5My43OTcxMDE0NDkyNzU0VjEwODAuMDZINDQzLjgyNjA4Njk1NjUyMTc1Vjk5NS40SDI0OS45NzEwMTQ0OTI3NTM2MlYxMjYwLjZINDU0LjAyODk4NTUwNzI0NjRWMTE0Ny4zOEg3MDQuMFYxNDg1LjBIMC4wWiIvPgogIDxwYXRoIGQ9Ik03ODguMTQyMDI4OTg1NTA3MyA3NzEuMEgxNDcxLjczNjIzMTg4NDA1OFYxMDE1LjhIMTIyMS43NjUyMTczOTEzMDQzVjk1NC42SDg4NC4wNDkyNzUzNjIzMTg5TDEwMTcuNzA3MjQ2Mzc2ODExNyA5MDguN1YxMDQ2LjRMNzg4LjE0MjAyODk4NTUwNzMgOTUxLjU0TDE0ODUuMCAxMDg3LjJWMTQ4NS4wSDc4MS4wMDAwMDAwMDAwMDAxVjEyMzAuMEgxMDMwLjk3MTAxNDQ5Mjc1MzdWMTI5MS4ySDE0MTMuNTc5NzEwMTQ0OTI3NUwxMjY1LjYzNzY4MTE1OTQyMDUgMTMzNy4xVjExOTguMzhMMTQ4NS4wIDEyOTMuMjRMNzg4LjE0MjAyODk4NTUwNzMgMTE1Ny41OFoiLz4KPC9zdmc+Cg=="></div></div><div class="fav-tag"><span>light</span><span>dark</span></div><div class="fav-cap"><b>ReCal</b><span>C set 1, S set 1</span></div></li></ul></div></div></div>
 </section>
 <section class="wm-sec">
-  <header class="wm-sec-head"><h1 class="wm-mark"><u>02 &middot;</u> The corner law</h1><p class="wm-lede">One curve, superellipse(1.2), and a radius ladder of 2&#7503;. The circles are the exceptions, listed so nothing else can claim to be one.</p></header>
+  <header class="wm-sec-head"><div class="wm-open"><div class="wm-open-l"><p class="wm-kick"><span class="wm-dg" data-d="2"><span>2</span></span>One curve</p><h1 class="wm-mark">The corner law</h1></div><p class="wm-open-r wm-lede">One curve, superellipse(1.2), and a radius ladder of 2&#7503;. The circles are the exceptions, listed so nothing else can claim to be one.</p></div></header>
   <div class="wm-body" id="s-corners" data-nosnap data-stage><meta charset=utf-8>
 
 <p class="lede">A rounded rectangle meets its straight edge at a curvature break: the cap is
@@ -7358,7 +7456,7 @@ the column as its target &mdash; and the ground arrives when it is the one that 
     </div>
   </div>
 </figure>
-<p class="bs-cost"><b>What it costs.</b> A resting row states nothing on its own &mdash;
+<p class="wm-run bs-cost"><b class="wm-hang">What it costs</b>A resting row states nothing on its own &mdash;
 and the family survives that only on two conditions it cannot enforce for itself: every row
 carries a <b>mark</b>, and every row is the <b>full width</b> of its column. Strip either
 and this becomes the unformatted list. It also needs somewhere to be a menu: the row shape
@@ -7391,7 +7489,7 @@ law uses &mdash; 1.2 under the pointer, 1.8 held. An editable is the identical r
       <p class="bs-panel-lab">Buttons</p>
       <div class="bs-row"><button class="wm-rule" type="button">Kern lists</button><button class="wm-rule active" type="button">Link roman + italic</button></div>
       <div class="bs-row"><button class="wm-rule" type="button">10 Reg</button><button class="wm-rule" type="button" disabled>Average pairs</button></div>
-      <p class="bs-cost" style="margin-top:.75rem"><b>No icon-only form.</b> There is nothing
+      <p class="wm-run bs-cost" style="margin-top:.75rem"><b class="wm-hang">No icon-only form</b>There is nothing
       to draw it in. Those actions borrow the boxed button.</p>
     </div>
     <div class="bs-panel" data-ladder="secondary">
@@ -7449,13 +7547,13 @@ law uses &mdash; 1.2 under the pointer, 1.8 held. An editable is the identical r
     </div>
   </div>
 </figure>
-<p class="bs-cost"><b>What it costs.</b> Three things. The 44px floor is bought entirely
+<p class="wm-run bs-cost"><b class="wm-hang">What it costs</b>Three things. The 44px floor is bought entirely
 with invisible padding, so two stacked actions are 88px of line box or they overlap. Two
 actions side by side read as one sentence unless something separates them. And the whole
 family depends on a document-wide prohibition that no component can enforce &mdash; the
 first underlined caption someone adds takes the affordance down with it.</p>
 
-<p class="bs-lede" style="margin-top:2rem"><b>Why these two</b>, in the study&rsquo;s own words.</p>
+<p class="wm-run bs-lede" style="margin-top:2rem"><b class="wm-hang">Why these two</b>, in the study&rsquo;s own words.</p>
 <blockquote class="bs-quote">06 for the menu, where an enclosure means <i>chosen</i> and
 the row does the pointing &hellip;
 <cite>Which one, Six ways to say press</cite></blockquote>
@@ -7479,7 +7577,7 @@ the secondary formerly 03 in <a href="system/pages/buttons.html">Six ways to say
 </div></div>
 </section>
 <section class="wm-sec">
-  <header class="wm-sec-head"><h1 class="wm-mark"><u>03 &middot;</u> Interface</h1><p class="wm-lede">One dial, drawn five ways, and the controls that grew around it. Each answers a press the same way: acknowledge, then confirm.</p></header>
+  <header class="wm-sec-head"><div class="wm-open"><div class="wm-open-l"><p class="wm-kick"><span class="wm-dg" data-d="3"><span>3</span></span>One dial</p><h1 class="wm-mark">Interface</h1></div><p class="wm-open-r wm-lede">One dial, drawn five ways, and the controls that grew around it. Each answers a press the same way: acknowledge, then confirm.</p></div></header>
   <div class="wm-body" id="s-controls"><div data-nosnap data-stage>
 <meta charset="utf-8">
 
@@ -7531,24 +7629,24 @@ a glyph drawn for 20px used at 6 is the 20px drawing scaled down, stroke and all
 path has no floor.</p>
 
 <h3 class="wm-h3 marks-h3">Drawn today</h3>
-<p class="lede">Every Material name any app calls upon &mdash; wm-primitives, font-proofer, ReCal, Kernpare,
+<div class="marks-wrap"><p class="lede">Every Material name any app calls upon &mdash; wm-primitives, font-proofer, ReCal, Kernpare,
 opsz-proofer, WORDMAKE, GliffDiff and this page &mdash; with what it means and who draws it. All of them
 are in the one shipped face: an 81-name subset in <code>fonts/</code>, cut by
 <code>scripts/cut-icon-subset.py</code>, and <code>lint-icons.py</code> fails an app on a name
 outside it. (WORDMAKE still ships the whole family for itself.) The stepper&rsquo;s arrows are
 not here: a stepper is the house chevron, not a Material mark.</p>
-<div class="marks" id="controls-m-icons"></div>
+<div class="marks" id="controls-m-icons"></div></div>
 
 <h3 class="wm-h3 marks-h3">In the face, waiting for a use</h3>
-<p class="lede">The type tools&rsquo; vocabulary, cut into the face 2026-09-26 so a proofer or a
+<div class="marks-wrap"><p class="lede">The type tools&rsquo; vocabulary, cut into the face 2026-09-26 so a proofer or a
 specimen page can reach for one without a font rebuild. Each moves up the day an app draws it.</p>
-<div class="marks" id="controls-m-icons-full"></div>
+<div class="marks" id="controls-m-icons-full"></div></div>
 
 <h3 class="wm-h3 marks-h3">Chevrons</h3>
-<p class="lede">One drawing, one angle (34.6&deg;), three sizes. The stroke is derived from the
+<div class="marks-wrap"><p class="lede">One drawing, one angle (34.6&deg;), three sizes. The stroke is derived from the
 width rather than fixed &mdash; optical sizing by another name: at one absolute stroke a small
 chevron carries more ink per unit of mark and reads heavier.</p>
-<div class="marks marks--chev" id="controls-m-chevrons"></div>
+<div class="marks marks--chev" id="controls-m-chevrons"></div></div>
 
 <h2 id="controls-c3" class="wm-h2 marks-h">The chips</h2>
 <p class="lede">One of a set, every option visible, the chosen one filled &mdash; so the state
@@ -7557,21 +7655,26 @@ gave the grammar (an outline in the option&rsquo;s own hue, a fill for the chose
 font-proofer&rsquo;s preset bar the size. A chip chooses; <code>.wm-btn</code> does. Click any
 of these. <code>src/chip.css</code>.</p>
 <div class="chip-demo">
-  <p class="chip-cap">A set &middot; <code>.wm-chip</code>, with <code>data-label</code> so choosing never shifts the row</p>
+ <div class="pair">
+  <p class="pair-t">A set. One is chosen, and <code>data-label</code> reserves each chip&rsquo;s width, so choosing never shifts the row.</p>
   <div class="wm-chip-row" data-one>
     <button class="wm-chip on" data-label="Sample"><span>Sample</span></button>
     <button class="wm-chip" data-label="A Tale of Two Cities"><span>A Tale of Two Cities</span></button>
     <button class="wm-chip" data-label="Staatliche Bauhaus"><span>Staatliche Bauhaus</span></button>
     <button class="wm-chip" data-label="Kern King"><span>Kern King</span></button>
   </div>
-  <p class="chip-cap">Each its own hue &middot; <code>--chip-color</code></p>
+ </div>
+ <div class="pair">
+  <p class="pair-t">Each in its own hue, from <code>--chip-color</code>.</p>
   <div class="wm-chip-row" data-one>
     <button class="wm-chip" style="--chip-color:#e08a63" data-label="A11y"><span>A11y</span></button>
     <button class="wm-chip on" data-label="UI"><span>UI</span></button>
     <button class="wm-chip" style="--chip-color:#6f9ee8" data-label="Base"><span>Base</span></button>
     <button class="wm-chip" style="--chip-color:#5fc678" data-label="Geo"><span>Geo</span></button>
   </div>
-  <p class="chip-cap">A lens over a canvas, and a switch beside it &middot; <code>--small</code>, <code>--switch</code></p>
+ </div>
+ <div class="pair">
+  <p class="pair-t">Small, over a canvas, with a switch beside it: <code>--small</code> and <code>--switch</code>.</p>
   <div class="wm-chip-row" data-one>
     <span class="chip-lbl">context</span>
     <button class="wm-chip wm-chip--small on">off</button>
@@ -7580,6 +7683,7 @@ of these. <code>src/chip.css</code>.</p>
     <button class="wm-chip wm-chip--small">01</button>
     <button class="wm-chip wm-chip--small wm-chip--switch" data-toggle><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">sync_alt</span>rev</button>
   </div>
+ </div>
 </div>
 
 <h2 id="controls-c4" class="wm-h2 marks-h">The zoom control</h2>
@@ -7591,15 +7695,21 @@ type stays type. 50&ndash;400%, steps of 10, kept in <code>localStorage</code>. 
 press the marks, or focus the rail and press <code>+</code> <code>&minus;</code> <code>0</code>.
 <code>src/zoomControl.js</code> + <code>.css</code>; GESTURES.md &sect;12.</p>
 <div class="zoom-demo">
-  <p class="chip-cap">The morph &middot; one glass leaves the box as it fills and zips to the lozenge&rsquo;s place; it splits into &minus; and +, which pull the rule out to the ends; the lozenge appears as a dot and grows round 1, 10, 100, 100%. Closing folds it back. Composed from the control&rsquo;s own keyframes by <code>scripts/zoom-morph-svg.mjs</code> (open 600ms, hold, close 300ms, hold)</p>
+ <div class="pair">
+  <p class="pair-t">The morph. One glass leaves the box as it fills and zips to the lozenge&rsquo;s place; it splits into &minus; and +, which pull the rule out to the ends; the lozenge appears as a dot and grows round 1, 10, 100, 100%. Closing folds it back. Composed from the control&rsquo;s own keyframes by <code>scripts/zoom-morph-svg.mjs</code>: open 600ms, hold, close 300ms, hold.</p>
   <img class="zoom-morph" src="assets/zoom-morph.svg" alt="The zoom control opening out of its mark and closing back into it" width="482" height="102">
-  <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and the control opens leftwards out of it while the mark stays put and fills (the morph above); press the mark again, Escape, or anywhere else, and it folds and keeps the zoom &mdash; shut at a zoom, the value stays on show beside the filled mark. The reset is a press on the lozenge (or <code>0</code>). The mark, <code>data-icon</code>:</p>
+ </div>
+ <div class="pair">
+  <p class="pair-t">At rest, one mark, with <code>data-collapse</code>. Press it and the control opens leftwards out of it while the mark stays put and fills. Press the mark again, Escape, or anywhere else, and it folds and keeps the zoom: shut at a zoom, the value stays on show beside the filled mark. The reset is a press on the lozenge, or <code>0</code>. The mark is <code>data-icon</code>.</p>
   <div class="wm-chip-row zoom-icons">
     <button type="button" class="wm-chip wm-chip--small" aria-pressed="true" data-zicon="pageview"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">pageview</span>pageview</button>
     <button type="button" class="wm-chip wm-chip--small" aria-pressed="false" data-zicon="feature_search"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">feature_search</span>feature_search</button>
   </div>
 
-  <p class="chip-cap">Left &middot; <code>.wm-zoom--left</code> in a <code>.wm-theme-row</code>: opens leftwards over its own row, from a 27px footprint; the marks, the action and the line below never move</p>
+ </div>
+ <div class="pair">
+  <p class="pair-t">Left. <code>.wm-zoom--left</code> in a <code>.wm-theme-row</code> opens leftwards over its own row, from a 27px footprint. The marks, the action and the line below never move.</p>
+  <div class="pair-r">
   <div class="zoom-title">
     <span class="zoom-title-h">Paragraph comparison</span>
     <span class="zoom-title-a">
@@ -7619,7 +7729,11 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
     <p>Zoomed by the control in the title row, which captures the browser&rsquo;s zoom over this card (<code>data-capture</code>): pinch on a trackpad, or &#8984;/Ctrl + &minus; 0, with the pointer here. Elsewhere on the page the browser zooms as ever.</p>
   </div></div>
 
-  <p class="chip-cap">Stack &middot; <code>.wm-theme-stack</code>: rests as one mark at the right edge under the theme chips; opens under them, one width and one right edge from one grid column (the rail&rsquo;s 10rem floor makes it the wider row)</p>
+  </div>
+ </div>
+ <div class="pair">
+  <p class="pair-t">Stack. <code>.wm-theme-stack</code> rests as one mark at the right edge under the theme chips, and opens under them: one width and one right edge from one grid column. The rail&rsquo;s 10rem floor makes it the wider row.</p>
+  <div class="pair-r">
   <div class="wm-theme-stack">
     <div class="wm-chip-row" role="group" aria-label="Colour scheme">
       <button type="button" class="wm-chip" data-theme-pick="auto" data-label="Auto" aria-pressed="true">Auto</button>
@@ -7633,26 +7747,30 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
     <p>A sample card, zoomed by the control above. At 200% every length in it is twice as long and every baseline twice as far down; past the card&rsquo;s edge it scrolls.</p>
   </div></div>
 
-  <p class="chip-cap">The markup &middot; mounted at DOMContentLoaded, or <code>wmZoom.mount(el)</code></p>
-<pre>&lt;span class="wm-theme-row"&gt;                                     left
+  </div>
+ </div>
+ <p class="z-body">The markup, mounted at DOMContentLoaded or by <code>wmZoom.mount(el)</code>. Without <code>data-collapse</code> it is always open, the mark is only the reset, and it needs no stack.</p>
+ <figure class="z-code"><figcaption>Left</figcaption><pre>&lt;span class="wm-theme-row"&gt;
   &lt;span class="wm-zoom wm-zoom--left" data-collapse data-target="#page"&gt;&lt;/span&gt;
   &lt;span class="wm-theme"&gt;&hellip;the three marks&hellip;&lt;/span&gt;
-&lt;/span&gt;
-
-&lt;div class="wm-theme-stack"&gt;                                   stack
+&lt;/span&gt;</pre></figure>
+ <figure class="z-code"><figcaption>Stack</figcaption><pre>&lt;div class="wm-theme-stack"&gt;
   &lt;div class="wm-chip-row" role="group" aria-label="Colour scheme"&gt;&hellip;Auto Light Dark&hellip;&lt;/div&gt;
   &lt;div class="wm-zoom" data-collapse data-icon="pageview" data-target="#page"&gt;&lt;/div&gt;
-&lt;/div&gt;
-
-data-min / max / step   50 / 400 / 10        data-key   localStorage key (wm-zoom): "170 open"
-data-collapse           rest as one mark     data-icon  pageview | feature_search
-data-open="true"        start open           data-keys="local"  keys only with focus inside
-data-capture            take over pinch and &#8984;/Ctrl + &minus; 0 over the target (or a selector)
-events     wm-zoom (detail: the percent) &middot; wm-zoom-open (detail: true / false), bubbling
-keys       + or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; Escape folds, keeps the zoom &middot; never with Cmd/Ctrl/Alt
-the mark   shut: opens &middot; open: folds, keeps the zoom &middot; without data-collapse: back to 100
-the pill   press: back to 100 (it counts down and slides home) &middot; drag: drags</pre>
-  <p class="chip-cap">Without <code>data-collapse</code> it is always open, the mark is only the reset, and it needs no stack</p>
+&lt;/div&gt;</pre></figure>
+ <table class="z-spec"><tbody>
+  <tr><th scope="row"><code>data-min / max / step</code></th><td>50 / 400 / 10</td></tr>
+  <tr><th scope="row"><code>data-collapse</code></th><td>rest as one mark</td></tr>
+  <tr><th scope="row"><code>data-open="true"</code></th><td>start open</td></tr>
+  <tr><th scope="row"><code>data-capture</code></th><td>take over pinch and &#8984;/Ctrl + &minus; 0 over the target, or a selector</td></tr>
+  <tr><th scope="row"><code>data-key</code></th><td>the localStorage key, <code>wm-zoom</code>: "170 open"</td></tr>
+  <tr><th scope="row"><code>data-icon</code></th><td>pageview | feature_search</td></tr>
+  <tr><th scope="row"><code>data-keys="local"</code></th><td>keys only with focus inside</td></tr>
+  <tr><th scope="row"><code>events</code></th><td>wm-zoom, detail the percent &middot; wm-zoom-open, detail true / false &middot; both bubble</td></tr>
+  <tr><th scope="row"><code>keys</code></th><td>+ or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; Escape folds, keeps the zoom &middot; never with Cmd / Ctrl / Alt</td></tr>
+  <tr><th scope="row"><code>the mark</code></th><td>shut: opens &middot; open: folds, keeps the zoom &middot; without data-collapse: back to 100</td></tr>
+  <tr><th scope="row"><code>the pill</code></th><td>press: back to 100, it counts down and slides home &middot; drag: drags</td></tr>
+ </tbody></table>
 </div>
 
 <h2 id="controls-c5" class="wm-h2 marks-h">The theme stack, vertical</h2>
@@ -7776,10 +7894,10 @@ the target      pans sideways in its own overflow-x: auto box, or a phone widens
 </div>
 
 
-</div><div data-nosnap data-stage><h2 id="controls-c6" class="wm-h2">WIP primitives <span>pages to decide from</span></h2><div class="wip" id="controls-wip"><p><b>Nothing here ships.</b> A control above has a spec and a test; a page here has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline so it cannot pass for finished.</p><ul class="wip-list"><li><a class="wip-card" href="system/pages/buttons.html"><u>undecided</u><b>Six ways to say press</b><i>the button as six families, Keyline, Lozenge, Rule, Plate, Bracket, Menu, each drawing the same six specimens, with a coverage table of what each cannot do. Explorations: none chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; NEXT.md G says what a choice, if one is ever made, changes.</i></a></li><li><a class="wip-card" href="system/pages/play.html"><u>undecided</u><b>Seven ways to say play</b><i>the one control where a press does two things, drawn seven ways by what carries the difference: the mark, the ring, the word, the ground, the enclosure, the elevation, the surface. All live on one fake ninety-second clip. Superseded in scope by the transport page below &#8212; the bar, not the button, is the instrument &#8212; and kept as the record of the button question. TRANSPORT.md.</i></a></li><li><a class="wip-card" href="system/pages/transport.html"><u>undecided</u><b>Six ways to build the bar</b><i>one transport primitive &#8212; play, scrubber, readouts slot &#8212; in two registers, WORDMAKE's frames and Morf's builds, each schema drawn twice on the same live clocks: Deck, Slate, Ruler, Strip, Cells, Overlay. Decided: one primitive; no stage click; Morf's stops evenly by beat. Undecided: the schema. TRANSPORT.md has the coverage and what none has had.</i></a></li></ul></div></div></div>
+</div><div data-nosnap data-stage><h2 id="controls-c6" class="wm-h2">WIP primitives <span>pages to decide from</span></h2><div class="wip" id="controls-wip"><p class="wm-run"><b class="wm-hang">Nothing here ships</b>A control above has a spec and a test; a page here has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline so it cannot pass for finished.</p><ul class="wip-list"><li><a class="wip-card" href="system/pages/play.html"><u>undecided</u><b>Seven ways to say play</b><i>the one control where a press does two things, drawn seven ways by what carries the difference: the mark, the ring, the word, the ground, the enclosure, the elevation, the surface. All live on one fake ninety-second clip. Superseded in scope by the transport page below &#8212; the bar, not the button, is the instrument &#8212; and kept as the record of the button question. TRANSPORT.md.</i></a></li><li><a class="wip-card" href="system/pages/transport.html"><u>undecided</u><b>Six ways to build the bar</b><i>one transport primitive &#8212; play, scrubber, readouts slot &#8212; in two registers, WORDMAKE's frames and Morf's builds, each schema drawn twice on the same live clocks: Deck, Slate, Ruler, Strip, Cells, Overlay. Decided: one primitive; no stage click; Morf's stops evenly by beat. Undecided: the schema. TRANSPORT.md has the coverage and what none has had.</i></a></li></ul></div></div></div>
 </section>
 <section class="wm-sec">
-  <header class="wm-sec-head"><h1 class="wm-mark"><u>04 &middot;</u> Space</h1><p class="wm-lede">A pad scale in steps, a cap so small radii never pinch, and alignment that falls out of the step rather than being set.</p></header>
+  <header class="wm-sec-head"><div class="wm-open"><div class="wm-open-l"><p class="wm-kick"><span class="wm-dg" data-d="4"><span>4</span></span>A pad scale</p><h1 class="wm-mark">Space</h1></div><p class="wm-open-r wm-lede">A pad scale in steps, a cap so small radii never pinch, and alignment that falls out of the step rather than being set.</p></div></header>
   <div class="wm-body" id="s-space" data-nosnap data-stage><meta charset=utf-8>
 <h2 id="space-c1" class="wm-h2">The padding scale</h2>
 <p class="lede">Derived from the live surface, not invented: <b>117</b> padding numbers across
@@ -7929,7 +8047,7 @@ UI-kit board is a gallery of COSS components rather than house UI &mdash; nothin
 aligns against our chrome, so it keeps its own numbers.</p></div>
 </section>
 <section class="wm-sec">
-  <header class="wm-sec-head"><h1 class="wm-mark"><u>05 &middot;</u> Color</h1><p class="wm-lede">Every declaration audited against the vocabulary, and the ramps, which are colour under a curve.</p></header>
+  <header class="wm-sec-head"><div class="wm-open"><div class="wm-open-l"><p class="wm-kick"><span class="wm-dg" data-d="5"><span>5</span></span>The audit</p><h1 class="wm-mark">Color</h1></div><p class="wm-open-r wm-lede">Every declaration audited against the vocabulary, and the ramps, which are colour under a curve.</p></div></header>
   <div class="wm-body" id="s-color" data-nosnap data-stage><h2 id="color-c1" class="wm-h2">Color audit</h2>
 <p class="lede">Every color literal in the three style bases &#8212; 692 of them, 180 distinct values &#8212; with what each one does and where to find it.</p>
 <div class="chips"><span class="chip"><i class="sw" style="background:#e8e8e8"></i><code>#e8e8e8</code><b>28</b></span><span class="chip"><i class="sw" style="background:#111827"></i><code>#111827</code><b>28</b></span><span class="chip"><i class="sw" style="background:#fff"></i><code>#fff</code><b>26</b></span><span class="chip"><i class="sw" style="background:#1a1a1a"></i><code>#1a1a1a</code><b>20</b></span><span class="chip"><i class="sw" style="background:#e5e7eb"></i><code>#e5e7eb</code><b>20</b></span><span class="chip"><i class="sw" style="background:#111"></i><code>#111</code><b>18</b></span><span class="chip"><i class="sw" style="background:#555"></i><code>#555</code><b>18</b></span><span class="chip"><i class="sw" style="background:#383838"></i><code>#383838</code><b>17</b></span><span class="chip"><i class="sw" style="background:#444"></i><code>#444</code><b>16</b></span><span class="chip"><i class="sw" style="background:#374151"></i><code>#374151</code><b>16</b></span><span class="chip"><i class="sw" style="background:#f3f4f6"></i><code>#f3f4f6</code><b>16</b></span><span class="chip"><i class="sw" style="background:#666"></i><code>#666</code><b>15</b></span><span class="chip"><i class="sw" style="background:#2a2a2a"></i><code>#2a2a2a</code><b>15</b></span><span class="chip"><i class="sw" style="background:#1e1e1e"></i><code>#1e1e1e</code><b>14</b></span></div>
@@ -8022,7 +8140,7 @@ not announce itself.</p></section>
 </div></div>
 </section>
 <section class="wm-sec">
-  <header class="wm-sec-head"><h1 class="wm-mark"><u>06 &middot;</u> Motion</h1><p class="wm-lede">Three durations, one curve, and two reasons to move: to acknowledge, or to confirm. Nothing on this page animates for any other reason.</p></header>
+  <header class="wm-sec-head"><div class="wm-open"><div class="wm-open-l"><p class="wm-kick"><span class="wm-dg" data-d="6"><span>6</span></span>Three durations</p><h1 class="wm-mark">Motion</h1></div><p class="wm-open-r wm-lede">Three durations, one curve, and two reasons to move: to acknowledge, or to confirm. Nothing on this page animates for any other reason.</p></div></header>
   <div class="wm-body" id="s-motion">
 <meta charset="utf-8">
 
@@ -8043,8 +8161,7 @@ ReCal&#8217;s, written down in its spec, not the fallbacks that had accumulated 
   <tr><td><code>--dur-confirm</code></td><td class="num">80ms</td><td>one phase of the confirm; a blink, so off the ladder</td></tr>
 </table>
 
-<h3 class="wm-h3">Instant, fast, medium</h3>
-<p>Three steps carry nearly everything. A mark&#8217;s rollover runs at <code>--icon-dur</code>, 90ms, under
+<p class="wm-run"><b class="wm-hang">Three steps</b>Three steps carry nearly everything. A mark&#8217;s rollover runs at <code>--icon-dur</code>, 90ms, under
 <code>--dur-fast</code> on purpose: at 140 the mark lagged the row it sits in, and a rollover should feel like
 the pointer, not an animation about it. A state change is fast, 140. A reveal is medium, 240.</p>
 
@@ -8076,8 +8193,7 @@ then the control settles into its result. A blink, <code>steps(1)</code>, paint 
 and closes in 300, the open folded back. Layout jumps to the end state at once; only the drawing travels.</p>
 <figure class="mo-fig"><img src="assets/zoom-morph.svg" alt="The zoom control opening out of its mark and closing back into it" width="482" height="102"></figure>
 
-<h3 class="wm-h3">Transform, opacity, clip only</h3>
-<p>The morph animates three properties and nothing else, so no frame reflows the page: a magnifier leaves the
+<p class="wm-run"><b class="wm-hang">No reflow</b>The morph animates three properties and nothing else, so no frame reflows the page: a magnifier leaves the
 mark as it fills, zips to where the lozenge will sit, and the rule opens from it by its clip. The theme
 stack&#8217;s stow is a translate, the confirm a custom property that only paint reads.</p>
 
@@ -8095,7 +8211,7 @@ stack&#8217;s stow is a translate, the confirm a custom property that only paint
 </div>
 </section>
 <section class="wm-sec wm-appx" id="appendix">
-  <header class="wm-sec-head"><h1 class="wm-mark"><u>A &middot;</u> Who uses what</h1><p class="wm-lede">Every color value left after removing <code>holo.css</code> and the GEOM steps &#8212; 142 distinct values across 590 sites &#8212; expanded by the different jobs each one does. Ordered by how overloaded it is: <b>44</b> values are doing more than one job, and those are the ones a value-to-token sweep would silently merge.</p>
+  <header class="wm-sec-head"><div class="wm-open"><div class="wm-open-l"><p class="wm-kick"><span class="wm-dg" data-d="A"><span>A</span></span>The evidence</p><h1 class="wm-mark">Who uses what</h1></div><p class="wm-open-r wm-lede">Every color value left after removing <code>holo.css</code> and the GEOM steps &#8212; 142 distinct values across 590 sites &#8212; expanded by the different jobs each one does. Ordered by how overloaded it is: <b>44</b> values are doing more than one job, and those are the ones a value-to-token sweep would silently merge.</p></div>
     <button type="button" class="wm-appx-btn" aria-expanded="false" aria-controls="appx-body"><span>Show the usage map</span><i aria-hidden="true">+</i></button></header>
   <div class="wm-collapse" id="appx-body" style="max-height:0px;visibility:hidden" inert><div><div class="wm-body" id="s-usage" data-nosnap data-stage>
 
@@ -8982,10 +9098,11 @@ stack&#8217;s stow is a translate, the confirm a custom property that only paint
   var probe = document.createElement('span'); probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
   function stripes(){
     var cs = getComputedStyle(tc), n = parseInt(cs.getPropertyValue('--tc-n'), 10) || 12, f = parseInt(cs.getPropertyValue('--tc-first'), 10) || 1;
-    if (cols.getAttribute('data-k') === n + '/' + f) return;
-    cols.setAttribute('data-k', n + '/' + f);
-    var h = ''; for (var i = 0; i < n; i++) h += '<span><u>' + (f + i) + '</u></span>';
-    cols.innerHTML = h;
+    var tgt = cols || box;
+    if (tgt.getAttribute('data-k') === n + '/' + f) return;
+    tgt.setAttribute('data-k', n + '/' + f);
+    if (cols) { var h = ''; for (var i = 0; i < n; i++) h += '<span><u>' + (f + i) + '</u></span>'; cols.innerHTML = h; }
+    else { var is = box.querySelectorAll(':scope > i'); for (var k = 0; k < is.length; k++) is[k].innerHTML = '<u>' + (f + k) + '</u>'; }
   }
   function draw(){
     stripes();
@@ -10131,7 +10248,7 @@ const READY = [
     m.textContent = name; m.setAttribute('translate', 'no');
     m.style.fontSize = '24px';
     m.style.setProperty('--icon-opsz', '24');
-    const n = mk('figcaption', 'mark-name'); n.textContent = name;
+    const n = mk('figcaption', 'mark-name'); n.innerHTML = name.replace(/_/g, '_<wbr>');  // a long name breaks at its underscores, never inside a word
     const u = mk('span', 'mark-use'); u.textContent = use;
     c.append(m, n, u);
     if (apps) { const a = mk('span', 'mark-apps'); a.textContent = apps.join(' \u00B7 '); c.append(a); }
@@ -10632,7 +10749,8 @@ ctl('dither', v => {
   var NS='http://www.w3.org/2000/svg';
   function mk(t,c){var e=document.createElementNS(NS,t);if(c)e.setAttribute('class',c);return e}
   function se(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)}
-  var W=300,SW=7.2,R=85,xv=W-SW/2,hy=SW/2,x1=xv-R,cy=hy+R,H=300;
+  // 100 units per em: a 1em svg that is nearly all corner, so the rule can shorten until the leg meets the chevron
+  var W=100,SW=7.2,R=85,xv=W-SW/2,hy=SW/2,x1=xv-R,cy=hy+R,H=300;
   var NC=40,NF=10,total=NF+NC+NF;
   function corner(mode){var pts=[],i,t;
     for(i=0;i<NC;i++){t=i/(NC-1);
@@ -10685,13 +10803,33 @@ ctl('dither', v => {
     pt.x=bb.x+bb.width/2; pt.y=bb.y; var scr=pt.matrixTransform(m);
     var l3=svg.closest('.wm-l3'); if(!l3) return;
     var st=l3.parentElement.getBoundingClientRect();
-    var chevX=scr.x, extra=st.right-chevX-4;
-    /* l3 ONLY. Applying this to every ruled line was tried and clipped the headline:
-       `extra` is measured from the stack's right edge for the line that carries the
-       bend, and the other lines start at different indents, so the same margin
-       squeezed `laws.` and `surface.` until the words cut off. Lining four rules up on
-       the chevron needs a per-line measurement, not one number reused. */
-    if(extra>0&&extra<st.width*.6) l3.style.marginRight=extra+'px';
+    /* THE LEG LANDS ON THE COUNTER, AND THE HEADLINE MAKES ROOM (Mark, 2026-10-09). The
+       chevron lives in the 6's counter and the 6 does not move for it. Walking the leg over
+       to the counter ran the stroke through SURFACE, so first the headline is scaled down --
+       only as far as SURFACE. needs to clear the leg by a quarter em -- and the rule weight
+       scales with it (one stroke, one ratio). Then the margin walks the leg over. Nothing is
+       squeezed: the tail is 1em, the corner alone, so the room is always there. */
+    var stack=l3.parentElement; stack.style.fontSize=''; stack.style.removeProperty('--wm-stroke'); stack.style.marginLeft='';
+    var fp0=parseFloat(getComputedStyle(l3).fontSize), st0=stack.getBoundingClientRect();
+    var l4=stack.querySelector('.wm-l4'), r4=document.createRange(); r4.selectNodeContents(l4.firstChild);
+    var tw4=r4.getBoundingClientRect().width, ml4=parseFloat(getComputedStyle(l4).marginLeft);
+    var chevX=scr.x, need=st0.left+ml4+tw4+SW/2+.25*fp0;
+    /* first the headline walks left into the empty column (6 and its gutter; column 5 is the
+       rail's, SIX landed on the outline when it took both) and only what is still short is scaled */
+    var rs=getComputedStyle(document.documentElement), gg=parseFloat(rs.getPropertyValue('--grid-gutter'))||0,
+        gm=parseFloat(rs.getPropertyValue('--grid-margin'))||0, pc=(innerWidth-2*gm-23*gg)/24;
+    var hang=(pc>0&&innerWidth>1023)?pc+gg:0;   // column 6 and its gutter: the empty one, never the rail's last column
+    if(need>chevX&&hang>0){var shift=Math.min(hang,need-chevX);
+      stack.style.marginLeft=(-shift)+'px'; st0=stack.getBoundingClientRect(); need-=shift;}
+    if(need>chevX){var sc=(chevX-SW/2-st0.left-ml4)/(tw4+.25*fp0);
+      if(sc>.5){stack.style.fontSize=(fp0*sc).toFixed(2)+'px';
+        stack.style.setProperty('--wm-stroke',Math.max(3,Math.round(8*sc*2)/2)+'px');}}
+    var st=stack.getBoundingClientRect(), extra=st.right-chevX-4;
+    var tn=l3.firstChild, rg=document.createRange(); rg.selectNodeContents(tn);
+    var fp=parseFloat(getComputedStyle(l3).fontSize), tw=rg.getBoundingClientRect().width;
+    var room=st.width-parseFloat(getComputedStyle(l3).marginLeft)-tw-.38*fp-1*fp;
+    if(extra>room) extra=room;
+    l3.style.marginRight=(extra>0&&extra<st.width*.6)?extra+'px':'';
     var fpx=parseFloat(getComputedStyle(l3).fontSize);
     var l3r=l3.getBoundingClientRect(), barY=l3r.top+l3r.height/2;
     /* 40 stands. Shortening it to 26 did not close a gap -- it let dy grow past the
@@ -10699,8 +10837,10 @@ ctl('dither', v => {
        page. Meeting the chevron is a real want, but it is a change to where the SVG
        ends, not to this clearance. */
     var dy=scr.y-40-barY;
+    /* and the leg never runs through the dek: it stops a line above it, still on the chevron's x */
+    var dek=document.querySelector('.wm-dek'); if(dek){var dt=dek.getBoundingClientRect().top-24-barY; if(dy>dt) dy=dt;}
     if(dy>fpx*.9){svg.style.height=dy+'px';H=dy*100/fpx;
-      svg.setAttribute('viewBox','0 0 300 '+Math.round(H));}}
+      svg.setAttribute('viewBox','0 0 100 '+Math.round(H));}}
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   position();
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){position();
@@ -12026,7 +12166,9 @@ if (typeof window !== 'undefined') { window.wmConfirm = wmConfirm }
   function draw(){ raf=0;
     if(!on.cols&&!on.lines) return;
     var z=main.currentCSSZoom||1, r=main.getBoundingClientRect(), p=pan.getBoundingClientRect();
-    var x0=Math.max(0,r.left,p.left), x1=Math.min(root.clientWidth,r.right,p.right);
+    /* from the pan's edge, not <main>'s: the pan reaches back over the hang (GRAMMAR_CSS), so the columns the
+       numeral and the bullets hang on -- 6 and 5 -- are drawn too (Mark, 2026-10-09); the phase is still <main>'s */
+    var x0=Math.max(0,p.left), x1=Math.min(root.clientWidth,r.right,p.right);
     var y0=Math.max(0,r.top), y1=Math.min(innerHeight,r.bottom);
     if(x1<=x0||y1<=y0){ if(last!=='0'){ last='0'; ov.style.width='0px'; } return; }
     /* the box is written only when it changes -- near <main>'s ends, or on a zoom or resize --
@@ -12062,6 +12204,8 @@ if (typeof window !== 'undefined') { window.wmConfirm = wmConfirm }
   });
   addEventListener('scroll',redraw,{passive:true}); pan.addEventListener('scroll',redraw,{passive:true});
   addEventListener('resize',redraw); addEventListener('wm-zoom',redraw);
+  addEventListener('wm-zoom',function(e){var pan=document.querySelector('.wm-pan'); if(!pan) return;
+    var v=e.detail&&e.detail.percent!=null?e.detail.percent:e.detail; if(Math.abs((+v||100)-100)>.5) pan.setAttribute('data-zoomed',''); else pan.removeAttribute('data-zoomed');});
   if('ResizeObserver' in window) new ResizeObserver(redraw).observe(main);
 })();
 </script>

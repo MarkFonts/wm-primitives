@@ -114,6 +114,19 @@ OPENERS = {
                 "Nothing on this page animates for any other reason.",
     # usage: its page's own lede, lifted out of the page (build_section)
 }
+# THE KICKER (proposal v2, 2026-10-09): one short line over the name, the title role in ink-3, so the
+# opener is two consecutive title lines and the name is the one in full ink. Short enough never to wrap
+# in four columns.
+KICKERS = {
+    "readme":   "The promise",
+    "type":     "Seven roles",
+    "corners":  "One curve",
+    "controls": "One dial",
+    "space":    "A pad scale",
+    "color":    "The audit",
+    "motion":   "Three durations",
+    "usage":    "The evidence",
+}
 # The numbers figure, for a section that has one: (value, caption, is-a-goal). Type's strip,
 # which used to sit in the type page's header.
 NUMBERS = {
@@ -409,7 +422,23 @@ def build_section(sid, label, path, kicker):
         chapters.append((cid, text))
         return f'<h2 id="{cid}"{heading_class(m.group(1), "wm-h2")}>{m.group(2)}</h2>'
     html = re.sub(r'<h2([^>]*)>(.*?)</h2>', tag_h2, html, flags=re.S)
+    # AN H3 OVER ONE PARAGRAPH IS A RUN-IN (2026-10-09): the sub-subject that heads a single paragraph and
+    # then yields to the next heading names that paragraph, so it hangs as its label instead.
+    html = re.sub(r'<h3[^>]*>(.*?)</h3>\s*<p>(?=(?:(?!<h[23]\b|<p\b).)*?<h[23]\b)',
+                  lambda m: f'<p><b>{RUN_IN_LABELS.get(m.group(1), m.group(1))}</b> ', html, flags=re.S)
     html = re.sub(r'<h3([^>]*)>(.*?)</h3>', tag_h3, html, flags=re.S)
+    # THE RUN-IN (2026-10-09): a paragraph's first words in bold hang in the column before the text, in the
+    # label role, right-aligned to the column's edge -- the hang column's signal, position, and no ink or
+    # weight inside the paragraph. The trailing full stop goes with the words out of the sentence.
+    def run_in(m):
+        words = re.sub(r'[.:]\s*$', '', m.group(2).strip())
+        # the hang column holds a label, not a sentence: past ~20 characters the words wrap into a
+        # stack that clips at the pan's edge, so a long bold opener stays as the page wrote it
+        n = len(re.sub(r'<[^>]+>', '', words))
+        if n > 20 or n < 2:      # and a single letter is a key cap (the grid's G and L), not a name
+            return m.group(0)
+        return f'<p{heading_class(m.group(1), "wm-run")}><b class="wm-hang">{words}</b>'
+    html = re.sub(r'<p([^>]*)>\s*<b>(.*?)</b>\s*', run_in, html, flags=re.S)
 
     # each script gets its own scope, and its document queries are rebound to the section
     if js.strip():
@@ -438,6 +467,12 @@ def build_section(sid, label, path, kicker):
     return dict(sid=sid, label=label, title=title, kicker=kicker,
                 css=css, html=html, js=js, chapters=chapters, lede=lede)
 
+
+# An h3 demoted to a run-in hangs as a label, and a label is a word or two: these are the rewrites.
+RUN_IN_LABELS = {
+    "Instant, fast, medium": "Three steps",
+    "Transform, opacity, clip only": "No reflow",
+}
 
 # THE TWO HEADING LEVELS, as classes the shell styles (SHELL, "the openers"). Every h2 is a
 # chapter, whatever class its page gave it -- the shell rule outranks the page's own -- except
@@ -723,11 +758,8 @@ def build_readme():
 # work-in-progress surface can never be mistaken for a finished one (Mark, 2026-09-20).
 # One entry per proposal page in docs/system/pages/ that build.py does NOT assemble.
 WIP = [
-    ("system/pages/buttons.html", "Six ways to say press",
-     "the button as six families, Keyline, Lozenge, Rule, Plate, Bracket, Menu, each drawing "
-     "the same six specimens, with a coverage table of what each cannot do. Explorations: none "
-     "chosen, none production-ready. BUTTONS.md says what each demonstrates and what none has had; "
-     "NEXT.md G says what a choice, if one is ever made, changes."),
+    # buttons.html left this list 2026-10-09: the button was chosen 2026-10-08 (06 Menu primary, 03 Rule
+    # secondary, button-sets.html inside 02), so there is nothing left to decide from it.
     ("system/pages/play.html", "Seven ways to say play",
      "the one control where a press does two things, drawn seven ways by what carries the "
      "difference: the mark, the ring, the word, the ground, the enclosure, the elevation, the "
@@ -976,7 +1008,12 @@ html,body{margin:0;padding:0;background:var(--bg)}
       disabled, WATERMARKS". opsz rides auto to its ceiling up there, which is the
       documented behaviour. The eyebrow runs vertical at the right margin. */
 .wm-head{position:relative;min-height:100svh;box-sizing:border-box;display:flex;
-  flex-direction:column;padding:44px 0 0;overflow:hidden}
+  flex-direction:column;padding:44px 0 0;overflow:visible clip}
+/* visible x, clip y (Mark, 2026-10-09: "fix how the 6 is cropped"). The header ends at
+   column 24 and overflow:hidden cropped the 6 at the MARGIN, which is the picture-cut-by-
+   the-margin reading the negative inset below exists to avoid. The sheet's edge does the
+   horizontal crop now (the pan's clip-margin is the page margin); the header still crops
+   the 6's 4svh of vertical overrun. */
 /* The 6 is not a picture of the Face -- it is the Face: real contours extracted at
    GEOM 100, shown the way the editor shows them. Everything at FULL ink, outlines
    only. The nodes are live: hover gets the grab hand and the signal hue -- the
@@ -1018,7 +1055,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   margin:clamp(16px,7vh,84px) 24px 0 0;font-size:clamp(2.4rem,8.6vw,10rem);line-height:1.07;
   font-weight:400;letter-spacing:.12em;text-transform:uppercase;
   font-variation-settings:"GEOM" 100}
-.wm-stack span{display:flex;align-items:center;gap:.38em}
+.wm-stack span{display:flex;align-items:center;gap:.38em;white-space:nowrap}
 /* ONE STROKE, THREE DRAWINGS. The rule, the bend and the chevron are a single line
    that happens to be drawn by an element and two SVGs, so they must render at one
    thickness -- and matching the NUMBERS does not do it, because each has its own CTM.
@@ -1027,20 +1064,22 @@ html,body{margin:0;padding:0;background:var(--bg)}
 :root{ --wm-stroke:8px; }
 /* the rule-fill runs each open line out to the shared right rail; its weight sits
    near the caps' stroke and its seat at the optical mid of a 720 cap */
-.wm-stack i{flex:1 1 0;height:var(--wm-stroke,8px);background:currentColor;
+/* min-width 0 and the word kept whole (nowrap, above): when the bend's margin squeezes the line the RULE
+   gives way, to nothing if it must, and never runs back over the type (the EVERY rule crossed the Y, 2026-10-09) */
+.wm-stack i{flex:1 1 0;min-width:0;height:var(--wm-stroke,8px);background:currentColor;
   transform:translateY(calc(var(--wm-stroke,8px) / -2));position:relative;z-index:3}
 /* the rules and the bend ride ABOVE the blend layer: a hairline crossing a rule
    inverted it into a visible chop, and a rule is furniture, not type */
 .wm-l2{margin-left:11vw}
-.wm-l3{margin-left:3.5vw;position:relative}
+.wm-l3{margin-left:0;position:relative}   /* un-indented (Mark, 2026-10-09): the line that carries the bend gets the room */
 .wm-l4{margin-left:16vw}
 /* the EVERY rule does not stop at the rail: it bends and runs down the page, and
    the corner it turns is a lecture: a looping G0 -> G1 -> G2 morph wearing its own
    curvature comb, teeth on the outside, envelope in the signal hue -- position,
    tangent, curvature, the house law landing on G2. The label reads along the
    descender. The chevron now lives in the 6's counter and rides it. */
-.wm-l3 i{margin-right:3em}
-.wm-bendsvg{position:absolute;right:0;top:calc(50% - .071em);width:3em;height:5.6em;
+.wm-l3 i{margin-right:1em}   /* the tail is only the corner now: .85em of bend + the stroke (Mark, 2026-10-09: the corner lands on the chevron) */
+.wm-bendsvg{position:absolute;right:0;top:calc(50% - .071em);width:1em;height:5.6em;
   overflow:visible;pointer-events:none;z-index:3}
 /* 8 is .wm6-chev's stroke-width. The bend runs INTO the chevron, so a 7.2 stroke
    meeting an 8 one drew a join rather than an arrow. */
@@ -1144,7 +1183,18 @@ html,body{margin:0;padding:0;background:var(--bg)}
 /* The content column, and the box the zoom control pans it in (GESTURES G80): zoomed, <main>
    keeps its 100% width and left edge and grows right, so it scrolls sideways HERE rather than
    widening the document -- which on a phone would drag the fixed theme stack with it. */
-.wm-pan{grid-column:calc(var(--rail-span) + var(--rail-gap) + 1) / -1;grid-row:1;min-width:0;overflow-x:auto}
+.wm-pan{grid-column:calc(var(--rail-span) + var(--rail-gap) + 1) / -1;grid-row:1;min-width:0;
+  overflow:clip;overflow-clip-margin:112px}
+/* BOTH axes clip: Chrome honours overflow-clip-margin only when x and y are clip, so
+   `overflow-x:clip` alone still cut the 6 at column 24. And a LITERAL length: Chromium 153
+   rejects calc(), clamp() and a var() resolving to either (computed 0px, measured
+   2026-10-09), so this is --grid-margin's ceiling written out; past the margin the viewport
+   is the crop anyway. */
+/* clip, not auto, at 100%: a scroll container crops at its own box and the 6 has to run to
+   the sheet's edge, so at rest the pan clips a page-margin out (the viewport edge, exactly)
+   and nothing can scroll it sideways. The zoom control fires wm-zoom; at any value but 100
+   the pan goes back to being the scroller G80 wants. */
+.wm-pan[data-zoomed]{overflow:auto}
 /* A column: the index scrolls when it is taller than the viewport, and the foot sits
    BELOW it in flow. It used to be pinned to the scroller's bottom edge and the rule was
    drawn on the scroller too -- so once the index outgrew 88vh (Color took the ramps'
@@ -1439,7 +1489,7 @@ for s in secs:
     href = "appendix" if s["sid"] in APPENDIX else f's-{s["sid"]}'
     rail.append(
         f'<div class="wm-grp"><a class="wm-lvl0" href="#{href}">'
-        f'<u>{s["num"]}</u>{name}</a>{chapters}</div>')
+        f'<u data-d="{s["num"][-1]}">{s["num"]}</u>{name}</a>{chapters}</div>')
 rail = "".join(rail)
 
 def numbers_html(sid):
@@ -1459,8 +1509,15 @@ for s in secs:
     sid = s["sid"]
     stage = ' data-nosnap data-stage' if sid in OFF_LINE else ''
     body = f'<div class="wm-body" id="s-{sid}"{stage}>{s["html"]}</div>'
-    head = (f'<h1 class="wm-mark"><u>{s["num"]} &middot;</u> {s["label"]}</h1>'
-            f'<p class="wm-lede">{s["lede"]}</p>{numbers_html(sid)}')
+    # THE OPENER, two columns (proposal v2, variant 1): kicker over name in the left four columns, the lede
+    # in the title role in the right six, first baselines shared; the section's numeral, one digit, p4,
+    # hung right-aligned into the column before the text with its ink on the column edge (--dt) and its
+    # baseline on the name's.
+    digit = s["num"][-1]
+    head = (f'<div class="wm-open"><div class="wm-open-l">'
+            f'<p class="wm-kick"><span class="wm-dg" data-d="{digit}"><span>{digit}</span></span>{KICKERS.get(sid, "")}</p>'
+            f'<h1 class="wm-mark">{s["label"]}</h1></div>'
+            f'<p class="wm-open-r wm-lede">{s["lede"]}</p></div>{numbers_html(sid)}')
     if sid in APPENDIX:
         # shut until pressed: the Collapse primitive's box (collapse.css), measured by the
         # shell's script below rather than Collapse.tsx, since this page has no React
@@ -1486,8 +1543,9 @@ for s in secs:
 # internal proportions depend on that — the section runs full-bleed below its heading
 # rather than being squeezed into the shell's column.
 resets = "\n".join(
+    # overflow visible too: a page's own overflow-x:auto (motion's) clipped the hang column's labels
     f"#s-{s['sid']}{{max-width:none;margin:0;padding:0;background:none;min-height:0;"
-    f"display:block;place-items:normal;width:auto}}" for s in secs)
+    f"display:block;place-items:normal;width:auto;overflow:visible}}" for s in secs)
 
 # Only the type page wraps its content in a fixed 1000px column; the rest flow at body
 # width. Release that one too, so all six share the shell's column rather than stacking
@@ -1637,7 +1695,8 @@ HERO_TMPL = """
   var NS='http://www.w3.org/2000/svg';
   function mk(t,c){var e=document.createElementNS(NS,t);if(c)e.setAttribute('class',c);return e}
   function se(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)}
-  var W=300,SW=7.2,R=85,xv=W-SW/2,hy=SW/2,x1=xv-R,cy=hy+R,H=300;
+  // 100 units per em: a 1em svg that is nearly all corner, so the rule can shorten until the leg meets the chevron
+  var W=100,SW=7.2,R=85,xv=W-SW/2,hy=SW/2,x1=xv-R,cy=hy+R,H=300;
   var NC=40,NF=10,total=NF+NC+NF;
   function corner(mode){var pts=[],i,t;
     for(i=0;i<NC;i++){t=i/(NC-1);
@@ -1690,13 +1749,33 @@ HERO_TMPL = """
     pt.x=bb.x+bb.width/2; pt.y=bb.y; var scr=pt.matrixTransform(m);
     var l3=svg.closest('.wm-l3'); if(!l3) return;
     var st=l3.parentElement.getBoundingClientRect();
-    var chevX=scr.x, extra=st.right-chevX-4;
-    /* l3 ONLY. Applying this to every ruled line was tried and clipped the headline:
-       `extra` is measured from the stack's right edge for the line that carries the
-       bend, and the other lines start at different indents, so the same margin
-       squeezed `laws.` and `surface.` until the words cut off. Lining four rules up on
-       the chevron needs a per-line measurement, not one number reused. */
-    if(extra>0&&extra<st.width*.6) l3.style.marginRight=extra+'px';
+    /* THE LEG LANDS ON THE COUNTER, AND THE HEADLINE MAKES ROOM (Mark, 2026-10-09). The
+       chevron lives in the 6's counter and the 6 does not move for it. Walking the leg over
+       to the counter ran the stroke through SURFACE, so first the headline is scaled down --
+       only as far as SURFACE. needs to clear the leg by a quarter em -- and the rule weight
+       scales with it (one stroke, one ratio). Then the margin walks the leg over. Nothing is
+       squeezed: the tail is 1em, the corner alone, so the room is always there. */
+    var stack=l3.parentElement; stack.style.fontSize=''; stack.style.removeProperty('--wm-stroke'); stack.style.marginLeft='';
+    var fp0=parseFloat(getComputedStyle(l3).fontSize), st0=stack.getBoundingClientRect();
+    var l4=stack.querySelector('.wm-l4'), r4=document.createRange(); r4.selectNodeContents(l4.firstChild);
+    var tw4=r4.getBoundingClientRect().width, ml4=parseFloat(getComputedStyle(l4).marginLeft);
+    var chevX=scr.x, need=st0.left+ml4+tw4+SW/2+.25*fp0;
+    /* first the headline walks left into the empty column (6 and its gutter; column 5 is the
+       rail's, SIX landed on the outline when it took both) and only what is still short is scaled */
+    var rs=getComputedStyle(document.documentElement), gg=parseFloat(rs.getPropertyValue('--grid-gutter'))||0,
+        gm=parseFloat(rs.getPropertyValue('--grid-margin'))||0, pc=(innerWidth-2*gm-23*gg)/24;
+    var hang=(pc>0&&innerWidth>1023)?pc+gg:0;   // column 6 and its gutter: the empty one, never the rail's last column
+    if(need>chevX&&hang>0){var shift=Math.min(hang,need-chevX);
+      stack.style.marginLeft=(-shift)+'px'; st0=stack.getBoundingClientRect(); need-=shift;}
+    if(need>chevX){var sc=(chevX-SW/2-st0.left-ml4)/(tw4+.25*fp0);
+      if(sc>.5){stack.style.fontSize=(fp0*sc).toFixed(2)+'px';
+        stack.style.setProperty('--wm-stroke',Math.max(3,Math.round(8*sc*2)/2)+'px');}}
+    var st=stack.getBoundingClientRect(), extra=st.right-chevX-4;
+    var tn=l3.firstChild, rg=document.createRange(); rg.selectNodeContents(tn);
+    var fp=parseFloat(getComputedStyle(l3).fontSize), tw=rg.getBoundingClientRect().width;
+    var room=st.width-parseFloat(getComputedStyle(l3).marginLeft)-tw-.38*fp-1*fp;
+    if(extra>room) extra=room;
+    l3.style.marginRight=(extra>0&&extra<st.width*.6)?extra+'px':'';
     var fpx=parseFloat(getComputedStyle(l3).fontSize);
     var l3r=l3.getBoundingClientRect(), barY=l3r.top+l3r.height/2;
     /* 40 stands. Shortening it to 26 did not close a gap -- it let dy grow past the
@@ -1704,8 +1783,10 @@ HERO_TMPL = """
        page. Meeting the chevron is a real want, but it is a change to where the SVG
        ends, not to this clearance. */
     var dy=scr.y-40-barY;
+    /* and the leg never runs through the dek: it stops a line above it, still on the chevron's x */
+    var dek=document.querySelector('.wm-dek'); if(dek){var dt=dek.getBoundingClientRect().top-24-barY; if(dy>dt) dy=dt;}
     if(dy>fpx*.9){svg.style.height=dy+'px';H=dy*100/fpx;
-      svg.setAttribute('viewBox','0 0 300 '+Math.round(H));}}
+      svg.setAttribute('viewBox','0 0 100 '+Math.round(H));}}
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   position();
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){position();
@@ -2132,7 +2213,9 @@ CHROME = """
   function draw(){ raf=0;
     if(!on.cols&&!on.lines) return;
     var z=main.currentCSSZoom||1, r=main.getBoundingClientRect(), p=pan.getBoundingClientRect();
-    var x0=Math.max(0,r.left,p.left), x1=Math.min(root.clientWidth,r.right,p.right);
+    /* from the pan's edge, not <main>'s: the pan reaches back over the hang (GRAMMAR_CSS), so the columns the
+       numeral and the bullets hang on -- 6 and 5 -- are drawn too (Mark, 2026-10-09); the phase is still <main>'s */
+    var x0=Math.max(0,p.left), x1=Math.min(root.clientWidth,r.right,p.right);
     var y0=Math.max(0,r.top), y1=Math.min(innerHeight,r.bottom);
     if(x1<=x0||y1<=y0){ if(last!=='0'){ last='0'; ov.style.width='0px'; } return; }
     /* the box is written only when it changes -- near <main>'s ends, or on a zoom or resize --
@@ -2168,6 +2251,8 @@ CHROME = """
   });
   addEventListener('scroll',redraw,{passive:true}); pan.addEventListener('scroll',redraw,{passive:true});
   addEventListener('resize',redraw); addEventListener('wm-zoom',redraw);
+  addEventListener('wm-zoom',function(e){var pan=document.querySelector('.wm-pan'); if(!pan) return;
+    var v=e.detail&&e.detail.percent!=null?e.detail.percent:e.detail; if(Math.abs((+v||100)-100)>.5) pan.setAttribute('data-zoomed',''); else pan.removeAttribute('data-zoomed');});
   if('ResizeObserver' in window) new ResizeObserver(redraw).observe(main);
 })();
 """
@@ -2257,19 +2342,114 @@ TAIL = ("" if not LINKED else "\n</body></html>")
 # The same margins wherever a head sits: the first chapter is 24 + 48 under its opener.
 HEADS_CSS = """
 .wm-main :is(__IDS__) h2.wm-h2{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;
-  gap:0 24px;margin:48px 0 15px;padding:0 0 5px;border:0;border-bottom:1px solid var(--h-line);background:none;
-  font-family:var(--ui-font);font-size:var(--type-label-size,.75rem);--lh:var(--lead-ui);line-height:var(--lead-ui,15px);
-  font-weight:400;font-style:normal;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;
-  font-variation-settings:"GEOM" 100;color:var(--h-ink);opacity:1;text-align:left;max-width:none;width:auto;min-height:0}
+  gap:0 24px;margin:72px 0 12px;padding:0;border:0;background:none;
+  font-family:var(--ui-font);font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title,30px);
+  font-weight:400;font-style:normal;letter-spacing:0;text-transform:none;
+  font-variation-settings:normal;color:var(--h-ink);opacity:1;text-align:left;max-width:none;width:auto;min-height:0}
 .wm-main :is(__IDS__) h2.wm-h2 > *{font:inherit;line-height:inherit;font-weight:400;letter-spacing:0;text-transform:none;
-  font-variation-settings:"GEOM" 25;color:var(--h-ink-3);margin:0;padding:0;background:none;border:0}
-.wm-main :is(__IDS__) h3.wm-h3{display:block;margin:24px 0 9px;padding:0;border:0;background:none;
+  font-size:var(--type-ui-size,.75rem);font-variation-settings:normal;color:var(--h-ink-3);margin:0;padding:0;background:none;border:0}
+.wm-main :is(__IDS__) h3.wm-h3{display:block;margin:48px 0 6px;padding:0;border:0;background:none;
   font-family:var(--ui-font);font-size:var(--type-lede-size,1.125rem);--lh:var(--lead-lede);line-height:var(--lead-lede,27px);
   font-weight:400;font-style:normal;letter-spacing:0;text-transform:none;font-variation-settings:normal;
   color:var(--h-ink);opacity:1;max-width:none}
 .wm-main :is(__IDS__) h3.wm-h3 > span{margin-left:12px;font-size:var(--type-ui-size,.75rem);font-weight:400;color:var(--h-ink-3)}
 """.replace("__IDS__", ",".join(f"#s-{s['sid']}" for s in secs)) \
   + (HERE.parent.parent / "src" / "collapse.css").read_text()
+
+# THE TYPE GRAMMAR (proposal v2, 2026-10-09). <main> is the content's 18 columns (page 7-24). The HANG is the
+# empty column 6 and its gutter, between the rail and the text (Mark, 2026-10-09: the hang does not spend a
+# content column): the section numeral, list numerals and bullets, a run-in's words, right-aligned to column
+# 6's edge. Prose runs on columns 7-16 and hugs column 7; figures start there too. Captions are the ui role,
+# sentence case, ink-3, at most six columns. The opener is two columns with a fifth of the viewport above it.
+GRAMMAR_CSS = """
+.wm-main{container-type:inline-size;--col:calc((100cqw - 17 * var(--grid-gutter)) / 18);--hangw:calc(var(--col) + var(--grid-gutter))}
+.wm-sec{max-width:none}
+/* no 1080 cap (Mark, 2026-10-09: nothing reached column 24): a figure runs to the last column, prose keeps its ten */
+.wm-main .wm-body:is(__IDS__){padding-left:0;max-width:none}
+.wm-main :is(__IDS__) :is(p,ul,ol,h2.wm-h2,h3.wm-h3,figcaption,pre){max-width:calc(10 * var(--col) + 9 * var(--grid-gutter))}
+/* a code block keeps the measure too and scrolls inside it, rather than running out to the window (the zoom's markup did) */
+.wm-main :is(__IDS__) pre{overflow-x:auto;box-sizing:border-box}
+/* the opener */
+/* a fifth of the viewport from the section above's last edge to the name's baseline: 30 + 23.5 of it is the kicker line */
+.wm-sec-head{padding:0 0 24px;margin-top:round(nearest, calc(20vh - 54px), 3px);box-shadow:none}
+.wm-sec:first-of-type .wm-sec-head{margin-top:round(nearest, calc(20vh - 54px), 3px)}
+.wm-open{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));column-gap:var(--grid-gutter);align-items:baseline}
+.wm-open-l{grid-column:1 / span 4;position:relative}
+.wm-open-r{grid-column:5 / span 6}
+.wm-kick,.wm-mark{margin:0;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title,30px);
+  font-weight:400;letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums}
+.wm-kick{color:var(--ink-3)}
+.wm-mark{color:var(--ink)}
+.wm-lede.wm-open-r{margin:0;max-width:none;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title,30px);color:var(--ink)}
+/* the numeral: p4 136 in 135, baseline on the name's (the left column's second line) */
+.wm-dg{position:absolute;right:calc(100% + var(--grid-gutter) - 1em * var(--dt,0));top:-59px;
+  font-size:var(--poster-4,8.5rem);line-height:135px;color:var(--ink-3);font-weight:400;white-space:nowrap;letter-spacing:0}
+.wm-dg[data-d="0"]{--dt:0.0176}.wm-dg[data-d="1"]{--dt:0.0801}.wm-dg[data-d="2"]{--dt:0.0489}.wm-dg[data-d="3"]{--dt:0.0562}
+.wm-dg[data-d="4"]{--dt:0.0176}.wm-dg[data-d="5"]{--dt:0.0544}.wm-dg[data-d="6"]{--dt:0.0452}.wm-dg[data-d="7"]{--dt:0.0599}
+.wm-dg[data-d="8"]{--dt:0.0581}.wm-dg[data-d="9"]{--dt:0.0526}
+.wm-nums{margin:24px 0 0;max-width:calc(10 * var(--col) + 9 * var(--grid-gutter))}
+/* the hang: the pan clips at its padding edge, so it reaches back over column 6, column 5 and the three gutters
+   and gives the width back as padding; <main> does not move. A big numeral may touch column 5 at 1280. */
+@media (min-width:1024px){
+  .wm-pan{--hang:calc(2 * (100vw - 2 * var(--grid-margin) - 23 * var(--grid-gutter)) / 24 + 3 * var(--grid-gutter));
+    margin-left:calc(-1 * var(--hang));padding-left:var(--hang)}
+}
+@media (min-width:1024px) and (max-width:1279px){ .wm-dg{font-size:var(--poster-3,6rem);line-height:96px;top:-26px} }
+/* the run-in: the words in the label role, right-aligned on the hang column's edge, on the paragraph's first line */
+.wm-main :is(__IDS__) p.wm-run{position:relative}
+/* top: the label's baseline in a 24 line sits 1.31 above the body's by the metrics, 1px as Chrome lays it (measured) */
+.wm-main :is(__IDS__) .wm-hang{position:absolute;right:calc(100% + var(--grid-gutter));top:1px;width:calc(2 * var(--col) + var(--grid-gutter));
+  text-align:right;font-weight:400;font-size:var(--type-label-size,.75rem);line-height:inherit;letter-spacing:var(--track-caps,.12em);
+  text-transform:uppercase;font-variation-settings:"GEOM" 100;color:var(--ink-3);text-wrap:balance}
+/* a chapter's number, hung: the head's own size, ink-3, its ink on the edge (the poster trim map, nearer 26 than 12's) */
+.wm-main :is(__IDS__) h2.wm-h2{position:relative}
+.wm-main :is(__IDS__) h2.wm-h2 > u.wm-hang{position:absolute;right:calc(100% + var(--grid-gutter) - 1em * var(--dt,0));top:0;width:auto;
+  font:inherit;line-height:inherit;letter-spacing:0;text-transform:none;font-variation-settings:normal;color:var(--ink-3);
+  text-decoration:none;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.wm-hang-t[data-d="0"]{--dt:0.0176}.wm-hang-t[data-d="1"]{--dt:0.0801}.wm-hang-t[data-d="2"]{--dt:0.0489}.wm-hang-t[data-d="3"]{--dt:0.0562}
+.wm-hang-t[data-d="4"]{--dt:0.0176}.wm-hang-t[data-d="5"]{--dt:0.0544}.wm-hang-t[data-d="6"]{--dt:0.0452}.wm-hang-t[data-d="7"]{--dt:0.0599}
+.wm-hang-t[data-d="8"]{--dt:0.0581}.wm-hang-t[data-d="9"]{--dt:0.0526}
+/* lists: the numeral or the dot hangs, the text hugs the column */
+/* prose lists only: a stage's lists (the pad scale's do / don't) keep their own */
+.wm-main :is(__IDS__) :is(ol,ul):not(.t-ui,[data-stage] *){list-style:none;margin-left:0;padding-left:0}
+.wm-main :is(__IDS__) :is(ol,ul):not(.t-ui,[data-stage] *) > li{position:relative;padding-left:0}
+.wm-main :is(__IDS__) ol:not(.t-ui,[data-stage] *){counter-reset:wm-li}
+.wm-main :is(__IDS__) ol:not(.t-ui,[data-stage] *) > li::before{counter-increment:wm-li;content:counter(wm-li);position:absolute;right:calc(100% + var(--grid-gutter) - 1em * .0787);top:0;
+  font-size:var(--type-label-size,.75rem);line-height:inherit;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.wm-main :is(__IDS__) ul:not(.t-ui,[data-stage] *) > li::before{content:"";position:absolute;right:calc(100% + var(--grid-gutter));top:calc(.5lh - 1.5px);width:3px;height:3px;border-radius:50%;background:var(--ink-3)}
+/* captions: the ui role, sentence case, ink-3, six columns at most */
+.wm-main .wm-body:is(__IDS__) :is(figcaption,.chip-cap,.gx-cap,.bs-cap,.bt-hdr-cap){font-family:var(--ui-font);font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);line-height:var(--lead-ui,15px);
+  letter-spacing:0;text-transform:none;font-variation-settings:normal;color:var(--ink-3);max-width:calc(6 * var(--col) + 5 * var(--grid-gutter))}
+/* THE RAIL ON THE COLUMNS: numerals hang right-aligned in the rail's first column, ink on the edge (--dt); labels start
+   on its second column, section and chapter sharing that edge (depth is case, not indent); the axis and the dot sit on
+   the first column's left edge */
+@media (min-width:1024px){
+  .wm-railcol{container-type:inline-size;--rc:calc((100cqw - 4 * var(--grid-gutter)) / 5)}
+  .wm-axis-in::before,.wm-axis-in::after{left:calc(var(--rail-hang) - 1px)}
+  .wm-lvl0,.wm-lvl1{display:grid;grid-template-columns:var(--rc) minmax(0,1fr);column-gap:var(--grid-gutter);align-items:baseline;margin-left:0}
+  .wm-lvl0 u,.wm-lvl1 u{justify-self:end;text-align:right;margin:0 calc(-1em * var(--dt,0)) 0 0;letter-spacing:0}
+  .wm-lvl0::before{left:-7px;width:14px}
+  .wm-lvl1::before{left:3px;width:6px}
+  .wm-lvl0.on::before,.wm-lvl1.on::before{left:-7px;width:14px}
+}
+u[data-d="0"]{--dt:0.0579}u[data-d="1"]{--dt:0.0995}u[data-d="4"]{--dt:0.037}
+u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="8"],u[data-d="9"]{--dt:0.0787}
+/* below 1024: no hang column to speak of; the numeral is a label before the kicker, the run-in a line above */
+@media (max-width:1023px){
+  .wm-main{--col:calc((100cqw - 11 * var(--grid-gutter)) / 12)}
+  .wm-main .wm-body:is(__IDS__){max-width:none}
+  .wm-main :is(__IDS__) :is(p,ul,ol,h2.wm-h2,h3.wm-h3,figcaption,pre){max-width:none}
+  .wm-sec-head,.wm-sec:first-of-type .wm-sec-head{margin-top:72px}
+  .wm-open{display:block}
+  .wm-open-r{margin-top:24px}
+  .wm-dg{position:static;font-size:var(--type-label-size,.75rem);line-height:inherit;margin-right:.5em;font-variation-settings:"GEOM" 100}
+  .wm-nums{max-width:none}
+  .wm-main :is(__IDS__) .wm-hang{position:static;display:block;width:auto;text-align:left;text-wrap:normal}
+  .wm-main :is(__IDS__) h2.wm-h2 > u.wm-hang{position:static;display:inline;margin-right:.4em}
+  .wm-main :is(__IDS__) :is(ol,ul):not(.t-ui,[data-stage] *){padding-left:var(--hangw)}
+  .wm-main :is(__IDS__) :is(ol,ul):not(.t-ui,[data-stage] *) > li::before{right:calc(100% + var(--grid-gutter))}
+}
+""".replace("__IDS__", ",".join(f"#s-{s['sid']}" for s in secs))
 
 # STAGES KEEP THEIR TYPE; THEIR HEADS ARE THE SHELL'S. A stage ([data-nosnap], build.py OFF_LINE)
 # sets its own leadings, so the snapper leaves it alone -- and that used to take its chapter heads
@@ -2337,11 +2517,18 @@ APPX = """
 })();
 """
 
+# A NUMBERED CHAPTER HANGS ITS NUMBER (Mark, 2026-10-09): the README's "N . Name" heads keep the name on
+# column 7 and put the numeral on the hang, in the head's own role and ink-3, ink on column 6's edge.
+def hang_h2_number(page):
+    return re.sub(r'(<h2 id="readme-c\d+" class="wm-h2")>(\d+) &#183; ',
+                  lambda m: f'{m.group(1)}><u class="wm-hang wm-hang-t" data-d="{m.group(2)[-1]}">{m.group(2)}</u>', page)
+
 page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 <style>{FONTS}{GRID_CSS}{SHELL}
 {CHROME_CSS}
 {css_parts}
 {HEADS_CSS}
+{GRAMMAR_CSS}
 </style>
 <div class="wm">
   <div class="wm-doc">
@@ -2353,7 +2540,7 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
     <p class="wm-eyebrow">wm-primitives &middot; the house system</p>
     <h1 class="wm-stack"><span class="wm-l1">Six<i></i></span><span
       class="wm-l2">laws.</span><span class="wm-l3">Every<i></i><svg class="wm-bendsvg" id="wmbend"
-      viewBox="0 0 300 560" aria-hidden="true"></svg><u class="wm-bendlbl" id="wmbendlbl"></u></span><span
+      viewBox="0 0 100 560" aria-hidden="true"></svg><u class="wm-bendlbl" id="wmbendlbl"></u></span><span
       class="wm-l4">surface.</span></h1>
     <div class="wm-close">
       <p class="wm-dek">Type, corners, circles, space, and color, each decided once and written
@@ -2400,6 +2587,7 @@ if not LINKED:
 
 out = (DOCS/"index.html" if LINKED else HERE/"wm-system.html")
 out.parent.mkdir(parents=True, exist_ok=True)
+page = hang_h2_number(page)
 out.write_text(page)
 print(f"wrote {out.name}: {len(page):,} bytes ({len(page)/1e6:.2f}MB)")
 if LINKED:
