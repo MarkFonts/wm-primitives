@@ -123,6 +123,84 @@ code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-h
 .gx-panel{grid-row:2 / 4;background:var(--surface-hi,#e6e6e6);padding-block:24px}
 .gx-stage{grid-row:2 / 4;background:repeating-linear-gradient(135deg,var(--ink-3,#999) 0 1px,transparent 1px 7px);opacity:.55}
 .gx-wide{grid-row:4;align-self:center}
+
+/* THE TRY-IT CARD. A box on the page's own columns: its stripes are the page's (the content's 18
+   from 1024, numbered 7-24 as the page numbers them; 12 below), so G lands exactly on them. Its
+   canvas draws the 3px lines faintly and the row's step -- the ui column's lead -- stronger, from
+   the shared first baseline. The words step with the column as the homepage's headline does:
+     1312 up      45/48 beside 12/24      step 24, the big lead two of it
+     1152-1311    39/42 beside 12/21      step 21
+     1024-1151    33/36 beside 12/18      step 18
+     681-1023     28/30 beside 12/15      step 15
+     phone        22/24, the column stacked under it at 12/18
+   The ui column is padded down by what puts its first baseline where the words' is without the row
+   rule's help (12, 15, 18, 21: the big line's baseline over its box top, less the small one's,
+   both after grid.css's nudge) -- padded, not given a margin, so both items keep one box top and
+   are one row to the snapper and the spec -- because the row rule moves only the first block and would open
+   the gap under the column's first paragraph by as much.
+   The caps are N x 3px tall and hang 6 under the baseline (3 below 1024). A button's baseline is
+   its letter's, wherever its box ends, so a tall cap set on the baseline opened its line (116 for
+   two lines of 48): it is set to the line's top instead, which cannot grow a line it is shorter
+   than, and moved down by --tc-top -- the line box's top over the baseline (its rounded ascent
+   plus the floored half-leading) less the cap's height above it -- with `top`, which moves the
+   glyphs and not the layout. */
+.gx-tc{margin:0 0 48px;--tc-key:21px;--tc-key-fs:12px;--tc-top:1px;--tc-n:12;--tc-first:1}
+.gx-tc-in{position:relative;overflow:hidden;background:var(--surface,#fff);border-radius:var(--radius,6px);padding-block:24px 36px}
+.gx-tc-cv{position:absolute;left:0;top:0;pointer-events:none}
+.gx-tc-cols{position:absolute;inset:0;padding-inline:inherit;display:grid;pointer-events:none;
+  grid-template-columns:repeat(var(--tc-n),minmax(0,1fr));column-gap:var(--grid-gutter,24px)}
+.gx-tc-cols > span{background:rgba(255,40,140,.045);border-inline:1px solid rgba(255,40,140,.22)}
+.gx-tc-cols u{display:block;padding-top:6px;text-align:center;text-decoration:none;font-size:9px;line-height:12px;
+  font-variant-numeric:tabular-nums;color:rgba(255,40,140,.7)}
+.gx-tc-row{position:relative;z-index:1;display:grid;align-items:start;padding-top:24px;
+  grid-template-columns:repeat(var(--tc-n),minmax(0,1fr));column-gap:var(--grid-gutter,24px)}
+.gx-tc-big{grid-column:2 / span 10;margin:0;font-size:22px;--lh:24px;line-height:var(--lh);font-weight:600;
+  font-variation-settings:"GEOM" 50;letter-spacing:0;color:var(--ink,#17181a);text-wrap:balance}
+.gx-tc-side{grid-column:2 / span 10;margin-top:24px}
+.gx-tc-side p{margin:0 0 18px;max-width:34ch;font-size:var(--type-ui-size,.75rem);--lh:18px;color:var(--ink-2,rgba(23,24,26,.62))}
+.gx-tc-side p:last-child{margin-bottom:0}
+.gx-tc-side b{color:var(--ink,#17181a);font-weight:600}
+.gx-tc .gx-key{display:inline-block;box-sizing:border-box;height:var(--tc-key);min-width:var(--tc-key);margin:0 .06em;
+  padding:0 calc(var(--tc-key) / 4);vertical-align:top;position:relative;top:var(--tc-top);
+  font:inherit;font-size:var(--tc-key-fs);line-height:calc(var(--tc-key) - 4px);font-weight:600;font-variation-settings:"GEOM" 100;
+  text-align:center;color:var(--ink,#17181a);background:var(--surface-hi,#ebebeb);cursor:pointer;
+  border:1px solid var(--ink-3,rgba(23,24,26,.38));border-bottom-width:3px;border-radius:calc(var(--tc-key) / 5);
+  transition:color .15s,background-color .15s,border-color .15s}
+.gx-tc .gx-key:hover{border-color:var(--ink,#17181a)}
+.gx-tc .gx-key[aria-pressed="true"]{color:var(--bg,#f4f4f4);background:var(--ink,#17181a);border-color:var(--ink,#17181a)}
+@media (min-width:681px){
+  .gx-tc{--tc-key:24px;--tc-key-fs:15px;--tc-top:3px}
+  .gx-tc-big{grid-column:2 / span 7;font-size:28px;--lh:30px}
+  .gx-tc-side{grid-column:9 / span 3;margin-top:0;padding-top:12px}
+  .gx-tc-side p{--lh:15px;margin-bottom:15px}
+}
+@media (min-width:1024px){
+  .gx-tc{--tc-key:30px;--tc-key-fs:18px;--tc-top:5px;--tc-n:18;--tc-first:7}
+  .gx-tc-in{padding-block:24px 48px}
+  .gx-tc-big{grid-column:2 / span 10;font-size:33px;--lh:36px}
+  .gx-tc-side{grid-column:13 / span 5;padding-top:15px}
+  .gx-tc-side p{--lh:18px;margin-bottom:18px}
+}
+@media (min-width:1152px){
+  .gx-tc{--tc-key:36px;--tc-key-fs:21px;--tc-top:3px}
+  .gx-tc-big{font-size:39px;--lh:42px}
+  .gx-tc-side{padding-top:18px}
+  .gx-tc-side p{--lh:21px;margin-bottom:21px}
+}
+@media (min-width:1312px){
+  .gx-tc{--tc-key:42px;--tc-key-fs:24px;--tc-top:2px}
+  .gx-tc-in{padding-block:24px 72px}
+  .gx-tc-big{font-size:45px;--lh:48px}
+  .gx-tc-side{padding-top:21px}
+  .gx-tc-side p{--lh:24px;margin-bottom:24px}
+}
+
+/* ?card=full: the same card as a screen -- one viewport tall (whole lines), the words on its
+   vertical middle, the stripes and lines running the height of the window. It cannot run to the
+   window's edges from here: every chapter is a .wm-body, position: relative and overflow-x: auto
+   (the shell's), so a box that leaves the content column is clipped by it -- the full bleed over
+   the rail is a shell change. */
+.gx-tc--full .gx-tc-in{height:round(down,100svh,3px);border-radius:0;display:flex;flex-direction:column;justify-content:center}
 </style>
 <body class="wm-lines">
 
@@ -134,8 +212,26 @@ its sample by its last line, a component moves whole. Everything on this page ou
 empty, and everything else starts on the seventh line and runs to the margin (below 1024 the rail is a bar
 and the copy takes all 12). <a href="https://github.com/MarkFonts/wm-primitives/blob/main/GRID.md">GRID.md</a>
 is the standard in words; <a href="grid.html">grid.html</a> is the bench it was cut on.</p>
-<p class="wm-try">Try it now: press <button type="button" class="wm-key" data-overlay="cols" aria-pressed="false">G</button> for the columns,
-<button type="button" class="wm-key" data-overlay="lines" aria-pressed="false">L</button> for the baseline &#8212; anywhere on this page, at any scroll.</p>
+<!-- THE TRY-IT CARD. The keys' invitation, set as a demonstration of what they draw: a box on
+     the page's own columns (its stripes are the page's columns, numbered as the page numbers
+     them, so G lands exactly on them), lines every 3px and the row's step drawn stronger, the
+     words in the display role beside a ui column that shares their first baseline. The caps are
+     the shell's .wm-key buttons, drawn big: the shell wires every .wm-key[data-overlay] and keeps
+     their aria-pressed in step with the keyboard. ?card=full sets the full-screen version. -->
+<div class="gx-tc" data-tc>
+  <div class="gx-tc-in">
+    <div class="gx-tc-cols" aria-hidden="true" data-nosnap></div>
+    <div class="gx-tc-row wm-baselines">
+      <h3 class="gx-tc-big">Press <button type="button" class="wm-key gx-key" data-overlay="cols" aria-pressed="false" aria-label="G, show the columns">G</button> for the columns, <button type="button" class="wm-key gx-key" data-overlay="lines" aria-pressed="false" aria-label="L, show the baseline">L</button> for the baseline &#8212; anywhere on the page.</h3>
+      <div class="gx-tc-side">
+        <p><b>G</b> lays the house columns over the page in pink &#8212; 24 from 1024, 12 below &#8212; from
+        the same three tokens as these stripes, so they land on them.</p>
+        <p><b>L</b> draws a hairline every 3px down the page. The words beside this lead at twice this
+        column&#8217;s lead, so each of their lines lands on every other one of these. Press again to hide.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <h2>Columns <span>24, and 12 below 1024</span></h2>
 <p><b>24.</b> It halves, thirds, quarters, sixths and eighths, and calsans splits its sections 5:7 three
@@ -265,6 +361,56 @@ of columns 11 and 24.</p>
   <div class="wm-grid wm-grid--bleed gx-sheet gx-over" style="--grid-cols:24;--grid-gutter:24px;--rows:24px 1fr 1fr 72px 24px;row-gap:24px"><i style="grid-column:1"></i><i style="grid-column:2"></i><i style="grid-column:3"></i><i style="grid-column:4"></i><i style="grid-column:5"></i><i style="grid-column:6"></i><i style="grid-column:7"></i><i style="grid-column:8"></i><i style="grid-column:9"></i><i style="grid-column:10"></i><i style="grid-column:11"></i><i style="grid-column:12"></i><i style="grid-column:13"></i><i style="grid-column:14"></i><i style="grid-column:15"></i><i style="grid-column:16"></i><i style="grid-column:17"></i><i style="grid-column:18"></i><i style="grid-column:19"></i><i style="grid-column:20"></i><i style="grid-column:21"></i><i style="grid-column:22"></i><i style="grid-column:23"></i><i style="grid-column:24"></i><div class="gx-panel" style="--start:1;--span:5;--start-md:1;--span-md:5"><p>Rail<small>column 1: one gutter in from the window</small></p></div><div class="gx-stage" data-nosnap style="--start:6;--span:14;--start-md:6;--span-md:14"></div><div class="gx-panel" style="--start:20;--span:5;--start-md:20;--span-md:5"><p>Inspector<small>column 24: one gutter from the right</small></p></div><p class="gx-wide" style="--start:1;--span:24;--start-md:1;--span-md:24">.wm-grid--bleed: no margin, ever &#8212; but never flush.</p></div></div></div>
 <p class="gx-cap">1440, a tool &#183; .wm-grid--bleed &#183; columns of 37 to the window's edges &#183; text one gutter (24) in where a box touches an edge</p>
 
+<script>
+(function(){
+  // THE TRY-IT CARD: its stripes (the page's columns, numbered as the page numbers them) and its
+  // lines -- every 3px from the root's top, where ?grid and L draw them, and the row's step
+  // stronger, counted both ways from the big text's first baseline.
+  var tc = document.querySelector('[data-tc]'); if (!tc) return;
+  if (/[?&]card=full\b/.test(location.search)) tc.classList.add('gx-tc--full');
+  var box = tc.querySelector('.gx-tc-in'), cols = tc.querySelector('.gx-tc-cols');
+  var big = tc.querySelector('.gx-tc-big'), side = tc.querySelector('.gx-tc-side p');
+  var cv = document.createElement('canvas'); cv.className = 'gx-tc-cv'; cv.setAttribute('aria-hidden', 'true');
+  box.insertBefore(cv, box.firstChild);
+  var probe = document.createElement('span'); probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+  function stripes(){
+    var cs = getComputedStyle(tc), n = parseInt(cs.getPropertyValue('--tc-n'), 10) || 12, f = parseInt(cs.getPropertyValue('--tc-first'), 10) || 1;
+    if (cols.getAttribute('data-k') === n + '/' + f) return;
+    cols.setAttribute('data-k', n + '/' + f);
+    var h = ''; for (var i = 0; i < n; i++) h += '<span><u>' + (f + i) + '</u></span>';
+    cols.innerHTML = h;
+  }
+  function draw(){
+    stripes();
+    var dpr = window.devicePixelRatio || 1, root = box.closest('.wm-lines') || box;
+    var r = box.getBoundingClientRect(), off = r.top - root.getBoundingClientRect().top;
+    var bl = parseFloat(getComputedStyle(root).getPropertyValue('--bl')) || 3;
+    cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px';
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    var g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height);
+    g.fillStyle = 'rgba(40,120,255,.11)';
+    for (var k = Math.ceil(off / bl); (k * bl - off) < r.height + bl; k++)
+      g.fillRect(0, Math.round(k * bl * dpr) - Math.round(off * dpr) - 1, cv.width, 1);
+    // the step: the ui column's lead where it stands beside the words, the words' own lead where it stacks
+    var t = big.firstChild; while (t && !(t.nodeType === 3 && t.textContent.trim())) t = t.nextSibling;
+    if (!t) return;
+    big.insertBefore(probe, t); var y0 = probe.getBoundingClientRect().top - r.top; probe.remove();
+    var sb = side.getBoundingClientRect(), bb = big.getBoundingClientRect();
+    var step = parseFloat(getComputedStyle(sb.top < bb.bottom - 1 ? side : big).lineHeight) || 24;
+    g.fillStyle = 'rgba(40,120,255,.42)';
+    for (var y = y0 - Math.floor(y0 / step) * step; y < r.height; y += step)
+      g.fillRect(0, Math.round(y * dpr) - 1, cv.width, Math.max(1, Math.round(dpr / 2)));
+  }
+  var raf = 0;
+  function redraw(){ cancelAnimationFrame(raf); raf = requestAnimationFrame(draw); }
+  addEventListener('resize', redraw);
+  if (document.fonts) document.fonts.ready.then(redraw);
+  if ('ResizeObserver' in window) new ResizeObserver(redraw).observe(box.closest('.wm-lines') || box);
+  // the snapper writes its remainder inline on the words: redraw from where it put them
+  new MutationObserver(redraw).observe(big, { attributes: true, attributeFilter: ['style'] });
+  draw();
+})();
+</script>
 <script>
 (function(){
   // the sheets: a real width, scaled to the column it has here
