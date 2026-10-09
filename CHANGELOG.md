@@ -12,6 +12,26 @@ Newest first.
 
 ---
 
+## 2026-10-08 -- the system page: Type's content pass
+
+**One home for each idea.** The waterfall and the grid's "seven roles" were two tables of the same
+seven roles; they are one chapter now, on the line, with size, leading, units and what each role
+spends side by side. The geom chapter is its own, the two-signals pair moved under the budget, and
+"opsz is free" is said once, in its own chapter. The grid's nine recommendations are three sentences
+(GRID.md has the list); class names, check numbers, file paths and decl counts left the reader copy.
+Code is the Face at GEOM 0 across the section, the GEOM chart's lettering included, and the chart's
+UI pad reads 16-34 like src/type.ts. No display, title or label head is 600 any more. The stage pages
+of 02-05 set their running text in the body or ui role, so it sits on the line.
+
+**History that left the page.**
+- Audited 2026-08-07 across wordmark.nyc, ReCal, font-proofer and wm-primitives (the footer).
+- The correction: the label role was 10px, uppercase, wght 500 and 0.62 ink -- four signals for one
+  idea ("minor" four times). Now it sits at ui size in full ink and differs by case alone, with caps
+  tracking as the compensation. TYPOGRAPHY.md says the same.
+- Getting there (the phases) is in NEXT.md I.
+
+---
+
 ## 2026-10-08 -- the system page: one opener, one h2, one h3
 
 **Five heading treatments became three levels.** Type alone had a 45px bold h1, a 26px semibold

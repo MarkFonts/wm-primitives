@@ -63,7 +63,7 @@
 /* ── the study's furniture (buttons.html .bt-fam / .bt-rack / .bt-panel), restated ── */
 .bs-fam-head{ margin: 0; }   /* the h3 inside is the shell's sub-subject: its margins, its note in a span */
 .bs-fam-head h3{ margin: 0; font-size: 1.125rem; font-weight: 500; }
-.bs-thesis{ max-width: 44em; font-size: .9375rem; line-height: 1.55; margin: 0 0 1.25rem; opacity: .8; }
+.bs-thesis{ max-width: 44em; font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px); margin: 0 0 24px; opacity: .8; }
 .bs-rack{ display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
   gap: 1px; background: var(--border); }
 .bs-panel{ background: var(--bg); padding: 1.125rem 1.25rem 1.375rem; min-width: 0;
@@ -76,7 +76,7 @@
 .bs-row{ display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
 .bs-row + .bs-row{ margin-top: .625rem; }
 .bs-stack{ display: flex; flex-direction: column; gap: 1.5rem; align-items: flex-start; }
-.bs-cost{ font-size: .8125rem; line-height: 1.45; color: var(--text-muted); margin: 1rem 0 0; max-width: 46em; }
+.bs-cost{ font-size:var(--type-ui-size,.75rem);line-height:var(--type-ui-lead,15px); color: var(--text-muted); margin: 15px 0 0; max-width: 46em; }
 .bs-cost b{ color: var(--text); font-weight: 500; }
 .bs-page > .bs-cost{ color: inherit; opacity: .8; }
 .bs-st{ display: grid; grid-template-columns: auto 1fr; gap: .5rem .875rem; align-items: center; }
@@ -119,7 +119,7 @@
    the study is set in weight, not with a rule. */
 .bs-page a{ color: inherit; text-decoration: none; font-weight: 600; }
 .bs-page a:hover{ opacity: .75; }
-.bs-lede{ max-width: 46em; font-size: .9375rem; line-height: 1.55; margin: 0 0 1rem; opacity: .8; }
+.bs-lede{ max-width: 46em; font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px); margin: 0 0 24px; opacity: .8; }
 .bs-lede code, .bs-thesis code{ font-size: .92em; }
 .bs-quote{ max-width: 46em; margin: 0 0 1rem; padding: 0 0 0 1rem; font-size: .9375rem;
   line-height: 1.55; box-shadow: inset 2px 0 0 currentColor; }

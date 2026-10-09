@@ -4,7 +4,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:#0f0f0f;color:#e8e8e8;font-family:"CalSansVF",system-ui,sans-serif;
  font-optical-sizing:auto;font-variation-settings:"GEOM" 25;padding:32px 28px 90px}
-h1{font-size:23px;margin:0 0 5px} .lede{color:#999;font-size:13px;margin:0 0 22px;max-width:84ch}
+h1{font-size:23px;margin:0 0 5px} .lede{color:#999;font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px);margin:0 0 24px;max-width:84ch}
 h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:34px 0 12px;padding-bottom:7px;
  border-bottom:1px solid #222;display:flex;justify-content:space-between}
 h2 span{color:#666;letter-spacing:0;text-transform:none;font-size:10px}
@@ -58,13 +58,14 @@ th{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:#666;font-w
      group labels, glyph captions. Things pinned to something else that name it. It sat at
      8px, where exactly one declaration used it, while the real annotations were at 9 and
      10 — so 9 is where they actually live, and 8 was a size we were not using. ---- */
-  --type-micro-size: 0.5625rem;   --type-micro-lead: 1.2;    /*   9px */
-  --type-label-size: 0.75rem;     --type-label-lead: 1.3;    /*  12px */
-  --type-ui-size: 0.75rem;        --type-ui-lead: 1.4;       /*  12px */
-  --type-body-size: 1rem;         --type-body-lead: 1.55;    /*  16px */
-  --type-lede-size: 1.125rem;     --type-lede-lead: 1.5;     /*  18px */
-  --type-title-size: 1.625rem;    --type-title-lead: 1.2;    /*  26px */
-  --type-display-size: 2.8125rem; --type-display-lead: 1.1;  /*  45px */
+  --type-micro-size: 0.5625rem;   --type-micro-lead: round(nearest, 1.3em, var(--bl));    /*  9 / 12px */
+  --type-label-size: 0.75rem;     --type-label-lead: round(nearest, 1.25em, var(--bl));   /* 12 / 15px */
+  --type-ui-size: 0.75rem;        --type-ui-lead: round(nearest, 1.25em, var(--bl));      /* 12 / 15px */
+  --type-body-size: 1rem;         --type-body-lead: round(nearest, 1.5em, var(--bl));     /* 16 / 24px */
+  --type-lede-size: 1.125rem;     --type-lede-lead: round(nearest, 1.5em, var(--bl));     /* 18 / 27px */
+  --type-title-size: 1.625rem;    --type-title-lead: round(nearest, 1.15em, var(--bl));   /* 26 / 30px */
+  --type-display-size: 2.8125rem; --type-display-lead: round(nearest, 1.12em, var(--bl)); /* 45 / 51px */
+  --bl: 3px;
 
   /* ---- poster: the monster scale, ratio root-2 so every second step doubles.
      Sets size and leading only — never an axis — so it serves any face. ---- */
@@ -2127,7 +2128,7 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
   font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
 .cap-hd b{color:#e8e8e8;font-weight:400}
 
-.dd-note{font-size:12.5px;line-height:1.5;color:var(--text-muted,#999);margin:14px 0 0;max-width:70ch}
+.dd-note{font-size:var(--type-ui-size,.75rem);line-height:var(--type-ui-lead,15px);color:var(--text-muted,#999);margin:15px 0 0;max-width:70ch}
 .dd-note b{color:var(--text,#e8e8e8);font-weight:600}
 </style>
 <h1>The padding scale</h1>

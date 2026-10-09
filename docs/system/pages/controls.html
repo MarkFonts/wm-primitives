@@ -140,7 +140,8 @@
    figures, auto-fit re-solves every track, and the headline in EVERY card slides.
    The value should move the field, not the page. */
 .card{ min-width: 0; background: var(--panel); padding: 1.5rem 1.5rem 1.75rem; display: flex; flex-direction: column; }.card-head{ display: flex; justify-content: space-between; align-items: baseline;
-  gap: 1rem; margin-bottom: 1.25rem; }.card-name{ font-family: var(--serif); font-size: 1.25rem; margin: 0; }.card-idx{ font-family: var(--mono); font-size: .625rem; letter-spacing: .14em; color: var(--accent); }.card-note{ font-size: .8125rem; line-height: 1.45; color: var(--muted); margin: 1.25rem 0 0; }.card-note b{ color: var(--ink-2); font-weight: 500; }.rig{ flex: 1; }
+  gap: 1rem; margin-bottom: 1.25rem; }.card-name{ font-family: var(--serif); font-size: 1.25rem; font-weight: 400; margin: 0; }.card-idx{ font-family: var(--mono); font-size: .625rem; letter-spacing: .14em; color: var(--accent); }.card-note{ font-size:var(--type-ui-size,.75rem);line-height:var(--type-ui-lead,15px); color: var(--muted); margin: 21px 0 0; }
+.lede{ font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px); }.card-note b{ color: var(--ink-2); font-weight: 500; }.rig{ flex: 1; }
 /* The RAIL's two jobs, which the component cannot do for itself (DIAL.md §5):
    - give the rows a width to fill, or each sizes to its own content and the values stop
      sharing a right edge (R1)

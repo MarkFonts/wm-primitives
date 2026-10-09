@@ -1,0 +1,9 @@
+Type section content pass: one roles chapter, geom on its own, hygiene, prose on the line
+
+Merges the waterfall and the grid roles into one table on the line; geom is its own
+chapter; Recommendations is three sentences; Getting there, the audit date and The
+correction move to NEXT.md and CHANGELOG.md; code is the Face at GEOM 0 (chart too, UI
+pad 16-34); no 600 on display/title/label heads; favicon captions cut; stage pages of
+02-05 set running text in the body/ui role (space.html tokens were stale).
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>

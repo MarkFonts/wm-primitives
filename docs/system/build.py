@@ -101,8 +101,8 @@ APPENDIX = {"usage"}
 # becomes an h2 chapter where it names a part (build_section).
 OPENERS = {
     "readme":   "The promise: every control works and renders the same, from one source.",
-    "type":     "Seven roles, one signal each. Every size on this page is set by the token it documents, "
-                "and nothing differs from its neighbour in more than one way at a time.",
+    "type":     "Seven roles, one signal each, and nothing differs from its neighbour in more than one way "
+                "at a time. The prose and the chrome on this page are set in them; a figure drawn to scale says so.",
     "corners":  "One curve, superellipse(1.2), and a radius ladder of 2\u1d4f. The circles are the exceptions, "
                 "listed so nothing else can claim to be one.",
     "controls": "One dial, drawn five ways, and the controls that grew around it. Each answers a press "
@@ -534,7 +534,7 @@ GEOM_TOKENS = """<style>
   --g-onfg:#ffffff; --g-onfg:oklch(100.00% 0 0);
   --g-ui:#242424; --g-ui:oklch(26.03% 0 0);
 }
-.mono{font-family:"PaperMono",ui-monospace,SFMono-Regular,Menlo,monospace}
+.mono{font-family:"Face",system-ui,sans-serif;font-variation-settings:"GEOM" 0;font-feature-settings:"tnum" 1,"zero" 1}
 </style>
 """
 
@@ -558,6 +558,29 @@ def build_type_page():
               "onfg","a11y","ui","base","geo"):
         svg = svg.replace(f"var(--{t})", f"var(--g-{t})")
     svg = svg.replace('id="card"','id="geom-card"').replace('url(#card)','url(#geom-card)')
+    # The chart's lettering is the Face at GEOM 0, as every code pill in the section is; its labels
+    # read as words (no OpenType tags, no flags), and the UI pad is 16-34, which is src/type.ts's.
+    svg = re.sub(r"\.mono \{ font-family:'PaperMono'[^}]*\}",
+                 '.mono { font-family:"Face", sans-serif; font-variation-settings:"GEOM" 0; font-feature-settings:"tnum" 1,"zero" 1; }', svg)
+    for old, new in (
+        ("CAL SANS v2.000 · GEOM AXIS · 4 LANDINGS / 3 TRANSITIONS · UI=DEFAULT", "CAL SANS · THE GEOM AXIS · FOUR LANDINGS, THREE TRANSITIONS"),
+        ("15 GROUPS · rclt · 6 AXES (+ital)", "15 GROUPS OF GLYPHS"),
+        ("15–34  UI", "16–34  UI"),
+        ('<rect x="401.6" y="220" width="308.56000000000006" height="1376" fill="var(--g-ui)" opacity="0.07"/>',
+         '<rect x="417.84" y="220" width="292.32" height="1376" fill="var(--g-ui)" opacity="0.07"/>'),
+        ('<text class="mono" x="401.6" y="210" font-size="22" fill="var(--g-ui)" text-anchor="start"',
+         '<text class="mono" x="417.84" y="210" font-size="22" fill="var(--g-ui)" text-anchor="start"'),
+        ('<rect x="401.6" y="236" width="308.56000000000006" height="8" fill="var(--g-ui)" opacity="0.85" rx="1"/>',
+         '<rect x="417.84" y="236" width="292.32" height="8" fill="var(--g-ui)" opacity="0.85" rx="1"/>'),
+        ('<rect x="320.4" y="236" width="81.20000000000005" height="8" fill="url(#hatch)"/>',
+         '<rect x="320.4" y="236" width="97.44" height="8" fill="url(#hatch)"/>'),
+        ('<line x1="401.6" y1="244" x2="401.6" y2="252" stroke="var(--g-ui)" stroke-width="1.5"/>',
+         '<line x1="417.84" y1="244" x2="417.84" y2="252" stroke="var(--g-ui)" stroke-width="1.5"/>'),
+        ('<text class="mono" x="401.6" y="270" font-size="22" fill="var(--g-ui)" text-anchor="middle">15</text>',
+         '<text class="mono" x="417.84" y="270" font-size="22" fill="var(--g-ui)" text-anchor="middle">16</text>'),
+    ):
+        assert svg.count(old) == 1, old
+        svg = svg.replace(old, new)
     svg = svg.replace('id="hatch"','id="geom-hatch"').replace('url(#hatch)','url(#geom-hatch)')
     for t in ("a11y","base","geo","ui","fg"):
         svg = re.sub(r'(fill|stroke)="var\(--g-%s\)"([^/>]*?)\s*opacity="0\.07"'%t,
@@ -727,7 +750,7 @@ WIP_CSS = """
   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
   transition:border-color .15s,background-color .15s}
 .wip-card:hover{border-color:var(--ink-3)}
-.wip-card b{display:block;font-size:var(--type-lede-size,1.125rem);font-weight:600;line-height:1.3;margin:0 0 6px;color:var(--ink)}
+.wip-card b{display:block;font-size:var(--type-lede-size,1.125rem);font-weight:400;line-height:1.3;margin:0 0 6px;color:var(--ink)}
 .wip-card i{display:block;font-style:normal;font-size:var(--type-ui-size,.75rem);line-height:1.5;color:var(--ink-2);max-width:56ch}
 .wip-card u{position:absolute;top:18px;right:20px;text-decoration:none;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 """
@@ -735,13 +758,13 @@ WIP_CSS = """
 # ground it is for. The files are docs/favicons/ (scripts/make-favicon.py); they are
 # inlined as data: images so the self-contained build carries them too, and so each SVG's
 # own <style> (a bare `path, polygon` rule) cannot reach the page.
-FAVICONS = [  # (file stem, app, how its two letters were set)
-    ("wmfp", "font-proofer",  "F, P.ss01"),
-    ("wmgd", "GliffDiff",     "G.ss01, D.ss01"),
-    ("wmop", "opsz-proofer",  "O.ss01, P.ss01"),
-    ("wmpr", "wm-primitives", "P.ss01, R.ss06"),
-    ("wmwm", "WORDMAKE",      "W, M.ss05"),
-    ("wmcs", "ReCal",         "C.ss01, S.ss01"),
+FAVICONS = [  # (file stem, app, the sets its two letters are drawn in)
+    ("wmfp", "font-proofer",  "F default, P set 1"),
+    ("wmgd", "GliffDiff",     "G set 1, D set 1"),
+    ("wmop", "opsz-proofer",  "O set 1, P set 1"),
+    ("wmpr", "wm-primitives", "P set 1, R set 6"),
+    ("wmwm", "WORDMAKE",      "W default, M set 5"),
+    ("wmcs", "ReCal",         "C set 1, S set 1"),
 ]
 # Comments stay out of FAV_CSS: the chapter scoper splits on "}" and prefixes #s-type, so a
 # comment in front of an @media eats the prefix and the rule inside loses on specificity.
@@ -750,8 +773,9 @@ FAVICONS = [  # (file stem, app, how its two letters were set)
 # The specimen is drawn in currentColor, so it follows the theme; alternates carry the accent rule.
 FAV_CSS = """
 .fav{max-width:1080px}
-.fav>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2);max-width:72ch}
-.fav>p b{color:var(--ink);font-weight:600}
+.fav>p{font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px);margin:0 0 24px;color:var(--ink-2);max-width:66ch}
+.fav>p b{color:var(--ink);font-weight:400}
+.fav>p.fav-note{font-size:var(--type-ui-size,.75rem);line-height:var(--type-ui-lead,15px);color:var(--ink-3);margin:15px 0 0;max-width:none}
 .fav-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:0;padding:0;list-style:none}
 @media (max-width:900px){.fav-grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:520px){.fav-grid{grid-template-columns:1fr}}
@@ -760,18 +784,16 @@ FAV_CSS = """
 .fav-tile--light{background:#fff}
 .fav-tile--dark{background:#0f0f0f}
 .fav-tile img{width:58%;height:auto;display:block}
-.fav-cap{margin-top:10px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
-.fav-cap b{font-size:var(--type-ui-size,.75rem);font-weight:600;letter-spacing:var(--track-caps,.12em);color:var(--ink)}
-.fav-cap i{font-style:normal;font-size:var(--type-ui-size,.75rem);color:var(--ink-2)}
-.fav-cap u{text-decoration:none;font-size:var(--type-micro-size,.5625rem);color:var(--ink-3);width:100%}
+.fav-cap{margin-top:10px;display:flex;gap:4px 8px;align-items:baseline;flex-wrap:wrap}
+.fav-cap b{font-size:var(--type-ui-size,.75rem);font-weight:400;color:var(--ink)}
+.fav-cap span{font-size:var(--type-ui-size,.75rem);color:var(--ink-3)}
 .fav-tag{display:flex;justify-content:space-between;margin-top:6px;font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}
-.fav>p.fav-sub{margin:48px 0 16px;line-height:1.4;max-width:none;font-size:var(--type-micro-size,.5625rem);letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3)}
+.fav>h3{margin-top:48px}
 .fav-caps{display:grid;grid-template-columns:repeat(13,1fr);gap:18px 10px;margin:0;padding:0;list-style:none;color:var(--ink)}
 .fav-caps li{display:flex;flex-direction:column;align-items:center;gap:8px}
 .fav-caps svg{width:100%;height:auto;display:block;fill:currentColor;overflow:visible}
 .fav-caps u{text-decoration:none;font-size:var(--type-micro-size,.5625rem);color:var(--ink-3);border-top:2px solid transparent;padding-top:4px;min-width:18px;text-align:center}
 .fav-caps .alt u{border-top-color:var(--accent,currentColor);color:var(--ink-2)}
-.fav-caps i{font-style:normal;font-size:var(--type-micro-size,.5625rem);color:var(--ink-3);margin-top:-4px}
 @media (max-width:720px){.fav-caps{grid-template-columns:repeat(7,1fr)}}
 """
 
@@ -783,27 +805,27 @@ def favicons_html():
         f'<div class="fav-tile fav-tile--light"><img alt="{stem.upper()}, light" src="{uri(stem, "light")}"></div>'
         f'<div class="fav-tile fav-tile--dark"><img alt="{stem.upper()}, dark" src="{uri(stem, "dark")}"></div></div>'
         f'<div class="fav-tag"><span>light</span><span>dark</span></div>'
-        f'<div class="fav-cap"><b>{stem.upper()}</b><i>{app}</i><u>{how}</u></div></li>'
+        f'<div class="fav-cap"><b>{app}</b><span>{how}</span></div></li>'
         for stem, app, how in FAVICONS)
     import json
     spec = json.loads((DOCS/"favicons"/"ss01-uppercase.json").read_text())
-    n1 = sum(1 for g in spec["glyphs"] if g["set"] == "ss01")
-    n6 = sum(1 for g in spec["glyphs"] if g["set"] == "ss06")
     caps = "".join(
         f'<li class="{"alt" if g["set"] else ""}"><svg viewBox="0 -780 {g["advance"]} 860" aria-label="{g["glyph"]}">'
-        f'<path d="{g["d"]}"/></svg><u>{g["char"]}</u><i>{(g["set"] or "default").replace("ss0", "set ")}</i></li>'
+        f'<path d="{g["d"]}"/></svg><u>{g["char"]}</u></li>'
         for g in spec["glyphs"])
-    return ('<h2 class="fav-h">The favicons <span>WM Mono, light and dark</span></h2>'
-            '<div class="fav" id="favicons"><p><b>Four letters, two of them always the same.</b> Every app&#8217;s '
-            'icon is the drawn WM over its own two letters set in WM Mono, one scale, each letter widened to its '
-            'cell &#8212; mostly the square set 1. The capitals below are the house pick of the font&#8217;s sets.</p>'
-            f'<p class="fav-sub">WM Mono capitals &#183; set 6 for {n6} ({"".join(g["char"] for g in spec["glyphs"] if g["set"] == "ss06")}; '
-            f'its M and W are the drawn WM), set 1 for {n1}, the rest default</p>'
+    s6 = " ".join(g["char"] for g in spec["glyphs"] if g["set"] == "ss06")
+    s1 = " ".join(g["char"] for g in spec["glyphs"] if g["set"] == "ss01")
+    return ('<h2>The favicons <span>WM Mono, light and dark</span></h2>'
+            '<div class="fav" id="favicons"><p><b>The drawn WM over two letters.</b> Every app&#8217;s icon is the drawn WM '
+            'above its own two letters, set in WM Mono at one scale and each letter widened to its cell &#8212; '
+            'mostly the square set 1.</p>'
+            '<h3>The capitals</h3>'
             f'<ul class="fav-caps">{caps}</ul>'
-            '<p class="fav-sub">The lockups &#183; light and dark</p>'
-            '<p>A page links the ink file, which turns itself white under a dark scheme; these are the two fixed '
-            'colourways, each on the ground it is for. All of them, ink included, are in <code>favicons/</code>, and '
-            '<code>scripts/make-favicon.py</code> builds another.</p>'
+            f'<p class="fav-note">Stylistic sets, marked by the rule above a letter: set 6 (ss06) for {s6}, whose M and W are the drawn WM; '
+            f'set 1 (ss01) for {s1}; the rest default.</p>'
+            '<h3>The lockups</h3>'
+            '<p>Light and dark are the two fixed colourways, each shown on the ground it is for. A page links one file, '
+            'which turns itself white under a dark scheme.</p>'
             f'<ul class="fav-grid">{cards}</ul></div>')
 
 def wip_html():
@@ -1075,7 +1097,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-stats{display:flex;flex-wrap:wrap}
 .wm-stat{padding:0 26px;border-left:1px solid var(--line)}
 .wm-stat:first-child{padding-left:0;border-left:none}
-.wm-stat b{display:block;font-size:30px;line-height:1;font-weight:600;letter-spacing:-.02em;
+.wm-stat b{display:block;font-size:30px;line-height:1;font-weight:400;letter-spacing:-.02em;
   font-variant-numeric:tabular-nums;color:var(--ink);font-variation-settings:"GEOM" 50}
 .wm-stat i{display:block;font-style:normal;font-size:12px;color:var(--ink-3);margin-top:9px}
 /* The one button on the poster, and it is not a law: the door to the pages still being
@@ -1215,6 +1237,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-nums-row{display:grid;grid-template-columns:repeat(4,1fr);margin-top:9px;background:var(--surface);border-radius:8px;overflow:hidden}
 .wm-num{display:flex;flex-direction:column;gap:6px;padding:15px 18px;box-shadow:inset 1px 0 var(--line)}
 .wm-num:first-child{box-shadow:none}
+.wm-num b{font-weight:400}
 .wm-num b{font-weight:400;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title);font-variant-numeric:tabular-nums}
 .wm-num.is-goal b{color:var(--signal)}
 .wm-num span{font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);line-height:var(--lead-ui);color:var(--ink-2)}
@@ -2254,16 +2277,21 @@ HEADS_CSS = """
 # marked data-nosnap itself, a child that does is opened the same way, and the heads are left on
 # the line. Before gridSnap.js's first pass, so it never measures the stage as a whole. A box that
 # has text of its own cannot be opened (it would be measured, and moved, as one block): it stays
-# a stage, and says so in the console.
+# a stage, and says so in the console. Two things stay ON the line inside a stage: a box marked
+# data-online (the table of roles, which is about the line), and a paragraph of the stage's own prose
+# whose leading is whole 3px units -- prose may not sit between the lines, a figure may.
 STAGES = """
 (function(){
   var HEADS='h2.wm-h2,h3.wm-h3';
   function own(el){ for(var n=el.firstChild;n;n=n.nextSibling) if(n.nodeType===3&&n.textContent.trim()) return true; return false; }
+  function whole(el){ var v=parseFloat(getComputedStyle(el).lineHeight); return v>0 && Math.abs(v/3-Math.round(v/3))<0.001; }
   function open(el){
     if(own(el)){ console.warn('stage kept whole (it has text of its own):', el); return; }
     el.removeAttribute('data-nosnap');
     [].forEach.call(el.children,function(c){
       if(c.matches(HEADS)) return;
+      if(c.hasAttribute('data-online')) return;               // a table of roles: on the line by design
+      if(c.tagName==='P' && whole(c)) return;                   // prose in whole 3px units is prose, on the line
       if(c.querySelector(HEADS)) open(c); else c.setAttribute('data-nosnap','');
     });
   }
