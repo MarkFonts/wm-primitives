@@ -323,6 +323,7 @@ light (G31).
 | G89 | zoom lozenge press (G72), the `0` key, a non-collapsing mark (G59) | the reset to 100 blinks the **lozenge's** fill, while it slides home. Shut, the reset shows on the note (G73) and nothing blinks. **Open / close (G67) does not confirm**: the morph's first beat fills the same mark (FILL 0 → 1, 0–120ms, Web Animations) and would override the blink — the morph is its receipt | click-confirm |
 | G90 | theme mark (G38), alignment mark, chip, row, stop, `fit-switch`, the auto switch | confirmed in the primitive's own handler. A React button that rewrites its `className` on the result (an `.active` mark) re-asserts the class after the microtask and the next frame, so the receipt survives the render | click-confirm |
 | G91 | `GlyphPicker`'s copy (SLIDERS.md row 8) | the filled, active `content_copy` blinks off 80 / on 80, **then** becomes `check` at 160. It was its own 260ms slow fill; it is the house confirm now, and still fills before it swaps | click-confirm |
+| G92 | press (`:active`) on a chip, a mark (`.wm-icon-btn`: the theme marks, the zoom's marks, the alignments) or the lozenge | the **acknowledgement**, snapped on, so the confirm's off phase has a look to undo. Chip: a pill, so not corners.css's inset ring (it ignores `corner-shape`) — the edge goes to the fill's ink over a 12% wash. Mark: the **hover rung** (ink-quiet, GRAD +50) — no box, no disc; never on an already active mark (G51). Lozenge: its ink goes to the end of the ramp (white on dark, black on light). A chosen chip takes none: it is already filled | press-ack |
 
 **Where the call lives.** Wired: `ThemeSwitch` and `mountThemeSwitch` (theme.js), `Fitting`
 (alignments, Swiss Rag, Hyphenate), `StopSlider` (a stop), `StyleScopeDropdown` (a row, the
@@ -332,9 +333,6 @@ reset) and `dialHandle.js` (the auto switch) — the two plain scripts through
 **The host's:** `.wm-btn` and `.wm-chip` have no script — the app calls `wmConfirm(button)` in
 its own handler, after the work succeeded; the same for the case study's `.ui-*`.
 
-**Not promised (§14).** A confirm for a press with no press look: a chip, a mark and the
-lozenge have no `:active` paint, so for one being newly chosen the 0–80 off phase is the look
-it already had — it reads as the result arriving 80ms late and blinking once, not as a
-press undone. Whether those get an acknowledgement is open. The `--switch` chip's dashed rest
-edge is not restored in the off phase (border-style cannot be multiplied); it blinks solid.
-
+**Not promised (§14).** The `--switch` chip keeps its **dashed** edge through the whole blink:
+dashed is its rest look, and the receipt must not solidify it (Mark has not ruled; the rest look
+is the safe one).

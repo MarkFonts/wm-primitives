@@ -12,9 +12,11 @@
  * (opsz 12, wght 400 at rest / 600 chosen) with fontTools. The loop:
  *     Text chosen, hold . press Display: it is chosen, its fill OFF one phase, ON one phase,
  *     settled, hold . press Text: the same . back to the start
- * Each chip is three drawings -- rest (outline, regular), off (outline, bold: the weight does
- * not blink), chosen (fill, bold, ground ink) -- switched by opacity on steps, never faded,
- * because the confirm is a blink. currentColor plus a prefers-color-scheme rule. */
+ * Each chip is four drawings -- rest (outline, regular), pressed (the :active acknowledgement,
+ * G92: the edge in full ink over a 12% wash), off (outline, bold: the weight does not blink),
+ * chosen (fill, bold, ground ink) -- switched by opacity on steps, never faded, because the
+ * confirm is a blink. The press is held for two phases before the release, so the loop reads
+ * press -> undo -> redo -> settle. currentColor plus a prefers-color-scheme rule. */
 import { chromium } from '@playwright/test'
 import { createServer } from 'node:http'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
@@ -76,36 +78,38 @@ const r2 = n => Math.round(n * 100) / 100
 const path = d => d.replace(/-?\d+\.\d+/g, m => String(r2(+m)))
 
 /* the loop, in ms: [0, A) Text chosen; A Display pressed; B Text pressed; T back to the start */
-const A = HOLD, B = A + 2 * P + SETTLE, T = B + 2 * P + SETTLE
+const PRESS = 2 * P   // how long the press is held before the release that confirms
+const A = HOLD + PRESS, B = A + 2 * P + SETTLE + PRESS, T = B + 2 * P + SETTLE
 const pct = ms => `${r2(ms / T * 100)}%`
-// a chip's state at each moment: which of its three drawings shows
+// a chip's state at each moment: which of its four drawings shows
 function states(i) {
   return i === 1
-    ? [[0, 'rest'], [A, 'off'], [A + P, 'on'], [B, 'rest']]
-    : [[0, 'on'], [A, 'rest'], [B, 'off'], [B + P, 'on']]
+    ? [[0, 'rest'], [A - PRESS, 'pressed'], [A, 'off'], [A + P, 'on'], [B, 'rest']]
+    : [[0, 'on'], [A, 'rest'], [B - PRESS, 'pressed'], [B, 'off'], [B + P, 'on']]
 }
 const PAD = 6, W = Math.ceil(geo.w + 2 * PAD), H = Math.ceil(geo.h + 2 * PAD)
 const css = [], body = []
-const rect = (c, cls) => `<rect class="${cls}" x="${r2(PAD + c.x + (cls === 'edge' ? .5 : 0))}" y="${r2(PAD + c.y + (cls === 'edge' ? .5 : 0))}" width="${r2(c.w - (cls === 'edge' ? 1 : 0))}" height="${r2(c.h - (cls === 'edge' ? 1 : 0))}" rx="${r2(c.r - (cls === 'edge' ? .5 : 0))}"/>`
+const rect = (c, cls) => `<rect class="${cls}" x="${r2(PAD + c.x + (cls.startsWith('edge') ? .5 : 0))}" y="${r2(PAD + c.y + (cls.startsWith('edge') ? .5 : 0))}" width="${r2(c.w - (cls.startsWith('edge') ? 1 : 0))}" height="${r2(c.h - (cls.startsWith('edge') ? 1 : 0))}" rx="${r2(c.r - (cls.startsWith('edge') ? .5 : 0))}"/>`
 const label = (c, word, w, cls) => { const g = G[`${word}:${w}`]; return `<path class="${cls}" transform="translate(${r2(PAD + c.cx - g.w / 2)} ${r2(PAD + c.top + G.asc)})" d="${path(g.d)}"/>` }
 geo.chips.forEach((c, i) => {
   const word = LABELS[i], st = states(i)
   const draw = {
     rest: rect(c, 'edge') + label(c, word, 400, 'ink'),
+    pressed: rect(c, 'wash') + rect(c, 'edge full') + label(c, word, 400, 'fill'),
     off:  rect(c, 'edge') + label(c, word, 600, 'ink'),
     on:   rect(c, 'fill') + label(c, word, 600, 'ground'),
   }
-  for (const s of ['rest', 'off', 'on']) {
+  for (const s of ['rest', 'pressed', 'off', 'on']) {
     const id = `c${i}${s}`
     const frames = st.map(([ms, v]) => `${pct(ms)}{opacity:${v === s ? 1 : 0}}`)
     css.push(`@keyframes ${id}{${frames.join('')}100%{opacity:${st[0][1] === s ? 1 : 0}}}#${id}{animation:${id} ${T}ms step-end infinite}`)
     body.push(`<g id="${id}">${draw[s]}</g>`)
   }
 })
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W * 2}" height="${H * 2}" role="img" aria-label="A chip is chosen and confirms: its fill blinks off, then on, then it settles">
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W * 2}" height="${H * 2}" role="img" aria-label="A chip is pressed, then confirms: the press look goes off, the fill comes on, then it settles">
 <!-- wm-primitives click confirm (GESTURES.md §14): off ${P}ms, on ${P}ms, then settle${P !== geo.phase ? `; SLOWED x${P / geo.phase}, the real phase is ${geo.phase}ms` : ''}. Composed by scripts/confirm-svg.mjs from the live chips; do not edit. -->
 <style>svg{color:#161616;--ground:#fafafa}@media (prefers-color-scheme:dark){svg{color:#e8e8e8;--ground:#111}}
-.fill{fill:currentColor}.edge{fill:none;stroke:currentColor;stroke-width:1;stroke-opacity:.38}.ink{fill:currentColor;fill-opacity:.62}.ground{fill:var(--ground)}
+.fill{fill:currentColor}.edge{fill:none;stroke:currentColor;stroke-width:1;stroke-opacity:.38}.edge.full{stroke-opacity:1}.wash{fill:currentColor;fill-opacity:.12}.ink{fill:currentColor;fill-opacity:.62}.ground{fill:var(--ground)}
 ${css.join('\n')}</style>
 ${body.join('\n')}
 </svg>

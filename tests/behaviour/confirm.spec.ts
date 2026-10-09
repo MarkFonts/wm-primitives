@@ -126,4 +126,52 @@ test.describe('the confirm', () => {
     await page.waitForTimeout(300)
     expect(await has(light)).toBe(false)
   })
+
+  test('G92 · the acknowledgement: chip and mark show a press look on :active, and the confirm at 40ms differs from it', async ({ page }) => {
+    for (const [sel, read] of [
+      ['#chips .wm-chip:nth-child(2)', 'chip'],
+      ['#theme [data-mode="light"]', 'mark'],
+    ] as const) {
+      const el = page.locator(sel)
+      const look = () => el.evaluate((e, read) => {
+        const t = read === 'mark' ? e.querySelector('.wm-icon')! : e
+        const cs = getComputedStyle(t)
+        return [cs.borderTopColor, cs.backgroundColor, cs.color, cs.fontVariationSettings].join(' | ')
+      }, read)
+      const b = (await el.boundingBox())!
+      await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await page.waitForTimeout(150)
+      const hover = await look()
+      await page.mouse.down()
+      const pressed = await look()
+      if (read === 'chip') expect(pressed).not.toBe(hover)   // a mark's ack IS the hover rung; on touch there is no hover
+      await page.mouse.up()
+      const at40 = await el.evaluate(e => { const a = e.getAnimations().find(a => (a as CSSAnimation).animationName === 'wm-confirm')!; a.pause(); a.currentTime = 40; return true })
+      expect(at40).toBe(true)
+      expect(await look()).not.toBe(pressed)
+      await el.evaluate(e => e.getAnimations().forEach(a => a.finish()))
+      await page.waitForTimeout(150)
+    }
+  })
+
+  test('G92 · the lozenge brightens while pressed', async ({ page }) => {
+    const pill = page.locator('#zoom .wm-hd-pill')
+    const bg = () => pill.evaluate(e => getComputedStyle(e).backgroundColor)
+    const rest = await bg()
+    const b = (await pill.boundingBox())!
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await page.mouse.down()
+    expect(await bg()).not.toBe(rest)
+    await page.mouse.up()
+  })
+
+  test('§14 · a --switch chip keeps its dashed edge through the blink', async ({ page }) => {
+    const sw = await page.evaluate(() => {
+      const b = document.createElement('button'); b.className = 'wm-chip wm-chip--switch on'; b.textContent = 'rev'
+      document.getElementById('chips')!.append(b); (window as any).wmConfirm(b)
+      const a = b.getAnimations().find(a => (a as CSSAnimation).animationName === 'wm-confirm')!; a.pause()
+      const out: string[] = []
+      for (const t of [40, 120]) { a.currentTime = t; out.push(getComputedStyle(b).borderTopStyle) }
+      return out
+    })
+    expect(sw).toEqual(['dashed', 'dashed'])
+  })
 })
