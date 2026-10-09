@@ -135,17 +135,19 @@
   .inks > div { background: var(--surface-1); padding: 15px 22px; display: grid;
     grid-template-columns: 120px 1fr max-content; gap: 20px; align-items: baseline; }
 
-  .fix { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1px;
+  .fix { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* two cards and the line under them */ gap: 1px;
     background: var(--border-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius); overflow: hidden; }
   .fix > div { background: var(--surface-1); padding: 26px 24px; display: flex; flex-direction: column; gap: 16px; }
   .fix > div > .t-body:nth-of-type(2) { margin-top: -8px; }
   .fix > div > .t-ui { margin-top: 4px; }
+  .fix { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 720px) { .fix { grid-template-columns: minmax(0, 1fr); } }
   .fix > .wide { grid-column: 1 / -1; padding-block: 18px; }
   .fix > .wide p { margin: 0; }
 
   /* The four landings, each shown doing its own job rather than all four saying the same
      sentence. Cells are equal-width so the only thing varying between them is the drawing. */
-  .landings { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1px;
+  .landings { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1px;
     background: var(--border-subtle); border: 1px solid var(--border-subtle);
     border-radius: var(--radius); overflow: hidden; }
   .landings > div { background: var(--surface-1); padding: 22px 20px;
@@ -312,7 +314,7 @@
         <div class="lz"><span class="t-label ink-quiet">Base</span><b class="t-label">GEOM 50</b></div>
         <div class="diag t-title">agjty Il1 0O</div>
         <div class="job">
-          <div class="t-title">Quarterly review</div>
+          <div class="t-title">Annual report</div>
         </div>
         <p class="t-ui ink-quiet">Rounder construction for headings, sitting above UI copy
           without touching size, weight, or color. Seven letters redraw on the way here: the
