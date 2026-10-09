@@ -1,0 +1,372 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The button</title>
+<!-- A PART of "The corner law" (build.py SECTIONS), its last, in the slot the button
+     placeholder held until 2026-10-08. The sets themselves are
+     src/button-sets.css, inlined by build.py (PRIMITIVE_CSS_PART) so the page is the shipped
+     thing; the links below only make this file render on its own, and the build strips them.
+     Same constraint as buttons.html: no comma inside :is() / :not() / :where() here. -->
+<link rel="stylesheet" href="../../src/type.css">
+<link rel="stylesheet" href="../../src/space.css">
+<link rel="stylesheet" href="../../src/icon.css">
+<link rel="stylesheet" href="../../src/themeSwitch.css">
+<link rel="stylesheet" href="../../src/button.css">
+<link rel="stylesheet" href="../../src/button-sets.css">
+<style>
+@font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype");
+  font-weight: 400 700; font-style: normal; font-display: swap; }
+@font-face{ font-family:"Material Symbols Outlined"; src:url("../../fonts/MaterialSymbolsOutlined.woff2") format("woff2");
+  font-weight: 100 700; font-display: block; }
+
+/* Standalone only, set by the script when no section is around this part: the assembled
+   page paints its own ground. No html/body rule -- the build scopes those onto the part,
+   where a dark ground would follow the light theme into the page. */
+.bs-page.standalone{ padding: 2rem 16px 4rem; color: #e8e8e8; background: #0f0f0f;
+  min-height: 100vh; font-family: "CalSansVF", system-ui, sans-serif; }
+
+/* ONE TOGGLE, TWO BLOCKS. The figures carry their own data-theme, set by the chapter's one
+   .wm-theme (the house marks), not by the page's switch. Each figure restates the seven roles for its theme, so either set can
+   be judged in either theme whatever the page's own switch says. The values are color.css's,
+   copied as hex: a role computed from --text on :root (--text-muted, --border) does not
+   recompute under a local --text, so each one is spelled out here.
+   The mark's GRAD ladder and its HDR paint key off :root's theme in icon.css, so a panel in
+   the other theme restates those too -- including --icon-hdr: 0 in light, which is
+   icon.css's own light gate (a chosen mark goes DARKER on a light ground, never to PQ white). */
+.bs-page{ --ui-font: "CalSansVF", system-ui, sans-serif; }
+.bs-fig{ --ui-font: "CalSansVF", system-ui, sans-serif; font-family: var(--ui-font);
+  border-radius: 8px; corner-shape: superellipse(1.2); padding: 1.5rem; min-width: 0; }
+.bs-fig[data-theme="dark"]{ --bg:#0f0f0f; --surface:#1a1a1a; --surface-hi:#252525; --text:#e8e8e8;
+  --text-muted:rgba(232,232,232,.62); --text-dim:rgba(232,232,232,.38);
+  --border:rgba(232,232,232,.14); --text-rgb:232,232,232; --accent:#eeff41;
+  background: var(--bg); color: var(--text); box-shadow: inset 0 0 0 1px var(--border); }
+.bs-fig[data-theme="light"]{ --bg:#f4f4f4; --surface:#ffffff; --surface-hi:#ebebeb; --text:#161616;
+  --text-muted:rgba(22,22,22,.66); --text-dim:rgba(22,22,22,.42);
+  --border:rgba(22,22,22,.16); --text-rgb:22,22,22; --accent:#5c6b00;
+  background: var(--bg); color: var(--text); box-shadow: inset 0 0 0 1px var(--border); }
+.bs-fig[data-theme="dark"] .wm-icon{ --icon-grad: 50; }
+.bs-fig[data-theme="dark"] .wm-menu:not(.active):hover > .wm-icon{ --icon-grad: 100; }
+.bs-fig[data-theme="dark"] .active > .wm-icon{ --icon-grad: 75; }
+.bs-fig[data-theme="light"] .wm-icon{ --icon-grad: 100; }
+.bs-fig[data-theme="light"] .wm-menu:not(.active):hover > .wm-icon{ --icon-grad: 150; }
+.bs-fig[data-theme="light"] .active > .wm-icon{ --icon-grad: 100; --icon-hdr: 0; dynamic-range-limit: standard; }
+
+/* the sunk ground the study's track and field sit in, per theme (buttons.html --bt-sunk-bg) */
+.bs-fig[data-theme="dark"]{ --bs-sunk: color-mix(in oklab, #000 30%, var(--surface)); }
+.bs-fig[data-theme="light"]{ --bs-sunk: color-mix(in oklab, #000 13%, var(--surface)); }
+.bs-fig{ margin: 0 0 1.5rem; padding: 0; overflow: hidden; }
+.bs-toggle{ display: flex; align-items: center; gap: .75rem; margin: 2rem 0; }
+.bs-toggle .bs-cap{ margin: 0; }
+.bs-cap{ font-size: .6875rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-dim); margin: 0 0 .75rem; }
+
+/* ── the study's furniture (buttons.html .bt-fam / .bt-rack / .bt-panel), restated ── */
+.bs-fam-head{ display: flex; align-items: baseline; gap: .75rem; margin: 2.5rem 0 .5rem; }
+.bs-fam-head h3{ margin: 0; font-size: 1.125rem; font-weight: 500; }
+.bs-thesis{ max-width: 44em; font-size: .9375rem; line-height: 1.55; margin: 0 0 1.25rem; opacity: .8; }
+.bs-rack{ display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1px; background: var(--border); }
+.bs-panel{ background: var(--bg); padding: 1.125rem 1.25rem 1.375rem; min-width: 0;
+  display: flex; flex-direction: column; font-size: .8125rem; line-height: 1.45; }
+.bs-wide{ grid-column: 1 / -1; }
+/* fills the row the secondary's rack would otherwise leave a hole in (two-up and narrower: one cell) */
+@media (min-width: 1100px){ .bs-span2{ grid-column: span 2; } }
+.bs-panel-lab{ font-size: .625rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-dim); margin: 0 0 .875rem; }
+.bs-row{ display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.bs-row + .bs-row{ margin-top: .625rem; }
+.bs-stack{ display: flex; flex-direction: column; gap: 1.5rem; align-items: flex-start; }
+.bs-cost{ font-size: .8125rem; line-height: 1.45; color: var(--text-muted); margin: 1rem 0 0; max-width: 46em; }
+.bs-cost b{ color: var(--text); font-weight: 500; }
+.bs-page > .bs-cost{ color: inherit; opacity: .8; }
+.bs-st{ display: grid; grid-template-columns: auto 1fr; gap: .5rem .875rem; align-items: center; }
+.bs-st-lab{ font-size: .6875rem; color: var(--text-dim); }
+.bs-proof{ display: block; width: 259px; max-width: 100%; height: auto; }
+.bs-fig[data-theme="dark"] .bs-proof--light{ display: none; }
+.bs-fig[data-theme="light"] .bs-proof--dark{ display: none; }
+
+/* PINNED STATES. A page cannot hover five things at once, so the ladder pins them with
+   .s-h / .s-p / .s-f -- the study's method. These are copies of src/button-sets.css's
+   :hover / :active / :focus-visible declarations and nothing else; every specimen outside
+   the ladder is the shipped rule, live. */
+.wm-menu.s-h{ color: var(--text); background: color-mix(in oklab, var(--text) 6%, transparent); }
+.wm-menu.s-h > .wm-icon{ --icon-grad: 100; color: rgba(var(--text-rgb), .62); }
+.wm-menu.s-p{ color: var(--text); background: none; box-shadow: inset 0 0 0 1.8px currentColor; }
+.wm-menu.s-f{ outline: 2px solid var(--accent); outline-offset: -2px; }
+.wm-rule.s-h{ text-decoration-color: var(--text); text-decoration-thickness: 1.2px; }
+.wm-rule.s-p{ text-decoration-color: var(--text); text-decoration-thickness: 1.8px; }
+.wm-rule.s-f{ outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* THE SECONDARY'S LIST, for the "where it runs out" figure (study .bt-rail-list) */
+.bs-rail{ display: flex; flex-direction: column; gap: 2px; }
+.bs-ed{ display: block; }
+/* pinned hover for the editables, copies of the shipped :hover */
+.wm-rule-ed.s-h, .wm-field-ed.s-h{ text-decoration-color: var(--text); }
+
+/* IN SITU (buttons.html .bt-situ) and the one-of-N track (.bt-f-seg) */
+.bs-situ{ background: var(--surface); box-shadow: inset 0 0 0 1px var(--border);
+  border-radius: 8px; padding: .875rem 1rem 1rem; }
+.bs-situ-head{ display: flex; justify-content: space-between; align-items: baseline;
+  font-size: .6875rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-dim); margin: 0 0 .5rem; }
+.bs-situ-head b{ color: var(--text-muted); font-weight: 500; }
+.bs-situ-row{ display: flex; align-items: center; gap: .375rem; margin-top: .875rem; flex-wrap: wrap; }
+/* A mark outside a .wm-menu (the theme marks, the boxed button) at the Icon size; inside one, button-sets.css sizes it. */
+.bs-page .wm-icon{ max-width: 1.25em; overflow: hidden; }
+.bs-page .wm-icon-btn .wm-icon, .bs-page .wm-btn .wm-icon{ font-size: 20px; }
+/* THE PAGE KEEPS THE SECONDARY'S LAW. Nothing but a .wm-rule is underlined here (the
+   editables are the study's marks for editing, kept dashed or on a value). So the pointer to
+   the study is set in weight, not with a rule. */
+.bs-page a{ color: inherit; text-decoration: none; font-weight: 600; }
+.bs-page a:hover{ opacity: .75; }
+.bs-lede{ max-width: 46em; font-size: .9375rem; line-height: 1.55; margin: 0 0 1rem; opacity: .8; }
+.bs-lede code, .bs-thesis code{ font-size: .92em; }
+.bs-quote{ max-width: 46em; margin: 0 0 1rem; padding: 0 0 0 1rem; font-size: .9375rem;
+  line-height: 1.55; box-shadow: inset 2px 0 0 currentColor; }
+.bs-quote cite{ display: block; font-style: normal; font-size: .75rem; opacity: .6; margin-top: .375rem; }
+</style>
+
+<div class="bs-page" id="bs-root">
+
+<h2>The button <span>the primary and the secondary, chosen 2026-10-08</span></h2>
+
+<p class="bs-lede">Two of the six graduated on 2026-10-08: <b>the primary</b> and <b>the
+secondary</b>, in <code>src/button-sets.css</code>. They are not a pair &mdash; each has its
+own place, and one panel never holds both. Beside <code>.wm-btn</code> rather than on top of
+it, so nothing that ships today moves.</p>
+
+<div class="bs-fam-head"><h3>The primary</h3><code>.wm-menu</code> <code>.wm-menu--row</code> <code>.wm-menu-list</code></div>
+<p class="bs-thesis"><b>An enclosure means chosen, not pressable.</b> It is what
+font-proofer&rsquo;s rail already does, and what that is, is a <b>menu</b> &mdash; preview
+modes of equal weight, picked between rather than read, which is the one place where a mark
+earns its space. A row has no edge at rest &mdash; a mark, a label, and the full width of
+the column as its target &mdash; and the ground arrives when it is the one that is on.</p>
+
+<figure class="bs-fig" data-theme="dark">
+  <div class="bs-rack">
+    <div class="bs-panel">
+      <p class="bs-panel-lab">Already shipping &middot; font-proofer, Preview Mode</p>
+      <img class="bs-proof bs-proof--dark" src="../../assets/proofer-menu-dark.png" width="259" height="234" alt="font-proofer's Preview Mode menu, dark: Big Word, Paragraph chosen on a ground, UI, Type Scale, Glyphs">
+      <img class="bs-proof bs-proof--light" src="../../assets/proofer-menu-light.png" width="259" height="234" alt="font-proofer's Preview Mode menu, light">
+      <p class="bs-cost"><b>This is the primary as font-proofer already draws it</b>
+      (<code>.mode-group</code> of <code>.mode-btn</code>, <code>.mode-btn-row</code> where a
+      panel toggle trails). Adopting the primitive there is a rename, not a redraw.</p>
+    </div>
+    <div class="bs-panel">
+      <p class="bs-panel-lab">Menu</p>
+      <div class="wm-menu-list">
+<button class="wm-menu wm-menu--row" type="button"><span class="wm-icon" aria-hidden="true" translate="no">calendar_month</span>Booking events</button>
+<button class="wm-menu wm-menu--row" type="button"><span class="wm-icon" aria-hidden="true" translate="no">insert_text</span>Big Word</button>
+<button class="wm-menu wm-menu--row active" type="button"><span class="wm-icon" aria-hidden="true" translate="no">format_paragraph</span>Paragraph<span class="wm-icon wm-menu-mark--sm" aria-hidden="true" translate="no">discover_tune</span></button>
+<button class="wm-menu wm-menu--row" type="button"><span class="wm-icon" aria-hidden="true" translate="no">text_fields</span>Type Scale</button>
+<button class="wm-menu wm-menu--row" type="button"><span class="wm-icon" aria-hidden="true" translate="no">grid_view</span>Glyphs</button>
+      </div>
+      <div class="bs-row" style="margin-top:.875rem">
+        <button class="wm-menu wm-menu--mark" type="button" aria-label="Align left"><span class="wm-icon" aria-hidden="true" translate="no">format_align_left</span></button>
+        <button class="wm-menu wm-menu--mark" type="button" aria-label="Align centre"><span class="wm-icon" aria-hidden="true" translate="no">format_align_center</span></button>
+        <button class="wm-menu wm-menu--mark active" type="button" aria-label="Align right"><span class="wm-icon" aria-hidden="true" translate="no">format_align_right</span></button>
+        <button class="wm-menu wm-menu--mark" type="button" aria-label="Reset"><span class="wm-icon" aria-hidden="true" translate="no">settings_backup_restore</span></button>
+      </div>
+    </div>
+    <div class="bs-panel" data-ladder="primary">
+      <p class="bs-panel-lab">States</p>
+      <div class="bs-st">
+        <span class="bs-st-lab">rest</span><span><button class="wm-menu wm-menu--row" type="button"><span class="wm-icon" aria-hidden="true" translate="no">grid_view</span>Glyphs</button></span>
+        <span class="bs-st-lab">hover</span><span><button class="wm-menu wm-menu--row s-h" type="button"><span class="wm-icon" aria-hidden="true" translate="no">grid_view</span>Glyphs</button></span>
+        <span class="bs-st-lab">held</span><span><button class="wm-menu wm-menu--row s-p" type="button"><span class="wm-icon" aria-hidden="true" translate="no">grid_view</span>Glyphs</button></span>
+        <span class="bs-st-lab">focus</span><span><button class="wm-menu wm-menu--row s-f" type="button"><span class="wm-icon" aria-hidden="true" translate="no">grid_view</span>Glyphs</button></span>
+        <span class="bs-st-lab">chosen</span><span><button class="wm-menu wm-menu--row active" type="button"><span class="wm-icon" aria-hidden="true" translate="no">grid_view</span>Glyphs</button></span>
+        <span class="bs-st-lab">disabled</span><span><button class="wm-menu wm-menu--row" type="button" disabled><span class="wm-icon" aria-hidden="true" translate="no">grid_view</span>Glyphs</button></span>
+      </div>
+    </div>
+    <div class="bs-panel">
+      <p class="bs-panel-lab">Buttons</p>
+      <div class="bs-row">
+        <button class="wm-menu" type="button">Kern lists</button>
+        <button class="wm-menu active" type="button">Link roman + italic</button>
+      </div>
+      <div class="bs-row">
+        <button class="wm-menu" type="button">10 Reg</button>
+        <button class="wm-menu wm-menu--mark" type="button" aria-label="Reset"><span class="wm-icon" aria-hidden="true" translate="no">settings_backup_restore</span></button>
+        <button class="wm-menu" type="button" disabled>Average pairs</button>
+      </div>
+      <p class="bs-cost" style="margin-top:.75rem">The primary is the giveaway: it spends its
+      enclosure on <i>chosen</i>, so the one action that matters can only borrow the same
+      ground. <b>There is no louder left to go.</b></p>
+    </div>
+    <div class="bs-panel">
+      <p class="bs-panel-lab">Editable</p>
+      <div class="bs-stack" style="width:100%">
+        <div class="wm-field"><span class="wm-field-lab">measure</span><span class="wm-field-val"><span class="wm-field-ed" contenteditable="plaintext-only" spellcheck="false">620</span><span class="wm-field-unit">px</span></span></div>
+        <div class="wm-field"><span class="wm-field-lab">size</span><span class="wm-field-val"><span class="wm-field-ed s-h" contenteditable="plaintext-only" spellcheck="false">18</span></span></div>
+        <div class="wm-field"><span class="wm-field-lab">tracking</span><span class="wm-field-val"><span class="wm-field-ed" contenteditable="plaintext-only" spellcheck="false">0.000</span></span></div>
+        <button class="wm-field wm-field--select" type="button">&mdash;<span class="wm-icon wm-menu-mark--sm" aria-hidden="true" translate="no">keyboard_arrow_down</span></button>
+      </div>
+    </div>
+    <div class="bs-panel">
+      <p class="bs-panel-lab">In situ</p>
+      <div class="bs-situ">
+        <div class="bs-situ-head"><b>Headline</b><span>20 &le; char</span></div>
+        <span class="wm-field-ed" style="display:inline-block" contenteditable="plaintext-only" spellcheck="false">Ours. Always Cal Sans at Base.</span>
+        <div class="bs-situ-row">
+          <button class="wm-menu wm-menu--mark" type="button" aria-label="Align left"><span class="wm-icon" aria-hidden="true" translate="no">format_align_left</span></button>
+          <button class="wm-menu wm-menu--mark" type="button" aria-label="Align centre"><span class="wm-icon" aria-hidden="true" translate="no">format_align_center</span></button>
+          <button class="wm-menu wm-menu--mark" type="button" aria-label="Align right"><span class="wm-icon" aria-hidden="true" translate="no">format_align_right</span></button>
+          <button class="wm-menu wm-menu--mark active" type="button" aria-label="Justify"><span class="wm-icon" aria-hidden="true" translate="no">format_align_justify</span></button>
+        </div>
+        <div class="wm-menu-seg" style="margin-top:.5rem"><button class="wm-menu active" type="button">Roman</button><button class="wm-menu" type="button">Italic</button></div>
+      </div>
+    </div>
+    <div class="bs-panel bs-wide">
+      <p class="bs-panel-lab">Screamer</p>
+      <div class="bs-row"><button class="wm-menu active wm-menu--display" type="button">Let&rsquo;s talk type&thinsp;&#x2197;</button></div>
+      <p class="bs-cost">And here is the family&rsquo;s ceiling: chosen IS the loudest thing it owns.</p>
+    </div>
+  </div>
+</figure>
+<p class="bs-cost"><b>What it costs.</b> A resting row states nothing on its own &mdash;
+and the family survives that only on two conditions it cannot enforce for itself: every row
+carries a <b>mark</b>, and every row is the <b>full width</b> of its column. Strip either
+and this becomes the unformatted list. It also needs somewhere to be a menu: the row shape
+wants 200px and a left edge to sit against. And because the enclosure is spent on
+<i>chosen</i>, there is nothing left to spend on <i>primary</i> &mdash; a destructive
+action here looks like every other row.</p>
+<p class="bs-cost"><b>And it does not do prose.</b> The editable mark is drawn on the text,
+so on a value it is four characters wide and on a wrapped sentence it is two full lines of
+underline. <code>.slider-number</code> was written for a number in a rail and it is right
+there.</p>
+
+<div class="bs-toggle">
+  <div class="wm-theme" role="group" aria-label="Theme of the figures">
+    <button type="button" class="wm-icon-btn" data-bs-theme="light" aria-label="Light" aria-pressed="false"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
+    <button type="button" class="wm-icon-btn active" data-bs-theme="dark" aria-label="Dark" aria-pressed="true"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
+  </div>
+  <p class="bs-cap">every figure in this chapter, one theme</p>
+</div>
+
+<div class="bs-fam-head"><h3>The secondary</h3><code>.wm-rule</code></div>
+<p class="bs-thesis"><b>The type is the control.</b> No box in any state. An action is
+ink-full with a solid rule at <code>1px</code>, thickening to the same two numbers the press
+law uses &mdash; 1.2 under the pointer, 1.8 held. An editable is the identical rule,
+<b>dashed</b>. Solid means it happens; dashed means it is yours. The condition is absolute:
+<b>nothing else in the document may be underlined</b>.</p>
+
+<figure class="bs-fig" data-theme="dark">
+  <div class="bs-rack">
+    <div class="bs-panel">
+      <p class="bs-panel-lab">Buttons</p>
+      <div class="bs-row"><button class="wm-rule" type="button">Kern lists</button><button class="wm-rule active" type="button">Link roman + italic</button></div>
+      <div class="bs-row"><button class="wm-rule" type="button">10 Reg</button><button class="wm-rule" type="button" disabled>Average pairs</button></div>
+      <p class="bs-cost" style="margin-top:.75rem"><b>No icon-only form.</b> There is nothing
+      to draw it in. Those actions borrow the boxed button.</p>
+    </div>
+    <div class="bs-panel" data-ladder="secondary">
+      <p class="bs-panel-lab">States</p>
+      <div class="bs-st">
+        <span class="bs-st-lab">rest</span><span><button class="wm-rule" type="button">Delete pairs</button></span>
+        <span class="bs-st-lab">hover</span><span><button class="wm-rule s-h" type="button">Delete pairs</button></span>
+        <span class="bs-st-lab">held</span><span><button class="wm-rule s-p" type="button">Delete pairs</button></span>
+        <span class="bs-st-lab">focus</span><span><button class="wm-rule s-f" type="button">Delete pairs</button></span>
+        <span class="bs-st-lab">chosen</span><span><button class="wm-rule active" type="button">Delete pairs</button></span>
+        <span class="bs-st-lab">disabled</span><span><button class="wm-rule" type="button" disabled>Delete pairs</button></span>
+      </div>
+    </div>
+    <div class="bs-panel">
+      <p class="bs-panel-lab">Editable</p>
+      <div class="bs-stack">
+        <span class="bs-ed wm-rule-ed" contenteditable="plaintext-only" spellcheck="false">Turn any page into a booking portal</span>
+        <span class="bs-ed wm-rule-ed s-h" contenteditable="plaintext-only" spellcheck="false">Track a no-show without asking who joined</span>
+        <span class="bs-ed wm-rule-ed" contenteditable="plaintext-only" spellcheck="false">Reassign a booking when someone calls out</span>
+      </div>
+    </div>
+    <div class="bs-panel">
+      <p class="bs-panel-lab">In situ</p>
+      <div class="bs-situ">
+        <div class="bs-situ-head"><b>Headline</b><span>20 &le; char</span></div>
+        <span class="bs-ed wm-rule-ed" contenteditable="plaintext-only" spellcheck="false">Ours. Always Cal Sans at Base.</span>
+        <div class="bs-situ-row">
+          <button class="wm-btn" type="button" aria-label="Align left"><span class="wm-icon" aria-hidden="true" translate="no">format_align_left</span></button>
+          <button class="wm-btn active" type="button" aria-label="Justify"><span class="wm-icon" aria-hidden="true" translate="no">format_align_justify</span></button>
+          <span class="bs-sp"></span>
+          <button class="wm-rule active" type="button">Rom</button>
+          <button class="wm-rule" type="button">Ital</button>
+        </div>
+      </div>
+    </div>
+    <div class="bs-panel bs-span2">
+      <p class="bs-panel-lab">Menu</p>
+      <div class="bs-rail">
+        <button class="wm-rule wm-rule--row" type="button"><span class="wm-icon" aria-hidden="true" translate="no">calendar_month</span>booking events</button>
+        <button class="wm-rule wm-rule--row" type="button"><span class="wm-icon" aria-hidden="true" translate="no">insert_text</span>Big Word</button>
+        <button class="wm-rule wm-rule--row active" type="button"><span class="wm-icon" aria-hidden="true" translate="no">format_paragraph</span>Paragraph<span class="wm-icon wm-menu-mark--sm" aria-hidden="true" translate="no">discover_tune</span></button>
+        <button class="wm-rule wm-rule--row" type="button"><span class="wm-icon" aria-hidden="true" translate="no">text_fields</span>Type Scale</button>
+        <button class="wm-rule wm-rule--row" type="button"><span class="wm-icon" aria-hidden="true" translate="no">grid_view</span>Glyphs</button>
+      </div>
+      <p class="bs-cost"><b>And this is where the family runs out.</b> The rule scopes to
+      the <i>text</i>, so in a row the leading mark, the label and the trailing mark are
+      three objects at the same height with nothing holding them together &mdash; an
+      underline cannot reach across a flex gap, and the row never becomes one thing. Which is
+      why a list of rows is the primary&rsquo;s, never this.</p>
+    </div>
+    <div class="bs-panel bs-wide">
+      <p class="bs-panel-lab">Screamer</p>
+      <div class="bs-row"><button class="wm-rule active wm-rule--display" type="button">Let&rsquo;s talk type&thinsp;&#x2197;</button></div>
+      <p class="bs-cost">No box at any size. The rule thickens with the type instead of staying 1px.</p>
+    </div>
+  </div>
+</figure>
+<p class="bs-cost"><b>What it costs.</b> Three things. The 44px floor is bought entirely
+with invisible padding, so two stacked actions are 88px of line box or they overlap. Two
+actions side by side read as one sentence unless something separates them. And the whole
+family depends on a document-wide prohibition that no component can enforce &mdash; the
+first underlined caption someone adds takes the affordance down with it.</p>
+
+<p class="bs-lede" style="margin-top:2rem"><b>Why these two</b>, in the study&rsquo;s own words.</p>
+<blockquote class="bs-quote">06 for the menu, where an enclosure means <i>chosen</i> and
+the row does the pointing &hellip;
+<cite>Which one, Six ways to say press</cite></blockquote>
+<blockquote class="bs-quote">The type is the control. No box in any state. &hellip; the condition is absolute:
+<b>nothing else in the document may be underlined</b>.
+<cite>03 Rule, Six ways to say press</cite></blockquote>
+
+<p class="bs-lede"><b>Why they never share a panel.</b> The study paired the menu with the
+boxed button and named the rule the one to reject, and its worry about the pairing was one
+panel holding two meanings of a box at once. That objection is now the rule: a panel is a
+menu or it is a run of text, and it uses one set. An enclosure only ever means
+<i>chosen</i>, and a rule only ever means <i>press</i>, because nothing else is
+underlined.</p>
+
+<p class="bs-lede">All six, with every state and every cost: the primary is formerly 06 and
+the secondary formerly 03 in <a href="system/pages/buttons.html">Six ways to say press</a>.</p>
+
+</div>
+
+<script>
+(function(){
+  var root = document.getElementById('bs-root');
+  if (!root) return;
+  if (!document.getElementById('s-corners')) root.classList.add('standalone');
+  // One chosen row per list: the ground moves to the row that was pressed, and the confirm
+  // (src/confirm.js, window.wmConfirm, once it ships) blinks it. A page without it still
+  // chooses, unconfirmed.
+  // The chapter's one theme toggle: both figures follow it, the page does not.
+  root.querySelectorAll('[data-bs-theme]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var t = b.getAttribute('data-bs-theme');
+      root.querySelectorAll('.bs-fig').forEach(function(f){ f.setAttribute('data-theme', t); });
+      root.querySelectorAll('[data-bs-theme]').forEach(function(o){
+        var on = o === b; o.classList.toggle('active', on); o.setAttribute('aria-pressed', String(on));
+      });
+    });
+  });
+  root.addEventListener('click', function(e){
+    var row = e.target.closest('.wm-menu--row');
+    if (!row || row.disabled) return;
+    var list = row.closest('.wm-menu-list');
+    if (!list) return;
+    list.querySelectorAll('.wm-menu--row.active').forEach(function(r){ r.classList.remove('active'); });
+    row.classList.add('active');
+    if (window.wmConfirm) window.wmConfirm(row);
+  });
+})();
+</script>

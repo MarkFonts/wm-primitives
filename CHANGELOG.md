@@ -12,6 +12,16 @@ Newest first.
 
 ---
 
+## 2026-10-08 -- the button, chosen: the menu primary, the rule secondary
+
+Mark's decision from "Six ways to say press": the menu family (formerly 06) is the house
+PRIMARY and the rule family (formerly 03) the SECONDARY. `src/button-sets.css` (`.wm-menu`,
+`.wm-menu--row`, `.wm-menu-list`, `.wm-rule` and the documented variants), 36px on the line,
+press on corners.css's model, and the confirm through `--confirm-off` -- which is why it ships
+in the same PR as the confirm (Mark: "or put them together"; was #107). The chapter "The button"
+replaces the placeholder under The corner law; `src/button.css` is untouched. The Interface
+chapter's Confirm card uses the two sets as its live controls, each in its own figure.
+
 ## 2026-10-08 -- the click confirm
 
 **Mark: "every click has a CONFIRMATION signal, like macOS: on successful click, undo then

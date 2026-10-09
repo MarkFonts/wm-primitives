@@ -67,7 +67,9 @@ SECTIONS = [
                                  "7 roles, 3 inks, 6 signals, 24 columns, a 3px baseline"),
     # Circles is the corner law's exclusion list, not a law of its own: it rides
     # inside 02. 03 is the control interface.
-    ("corners",  "The corner law",    [SD/"corner-law.html", SD/"circles.html"],
+    # The button (the primary and the secondary, chosen 2026-10-08) rides in here too, last:
+    # it replaced the placeholder this section used to write after its parts.
+    ("corners",  "The corner law",    [SD/"corner-law.html", SD/"circles.html", SD/"button-sets.html"],
                                        "superellipse(1.2), 2^k, and what opts out"),
     # The confirm rides inside Interface: it is how every control there answers a press
     # that worked (GESTURES.md §14).
@@ -174,7 +176,8 @@ PRIMITIVE_JS = {
 # to the section and snap nothing but the demo, and two snappers would fight over --snap.
 PRIMITIVE_CSS_PART = {
     "grid.html": ("type.css", "chip.css"),
-    "confirm.html": ("type.css", "motion.css", "button.css", "chip.css", "icon.css", "chevron.css", "AxisTriplet.css"),
+    "confirm.html": ("type.css", "motion.css", "button-sets.css", "chip.css", "icon.css"),
+    "button-sets.html": ("type.css", "space.css", "icon.css", "themeSwitch.css", "button.css", "button-sets.css"),
 }
 
 # ---------------------------------------------------------------- the line
@@ -194,9 +197,6 @@ OFF_LINE = {
     # h1 and lede at line-height: normal (the grid would make them 24); notes at 1.4 / 1.5
     # of 12-13px, which are 16.8-19.5, off the unit
     "corners":  "the corner law and circles set their own leadings, off the unit",
-    # the h1 is 40px at normal (51.2): the grid would set it solid at 24 and a wrap would
-    # collide; .card-note is 13 x 1.45 = 18.85; the dials are components with their own rows
-    "controls": "the dials and their notes set their own leadings; the h1 would collapse",
     # 864 blocks of audit tables and the ramps' specimens (1.42, 1.34 -- they ARE the
     # demo); notes at 13.5 x 1.5 = 20.25
     "color":    "the audit is tables and the ramps are specimens",
@@ -205,8 +205,14 @@ OFF_LINE = {
     "usage":    "the usage map is 3,700 table cells",
 }
 # A section whose OWN page is a stage while a part folded into it is on the line: the page's
-# html is wrapped instead. Empty now; Type does it on its .wrap, see above.
-OFF_LINE_PART = {}
+# html is wrapped instead. Type does it on its .wrap, see above.
+OFF_LINE_PART = {
+    # Interface: its own page is a stage -- the h1 is 40px at normal (51.2), the grid would set
+    # it solid at 24 and a wrap would collide; .card-note is 13 x 1.45 = 18.85; the dials are
+    # components with their own rows -- and so is the WIP chapter under it (build_section). The
+    # Confirm part between them is ON the line: it is the Grid part's try-it card, restated.
+    "controls.html": "the dials and their notes set their own leadings; the h1 would collapse",
+}
 
 def asset_src(m):
     if "--linked" in sys.argv:
@@ -314,24 +320,8 @@ def build_section(sid, label, path, kicker):
         css += scope_css(FAV_CSS, root)
 
     if sid == "controls":
-        html += wip_html()
+        html += '<div data-nosnap>' + wip_html() + '</div>'   # a stage, like the chapter's own page
         css += scope_css(WIP_CSS, root)
-
-    # A placeholder chapter, asked for on 2026-09-19: the house button drawn from the
-    # corner law -- the G2 corner, and the pad scale for the space inside the shape. The
-    # heading is real so the rail lists it; the body says it is not written yet.
-    if sid == "corners":
-        # Hatched like the WIP chapter, because it IS work in progress, and it links the
-        # page the decision will be made from.
-        html += ('<h2>The button <span>placeholder &#8212; the G2 corner and the space inside it</span></h2>'
-                 '<a class="wm-placeholder" href="system/pages/buttons.html"><u>undecided</u>'
-                 '<p>Not written yet. The house button (<code>.wm-btn</code>, '
-                 '<code>src/button.css</code>) is the corner law applied to a control: the G2 '
-                 'superellipse on its corners, the pad scale for the space between the shape and '
-                 'its label, and the cap rule (<code>padding-x &#8805; 0.6 &#215; radius</code>) that '
-                 'keeps a small radius from pinching. This chapter will draw it at every size on the '
-                 'ladder and show where the label sits inside each &#8212; once one of the six '
-                 'families on <b>Six ways to say press</b> is chosen. None is yet.</p></a>')
 
     # ids are document-global: prefix them, and every reference to them.
     ids = set(re.findall(r'\bid="([^"]+)"', html))
@@ -1335,14 +1325,6 @@ resets = "\n".join(
 # width. Release that one too, so all six share the shell's column rather than stacking
 # six different measures down the page.
 resets += "\n#s-type>.wrap{max-width:none;margin:0;padding:0;width:auto}"
-resets += ("\n.wm-placeholder{display:block;position:relative;max-width:64ch;color:var(--ink-2);text-decoration:none;"
-           "border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));"
-           "padding:22px 24px;margin:8px 0 40px;"
-           "background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);"
-           "transition:border-color .15s}"
-           "\n.wm-placeholder:hover{border-color:var(--ink-3)}"
-           "\n.wm-placeholder p{margin:0}.wm-placeholder b{color:var(--ink);font-weight:600}"
-           "\n.wm-placeholder u{display:block;margin:0 0 10px;text-decoration:none;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}")
 resets += ("\n#s-corners .grid.g3,#s-circles .grid.g3,#s-space .grid.g3{grid-template-columns:repeat(auto-fit,minmax(430px,1fr))}")
 
 css_parts = "\n".join(f"/* ===== {s['sid']} ===== */\n{s['css']}" for s in secs) + \

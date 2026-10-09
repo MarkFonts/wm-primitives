@@ -1,0 +1,334 @@
+/* button-sets.css -- the two buttons Mark chose from the study (2026-10-08).
+ *
+ * docs/system/pages/buttons.html drew the button six ways. Two of them graduate:
+ *
+ *   06 MENU, the PRIMARY.  .wm-menu
+ *     An enclosure means CHOSEN, not pressable. At rest there is no edge at all -- a label
+ *     (and on a row, a mark) and the full width of its column as the target. The ground
+ *     arrives under the pointer (a 6% wash of the ink), and as a solid --surface-hi ground
+ *     when it is the one that is on.
+ *   03 RULE, the SECONDARY.  .wm-rule
+ *     The type is the control. No box in any state: full ink over a 1px rule, which
+ *     thickens on the press law's two numbers -- 1.2 under the pointer, 1.8 held.
+ *
+ *   .wm-menu              the button form: centred label, 36px
+ *   .wm-menu--row         the menu row: full width, left-aligned, a leading mark; a mark
+ *                         after the label is pushed to the far edge
+ *   .wm-menu-list         a column of rows, --tick apart
+ *   .wm-rule              the secondary: a label over a rule
+ *   .active / [aria-pressed="true"]   chosen, on either (icon.css lights a chosen row's mark)
+ *   :disabled             06: faint ink, no ground. 03: faint ink and NO RULE -- in this
+ *                         family the rule is the affordance, so a greyed rule would still
+ *                         say "press me" from across the room.
+ *
+ *   THE VARIANTS -- every other figure the study draws for these two, so nothing on the
+ *   system page is drawn from page-local CSS:
+ *   .wm-menu--mark        the primary's icon-only form (study .bt-f-ico): a bare mark whose
+ *                         target is padding; a ground under the pointer, the ring held, and
+ *                         chosen lights the MARK (icon.css), not a ground
+ *   .wm-menu-mark--sm     a 16px mark (study .bt-i--sm), e.g. the trailing panel toggle; a
+ *                         mark in a .wm-menu is 20px unless the Icon component sets its own
+ *   .wm-menu-seg          one of N (study .bt-f-seg): a sunk track, the chosen cell raised.
+ *                         The track draws the SET, not a button
+ *   .wm-field             the split lozenge (study .bt-f-field): .wm-field-lab on the sunk
+ *                         ground, .wm-field-val on the surface, .wm-field-unit after it;
+ *                         .wm-field-ed is the value's editable mark -- the dial's
+ *                         .slider-number rule, drawn on the text. .wm-field--select is the
+ *                         same lozenge as a button (study .bt-f-sel)
+ *   .wm-menu--display     the screamer (study .bt-scream--f): the title role, chosen ground
+ *   .wm-rule--row         the secondary as a row (study .bt-as-row) -- drawn so the page can
+ *                         show where the family runs out; a list of rows is the primary's
+ *   .wm-rule-ed           the secondary's editable: the same rule, dashed
+ *   .wm-rule--display     the screamer (study .bt-scream--r): the rule scales with the type
+ *
+ * A FILE OF ITS OWN, NOT MODIFIERS ON .wm-btn. .wm-btn draws a surface, a hairline and a
+ * 27px box, and every one of those is the opposite of both sets -- a --menu or --rule
+ * modifier would spend its whole body unsetting its base. And button.css stays byte-
+ * identical, so the apps that import it today (nothing imports this yet) cannot move.
+ *
+ * THE CONDITIONS THE STUDY NAMED, which no stylesheet can enforce and every caller must:
+ *   06 survives a resting row that states nothing only while every row carries a MARK and
+ *      every row is the FULL WIDTH of its column. Strip either and it is the unformatted
+ *      list the brief was written against.
+ *   03 holds only while NOTHING ELSE in the document is underlined. The first underlined
+ *      caption takes the affordance down with it.
+ *
+ * PRESS is corners.css's model, not the study's 12% wash: the stroke lands before the fill.
+ * :active rings the box at --stroke-press (06) or takes the rule to --stroke-press (03); the
+ * fill, if the press chose something, arrives on release as .active. corners.css's caveat
+ * holds -- an inset box-shadow follows border-radius, not corner-shape -- and is least
+ * visible at a radius this small.
+ *
+ * THE CONFIRM (motion.css on the click-confirm branch, GESTURES.md §14): on a press that
+ * worked, the host's script adds .wm-confirm (wmConfirm(el)), which drives --confirm-off --
+ * 1 for 80ms, 0 for the next 80ms. Each set multiplies ITS OWN held look by
+ * (1 - --confirm-off): the ring for 06, the press-weight rule for 03. Off, on, settle.
+ * Without motion.css nothing drives the number; it reads its 0 and a confirmed control
+ * simply shows its held look until confirm.js takes the class off.
+ *
+ * ON THE LINE: both are 36px, twelve units -- the 20px mark plus --spacing-03 above and
+ * below, which is also what a label-only box comes to once centred. One height for both, so
+ * the two sets read as one system -- though they are NOT a pair: a panel uses one of them
+ * (a menu of rows, or a run of text), never both (Mark, 2026-10-08). 45 on a coarse pointer, as with
+ * .wm-btn: the 44 floor, on the line.
+ *
+ * NO COMMA INSIDE :is() OR :not() IN THIS FILE. The system page's assembler splits a
+ * selector list on every comma (build.py scope_css), so `:is(.a, .b)` would be torn in two
+ * and vanish silently. Each pair is spelled as two rules. */
+@layer wm.controls {
+  .wm-menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 36px;
+    padding: 0 var(--spacing-04, 12px);
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 15px);
+    text-align: left;
+    color: var(--text-muted, rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62)));
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius, 8px);
+    corner-shape: superellipse(var(--corner-k, 1.2));
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    /* Not box-shadow: the press ring is the acknowledgement, and it lands on the frame. */
+    transition: color var(--dur-fast, 140ms) ease, background var(--dur-fast, 140ms) ease;
+  }
+  .wm-menu--row {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0 var(--spacing-03, 8px);
+  }
+  /* The mark's own space, on the side facing the label -- button.css's rule: no gap, so a
+     label written with inline markup cannot come apart. A mark after the label goes to the
+     far edge of the row. :first-child, not :not(:last-child): the label is usually a bare
+     text node, which the child selectors do not see, so a leading mark IS the last child.
+     The mark is the Icon component's, 20px (it sets the size inline; plain markup sets it
+     on .wm-icon), which is what the 36 below is built from. */
+  .wm-menu > .wm-icon:first-child { margin-right: var(--spacing-03, 8px); }
+  .wm-menu > [data-mark]:first-child { margin-right: var(--spacing-03, 8px); }
+  .wm-menu > .wm-icon:not(:first-child) { margin-left: var(--spacing-03, 8px); }
+  .wm-menu--row > .wm-icon:not(:first-child) { margin-left: auto; }
+  .wm-menu-list { display: flex; flex-direction: column; gap: var(--tick, 3px); }
+
+  .wm-menu:hover:not(:disabled) {
+    color: var(--text, inherit);
+    background: color-mix(in oklab, var(--text, #e8e8e8) 6%, transparent);
+  }
+  .wm-menu:active:not(:disabled) {
+    color: var(--text, inherit);
+    background: none;
+    box-shadow: inset 0 0 0 var(--stroke-press, 1.8px) currentColor;
+  }
+  .wm-menu.active { color: var(--text, inherit); background: var(--surface-hi, var(--surface)); }
+  .wm-menu[aria-pressed="true"] { color: var(--text, inherit); background: var(--surface-hi, var(--surface)); }
+  .wm-menu:disabled { color: var(--text-dim, currentColor); background: transparent; cursor: default; }
+  .wm-menu:focus { outline: none; }
+  /* Inset: a row is the full width of its column, and an outset ring would cross into the
+     gutter beside it. */
+  .wm-menu:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: -2px; }
+  .wm-menu.wm-confirm:not(:disabled) {
+    transition: none;
+    color: var(--text, inherit);
+    box-shadow: inset 0 0 0 calc(var(--stroke-press, 1.8px) * (1 - var(--confirm-off, 0))) currentColor;
+  }
+
+  .wm-rule {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: 36px;
+    padding: 0;
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 15px);
+    color: var(--text, inherit);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: underline;
+    text-decoration-thickness: var(--hair, 1px);
+    text-underline-offset: .22em;
+    text-decoration-color: var(--text-muted, currentColor);
+    -webkit-tap-highlight-color: transparent;
+    transition: text-decoration-color var(--dur-fast, 140ms) ease, text-decoration-thickness var(--dur-fast, 140ms) ease;
+  }
+  .wm-rule:hover:not(:disabled) {
+    text-decoration-color: var(--text, currentColor);
+    text-decoration-thickness: var(--stroke-hover, 1.2px);
+  }
+  .wm-rule:active:not(:disabled) {
+    text-decoration-color: var(--text, currentColor);
+    text-decoration-thickness: var(--stroke-press, 1.8px);
+  }
+  .wm-rule.active { text-decoration-color: var(--accent, currentColor); text-decoration-thickness: var(--stroke-press, 1.8px); }
+  .wm-rule[aria-pressed="true"] { text-decoration-color: var(--accent, currentColor); text-decoration-thickness: var(--stroke-press, 1.8px); }
+  .wm-rule:disabled { color: var(--text-dim, currentColor); text-decoration: none; cursor: default; }
+  .wm-rule:focus { outline: none; }
+  .wm-rule:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 3px; }
+  .wm-rule.wm-confirm:not(:disabled) {
+    transition: none;
+    text-decoration-thickness: calc(var(--hair, 1px) + (var(--stroke-press, 1.8px) - var(--hair, 1px)) * (1 - var(--confirm-off, 0)));
+    text-decoration-color: color-mix(in oklab, var(--text-muted, currentColor) calc(var(--confirm-off, 0) * 100%), var(--text, currentColor));
+  }
+  /* Chosen keeps its press weight; the blink is the signal going to ink and back. */
+  .wm-rule.active.wm-confirm {
+    text-decoration-thickness: var(--stroke-press, 1.8px);
+    text-decoration-color: color-mix(in oklab, var(--accent, currentColor) calc(var(--confirm-off, 0) * 100%), var(--text, currentColor));
+  }
+
+  /* ── variants ───────────────────────────────────────────────────────────── */
+  /* The marks' own sizes, as dialHandle.css sets its mark: the Icon component's 20 (and the
+     study's 16 for a trailing toggle). Inline size from <Icon size> still wins. */
+  .wm-menu > .wm-icon { font-size: 20px; }   /* token-lint: allow -- the mark's opsz 20 drawing, not a text role */
+  .wm-menu > .wm-icon.wm-menu-mark--sm { font-size: 16px; }   /* token-lint: allow -- the small mark, not a text role */
+  .wm-menu-mark--sm { font-size: 16px; }   /* token-lint: allow -- the small mark, not a text role */
+
+  .wm-menu--mark { min-width: 36px; padding: 0 var(--spacing-03, 8px); }
+  .wm-menu--mark > .wm-icon:first-child { margin-right: 0; }
+  .wm-menu--mark.active { background: transparent; }
+  .wm-menu--mark[aria-pressed="true"] { background: transparent; }
+
+  .wm-menu-seg {
+    display: flex;
+    padding: var(--tick, 3px);
+    gap: var(--tick, 3px);
+    border-radius: calc(var(--radius, 8px) + var(--tick, 3px));
+    corner-shape: superellipse(var(--corner-k, 1.2));
+    background: color-mix(in oklab, var(--bg, #0f0f0f) 70%, black);
+  }
+  .wm-menu-seg > .wm-menu { flex: 1 1 0; min-height: 30px; }   /* 36 inside the 3px track */
+
+  .wm-field {
+    display: flex;
+    align-items: stretch;
+    box-sizing: border-box;
+    min-height: 36px;
+    width: 100%;
+    border-radius: var(--radius, 8px);
+    corner-shape: superellipse(var(--corner-k, 1.2));
+    overflow: hidden;
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 15px);
+    background: var(--surface, transparent);
+  }
+  .wm-field-lab {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--spacing-04, 12px);
+    color: var(--text-dim, currentColor);
+    background: color-mix(in oklab, var(--bg, #0f0f0f) 70%, black);
+  }
+  .wm-field-val {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-01, 4px);
+    padding: 0 var(--spacing-04, 12px);
+    color: var(--text, inherit);
+  }
+  .wm-field-unit { color: var(--text-dim, currentColor); }
+  .wm-field-ed {
+    color: var(--text, inherit);
+    font-feature-settings: "tnum";
+    outline: none;
+    text-decoration: underline;
+    text-decoration-thickness: var(--hair, 1px);
+    text-underline-offset: 2px;
+    text-decoration-color: var(--text-muted, currentColor);
+    transition: text-decoration-color var(--dur-fast, 140ms) ease;
+  }
+  .wm-field-ed:hover { text-decoration-color: var(--text, currentColor); }
+  .wm-field-ed:focus {
+    color: var(--accent, currentColor);
+    text-decoration-color: var(--accent, currentColor);
+    text-decoration-thickness: 2px;
+    caret-color: var(--accent, currentColor);
+  }
+  .wm-field--select {
+    align-items: center;
+    gap: var(--spacing-03, 8px);
+    padding: 0 var(--spacing-04, 12px);
+    color: var(--text-muted, currentColor);
+    border: 0;
+    cursor: pointer;
+    text-align: left;
+  }
+  .wm-field--select:hover { color: var(--text, inherit); }
+  .wm-field--select:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+  .wm-field--select > .wm-icon:last-child { margin-left: auto; }
+
+  .wm-menu--display {
+    min-height: 0;
+    padding: var(--spacing-03, 8px) var(--spacing-05, 16px);
+    font-size: var(--type-title-size, 1.625rem);
+    line-height: var(--type-title-lead, 30px);
+  }
+
+  .wm-rule--row {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0 var(--spacing-03, 8px);
+  }
+  .wm-rule--row > .wm-icon { font-size: 20px; }   /* token-lint: allow -- the mark's opsz 20 drawing, not a text role */
+  .wm-rule--row > .wm-icon:first-child { margin-right: var(--spacing-03, 8px); }
+  .wm-rule--row > .wm-icon:not(:first-child) { margin-left: auto; }
+  .wm-rule-ed {
+    color: var(--text, inherit);
+    outline: none;
+    text-decoration: underline dashed;
+    text-decoration-thickness: var(--hair, 1px);
+    text-underline-offset: .22em;
+    text-decoration-color: var(--text-dim, currentColor);
+    transition: text-decoration-color var(--dur-fast, 140ms) ease;
+  }
+  .wm-rule-ed:hover { text-decoration-color: var(--text, currentColor); }
+  .wm-rule-ed:focus { text-decoration-style: solid; text-decoration-color: var(--accent, currentColor); caret-color: var(--accent, currentColor); }
+  .wm-rule--display {
+    min-height: 0;
+    font-size: var(--type-title-size, 1.625rem);
+    line-height: var(--type-title-lead, 30px);
+    text-decoration-thickness: .1em;
+    text-underline-offset: .16em;
+  }
+
+  @media (pointer: coarse) {
+    .wm-menu { min-height: 45px; }   /* fifteen units; the 44 floor, on the line */
+    .wm-menu--mark { min-width: 45px; }   /* the icon-only target stays square */
+    .wm-rule { min-height: 45px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wm-menu { transition: none; }
+    .wm-rule { transition: none; }
+  }
+}
+
+/* A row's mark takes the pointer from the ROW, as icon.css does for the buttons it names:
+   hovering a 20px glyph is a smaller target than the row it stands for, and the two must
+   not disagree. In wm.icon because that layer is declared after wm.controls -- a rule in
+   wm.controls cannot reach a mark however specific it is. The chosen row's mark is
+   icon.css's own `.active > .wm-icon`, untouched. */
+@layer wm.icon {
+  .wm-menu:not(.active):not(:disabled):hover > .wm-icon:not(.wm-icon--off) {
+    --icon-grad: 100;
+    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
+  }
+  .wm-menu:not(.active):focus-visible > .wm-icon:not(.wm-icon--off) {
+    --icon-grad: 100;
+    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .wm-menu:not(.active):not(:disabled):hover > .wm-icon:not(.wm-icon--off) { --icon-grad: 150; }
+  }
+  :root[data-theme="light"] .wm-menu:not(.active):not(:disabled):hover > .wm-icon:not(.wm-icon--off) { --icon-grad: 150; }
+}

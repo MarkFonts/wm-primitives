@@ -1,0 +1,40 @@
+<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><title>button-sets contract</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- src/button-sets.css on the package's own tokens: 06 Menu (.wm-menu, the primary) and
+     03 Rule (.wm-rule, the secondary), each in its own block -- never one row. ?theme=light flips the root. tests/behaviour and
+     tests/render button-sets.spec.ts. -->
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'dark'</script>
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css">
+<link rel="stylesheet" href="/dial/shared/src/space.css"><link rel="stylesheet" href="/dial/shared/src/corners.css">
+<link rel="stylesheet" href="/dial/shared/src/icon.css"><link rel="stylesheet" href="/dial/shared/src/button-sets.css">
+<style>
+  @font-face { font-family: 'Cal Sans'; src: url('/dial/shared/fonts/CalSansVF.woff2') format('woff2'); font-weight: 100 900; font-display: block; }
+  @font-face { font-family: 'Material Symbols Outlined'; src: url('/dial/shared/fonts/MaterialSymbolsOutlined.woff2') format('woff2'); font-weight: 100 700; font-display: block; }
+  :root{ --ui-font: 'Cal Sans'; --text-rgb: 232,232,232; --accent: #eeff41; }
+  :root[data-theme="light"]{ --text-rgb: 22,22,22; --accent: #5c6b00; }
+  body{ background: var(--bg); color: var(--text); margin: 0; font-family: 'Cal Sans'; }
+  .stage{ padding: 24px; display: flex; flex-direction: column; gap: 24px; align-items: flex-start; }
+  .line{ padding: 12px; display: flex; align-items: center; gap: 12px; font-size: var(--type-ui-size); line-height: var(--type-ui-lead); color: var(--text-muted); }
+  #list{ width: 240px; padding: 12px; }
+  .one{ padding: 12px; }
+  .wm-icon{ font-size: 20px; max-width: 1.25em; overflow: hidden; }   /* the Icon component's size */
+  #trail{ font-size: 16px; }
+</style></head><body>
+<div class="stage">
+  <div id="list" class="wm-menu-list">
+    <button class="wm-menu wm-menu--row" type="button"><span class="wm-icon" aria-hidden="true" translate="no">calendar_month</span>Booking events</button>
+    <button id="row" class="wm-menu wm-menu--row" type="button"><span class="wm-icon" aria-hidden="true" translate="no">insert_text</span>Big Word</button>
+    <button id="chosen" class="wm-menu wm-menu--row active" type="button"><span class="wm-icon" aria-hidden="true" translate="no">format_paragraph</span>Paragraph<span id="trail" class="wm-icon" aria-hidden="true" translate="no">discover_tune</span></button>
+    <button id="off" class="wm-menu wm-menu--row" type="button" disabled><span class="wm-icon" aria-hidden="true" translate="no">grid_view</span>Glyphs</button>
+  </div>
+  <div class="one" id="v-wrap" style="width:240px;display:flex;flex-direction:column;align-items:flex-start;gap:12px">
+    <button id="mark" class="wm-menu wm-menu--mark" type="button" aria-label="Reset"><span class="wm-icon" aria-hidden="true" translate="no">settings_backup_restore</span></button>
+    <div id="field" class="wm-field"><span class="wm-field-lab">size</span><span class="wm-field-val"><span id="field-ed" class="wm-field-ed" contenteditable="plaintext-only">18</span><span class="wm-field-unit">px</span></span></div>
+    <div id="seg" class="wm-menu-seg"><button class="wm-menu active" type="button">Roman</button><button class="wm-menu" type="button">Italic</button></div>
+    <span id="rule-ed" class="wm-rule-ed" contenteditable="plaintext-only">Turn any page into a booking portal</span>
+  </div>
+  <div class="one" id="m-wrap"><button id="m" class="wm-menu" type="button">Link roman + italic</button></div>
+  <div class="one" id="r-wrap"><button id="r" class="wm-rule" type="button">Kern lists</button></div>
+  <div class="line" id="inline"><span>12 pairs selected</span><button class="wm-rule" type="button">Kern lists</button><button class="wm-rule" type="button">Delete pairs</button><button id="r-on" class="wm-rule active" type="button">Rom</button><button id="r-off" class="wm-rule" type="button" disabled>Average pairs</button></div>
+</div>
+</body></html>
