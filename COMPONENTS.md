@@ -32,7 +32,7 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `EASES` `resolveEase` `bezierPoint` `bezierY` `rampStops` `scrim` `maskRamp` `blend` `blurLayers` `declaration` `channelBlend` `resolveRGB` `CHANNEL_NAMES` | Gradients — the shape of a ramp, and the three things a ramp can carry. The package already faded in three places and spelled it two ways; one of those spellings was the two-stop fade the other one wrote a paragraph expl… | WORDMAKE, ReCal, GliffDiff, font-proofer | GRADIENTS.md |
 | `ProgressiveBlur` `CurveEditor` `ChannelCurves` `GradientControls` `GradientPreview` `gradientCss` `GRADIENT_DEFAULTS` | A scrim and a blend are declarations and need no component. Progressive blur is not a declaration — it is a stack of masked backdrop layers, so it is DOM, and the stack is here once instead of in each consumer (where the… | — | — |
 
-CSS-only modules (imported from an app's entry stylesheet, nothing to export): `src/button.css`, `src/grid.css`, `src/chip.css`, `src/select.css`, `src/motion.css`, `src/color.css`.
+CSS-only modules (imported from an app's entry stylesheet, nothing to export): `src/button.css`, `src/button-sets.css`, `src/grid.css`, `src/chip.css`, `src/select.css`, `src/motion.css`, `src/color.css`.
 
 ## Marks
 
