@@ -69,7 +69,9 @@ SECTIONS = [
     # inside 02. 03 is the control interface.
     ("corners",  "The corner law",    [SD/"corner-law.html", SD/"circles.html"],
                                        "superellipse(1.2), 2^k, and what opts out"),
-    ("controls", "Interface",         SD/"controls.html",     "one dial, five ways"),
+    # The confirm rides inside Interface: it is how every control there answers a press
+    # that worked (GESTURES.md §14).
+    ("controls", "Interface",         [SD/"controls.html", SD/"confirm.html"], "one dial, five ways; the confirm"),
     ("space",   "Space",         SD/"space.html",        "the pad scale, cap + alignment"),
     # Ramps ride INSIDE Color, as circles ride inside the corner law: a gradient is
     # colour under a curve, and the page has six laws, not seven. (2026-09-19; the branch
@@ -152,7 +154,7 @@ PRIMITIVE_CSS = {
     # chevron.css carries the stepper stroke and its rollover; without it the docs page
     # draws chevrons at the browser's default stroke-width of 1, thinner than anything
     # that ships, since the weight left the SVG attribute so it could answer :hover.
-    "controls": ("type.css", "chevron.css", "icon.css", "AxisSlider.css", "AxisTriplet.css", "chip.css", "dialHandle.css",
+    "controls": ("type.css", "motion.css", "chevron.css", "icon.css", "AxisSlider.css", "AxisTriplet.css", "chip.css", "dialHandle.css",
                  "themeSwitch.css", "zoomControl.css"),
 }
 # The same for scripts: a chapter that DEMONSTRATES a plain-script primitive runs the file
@@ -161,6 +163,7 @@ PRIMITIVE_JS = {
     # zoomControl.js and themeStack.js are the SHELL's now (CHROME_JS below): the page's own zoom
     # uses them, and one copy mounts every control on the page, the chapter's demos included.
     # Two copies would each run a page-level + - 0 handler over their own controls.
+    # confirm.js is the shell's too (CHROME_JS), for the same reason: one window.wmConfirm.
     "controls": ("dialHandle.js",),
 }
 # A part folded into a section (an extra source) names its primitives by file, and they are
@@ -171,6 +174,7 @@ PRIMITIVE_JS = {
 # to the section and snap nothing but the demo, and two snappers would fight over --snap.
 PRIMITIVE_CSS_PART = {
     "grid.html": ("type.css", "chip.css"),
+    "confirm.html": ("type.css", "motion.css", "button.css", "chip.css", "icon.css", "chevron.css", "AxisTriplet.css"),
 }
 
 # ---------------------------------------------------------------- the line
@@ -258,7 +262,8 @@ def build_section(sid, label, path, kicker):
     # rule after it -- which is how the GEOM map lost all its --g-* colors and painted
     # black while --radius, declared earlier, still resolved.
     css = css.replace('<![CDATA[', '').replace(']]>', '')
-    js  = "".join((HERE.parent.parent / "src" / f).read_text() + "\n" for f in PRIMITIVE_JS.get(sid, ())) \
+    js  = "".join(re.sub(r'^export ', '', (HERE.parent.parent / "src" / f).read_text(), flags=re.M) + "\n"
+                  for f in PRIMITIVE_JS.get(sid, ())) \
         + "\n".join(re.findall(r'<script[^>]*>(.*?)</script>', raw, re.S))
 
     html = re.sub(r'<style[^>]*>.*?</style>', '', raw, flags=re.S)
@@ -1917,10 +1922,13 @@ assert not [c for c in LETTERBOX if ord(c) > 127], "letterbox.js must stay ASCII
 # carries for its demos are unchanged.
 CHROME_CSS = scope_css(re.sub(r'/\*.*?\*/', '', "".join(
     (HERE.parent.parent / "src" / f).read_text()
-    for f in ("icon.css", "dialHandle.css", "zoomControl.css", "themeSwitch.css")), flags=re.S)
+    for f in ("motion.css", "icon.css", "dialHandle.css", "zoomControl.css", "themeSwitch.css")), flags=re.S)
     .replace("url('../fonts/", "url('fonts/").replace('url("../fonts/', 'url("fonts/'), ".wm-chrome")
 CHROME_CSS = "".join(c if ord(c) < 128 else f"\\{ord(c):04X} " for c in CHROME_CSS)
-CHROME_JS = "".join((HERE.parent.parent / "src" / f).read_text() + "\n" for f in ("zoomControl.js", "themeStack.js"))
+# confirm.js first, its `export` stripped (this is a classic script): window.wmConfirm, which
+# zoomControl.js and the Interface chapter's demos call on a press that worked (GESTURES.md §14).
+CHROME_JS = "".join(re.sub(r'^export ', '', (HERE.parent.parent / "src" / f).read_text(), flags=re.M) + "\n"
+                    for f in ("confirm.js", "zoomControl.js", "themeStack.js"))
 CHROME_JS = "".join(c if ord(c) < 128 else f"\\u{ord(c):04X}" for c in CHROME_JS)
 
 # The marks' placement. A row on a desktop; on a phone -- its own rule, as themeSwitch.css asks of
@@ -1948,6 +1956,7 @@ CHROME = """
     if(v==='auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme',v);
     document.querySelectorAll('[data-theme-pick]').forEach(function(x){ var on=x.getAttribute('data-theme-pick')===v;
       x.setAttribute('aria-pressed',String(on)); if(x.classList.contains('wm-icon-btn')) x.classList.toggle('active',on); });
+    if(window.wmConfirm) window.wmConfirm(b);   /* the receipt, GESTURES.md §14 */
   }); });
 })();
 /* G and L: the columns and the 3px lines over the whole page, at any scroll, from anywhere

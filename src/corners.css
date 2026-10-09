@@ -70,3 +70,11 @@ input[type="range"]::-moz-range-thumb { corner-shape: round; }
   background: none;
   box-shadow: inset 0 0 0 var(--stroke-press, 1.8px) currentColor;
 }
+/* THE CONFIRM (motion.css, GESTURES.md §14): the same ring, after a press that worked -- off
+   for 80ms, on for 80ms, then the control settles (its fill, if it was chosen). The ring is
+   blinked, not the fill: it is the press look, and the fill is the result. */
+.ui-btn.wm-confirm:not(:disabled), .ui-seg > span.wm-confirm, .ui-tab.wm-confirm, .ui-chip.wm-confirm,
+.ui-tool.wm-confirm, .ssd-btn.wm-confirm:not(:disabled) {
+  transition: none;
+  box-shadow: inset 0 0 0 calc(var(--stroke-press, 1.8px) * (1 - var(--confirm-off, 0))) currentColor;
+}

@@ -331,6 +331,9 @@
   .slider-step-btn:first-child::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 4.38 5 1.62 9 4.38' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 4.38 5 1.62 9 4.38' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }
   .slider-step-btn + .slider-step-btn::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1.62 5 4.38 9 1.62' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1.62 5 4.38 9 1.62' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }
   .slider-step-btn:active::before { opacity: 1; transition: none; }
+  /* THE CONFIRM (motion.css, GESTURES.md §14, G88): the same light after a press that took
+     its one step -- off 80ms, on 80ms, then G31's decay. Not on a hold or a drag. */
+  .slider-step-btn.wm-confirm::before { opacity: calc(1 - var(--confirm-off, 0)); transition: none; }
 
   @media (pointer: coarse) {
     /* A FINGER-SIZED TARGET FOR THE VALUE, without moving it. The field measured 23x14 on

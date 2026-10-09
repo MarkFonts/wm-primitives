@@ -26,6 +26,7 @@
 // minus (U+2212) instead of a hyphen, arrow keys reimplemented because type=text does
 // not bring them, Shift for ×10, and drawn chevrons rather than the platform stepper,
 // which cannot survive type=text and does not theme.
+import { wmConfirm } from './confirm.js'
 import { useRef, useState } from 'react'
 import { nbMinus } from './format'
 import { CHEVRON, chevronPath } from './chevronGeometry'
@@ -85,7 +86,7 @@ export function AxisTriplet({
   /* Escape drops the draft and then blurs; the blur handler runs before React has
      applied that setState, so it reads the abandonment from here, not from `draft`. */
   const abandoned = useRef(false)
-  const hold = useRef<{ t?: number; i?: number }>({})
+  const hold = useRef<{ t?: number; i?: number; ok?: boolean }>({})
 
   /* The latest band, for the repeat timer. `value` in a closure is the band as it was
      when the press began, so a hold committed base+step, base+step, base+step -- one
@@ -107,7 +108,11 @@ export function AxisTriplet({
   }
   const startHold = (k: Key, dir: 1 | -1) => {
     const bump = () => { setDraft(null); commit(k, +(shown(k) + dir * step).toFixed(2)) }
+    /* Did the step on down DO anything? At a bound it is clamped back to where it was, and
+       a press that failed its own check is not confirmed (GESTURES.md G87). */
+    const from = shown(k), to = Math.min(max, Math.max(min, +(from + dir * step).toFixed(2)))
     bump()
+    hold.current.ok = to !== from
     hold.current.t = window.setTimeout(() => {
       hold.current.i = window.setInterval(bump, 60)
     }, 400)
@@ -180,7 +185,10 @@ export function AxisTriplet({
                       tabIndex={-1}
                       className="triplet-step-btn"
                       onPointerDown={e => { e.preventDefault(); startHold(k, dir) }}
-                      onPointerUp={stopHold}
+                      /* THE CONFIRM fires on the lift of a press that took its one step and
+                         never repeated (G88): a hold is not confirmed, and the repeat cannot
+                         retrigger it -- G31's rule for the flash, kept. */
+                      onPointerUp={e => { const h = hold.current; stopHold(); if (h.ok && !h.i) wmConfirm(e.currentTarget) }}
                       onPointerLeave={stopHold}
                       onPointerCancel={stopHold}
                     >

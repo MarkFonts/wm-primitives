@@ -71,7 +71,7 @@
       const dot = mk('span', 'wm-hd-auto-dot'); dot.setAttribute('aria-hidden', 'true');
       const word = mk('span', 'wm-hd-auto-word'); word.textContent = 'auto';
       autoBtn.append(dot, word); autoBtn.title = d.auto.title || 'follow automatically';
-      autoBtn.addEventListener('click', () => nudge(value === 'auto' ? d.auto.value : 'auto'));
+      autoBtn.addEventListener('click', () => { nudge(value === 'auto' ? d.auto.value : 'auto'); window.wmConfirm?.(autoBtn); });   // the receipt, if confirm.js is loaded (GESTURES.md G90)
       id.appendChild(autoBtn);
       root.__dot = dot;
     }

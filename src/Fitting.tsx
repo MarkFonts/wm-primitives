@@ -16,6 +16,7 @@ import { Collapse } from './Collapse'
 import { band, DEFAULTS, layoutParagraph, lineStyle, type Band, type FitMode, type FitOptions } from './flattersatz'
 import { splitInlineMarkup } from './inlineMarkup'
 import { Icon } from './Icon'
+import { wmConfirm } from './confirm.js'
 import './Fitting.css'
 
 export type { FitMode, FitOptions }
@@ -51,7 +52,7 @@ export function AlignmentButtons({ value, onChange, className = '' }: {
           className={`fit-align-btn${value === a ? ' active' : ''} ${className}`.trim()}
           title={a === 'justify' ? 'Justify' : `Align ${a}`}
           aria-pressed={value === a}
-          onClick={() => onChange(a)}
+          onClick={e => { onChange(a); wmConfirm(e.currentTarget) }}
         >
           {/* `active` carries both the ink and the weight, so the chosen alignment is
               bolder as well as brighter -- readable without colour. */}
@@ -135,7 +136,8 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, h
           aria-pressed={rag}
           disabled={mode === 'justified'}
           title={mode === 'justified' ? 'Justification replaces the rag — pick another alignment to set one' : undefined}
-          onClick={() => {
+          onClick={e => {
+            wmConfirm(e.currentTarget)
             // A rag arrives as a rag: the band, and nothing spent. The H&J bands are
             // where JUSTIFIED starts, which is a different question.
             if (!swissRag) set({ ragWidth: DEFAULTS.ragWidth, budgets: false, rag: DEFAULTS.rag })
@@ -151,7 +153,7 @@ export function FittingControls({ value, onChange, mode, swissRag, onSwissRag, h
           <button
             className={`fit-switch${hyphenate ? ' active' : ''}`}
             aria-pressed={hyphenate}
-            onClick={() => onHyphenate(!hyphenate)}
+            onClick={e => { onHyphenate(!hyphenate); wmConfirm(e.currentTarget) }}
           >
             <span>Hyphenate</span>
             <span className="fit-switch-state">{hyphenate ? 'on' : 'off'}</span>

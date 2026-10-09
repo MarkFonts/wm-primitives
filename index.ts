@@ -130,6 +130,12 @@ export type {
 // a .12s fallback everywhere else: one component, two speeds, depending on the app.
 // (src/motion.css -- no JS to export.)
 
+// wmConfirm -- the click confirm: on a press that WORKED, the control's press look blinks
+// off 80ms, on 80ms, then it settles (GESTURES.md §14). Adds .wm-confirm, which runs the one
+// keyframe in motion.css; no-op under reduced motion. The primitives call it on their own
+// outcomes; an app calls it on its own successes. Also on window for plain scripts.
+export { wmConfirm } from './src/confirm.js'
+
 // Colour tokens. color.css is additive like type.css and motion.css -- it declares the
 // ramp (--bg/--surface/--surface-hi/--text/--text-muted/--text-dim/--border) and styles
 // no element. A theme is seven numbers, not a second palette. It sits in @layer wm.color

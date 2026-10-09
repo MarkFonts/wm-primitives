@@ -324,7 +324,7 @@ than a word would at the same size.
 - **Ink is the other half, and it is three distinct rungs:** `--ink-faint` at rest,
   `--ink-quiet` on hover, `--ink-full` when active. Hover and active shared full ink at
   first, so arriving at active changed only the weight.
-- **90ms for the pointer, 260ms for a confirm.** At 140 the mark lagged the row it sits
+- **90ms for the pointer, 260ms for a confirm** (until 2026-10-08: the copy confirm is the house confirm now, 80 off / 80 on, GESTURES.md G91). At 140 the mark lagged the row it sits
   in. A rollover should feel like the pointer; the copy confirm is the one place that IS
   an animation, and it fills the mark before swapping to `check` so the swap does not
   read as a flash back to the old SVG.

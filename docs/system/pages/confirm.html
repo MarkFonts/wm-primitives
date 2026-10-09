@@ -1,0 +1,120 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The confirm</title>
+<!-- A part of Interface (build.py folds it into #s-controls after controls.html). The
+     primitives' own files, for standalone viewing: build.py strips these links and inlines
+     the same files from src/ (PRIMITIVE_CSS_PART, PRIMITIVE_JS), so what blinks here is
+     what ships. GESTURES.md §14. -->
+<link rel="stylesheet" href="../../src/type.css">
+<link rel="stylesheet" href="../../src/motion.css">
+<link rel="stylesheet" href="../../src/button.css">
+<link rel="stylesheet" href="../../src/chip.css">
+<link rel="stylesheet" href="../../src/icon.css">
+<link rel="stylesheet" href="../../src/chevron.css">
+<link rel="stylesheet" href="../../src/AxisTriplet.css">
+<script src="../../src/confirm.js" type="module"></script>
+<style>
+@font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype"); font-weight: 400 700; font-display:swap; }
+.cf{ --bg: #111; --surface: #1a1a1a; --surface-hi: #262626; --text: #e8e8e8;
+  --text-muted: rgba(232, 232, 232, .62); --text-dim: rgba(232, 232, 232, .38); --border: rgba(232, 232, 232, .16);
+  --ui-font: "CalSansVF", system-ui, sans-serif;
+  background: var(--bg); color: var(--text); font-family: var(--ui-font); padding: 24px; }
+.cf-h{ font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+.cf-note{ font-size: .8125rem; line-height: 1.5; color: var(--text-muted); max-width: 44em; margin: 0 0 16px; }
+.cf-note b{ color: var(--text); font-weight: 500; }
+.cf-grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 24px; margin: 0 0 16px; }
+.cf-cell{ display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.cf-lab{ font-size: .625rem; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); }
+.cf-row{ display: flex; align-items: center; gap: 4px; }
+.cf-step{ display: inline-flex; align-items: center; gap: 6px; font-size: .875rem; font-variant-numeric: tabular-nums; }
+.cf-step .triplet-step{ display: inline-flex; flex-direction: column; opacity: 1; }
+.cf-tl{ display: grid; grid-template-columns: 1fr 1fr 2fr; max-width: 24rem; font-size: .6875rem; color: var(--text-dim); }
+.cf-tl span{ padding: 6px 8px; border-top: 2px solid var(--border); }
+.cf-tl .on{ border-top-color: var(--text); color: var(--text-muted); }
+.cf label{ font-size: .75rem; color: var(--text-muted); display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.cf.slow{ --dur-confirm: 640ms; }
+.cf-fig{ margin: 0 0 16px; color: var(--text); }
+.cf-fig img{ display: block; margin: 0 0 6px; }
+.cf-fig img[hidden]{ display: none; }
+.cf-fig figcaption{ font-size: .75rem; color: var(--text-muted); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+</style>
+
+<div class="cf" id="cf">
+<h2 class="cf-h">The confirm</h2>
+<p class="cf-note"><code>:active</code> <b>acknowledges</b> a press. When it worked the
+control <b>confirms</b> it: its press look goes off for 80ms, on for 80ms, then it settles
+into the result &mdash; like a macOS menu item blinking. One keyframe set
+(<code>motion.css</code>), one call (<code>wmConfirm(el)</code>, <code>confirm.js</code>),
+three recipes: a box blinks its fill and edge, a mark its FILL/HDR paint, a stepper its
+chevron light. GESTURES.md &sect;14.</p>
+<div class="cf-grid">
+  <div class="cf-cell"><span class="cf-lab">box &middot; button</span>
+    <div class="cf-row"><button class="wm-btn" type="button" data-cf>Kern lists</button>
+    <button class="wm-btn wm-btn--solid" type="button" data-cf>Save</button></div></div>
+  <div class="cf-cell"><span class="cf-lab">box &middot; chip</span>
+    <div class="wm-chip-row" data-cf-chips>
+      <button class="wm-chip on" type="button" aria-pressed="true" data-label="Text">Text</button>
+      <button class="wm-chip" type="button" aria-pressed="false" data-label="Display">Display</button>
+      <button class="wm-chip" type="button" aria-pressed="false" data-label="Poster">Poster</button>
+    </div></div>
+  <div class="cf-cell"><span class="cf-lab">mark</span>
+    <div class="cf-row" data-cf-marks>
+      <button class="wm-icon-btn active" type="button" aria-pressed="true" aria-label="Align left"><span class="wm-icon material-symbols-outlined" aria-hidden="true">format_align_left</span></button>
+      <button class="wm-icon-btn" type="button" aria-pressed="false" aria-label="Align centre"><span class="wm-icon material-symbols-outlined" aria-hidden="true">format_align_center</span></button>
+      <button class="wm-icon-btn" type="button" aria-pressed="false" aria-label="Align right"><span class="wm-icon material-symbols-outlined" aria-hidden="true">format_align_right</span></button>
+    </div></div>
+  <div class="cf-cell"><span class="cf-lab">stepper &middot; hold to repeat</span>
+    <span class="cf-step triplet-f"><span id="cf-val">14</span>
+      <span class="triplet-step" aria-hidden="true">
+        <button class="triplet-step-btn" type="button" tabindex="-1" data-dir="1"><svg viewBox="0 0 7 6" width="7" height="6"><path d="M1 3.86 3.5 2.14 6 3.86" fill="none" stroke="currentColor" stroke-linecap="round"/></svg></button>
+        <button class="triplet-step-btn" type="button" tabindex="-1" data-dir="-1"><svg viewBox="0 0 7 6" width="7" height="6"><path d="M1 2.14 3.5 3.86 6 2.14" fill="none" stroke="currentColor" stroke-linecap="round"/></svg></button>
+      </span></span></div>
+</div>
+<figure class="cf-fig">
+  <img id="cf-svg-slow" src="../../assets/confirm-slow.svg" alt="Two chips: pressing Display fills it, blinks its fill off, then on, then it settles; then the same for Text" width="276" height="78">
+  <img id="cf-svg-real" src="../../assets/confirm.svg" alt="The same loop at real speed" width="276" height="78" hidden>
+  <figcaption>Slowed &times;8 (640ms a phase) so the blink can be read; the real one is 80.
+  <label><input type="checkbox" id="cf-real"> real speed</label></figcaption>
+</figure>
+<div class="cf-tl" aria-hidden="true"><span><b>0&ndash;80</b> off</span><span class="on"><b>80&ndash;160</b> on</span><span><b>160</b> settle</span></div>
+<p class="cf-note" style="margin-top:12px"><label><input type="checkbox" id="cf-slow"> slow &times;8</label>
+&nbsp; Not on a drag, not on a hold-repeat, not on a press that failed its own check (the
+stepper at 0 or 20 confirms nothing). Reduced motion: no blink.</p>
+</div>
+
+<script>
+(function(){
+  var root = document.getElementById('cf');
+  if (!root) return;
+  var confirm = function(el){ return window.wmConfirm ? window.wmConfirm(el) : false; };
+  root.querySelectorAll('[data-cf]').forEach(function(b){ b.addEventListener('click', function(){ confirm(b); }); });
+  [['[data-cf-chips]', 'on'], ['[data-cf-marks]', 'active']].forEach(function(g){
+    var set = root.querySelector(g[0]);
+    set.addEventListener('click', function(e){
+      var b = e.target.closest('button'); if (!b) return;
+      set.querySelectorAll('button').forEach(function(x){ x.classList.toggle(g[1], x === b); x.setAttribute('aria-pressed', String(x === b)); });
+      confirm(b);
+    });
+  });
+  // The stepper: one step on down, repeat after 400ms then every 60ms (G43); the confirm on
+  // the lift of a press that took its one step and never repeated (G88), and moved the value.
+  var val = 14, out = document.getElementById('cf-val'), t = 0, iv = 0, ok = false;
+  var bump = function(d){ var n = Math.max(0, Math.min(20, val + d)); var moved = n !== val; val = n; out.textContent = val; return moved; };
+  var stop = function(){ clearTimeout(t); clearInterval(iv); t = iv = 0; };
+  root.querySelectorAll('.triplet-step-btn').forEach(function(b){
+    var d = +b.dataset.dir;
+    b.addEventListener('pointerdown', function(e){ e.preventDefault(); stop(); ok = bump(d); t = setTimeout(function(){ iv = setInterval(function(){ bump(d); }, 60); }, 400); });
+    b.addEventListener('pointerup', function(){ var one = ok && !iv; stop(); if (one) confirm(b); });
+    b.addEventListener('pointerleave', stop);
+    b.addEventListener('pointercancel', stop);
+  });
+  var real = document.getElementById('cf-real');
+  real.addEventListener('change', function(){
+    document.getElementById('cf-svg-slow').hidden = real.checked;
+    document.getElementById('cf-svg-real').hidden = !real.checked;
+  });
+  var slow = document.getElementById('cf-slow');
+  slow.addEventListener('change', function(){ root.classList.toggle('slow', slow.checked); });
+})();
+</script>

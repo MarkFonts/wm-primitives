@@ -69,6 +69,27 @@
   .wm-btn--solid:hover:not(:disabled) { color: var(--bg, #111); filter: brightness(1.08); }
   .wm-btn--quiet { border-color: transparent; background: transparent; }
   .wm-btn--quiet:hover:not(:disabled) { border-color: var(--border, currentColor); }
+  /* THE CONFIRM (motion.css, GESTURES.md §14): the held look -- the raised surface, the
+     brighter hairline, full ink -- is OFF for the first 80ms (the rest look), ON for the next,
+     then the button settles. Mixed by --confirm-off, so it is one rule, not two states. */
+  .wm-btn.wm-confirm:not(:disabled) {
+    transition: none;
+    color: color-mix(in srgb, var(--text-muted, rgba(232, 232, 232, .62)) calc(var(--confirm-off, 0) * 100%), var(--text, #e8e8e8));
+    background: color-mix(in srgb, var(--surface, transparent) calc(var(--confirm-off, 0) * 100%), var(--surface-hi, var(--surface, transparent)));
+    border-color: color-mix(in srgb, var(--border, currentColor) calc(var(--confirm-off, 0) * 100%), var(--text-dim, currentColor));
+  }
+  .wm-btn--quiet.wm-confirm:not(:disabled) {
+    background: color-mix(in srgb, transparent calc(var(--confirm-off, 0) * 100%), var(--surface-hi, var(--surface, transparent)));
+    border-color: color-mix(in srgb, transparent calc(var(--confirm-off, 0) * 100%), var(--text-dim, currentColor));
+  }
+  /* --solid: its ink IS its look, so the blink takes the ink away (an outline in ground ink's
+     place) and puts it back. */
+  .wm-btn--solid.wm-confirm:not(:disabled) {
+    filter: none;
+    color: color-mix(in srgb, var(--text, #e8e8e8) calc(var(--confirm-off, 0) * 100%), var(--bg, #111));
+    background: color-mix(in srgb, transparent calc(var(--confirm-off, 0) * 100%), var(--text, #e8e8e8));
+    border-color: var(--text, #e8e8e8);
+  }
   .wm-btn:disabled { opacity: .4; cursor: default; }
   .wm-btn:focus { outline: none; }
   .wm-btn:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }

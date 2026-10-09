@@ -27,6 +27,7 @@
 // that and must not pretend to.
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { wmConfirm } from './confirm.js'
 import './StopSlider.css'
 
 /** A named place on the axis. */
@@ -140,7 +141,7 @@ export function StopSlider({
                  are, and "between two stops" is a state this control exists to allow. */
               aria-pressed={value === s.value}
               tabIndex={free ? -1 : 0}
-              onClick={() => onChange(s.value)}
+              onClick={e => { onChange(s.value); wmConfirm(e.currentTarget) }}
             >{s.label}</button>
           ))}
         </div>

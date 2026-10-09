@@ -151,6 +151,9 @@
       const from = value, still = document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches || !open;
       const x0 = lo(pill.getBoundingClientRect());
       set(100);
+      // THE RECEIPT (GESTURES.md G89): the lozenge blinks its fill -- if confirm.js is loaded, and
+      // only when it is on show. A shut control's reset shows on the note (G73), not here.
+      if (open) window.wmConfirm?.(pill);
       if (still) return;
       const dx = x0 - lo(pill.getBoundingClientRect());
       const dur = parseFloat(getComputedStyle(el).getPropertyValue('--dur-med')) || 240;
