@@ -157,6 +157,14 @@
   /* THE CONFIRM (motion.css, GESTURES.md §14). The lozenge is a mark, all fill: on a reset
      (zoomControl.js, G72) the fill goes for 80ms -- its numerals in ink on the rule -- and
      comes back. The auto switch blinks its on ink. */
+  /* THE ACKNOWLEDGEMENT (GESTURES.md G92): pressed, the lozenge's ink goes to the end of its
+     ramp -- white on dark, black on light -- snapped on. A press that becomes a drag keeps it
+     while held; a press that resets (G72) then blinks, below. */
+  .wm-hd-pill:active { background: color-mix(in srgb, var(--text, #e8e8e8) 40%, #fff); }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .wm-hd-pill:active { background: color-mix(in srgb, var(--text, #161616) 40%, #000); }
+  }
+  :root[data-theme="light"] .wm-hd-pill:active { background: color-mix(in srgb, var(--text, #161616) 40%, #000); }
   .wm-hd-pill.wm-confirm {
     background: color-mix(in srgb, transparent calc(var(--confirm-off, 0) * 100%), var(--text, #e8e8e8));
     color: color-mix(in srgb, var(--text, #e8e8e8) calc(var(--confirm-off, 0) * 100%), var(--bg, #111));

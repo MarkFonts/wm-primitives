@@ -12,6 +12,18 @@ Newest first.
 
 ---
 
+## 2026-10-08 -- a press acknowledgement for chips, marks and the lozenge
+
+**The confirm had nothing to undo on them.** A chip, a mark and the lozenge had no `:active`
+paint, so for one being newly chosen the confirm's off phase was the look it already had: the
+fill arrived 80ms late and blinked once. Mark could not see a blink in `confirm.svg` at all.
+Now each acknowledges the press (GESTURES.md G92), on corners.css's model -- the stroke lands
+before the fill: a chip's edge goes to the fill's ink over a 12% wash (a pill, so not the inset
+ring, which ignores `corner-shape`); a mark snaps to its hover rung (no box, no disc; not on an
+active mark, G51); the lozenge's ink goes to the end of its ramp. The `--switch` chip now keeps
+its dashed edge through the blink. `confirm.svg` / `confirm-slow.svg` draw the press too:
+press, undo, redo, settle.
+
 ## 2026-10-08 -- G and L follow the live-area zoom
 
 Mark at 130%, then 400%: "i want the baseline grid and columns to work accurately with the new

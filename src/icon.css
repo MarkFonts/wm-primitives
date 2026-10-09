@@ -386,6 +386,21 @@
   }
 
 
+  /* THE ACKNOWLEDGEMENT (GESTURES.md G92): a mark has no box and no disc to press, so :active
+     is the HOVER RUNG -- ink-quiet, GRAD one step up -- snapped on rather than eased, so a touch
+     (which has no hover) sees the press too. Not on an active mark: G51, a repaint over the
+     swatch replaces it. The confirm's off phase is then the rest rung, visibly a step down. */
+  .wm-icon-btn:not(.active):active .wm-icon:not(.wm-icon--off):not(.wm-icon--active) {
+    --icon-grad: 100;
+    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62));
+    transition: none;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .wm-icon-btn:not(.active):active .wm-icon:not(.wm-icon--off):not(.wm-icon--active) { --icon-grad: 150; }
+  }
+  :root[data-theme="light"] .wm-icon-btn:not(.active):active .wm-icon:not(.wm-icon--off):not(.wm-icon--active) { --icon-grad: 150; }
+  :root[data-theme="dark"] .wm-icon-btn:not(.active):active .wm-icon:not(.wm-icon--off):not(.wm-icon--active) { --icon-grad: 100; }
+
   /* While a confirm runs on the mark or on the button that owns it, the 90ms easing is off:
      the blink is two steps, and a transition would smear them into a flicker. */
   .wm-confirm .wm-icon, .wm-icon.wm-confirm { transition: none; }
