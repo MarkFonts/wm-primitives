@@ -12,6 +12,28 @@ Newest first.
 
 ---
 
+## 2026-10-08 -- G and L follow the live-area zoom
+
+Mark at 130%, then 400%: "i want the baseline grid and columns to work accurately with the new
+'live area' non-native zoom" -- the lines scaled, the columns did not: they were the page's 24
+over the whole viewport, rail included, at the 100% pitch, and beside the try-it card's own
+zoomed stripes they read as two sets. And "it is taking a lot of memory".
+
+- **One layer, the content column's.** `.wm-ov`, position:fixed in `.wm-pan` (the zoom target's
+  scroll parent -- never inside the zoomed `<main>`), sized to what is visible of `<main>`: never
+  bigger than the window, nothing over the rail or the margin. Both drawings are repeating
+  gradients with their pitch and phase read off `<main>` in screen px: lines every `--bl` x zoom
+  from its top, columns the content's own (18 right of the rail from 1024, 12 below) x zoom from
+  its left. The 24-column fixed grid and the viewport canvas are gone.
+- **A scroll is a repaint, not a layout**: the box is written only when it changes; a scroll
+  moves the gradients' phase.
+- Measured (headless Chromium, 1440x900 @2x, G+L on, 20 scroll steps): JS heap 3.3 MB at 100%,
+  4.7 at 400% -- the old overlay 3.8 and 4.3; layouts during the scroll 148 / 83, old 140 / 80;
+  the layer is 923x900 at any zoom. The overlay was never the memory: the zoomed page is.
+- `tests/behaviour/overlay-zoom.spec.ts`: at 130%, G's layer lives in `.wm-pan`, fits the
+  visible box, its pitch is 1.3 x (column + gutter) of the target, and every stripe of the try-it
+  card lands on one of its columns.
+
 ## 2026-10-08 -- the button, chosen: the menu primary, the rule secondary
 
 Mark's decision from "Six ways to say press": the menu family (formerly 06) is the house

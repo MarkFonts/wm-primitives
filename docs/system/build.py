@@ -1254,16 +1254,20 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-key:hover{color:var(--ink);border-color:var(--ink-3)}
 .wm-key[aria-pressed="true"]{color:var(--bg);background:var(--ink);border-color:var(--ink)}
 
-/* ---- The overlays, G and L, on the whole page: the columns (pink) are the shell's own grid,
-   drawn from the same three tokens; the lines (blue) are one viewport-sized canvas at the
-   screen's pixel density, one every --bl from <main>'s top -- gridSnap.js's ?grid drawing, made
-   a toggle. Over everything, under nothing that takes a click. */
-.wm-ov-cols{position:fixed;inset:0;z-index:2147483646;pointer-events:none;display:none;
-  grid-template-columns:repeat(var(--grid-cols),minmax(0,1fr));column-gap:var(--grid-gutter);padding-inline:var(--grid-margin)}
-.wm-ov-cols>i{background:rgba(255,40,140,.06);border-inline:1px solid rgba(255,40,140,.4)}
-.wm-show-cols .wm-ov-cols{display:grid}
-.wm-ov-lines{position:fixed;left:0;top:0;z-index:2147483646;pointer-events:none;display:none}
-.wm-show-lines .wm-ov-lines{display:block}
+/* ---- The overlays, G and L: ONE layer, the content column's (Mark, 2026-10-08: "i want the
+   baseline grid and columns to work accurately with the new live area non-native zoom"). It is
+   position:fixed in .wm-pan -- the zoom target's scroll parent, never inside the zoomed <main> --
+   and the shell sizes it to what is VISIBLE of <main> (its box, cut to the pan's and the
+   viewport's), so it is never bigger than the window at any zoom: at 400% a layer as tall as
+   <main> was the memory Mark saw. Both drawings are repeating gradients on that one box, their
+   pitch and phase read off <main> in screen px: the lines every --bl x zoom from <main>'s top,
+   the columns the content's own (18 right of the rail from 1024, 12 below), each column + gutter
+   x zoom from <main>'s left. So at 130% they are 3.9px and the zoomed columns, on the same text
+   as at 100%, the rail gets nothing, and there is one set, not the page's 24 plus the content's.
+   No DOM per line or per column, no canvas, contain: strict, no will-change. */
+.wm-ov{position:fixed;left:0;top:0;width:0;height:0;z-index:2147483646;pointer-events:none;contain:strict;
+  display:none;background-repeat:repeat}
+.wm-show-cols .wm-ov,.wm-show-lines .wm-ov{display:block}
 """
 
 # No cap. There was one (7), on the thought that past it a page's headings stop being
@@ -1941,34 +1945,56 @@ CHROME = """
     if(window.wmConfirm) window.wmConfirm(b);   /* the receipt, GESTURES.md §14 */
   }); });
 })();
-/* G and L: the columns and the 3px lines over the whole page, at any scroll, from anywhere
-   that is not a field. The keys are the grid bench's (docs/grid.html). */
+/* G and L: the columns and the 3px lines over the content column, at any scroll and any zoom,
+   from anywhere that is not a field. The keys are the grid bench's (docs/grid.html). One layer
+   (.wm-ov, above): sized to <main>'s visible box, painted with gradients whose pitch and phase
+   are <main>'s, so it costs the same at 400% as at 100%. */
 (function(){
-  var root=document.documentElement, main=document.querySelector('.wm-main');
-  var cols=document.createElement('div'); cols.className='wm-ov-cols'; cols.setAttribute('aria-hidden','true');
-  var cv=document.createElement('canvas'); cv.className='wm-ov-lines'; cv.setAttribute('aria-hidden','true');
-  document.body.append(cols,cv);
-  var on={cols:false,lines:false}, raf=0;
-  function drawCols(){ var n=+getComputedStyle(root).getPropertyValue('--grid-cols')||24;
-    if(cols.childElementCount!==n) cols.innerHTML=new Array(n+1).join('<i></i>'); }
-  /* one viewport-sized canvas, redrawn on scroll: a canvas the page's height goes blank past
-     65,535 device px. Line k sits on the device row just above k x --bl from <main>'s top, and
-     a zoomed <main> spaces them by its zoom. */
-  function drawLines(){ raf=0; if(!on.lines||!main) return;
-    var dpr=devicePixelRatio||1, vw=root.clientWidth, vh=innerHeight, r=main.getBoundingClientRect();
-    var bl=(parseFloat(getComputedStyle(main).getPropertyValue('--bl'))||3)*(main.currentCSSZoom||1);
-    cv.style.width=vw+'px'; cv.style.height=vh+'px';
-    if(cv.width!==Math.round(vw*dpr)||cv.height!==Math.round(vh*dpr)){ cv.width=Math.round(vw*dpr); cv.height=Math.round(vh*dpr); }
-    var g=cv.getContext('2d'); g.clearRect(0,0,cv.width,cv.height); g.fillStyle='rgba(40,120,255,.45)';
-    var x0=Math.max(0,r.left), x1=Math.min(vw,r.right), y0=Math.max(0,r.top), y1=Math.min(vh,r.bottom);
-    if(x1<=x0||y1<=y0) return;
-    for(var k=Math.max(0,Math.ceil((y0-r.top)/bl)); r.top+k*bl<y1; k++)
-      g.fillRect(Math.round(x0*dpr), Math.round((r.top+k*bl)*dpr)-1, Math.round((x1-x0)*dpr), 1);
+  var root=document.documentElement, main=document.querySelector('.wm-main'), pan=main&&main.parentElement;
+  if(!main) return;
+  var ov=document.createElement('div'); ov.className='wm-ov'; ov.setAttribute('aria-hidden','true');
+  pan.appendChild(ov);
+  var on={cols:false,lines:false}, raf=0, last='', lastSize='';
+  var px=function(el,v,d){ var n=parseFloat(getComputedStyle(el).getPropertyValue(v)); return isFinite(n)?n:d; };
+  /* the content's columns, in <main>'s own (unzoomed) space: the page's --grid-cols less the
+     rail's span and gap where the rail is a column (from 1024), the gutter the page's token;
+     <main> is exactly that many columns and gutters wide (no padding of its own) */
+  function grid(){
+    var cs=getComputedStyle(main), n=px(main,'--grid-cols',24), g=px(main,'--grid-gutter',24);
+    if(innerWidth>=1024) n-=px(main,'--rail-span',5)+px(main,'--rail-gap',1);
+    var w=main.offsetWidth;
+    return { n:n, g:g, col:(w-(n-1)*g)/n, w:w };
   }
-  function redraw(){ if(!raf) raf=requestAnimationFrame(drawLines); }
+  function draw(){ raf=0;
+    if(!on.cols&&!on.lines) return;
+    var z=main.currentCSSZoom||1, r=main.getBoundingClientRect(), p=pan.getBoundingClientRect();
+    var x0=Math.max(0,r.left,p.left), x1=Math.min(root.clientWidth,r.right,p.right);
+    var y0=Math.max(0,r.top), y1=Math.min(innerHeight,r.bottom);
+    if(x1<=x0||y1<=y0){ if(last!=='0'){ last='0'; ov.style.width='0px'; } return; }
+    /* the box is written only when it changes -- near <main>'s ends, or on a zoom or resize --
+       so a scroll is a repaint of one viewport-sized box (the phase), never a layout */
+    var box=x0+','+y0+','+(x1-x0)+','+(y1-y0);
+    if(box!==last){ last=box; ov.style.left=x0+'px'; ov.style.top=y0+'px'; ov.style.width=(x1-x0)+'px'; ov.style.height=(y1-y0)+'px'; }
+    var img=[], size=[], pos=[];
+    if(on.lines){
+      var bl=px(main,'--bl',3)*z, dy=((r.top-y0)%bl+bl)%bl;   // line k on the row just above k x bl from <main>'s top
+      img.push('linear-gradient(to bottom,transparent calc(100% - 1px),rgba(40,120,255,.45) calc(100% - 1px))');
+      size.push('100% '+bl+'px'); pos.push('0 '+(dy-1)+'px');   // the 1px band ends on the line
+    }
+    if(on.cols){
+      var G=grid(), pitch=(G.col+G.g)*z, c=G.col*z, dx=((r.left-x0)%pitch+pitch)%pitch;
+      img.push('linear-gradient(to right,rgba(255,40,140,.4) 0 1px,rgba(255,40,140,.06) 1px calc('+c+'px - 1px),rgba(255,40,140,.4) calc('+c+'px - 1px) '+c+'px,transparent '+c+'px)');
+      size.push(pitch+'px 100%'); pos.push(dx+'px 0');
+      ov.dataset.pitch=pitch.toFixed(3); ov.dataset.col=c.toFixed(3); ov.dataset.n=G.n;
+    }
+    var sz=img.join(',')+'|'+size.join(',');
+    if(sz!==lastSize){ lastSize=sz; ov.style.backgroundImage=img.join(','); ov.style.backgroundSize=size.join(','); }
+    ov.style.backgroundPosition=pos.join(',');
+  }
+  function redraw(){ if(!raf) raf=requestAnimationFrame(draw); }
   function set(k,v){ on[k]=v; root.classList.toggle('wm-show-'+k,v);
     document.querySelectorAll('.wm-key[data-overlay="'+k+'"]').forEach(function(b){ b.setAttribute('aria-pressed',String(v)); });
-    if(k==='cols') drawCols(); else redraw(); }
+    draw(); }
   document.querySelectorAll('.wm-key[data-overlay]').forEach(function(b){ b.addEventListener('click',function(){ var k=b.getAttribute('data-overlay'); set(k,!on[k]); }); });
   addEventListener('keydown',function(e){
     if(e.metaKey||e.ctrlKey||e.altKey) return;
@@ -1976,9 +2002,9 @@ CHROME = """
     var k=(e.key||'').toLowerCase();
     if(k==='g') set('cols',!on.cols); else if(k==='l') set('lines',!on.lines);
   });
-  addEventListener('scroll',redraw,{passive:true}); addEventListener('resize',function(){ drawCols(); redraw(); });
-  addEventListener('wm-zoom',redraw);
-  if(main&&'ResizeObserver' in window) new ResizeObserver(redraw).observe(main);
+  addEventListener('scroll',redraw,{passive:true}); pan.addEventListener('scroll',redraw,{passive:true});
+  addEventListener('resize',redraw); addEventListener('wm-zoom',redraw);
+  if('ResizeObserver' in window) new ResizeObserver(redraw).observe(main);
 })();
 """
 
