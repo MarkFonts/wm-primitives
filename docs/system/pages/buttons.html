@@ -803,8 +803,69 @@ html, body { margin: 0; background: var(--bg, #0f0f0f); }
 .bt-tbl .yes{ color: var(--bt-signal); }
 .bt-tbl .no{ color: var(--bt-ink3); }
 
+
+/* ── the confirm (GESTURES.md §14) ───────────────────────────────────────────
+   The house keyframe and wmConfirm(el), restated here because this page is published
+   from docs/ alone and src/ is not served (src/motion.css, src/confirm.js are the source).
+   :active acknowledges; on a press that WORKED the class .wm-confirm runs one keyframe set
+   that drives --confirm-off -- 1 for 80ms, then 0 for 80ms -- and every family below
+   multiplies ITS OWN held look (.s-p) by (1 - --confirm-off): off, on, settle. Nothing
+   moves: the plate's 1px sink is left out. Transitions are off while it runs, so the
+   steps stay steps. */
+@property --confirm-off{ syntax:'<number>'; inherits: true; initial-value: 0; }
+@keyframes wm-confirm{ 0%{ --confirm-off: 1; } 50%{ --confirm-off: 0; } 100%{ --confirm-off: 0; } }
+.bt-page{ --dur-confirm: 80ms; }
+.bt-page.bt-slow{ --dur-confirm: 640ms; }
+.bt-page .wm-confirm{ animation: wm-confirm calc(2 * var(--dur-confirm)) steps(1, end); transition: none; }
+.bt-page .wm-confirm::before{ transition: none; }
+/* the generic one, for anything without its own recipe: a tint laid over whatever is there */
+:where(.bt-page) button.wm-confirm{ box-shadow: inset 0 0 0 100vmax color-mix(in oklab, var(--bt-ink) calc((1 - var(--confirm-off)) * 16%), transparent); }
+/* 01 keyline: the held look is the 1.8 stroke, no ground, ink */
+.bt-k.wm-confirm:not(:disabled){ box-shadow: inset 0 0 0 calc(var(--bt-stroke-press) * (1 - var(--confirm-off))) currentColor;
+  background: color-mix(in oklab, var(--bt-sf) calc(var(--confirm-off) * 100%), transparent);
+  border-color: color-mix(in oklab, var(--bt-line) calc(var(--confirm-off) * 100%), transparent);
+  color: color-mix(in oklab, var(--bt-ink2) calc(var(--confirm-off) * 100%), var(--bt-ink)); }
+.bt-k.is-on.wm-confirm{ background: color-mix(in oklab, var(--bt-sf2) calc(var(--confirm-off) * 100%), transparent);
+  border-color: color-mix(in oklab, var(--bt-ink3) calc(var(--confirm-off) * 100%), transparent); color: var(--bt-ink); }
+/* the solid one keeps its ink and takes the stroke in its own label colour */
+.bt-k--solid.wm-confirm:not(:disabled){ background: var(--bt-ink); border-color: var(--bt-ink); color: var(--bt-bg); }
+/* 02 lozenge: the held look is 30% ink over the ground */
+.bt-z.wm-confirm{ box-shadow: inset 0 0 0 100vmax color-mix(in oklab, var(--bt-ink) calc((1 - var(--confirm-off)) * 30%), transparent); }
+/* 03 rule: the underline goes to the press stroke in full ink */
+.bt-r.wm-confirm{ text-decoration-thickness: calc(var(--bt-hair) + (var(--bt-stroke-press) - var(--bt-hair)) * (1 - var(--confirm-off)));
+  text-decoration-color: color-mix(in oklab, var(--bt-ink2) calc(var(--confirm-off) * 100%), var(--bt-ink)); box-shadow: none; }
+.bt-r.is-on.wm-confirm{ text-decoration-thickness: var(--bt-stroke-press);
+  text-decoration-color: color-mix(in oklab, var(--bt-signal) calc(var(--confirm-off) * 100%), var(--bt-ink)); }
+.bt-r--solid.wm-confirm{ text-decoration-thickness: var(--bt-stroke-press);
+  text-decoration-color: color-mix(in oklab, var(--bt-signal) calc(var(--confirm-off) * 100%), var(--bt-ink)); }
+/* 04 plate: the plate sinks to the sunk ground (its shadow and its 1px drop are left out) */
+.bt-p.wm-confirm{ background: linear-gradient(180deg,
+  color-mix(in oklab, var(--bt-plate-top) calc(var(--confirm-off) * 100%), var(--bt-sunk-bg)),
+  color-mix(in oklab, var(--bt-sf2) calc(var(--confirm-off) * 100%), var(--bt-sunk-bg))); }
+/* 05 bracket: the ground comes up and the brackets go to full ink at the press stroke */
+.bt-b.wm-confirm{ background: color-mix(in oklab, var(--bt-sf) calc((1 - var(--confirm-off)) * 100%), transparent); box-shadow: none; }
+.bt-b.wm-confirm::before{ border-color: color-mix(in oklab, var(--bt-ink3) calc(var(--confirm-off) * 100%), var(--bt-ink));
+  border-width: calc(var(--bt-stroke-hover) + (var(--bt-stroke-press) - var(--bt-stroke-hover)) * (1 - var(--confirm-off))); }
+.bt-b--solid.wm-confirm{ background: var(--bt-signal); box-shadow: inset 0 0 0 100vmax color-mix(in oklab, var(--bt-ink) calc((1 - var(--confirm-off)) * 30%), transparent); }
+/* 06 menu: rows, marks and segments take the 12% wash, laid over their own ground */
+.bt-f-row.wm-confirm, .bt-f-ico.wm-confirm, .bt-f-seg > button.wm-confirm{
+  box-shadow: inset 0 0 0 100vmax color-mix(in oklab, var(--bt-ink) calc((1 - var(--confirm-off)) * 12%), transparent); }
+/* the stepper: its chevron light, as G31 draws it on :active */
+.bt-hdr-step.wm-confirm::before{ opacity: calc(1 - var(--confirm-off)); }
+.bt-hdr-step.wm-confirm{ box-shadow: none; }
+
+.bt-confirm{ margin: 0 0 2.5rem; }
+.bt-confirm-live{ display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin: 1rem 0 .75rem; }
+.bt-tl{ display: grid; grid-template-columns: 1fr 1fr 2fr; max-width: 30rem; margin: .5rem 0 0;
+  font-size: .6875rem; color: var(--bt-ink3); font-variation-settings:'opsz' 10; }
+.bt-tl > span{ padding: .375rem .5rem; border-top: 2px solid var(--bt-line); }
+.bt-tl > .on{ border-top-color: var(--bt-ink); color: var(--bt-ink2); }
+.bt-tl b{ color: var(--bt-ink); font-weight: 500; font-feature-settings:"tnum"; }
+.bt-confirm label{ font-size: .75rem; color: var(--bt-ink2); display: inline-flex; align-items: center; gap: .375rem; cursor: pointer; }
+
 @media (prefers-reduced-motion: reduce){
   .bt-page *{ transition: none !important; }
+  .bt-page .wm-confirm{ animation: none; }
 }
 </style>
 
@@ -827,6 +888,33 @@ a bulleted list of unformatted links that each open a modal, with nothing on the
 say so. Every family below answers both in its own language, on the same
 content, so the comparison is between designs and not between demos.</p>
 
+
+<div class="bt-confirm">
+  <h3>The confirm</h3>
+  <p class="bt-lede">A press is answered twice. <code>:active</code> <b>acknowledges</b> it
+  while the pointer is down &mdash; unchanged. When the press <i>worked</i>, the control
+  <b>confirms</b> it the way macOS blinks a menu item: the held look goes <b>off for
+  80ms</b>, comes back <b>on for 80ms</b>, then the control settles into its result. A
+  blink, not a fade; paint only, nothing moves. Every button on this page does it, each
+  in its own held look. Press these:</p>
+  <div class="bt-confirm-live">
+    <button class="bt-k bt-hit" type="button" id="bt-confirm-k">Kern lists</button>
+    <button class="bt-k bt-k--solid bt-hit" type="button" id="bt-confirm-primary">Link roman + italic</button>
+    <button class="bt-f-ico bt-hit bt-ico" type="button" aria-label="Copy"><span class="bt-i">content_copy</span></button>
+    <button class="bt-hdr-step" type="button" aria-label="Step up">
+      <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 4.38 5 1.62 9 4.38" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <label><input type="checkbox" id="bt-slow"> slow &times;8</label>
+  </div>
+  <div class="bt-tl" aria-hidden="true">
+    <span><b>0&ndash;80</b> off</span><span class="on"><b>80&ndash;160</b> on</span><span><b>160</b> settle</span>
+  </div>
+  <p class="bt-cost">Not on a drag, not on a hold-repeat (a stepper held past 400ms confirms
+  nothing), not on a press that failed its own check. Reduced motion: no blink, straight to
+  the result. In the system it is <code>wmConfirm(el)</code> from <code>src/confirm.js</code>
+  and one keyframe set in <code>src/motion.css</code>; GESTURES.md &sect;14.</p>
+</div>
+
 <div class="bt-laws">
   <h3>What all six obey</h3>
   <table>
@@ -841,6 +929,7 @@ content, so the comparison is between designs and not between demos.</p>
     <tr><td>ink</td><td>faint / quiet / full = cannot act / present / chosen. Hover and pressed must not share an ink, or the ladder collapses.</td></tr>
     <tr><td>mark</td><td>Material Symbols, one weight (300). Emphasis rides <code>GRAD</code>, so a row of marks cannot shift by a fraction as one lights up.</td></tr>
     <tr><td>press</td><td>The stroke lands before the fill: the stroke acknowledges the tap, the fill confirms on release.</td></tr>
+    <tr><td>confirm</td><td>A press that worked blinks its held look: off 80ms, on 80ms, then the result. Never on a drag or a repeat.</td></tr>
     <tr><td>focus</td><td>2px, offset 2, on the signal. Never removed, in any family.</td></tr>
     <tr><td>label</td><td><b>A button is text.</b> A mark is an addition that has to earn
     itself, and most labels never do: &ldquo;Kern lists&rdquo;, &ldquo;10 Reg&rdquo;,
@@ -1034,6 +1123,7 @@ content, so the comparison is between designs and not between demos.</p>
 <!-- ═══ 03 ═══════════════════════════════════════════════════════════════ -->
 <div class="bt-fam">
   <div class="bt-fam-head"><span class="bt-idx">03</span><h3 style="margin:0;font-size:1.125rem;font-weight:500">Rule</h3></div>
+  <p class="bt-thesis"><b>Graduated 2026-10-08</b> as the house <b>secondary</b>, <code>.wm-rule</code> in <code>src/button-sets.css</code> &mdash; system page, The corner law, &ldquo;The button&rdquo;.</p>
   <p class="bt-thesis"><b>The type is the control.</b> No box in any state. An action is
   ink-full with a solid rule at <code>1px</code>, thickening to the same two numbers the
   press law uses &mdash; 1.2 under the pointer, 1.8 held. An editable is the identical rule,
@@ -1298,6 +1388,7 @@ content, so the comparison is between designs and not between demos.</p>
 <!-- ═══ 06 ════════════════════════════════════════════════════════════════════ -->
 <div class="bt-fam">
   <div class="bt-fam-head"><span class="bt-idx">06</span><h3 style="margin:0;font-size:1.125rem;font-weight:500">Menu</h3></div>
+  <p class="bt-thesis"><b>Graduated 2026-10-08</b> as the house <b>primary</b>, <code>.wm-menu</code> in <code>src/button-sets.css</code> &mdash; system page, The corner law, &ldquo;The button&rdquo;.</p>
   <p class="bt-thesis"><b>An enclosure means chosen, not pressable.</b> The inversion of the
   five above, and the only one already running: it is what font-proofer's rail already
   does, and what that is, is a <b>menu</b> &mdash; preview modes of equal weight, picked
@@ -1680,6 +1771,40 @@ here and it fails exactly where the brief says not to.</p>
       if (hdrRead) hdrRead.textContent = 'live ' + Number(hdrRange.value).toFixed(2);
     });
   }
+
+
+  // THE CONFIRM -- src/confirm.js's wmConfirm, restated (src/ is not served from docs/).
+  // Every button on the page is a demo whose press always succeeds, so one delegated
+  // handler confirms them all. A stepper held past the repeat threshold (400ms, G28) was a
+  // hold, not a step, and confirms nothing.
+  function wmConfirm(el){
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+    var phase = parseFloat(getComputedStyle(el).getPropertyValue('--dur-confirm')) || 80;
+    clearTimeout(el.__wmConfirmT);
+    if (el.classList.contains('wm-confirm')) {
+      var run = el.getAnimations && el.getAnimations().filter(function(a){ return a.animationName === 'wm-confirm'; })[0];
+      if (run) run.currentTime = 0;
+    } else {
+      el.classList.add('wm-confirm');
+      if (!el.__wmConfirmEnd) {
+        el.__wmConfirmEnd = function(e){ if (e.target === el && e.animationName === 'wm-confirm') { clearTimeout(el.__wmConfirmT); el.classList.remove('wm-confirm'); } };
+        el.addEventListener('animationend', el.__wmConfirmEnd);
+      }
+    }
+    el.__wmConfirmT = setTimeout(function(){ el.classList.remove('wm-confirm'); }, 2 * phase + 60);
+    return true;
+  }
+  window.wmConfirm = window.wmConfirm || wmConfirm;
+  var downAt = 0;
+  root.addEventListener('pointerdown', function(e){ downAt = e.timeStamp; });
+  root.addEventListener('click', function(e){
+    var b = e.target.closest && e.target.closest('button');
+    if (!b || b.disabled || !root.contains(b)) return;
+    if (b.classList.contains('bt-hdr-step') && e.detail && e.timeStamp - downAt >= 400) return;
+    wmConfirm(b);
+  });
+  var slow = document.getElementById('bt-slow');
+  if (slow) slow.addEventListener('change', function(){ root.classList.toggle('bt-slow', slow.checked); });
 
   var toggles = { 'bt-touch': 'touch', 'bt-target': 'target' };
   Object.keys(toggles).forEach(function(id){

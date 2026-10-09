@@ -23,6 +23,7 @@
 // Optional extras (used by ReCal's rail, ignored elsewhere):
 //   • onRangePointerDown — hook on the range thumb (e.g. drag-to-flash a zone)
 //   • disabled — dim/lock the control (e.g. a frozen axis)
+import { wmConfirm } from './confirm.js'
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { nbMinus } from './format'
@@ -126,7 +127,7 @@ export function AxisSlider({
   /* Shed float dust on every discrete step, as valueAt already does for the rail:
      1.6 + 0.1 is 1.7000000000000002, and the field printed it in full. */
   const clean = (n: number) => +n.toFixed(6)
-  const holdRef = useRef<{ t?: number; i?: number }>({})
+  const holdRef = useRef<{ t?: number; i?: number; ok?: boolean }>({})
   const stopStep = () => {
     clearTimeout(holdRef.current.t); clearInterval(holdRef.current.i)
     holdRef.current = {}
@@ -136,7 +137,11 @@ export function AxisSlider({
       const base = typeof valueRef.current === 'number' ? valueRef.current : (autoValue ?? min)
       onChange(clean(Math.min(max, Math.max(min, base + dir * step))))
     }
+    /* Whether the step on down moved the value: clamped at a bound it did not, and a press
+       that failed its own check is not confirmed (GESTURES.md G87). */
+    const from = typeof valueRef.current === 'number' ? valueRef.current : null
     bump()
+    holdRef.current.ok = from === null || clean(Math.min(max, Math.max(min, from + dir * step))) !== from
     holdRef.current.t = window.setTimeout(() => {
       holdRef.current.i = window.setInterval(bump, 60)
     }, 400)
@@ -562,7 +567,14 @@ export function AxisSlider({
                     const el = rangeRef.current
                     if (el) { const v = valueAt(e.clientX, el); if (v != null) queueValue(v) }
                   }}
-                  onPointerUp={e => { stepDrag.current = null; dragRef.current = null; stopStep(); flushValue(); release() }}
+                  /* THE CONFIRM: on the lift of a press that took its one step -- not one that
+                     repeated, became a rail drag (G29) or went to the scroller (G30); G88. */
+                  onPointerUp={e => {
+                    const d = stepDrag.current, h = holdRef.current
+                    const one = !!d && !d.live && h.ok && !h.i
+                    stepDrag.current = null; dragRef.current = null; stopStep(); flushValue(); release()
+                    if (one) wmConfirm(e.currentTarget)
+                  }}
                   onPointerLeave={stopStep}
                   onPointerCancel={e => { stepDrag.current = null; dragRef.current = null; stopStep(); flushValue(); release() }}
                 >

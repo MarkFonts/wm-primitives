@@ -126,6 +126,20 @@
     font-weight: 600;
   }
 
+  /* THE CONFIRM (motion.css, GESTURES.md §14). A chip's held look is its chosen fill and the
+     matching edge: off for 80ms (the outline), on for 80ms, then the chip settles -- filled if
+     it was chosen, outlined if a --switch was turned off. Only paint: the weight does not
+     blink, so a chip without data-label cannot shift its row. The second selector out-ranks
+     the chosen state; the first the hover. A --switch's dashed rest edge is not restated in
+     the off phase -- border-style cannot be multiplied -- so it blinks solid. */
+  .wm-chip.wm-confirm,
+  .wm-chip.wm-confirm:is(.on, [aria-pressed="true"], :has(> input:checked)) {
+    transition: none;
+    color: color-mix(in srgb, var(--chip-ink) calc(var(--confirm-off, 0) * 100%), var(--chip-on-ink));
+    background: color-mix(in srgb, transparent calc(var(--confirm-off, 0) * 100%), var(--chip-fill));
+    border-color: color-mix(in srgb, var(--chip-line) calc(var(--confirm-off, 0) * 100%), var(--chip-fill));
+  }
+
   .wm-chip--small {
     /* 1px, not var(--hair): the hosts disagree on what --hair is (Kernpare's is a length,
        the system page's a colour), and a colour there voids the whole padding. */

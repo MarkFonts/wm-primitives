@@ -23,11 +23,43 @@
            two of them had independently picked ~300ms for exactly this job, which is
            evidence rather than taste.
    slow    something crossing the screen
-   hint    not motion at all -- how long a one-time hint stays before it fades */
+   hint    not motion at all -- how long a one-time hint stays before it fades
+   confirm ONE PHASE of the click confirm (below): 80ms off, 80ms on. Mark's number,
+           2026-10-08. Not a fade, so it is not on the fast/med ladder. */
 :root {
   --dur-fast: 140ms;
   --dur-med:  240ms;
   --dur-layout: 300ms;
   --dur-slow: 400ms;
   --dur-hint: 3s;
+  --dur-confirm: 80ms;
+}
+
+/* THE CONFIRM -- the receipt after the acknowledgement (GESTURES.md §14, G84-G91).
+   :active acknowledges a press and is unchanged. On a SUCCESSFUL activation the control's
+   script adds .wm-confirm (src/confirm.js, wmConfirm(el)); for 80ms its press look is
+   OFF, for the next 80ms it is ON, then the class comes off and the control settles into
+   its result state. Like macOS blinking a menu item: undo the click look, redo it.
+
+   One keyframe set for every control. It moves no box and paints nothing itself: it drives
+   --confirm-off, 1 during the off phase and 0 otherwise, and each recipe (button.css,
+   chip.css, icon.css, corners.css, the steppers) mixes ITS OWN press look by that number,
+   so a chip blinks its fill, a mark its FILL/HDR paint, a stepper its chevron light.
+   steps(1): a blink, not a fade. Registered so it inherits into a button's mark and
+   chevron, and so calc() can multiply by it. */
+@property --confirm-off {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@keyframes wm-confirm {
+  0%   { --confirm-off: 1; }
+  50%  { --confirm-off: 0; }
+  100% { --confirm-off: 0; }
+}
+.wm-confirm {
+  animation: wm-confirm calc(2 * var(--dur-confirm, 80ms)) steps(1, end);
+}
+@media (prefers-reduced-motion: reduce) {
+  .wm-confirm { animation: none; }   /* confirm.js never adds it here; belt and braces */
 }

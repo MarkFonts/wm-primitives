@@ -100,6 +100,11 @@ export type {
 // .active, --solid, --quiet. The mark (.wm-icon-btn) lives in icon.css, the pill (.ui-seg)
 // in toggleGroup.css. CHROME.md is the census that produced it.
 
+// The chosen buttons (src/button-sets.css -- no JS to export), graduated from the study on
+// 2026-10-08: 06 Menu, the primary (.wm-menu, .wm-menu--row, .wm-menu-list -- an enclosure
+// means chosen), and 03 Rule, the secondary (.wm-rule -- the type is the control). Never both in
+// one panel. Additive: .wm-btn is unchanged and nothing imports this yet. docs/system/pages/button-sets.html.
+
 // The house grid (src/grid.css -- no JS to export): 24 columns (12 below 1024), the page
 // margin, the card inset, and a 3px line that .wm-lines puts text baselines on. Its partner
 // src/gridSnap.js is a plain <script> for static pages, not a module: it measures what CSS
@@ -129,6 +134,12 @@ export type {
 // system had three "fast" values and a --dur-fast only ReCal defined, at 140ms, against
 // a .12s fallback everywhere else: one component, two speeds, depending on the app.
 // (src/motion.css -- no JS to export.)
+
+// wmConfirm -- the click confirm: on a press that WORKED, the control's press look blinks
+// off 80ms, on 80ms, then it settles (GESTURES.md §14). Adds .wm-confirm, which runs the one
+// keyframe in motion.css; no-op under reduced motion. The primitives call it on their own
+// outcomes; an app calls it on its own successes. Also on window for plain scripts.
+export { wmConfirm } from './src/confirm.js'
 
 // Colour tokens. color.css is additive like type.css and motion.css -- it declares the
 // ramp (--bg/--surface/--surface-hi/--text/--text-muted/--text-dim/--border) and styles

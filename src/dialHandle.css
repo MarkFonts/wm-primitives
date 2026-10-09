@@ -154,6 +154,14 @@
     color: var(--text-dim, rgba(232, 232, 232, .38)); cursor: pointer;
   }
   .wm-hd-auto.on { color: var(--ok, var(--accent, currentColor)); }
+  /* THE CONFIRM (motion.css, GESTURES.md §14). The lozenge is a mark, all fill: on a reset
+     (zoomControl.js, G72) the fill goes for 80ms -- its numerals in ink on the rule -- and
+     comes back. The auto switch blinks its on ink. */
+  .wm-hd-pill.wm-confirm {
+    background: color-mix(in srgb, transparent calc(var(--confirm-off, 0) * 100%), var(--text, #e8e8e8));
+    color: color-mix(in srgb, var(--text, #e8e8e8) calc(var(--confirm-off, 0) * 100%), var(--bg, #111));
+  }
+  .wm-hd-auto.wm-confirm { color: color-mix(in srgb, var(--text-dim, rgba(232, 232, 232, .38)) calc(var(--confirm-off, 0) * 100%), var(--ok, var(--accent, #e8e8e8))); }
 
   /* vertical: id over rail, the hairline runs down, the lozenge never rotates */
   .wm-hd--vertical { flex-direction: column; gap: var(--spacing-03, 8px); }

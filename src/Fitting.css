@@ -48,6 +48,12 @@
 .fit-switch:hover:not(.active) { background: var(--bg-hover, rgba(255, 255, 255, .06)); }
 .fit-switch:active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text); }
 .fit-switch.active { background: var(--bg-hover, rgba(255, 255, 255, .06)); color: var(--text); }
+/* THE CONFIRM (motion.css, GESTURES.md §14): the held wash and full ink, off 80ms, on 80ms. */
+.fit-switch.wm-confirm:not(:disabled) {
+  transition: none;
+  background: color-mix(in srgb, var(--surface, transparent) calc(var(--confirm-off, 0) * 100%), var(--bg-hover, rgba(255, 255, 255, .06)));
+  color: color-mix(in srgb, var(--text-muted, rgba(232, 232, 232, .62)) calc(var(--confirm-off, 0) * 100%), var(--text, #e8e8e8));
+}
 .fit-switch:focus-visible { outline: 1px solid var(--text-muted); outline-offset: -2px; }
 .fit-switch-state { color: var(--text-dim); font-size: 0.9em; }
 

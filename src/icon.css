@@ -123,8 +123,10 @@
     /* Dark ground, at rest. Light starts higher: the same stroke reads lighter there. */
     --icon-grad: 50;
 
+    /* FILL times (1 - --confirm-off): a filled mark goes hollow for the confirm's off phase
+       (motion.css). --confirm-off is 0 everywhere else, so this is FILL as it always was. */
     font-variation-settings:
-      'FILL' var(--icon-fill),
+      'FILL' calc(var(--icon-fill) * (1 - var(--confirm-off, 0))),
       'wght' var(--icon-wght),
       'GRAD' var(--icon-grad),
       'opsz' var(--icon-opsz);
@@ -138,7 +140,8 @@
     /* 90ms, not --dur-fast's 140: at 140 the mark visibly lagged the row it sits in,
        arriving after the thing it labels had already moved. A rollover should feel like
        the pointer, not like an animation about the pointer. The copy confirm turns this
-       up to 260 because that one IS the animation. */
+       up to 260 because that one IS the animation. -- It no longer does: the copy confirm is
+       the house confirm now (motion.css, 80 off / 80 on), which runs with transitions off. */
     --icon-dur: 90ms;   /* token-lint: allow -- deliberately shorter than --dur-fast */
     transition:
       font-variation-settings var(--icon-dur) ease,
@@ -237,10 +240,14 @@
     color: transparent;
     background-image:
       linear-gradient(
-        rgba(var(--text-rgb, 232, 232, 232), calc(1 - var(--icon-hdr))),
-        rgba(var(--text-rgb, 232, 232, 232), calc(1 - var(--icon-hdr)))),
+        rgba(var(--text-rgb, 232, 232, 232), calc((1 - var(--icon-hdr)) * (1 - var(--confirm-off, 0)) + var(--ink-faint, .38) * var(--confirm-off, 0))),
+        rgba(var(--text-rgb, 232, 232, 232), calc((1 - var(--icon-hdr)) * (1 - var(--confirm-off, 0)) + var(--ink-faint, .38) * var(--confirm-off, 0)))),
       url('data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAE1pUHJhdmlmbWlhZm1pZjEAAAFebWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAAOcGl0bQAAAAAAAQAAADhpaW5mAAAAAAACAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAFWluZmUCAAABAAIAAEV4aWYAAAAAGmlyZWYAAAAAAAAADmNkc2MAAgABAAEAAACBaXBycAAAAGBpcGNvAAAAE2NvbHJuY2x4AAkAEAABgAAAAAxjbGxpA+gAQAAAABRpc3BlAAAAAAAAAGQAAABkAAAACWlyb3QAAAAAEHBpeGkAAAAAAwoKCgAAAAxhdjFDgQBMAAAAABlpcG1hAAAAAAAAAAEAAQaBAgMFhoQAAAAsaWxvYwAAAABEAAACAAEAAAABAAAB0AAAADcAAgAAAAEAAAGOAAAAQgAAAAFtZGF0AAAAAAAAAIkAAAAGRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAZKADAAQAAAABAAAAZAAAAAASAAoNAAAAAzY8Z//ChIgAwjIkEAGEgAYYYYi0VMregO56Wg+x6xnwsfoJWaYWX85G+ibLVJ6A');
-    background-size: 100% 100%;
+    /* THE CONFIRM'S OFF PHASE (motion.css): the HDR layer is sized to nothing -- a zero-size
+       image is not drawn -- and the ink above it drops to the rest rung, so for 80ms the
+       chosen mark is a resting one, then it is lit again. At --confirm-off 0 both are as
+       they always were. */
+    background-size: 100% 100%, calc((1 - var(--confirm-off, 0)) * 100%) 100%;
     background-repeat: no-repeat;
     -webkit-background-clip: text;
     background-clip: text;
@@ -262,7 +269,7 @@
     :root:not([data-theme="dark"]) .active > .wm-icon,
     :root:not([data-theme="dark"]) .active > * > .wm-icon {
       --icon-hdr: 0;
-      color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
+      color: rgba(var(--text-rgb, 232, 232, 232), calc(var(--ink-full, 1) - (var(--ink-full, 1) - var(--ink-faint, .38)) * var(--confirm-off, 0)));
       background-image: none;
       -webkit-background-clip: border-box;
       background-clip: border-box;
@@ -273,7 +280,7 @@
   :root[data-theme="light"] .active > .wm-icon,
   :root[data-theme="light"] .active > * > .wm-icon {
     --icon-hdr: 0;
-    color: rgba(var(--text-rgb, 232, 232, 232), var(--ink-full, 1));
+    color: rgba(var(--text-rgb, 232, 232, 232), calc(var(--ink-full, 1) - (var(--ink-full, 1) - var(--ink-faint, .38)) * var(--confirm-off, 0)));
     background-image: none;
     -webkit-background-clip: border-box;
     background-clip: border-box;
@@ -378,6 +385,10 @@
     .wm-icon-btn { min-width: 44px; min-height: 44px; }
   }
 
+
+  /* While a confirm runs on the mark or on the button that owns it, the 90ms easing is off:
+     the blink is two steps, and a transition would smear them into a flicker. */
+  .wm-confirm .wm-icon, .wm-icon.wm-confirm { transition: none; }
 
   @media (prefers-reduced-motion: reduce) {
     .wm-icon { transition: none; }

@@ -12,6 +12,53 @@ Newest first.
 
 ---
 
+## 2026-10-08 -- the button, chosen: the menu primary, the rule secondary
+
+Mark's decision from "Six ways to say press": the menu family (formerly 06) is the house
+PRIMARY and the rule family (formerly 03) the SECONDARY. `src/button-sets.css` (`.wm-menu`,
+`.wm-menu--row`, `.wm-menu-list`, `.wm-rule` and the documented variants), 36px on the line,
+press on corners.css's model, and the confirm through `--confirm-off` -- which is why it ships
+in the same PR as the confirm (Mark: "or put them together"; was #107). The chapter "The button"
+replaces the placeholder under The corner law; `src/button.css` is untouched. The Interface
+chapter's Confirm card uses the two sets as its live controls, each in its own figure.
+
+## 2026-10-08 -- the click confirm
+
+**Mark: "every click has a CONFIRMATION signal, like macOS: on successful click, undo then
+redo the click look."** Timing his: 80ms per phase. `:active` stays the acknowledgement; the
+confirm is a receipt, given only when the press worked. GESTURES.md §14, G84–G91.
+
+- **One keyframe, three recipes.** `src/motion.css` gains `--dur-confirm: 80ms`, a registered
+  `--confirm-off` and `@keyframes wm-confirm`: 1 for one phase, 0 for the next, `steps(1)`.
+  It paints nothing. Each family multiplies its OWN press look by that number, so a box
+  (`.wm-btn`, `.wm-chip`, `.fit-switch`, a stop, the `.ui-*` / `.ssd-btn` ring) blinks its fill
+  and edge, a mark its FILL and HDR paint (the HDR layer is sized to 0%, which is not drawn,
+  and the ink above it drops to the rest rung), a stepper its G31 chevron light. Nothing moves:
+  a chosen chip's weight does not blink.
+- **`wmConfirm(el)`** in `src/confirm.js`, exported from index.ts and set on `window` for the
+  plain scripts. Adds the class, takes it off on `animationend` (timeout fallback), does nothing
+  under reduced motion, and rewinds rather than re-adds on a second success. Found while
+  wiring it: React rewrites `className` whole when a theme mark becomes `.active`, which wiped
+  the class one render after the click -- so it is re-asserted after the microtask and the next
+  frame (G90, tested).
+- **Outcomes only.** Steppers confirm on the LIFT of a press that took its one step -- not once
+  the repeat started, not after a drag or a scroll, not when the step was clamped at a bound.
+  The zoom confirms its reset on the lozenge; open/close does not, because the G67 morph fills
+  that mark on its own Web Animations timeline and would override the blink.
+- **The copy confirm became this one.** GlyphPicker's 260ms slow fill is now off 80 / on 80,
+  then `check` at 160. Fill-before-swap is kept; only the length changed.
+- **The buttons page** (docs/system/pages/buttons.html) blinks every demo, each family in its
+  own held look, with a Confirm block near the top (live controls, the timeline, slow ×8). It
+  restates the keyframe and the function because Pages serves docs/ only.
+- **Open:** a chip, a mark and the lozenge have no `:active` paint, so for one being newly
+  chosen the off phase is the look it already had -- the result arrives 80ms late and blinks
+  once. An acknowledgement for them is a separate decision.
+- `scripts/confirm-svg.mjs` -> `docs/assets/confirm.svg`, the chip pair looping, composed from
+  the live chips. And `confirm-slow.svg` beside it (`CONFIRM_PHASE=640`, x8): Mark could not
+  see 80ms inside a 3s loop, so the docs part shows the slow one with a real-speed toggle.
+  The shell's own zoom and theme marks confirm too (confirm.js is in the shell's scripts). `tests/behaviour/confirm.spec.ts` on `tests/fixtures/confirm.html`.
+  `dist/dial.*` rebuilt (AxisSlider now imports confirm.js).
+
 ## 2026-10-08 -- the Grid chapter: the try-it card
 
 Mark: "was thinking about this in the 'grids and columns' section as a full screen or interestingly

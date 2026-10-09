@@ -218,6 +218,10 @@
 .triplet-step-btn:first-child::after { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 3.86 3.5 2.14 6 3.86' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 3.86 3.5 2.14 6 3.86' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }
 .triplet-step-btn + .triplet-step-btn::after { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 2.14 3.5 3.86 6 2.14' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6'%3E%3Cpath d='M1 2.14 3.5 3.86 6 2.14' fill='none' stroke='%23fff' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='miter' stroke-miterlimit='4'/%3E%3C/svg%3E"); }
 .triplet-step-btn:active::after { opacity: 1; transition: none; }
+/* THE CONFIRM (motion.css, GESTURES.md §14, G88): after a press that took its one step, the
+   same light, off 80ms and on 80ms, then G31's ease-out. Never on a hold: AxisTriplet.tsx
+   does not call it once the repeat has started. */
+.triplet-step-btn.wm-confirm::after { opacity: calc(1 - var(--confirm-off, 0)); transition: none; }
 @media (prefers-reduced-motion: reduce) { .triplet-step-btn::after { transition: none; } }
 
 @media (prefers-reduced-motion: reduce) {

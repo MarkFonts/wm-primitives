@@ -28,6 +28,7 @@ Every threshold in one place, so a test and the code cannot drift on a constant.
 | reference marker clamp from either end | **5px** | `clamp(5px, %, calc(100% − 5px))` |
 | shift-arrow coarse step | **×10** | field `onKeyDown` |
 | drag updates delivered to the host | **≤ 1 per frame**, latest wins, duplicates dropped | `queueValue` / `lastSent` |
+| the confirm: press look off, then on | **80ms / 80ms**, then settle | `--dur-confirm`, `src/motion.css` (§14) |
 
 `touch-action` on the rail is **`pan-y`**, always. The direction of a gesture is decided
 by the rules below, not by that property — it states one answer before anyone has moved.
@@ -288,3 +289,52 @@ moves a fixed element with the layout viewport (iOS Safari especially); the stac
 `visualViewport`. With capture on, a pinch that starts outside the region is still the browser's. A scroller
 other than the page (or `data-scroller`) is learnt on its first scroll event, so that one event
 does not count.
+
+## 14 · The confirm
+
+`src/confirm.js` (`wmConfirm(el)`) + one keyframe set in `src/motion.css`. Mark, 2026-10-08:
+*"every click has a CONFIRMATION signal, like macOS: on successful click, undo then redo the
+click look."* `:active` is the **acknowledgement** and is unchanged; the confirm is the
+**receipt**, given only when the press worked. Tested in `tests/behaviour/confirm.spec.ts`
+against `tests/fixtures/confirm.html`.
+
+**The timeline.** At the outcome (t = 0) the control's script adds `.wm-confirm`.
+
+| t (ms) | `--confirm-off` | what shows |
+| --- | --- | --- |
+| 0 – 80 | **1** | the press look **off** — the control's rest paint |
+| 80 – 160 | **0** | the press look **on** |
+| 160 | — | `animationend` takes the class off (a timeout 60ms later if the animation never ran); the control **settles** into its result state |
+
+`steps(1)`: a blink, not a fade, and the recipes' own transitions are off while it runs. Paint
+only — no box moves, the grid is untouched, a chosen chip's weight does not blink. Each family
+mixes **its own** press look by `--confirm-off`: a box (`.wm-btn`, `.wm-chip`, `.fit-switch`,
+`.wm-stops-row button`, the case study's `.ui-*` and `.ssd-btn` ring) its fill and edge; a mark
+(`.wm-icon`, `.wm-hd-pill`, `.ssd-row.on`) its FILL and HDR paint (G52); a stepper its chevron
+light (G31).
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G84 | a press whose outcome succeeded | `.wm-confirm` on the control at the outcome; `--confirm-off` 1 for 80ms, 0 for 80ms; the class is gone after 160 and the control is in its result state | click-confirm |
+| G85 | `prefers-reduced-motion: reduce` | no class, no blink: straight to the result | click-confirm |
+| G86 | a second success inside the blink | the running animation is rewound to 0 on the **same** class — the class is never taken off and put back, so nothing flickers; the timeout restarts with it | click-confirm |
+| G87 | a press that failed its own check — a step clamped at a bound, a reset at 100, a handler that reports failure | **nothing.** Only outcomes confirm: never a drag, a hold-repeat, a hover or a focus | click-confirm |
+| G88 | stepper (`.slider-step-btn`, `.triplet-step-btn`) | the confirm fires on the **lift** of a press that took its one step on down (G27, G43) and did nothing else: not once the repeat has started (G28), not after the press became a rail drag (G29) or went to the scroller (G30), not after the pointer left. So the repeat can never retrigger it, which is G31's rule for the flash, kept | click-confirm |
+| G89 | zoom lozenge press (G72), the `0` key, a non-collapsing mark (G59) | the reset to 100 blinks the **lozenge's** fill, while it slides home. Shut, the reset shows on the note (G73) and nothing blinks. **Open / close (G67) does not confirm**: the morph's first beat fills the same mark (FILL 0 → 1, 0–120ms, Web Animations) and would override the blink — the morph is its receipt | click-confirm |
+| G90 | theme mark (G38), alignment mark, chip, row, stop, `fit-switch`, the auto switch | confirmed in the primitive's own handler. A React button that rewrites its `className` on the result (an `.active` mark) re-asserts the class after the microtask and the next frame, so the receipt survives the render | click-confirm |
+| G91 | `GlyphPicker`'s copy (SLIDERS.md row 8) | the filled, active `content_copy` blinks off 80 / on 80, **then** becomes `check` at 160. It was its own 260ms slow fill; it is the house confirm now, and still fills before it swaps | click-confirm |
+
+**Where the call lives.** Wired: `ThemeSwitch` and `mountThemeSwitch` (theme.js), `Fitting`
+(alignments, Swiss Rag, Hyphenate), `StopSlider` (a stop), `StyleScopeDropdown` (a row, the
+trigger), `AxisSlider` / `AxisTriplet` steppers, `GlyphPicker` copy, `zoomControl.js` (the
+reset) and `dialHandle.js` (the auto switch) — the two plain scripts through
+`window.wmConfirm?.(el)`, so a page that does not load `confirm.js` still works, unconfirmed.
+**The host's:** `.wm-btn` and `.wm-chip` have no script — the app calls `wmConfirm(button)` in
+its own handler, after the work succeeded; the same for the case study's `.ui-*`.
+
+**Not promised (§14).** A confirm for a press with no press look: a chip, a mark and the
+lozenge have no `:active` paint, so for one being newly chosen the 0–80 off phase is the look
+it already had — it reads as the result arriving 80ms late and blinking once, not as a
+press undone. Whether those get an acknowledgement is open. The `--switch` chip's dashed rest
+edge is not restored in the off phase (border-style cannot be multiplied); it blinks solid.
+

@@ -50,6 +50,12 @@
   background: var(--text, #e8e8e8);
   color: var(--bg, #0f0f0f);
 }
+/* THE CONFIRM (motion.css, GESTURES.md §14): the pressed stop's ink fill, off 80ms, on 80ms. */
+.wm-stops-row button.wm-confirm {
+  transition: none;
+  background: color-mix(in srgb, transparent calc(var(--confirm-off, 0) * 100%), var(--text, #e8e8e8));
+  color: color-mix(in srgb, var(--text-muted, rgba(232, 232, 232, .62)) calc(var(--confirm-off, 0) * 100%), var(--bg, #0f0f0f));
+}
 .wm-stops-row button:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 1px; }
 
 /* The rail grows out of the right-hand edge, where the grip is parked. */

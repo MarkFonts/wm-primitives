@@ -70,6 +70,10 @@
 .ssd-row:hover,
 .ssd-row.on { background: var(--surface-hi); }
 
+/* THE CONFIRM (motion.css, GESTURES.md §14): the chosen row's fill, off 80ms, on 80ms -- its
+   mark blinks with it (icon.css). The trigger blinks its press ring (corners.css). */
+.ssd-row.on.wm-confirm { background: color-mix(in srgb, transparent calc(var(--confirm-off, 0) * 100%), var(--surface-hi)); }
+
 .ssd-check { width: 14px; flex: 0 0 auto; color: var(--text-muted); }
 /* The row's mark. Fixed slot so every specimen word starts on one x whatever size its
    row is set at -- a mark that moved with the type would give the list a ragged left

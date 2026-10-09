@@ -24,6 +24,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type MouseEvent as ReactMouseEvent } from 'react'
 import { Icon } from './Icon'
+import { wmConfirm } from './confirm.js'
 import './StyleScopeDropdown.css'
 
 export type ScopeChipKind = 'size' | 'axis' | 'tracking' | 'markup' | 'local'
@@ -92,6 +93,7 @@ export function StyleScopeList({ rows, mode = 'single', onSelect, onPicked, inli
           className={`ssd-row${r.selected ? ' on' : ''}`}
           onClick={(e) => {
             onSelect(r.id, e)
+            wmConfirm(e.currentTarget)
             if (mode === 'single') onPicked?.()
           }}
         >
@@ -149,7 +151,7 @@ export default function StyleScopeDropdown({
 
   return (
     <div ref={wrapRef} className={`ssd${className ? ' ' + className : ''}`}>
-      <button type="button" className="ssd-btn" onClick={() => setOpen(o => !o)}>
+      <button type="button" className="ssd-btn" onClick={e => { setOpen(o => !o); wmConfirm(e.currentTarget) }}>
         <span className="ssd-btn-label">{buttonLabel}</span>
         {/* Was `▾`, U+25BE -- a filled triangle from whatever UI font happened to be
             resolved, which is a fourth chevron treatment in a system that has one. */}

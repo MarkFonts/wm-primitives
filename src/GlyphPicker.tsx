@@ -15,6 +15,7 @@ import type { CSSProperties } from 'react'
 import { isSupported, type CmapRanges } from './glyphset'
 import { loadNamePages, algorithmicName } from './glyphNames'
 import { Icon } from './Icon'
+import { wmConfirm } from './confirm.js'
 import './GlyphPicker.css'
 
 /** One cell. `ffs` is a raw font-feature-settings fragment for this cell (e.g.
@@ -164,6 +165,13 @@ const Cell = memo(function Cell({ cell, active, state, name, onPick }: {
 // enough to see, and only then becomes check. The confirmation is the filling; the check
 // is where it lands.
 //
+// THE FILL IS NOW THE HOUSE CONFIRM (GESTURES.md §14, G91). It was its own 260ms slow fill;
+// it is the same receipt every control gives: on a copy that worked the button takes
+// .wm-confirm (wmConfirm), and the filled, active content_copy blinks -- off 80ms, on 80ms --
+// and only then becomes check, at 160. Still two steps, still fill-before-swap: the mark is
+// seen filled for the on phase before the glyph changes, so the swap does not read as a flash
+// back to the old icon. Only the length changed, 260 -> 160.
+//
 // Both marks come from one font at one weight, which is the other half of why this works:
 // two inlined SVGs from two sources could not be relied on to agree about stroke or
 // optical centre, and any disagreement between them shows up exactly at the swap.
@@ -185,11 +193,10 @@ function CopyIcon({ ok }: { ok: boolean }) {
       size={20}
       filled={ok}
       state={ok ? 'active' : 'rest'}
-      style={{ ['--icon-dur' as string]: `${FILL_MS}ms` }}
     />
   )
 }
-const FILL_MS = 260
+const FILL_MS = 160   // 2 x --dur-confirm: the blink, then the check
 
 // Label placement: each label magnets to its rule; colliding labels share the
 // displacement symmetrically — so coincident rules (asc == cap) split around the
@@ -297,9 +304,10 @@ export function GlyphPicker({
     onSelect?.(cell)
   }, [onSelect])
 
-  const copyActive = useCallback(() => {
+  const copyActive = useCallback((btn?: HTMLElement) => {
     navigator.clipboard?.writeText(active.ch).then(() => {
       setCopied(true)
+      wmConfirm(btn)
       setTimeout(() => setCopied(false), 2000)
     }).catch(() => {})
   }, [active.ch])
@@ -380,7 +388,7 @@ export function GlyphPicker({
     <div className="gp-side" style={{ flexBasis: sizeCss }}>
       <Specimen cell={active} metrics={metrics} fontKey={fontKey} />
       <div className="gp-console">
-        <button className="gp-copy" onClick={copyActive} title="Copy character to clipboard">
+        <button className="gp-copy" onClick={e => copyActive(e.currentTarget)} title="Copy character to clipboard">
           <span className="gp-code">U+{hex(active.ch)}{active.note ? ` · ${active.note}` : ''}</span>
           <CopyIcon ok={copied} />
         </button>

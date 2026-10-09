@@ -13,6 +13,7 @@
  *   - every change fires `wm-theme` on <html>, so a canvas that paints with token colours
  *     can repaint without the control knowing it exists.
  * Stamp BEFORE first paint from a head script: see bootTheme(). */
+import { wmConfirm } from './confirm.js'
 
 export const THEMES = ['auto', 'light', 'dark']
 export const THEME_KEY = 'wm-theme'
@@ -54,7 +55,7 @@ export function mountThemeSwitch(el, { key = THEME_KEY, legacyKeys = [], onChang
     b.setAttribute('aria-pressed', String(on))
   })
   const set = t => { paint(applyTheme(t, key)); onChange?.(t) }
-  const clicks = buttons.map(b => { const h = () => set(b.dataset.mode); b.addEventListener('click', h); return [b, h] })
+  const clicks = buttons.map(b => { const h = () => { set(b.dataset.mode); wmConfirm(b) }; b.addEventListener('click', h); return [b, h] })
   // Something else may apply a theme (a session restore, a shortcut): follow the event.
   const root = el.ownerDocument.documentElement
   const follow = e => paint(e.detail)

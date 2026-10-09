@@ -1,0 +1,39 @@
+<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><title>wmConfirm contract</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css">
+<link rel="stylesheet" href="/dial/shared/src/motion.css"><link rel="stylesheet" href="/dial/shared/src/space.css">
+<link rel="stylesheet" href="/dial/shared/src/icon.css"><link rel="stylesheet" href="/dial/shared/src/chip.css">
+<link rel="stylesheet" href="/dial/shared/src/button.css"><link rel="stylesheet" href="/dial/shared/src/dialHandle.css">
+<link rel="stylesheet" href="/dial/shared/src/zoomControl.css"><link rel="stylesheet" href="/dial/shared/dist/dial.css">
+<style>:root{--ui-font:system-ui;--text-rgb:232,232,232} body{background:var(--bg);color:var(--text);padding:24px;width:420px;font-family:system-ui}
+  #page{height:40px}</style>
+</head><body>
+<!-- GESTURES.md §14 (G84-G91). A chip set whose page script confirms the chosen chip, a button
+     whose handler can fail its own check, the dial bundle's stepper (React AxisSlider) and theme
+     marks (React ThemeSwitch), and the zoom control's lozenge. -->
+<div class="wm-chip-row" id="chips">
+  <button type="button" class="wm-chip on" aria-pressed="true" data-label="Text">Text</button>
+  <button type="button" class="wm-chip" aria-pressed="false" data-label="Display">Display</button>
+</div>
+<button type="button" class="wm-btn" id="save" style="margin-top:12px">Save</button>
+<div id="dial" style="margin-top:12px"></div>
+<div id="theme" style="margin-top:12px"></div>
+<div class="wm-zoom" id="zoom" data-target="#page" data-key="wm-zoom-confirm" style="margin-top:12px"></div>
+<div id="page"></div>
+<script src="/dial/shared/dist/dial.js"></script>
+<script src="/dial/shared/src/zoomControl.js"></script>
+<script type="module">
+  import { wmConfirm } from '/dial/shared/src/confirm.js'
+  const chips = document.getElementById('chips')
+  chips.addEventListener('click', e => {
+    const b = e.target.closest('.wm-chip'); if (!b) return
+    chips.querySelectorAll('.wm-chip').forEach(c => { c.classList.toggle('on', c === b); c.setAttribute('aria-pressed', String(c === b)) })
+    wmConfirm(b)
+  })
+  // a save that can fail its own check: no confirm when it does
+  window.saveOk = true
+  document.getElementById('save').addEventListener('click', e => { if (window.saveOk) wmConfirm(e.currentTarget) })
+  window.dial = wmDial.mount(document.getElementById('dial'), { label: 'Size', value: 10, min: 0, max: 20, step: 1, onChange: () => {} })
+  window.theme = wmDial.mountTheme(document.getElementById('theme'))
+  window.ready = true
+</script></body></html>

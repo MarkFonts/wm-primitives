@@ -11,6 +11,7 @@
 // and it stays in the app (toggleGroup.css says the same).
 import { useEffect, useState } from 'react'
 import { Icon } from './Icon'
+import { wmConfirm } from './confirm.js'
 import { THEMES, THEME_KEY, readTheme, applyTheme, type Theme } from './theme.js'
 import './toggleGroup.css'
 import './themeSwitch.css'
@@ -55,7 +56,7 @@ export function ThemeSwitch({ look = 'marks', storageKey = THEME_KEY, legacyKeys
           aria-label={words ? undefined : `${WORD[t]} colour scheme`}
           title={TITLE[t]}
           className={words ? (theme === t ? 'active' : undefined) : `wm-icon-btn${theme === t ? ' active' : ''}`}
-          onClick={() => choose(t)}
+          onClick={e => { choose(t); wmConfirm(e.currentTarget) }}
         >
           {words ? WORD[t] : <Icon name={MARK[t]} size={20} />}
         </button>
