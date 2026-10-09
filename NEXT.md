@@ -245,3 +245,27 @@ decided): *a closed keyline means press; a bottom-only keyline means change.*
 What makes a system world-class is not the count of components. It is that a builder can
 predict what the next one will do before reading it, and that the system tells them,
 loudly, when they have stepped off it. A, B and F are that. C, D and E are more surface.
+
+---
+
+## I · The type tokens: the phases, and one debt
+
+Moved off the system page, where a plan with no status column did not belong. Smallest surface
+first: an AxisSlider row is label, value, tag and track in one line, so under the budget most of
+them must differ by ink alone. If the rule survives that row, it is real.
+
+| phase | what | size |
+|---|---|---|
+| 0 | Freeze the vocabulary: roles, poster steps, inks, the budget | -- |
+| 1 | type.css + type.ts: roles, ink modifiers, helper | additive |
+| 2 | Adopt inside the primitives: proves the rule | 74 decls |
+| 3 | ReCal, then font-proofer: chrome only | 240 decls |
+| 4 | wordmark.nyc: codemod, 44 sizes to 7 roles | 524 decls |
+| 5 | Hold the line: lint raw font-size, then density | ongoing |
+
+Status is not recorded per phase; fill the column in before quoting it.
+
+**Known offender:** the Cal Sans case study's hero is a lede at 39 beside a sub at 27, which is not a
+whole multiple (GRID.md, the row rule). It stays on the tests' known-offenders list until the hero is
+re-sized.
+

@@ -11,7 +11,7 @@
    carrying a literal stayed readable. State both or state neither. */
 body{margin:0;background:#0f0f0f;color:#c9c9c9;font-family:"CalSansVF",system-ui,sans-serif;
  font-optical-sizing:auto;font-variation-settings:"GEOM" 25;padding:32px 28px 8px}
-h1{font-size:23px;margin:0 0 5px} .lede{color:#9a9a9a;font-size:13px;margin:0 0 22px;max-width:84ch}
+h1{font-size:23px;margin:0 0 5px} .lede{color:#9a9a9a;font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px);margin:0 0 24px;max-width:84ch}
 h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:34px 0 12px;padding-bottom:7px;
  border-bottom:1px solid #222;display:flex;justify-content:space-between}
 h2 span{color:#7d7d7d;letter-spacing:0;text-transform:none;font-size:10px}
@@ -24,7 +24,7 @@ h2 span{color:#7d7d7d;letter-spacing:0;text-transform:none;font-size:10px}
    The rule the rest of this file already follows: state ink only where you also state
    the ground, and then state both. Matching the audit on SIZE (13.5px) is right;
    matching it on colour cannot be, because the two sit on different grounds. */
-p.note{color:#9a9a9a;font-size:13.5px;line-height:1.5;margin:0 0 14px;max-width:84ch}
+p.note{color:#9a9a9a;font-size:var(--type-ui-size,.75rem);line-height:var(--type-ui-lead,15px);margin:0 0 15px;max-width:84ch}
 p.note b{font-weight:400}
 code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#7d7d7d}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px}

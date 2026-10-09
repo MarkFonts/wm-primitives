@@ -89,7 +89,7 @@
     /* the swipe is the stack's own (themeStack.js); the page's pan never starts on it */
     touch-action: none;
     --stack-drag: initial;   /* declared, unset: themeStack.js sets it inline during a swipe; declared so a consumer's token lint passes (as --hd-chars in dialHandle.css) */
-    transition: translate 180ms cubic-bezier(0.2, 0.7, 0.2, 1);   /* token-lint: allow -- between --dur-fast and --dur-med, Mark's 150-200; the house easing, as zoomControl.js's EASE */
+    transition: translate 180ms var(--ease, cubic-bezier(0.2, 0.7, 0.2, 1));   /* token-lint: allow -- between --dur-fast and --dur-med, Mark's 150-200; the house easing, motion.css's --ease */
   }
   .wm-theme-stack--vertical > .wm-theme { flex-direction: column; gap: 0; }
   .wm-theme-stack--vertical > :first-child { min-block-size: 0; }

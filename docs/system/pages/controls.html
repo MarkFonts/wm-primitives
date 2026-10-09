@@ -140,7 +140,8 @@
    figures, auto-fit re-solves every track, and the headline in EVERY card slides.
    The value should move the field, not the page. */
 .card{ min-width: 0; background: var(--panel); padding: 1.5rem 1.5rem 1.75rem; display: flex; flex-direction: column; }.card-head{ display: flex; justify-content: space-between; align-items: baseline;
-  gap: 1rem; margin-bottom: 1.25rem; }.card-name{ font-family: var(--serif); font-size: 1.25rem; margin: 0; }.card-idx{ font-family: var(--mono); font-size: .625rem; letter-spacing: .14em; color: var(--accent); }.card-note{ font-size: .8125rem; line-height: 1.45; color: var(--muted); margin: 1.25rem 0 0; }.card-note b{ color: var(--ink-2); font-weight: 500; }.rig{ flex: 1; }
+  gap: 1rem; margin-bottom: 1.25rem; }.card-name{ font-family: var(--serif); font-size: 1.25rem; font-weight: 400; margin: 0; }.card-idx{ font-family: var(--mono); font-size: .625rem; letter-spacing: .14em; color: var(--accent); }.card-note{ font-size:var(--type-ui-size,.75rem);line-height:var(--type-ui-lead,15px); color: var(--muted); margin: 21px 0 0; }
+.lede{ font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px); }.card-note b{ color: var(--ink-2); font-weight: 500; }.rig{ flex: 1; }
 /* The RAIL's two jobs, which the component cannot do for itself (DIAL.md §5):
    - give the rows a width to fill, or each sizes to its own content and the values stop
      sharing a right edge (R1)
@@ -662,6 +663,50 @@
 .vstack-scroll{flex:1;min-height:0;overflow:auto;padding:12px 20px}
 .vstack-scroll h3{margin:0 0 12px;font-size:var(--type-title-size, 1.5rem);line-height:var(--type-title-lead, 30px);font-weight:600;color:var(--text)}
 .vstack-scroll p{margin:0 0 24px;font-size:var(--type-body-size, 1rem);line-height:var(--type-body-lead, 24px);color:var(--text-muted)}
+
+/* ==== the grammar (2026-10-09): text left, illustration right; the marks flow round their text ==== */
+.pair{display:grid;grid-template-columns:calc(5 * var(--col) + 4 * var(--grid-gutter)) minmax(0,1fr);column-gap:var(--grid-gutter);align-items:start;margin:48px 0 0}
+.pair:first-child{margin-top:24px}
+.pair-t{margin:0;font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px);color:var(--text-muted)}
+.pair-t code{font-size:.875em}
+.pair > .wm-chip-row,.pair > .wm-theme-stack,.pair-r{justify-self:start;min-width:0;width:100%}
+.pair > .zoom-morph{justify-self:start}
+.chip-demo,.zoom-demo{display:block;margin:0 0 40px}
+.zoom-demo .wm-theme-stack{justify-self:start}
+.z-body{margin:48px 0 0;max-width:calc(10 * var(--col) + 9 * var(--grid-gutter));font-size:var(--type-body-size,1rem);line-height:24px;color:var(--text-muted)}
+.z-code{position:relative;margin:24px 0 0;max-width:calc(10 * var(--col) + 9 * var(--grid-gutter));padding:12px 18px;box-shadow:inset 0 0 0 1px var(--border);border-radius:var(--radius,8px);background:var(--surface)}
+.z-code figcaption{position:absolute;right:calc(100% + var(--grid-gutter));top:12px;width:calc(2 * var(--col) + var(--grid-gutter));text-align:right;
+  font-size:var(--type-label-size,.75rem);line-height:24px;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--text-dim)}
+.z-code pre{margin:0;font:var(--type-ui-size,.75rem)/24px ui-monospace,Menlo,monospace;color:var(--text-muted);white-space:pre;overflow-x:auto}
+.z-spec{margin:24px 0 0;max-width:calc(10 * var(--col) + 9 * var(--grid-gutter));width:100%;border-collapse:collapse;font-size:var(--type-ui-size,.75rem);line-height:15px}
+.z-spec th,.z-spec td{padding:6px 12px 6px 0;text-align:left;vertical-align:baseline;box-shadow:inset 0 -1px var(--border);font-weight:400}
+.z-spec th{width:calc(3 * var(--col) + 2 * var(--grid-gutter));color:var(--text);white-space:nowrap}
+.z-spec th code,.z-spec td code{font-size:1em}
+.z-spec td{color:var(--text-muted)}
+/* THE MARKS ON A GRID (2026-10-09): six tile tracks of three columns each, one gutter apart, so a row is the
+   eighteen exactly. The lede is a grid item too, two tracks wide (six columns) and two rows tall, top left;
+   the tiles fill round it and under it. ROWS SHARE THEIR HEIGHT (Mark, 2026-10-09: a row's items stretch to
+   their tallest sibling): the grid's default align-items:stretch does it, and the rule goes into GRID.md. */
+.marks-h3{margin-bottom:0}
+.marks-h3 + .lede{margin:0}
+.marks-wrap{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--grid-gutter) var(--grid-gutter);margin-top:16px;align-items:stretch}
+.marks-wrap > .lede{grid-column:1 / span 2;grid-row:1 / span 2;align-self:start;margin:0;padding-right:var(--grid-gutter)}
+.marks-wrap > .marks{display:contents}
+.marks .mark{display:flex;flex-direction:column;align-items:flex-start;text-align:left;box-sizing:border-box;margin:0;padding:16px 12px}
+.marks .mark .mark-name{word-break:break-word}
+@media (max-width:1023px){
+  .marks-wrap{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .marks-wrap > .lede{grid-column:1 / -1;grid-row:auto}
+}
+.toolbar{position:relative;padding:0;background:none;border:0;margin:24px 0 0}
+.toolbar > span{position:absolute;right:calc(100% + var(--grid-gutter));top:0;width:calc(2 * var(--col) + var(--grid-gutter));text-align:right;margin:0;line-height:27px}
+@media (max-width:1023px){
+  .pair{display:block}
+  .pair-t{margin-bottom:12px}
+  .marks-h3 + .lede{float:none;width:auto;margin:0}
+  .z-code figcaption{position:static;width:auto;text-align:left;line-height:15px;margin-bottom:6px}
+  .toolbar > span{position:static;width:auto;text-align:left;display:block}
+}
 </style>
 
 <h1>Five ways to draw one dial</h1>
@@ -698,24 +743,24 @@ a glyph drawn for 20px used at 6 is the 20px drawing scaled down, stroke and all
 path has no floor.</p>
 
 <h3 class="marks-h3">Drawn today</h3>
-<p class="lede">Every Material name any app calls upon &mdash; wm-primitives, font-proofer, ReCal, Kernpare,
+<div class="marks-wrap"><p class="lede">Every Material name any app calls upon &mdash; wm-primitives, font-proofer, ReCal, Kernpare,
 opsz-proofer, WORDMAKE, GliffDiff and this page &mdash; with what it means and who draws it. All of them
 are in the one shipped face: an 81-name subset in <code>fonts/</code>, cut by
 <code>scripts/cut-icon-subset.py</code>, and <code>lint-icons.py</code> fails an app on a name
 outside it. (WORDMAKE still ships the whole family for itself.) The stepper&rsquo;s arrows are
 not here: a stepper is the house chevron, not a Material mark.</p>
-<div class="marks" id="m-icons"></div>
+<div class="marks" id="m-icons"></div></div>
 
 <h3 class="marks-h3">In the face, waiting for a use</h3>
-<p class="lede">The type tools&rsquo; vocabulary, cut into the face 2026-09-26 so a proofer or a
+<div class="marks-wrap"><p class="lede">The type tools&rsquo; vocabulary, cut into the face 2026-09-26 so a proofer or a
 specimen page can reach for one without a font rebuild. Each moves up the day an app draws it.</p>
-<div class="marks" id="m-icons-full"></div>
+<div class="marks" id="m-icons-full"></div></div>
 
 <h3 class="marks-h3">Chevrons</h3>
-<p class="lede">One drawing, one angle (34.6&deg;), three sizes. The stroke is derived from the
+<div class="marks-wrap"><p class="lede">One drawing, one angle (34.6&deg;), three sizes. The stroke is derived from the
 width rather than fixed &mdash; optical sizing by another name: at one absolute stroke a small
 chevron carries more ink per unit of mark and reads heavier.</p>
-<div class="marks marks--chev" id="m-chevrons"></div>
+<div class="marks marks--chev" id="m-chevrons"></div></div>
 
 <h2 class="marks-h">The chips</h2>
 <p class="lede">One of a set, every option visible, the chosen one filled &mdash; so the state
@@ -724,21 +769,26 @@ gave the grammar (an outline in the option&rsquo;s own hue, a fill for the chose
 font-proofer&rsquo;s preset bar the size. A chip chooses; <code>.wm-btn</code> does. Click any
 of these. <code>src/chip.css</code>.</p>
 <div class="chip-demo">
-  <p class="chip-cap">A set &middot; <code>.wm-chip</code>, with <code>data-label</code> so choosing never shifts the row</p>
+ <div class="pair">
+  <p class="pair-t">A set. One is chosen, and <code>data-label</code> reserves each chip&rsquo;s width, so choosing never shifts the row.</p>
   <div class="wm-chip-row" data-one>
     <button class="wm-chip on" data-label="Sample"><span>Sample</span></button>
     <button class="wm-chip" data-label="A Tale of Two Cities"><span>A Tale of Two Cities</span></button>
     <button class="wm-chip" data-label="Staatliche Bauhaus"><span>Staatliche Bauhaus</span></button>
     <button class="wm-chip" data-label="Kern King"><span>Kern King</span></button>
   </div>
-  <p class="chip-cap">Each its own hue &middot; <code>--chip-color</code></p>
+ </div>
+ <div class="pair">
+  <p class="pair-t">Each in its own hue, from <code>--chip-color</code>.</p>
   <div class="wm-chip-row" data-one>
     <button class="wm-chip" style="--chip-color:#e08a63" data-label="A11y"><span>A11y</span></button>
     <button class="wm-chip on" data-label="UI"><span>UI</span></button>
     <button class="wm-chip" style="--chip-color:#6f9ee8" data-label="Base"><span>Base</span></button>
     <button class="wm-chip" style="--chip-color:#5fc678" data-label="Geo"><span>Geo</span></button>
   </div>
-  <p class="chip-cap">A lens over a canvas, and a switch beside it &middot; <code>--small</code>, <code>--switch</code></p>
+ </div>
+ <div class="pair">
+  <p class="pair-t">Small, over a canvas, with a switch beside it: <code>--small</code> and <code>--switch</code>.</p>
   <div class="wm-chip-row" data-one>
     <span class="chip-lbl">context</span>
     <button class="wm-chip wm-chip--small on">off</button>
@@ -747,6 +797,7 @@ of these. <code>src/chip.css</code>.</p>
     <button class="wm-chip wm-chip--small">01</button>
     <button class="wm-chip wm-chip--small wm-chip--switch" data-toggle><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">sync_alt</span>rev</button>
   </div>
+ </div>
 </div>
 
 <h2 class="marks-h">The zoom control</h2>
@@ -758,15 +809,21 @@ type stays type. 50&ndash;400%, steps of 10, kept in <code>localStorage</code>. 
 press the marks, or focus the rail and press <code>+</code> <code>&minus;</code> <code>0</code>.
 <code>src/zoomControl.js</code> + <code>.css</code>; GESTURES.md &sect;12.</p>
 <div class="zoom-demo">
-  <p class="chip-cap">The morph &middot; one glass leaves the box as it fills and zips to the lozenge&rsquo;s place; it splits into &minus; and +, which pull the rule out to the ends; the lozenge appears as a dot and grows round 1, 10, 100, 100%. Closing folds it back. Composed from the control&rsquo;s own keyframes by <code>scripts/zoom-morph-svg.mjs</code> (open 600ms, hold, close 300ms, hold)</p>
+ <div class="pair">
+  <p class="pair-t">The morph. One glass leaves the box as it fills and zips to the lozenge&rsquo;s place; it splits into &minus; and +, which pull the rule out to the ends; the lozenge appears as a dot and grows round 1, 10, 100, 100%. Closing folds it back. Composed from the control&rsquo;s own keyframes by <code>scripts/zoom-morph-svg.mjs</code>: open 600ms, hold, close 300ms, hold.</p>
   <img class="zoom-morph" src="../../assets/zoom-morph.svg" alt="The zoom control opening out of its mark and closing back into it" width="482" height="102">
-  <p class="chip-cap">At rest, one mark &middot; <code>data-collapse</code> &middot; press it and the control opens leftwards out of it while the mark stays put and fills (the morph above); press the mark again, Escape, or anywhere else, and it folds and keeps the zoom &mdash; shut at a zoom, the value stays on show beside the filled mark. The reset is a press on the lozenge (or <code>0</code>). The mark, <code>data-icon</code>:</p>
+ </div>
+ <div class="pair">
+  <p class="pair-t">At rest, one mark, with <code>data-collapse</code>. Press it and the control opens leftwards out of it while the mark stays put and fills. Press the mark again, Escape, or anywhere else, and it folds and keeps the zoom: shut at a zoom, the value stays on show beside the filled mark. The reset is a press on the lozenge, or <code>0</code>. The mark is <code>data-icon</code>.</p>
   <div class="wm-chip-row zoom-icons">
     <button type="button" class="wm-chip wm-chip--small" aria-pressed="true" data-zicon="pageview"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">pageview</span>pageview</button>
     <button type="button" class="wm-chip wm-chip--small" aria-pressed="false" data-zicon="feature_search"><span class="material-symbols-outlined" data-mark aria-hidden="true" translate="no">feature_search</span>feature_search</button>
   </div>
 
-  <p class="chip-cap">Left &middot; <code>.wm-zoom--left</code> in a <code>.wm-theme-row</code>: opens leftwards over its own row, from a 27px footprint; the marks, the action and the line below never move</p>
+ </div>
+ <div class="pair">
+  <p class="pair-t">Left. <code>.wm-zoom--left</code> in a <code>.wm-theme-row</code> opens leftwards over its own row, from a 27px footprint. The marks, the action and the line below never move.</p>
+  <div class="pair-r">
   <div class="zoom-title">
     <span class="zoom-title-h">Paragraph comparison</span>
     <span class="zoom-title-a">
@@ -786,7 +843,11 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
     <p>Zoomed by the control in the title row, which captures the browser&rsquo;s zoom over this card (<code>data-capture</code>): pinch on a trackpad, or &#8984;/Ctrl + &minus; 0, with the pointer here. Elsewhere on the page the browser zooms as ever.</p>
   </div></div>
 
-  <p class="chip-cap">Stack &middot; <code>.wm-theme-stack</code>: rests as one mark at the right edge under the theme chips; opens under them, one width and one right edge from one grid column (the rail&rsquo;s 10rem floor makes it the wider row)</p>
+  </div>
+ </div>
+ <div class="pair">
+  <p class="pair-t">Stack. <code>.wm-theme-stack</code> rests as one mark at the right edge under the theme chips, and opens under them: one width and one right edge from one grid column. The rail&rsquo;s 10rem floor makes it the wider row.</p>
+  <div class="pair-r">
   <div class="wm-theme-stack">
     <div class="wm-chip-row" role="group" aria-label="Colour scheme">
       <button type="button" class="wm-chip" data-theme-pick="auto" data-label="Auto" aria-pressed="true">Auto</button>
@@ -800,26 +861,30 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
     <p>A sample card, zoomed by the control above. At 200% every length in it is twice as long and every baseline twice as far down; past the card&rsquo;s edge it scrolls.</p>
   </div></div>
 
-  <p class="chip-cap">The markup &middot; mounted at DOMContentLoaded, or <code>wmZoom.mount(el)</code></p>
-<pre>&lt;span class="wm-theme-row"&gt;                                     left
+  </div>
+ </div>
+ <p class="z-body">The markup, mounted at DOMContentLoaded or by <code>wmZoom.mount(el)</code>. Without <code>data-collapse</code> it is always open, the mark is only the reset, and it needs no stack.</p>
+ <figure class="z-code"><figcaption>Left</figcaption><pre>&lt;span class="wm-theme-row"&gt;
   &lt;span class="wm-zoom wm-zoom--left" data-collapse data-target="#page"&gt;&lt;/span&gt;
   &lt;span class="wm-theme"&gt;&hellip;the three marks&hellip;&lt;/span&gt;
-&lt;/span&gt;
-
-&lt;div class="wm-theme-stack"&gt;                                   stack
+&lt;/span&gt;</pre></figure>
+ <figure class="z-code"><figcaption>Stack</figcaption><pre>&lt;div class="wm-theme-stack"&gt;
   &lt;div class="wm-chip-row" role="group" aria-label="Colour scheme"&gt;&hellip;Auto Light Dark&hellip;&lt;/div&gt;
   &lt;div class="wm-zoom" data-collapse data-icon="pageview" data-target="#page"&gt;&lt;/div&gt;
-&lt;/div&gt;
-
-data-min / max / step   50 / 400 / 10        data-key   localStorage key (wm-zoom): "170 open"
-data-collapse           rest as one mark     data-icon  pageview | feature_search
-data-open="true"        start open           data-keys="local"  keys only with focus inside
-data-capture            take over pinch and &#8984;/Ctrl + &minus; 0 over the target (or a selector)
-events     wm-zoom (detail: the percent) &middot; wm-zoom-open (detail: true / false), bubbling
-keys       + or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; Escape folds, keeps the zoom &middot; never with Cmd/Ctrl/Alt
-the mark   shut: opens &middot; open: folds, keeps the zoom &middot; without data-collapse: back to 100
-the pill   press: back to 100 (it counts down and slides home) &middot; drag: drags</pre>
-  <p class="chip-cap">Without <code>data-collapse</code> it is always open, the mark is only the reset, and it needs no stack</p>
+&lt;/div&gt;</pre></figure>
+ <table class="z-spec"><tbody>
+  <tr><th scope="row"><code>data-min / max / step</code></th><td>50 / 400 / 10</td></tr>
+  <tr><th scope="row"><code>data-collapse</code></th><td>rest as one mark</td></tr>
+  <tr><th scope="row"><code>data-open="true"</code></th><td>start open</td></tr>
+  <tr><th scope="row"><code>data-capture</code></th><td>take over pinch and &#8984;/Ctrl + &minus; 0 over the target, or a selector</td></tr>
+  <tr><th scope="row"><code>data-key</code></th><td>the localStorage key, <code>wm-zoom</code>: "170 open"</td></tr>
+  <tr><th scope="row"><code>data-icon</code></th><td>pageview | feature_search</td></tr>
+  <tr><th scope="row"><code>data-keys="local"</code></th><td>keys only with focus inside</td></tr>
+  <tr><th scope="row"><code>events</code></th><td>wm-zoom, detail the percent &middot; wm-zoom-open, detail true / false &middot; both bubble</td></tr>
+  <tr><th scope="row"><code>keys</code></th><td>+ or = in &middot; &minus; or - out &middot; 0 back to 100 &middot; arrows / Home / End on the rail &middot; Escape folds, keeps the zoom &middot; never with Cmd / Ctrl / Alt</td></tr>
+  <tr><th scope="row"><code>the mark</code></th><td>shut: opens &middot; open: folds, keeps the zoom &middot; without data-collapse: back to 100</td></tr>
+  <tr><th scope="row"><code>the pill</code></th><td>press: back to 100, it counts down and slides home &middot; drag: drags</td></tr>
+ </tbody></table>
 </div>
 
 <h2 class="marks-h">The theme stack, vertical</h2>
@@ -1719,7 +1784,7 @@ const READY = [
     m.textContent = name; m.setAttribute('translate', 'no');
     m.style.fontSize = '24px';
     m.style.setProperty('--icon-opsz', '24');
-    const n = mk('figcaption', 'mark-name'); n.textContent = name;
+    const n = mk('figcaption', 'mark-name'); n.innerHTML = name.replace(/_/g, '_<wbr>');  // a long name breaks at its underscores, never inside a word
     const u = mk('span', 'mark-use'); u.textContent = use;
     c.append(m, n, u);
     if (apps) { const a = mk('span', 'mark-apps'); a.textContent = apps.join(' · '); c.append(a); }

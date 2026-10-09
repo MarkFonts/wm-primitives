@@ -103,19 +103,10 @@
   .wrap { max-width: 1000px; margin: 0 auto; padding: 72px 32px 120px; }
   .tnum { font-variant-numeric: tabular-nums; }
 
-  header { display: flex; flex-direction: column; gap: 18px; padding-bottom: 40px; }
-  h1 { margin: 0; text-wrap: balance; }
-  .thesis { margin: 0; max-width: 60ch; text-wrap: pretty; }
 
-  .audit { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px;
-    background: var(--border-subtle); border: 1px solid var(--border-subtle);
-    border-radius: var(--radius); overflow: hidden; margin-top: 8px; }
-  .audit div { background: var(--surface-1); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
-  .audit b { font-weight: 400; }
-  .audit .is-goal b { color: var(--signal); }
 
-  section { padding-top: 56px; }
-  .sec-head { display: flex; flex-direction: column; gap: 10px; padding-bottom: 26px; }
+  section { padding-top: 0; }   /* the chapter h2 brings its own 48 (the shell) */
+  .sec-head { display: flex; flex-direction: column; gap: 0; padding-bottom: 26px;   /* the h2 brings its own 15 */ }
   .sec-head p { margin: 0; max-width: 66ch; text-wrap: pretty; }
 
   .ledgers { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1px;
@@ -129,30 +120,34 @@
     margin-top: 26px; display: flex; flex-direction: column; gap: 10px; background: var(--surface-1); }
   .rule .never { color: var(--signal); }
 
-  .fall { border-top: 1px solid var(--border-subtle); }
-  .role { display: grid; grid-template-columns: 1fr 300px; gap: 28px; align-items: baseline;
-    padding: 22px 0; border-bottom: 1px solid var(--border-subtle); }
-  .role-sample { min-width: 0; overflow-wrap: anywhere; }
-  .role-meta { display: flex; flex-direction: column; gap: 7px; text-align: right; }
-  .spec { display: flex; gap: 14px; justify-content: flex-end; flex-wrap: wrap; }
+  /* THE SEVEN ROLES: one table, on the line. A label that ends where its sample's first line
+     begins (data-baseline="last"), then the sample at its real size and leading. */
+  .roles { display: grid; grid-template-columns: minmax(0, 13rem) minmax(0, 1fr); column-gap: 24px; row-gap: 24px; }
+  .roles > div > p { margin: 0; max-width: none; }
+  .roles .body p { max-width: 48ch; }
   .spends { color: var(--signal); }
+  [data-ov] { position: relative; }
+  [data-ov] > canvas { position: absolute; left: 0; top: 0; pointer-events: none; }
+  .gx-box { padding: 24px 0; }
 
   .inks { display: flex; flex-direction: column; gap: 1px; background: var(--border-subtle);
     border: 1px solid var(--border-subtle); border-radius: var(--radius); overflow: hidden; }
   .inks > div { background: var(--surface-1); padding: 15px 22px; display: grid;
-    grid-template-columns: 120px 1fr 64px; gap: 20px; align-items: baseline; }
+    grid-template-columns: 120px 1fr max-content; gap: 20px; align-items: baseline; }
 
-  .fix { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1px;
+  .fix { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* two cards and the line under them */ gap: 1px;
     background: var(--border-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius); overflow: hidden; }
   .fix > div { background: var(--surface-1); padding: 26px 24px; display: flex; flex-direction: column; gap: 16px; }
-  .old-label { font-size: 10px; text-transform: uppercase; letter-spacing: var(--track-caps);
-    font-variation-settings: "opsz" 10, var(--ui-fvs), "wght" 500; color: rgba(var(--text-rgb), .62); }
   .fix > div > .t-body:nth-of-type(2) { margin-top: -8px; }
   .fix > div > .t-ui { margin-top: 4px; }
+  .fix { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 720px) { .fix { grid-template-columns: minmax(0, 1fr); } }
+  .fix > .wide { grid-column: 1 / -1; padding-block: 18px; }
+  .fix > .wide p { margin: 0; }
 
   /* The four landings, each shown doing its own job rather than all four saying the same
      sentence. Cells are equal-width so the only thing varying between them is the drawing. */
-  .landings { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1px;
+  .landings { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1px;
     background: var(--border-subtle); border: 1px solid var(--border-subtle);
     border-radius: var(--radius); overflow: hidden; }
   .landings > div { background: var(--surface-1); padding: 22px 20px;
@@ -181,10 +176,6 @@
     border-radius: var(--radius); background: var(--g-bg); }
   .geom-map svg { display: block; min-width: 1100px; width: 100%; height: auto; }
 
-  .tally { display: flex; flex-direction: column; gap: 5px; }
-  .tally span::before { content: "+ "; }
-  .bad { color: var(--signal); }
-
   .poster { border-top: 1px solid var(--border-subtle); }
   .poster-row { padding: 18px 0; border-bottom: 1px solid var(--border-subtle);
     display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
@@ -194,7 +185,6 @@
   .demo { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1px;
     background: var(--border-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius); overflow: hidden; }
   .demo > div { background: var(--surface-1); padding: 26px 24px; display: flex; flex-direction: column; gap: 14px; }
-  .demo .big { font-size: 34px; line-height: 1.15; }
   .o-small { font-variation-settings: "opsz" 8, var(--ui-fvs); }
   .o-large { font-variation-settings: "opsz" 45, var(--ui-fvs); }
   .demo b { color: var(--signal); font-weight: 400; }
@@ -203,14 +193,7 @@
     background: var(--border-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius); overflow: hidden; }
   .split > div { background: var(--surface-1); padding: 26px 24px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
   .split .governed { color: var(--signal); }
-  .sample-face { font-size: 30px; font-variation-settings: var(--ui-fvs); }
-  .sample-spec { font-family: var(--spec); font-size: 30px; }
   .split p { margin: 0; }
-
-  .phases { display: flex; flex-direction: column; gap: 1px; background: var(--border-subtle);
-    border: 1px solid var(--border-subtle); border-radius: var(--radius); overflow: hidden; }
-  .phase { background: var(--surface-1); padding: 16px 20px; display: grid;
-    grid-template-columns: 26px 1fr auto; gap: 18px; align-items: baseline; }
 
   /* Code pills stay in the Face, at the A11y landing. A system mono is the loudest thing
      that can happen to a page - a whole second typeface, uninvited, to say "this string is
@@ -223,35 +206,19 @@
     font-feature-settings: "tnum" 1, "zero" 1;
   }
   code { font-size: .92em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
-  footer { padding-top: 56px; }
 
   @media (max-width: 720px) {
     .wrap { padding: 48px 20px 80px; }
-    .role { grid-template-columns: 1fr; gap: 10px; }
-    .role-meta { text-align: left; }
-    .spec { justify-content: flex-start; }
+    .roles { grid-template-columns: minmax(0, 1fr); row-gap: 6px; }
+    .roles .smp { margin-bottom: 15px; }
   }
 </style>
 
 <div class="wrap">
-  <header>
-    <div class="t-label ink-quiet">WORDMARK &#183; type tokens</div>
-    <h1 class="t-display">Seven roles.<br>One signal each.</h1>
-    <p class="t-lede thesis">
-      Every size in this section is set by the token it documents, and nothing here differs from its neighbours in more than one way at a time.
-    </p>
-
-    <div class="audit tnum">
-      <div><b class="t-title">44</b><span class="t-ui ink-quiet">sizes before</span></div>
-      <div class="is-goal"><b class="t-title">7</b><span class="t-ui ink-quiet">text roles</span></div>
-      <div class="is-goal"><b class="t-title">5</b><span class="t-ui ink-quiet">poster steps</span></div>
-      <div class="is-goal"><b class="t-title">3</b><span class="t-ui ink-quiet">inks, from four</span></div>
-    </div>
-  </header>
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">The budget</div>
+      <h2>The budget</h2>
       <p class="t-body">
         Some changes the type <em>requires</em> to stay itself at a new setting. They
         carry no meaning and cost nothing. Others are made in order to say something,
@@ -260,15 +227,15 @@
     </div>
     <div class="ledgers">
       <div class="free">
-        <div class="t-label">Compensations &#8212; free</div>
+        <div class="t-label">Compensations</div>
         <ul class="t-ui ink-quiet">
-          <li><b>opsz</b><span>tracks size. The given. Our own product&#8217;s thesis.</span></li>
+          <li><b>opsz</b><span>tracks the size, whatever it is.</span></li>
           <li><b>tracking</b><span>caps only, one value. Size is opsz&#8217;s job.</span></li>
           <li><b>leading</b><span>answers to size and measure.</span></li>
         </ul>
       </div>
       <div>
-        <div class="t-label">Signals &#8212; budgeted</div>
+        <div class="t-label">Signals</div>
         <ul class="t-ui ink-quiet">
           <li><b>size</b><span>this is a different order of thing.</span></li>
           <li><b>case</b><span>this is a different kind of thing.</span></li>
@@ -283,13 +250,32 @@
       <p class="t-body">One signal per distinction. Compensations ride along free.</p>
       <p class="t-body never">Never ink + size + case together. Three ways of saying
         &#8220;minor&#8221; is not emphasis &#8212; it is a lack of confidence.</p>
-      <p class="t-ui ink-quiet">The exception that proves the first rule: <code>opsz</code>
-        <em>pinned</em> while size changes is a deliberate mismatch. That is no longer a
-        compensation. It is a signal, and it is spent.</p>
     </div>
 
-    <div class="sec-head" style="padding-top:26px;">
-      <div class="t-label ink-quiet">The sixth signal: geom</div>
+    <div class="fix" style="margin-top:26px;">
+      <div>
+        <div class="t-label ink-quiet">Two signals</div>
+        <div class="t-body" style="font-variation-settings: var(--ui-fvs), &#39;wght&#39; 640; color: var(--signal);">Cal Sans</div>
+        <p class="t-ui ink-quiet">Heavier <em>and</em> a different hue. Two ways of
+          saying &#8220;this is the heading&#8221; &#8212; and the pair is the habit
+          hardest to notice, because each half looks reasonable alone.</p>
+      </div>
+      <div>
+        <div class="t-label ink-quiet">One signal</div>
+        <div class="t-body sig-rule">Cal Sans</div>
+        <p class="t-ui ink-quiet">Same size, same weight, same color, same case. Only a
+          rule beneath it. The cheapest distinction available, and the one most proof
+          sheets already reach for.</p>
+      </div>
+      <div class="wide">
+        <p class="t-body">A geometric sans with an optical size axis, drawn for interfaces at small to medium sizes.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>The sixth signal: geom</h2>
       <p class="t-ui ink-quiet">Same size, weight, color, and case &#8212; the letters are
         simply built differently. Four landings, at <b class="tnum" style="font-weight:400;color:var(--signal);">0
         &#183; 25 &#183; 50 &#183; 100</b>. Each sits in the middle of a pad the font holds
@@ -328,7 +314,7 @@
         <div class="lz"><span class="t-label ink-quiet">Base</span><b class="t-label">GEOM 50</b></div>
         <div class="diag t-title">agjty Il1 0O</div>
         <div class="job">
-          <div class="t-title">Gage City&#8217;s quick joint</div>
+          <div class="t-title">Annual report</div>
         </div>
         <p class="t-ui ink-quiet">Rounder construction for headings, sitting above UI copy
           without touching size, weight, or color. Seven letters redraw on the way here: the
@@ -349,20 +335,18 @@
     </div>
 
     <div class="compose">
-      <div class="t-label ink-quiet" style="font-variation-settings: &#39;GEOM&#39; 100;">Now in eleven scripts</div>
+      <div class="t-label ink-quiet" style="font-variation-settings: &#39;GEOM&#39; 100;">A typeface in four voices</div>
       <div class="t-title" style="font-variation-settings: &#39;GEOM&#39; 50;">Gage City&#8217;s quick joint frugality</div>
       <p class="t-body ink-full" style="margin:0; max-width:56ch; font-variation-settings: &#39;GEOM&#39; 25;">Four
         landings on one page, and not one of them announces itself. The eyebrow is Geo, the
         heading is Base, this paragraph is UI, and the string below is A11y.</p>
       <div class="t-ui code-line ink-quiet" style="font-variation-settings: &#39;GEOM&#39; 0;">GEOM 100 50 25 0 &#183; Il1 0O</div>
     </div>
-    <p class="t-ui ink-quiet" style="margin-top:12px;">Construction changes only where the
-      role already changed, so geom reinforces the hierarchy rather than adding a second
-      axis of difference on top of it. That is the whole permission: it rides along with a
-      distinction you were making anyway, and it is never the thing doing the work alone.</p>
+    <p class="t-ui ink-quiet" style="margin-top:12px;">Geom rides along with a distinction
+      you were making anyway. It is never the thing doing the work alone.</p>
 
     <div style="margin-top:34px;">
-      <div class="t-label ink-quiet">The whole axis, drawn</div>
+      <h3>The whole axis, drawn</h3>
       <div class="geom-map" id="geom"><style>
 :root{
   /* the GEOM chart's palette. The axis hues are the DISPLAY-P3 colour in OKLCH, so a
@@ -440,7 +424,7 @@
   --g-onfg:#ffffff; --g-onfg:oklch(100.00% 0 0);
   --g-ui:#242424; --g-ui:oklch(26.03% 0 0);
 }
-.mono{font-family:"PaperMono",ui-monospace,SFMono-Regular,Menlo,monospace}
+.mono{font-family:"Face",system-ui,sans-serif;font-variation-settings:"GEOM" 0;font-feature-settings:"tnum" 1,"zero" 1}
 </style>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1650" preserveAspectRatio="xMidYMid meet">
 <defs>
@@ -448,7 +432,7 @@
     
     
     .calsans { font-family:"Face", sans-serif; }
-    .mono { font-family:'PaperMono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace; }
+    .mono { font-family:"Face", sans-serif; font-variation-settings:"GEOM" 0; font-feature-settings:"tnum" 1,"zero" 1; }
   ]]></style>
   <pattern id="geom-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
     <line x1="0" y1="0" x2="0" y2="6" stroke="var(--g-hatch)" stroke-width="1.4" opacity="0.4"/></pattern>
@@ -456,32 +440,32 @@
 <defs><clipPath id="geom-card"><rect x="58.36" y="58.36" width="1803.28" height="1533.28" rx="129.99"/></clipPath></defs><rect x="58.36" y="58.36" width="1803.28" height="1533.28" rx="129.99" fill="var(--g-bg)"/>
 <g clip-path="url(#geom-card)"><g transform="translate(960.00,825.00) scale(0.85852) translate(-960.00,-825.00)">
 <rect x="158.0" y="220" width="162.39999999999998" height="1376" fill="var(--g-a11y-wash)"/>
-<rect x="401.6" y="220" width="308.56000000000006" height="1376" fill="var(--g-ui-wash)"/>
+<rect x="417.84" y="220" width="292.32" height="1376" fill="var(--g-ui-wash)"/>
 <rect x="807.6" y="220" width="324.80000000000007" height="1376" fill="var(--g-base-wash)"/>
 <rect x="1457.2" y="220" width="324.79999999999995" height="1376" fill="var(--g-geo-wash)"/>
 <g stroke="var(--g-vgrid)" stroke-width="1" opacity="0.2"><line x1="0" y1="0" x2="0" y2="3000"/><line x1="60" y1="0" x2="60" y2="3000"/><line x1="120" y1="0" x2="120" y2="3000"/><line x1="180" y1="0" x2="180" y2="3000"/><line x1="240" y1="0" x2="240" y2="3000"/><line x1="300" y1="0" x2="300" y2="3000"/><line x1="360" y1="0" x2="360" y2="3000"/><line x1="420" y1="0" x2="420" y2="3000"/><line x1="480" y1="0" x2="480" y2="3000"/><line x1="540" y1="0" x2="540" y2="3000"/><line x1="600" y1="0" x2="600" y2="3000"/><line x1="660" y1="0" x2="660" y2="3000"/><line x1="720" y1="0" x2="720" y2="3000"/><line x1="780" y1="0" x2="780" y2="3000"/><line x1="840" y1="0" x2="840" y2="3000"/><line x1="900" y1="0" x2="900" y2="3000"/><line x1="960" y1="0" x2="960" y2="3000"/><line x1="1020" y1="0" x2="1020" y2="3000"/><line x1="1080" y1="0" x2="1080" y2="3000"/><line x1="1140" y1="0" x2="1140" y2="3000"/><line x1="1200" y1="0" x2="1200" y2="3000"/><line x1="1260" y1="0" x2="1260" y2="3000"/><line x1="1320" y1="0" x2="1320" y2="3000"/><line x1="1380" y1="0" x2="1380" y2="3000"/><line x1="1440" y1="0" x2="1440" y2="3000"/><line x1="1500" y1="0" x2="1500" y2="3000"/><line x1="1560" y1="0" x2="1560" y2="3000"/><line x1="1620" y1="0" x2="1620" y2="3000"/><line x1="1680" y1="0" x2="1680" y2="3000"/><line x1="1740" y1="0" x2="1740" y2="3000"/><line x1="1800" y1="0" x2="1800" y2="3000"/><line x1="1860" y1="0" x2="1860" y2="3000"/></g>
-<text class="mono" x="48" y="44" font-size="24" fill="var(--g-dim)" letter-spacing="1.2">CAL SANS v2.000 · GEOM AXIS · 4 LANDINGS / 3 TRANSITIONS · UI=DEFAULT</text>
+<text class="mono" x="48" y="44" font-size="24" fill="var(--g-dim)" letter-spacing="1.2">CAL SANS · THE GEOM AXIS · FOUR LANDINGS, THREE TRANSITIONS</text>
 <text class="mono" x="1872" y="44" font-size="24" fill="var(--g-dim)" text-anchor="end" letter-spacing="1.2">GEOM = 25 / 100</text>
 <text class="calsans" x="48" y="150" font-size="72" font-weight="500" fill="var(--g-fg)"
     style="font-variation-settings: 'GEOM' 25, 'wght' 500, 'opsz' 10;">Gage City’s quick joint frugality.</text>
 <line x1="158" y1="240" x2="1782" y2="240" stroke="var(--g-tick)" stroke-width="2"/>
 <text class="mono" x="158.0" y="210" font-size="22" fill="var(--g-a11y)" text-anchor="start" font-weight="700" letter-spacing="2">A11y</text>
-<text class="mono" x="401.6" y="210" font-size="22" fill="var(--g-ui)" text-anchor="start" font-weight="700" letter-spacing="2">UI</text>
+<text class="mono" x="417.84" y="210" font-size="22" fill="var(--g-ui)" text-anchor="start" font-weight="700" letter-spacing="2">UI</text>
 <text class="mono" x="807.6" y="210" font-size="22" fill="var(--g-base)" text-anchor="start" font-weight="700" letter-spacing="2">Base</text>
 <text class="mono" x="1457.2" y="210" font-size="22" fill="var(--g-geo)" text-anchor="start" font-weight="700" letter-spacing="2">Geo</text>
 <rect x="158.0" y="236" width="162.39999999999998" height="8" fill="var(--g-a11y-85)" rx="1"/>
-<rect x="401.6" y="236" width="308.56000000000006" height="8" fill="var(--g-ui-85)" rx="1"/>
+<rect x="417.84" y="236" width="292.32" height="8" fill="var(--g-ui-85)" rx="1"/>
 <rect x="807.6" y="236" width="324.80000000000007" height="8" fill="var(--g-base-85)" rx="1"/>
 <rect x="1457.2" y="236" width="324.79999999999995" height="8" fill="var(--g-geo-85)" rx="1"/>
-<rect x="320.4" y="236" width="81.20000000000005" height="8" fill="url(#geom-hatch)"/>
+<rect x="320.4" y="236" width="97.44" height="8" fill="url(#geom-hatch)"/>
 <rect x="710.1600000000001" y="236" width="97.43999999999994" height="8" fill="url(#geom-hatch)"/>
 <rect x="1132.4" y="236" width="324.79999999999995" height="8" fill="url(#geom-hatch)"/>
 <line x1="158.0" y1="244" x2="158.0" y2="252" stroke="var(--g-a11y)" stroke-width="1.5"/>
 <text class="mono" x="158.0" y="270" font-size="22" fill="var(--g-a11y)" text-anchor="middle">0</text>
 <line x1="320.4" y1="244" x2="320.4" y2="252" stroke="var(--g-a11y)" stroke-width="1.5"/>
 <text class="mono" x="320.4" y="270" font-size="22" fill="var(--g-a11y)" text-anchor="middle">10</text>
-<line x1="401.6" y1="244" x2="401.6" y2="252" stroke="var(--g-ui)" stroke-width="1.5"/>
-<text class="mono" x="401.6" y="270" font-size="22" fill="var(--g-ui)" text-anchor="middle">15</text>
+<line x1="417.84" y1="244" x2="417.84" y2="252" stroke="var(--g-ui)" stroke-width="1.5"/>
+<text class="mono" x="417.84" y="270" font-size="22" fill="var(--g-ui)" text-anchor="middle">16</text>
 <line x1="710.1600000000001" y1="244" x2="710.1600000000001" y2="252" stroke="var(--g-ui)" stroke-width="1.5"/>
 <text class="mono" x="710.1600000000001" y="270" font-size="22" fill="var(--g-ui)" text-anchor="middle">34</text>
 <line x1="807.6" y1="244" x2="807.6" y2="252" stroke="var(--g-base)" stroke-width="1.5"/>
@@ -690,113 +674,56 @@
 <rect x="48" y="1620" width="16" height="16" fill="var(--g-a11y)"/>
 <text class="mono" x="72" y="1634" font-size="24" fill="var(--g-fg2)">0–10  A11y</text>
 <rect x="388" y="1620" width="16" height="16" fill="var(--g-ui)"/>
-<text class="mono" x="412" y="1634" font-size="24" fill="var(--g-fg2)">15–34  UI</text>
+<text class="mono" x="412" y="1634" font-size="24" fill="var(--g-fg2)">16–34  UI</text>
 <rect x="728" y="1620" width="16" height="16" fill="var(--g-base)"/>
 <text class="mono" x="752" y="1634" font-size="24" fill="var(--g-fg2)">40–60  Base</text>
 <rect x="1068" y="1620" width="16" height="16" fill="var(--g-geo)"/>
 <text class="mono" x="1092" y="1634" font-size="24" fill="var(--g-fg2)">80–100  Geo</text>
-<text class="mono" x="1872" y="1634" font-size="24" fill="var(--g-dim)" text-anchor="end">15 GROUPS · rclt · 6 AXES (+ital)</text>
+<text class="mono" x="1872" y="1634" font-size="24" fill="var(--g-dim)" text-anchor="end">15 GROUPS OF GLYPHS</text>
 </g></g>
 </svg></div>
       <p class="t-ui ink-quiet" style="margin-top:12px;">Every glyph Cal Sans swaps across
-        GEOM, and the range each swap holds for. The four landings are the columns; the
-        marker sits on UI 25. Read down a column and you are reading one landing&#8217;s
-        alphabet. The pads are visible here as the stretches where no bar starts or ends,
-        and 37 is visible as the gap between two of them.</p>
-    </div>
-
-    <div class="fix" style="margin-top:26px;">
-      <div>
-        <div class="t-label ink-quiet">Two signals</div>
-        <div class="t-body" style="font-variation-settings: var(--ui-fvs), &#39;wght&#39; 640; color: var(--signal);">Cal Sans</div>
-        <p class="t-body" style="margin:0;">A geometric sans with an optical size axis, drawn for interfaces at small to medium sizes. The heading above it is the same size as this line.</p>
-        <p class="t-ui ink-quiet">Heavier <em>and</em> a different hue. Two ways of
-          saying &#8220;this is the heading&#8221; &#8212; and the pair is the habit
-          hardest to notice, because each half looks reasonable alone.</p>
-      </div>
-      <div>
-        <div class="t-label ink-quiet">One signal</div>
-        <div class="t-body sig-rule">Cal Sans</div>
-        <p class="t-body" style="margin:0;">A geometric sans with an optical size axis, drawn for interfaces at small to medium sizes. The heading above it is the same size as this line.</p>
-        <p class="t-ui ink-quiet">Same size, same weight, same color, same case. Only a
-          rule beneath it. The cheapest distinction available, and the one most of our
-          proof sheets already reach for.</p>
-      </div>
+        GEOM, and the range each swap holds for. Read down a column and you are reading one
+        landing&#8217;s alphabet; 37 is the gap between two of them. A figure drawn to
+        scale: its lettering belongs to the chart, not to a role.</p>
     </div>
   </section>
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">The waterfall</div>
+      <h2>The seven roles <span>leading 12 &#183; 15 &#183; 15 &#183; 24 &#183; 27 &#183; 30 &#183; 51</span></h2>
       <p class="t-body">
-        Each row at its real size with its real settings. Every role spends size and
-        nothing else &#8212; except <code>label</code>, which spends case instead and
-        stays at chrome size in full ink. Sizes are declared in <code>rem</code> against
-        a 16px root, so the scale follows the reader&#8217;s own text size; we quote px
-        because that is how type is talked about.
+        Each role at its real size and leading. Every role spends size and nothing else
+        &#8212; except <code>label</code>, which spends case instead and stays at chrome size
+        in full ink. Every leading is a whole number of 3px lines, so baselines of different
+        sizes still meet on one set of lines. Sizes are declared in <code>rem</code> against a
+        16px root, so the scale follows the reader&#8217;s own text size; we quote px because
+        that is how type is talked about.
       </p>
     </div>
-
-    <div class="fall">
-      <div class="role">
-        <div class="role-sample t-micro">latin small letter a with ring above</div>
-        <div class="role-meta">
-          <div class="t-ui">micro <span class="ink-faint">&#183; glyph captions</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>9px</span><span>12</span><span class="spends">size</span></div>
-        </div>
-      </div>
-      <div class="role">
-        <div class="role-sample t-label">Geometric form</div>
-        <div class="role-meta">
-          <div class="t-ui">label <span class="ink-faint">&#183; eyebrows, section heads</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>12px</span><span>15</span><span class="spends">case</span></div>
-        </div>
-      </div>
-      <div class="role">
-        <div class="role-sample t-ui">Freeze opsz &#183; Optical scale &#215;6 &#183; Return to your defaults</div>
-        <div class="role-meta">
-          <div class="t-ui">ui <span class="ink-faint">&#183; all chrome</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>12px</span><span>15</span><span>norm</span></div>
-        </div>
-      </div>
-      <div class="role">
-        <div class="role-sample t-body">
-          The optical size axis governs how the font behaves as size changes &#8212;
-          stroke contrast, spacing, detail. A token that carries only a pixel value
-          throws that away.
-        </div>
-        <div class="role-meta">
-          <div class="t-ui">body <span class="ink-faint">&#183; prose, docs</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>16px</span><span>24</span><span>norm</span></div>
-        </div>
-      </div>
-      <div class="role">
-        <div class="role-sample t-lede">Tokens govern the Face. The Specimen belongs to the user.</div>
-        <div class="role-meta">
-          <div class="t-ui">lede <span class="ink-faint">&#183; intros</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>18px</span><span>27</span><span class="spends">size</span></div>
-        </div>
-      </div>
-      <div class="role">
-        <div class="role-sample t-title">Optical size is part of the token</div>
-        <div class="role-meta">
-          <div class="t-ui">title <span class="ink-faint">&#183; panel + page titles</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>26px</span><span>30</span><span class="spends">size</span></div>
-        </div>
-      </div>
-      <div class="role">
-        <div class="role-sample t-display">Face &amp; Specimen</div>
-        <div class="role-meta">
-          <div class="t-ui">display <span class="ink-faint">&#183; largest chrome</span></div>
-          <div class="spec t-ui ink-quiet tnum"><span>45px</span><span>51</span><span class="spends">size</span></div>
-        </div>
+    <div class="gx-box" data-ov data-online>
+      <div class="roles wm-baselines">
+        <div class="lbl"><p class="t-ui ink-faint">micro &#183; 9 / 12 &#183; 4 units<br>glyph captions &#183; <span class="spends">size</span></p></div>
+        <div class="smp"><p class="t-micro">latin small letter a with ring above</p></div>
+        <div class="lbl"><p class="t-ui ink-faint">label &#183; 12 / 15 &#183; 5 units<br>eyebrows, section heads &#183; <span class="spends">case</span></p></div>
+        <div class="smp"><p class="t-label">Geometric form</p></div>
+        <div class="lbl"><p class="t-ui ink-faint">ui &#183; 12 / 15 &#183; 5 units<br>all chrome &#183; the norm</p></div>
+        <div class="smp"><p class="t-ui">Weight 400 &#183; Optical size auto &#183; Reset to defaults</p></div>
+        <div class="lbl"><p class="t-ui ink-faint">body &#183; 16 / 24 &#183; 8 units<br>prose, docs &#183; the norm</p></div>
+        <div class="smp body"><p class="t-body">The optical size axis governs how the font behaves as size changes &#8212; stroke contrast, spacing, detail. A token that carries only a pixel value throws that away.</p></div>
+        <div class="lbl"><p class="t-ui ink-faint">lede &#183; 18 / 27 &#183; 9 units<br>intros &#183; <span class="spends">size</span></p></div>
+        <div class="smp"><p class="t-lede">Tokens govern the Face. The Specimen belongs to the user.</p></div>
+        <div class="lbl"><p class="t-ui ink-faint">title &#183; 26 / 30 &#183; 10 units<br>panel and page titles &#183; <span class="spends">size</span></p></div>
+        <div class="smp"><p class="t-title">Optical size is part of the token</p></div>
+        <div class="lbl"><p class="t-ui ink-faint">display &#183; 45 / 51 &#183; 17 units<br>largest chrome &#183; <span class="spends">size</span></p></div>
+        <div class="smp"><p class="t-display">Face &amp; Specimen</p></div>
       </div>
     </div>
   </section>
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">The poster scale</div>
+      <h2>The poster scale</h2>
       <p class="t-body">
         The seven roles stop at 45px &#8212; the largest size chrome has any business
         being. Above it is a different instrument: the monster sample. And up there the
@@ -836,15 +763,12 @@
         <b style="font-weight:400; color:var(--signal);">Ratio &#8730;2</b> &#8212; the
         paper ratio, the one the A-series is built on, so every second step doubles
         exactly: 48 &#8594; 96 &#8594; 192. Tailwind&#8217;s 5xl&#8211;9xl walks 1.25,
-        1.20, 1.33, 1.33 &#8212; four intervals pretending to be a scale. Two of our five
-        steps (68, 96) were already in the codebase.
+        1.20, 1.33, 1.33 &#8212; four intervals pretending to be a scale.
       </p>
       <p class="t-body" style="flex:1; min-width:280px; margin:0;">
         Leading tightens as the steps climb &#8212; a compensation. Tracking does
         <em>not</em>, and that is the rule: hand-tracking display type is what you do when
-        a font has no optical size axis. Ours has one, and <code>opsz</code> is already
-        tightening the fit at every step. Doing it again by hand double-counts the axis
-        we built the product on.
+        a font has no optical size axis. Ours has one, so the fit tightens by itself.
       </p>
     </div>
 
@@ -867,12 +791,11 @@
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">Ink</div>
+      <h2>Ink</h2>
       <p class="t-body">
-        Grey is a signal, and we were spending it like punctuation. Four levels resolved
-        to 1.00 &#183; 0.64 &#183; 0.40 &#183; 0.24 on our ground &#8212; a finer
-        gradation than a page can mean. Three, expressed as opacity on the text color so
-        they compose over any ground and stay honest in both themes.
+        Grey is a signal, so there are three of it, not a gradient. Each is expressed as
+        opacity on the text color, so they compose over any ground and stay honest in both
+        themes.
       </p>
     </div>
     <div class="inks tnum">
@@ -893,68 +816,32 @@
       </div>
     </div>
     <p class="t-body" style="padding-top:14px; max-width:66ch;">
-      Three values, and only three: <span class="tnum">1.00</span>,
-      <span class="tnum">0.62</span>, <span class="tnum">0.38</span>. An arbitrary alpha
-      is not an ink. All three rows above are one size, because quiet comes from ink at
-      the size the context calls for &#8212; never from a smaller role <em>and</em> a
-      lighter grey.
+      An arbitrary alpha is not an ink. All three rows above are one size, because quiet
+      comes from ink at the size the context calls for &#8212; never from a smaller role
+      <em>and</em> a lighter grey.
     </p>
 
     <div class="inks" style="margin-top:26px;">
       <div>
         <span class="t-ui ink-faint">--signal</span>
-        <span class="t-ui" style="color:var(--signal);">Hue is not an ink, and not one of the five signals.</span>
-        <span class="t-ui ink-faint">#4a7fd4</span>
+        <span class="t-ui" style="color:var(--signal);">Hue is not an ink, and not one of the six signals.</span>
+        <span class="t-ui ink-faint">#eeff41 &#183; #5c6b00</span>
       </div>
     </div>
     <p class="t-body" style="padding-top:14px; max-width:66ch;">
-      The acid yellow throughout is doing one job: pointing at the thing under discussion
-      &#8212; the value being explained, the word the sentence is about. It never marks
-      hierarchy and it never means &#8220;important.&#8221; The moment a color means
-      important, it can no longer mean anything else, and every future use of it has to
-      fight the one before.
+      The acid yellow on dark, and its olive on light, are doing one job: pointing at the
+      thing under discussion &#8212; the value being explained, the word the sentence is
+      about. It never marks hierarchy and it never means &#8220;important.&#8221; The moment
+      a color means important, it can no longer mean anything else, and every future use of
+      it has to fight the one before.
     </p>
   </section>
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">The correction</div>
+      <h2>Why opsz is free</h2>
       <p class="t-body">
-        The label role as it stood said &#8220;minor&#8221; four times. A label is not
-        less important than the thing it labels; it is a different kind of thing &#8212;
-        so it should differ in kind, not in importance.
-      </p>
-    </div>
-    <div class="fix">
-      <div>
-        <div class="t-label ink-quiet">Before</div>
-        <div class="old-label">Geometric form</div>
-        <div class="tally t-ui ink-quiet">
-          <span class="bad">10px &#8212; smaller</span>
-          <span class="bad">uppercase &#8212; different</span>
-          <span class="bad">wght 500 &#8212; heavier</span>
-          <span class="bad">0.62 ink &#8212; quieter</span>
-        </div>
-        <div class="t-ui bad">Four signals, one idea.</div>
-      </div>
-      <div>
-        <div class="t-label ink-quiet">After</div>
-        <div class="t-label">Geometric form</div>
-        <div class="tally t-ui ink-quiet">
-          <span>uppercase &#8212; different in kind</span>
-          <span class="ink-faint">.12em tracking &#8212; compensation, caps require it</span>
-          <span class="ink-faint">12px, full ink &#8212; same as its neighbours</span>
-        </div>
-        <div class="t-ui">One signal: case.</div>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="sec-head">
-      <div class="t-label ink-quiet">Why opsz is free</div>
-      <p class="t-body">
-        Both lines are set at exactly 34px in the same font. Only the optical size
+        Both lines are set at the title size in the same font. Only the optical size
         differs. This is what the type does to stay itself across sizes &#8212; a
         compensation, not a statement. Which is precisely why it must ride inside the
         token and never count against the budget.
@@ -962,19 +849,22 @@
     </div>
     <div class="demo">
       <div>
-        <div class="big o-small">Handgloves at eight</div>
-        <div class="t-ui ink-quiet">34px &#183; <b>opsz 8</b> &#8212; drawn for small sizes: open spacing, sturdier strokes. Set large, it reads clumsy.</div>
+        <div class="t-title o-small">Handgloves at eight</div>
+        <div class="t-ui ink-quiet">26px &#183; <b>opsz 8</b> &#8212; drawn for small sizes: open spacing, sturdier strokes. Set large, it reads clumsy.</div>
       </div>
       <div>
-        <div class="big o-large">Handgloves at forty-five</div>
-        <div class="t-ui ink-quiet">34px &#183; <b>opsz 45</b> &#8212; drawn for display: tighter fit, finer joins. Set small, it falls apart.</div>
+        <div class="t-title o-large">Handgloves at forty-five</div>
+        <div class="t-ui ink-quiet">26px &#183; <b>opsz 45</b> &#8212; drawn for display: tighter fit, finer joins. Set small, it falls apart.</div>
       </div>
     </div>
+    <p class="t-ui ink-quiet" style="margin-top:12px; max-width:66ch;">The one exception: <code>opsz</code>
+      <em>pinned</em> while the size changes is a deliberate mismatch. That is no longer a
+      compensation. It is a signal, and it is spent.</p>
   </section>
 
   <section>
     <div class="sec-head">
-      <div class="t-label ink-quiet">The boundary</div>
+      <h2>The boundary</h2>
       <p class="t-body">
         The one rule that keeps a type tool honest: the system dresses the interface,
         never the artifact under test.
@@ -983,41 +873,17 @@
     <div class="split">
       <div>
         <div class="t-label governed">Face &#8212; governed</div>
-        <div class="sample-face">Weight &#183; opsz &#183; GEOM</div>
-        <p class="t-ui ink-quiet">Chrome. Seven roles, five poster steps, three inks, one
-          vocabulary across wordmark.nyc, ReCal, and font-proofer.</p>
+        <div class="t-title">Weight &#183; opsz &#183; GEOM</div>
+        <p class="t-ui ink-quiet">Chrome. One vocabulary across wordmark.nyc, ReCal and
+          font-proofer.</p>
       </div>
       <div>
         <div class="t-label ink-quiet">Specimen &#8212; free</div>
-        <div class="sample-spec">Weight &#183; opsz &#183; GEOM</div>
+        <div class="t-title spec-face">Weight &#183; opsz &#183; GEOM</div>
         <p class="t-ui ink-quiet">The proofed font. Its size, leading, and axes are the
           user&#8217;s parameter space &#8212; tokenizing them would systematize the
-          subject of the tool.</p>
+          subject of the tool. Set here at the title size only to sit beside the Face.</p>
       </div>
     </div>
   </section>
-
-  <section>
-    <div class="sec-head">
-      <div class="t-label ink-quiet">Getting there</div>
-      <p class="t-body">
-        Smallest surface first. An AxisSlider row is label, value, tag, and track in one
-        line &#8212; under the budget most of them must differ by ink alone. If the rule
-        survives that row, it is real.
-      </p>
-    </div>
-    <div class="phases tnum">
-      <div class="phase"><span class="t-ui ink-faint">0</span><span class="t-ui">Freeze the vocabulary <span class="ink-quiet">&#8212; roles, poster steps, inks, the budget</span></span><span class="t-ui ink-faint">&#8212;</span></div>
-      <div class="phase"><span class="t-ui ink-faint">1</span><span class="t-ui">type.css + type.ts <span class="ink-quiet">&#8212; roles, ink modifiers, helper</span></span><span class="t-ui ink-faint">additive</span></div>
-      <div class="phase"><span class="t-ui ink-faint">2</span><span class="t-ui">Adopt inside the primitives <span class="ink-quiet">&#8212; proves the rule</span></span><span class="t-ui ink-faint">74 decls</span></div>
-      <div class="phase"><span class="t-ui ink-faint">3</span><span class="t-ui">ReCal, then font-proofer <span class="ink-quiet">&#8212; chrome only</span></span><span class="t-ui ink-faint">240 decls</span></div>
-      <div class="phase"><span class="t-ui ink-faint">4</span><span class="t-ui">wordmark.nyc <span class="ink-quiet">&#8212; codemod, 44 sizes to 7 roles</span></span><span class="t-ui ink-faint">524 decls</span></div>
-      <div class="phase"><span class="t-ui ink-faint">5</span><span class="t-ui">Hold the line <span class="ink-quiet">&#8212; lint raw font-size, then density</span></span><span class="t-ui ink-faint">ongoing</span></div>
-    </div>
-  </section>
-
-  <footer class="t-ui ink-faint">
-    Set in Cal Sans. Audited 2026-08-07 across wordmark.nyc, ReCal, font-proofer, and
-    wm-primitives.
-  </footer>
 </div>

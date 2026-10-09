@@ -39,6 +39,9 @@ already has it. A child spans `--span` of the 24 and `--span-md` of the 12, star
 / `--start-md` (default: all of them). `--grid-col` is one column as a length, from `100cqw` (the container's content box, so
 the margin is already out of it), so anything inside can measure a column without script.
 
+**Rows share their height.** Items that share a row stretch to the tallest of them: a grid row's default
+`align-items: stretch`, never a per-card height. A row of cards with ragged bottoms is a lint failure (2026-10-09).
+
 **Cards: rule A.** A card is a box on the columns, and its contents step in one column and one
 gutter, so they land on the next column line (`.wm-card`). The hanging version (B), where the box
 hung outside the columns and the text sat on them, drew over its neighbours.

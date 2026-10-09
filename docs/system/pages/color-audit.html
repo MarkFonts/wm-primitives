@@ -34,10 +34,10 @@ not announce itself.</p></section>
 :root[data-theme=light] {}
 body {}
 h1 { font-size:30px; margin:0 0 6px; letter-spacing:-.01em }
-.lede { color:var(--ink2); max-width:70ch; margin:0 0 22px }
+.lede { color:var(--ink2); max-width:70ch; margin:0 0 24px; font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px) }
 h2 { font-size:13px; text-transform:uppercase; letter-spacing:.11em; margin:44px 0 4px }
 h3 { font-size:12px; font-weight:500; color:var(--ink2); margin:22px 0 7px; font-family:ui-monospace,Menlo,monospace }
-.note { color:var(--ink2); max-width:74ch; margin:0 0 6px; font-size:13.5px }
+.note { color:var(--ink2); max-width:74ch; margin:0 0 6px; font-size:var(--type-ui-size,.75rem);line-height:var(--type-ui-lead,15px) }
 .n { color:var(--acc); font-variant-numeric:tabular-nums; font-weight:400 }
 .chips { display:flex; flex-wrap:wrap; gap:7px; margin:0 0 10px }
 .chip { display:inline-flex; align-items:center; gap:6px; background:var(--card);
@@ -46,13 +46,17 @@ h3 { font-size:12px; font-weight:500; color:var(--ink2); margin:22px 0 7px; font
 .sw { width:13px; height:13px; border-radius:3px; display:inline-block; flex:none;
   border:1px solid rgba(128,128,128,.45); vertical-align:-2px }
 section { overflow-x:auto }
-table { width:100%; min-width:760px; border-collapse:collapse; font-size:12.5px;
+table { width:100%; min-width:0; border-collapse:collapse; font-size:12.5px;
   margin-bottom:4px; table-layout:fixed }
 /* one column grid for every table on the page -- the audit reads as one instrument,
    not per-file schemas. WHERE is hidden here: rows already sit under their file's
    heading, so the column only ever repeated it. */
-th:nth-child(1){width:21%} th:nth-child(2){width:23%}
-th:nth-child(3){width:18%} th:nth-child(4){width:38%}
+/* ON THE COLUMNS (Mark, 2026-10-09): value 4, what it does 5, property 5, selector 4 -- eighteen, each width carrying
+   its trailing gutter so the next cell's text starts on a column edge; --col is <main>'s (the shell's GRAMMAR_CSS) */
+section > table th, section > table td { box-sizing:border-box }   /* the width is the column's, padding inside it */
+section > table th:nth-child(1){width:calc(4 * var(--col) + 4 * var(--grid-gutter))} section > table th:nth-child(2){width:calc(5 * var(--col) + 5 * var(--grid-gutter))}
+section > table th:nth-child(3){width:calc(5 * var(--col) + 5 * var(--grid-gutter))} section > table th:nth-child(4){width:calc(4 * var(--col) + 3 * var(--grid-gutter))}
+@media (max-width:1023px){ section > table th:nth-child(1){width:21%} section > table th:nth-child(2){width:23%} section > table th:nth-child(3){width:18%} section > table th:nth-child(4){width:38%} }
 th:nth-child(5), td.l { display:none }
 th { text-align:left; font-weight:400; color:var(--ink3); font-size:10.5px; text-transform:uppercase;
   letter-spacing:.09em; padding:5px 10px 5px 0; border-bottom:1px solid var(--line); white-space:nowrap }

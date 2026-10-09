@@ -25,7 +25,13 @@
    slow    something crossing the screen
    hint    not motion at all -- how long a one-time hint stays before it fades
    confirm ONE PHASE of the click confirm (below): 80ms off, 80ms on. Mark's number,
-           2026-10-08. Not a fade, so it is not on the fast/med ladder. */
+           2026-10-08. Not a fade, so it is not on the fast/med ladder.
+
+   --ease  THE CURVE, and the only one: cubic-bezier(0.2, 0.7, 0.2, 1), the Cal Sans case
+           study tester's unlock curve. It was typed out three times -- the zoom control's
+           morph and its reset slide (zoomControl.js) and the vertical theme stack's stow
+           (themeSwitch.css) -- each with a comment saying it was the house easing and that
+           motion.css held no easings. It holds one now; those three read it. */
 :root {
   --dur-fast: 140ms;
   --dur-med:  240ms;
@@ -33,6 +39,7 @@
   --dur-slow: 400ms;
   --dur-hint: 3s;
   --dur-confirm: 80ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 /* THE CONFIRM -- the receipt after the acknowledgement (GESTURES.md §14, G84-G91).

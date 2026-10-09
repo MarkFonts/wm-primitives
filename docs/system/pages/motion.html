@@ -1,0 +1,91 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Motion</title>
+<!-- Source for section 06, Motion. What the system already states about movement, gathered
+     from the files that state it: src/motion.css (the durations, the curve, the confirm),
+     icon.css (--icon-dur), zoomControl.js (the morph), themeSwitch.css (the stow) and
+     GESTURES.md sections 12-14. On the line: every leading is a role's, every box a whole
+     number of 3px units, so build.py does not list it in OFF_LINE. A first pass; the content
+     pass expands it. Written standalone: `body` is the section when build.py assembles it. -->
+<style>
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink,#17181a);font-family:var(--ui-font,system-ui,sans-serif);font-optical-sizing:auto;
+  font-size:var(--type-body-size,1rem)}
+p{margin:0 0 24px;max-width:64ch;color:var(--ink-2,rgba(23,24,26,.62))}
+code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-height:1;white-space:nowrap}
+a{color:inherit;text-decoration:underline;text-underline-offset:.15em;text-decoration-color:var(--ink-3,currentColor)}
+/* a table on the line: 6 + 15 + 6 = 27 a row, its rule a shadow so it adds no height */
+table{border-collapse:collapse;width:100%;max-width:720px;margin:0 0 24px}
+th,td{text-align:left;vertical-align:baseline;padding:6px 24px 6px 0;font-size:var(--type-ui-size,.75rem);
+  --lh:var(--lead-ui);line-height:var(--lead-ui,15px);box-shadow:inset 0 -1px var(--line,rgba(23,24,26,.16))}
+th{font-weight:400;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3,rgba(23,24,26,.38))}
+td{color:var(--ink-2,rgba(23,24,26,.62))}
+td:first-child{color:var(--ink,#17181a);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.mo-fig{margin:0 0 24px}
+.mo-fig img{display:block;max-width:100%;height:auto}
+</style>
+<body>
+
+<h2>The durations <span>motion.css</span></h2>
+<p>Every transition reads a token; a duration spelled out in a rule is a lint failure. The values are
+ReCal&#8217;s, written down in its spec, not the fallbacks that had accumulated beside them.</p>
+<table>
+  <tr><th>Token</th><th>Value</th><th>For</th></tr>
+  <tr><td><code>--dur-fast</code></td><td class="num">140ms</td><td>a state change on one element: hover, press, focus, a colour</td></tr>
+  <tr><td><code>--dur-med</code></td><td class="num">240ms</td><td>something resizing or revealing: a collapse, a panel</td></tr>
+  <tr><td><code>--dur-layout</code></td><td class="num">300ms</td><td>a large surface moving: the sidebar, the mobile sheet</td></tr>
+  <tr><td><code>--dur-slow</code></td><td class="num">400ms</td><td>something crossing the screen</td></tr>
+  <tr><td><code>--dur-hint</code></td><td class="num">3s</td><td>not motion: how long a one-time hint stays</td></tr>
+  <tr><td><code>--dur-confirm</code></td><td class="num">80ms</td><td>one phase of the confirm; a blink, so off the ladder</td></tr>
+</table>
+
+<h3>Instant, fast, medium</h3>
+<p>Three steps carry nearly everything. A mark&#8217;s rollover runs at <code>--icon-dur</code>, 90ms, under
+<code>--dur-fast</code> on purpose: at 140 the mark lagged the row it sits in, and a rollover should feel like
+the pointer, not an animation about it. A state change is fast, 140. A reveal is medium, 240.</p>
+
+<h2>The curve <span>--ease</span></h2>
+<p>One curve, <code>cubic-bezier(0.2, 0.7, 0.2, 1)</code>, the Cal Sans case study tester&#8217;s unlock curve:
+quick off the mark, long settle. It was typed out three times with a comment calling it the house easing;
+it is a token now, <code>--ease</code> in motion.css, and the three read it.</p>
+<table>
+  <tr><th>Reader</th><th>Duration</th><th>What moves</th></tr>
+  <tr><td>zoomControl.js, the morph</td><td class="num">600 / 300ms</td><td>the zoom control opening out of its mark, and closing</td></tr>
+  <tr><td>zoomControl.js, the reset</td><td class="num">--dur-med</td><td>the lozenge sliding home to 100</td></tr>
+  <tr><td>themeSwitch.css, the stow</td><td class="num">180ms</td><td>the vertical theme stack leaving the top edge</td></tr>
+</table>
+
+<h2>Acknowledge and confirm <span>GESTURES &#167;14</span></h2>
+<p>A press is answered twice. <code>:active</code> acknowledges it while the pointer is down. When the press
+worked, the control&#8217;s script adds <code>.wm-confirm</code>: its press look goes off for 80ms, on for 80ms,
+then the control settles into its result. A blink, <code>steps(1)</code>, paint only: no box moves.</p>
+<figure class="mo-fig"><img src="../../assets/confirm.svg" alt="A chip is chosen and confirms: its fill blinks off, then on, then it settles" width="276" height="78"></figure>
+<table>
+  <tr><th>t</th><th><code>--confirm-off</code></th><th>What shows</th></tr>
+  <tr><td class="num">0&#8211;80ms</td><td>1</td><td>the press look off: the control&#8217;s rest paint</td></tr>
+  <tr><td class="num">80&#8211;160ms</td><td>0</td><td>the press look on</td></tr>
+  <tr><td class="num">160ms</td><td>&#8212;</td><td>the class comes off; the control is in its result state</td></tr>
+</table>
+
+<h2>The morph <span>GESTURES &#167;12</span></h2>
+<p>The zoom control opens leftwards out of its mark in one 600ms timeline, 2.5 &#215; <code>--dur-med</code>,
+and closes in 300, the open folded back. Layout jumps to the end state at once; only the drawing travels.</p>
+<figure class="mo-fig"><img src="../../assets/zoom-morph.svg" alt="The zoom control opening out of its mark and closing back into it" width="482" height="102"></figure>
+
+<h3>Transform, opacity, clip only</h3>
+<p>The morph animates three properties and nothing else, so no frame reflows the page: a magnifier leaves the
+mark as it fills, zips to where the lozenge will sit, and the rule opens from it by its clip. The theme
+stack&#8217;s stow is a translate, the confirm a custom property that only paint reads.</p>
+
+<h2>Reduced motion <span>prefers-reduced-motion: reduce</span></h2>
+<p>Every file that moves carries its own rule, and each says the same thing: the end state, at once.</p>
+<table>
+  <tr><th>Where</th><th>With reduced motion</th></tr>
+  <tr><td>motion.css, confirm.js</td><td>no class, no blink: straight to the result (G85)</td></tr>
+  <tr><td>zoomControl.js</td><td>the two states swapped with no morph (G68); the reset jumps (G72)</td></tr>
+  <tr><td>themeSwitch.css</td><td>the stack stows and returns without the translate</td></tr>
+  <tr><td>collapse.css</td><td>the box opens and shuts without its height transition</td></tr>
+  <tr><td>icon, chip, button, chevron, slider CSS</td><td>their transitions off</td></tr>
+</table>
+</body>
