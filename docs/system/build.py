@@ -1069,7 +1069,9 @@ html,body{margin:0;padding:0;background:var(--bg)}
    that happens to be drawn by an element and two SVGs, so they must render at one
    thickness -- and matching the NUMBERS does not do it, because each has its own CTM.
    Declared here rather than in the gloss block so the stack can actually read it; it
-   was set on .wm-head and used by nothing. */
+   was set on .wm-head and used by nothing. 8px is only the value before the bend's script has
+   run: position() sets it on the stack from the headline's own stem, so the line weighs what
+   the letters weigh at every size. */
 :root{ --wm-stroke:8px; }
 /* the rule-fill runs each open line out to the shared right rail; its weight sits
    near the caps' stroke and its seat at the optical mid of a 720 cap */
@@ -1159,7 +1161,13 @@ html,body{margin:0;padding:0;background:var(--bg)}
   font-size:13px;font-weight:600;letter-spacing:.02em;transition:border-color .15s}
 .wm-wip i{font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3)}
 .wm-wip:hover{border-color:var(--ink-3)}
-@media (max-width:720px){.wm-stat{padding:0 18px}}
+/* on the columns below 1024 (Mark's phone, 2026-10-11: "we have a grid"): the four counts two by
+   two, six of the twelve columns each, the hairline between the pairs, a line of 24 between the rows */
+@media (max-width:1023px){
+  .wm-stats{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--grid-gutter);row-gap:24px}
+  .wm-stat{grid-column:span 6;padding:0;border-left:0}
+  .wm-stat:nth-child(2n){padding-left:var(--grid-gutter);border-left:1px solid var(--line)}
+}
 
 /* ---- The outline is an AXIS, not a sidebar. No panel, no card, no active pill: a
    hairline rule with ticks, a diamond handle that slides to the current chapter, and the
@@ -1418,7 +1426,15 @@ html,body{margin:0;padding:0;background:var(--bg)}
   /* WebKit (every iOS browser) does not take the two-value overflow, so `visible clip` on the
      header clipped both ways and the 6's handles stopped at the column's left edge (Mark's phone,
      2026-10-11). No clip on the header there; the 6 clips itself to the header's 4svh overrun. */
-  @supports (-webkit-touch-callout:none){.wm-head{overflow:visible} .wm-six{clip-path:inset(0 0 0 0)}}
+  @supports (-webkit-touch-callout:none){.wm-head{overflow:visible} .wm-six{clip-path:inset(0 0 0 0)}
+  /* Nor does WebKit take overflow-clip-margin, so the pan's page-margin allowance was 0 there and
+     the 6 stopped at the column's right edge (Mark's phone, 2026-10-11: "the right trims now").
+     The pan stops clipping and the crop moves out to .wm-doc, whose padding box IS the screen:
+     clip, not hidden, so it is no scroll container -- the rail stays sticky and nothing can be
+     panned sideways, because past the screen edge nothing is laid out at all. Not html or body:
+     their overflow propagates to the viewport, where clip becomes hidden, and iOS has a history
+     of letting a finger drag a hidden viewport sideways anyway. */
+    .wm-pan{overflow:visible} .wm-doc{overflow-x:clip}}
   .wm-lb{margin-top:8vh}
 }
 /* below ~90px of statement the five labels start colliding (asc-cap is .18em);
@@ -1705,15 +1721,53 @@ HERO_TMPL = """
       if(hist.length){P=hist.pop();paint();applyComb(performance.now());ev.preventDefault();}}});
   function loc(ev){var pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;
     return pt.matrixTransform(svg.getScreenCTM().inverse())}
+  /* A finger is not a cursor, so touch takes its own path and the pointer handlers leave it
+     alone. On a phone the 6 sits UNDER the headline, which is z-index 4 above it: the words and
+     the h1's own box take the touch, and a node was only reachable through the few gaps between
+     letters. Nodes are also 14 units, a few screen px at phone scale -- smaller than any fingertip.
+     So a touch anywhere is tested against the drawing itself: the nearest node within a finger's
+     radius is grabbed, the touch is cancelled so the page cannot scroll under the drag, and a
+     touch that lands on no node does nothing at all, which leaves it a scroll. */
   nodeEls.forEach(function(e,i){
-    e.addEventListener('pointerdown',function(ev){
+    e.addEventListener('pointerdown',function(ev){if(ev.pointerType==='touch')return;
       hist.push(snap());if(hist.length>120)hist.shift();
       drag=i;e.classList.add('drag');e.setPointerCapture(ev.pointerId);ev.preventDefault();});
-    e.addEventListener('pointermove',function(ev){if(drag!==i)return;
+    e.addEventListener('pointermove',function(ev){if(drag!==i||ev.pointerType==='touch')return;
       var q=loc(ev);P[i].x=Math.round(q.x);P[i].y=Math.round(q.y);paint();applyComb(performance.now());});
-    e.addEventListener('pointerup',function(){drag=-1;t0=performance.now()-POP;e.classList.remove('drag');});
-    e.addEventListener('lostpointercapture',function(){drag=-1;t0=performance.now()-POP;e.classList.remove('drag');});
+    e.addEventListener('pointerup',function(ev){if(ev.pointerType==='touch')return;
+      drag=-1;t0=performance.now()-POP;e.classList.remove('drag');});
+    e.addEventListener('lostpointercapture',function(ev){if(ev.pointerType==='touch')return;
+      drag=-1;t0=performance.now()-POP;e.classList.remove('drag');});
   });
+  var head=svg.closest('.wm-head'),FINGER=20,tid=null,gx=0,gy=0;
+  function nearest(x,y){
+    var hb=head.getBoundingClientRect(),sb=svg.getBoundingClientRect(),best=-1,bd=FINGER*FINGER;
+    // only what is on screen: the header crops the 6 below, the screen crops it right
+    if(y<sb.top||y>Math.min(sb.bottom,hb.bottom)||x<0||x>innerWidth)return -1;
+    var m=svg.getScreenCTM();if(!m)return -1;
+    for(var i=0;i<P.length;i++){var nx=m.a*P[i].x+m.c*P[i].y+m.e,ny=m.b*P[i].x+m.d*P[i].y+m.f;
+      var dd=(nx-x)*(nx-x)+(ny-y)*(ny-y);if(dd<bd){bd=dd;best=i}}
+    return best}
+  function release(){if(drag<0)return;nodeEls[drag].classList.remove('drag');
+    drag=-1;tid=null;t0=performance.now()-POP;}
+  // passive:false is the point: only a cancelable touchstart can keep the page from scrolling
+  document.addEventListener('touchstart',function(ev){
+    if(drag>=0||ev.touches.length!==1)return;
+    var tg=ev.target;if(tg.closest&&tg.closest('.wm-rail,.wm-chrome,a,button,input'))return;
+    var t=ev.changedTouches[0],i=nearest(t.clientX,t.clientY);if(i<0)return;
+    ev.preventDefault();
+    hist.push(snap());if(hist.length>120)hist.shift();
+    // the grabbed node takes the hover state and the comb holds out, as under a cursor
+    drag=i;tid=t.identifier;nodeEls[i].classList.add('drag');applyComb(performance.now());
+    // keep the grab offset: the node stays where it was under the finger instead of jumping to it
+    var m=svg.getScreenCTM();gx=t.clientX-(m.a*P[i].x+m.c*P[i].y+m.e);gy=t.clientY-(m.b*P[i].x+m.d*P[i].y+m.f);},{passive:false});
+  document.addEventListener('touchmove',function(ev){if(drag<0)return;
+    for(var k=0;k<ev.changedTouches.length;k++){var t=ev.changedTouches[k];if(t.identifier!==tid)continue;
+      ev.preventDefault();var q=loc({clientX:t.clientX-gx,clientY:t.clientY-gy});P[drag].x=Math.round(q.x);P[drag].y=Math.round(q.y);
+      paint();applyComb(performance.now());}},{passive:false});
+  document.addEventListener('touchend',function(ev){
+    for(var k=0;k<ev.changedTouches.length;k++)if(ev.changedTouches[k].identifier===tid)release();});
+  document.addEventListener('touchcancel',release);
 })();
 (function(){
   var svg=document.getElementById('wmbend'); if(!svg) return;
@@ -1722,6 +1776,7 @@ HERO_TMPL = """
   function se(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)}
   // 100 units per em: a 1em svg that is nearly all corner, so the rule can shorten until the leg meets the chevron
   var W=100,SW=7.2,R=85,xv=W-SW/2,hy=SW/2,x1=xv-R,cy=hy+R,H=300;
+  var STEM=.088;   // Cal Sans I at GEOM 100, wght 400: its stem as a fraction of the em (see position)
   var NC=40,NF=10,total=NF+NC+NF;
   function corner(mode){var pts=[],i,t;
     for(i=0;i<NC;i++){t=i/(NC-1);
@@ -1778,8 +1833,8 @@ HERO_TMPL = """
        chevron lives in the 6's counter and the 6 does not move for it. Walking the leg over
        to the counter ran the stroke through SURFACE, so first the headline is scaled down --
        only as far as SURFACE. needs to clear the leg by a quarter em -- and the rule weight
-       scales with it (one stroke, one ratio). Then the margin walks the leg over. Nothing is
-       squeezed: the tail is 1em, the corner alone, so the room is always there. */
+       follows it (one stroke, one ratio, set below). Then the margin walks the leg over. Nothing
+       is squeezed: the tail is 1em, the corner alone, so the room is always there. */
     var stack=l3.parentElement; stack.style.fontSize=''; stack.style.removeProperty('--wm-stroke'); stack.style.marginLeft='';
     var fp0=parseFloat(getComputedStyle(l3).fontSize), st0=stack.getBoundingClientRect();
     var l4=stack.querySelector('.wm-l4'), r4=document.createRange(); r4.selectNodeContents(l4.firstChild);
@@ -1793,8 +1848,15 @@ HERO_TMPL = """
     if(need>chevX&&hang>0){var shift=Math.min(hang,need-chevX);
       stack.style.marginLeft=(-shift)+'px'; st0=stack.getBoundingClientRect(); need-=shift;}
     if(need>chevX){var sc=(chevX-SW/2-st0.left-ml4)/(tw4+.25*fp0);
-      if(sc>.5){stack.style.fontSize=(fp0*sc).toFixed(2)+'px';
-        stack.style.setProperty('--wm-stroke',Math.max(3,Math.round(8*sc*2)/2)+'px');}}
+      if(sc>.5)stack.style.fontSize=(fp0*sc).toFixed(2)+'px';}
+    /* THE RULE WEIGHS WHAT THE LETTERS WEIGH (Mark's phone, 2026-10-11: "should feel like same
+       stroke width as the letters they accompany"). A fixed 8px was a desktop number: at the
+       phone's 38px headline it was twice the caps' stem. STEM is Cal Sans's own -- the ink width
+       of I at GEOM 100, wght 400, 176-178 of 2000 units across the opsz range -- taken at the
+       size the headline actually ends up, after the scaling above, and rounded to whole pixels
+       so the bar's edges land on the pixel grid. The bend and the chevron read the bar's height
+       (strokeUnits, in the gloss script), so this one number still drives all three. */
+    stack.style.setProperty('--wm-stroke',Math.max(1,Math.round(STEM*parseFloat(getComputedStyle(stack).fontSize)))+'px');
     var st=stack.getBoundingClientRect(), extra=st.right-chevX-4;
     var tn=l3.firstChild, rg=document.createRange(); rg.selectNodeContents(tn);
     var fp=parseFloat(getComputedStyle(l3).fontSize), tw=rg.getBoundingClientRect().width;
@@ -2559,6 +2621,7 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
      the gigantic number"): the left block is a viewport tall, less the bar, in whole 3px lines, and
      the numeral and name sit at its foot; the lede and the chapter scroll in under them */
   .wm-sec-head,.wm-sec:first-of-type .wm-sec-head{margin-top:0}
+  .wm-sec:first-of-type .wm-open-l{min-height:0;margin-top:72px}   /* no screen of space before section zero on a phone: the hero is right above it */
   /* --snap-unit: the snapper moves the block as ONE, measured by its first text -- the KICKER, which
      comes first in the markup for this reason: its baseline is exactly 30 above the name's, so both
      land on the line; the numeral, sized in vw, sits a fraction of a pixel off its own, unseen at
