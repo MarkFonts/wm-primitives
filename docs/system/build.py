@@ -2328,9 +2328,17 @@ if (lb) {
     raf = (live || mp || G.some(function (g) { return g.sp > -1; })) ? requestAnimationFrame(frame) : null;
   }
   function kick() { if (!raf) raf = requestAnimationFrame(frame); }
-  function at(e) { var p = e.touches ? e.touches[0] : e; mp = { x: p.clientX, y: p.clientY }; kick(); }
-  addEventListener('mousemove', at, { passive: true }); addEventListener('touchmove', at, { passive: true }); addEventListener('touchstart', at, { passive: true });
-  addEventListener('mouseleave', function () { mp = null; }); addEventListener('touchend', function () { mp = null; });
+  /* A tap is a touchstart, a touchend, and then -- in Chrome, 300ms later -- a synthesized mousemove
+     at the same point, which parked the field there for good and the glyphs never came home
+     (Mark, 2026-10-11: "it stays in there after a tap"). Mouse events are ignored for a second
+     after any touch; the touch itself ends the field on touchend. */
+  var lastTouch = 0;
+  function at(e) { if (!e.touches && performance.now() - lastTouch < 1000) return; var p = e.touches ? e.touches[0] : e; mp = { x: p.clientX, y: p.clientY }; kick(); }
+  function touchDone() { lastTouch = performance.now(); mp = null; }
+  addEventListener('mousemove', at, { passive: true }); addEventListener('touchmove', at, { passive: true });
+  addEventListener('touchstart', function (e) { lastTouch = performance.now(); at(e); }, { passive: true });
+  addEventListener('touchend', touchDone, { passive: true }); addEventListener('touchcancel', touchDone, { passive: true });
+  addEventListener('mouseleave', function () { mp = null; });
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) kick();
 })();
 """
