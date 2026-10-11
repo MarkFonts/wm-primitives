@@ -1530,7 +1530,7 @@ for s in secs:
     # baseline on the name's.
     digit = s["num"][-1]
     head = (f'<div class="wm-open"><div class="wm-open-l">'
-            f'<p class="wm-kick"><span class="wm-dg" data-d="{digit}"><span>{digit}</span></span><span class="wm-kick-t">{KICKERS.get(sid, "")}</span></p>'
+            f'<p class="wm-kick"><span class="wm-kick-t">{KICKERS.get(sid, "")}</span><span class="wm-dg" data-d="{digit}"><span>{digit}</span></span></p>'
             f'<h1 class="wm-mark">{s["label"]}</h1>{FLEURON}</div>'
             f'<p class="wm-open-r wm-lede">{s["lede"]}</p></div>{numbers_html(sid)}')
     if sid in APPENDIX:
@@ -2304,8 +2304,8 @@ if (lb) {
    tamed from 4 to 1.6 for glyphs forty times the size, and the speckle: a seeded sixth of them
    fades toward the signal on five phase groups. Touch counts as the cursor on a phone. */
 (function () {
-  /* the W and M move as ONE body (Mark, 2026-10-11: "center align W and M"): pushed apart they lost their axis */
-  var all = [].slice.call(document.querySelectorAll('.wm-fleuron i span, .wm-fleuron .fl-wm')); if (!all.length) return;
+  /* the W and the M are two glyphs and move as two (Mark, 2026-10-11); at rest they share an axis */
+  var all = [].slice.call(document.querySelectorAll('.wm-fleuron i span, .wm-fleuron .fl-wm span')); if (!all.length) return;
   var mp = null, raf = null, seed = 7;
   function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
   var G = all.map(function (el, i) { return { el: el, dx: 0, dy: 0, sp: rnd() < 1 / 6 ? (i % 5) : -1 }; });
@@ -2426,7 +2426,10 @@ GRAMMAR_CSS = """
 /* the opener */
 /* a fifth of the viewport from the section above's last edge to the name's baseline: 30 + 23.5 of it is the kicker line */
 .wm-sec-head{padding:0 0 24px;margin-top:var(--open-gap);box-shadow:none;position:relative;
-  --open-gap:round(nearest, calc(42vh - 54px), 3px)}   /* 42vh, was 20 (Mark, 2026-10-11): the section break lives in this gap on desktop too, a third of the screen each side of it */
+  --open-gap:round(nearest, calc(42vh - 54px), 3px)}
+/* no break before section zero (Mark, 2026-10-11): the hero is above it, and the gap stays the old 20vh */
+.wm-sec:first-of-type .wm-sec-head{--open-gap:round(nearest, calc(20vh - 54px), 3px)}
+.wm-sec:first-of-type .wm-fleuron{display:none}   /* 42vh, was 20 (Mark, 2026-10-11): the section break lives in this gap on desktop too, a third of the screen each side of it */
 .wm-sec:first-of-type .wm-sec-head{margin-top:round(nearest, calc(20vh - 54px), 3px)}
 .wm-open{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));column-gap:var(--grid-gutter);align-items:baseline}
 .wm-open-l{grid-column:1 / span 4;position:relative}
@@ -2450,8 +2453,7 @@ GRAMMAR_CSS = """
   left:calc(5 * var(--col) + 4.5 * var(--grid-gutter));   /* the middle of the ten text columns (Mark, 2026-10-11), measured from the kicker block's left, which is the column's */
   font-family:"Face","CalSansVF",sans-serif;font-weight:700;font-variation-settings:"GEOM" 100,"wght" 700;font-size:40px;line-height:1;   /* Cal Sans Geo Bold (Mark, 2026-10-11) */
   color:var(--ink);cursor:crosshair;user-select:none}
-.wm-fleuron i span,.wm-fleuron .fl-wm{display:block;will-change:transform;transition:color .5s}
-.wm-fleuron .fl-wm span{display:block}
+.wm-fleuron i span,.wm-fleuron .fl-wm span{display:block;will-change:transform;transition:color .5s}
 /* the stars touch the W: the gap between the two ornament groups IS the WM (Mark, 2026-10-11: "the
    ornament gap is an M"). Each group sits on ONE baseline at one size, the glyphs where the face
    draws them (Mark: "use the actual glyphs' baseline"); centring their boxes had put the star low. */
@@ -2520,8 +2522,10 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
      the gigantic number"): the left block is a viewport tall, less the bar, in whole 3px lines, and
      the numeral and name sit at its foot; the lede and the chapter scroll in under them */
   .wm-sec-head,.wm-sec:first-of-type .wm-sec-head{margin-top:0}
-  /* --snap-unit: the snapper moves the block as ONE, measured by its first text (the numeral):
-     snapped one by one, the name took a nudge the numeral did not and sat 3px under its baseline */
+  /* --snap-unit: the snapper moves the block as ONE, measured by its first text -- the KICKER, which
+     comes first in the markup for this reason: its baseline is exactly 30 above the name's, so both
+     land on the line; the numeral, sized in vw, sits a fraction of a pixel off its own, unseen at
+     270px. Snapped one by one, the name took a nudge the numeral did not and sat 3px under it. */
   /* the numeral lives inside the kicker's <p>; the <p> dissolves (display:contents) so the numeral
      takes column 1 across both rows and the kicker's words (.wm-kick-t) column 2, row 1, where
      `end` sinks them onto the name. Integer offsets, not baseline alignment: aligning last
@@ -2537,8 +2541,10 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
   /* Mark's mockup (2026-10-11): the number in ink, 312px (104 lines), its left side off the
      edge of the screen; kicker and name small at its foot in the right half */
   .wm-dg{position:static;grid-column:1;grid-row:1 / span 2;justify-self:start;align-self:end;right:auto;top:auto;
-    margin:0 0 var(--dg-drop,-48px) calc(-1 * var(--grid-margin) - .1em);   /* -48: measured, the name's baseline on the numeral's at 312/312 */
-    font-size:312px;line-height:312px;color:var(--ink);font-variation-settings:"GEOM" 100}
+    margin:0 0 -.154em calc(-1 * var(--grid-margin) - .1em);   /* -.154em: 48px at 312, the name's baseline on the numeral's */
+    font-size:round(down, clamp(200px, 72vw, 312px), 3px);line-height:1;color:var(--ink);font-variation-settings:"GEOM" 100}   /* whole lines: a 259.2px box put the name .3 off */
+  /* 72vw, capped at 312 (Mark, 2026-10-11: a 0 at 312 ran into the kicker on a 375 screen): the
+     widest digit stays in the left half with the right half's column free */
   .wm-mark{grid-column:2;grid-row:2}
   /* the ornament, centred in the screen of space above the number: outlines hairline, the mark filled */
   .wm-fleuron{position:static;translate:none;grid-column:1 / span 2;grid-row:1;align-self:center;justify-self:center;margin-bottom:120px}
