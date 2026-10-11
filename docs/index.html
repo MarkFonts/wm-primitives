@@ -6525,7 +6525,7 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
   /* Mark's mockup (2026-10-11): the number in ink, 312px (104 lines), its left side off the
      edge of the screen; kicker and name small at its foot in the right half */
   .wm-dg{position:static;grid-column:1;grid-row:1 / span 2;justify-self:start;align-self:end;right:auto;top:auto;
-    margin:0 0 -.154em calc(-1 * var(--grid-margin) - .1em);   /* -.154em: 48px at 312, the name's baseline on the numeral's */
+    margin:0 0 -.154em 0;   /* -.154em: 48px at 312, the name's baseline on the numeral's. Whole number on the screen, on the column (Mark, 2026-10-11) -- not run off the edge */
     font-size:round(down, clamp(200px, 72vw, 312px), 3px);line-height:1;color:var(--ink);font-variation-settings:"GEOM" 100}   /* whole lines: a 259.2px box put the name .3 off */
   /* 72vw, capped at 312 (Mark, 2026-10-11: a 0 at 312 ran into the kicker on a 375 screen): the
      widest digit stays in the left half with the right half's column free */
