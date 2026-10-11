@@ -182,16 +182,16 @@
   .poster-row .meta { display: flex; gap: 14px; align-items: baseline; }
   .ratio { display: flex; gap: 26px; flex-wrap: wrap; padding-top: 18px; }
 
-  .demo { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1px;
-    background: var(--border-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius); overflow: hidden; }
-  .demo > div { background: var(--surface-1); padding: 26px 24px; display: flex; flex-direction: column; gap: 14px; }
+  /* rule A: each half is a box of 9 columns; contents step in one column + one gutter */
+  .demo, .split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--grid-gutter); align-items: stretch; }
+  .demo > div, .split > div { background: var(--surface-1); box-shadow: inset 0 0 0 1px var(--border-subtle); border-radius: var(--radius);
+    box-sizing: border-box; padding: 27px var(--grid-gutter) 27px calc(var(--col) + var(--grid-gutter)); display: flex; flex-direction: column; gap: 15px; min-width: 0; overflow: hidden; }
+  .split > div { gap: 12px; }
+  @media (max-width: 1023px) { .demo, .split { grid-template-columns: 1fr; } }
   .o-small { font-variation-settings: "opsz" 8, var(--ui-fvs); }
   .o-large { font-variation-settings: "opsz" 45, var(--ui-fvs); }
   .demo b { color: var(--signal); font-weight: 400; }
 
-  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1px;
-    background: var(--border-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius); overflow: hidden; }
-  .split > div { background: var(--surface-1); padding: 26px 24px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
   .split .governed { color: var(--signal); }
   .split p { margin: 0; }
 

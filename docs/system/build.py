@@ -117,6 +117,15 @@ OPENERS = {
 # THE KICKER (proposal v2, 2026-10-09): one short line over the name, the title role in ink-3, so the
 # opener is two consecutive title lines and the name is the one in full ink. Short enough never to wrap
 # in four columns.
+FLEURON = ('<div class="wm-fleuron" aria-hidden="true">'
+           '<i class="fl-l"><span>&#9667;</span><span>&#9667;</span><span>&#10023;</span></i>'
+           '<b class="fl-wm"><span>W</span><span>M</span></b>'
+           '<i class="fl-r"><span>&#10023;</span><span>&#9657;</span><span>&#9657;</span></i></div>')
+# the phone opener's section break (Mark's drawing, 2026-10-11): two chevrons and a star, W over M
+# tightly leaded, a star and two chevrons, all Cal Sans at GEOM 100; the gap each side of the WM
+# is an M. The glyphs hang together the way the colophon's do: the cursor pushes and scales the
+# ones it passes (the letterbox's own numbers, see FLEURON_JS) and a seeded share of them breathes
+# toward the signal. Real glyphs, not a letter grid: at 40px a grid of 5px glyphs has no silhouette.
 KICKERS = {
     "readme":   "The promise",
     "type":     "Seven roles",
@@ -1185,6 +1194,12 @@ html,body{margin:0;padding:0;background:var(--bg)}
    widening the document -- which on a phone would drag the fixed theme stack with it. */
 .wm-pan{grid-column:calc(var(--rail-span) + var(--rail-gap) + 1) / -1;grid-row:1;min-width:0;
   overflow:clip;overflow-clip-margin:112px}
+@media (max-width:1023px){.wm-pan{overflow-clip-margin:32px}}
+@media (max-width:680px){.wm-pan{overflow-clip-margin:20px}}
+/* the allowance is the page margin, as a literal per breakpoint (grid.css: 20px floor under 681,
+   32px above): the opener's number runs off the SCREEN, not off the column (Mark, 2026-10-11:
+   "the number clipping?"). It was 0 for a day: anything past the column had widened the layout
+   viewport (452 on a 414 screen); within the margin nothing can, the viewport is the crop. */
 /* BOTH axes clip: Chrome honours overflow-clip-margin only when x and y are clip, so
    `overflow-x:clip` alone still cut the 6 at column 24. And a LITERAL length: Chromium 153
    rejects calc(), clamp() and a var() resolving to either (computed 0px, measured
@@ -1236,7 +1251,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-lvl1::before{content:"";position:absolute;left:-28px;top:50%;width:8px;height:1px;
   background:var(--line)}
 .wm-lvl0:hover,.wm-lvl1:hover{color:var(--ink-2)}
-.wm-lvl0.on,.wm-lvl1.on{color:var(--ink)}
+.wm-lvl0.on,.wm-lvl1.on,.wm-grp.on > .wm-lvl0{color:var(--ink)}
 /* No underline for "you are in this page": the chapters are already nested under their
    section, so a lit chapter shows its page by position. An underline would be a second
    device for something the grouping states, and the ink would then be doing cursor duty
@@ -1486,7 +1501,7 @@ for s in secs:
     chapters = "".join(rail_chapter(cid, txt) for cid, txt in dedupe(s["chapters"])[:CHAPTER_CAP])
     # the appendix is named as one, its letter standing in the numeral's column
     name = f'Appendix &middot; {s["label"]}' if s["sid"] in APPENDIX else s["label"]
-    href = "appendix" if s["sid"] in APPENDIX else f's-{s["sid"]}'
+    href = "appendix" if s["sid"] in APPENDIX else f'o-{s["sid"]}'   # the opener (header), not the body: #s-<sid> starts past the chapter's number
     rail.append(
         f'<div class="wm-grp"><a class="wm-lvl0" href="#{href}">'
         f'<u data-d="{s["num"][-1]}">{s["num"]}</u>{name}</a>{chapters}</div>')
@@ -1515,22 +1530,22 @@ for s in secs:
     # baseline on the name's.
     digit = s["num"][-1]
     head = (f'<div class="wm-open"><div class="wm-open-l">'
-            f'<p class="wm-kick"><span class="wm-dg" data-d="{digit}"><span>{digit}</span></span>{KICKERS.get(sid, "")}</p>'
-            f'<h1 class="wm-mark">{s["label"]}</h1></div>'
+            f'<p class="wm-kick"><span class="wm-dg" data-d="{digit}"><span>{digit}</span></span><span class="wm-kick-t">{KICKERS.get(sid, "")}</span></p>'
+            f'<h1 class="wm-mark">{s["label"]}</h1>{FLEURON}</div>'
             f'<p class="wm-open-r wm-lede">{s["lede"]}</p></div>{numbers_html(sid)}')
     if sid in APPENDIX:
         # shut until pressed: the Collapse primitive's box (collapse.css), measured by the
         # shell's script below rather than Collapse.tsx, since this page has no React
         body_parts.append(f"""
 <section class="wm-sec wm-appx" id="appendix">
-  <header class="wm-sec-head">{head}
+  <header class="wm-sec-head" id="o-{sid}">{head}
     <button type="button" class="wm-appx-btn" aria-expanded="false" aria-controls="appx-body"><span>Show the usage map</span><i aria-hidden="true">+</i></button></header>
   <div class="wm-collapse" id="appx-body" style="max-height:0px;visibility:hidden" inert><div>{body}</div></div>
 </section>""")
     else:
         body_parts.append(f"""
 <section class="wm-sec">
-  <header class="wm-sec-head">{head}</header>
+  <header class="wm-sec-head" id="o-{sid}">{head}</header>
   {body}
 </section>""")
 
@@ -2284,6 +2299,40 @@ if (lb) {
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(lb.init);
   else lb.init();
 }
+/* The phone openers' section breaks: real glyphs under the letterbox's cursor physics -- the
+   same radius, strength and damping the colophon's glyphs run (letterbox.js), the scale peak
+   tamed from 4 to 1.6 for glyphs forty times the size, and the speckle: a seeded sixth of them
+   fades toward the signal on five phase groups. Touch counts as the cursor on a phone. */
+(function () {
+  /* the W and M move as ONE body (Mark, 2026-10-11: "center align W and M"): pushed apart they lost their axis */
+  var all = [].slice.call(document.querySelectorAll('.wm-fleuron i span, .wm-fleuron .fl-wm')); if (!all.length) return;
+  var mp = null, raf = null, seed = 7;
+  function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+  var G = all.map(function (el, i) { return { el: el, dx: 0, dy: 0, sp: rnd() < 1 / 6 ? (i % 5) : -1 }; });
+  function frame(now) {
+    var live = false;
+    for (var i = 0; i < G.length; i++) {
+      var g = G[i], r = g.el.getBoundingClientRect(), hx = r.left + r.width / 2 - g.dx, hy = r.top + r.height / 2 - g.dy, scale = 1;
+      if (mp) {
+        var rx = (hx + g.dx) - mp.x, ry = (hy + g.dy) - mp.y, d = Math.sqrt(rx * rx + ry * ry);
+        /* radius 120, strength 9: the letterbox's 100 / 35 moves 10px glyphs a glyph or two; these are 60px */
+        if (d < 120 && d > 0) { var f = (1 - d / 120) * 9 * 0.3; g.dx += rx / d * f; g.dy += ry / d * f; }
+        var d2 = Math.sqrt((hx + g.dx - mp.x) * (hx + g.dx - mp.x) + (hy + g.dy - mp.y) * (hy + g.dy - mp.y));
+        if (d2 < 120) scale = 1 + 0.35 * (1 - d2 / 120);
+      }
+      g.dx *= 0.94; g.dy *= 0.94;
+      if (Math.abs(g.dx) < 0.05 && Math.abs(g.dy) < 0.05 && scale === 1) { g.dx = g.dy = 0; g.el.style.transform = ''; }
+      else { g.el.style.transform = 'translate(' + g.dx.toFixed(2) + 'px,' + g.dy.toFixed(2) + 'px) scale(' + scale.toFixed(3) + ')'; live = true; }
+      if (g.sp > -1) { var t = 0.5 + 0.5 * Math.sin(now * 0.0016 + g.sp * 1.2566); g.el.style.color = 'color-mix(in oklab, var(--ink), var(--signal) ' + (t * 100).toFixed(1) + '%)'; }
+    }
+    raf = (live || mp || G.some(function (g) { return g.sp > -1; })) ? requestAnimationFrame(frame) : null;
+  }
+  function kick() { if (!raf) raf = requestAnimationFrame(frame); }
+  function at(e) { var p = e.touches ? e.touches[0] : e; mp = { x: p.clientX, y: p.clientY }; kick(); }
+  addEventListener('mousemove', at, { passive: true }); addEventListener('touchmove', at, { passive: true }); addEventListener('touchstart', at, { passive: true });
+  addEventListener('mouseleave', function () { mp = null; }); addEventListener('touchend', function () { mp = null; });
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) kick();
+})();
 """
 
 SPY = """
@@ -2292,12 +2341,16 @@ SPY = """
   var links=[].slice.call(rail.querySelectorAll('a[href^="#"]'));
   var targets=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
   function tick(){
-    var y=scrollY+innerHeight*0.28, best=-1;
+    /* dead centre, not 28% (Mark, 2026-10-11): an opener in the middle of the screen lights its chapter */
+    var y=scrollY+innerHeight*0.5, best=-1;
     for(var i=0;i<targets.length;i++){
       var t=targets[i]; if(!t) continue;
       if(t.getBoundingClientRect().top+scrollY<=y) best=i;
     }
     links.forEach(function(a,i){a.classList.toggle('on',i===best);});
+    /* the GROUP lights with its lit child: on a phone the bar shows chapters only, and a lit
+       sub-entry it cannot show lit nothing (Mark, 2026-10-11: the glow never triggered) */
+    [].forEach.call(rail.querySelectorAll('.wm-grp'),function(g){g.classList.toggle('on',best>-1&&g.contains(links[best]));});
 
     /* The travelled rule ends AT the dot. It used to be the page's scroll fraction,
        which put its end wherever the document's height said, unrelated to the link
@@ -2306,7 +2359,8 @@ SPY = """
     if(best>-1){ var el=links[best];
       rail.style.setProperty('--prog-px', (el.offsetTop + el.offsetHeight/2 - 6) + 'px');
       var rb=rail.getBoundingClientRect(), eb=el.getBoundingClientRect();
-      if(eb.top<rb.top+8||eb.bottom>rb.bottom-8) el.scrollIntoView({block:'nearest'});
+      var vis=el.offsetParent?el:el.closest('.wm-grp').querySelector('.wm-lvl0'); eb=vis.getBoundingClientRect();
+      if(eb.top<rb.top+8||eb.bottom>rb.bottom-8||eb.left<rb.left+8||eb.right>rb.right-8) vis.scrollIntoView({block:'nearest',inline:'nearest'});
     } else rail.style.setProperty('--prog-px', '0px');
   }
   addEventListener('scroll',tick,{passive:true}); addEventListener('resize',tick); tick();
@@ -2371,11 +2425,12 @@ GRAMMAR_CSS = """
 .wm-main :is(__IDS__) pre{overflow-x:auto;box-sizing:border-box}
 /* the opener */
 /* a fifth of the viewport from the section above's last edge to the name's baseline: 30 + 23.5 of it is the kicker line */
-.wm-sec-head{padding:0 0 24px;margin-top:round(nearest, calc(20vh - 54px), 3px);box-shadow:none}
+.wm-sec-head{padding:0 0 24px;margin-top:var(--open-gap);box-shadow:none;position:relative;
+  --open-gap:round(nearest, calc(42vh - 54px), 3px)}   /* 42vh, was 20 (Mark, 2026-10-11): the section break lives in this gap on desktop too, a third of the screen each side of it */
 .wm-sec:first-of-type .wm-sec-head{margin-top:round(nearest, calc(20vh - 54px), 3px)}
 .wm-open{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));column-gap:var(--grid-gutter);align-items:baseline}
 .wm-open-l{grid-column:1 / span 4;position:relative}
-.wm-open-r{grid-column:5 / span 6}
+.wm-open-r{grid-column:5 / span 8}   /* eight columns (Mark, 2026-10-11): at 26px six wrapped the lede to seven to nine lines */
 .wm-kick,.wm-mark{margin:0;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title,30px);
   font-weight:400;letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums}
 .wm-kick{color:var(--ink-3)}
@@ -2388,6 +2443,21 @@ GRAMMAR_CSS = """
 .wm-dg[data-d="4"]{--dt:0.0176}.wm-dg[data-d="5"]{--dt:0.0544}.wm-dg[data-d="6"]{--dt:0.0452}.wm-dg[data-d="7"]{--dt:0.0599}
 .wm-dg[data-d="8"]{--dt:0.0581}.wm-dg[data-d="9"]{--dt:0.0526}
 .wm-nums{margin:24px 0 0;max-width:calc(10 * var(--col) + 9 * var(--grid-gutter))}
+/* THE SECTION BREAK, on desktop (Mark, 2026-10-11): centred in the gap above the opener, across
+   the main column. The same glyphs and physics as the phone's; the phone block below moves it
+   into the opener's screen of space instead. */
+.wm-fleuron{display:flex;align-items:center;position:absolute;top:calc(-.5 * var(--open-gap));translate:-50% -50%;
+  left:calc(5 * var(--col) + 4.5 * var(--grid-gutter));   /* the middle of the ten text columns (Mark, 2026-10-11), measured from the kicker block's left, which is the column's */
+  font-family:"Face","CalSansVF",sans-serif;font-weight:700;font-variation-settings:"GEOM" 100,"wght" 700;font-size:40px;line-height:1;   /* Cal Sans Geo Bold (Mark, 2026-10-11) */
+  color:var(--ink);cursor:crosshair;user-select:none}
+.wm-fleuron i span,.wm-fleuron .fl-wm{display:block;will-change:transform;transition:color .5s}
+.wm-fleuron .fl-wm span{display:block}
+/* the stars touch the W: the gap between the two ornament groups IS the WM (Mark, 2026-10-11: "the
+   ornament gap is an M"). Each group sits on ONE baseline at one size, the glyphs where the face
+   draws them (Mark: "use the actual glyphs' baseline"); centring their boxes had put the star low. */
+.wm-fleuron i{display:flex;align-items:baseline;font-style:normal;font-size:1.8em}
+.wm-fleuron i span{margin:0 .02em}
+.wm-fleuron .fl-wm{display:flex;flex-direction:column;align-items:center;margin:0;font-size:1.5em;line-height:.76}
 /* the hang: the pan clips at its padding edge, so it reaches back over column 6, column 5 and the three gutters
    and gives the width back as padding; <main> does not move. A big numeral may touch column 5 at 1280. */
 @media (min-width:1024px){
@@ -2439,13 +2509,46 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
   .wm-main{--col:calc((100cqw - 11 * var(--grid-gutter)) / 12)}
   .wm-main .wm-body:is(__IDS__){max-width:none}
   .wm-main :is(__IDS__) :is(p,ul,ol,h2.wm-h2,h3.wm-h3,figcaption,pre){max-width:none}
-  .wm-sec-head,.wm-sec:first-of-type .wm-sec-head{margin-top:72px}
+  /* THE PHONE OPENER (Mark, 2026-10-11: not a tiny numeral in the paragraph column -- the
+     gigantic number takes half the phone's columns, preceding the section). Left half: the
+     numeral at p4; right half: kicker over name, the name's baseline on the numeral's
+     (last-baseline alignment, the same relation as the desktop opener); the lede below, full width. */
   .wm-open{display:block}
-  .wm-open-r{margin-top:24px}
-  .wm-dg{position:static;font-size:var(--type-label-size,.75rem);line-height:inherit;margin-right:.5em;font-variation-settings:"GEOM" 100}
+  .wm-open-l{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1fr auto;column-gap:var(--grid-gutter);align-items:end;--snap-unit:1;
+    min-height:round(down, calc(100svh - 48px), 3px)}
+  /* a screen of space before the number (Mark, 2026-10-11: "essentially 100vh just space before and
+     the gigantic number"): the left block is a viewport tall, less the bar, in whole 3px lines, and
+     the numeral and name sit at its foot; the lede and the chapter scroll in under them */
+  .wm-sec-head,.wm-sec:first-of-type .wm-sec-head{margin-top:0}
+  /* --snap-unit: the snapper moves the block as ONE, measured by its first text (the numeral):
+     snapped one by one, the name took a nudge the numeral did not and sat 3px under its baseline */
+  /* the numeral lives inside the kicker's <p>; the <p> dissolves (display:contents) so the numeral
+     takes column 1 across both rows and the kicker's words (.wm-kick-t) column 2, row 1, where
+     `end` sinks them onto the name. Integer offsets, not baseline alignment: aligning last
+     baselines put the kicker .64px off the line (font metrics x 136). The desktop opener sets the
+     numeral's box 59px above the kicker's, i.e. 89 above the name's: 135 - 89 - 30 = 16px below
+     the name's box is the same relation -- measured 17, the metrics round differently in a grid
+     cell (name baseline 1px under the numeral's at 16, equal at 17, all eight openers). */
+  .wm-kick{display:contents}
+  .wm-kick-t{grid-column:2;grid-row:1;line-height:var(--lead-title,30px);position:relative;
+    /* grid.css's metric nudge, the one the name (an h1) gets and a span does not: same font, same
+       1px, so the kicker's baseline is exactly 30 above the name's inside the unit */
+    top:calc(mod(calc(var(--bl) - mod(calc(round(down, (var(--lh) - var(--asc) - var(--desc)) / 2, 1px) + var(--asc)), var(--bl))), var(--bl)))}
+  /* Mark's mockup (2026-10-11): the number in ink, 312px (104 lines), its left side off the
+     edge of the screen; kicker and name small at its foot in the right half */
+  .wm-dg{position:static;grid-column:1;grid-row:1 / span 2;justify-self:start;align-self:end;right:auto;top:auto;
+    margin:0 0 var(--dg-drop,-48px) calc(-1 * var(--grid-margin) - .1em);   /* -48: measured, the name's baseline on the numeral's at 312/312 */
+    font-size:312px;line-height:312px;color:var(--ink);font-variation-settings:"GEOM" 100}
+  .wm-mark{grid-column:2;grid-row:2}
+  /* the ornament, centred in the screen of space above the number: outlines hairline, the mark filled */
+  .wm-fleuron{position:static;translate:none;grid-column:1 / span 2;grid-row:1;align-self:center;justify-self:center;margin-bottom:120px}
+  .wm-lede.wm-open-r{margin-top:24px}   /* two classes: the desktop rule's margin:0 outranked the one-class phone rule and the lede sat on the name */
   .wm-nums{max-width:none}
   .wm-main :is(__IDS__) .wm-hang{position:static;display:block;width:auto;text-align:left;text-wrap:normal}
   .wm-main :is(__IDS__) h2.wm-h2 > u.wm-hang{position:static;display:inline;margin-right:.4em}
+  /* a numbered h2 flows as one line on a phone: as a flex row, space-between put the number at
+     the left edge and the title at the right (Mark's crop, 2026-10-11) */
+  .wm-main :is(__IDS__) h2.wm-h2:has(> u.wm-hang){display:block}
   .wm-main :is(__IDS__) :is(ol,ul):not(.t-ui,[data-stage] *){padding-left:var(--hangw)}
   .wm-main :is(__IDS__) :is(ol,ul):not(.t-ui,[data-stage] *) > li::before{right:calc(100% + var(--grid-gutter))}
 }
