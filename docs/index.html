@@ -6436,7 +6436,8 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-fleuron{display:flex;align-items:center;position:absolute;top:calc(-.5 * var(--open-gap));translate:-50% -50%;
   left:calc(5 * var(--col) + 4.5 * var(--grid-gutter));   /* the middle of the ten text columns (Mark, 2026-10-11), measured from the kicker block's left, which is the column's */
   font-family:"Face","CalSansVF",sans-serif;font-weight:700;font-variation-settings:"GEOM" 100,"wght" 700;font-size:40px;line-height:1;   /* Cal Sans Geo Bold (Mark, 2026-10-11) */
-  color:var(--ink);cursor:crosshair;user-select:none}
+  color:var(--ink);cursor:crosshair;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+/* touch-action none and no callout: a held finger on Safari selected the glyphs instead of pushing them (Mark, 2026-10-11) */
 .wm-fleuron i span,.wm-fleuron .fl-wm span{display:block;will-change:transform;transition:color .5s}
 /* the stars touch the W: the gap between the two ornament groups IS the WM (Mark, 2026-10-11: "the
    ornament gap is an M"). Each group sits on ONE baseline at one size, the glyphs where the face
@@ -12881,7 +12882,7 @@ if (lb) {
 (function () {
   /* the W and the M are two glyphs and move as two (Mark, 2026-10-11); at rest they share an axis */
   var all = [].slice.call(document.querySelectorAll('.wm-fleuron i span, .wm-fleuron .fl-wm span')); if (!all.length) return;
-  var mp = null, raf = null, seed = 7;
+  var mp = null, raf = null, seed = 7, touching = false;
   function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
   var G = all.map(function (el, i) { return { el: el, dx: 0, dy: 0, sp: rnd() < 1 / 6 ? (i % 5) : -1 }; });
   function frame(now) {
@@ -12890,12 +12891,16 @@ if (lb) {
       var g = G[i], r = g.el.getBoundingClientRect(), hx = r.left + r.width / 2 - g.dx, hy = r.top + r.height / 2 - g.dy, scale = 1;
       if (mp) {
         var rx = (hx + g.dx) - mp.x, ry = (hy + g.dy) - mp.y, d = Math.sqrt(rx * rx + ry * ry);
-        /* radius 120, strength 9: the letterbox's 100 / 35 moves 10px glyphs a glyph or two; these are 60px */
-        if (d < 120 && d > 0) { var f = (1 - d / 120) * 9 * 0.3; g.dx += rx / d * f; g.dy += ry / d * f; }
+        /* radius 120, strength 9: the letterbox's 100 / 35 moves 10px glyphs a glyph or two; these are 60px.
+           A held finger is the engine's pressed state (its 250 / 105), scaled the same way: the glyphs clear
+           the finger and stay clear while it is down. */
+        var R = touching ? 280 : 120, S = touching ? 80 : 9;   /* touch: 36 at 220 was "TOO weak" (Mark) */
+        if (d < R && d > 0) { var f = (1 - d / R) * S * 0.3; g.dx += rx / d * f; g.dy += ry / d * f; }
         var d2 = Math.sqrt((hx + g.dx - mp.x) * (hx + g.dx - mp.x) + (hy + g.dy - mp.y) * (hy + g.dy - mp.y));
-        if (d2 < 120) scale = 1 + 0.35 * (1 - d2 / 120);
+        if (d2 < R) scale = 1 + 0.35 * (1 - d2 / R);
       }
-      g.dx *= 0.94; g.dy *= 0.94;
+      /* home again: fast under a live field, a slow drift once it lifts (.975 halves in ~.5s; .94 snapped back) */
+      var k = mp ? 0.94 : 0.975; g.dx *= k; g.dy *= k;
       if (Math.abs(g.dx) < 0.05 && Math.abs(g.dy) < 0.05 && scale === 1) { g.dx = g.dy = 0; g.el.style.transform = ''; }
       else { g.el.style.transform = 'translate(' + g.dx.toFixed(2) + 'px,' + g.dy.toFixed(2) + 'px) scale(' + scale.toFixed(3) + ')'; live = true; }
       if (g.sp > -1) { var t = 0.5 + 0.5 * Math.sin(now * 0.0016 + g.sp * 1.2566); g.el.style.color = 'color-mix(in oklab, var(--ink), var(--signal) ' + (t * 100).toFixed(1) + '%)'; }
@@ -12909,9 +12914,9 @@ if (lb) {
      after any touch; the touch itself ends the field on touchend. */
   var lastTouch = 0;
   function at(e) { if (!e.touches && performance.now() - lastTouch < 1000) return; var p = e.touches ? e.touches[0] : e; mp = { x: p.clientX, y: p.clientY }; kick(); }
-  function touchDone() { lastTouch = performance.now(); mp = null; }
+  function touchDone() { lastTouch = performance.now(); mp = null; touching = false; }
   addEventListener('mousemove', at, { passive: true }); addEventListener('touchmove', at, { passive: true });
-  addEventListener('touchstart', function (e) { lastTouch = performance.now(); at(e); }, { passive: true });
+  addEventListener('touchstart', function (e) { lastTouch = performance.now(); touching = true; at(e); }, { passive: true });
   addEventListener('touchend', touchDone, { passive: true }); addEventListener('touchcancel', touchDone, { passive: true });
   addEventListener('mouseleave', function () { mp = null; });
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) kick();
