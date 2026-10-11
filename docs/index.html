@@ -12899,8 +12899,9 @@ if (lb) {
         var d2 = Math.sqrt((hx + g.dx - mp.x) * (hx + g.dx - mp.x) + (hy + g.dy - mp.y) * (hy + g.dy - mp.y));
         if (d2 < R) scale = 1 + 0.35 * (1 - d2 / R);
       }
-      /* home again: fast under a live field, a slow drift once it lifts (.975 halves in ~.5s; .94 snapped back) */
-      var k = mp ? 0.94 : 0.975; g.dx *= k; g.dy *= k;
+      /* home again: fast under a live field, a slow drift once it lifts -- .988 halves in about a second,
+         three seconds to settle (Mark: .975 was "too immediate", .94 had snapped back) */
+      var k = mp ? 0.94 : 0.988; g.dx *= k; g.dy *= k;
       if (Math.abs(g.dx) < 0.05 && Math.abs(g.dy) < 0.05 && scale === 1) { g.dx = g.dy = 0; g.el.style.transform = ''; }
       else { g.el.style.transform = 'translate(' + g.dx.toFixed(2) + 'px,' + g.dy.toFixed(2) + 'px) scale(' + scale.toFixed(3) + ')'; live = true; }
       if (g.sp > -1) { var t = 0.5 + 0.5 * Math.sin(now * 0.0016 + g.sp * 1.2566); g.el.style.color = 'color-mix(in oklab, var(--ink), var(--signal) ' + (t * 100).toFixed(1) + '%)'; }
