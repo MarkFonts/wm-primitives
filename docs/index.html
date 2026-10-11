@@ -12939,11 +12939,16 @@ if (lb) {
 </script>
 <style id="gloss-css">
 .wm-head{ --gx:0px; --gy:0px; --gw:0px; --gh:0px; --gloss:url(field-247.avif); }
-/* LIGHT GROUND, NO GLOSS. The field is light paint for dark ground: on a light page the glossed
-   lines (LAWS., SURFACE.) went to fog -- Mark's phone, 2026-10-11, and the desktop light shot the
-   same. In light the caps are ink; the rules keep the field, a grey bar reads on white. */
-@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .wm-head .wm-stack span{ background:none; color:var(--ink); } }
-:root[data-theme="light"] .wm-head .wm-stack span{ background:none; color:var(--ink); }
+/* LIGHT GROUND, NO GLOSS AT ALL. The field is light paint for dark ground: on a light page the
+   glossed lines (LAWS., SURFACE.) went to fog -- Mark's phone, 2026-10-11 -- and a grey bar was
+   not wanted either ("should not have gray or PQ AVIF at all"). In light the caps are ink, the
+   rules are ink, and the bend's gloss layer is off. */
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .wm-head :is(.wm-stack span, .wm-stack i){ background:var(--ink); background-image:none; color:var(--ink); }
+  :root:not([data-theme="dark"]) .wm-head .wm-stack span{ background:none; }
+  :root:not([data-theme="dark"]) .wm-head .wm-bendsvg rect[data-gloss]{ display:none; } }
+:root[data-theme="light"] .wm-head :is(.wm-stack span, .wm-stack i){ background:var(--ink); background-image:none; color:var(--ink); }
+:root[data-theme="light"] .wm-head .wm-stack span{ background:none; }
+:root[data-theme="light"] .wm-head .wm-bendsvg rect[data-gloss]{ display:none; }
 /* A phone gets the 1000-square bake: 61KB against 238KB, and the crop it takes is a
    fraction of a field it was never going to resolve at that width anyway. The saving
    that matters is not the download -- it is that every repaint resamples a smaller
