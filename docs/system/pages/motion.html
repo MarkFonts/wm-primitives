@@ -21,6 +21,7 @@ th,td{text-align:left;vertical-align:baseline;padding:6px 24px 6px 0;font-size:v
 th{font-weight:400;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3,rgba(23,24,26,.38))}
 td{color:var(--ink-2,rgba(23,24,26,.62))}
 td:first-child{color:var(--ink,#17181a);white-space:nowrap}
+@media (max-width:680px){table{table-layout:fixed} td,td:first-child,.num{white-space:normal;overflow-wrap:anywhere}}   /* a phone column: the nowrap cells ran 14px past it (2026-10-11) */
 .num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .mo-fig{margin:0 0 24px}
 .mo-fig img{display:block;max-width:100%;height:auto}

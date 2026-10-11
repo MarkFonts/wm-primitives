@@ -700,7 +700,17 @@ html,body{margin:0;padding:0;background:var(--bg)}
   .wm-lvl1{display:none}
   .wm-lvl0{padding:14px 15px}
   .wm-lvl0::before,.wm-lvl0.on::before{display:none}
-  .wm-head{padding:32px 0 0}
+  .wm-head{padding:32px 0 0;min-height:0}
+  /* THE PHONE HERO (Mark's phone, 2026-10-11: "why is there paragraphs on the six"). The 6 is
+     not a full-screen watermark here: it has the headline's region -- half a screen, top-aligned,
+     run off the right -- and the dek and the counts come below it in flow. */
+  .wm-stack{min-height:50svh}
+  .wm-six{height:calc(50svh + 32px);top:0;transform:none;right:-18vw}
+  .wm-bendlbl{right:1.3em}   /* inside the corner: at 38px the label at .35em sat on the leg itself */
+  /* WebKit (every iOS browser) does not take the two-value overflow, so `visible clip` on the
+     header clipped both ways and the 6's handles stopped at the column's left edge (Mark's phone,
+     2026-10-11). No clip on the header there; the 6 clips itself to the header's 4svh overrun. */
+  @supports (-webkit-touch-callout:none){.wm-head{overflow:visible} .wm-six{clip-path:inset(0 0 0 0)}}
   .wm-lb{margin-top:8vh}
 }
 /* below ~90px of statement the five labels start colliding (asc-cap is .18em);
@@ -6341,7 +6351,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 /* ===== motion ===== */
 #s-motion *{box-sizing:border-box}#s-motion{margin:0;color:var(--ink,#17181a);font-family:var(--ui-font,system-ui,sans-serif);font-optical-sizing:auto;
   font-size:var(--type-body-size,1rem)}#s-motion p{margin:0 0 24px;max-width:64ch;color:var(--ink-2,rgba(23,24,26,.62))}#s-motion code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-height:1;white-space:nowrap}#s-motion a{color:inherit;text-decoration:underline;text-underline-offset:.15em;text-decoration-color:var(--ink-3,currentColor)}#s-motion table{border-collapse:collapse;width:100%;max-width:720px;margin:0 0 24px}#s-motion th,#s-motion td{text-align:left;vertical-align:baseline;padding:6px 24px 6px 0;font-size:var(--type-ui-size,.75rem);
-  --lh:var(--lead-ui);line-height:var(--lead-ui,15px);box-shadow:inset 0 -1px var(--line,rgba(23,24,26,.16))}#s-motion th{font-weight:400;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3,rgba(23,24,26,.38))}#s-motion td{color:var(--ink-2,rgba(23,24,26,.62))}#s-motion td:first-child{color:var(--ink,#17181a);white-space:nowrap}#s-motion .num{font-variant-numeric:tabular-nums;white-space:nowrap}#s-motion .mo-fig{margin:0 0 24px}#s-motion .mo-fig img{display:block;max-width:100%;height:auto}
+  --lh:var(--lead-ui);line-height:var(--lead-ui,15px);box-shadow:inset 0 -1px var(--line,rgba(23,24,26,.16))}#s-motion th{font-weight:400;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3,rgba(23,24,26,.38))}#s-motion td{color:var(--ink-2,rgba(23,24,26,.62))}#s-motion td:first-child{color:var(--ink,#17181a);white-space:nowrap}@media (max-width:680px){#s-motion table{table-layout:fixed}#s-motion td,#s-motion td:first-child,#s-motion .num{white-space:normal;overflow-wrap:anywhere}}#s-motion .num{font-variant-numeric:tabular-nums;white-space:nowrap}#s-motion .mo-fig{margin:0 0 24px}#s-motion .mo-fig img{display:block;max-width:100%;height:auto}
 
 /* ===== usage ===== */
 #s-usage{
@@ -6453,9 +6463,12 @@ html,body{margin:0;padding:0;background:var(--bg)}
 }
 @media (min-width:1024px) and (max-width:1279px){ .wm-dg{font-size:var(--poster-3,6rem);line-height:96px;top:-26px} }
 /* the run-in: the words in the label role, right-aligned on the hang column's edge, on the paragraph's first line */
+.wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) .wm-run.bs-cost > .wm-hang{top:0}
 .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) p.wm-run{position:relative}
 /* top: the label's baseline in a 24 line sits 1.31 above the body's by the metrics, 1px as Chrome lays it (measured) */
 .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) .wm-hang{position:absolute;right:calc(100% + var(--grid-gutter));top:1px;width:calc(2 * var(--col) + var(--grid-gutter));
+  /* top:1px is the 12-in-24 label's offset against a 16/24 paragraph; against a 12/15 one (the
+     button sets' "What it costs") the baselines already agree, so no offset (measured 2026-10-11) */
   text-align:right;font-weight:400;font-size:var(--type-label-size,.75rem);line-height:inherit;letter-spacing:var(--track-caps,.12em);
   text-transform:uppercase;font-variation-settings:"GEOM" 100;color:var(--ink-3);text-wrap:balance}
 /* a chapter's number, hung: the head's own size, ink-3, its ink on the edge (the poster trim map, nearer 26 than 12's) */
@@ -6536,6 +6549,7 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
   .wm-lede.wm-open-r{margin-top:24px}   /* two classes: the desktop rule's margin:0 outranked the one-class phone rule and the lede sat on the name */
   .wm-nums{max-width:none}
   .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) .wm-hang{position:static;display:block;width:auto;text-align:left;text-wrap:normal}
+  .wm-wip{display:none}   /* the hero's WIP button sat over the 6 on a phone (Mark, 2026-10-11); the chapter is in the bar */
   .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) h2.wm-h2 > u.wm-hang{position:static;display:inline;margin-right:.4em}
   /* a numbered h2 flows as one line on a phone: as a flex row, space-between put the number at
      the left edge and the title at the right (Mark's crop, 2026-10-11) */
@@ -12925,6 +12939,11 @@ if (lb) {
 </script>
 <style id="gloss-css">
 .wm-head{ --gx:0px; --gy:0px; --gw:0px; --gh:0px; --gloss:url(field-247.avif); }
+/* LIGHT GROUND, NO GLOSS. The field is light paint for dark ground: on a light page the glossed
+   lines (LAWS., SURFACE.) went to fog -- Mark's phone, 2026-10-11, and the desktop light shot the
+   same. In light the caps are ink; the rules keep the field, a grey bar reads on white. */
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .wm-head .wm-stack span{ background:none; color:var(--ink); } }
+:root[data-theme="light"] .wm-head .wm-stack span{ background:none; color:var(--ink); }
 /* A phone gets the 1000-square bake: 61KB against 238KB, and the crop it takes is a
    fraction of a field it was never going to resolve at that width anyway. The saving
    that matters is not the download -- it is that every repaint resamples a smaller
