@@ -6568,6 +6568,7 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
   /* 72vw, capped at 312 (Mark, 2026-10-11: a 0 at 312 ran into the kicker on a 375 screen): the
      widest digit stays in the left half with the right half's column free */
   .wm-mark{grid-column:2;grid-row:2}
+  .wm-open--wide .wm-kick-t,.wm-open--wide .wm-mark{grid-column:1 / span 2}   /* the appendix has no numeral: its words take the whole width */
   /* the ornament, centred in the screen of space above the number: outlines hairline, the mark filled */
   .wm-fleuron{position:static;translate:none;grid-column:1 / span 2;grid-row:1;align-self:center;justify-self:center;margin-bottom:120px}
   .wm-lede.wm-open-r{margin-top:24px}   /* two classes: the desktop rule's margin:0 outranked the one-class phone rule and the lede sat on the name */
@@ -8312,7 +8313,7 @@ stack&#8217;s stow is a translate, the confirm a custom property that only paint
 </div>
 </section>
 <section class="wm-sec wm-appx" id="appendix">
-  <header class="wm-sec-head" id="o-usage"><div class="wm-open wm-open--wide"><div class="wm-open-l"><p class="wm-kick"><span class="wm-kick-t">The evidence</span><span class="wm-dg" data-d="A"><span>A</span></span></p><h1 class="wm-mark">Who uses what</h1><div class="wm-fleuron" aria-hidden="true"><i class="fl-l"><span>&#9667;</span><span>&#9667;</span><span>&#10023;</span></i><b class="fl-wm"><span>W</span><span>M</span></b><i class="fl-r"><span>&#10023;</span><span>&#9657;</span><span>&#9657;</span></i></div></div><p class="wm-open-r wm-lede">Which app draws which control, read from the source, so a change knows every place it lands before it ships.</p></div>
+  <header class="wm-sec-head" id="o-usage"><div class="wm-open wm-open--wide"><div class="wm-open-l"><p class="wm-kick"><span class="wm-kick-t">Appendix</span></p><h1 class="wm-mark">Who uses what</h1><div class="wm-fleuron" aria-hidden="true"><i class="fl-l"><span>&#9667;</span><span>&#9667;</span><span>&#10023;</span></i><b class="fl-wm"><span>W</span><span>M</span></b><i class="fl-r"><span>&#10023;</span><span>&#9657;</span><span>&#9657;</span></i></div></div><p class="wm-open-r wm-lede">Which app draws which control, read from the source, so a change knows every place it lands before it ships.</p></div>
     <button type="button" class="wm-appx-btn" aria-expanded="false" aria-controls="appx-body"><span>Show the usage map</span><i aria-hidden="true">+</i></button></header>
   <div class="wm-collapse" id="appx-body" style="max-height:0px;visibility:hidden" inert><div><div class="wm-body" id="s-usage" data-nosnap data-stage>
 

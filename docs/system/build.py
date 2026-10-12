@@ -134,7 +134,7 @@ KICKERS = {
     "space":    "A pad scale",
     "color":    "The audit",
     "motion":   "Three durations",
-    "usage":    "The evidence",
+    "usage":    "Appendix",   # the kicker says what it is; the appendix has no numeral (Mark, 2026-10-11)
 }
 # The opener's lede: ONE sentence written for the opener, not the page's own lede lifted up -- that
 # one repeated the kicker's words ("One curve" over "One curve, superellipse(1.2), and...") and
@@ -1569,7 +1569,8 @@ for s in secs:
     # baseline on the name's.
     digit = s["num"][-1]
     head = (f'<div class="wm-open{" wm-open--wide" if sid in APPENDIX else ""}"><div class="wm-open-l">'
-            f'<p class="wm-kick"><span class="wm-kick-t">{KICKERS.get(sid, "")}</span><span class="wm-dg" data-d="{digit}"><span>{digit}</span></span></p>'
+            f'<p class="wm-kick"><span class="wm-kick-t">{KICKERS.get(sid, "")}</span>'
+            + ('' if sid in APPENDIX else f'<span class="wm-dg" data-d="{digit}"><span>{digit}</span></span>') + '</p>'
             f'<h1 class="wm-mark">{s["label"]}</h1>{FLEURON}</div>'
             f'<p class="wm-open-r wm-lede">{LEDES.get(sid, s["lede"])}</p></div>{numbers_html(sid)}')
     if sid in APPENDIX:
@@ -2665,6 +2666,7 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
   /* 72vw, capped at 312 (Mark, 2026-10-11: a 0 at 312 ran into the kicker on a 375 screen): the
      widest digit stays in the left half with the right half's column free */
   .wm-mark{grid-column:2;grid-row:2}
+  .wm-open--wide .wm-kick-t,.wm-open--wide .wm-mark{grid-column:1 / span 2}   /* the appendix has no numeral: its words take the whole width */
   /* the ornament, centred in the screen of space above the number: outlines hairline, the mark filled */
   .wm-fleuron{position:static;translate:none;grid-column:1 / span 2;grid-row:1;align-self:center;justify-self:center;margin-bottom:120px}
   .wm-lede.wm-open-r{margin-top:24px}   /* two classes: the desktop rule's margin:0 outranked the one-class phone rule and the lede sat on the name */
