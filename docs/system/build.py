@@ -136,6 +136,19 @@ KICKERS = {
     "motion":   "Three durations",
     "usage":    "The evidence",
 }
+# The opener's lede: ONE sentence written for the opener, not the page's own lede lifted up -- that
+# one repeated the kicker's words ("One curve" over "One curve, superellipse(1.2), and...") and
+# Mark asked for real ledes, not truncations (2026-10-11). American English, Oxford commas.
+LEDES = {
+    "readme":   "One dial, one switch, one set of tokens, built once and proven in every app before it counts as shipped.",
+    "type":     "Seven sizes with their leadings, every one on the 3px line, and a sixth signal, geom, that only the face can give.",
+    "corners":  "Every corner rounds the way Cal Sans is drawn, superellipse at 1.2 on a ladder of radii, and the true circles are counted so nothing else can pass for one.",
+    "controls": "Five ways to draw the same dial, the marks that travel with it, and the chips, toggles, and zoom that share its grammar.",
+    "space":    "Twelve steps of padding read off the live surface, a cap at the radius, and a rule for when a row may spend a step.",
+    "color":    "Six hundred and ninety-two declarations, a hundred and eighty values, and the three ramps every one of them has to come from.",
+    "motion":   "Three durations and one curve, so a change reads as the same gesture wherever it happens, and the confirm that proves a press landed.",
+    "usage":    "Which app draws which control, read from the source, so a change knows every place it lands before it ships.",
+}
 # The numbers figure, for a section that has one: (value, caption, is-a-goal). Type's strip,
 # which used to sit in the type page's header.
 NUMBERS = {
@@ -1558,7 +1571,7 @@ for s in secs:
     head = (f'<div class="wm-open"><div class="wm-open-l">'
             f'<p class="wm-kick"><span class="wm-kick-t">{KICKERS.get(sid, "")}</span><span class="wm-dg" data-d="{digit}"><span>{digit}</span></span></p>'
             f'<h1 class="wm-mark">{s["label"]}</h1>{FLEURON}</div>'
-            f'<p class="wm-open-r wm-lede">{s["lede"]}</p></div>{numbers_html(sid)}')
+            f'<p class="wm-open-r wm-lede">{LEDES.get(sid, s["lede"])}</p></div>{numbers_html(sid)}')
     if sid in APPENDIX:
         # shut until pressed: the Collapse primitive's box (collapse.css), measured by the
         # shell's script below rather than Collapse.tsx, since this page has no React
@@ -2534,7 +2547,8 @@ GRAMMAR_CSS = """
 .wm-kick{color:var(--ink-3)}
 .wm-mark{color:var(--ink)}
 .wm-lede.wm-open-r{margin:0;max-width:none;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title,30px);color:var(--ink)}
-/* the numeral: p4 136 in 135, baseline on the name's (the left column's second line) */
+/* the numeral: p4 136 in 135, baseline on the name's (the left column's second line; Mark, 2026-10-11:
+   "i like how the numbers are touching line 2") */
 .wm-dg{position:absolute;right:calc(100% + var(--grid-gutter) - 1em * var(--dt,0));top:-59px;
   font-size:var(--poster-4,8.5rem);line-height:135px;color:var(--ink-3);font-weight:400;white-space:nowrap;letter-spacing:0}
 .wm-dg[data-d="0"]{--dt:0.0176}.wm-dg[data-d="1"]{--dt:0.0801}.wm-dg[data-d="2"]{--dt:0.0489}.wm-dg[data-d="3"]{--dt:0.0562}
@@ -2641,7 +2655,7 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
   /* Mark's mockup (2026-10-11): the number in ink, 312px (104 lines), its left side off the
      edge of the screen; kicker and name small at its foot in the right half */
   .wm-dg{position:static;grid-column:1;grid-row:1 / span 2;justify-self:start;align-self:end;right:auto;top:auto;
-    margin:0 0 -.154em 0;   /* -.154em: 48px at 312, the name's baseline on the numeral's. Whole number on the screen, on the column (Mark, 2026-10-11) -- not run off the edge */
+    margin:0 0 -.154em 0;   /* -.154em: 48px at 312, the numeral's baseline on the name's. Whole number on the screen, on the column (Mark, 2026-10-11) -- not run off the edge */
     font-size:round(down, clamp(200px, 72vw, 312px), 3px);line-height:1;color:var(--ink);font-variation-settings:"GEOM" 100}   /* whole lines: a 259.2px box put the name .3 off */
   /* 72vw, capped at 312 (Mark, 2026-10-11: a 0 at 312 ran into the kicker on a 375 screen): the
      widest digit stays in the left half with the right half's column free */
