@@ -711,7 +711,7 @@
 
 <h1>Five ways to draw one dial</h1>
 <p class="lede">The first four carry the same three controls &mdash; one with a unit, one with
-a tag, one with neither &mdash; so the labelling question stays visible while the shapes are
+a tag, one with neither &mdash; so the labeling question stays visible while the shapes are
 compared, and they share one state. What every field here has in common is what
 <code>AxisSlider</code> ships: a single <code>type=text</code> field, so the value can print a
 real minus where a number input is stuck with a hyphen; drawn chevrons rather than the browser's
@@ -744,7 +744,7 @@ path has no floor.</p>
 
 <h3 class="marks-h3">Drawn today</h3>
 <div class="marks-wrap"><p class="lede">Every Material name any app calls upon &mdash; wm-primitives, font-proofer, ReCal, Kernpare,
-opsz-proofer, WORDMAKE, GliffDiff and this page &mdash; with what it means and who draws it. All of them
+opsz-proofer, WORDMAKE, GliffDiff, and this page &mdash; with what it means and who draws it. All of them
 are in the one shipped face: an 81-name subset in <code>fonts/</code>, cut by
 <code>scripts/cut-icon-subset.py</code>, and <code>lint-icons.py</code> fails an app on a name
 outside it. (WORDMAKE still ships the whole family for itself.) The stepper&rsquo;s arrows are
@@ -822,17 +822,17 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
 
  </div>
  <div class="pair">
-  <p class="pair-t">Left. <code>.wm-zoom--left</code> in a <code>.wm-theme-row</code> opens leftwards over its own row, from a 27px footprint. The marks, the action and the line below never move.</p>
+  <p class="pair-t">Left. <code>.wm-zoom--left</code> in a <code>.wm-theme-row</code> opens leftwards over its own row, from a 27px footprint. The marks, the action, and the line below never move.</p>
   <div class="pair-r">
   <div class="zoom-title">
     <span class="zoom-title-h">Paragraph comparison</span>
     <span class="zoom-title-a">
       <span class="wm-theme-row">
         <span class="wm-zoom wm-zoom--left" data-collapse data-capture data-target=".zoom-sample--left" data-key="wm-system-zoom-left" data-keys="local"></span>
-        <span class="wm-theme" role="group" aria-label="Colour scheme">
-          <button type="button" class="wm-icon-btn" data-theme-pick="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
-          <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
-          <button type="button" class="wm-icon-btn" data-theme-pick="dark" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
+        <span class="wm-theme" role="group" aria-label="Color scheme">
+          <button type="button" class="wm-icon-btn" data-theme-pick="auto" aria-label="Auto color scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
+          <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-label="Light color scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
+          <button type="button" class="wm-icon-btn" data-theme-pick="dark" aria-label="Dark color scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
         </span>
       </span>
       <button type="button" class="zoom-title-btn">Export PDF</button>
@@ -849,7 +849,7 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
   <p class="pair-t">Stack. <code>.wm-theme-stack</code> rests as one mark at the right edge under the theme chips, and opens under them: one width and one right edge from one grid column. The rail&rsquo;s 10rem floor makes it the wider row.</p>
   <div class="pair-r">
   <div class="wm-theme-stack">
-    <div class="wm-chip-row" role="group" aria-label="Colour scheme">
+    <div class="wm-chip-row" role="group" aria-label="Color scheme">
       <button type="button" class="wm-chip" data-theme-pick="auto" data-label="Auto" aria-pressed="true">Auto</button>
       <button type="button" class="wm-chip" data-theme-pick="light" data-label="Light" aria-pressed="false">Light</button>
       <button type="button" class="wm-chip" data-theme-pick="dark" data-label="Dark" aria-pressed="false">Dark</button>
@@ -869,7 +869,7 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
   &lt;span class="wm-theme"&gt;&hellip;the three marks&hellip;&lt;/span&gt;
 &lt;/span&gt;</pre></figure>
  <figure class="z-code"><figcaption>Stack</figcaption><pre>&lt;div class="wm-theme-stack"&gt;
-  &lt;div class="wm-chip-row" role="group" aria-label="Colour scheme"&gt;&hellip;Auto Light Dark&hellip;&lt;/div&gt;
+  &lt;div class="wm-chip-row" role="group" aria-label="Color scheme"&gt;&hellip;Auto Light Dark&hellip;&lt;/div&gt;
   &lt;div class="wm-zoom" data-collapse data-icon="pageview" data-target="#page"&gt;&lt;/div&gt;
 &lt;/div&gt;</pre></figure>
  <table class="z-spec"><tbody>
@@ -888,7 +888,7 @@ press the marks, or focus the rail and press <code>+</code> <code>&minus;</code>
 </div>
 
 <h2 class="marks-h">The theme stack, vertical</h2>
-<p class="lede">The phone&rsquo;s version of the cluster: Auto, Light, Dark and the zoom&rsquo;s mark,
+<p class="lede">The phone&rsquo;s version of the cluster: Auto, Light, Dark, and the zoom&rsquo;s mark,
 <b>top to bottom</b>, fixed to the top right of the screen so it never pans with the page, floating
 over the text with no bar and no ground. The chosen mark is the house active mark &mdash; the PQ
 swatch on a dark ground (HDR white; plain white on an SDR screen), full ink on light. Opt-in
@@ -901,10 +901,10 @@ and a tap at the top edge or a scroll up brings it back; both are on by default.
     <div class="vstack-phone">
     <div class="vstack-chrome"><div><b>Paragraph</b><span>Big Word</span><span>Glyphs</span></div><div><span>A Tale of Two Cities</span><span>Hamlet</span></div></div>
     <div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe" data-scroller=".vstack-scroll--down" style="--stack-top: 90px">
-      <div class="wm-theme" role="group" aria-label="Colour scheme">
-        <button type="button" class="wm-icon-btn" data-theme-pick="auto" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
-        <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
-        <button type="button" class="wm-icon-btn" data-theme-pick="dark" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
+      <div class="wm-theme" role="group" aria-label="Color scheme">
+        <button type="button" class="wm-icon-btn" data-theme-pick="auto" aria-label="Auto color scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
+        <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-label="Light color scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
+        <button type="button" class="wm-icon-btn" data-theme-pick="dark" aria-label="Dark color scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
       </div>
       <div class="wm-zoom wm-zoom--down" data-collapse data-capture data-target=".vstack-sample--down" data-key="wm-system-zoom-down" data-keys="local"></div>
     </div>
@@ -924,7 +924,7 @@ and a tap at the top edge or a scroll up brings it back; both are on by default.
 <div class="zoom-demo">
   <p class="chip-cap">The markup &middot; the class is the HOST&rsquo;s to put on, under its own phone rule; CSS cannot add a class, so it is the app&rsquo;s mobile branch or a matchMedia</p>
 <pre>&lt;div class="wm-theme-stack wm-theme-stack--vertical" data-hide="scroll swipe" data-below="header .row"&gt;
-  &lt;div class="wm-theme" role="group" aria-label="Colour scheme"&gt;&hellip;the three marks&hellip;&lt;/div&gt;
+  &lt;div class="wm-theme" role="group" aria-label="Color scheme"&gt;&hellip;the three marks&hellip;&lt;/div&gt;
   &lt;div class="wm-zoom wm-zoom--down" data-collapse data-capture data-target="#page"&gt;&lt;/div&gt;
 &lt;/div&gt;
 
@@ -1640,7 +1640,7 @@ const VARIANTS = [
     syncs.push(() => { h.set(get(d), true); h.setOrient(document.body.classList.contains('vert') ? 'vertical' : 'horizontal'); });
   }) },
   { name: 'The toggle becomes the slider', note: '<b>One node, two states.</b> Ported from <code>MorphControl</code> in CustomTypeTester — the grip parked at the right edge IS the thumb: click it and it travels onto the rail and grows into it, while the stops fade out. It does not reveal a second control. The value only appears once there is a continuous number to show. <b>Added here:</b> a way back to the stops, which the original has no path to.', build: c => c.appendChild(v4()) },
-  { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired and max are one control, so they share a label and a unit \u2014 printed once, beside the name, because three copies of it would say the fields measure three different things. There is no box: the rule under each number IS the field, the same one 01 and 02 draw. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The four rows are the prop surface: heads on the first, a 100-centred store shown 0-centred on the second, a chip on the third, and the fourth disabled. The shape the other five cannot make, because they each hold a single value. It has no vertical form, so Vertical leaves it as it is.', build: c => TRIPLETS.forEach(t => c.appendChild(axisTriplet(t))) },
+  { name: 'The triplet', note: '<b>One parameter, three numbers.</b> ReCal\u2019s justification rail: min, desired, and max are one control, so they share a label and a unit \u2014 printed once, beside the name, because three copies of it would say the fields measure three different things. There is no box: the rule under each number IS the field, the same one 01 and 02 draw. Editing one carries the others rather than refusing the edit \u2014 type 90 into a min under a max of 80 and the range moves with you. The four rows are the prop surface: heads on the first, a 100-centered store shown 0-centered on the second, a chip on the third, and the fourth disabled. The shape the other five cannot make, because they each hold a single value. It has no vertical form, so Vertical leaves it as it is.', build: c => TRIPLETS.forEach(t => c.appendChild(axisTriplet(t))) },
 ];
 
 const grid = document.getElementById('t-grid');
@@ -1746,7 +1746,7 @@ const MDS = [
   ['fit_page_height','fit height',         ['WORDMAKE']],
   ['text_rotation_none','no rotation',     ['WORDMAKE']],
   ['text_select_start','select start',     ['WORDMAKE']],
-  ['align_horizontal_center','centre',     ['WORDMAKE']],
+  ['align_horizontal_center','center',     ['WORDMAKE']],
   ['fit_width','fit width (v3 dial)',      ['system page']],
   ['line_weight','weight (v3 dial)',       ['system page']],
   ['format_line_spacing','leading (v3 dial)', ['system page']],

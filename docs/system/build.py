@@ -101,7 +101,7 @@ APPENDIX = {"usage"}
 # becomes an h2 chapter where it names a part (build_section).
 OPENERS = {
     "readme":   "The promise: every control works and renders the same, from one source.",
-    "type":     "Seven roles, one signal each, and nothing differs from its neighbour in more than one way "
+    "type":     "Seven roles, one signal each, and nothing differs from its neighbor in more than one way "
                 "at a time. The prose and the chrome on this page are set in them; a figure drawn to scale says so.",
     "corners":  "One curve, superellipse(1.2), and a radius ladder of 2\u1d4f. The circles are the exceptions, "
                 "listed so nothing else can claim to be one.",
@@ -109,7 +109,7 @@ OPENERS = {
                 "the same way: acknowledge, then confirm.",
     "space":    "A pad scale in steps, a cap so small radii never pinch, and alignment that falls out of "
                 "the step rather than being set.",
-    "color":    "Every declaration audited against the vocabulary, and the ramps, which are colour under a curve.",
+    "color":    "Every declaration audited against the vocabulary, and the ramps, which are color under a curve.",
     "motion":   "Three durations, one curve, and two reasons to move: to acknowledge, or to confirm. "
                 "Nothing on this page animates for any other reason.",
     # usage: its page's own lede, lifted out of the page (build_section)
@@ -878,7 +878,7 @@ def favicons_html():
             f'<p class="fav-note">Stylistic sets, marked by the rule above a letter: set 6 (ss06) for {s6}, whose M and W are the drawn WM; '
             f'set 1 (ss01) for {s1}; the rest default.</p>'
             '<h3>The lockups</h3>'
-            '<p>Light and dark are the two fixed colourways, each shown on the ground it is for. A page links one file, '
+            '<p>Light and dark are the two fixed colorways, each shown on the ground it is for. A page links one file, '
             'which turns itself white under a dark scheme.</p>'
             f'<ul class="fav-grid">{cards}</ul></div>')
 
@@ -2805,10 +2805,10 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
   </div>
   <div class="wm-lb"><canvas id="lb-footer" aria-label="WORDMARK"></canvas></div>
   <div class="wm-chrome"><div data-hide="scroll swipe">
-    <div class="wm-theme" role="group" aria-label="Colour scheme">
-      <button type="button" class="wm-icon-btn active" data-theme-pick="auto" aria-pressed="true" aria-label="Auto colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
-      <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-pressed="false" aria-label="Light colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
-      <button type="button" class="wm-icon-btn" data-theme-pick="dark" aria-pressed="false" aria-label="Dark colour scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
+    <div class="wm-theme" role="group" aria-label="Color scheme">
+      <button type="button" class="wm-icon-btn active" data-theme-pick="auto" aria-pressed="true" aria-label="Auto color scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
+      <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-pressed="false" aria-label="Light color scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
+      <button type="button" class="wm-icon-btn" data-theme-pick="dark" aria-pressed="false" aria-label="Dark color scheme"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
     </div>
     <div class="wm-zoom wm-zoom--left" data-collapse data-capture data-target=".wm-main" data-key="wm-system-page-zoom"></div>
   </div></div>

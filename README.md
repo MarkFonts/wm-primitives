@@ -44,7 +44,7 @@ it.
 
 Every rule this package writes is inside `@layer wm.*`. **An unlayered rule in your app
 beats any of them, at any specificity, first try.** Theme through tokens
-(`--accent: var(--signal)`), choose behaviour through props, and reach in with a
+(`--accent: var(--signal)`), choose behavior through props, and reach in with a
 selector only as a last resort — where the layer guarantees you win. The header of
 `src/AxisSlider.css` is the long form.
 
@@ -74,7 +74,7 @@ consumer that wants to stand still pins the tag instead. `v0.1.0` is the contrac
   cannot do, and what none of them has had yet. None chosen.
 - [NEXT.md](NEXT.md) — the checklist from here to a system a stranger is fluent in.
 - [The system, illustrated](https://markfonts.github.io/wm-primitives/) — type, corners,
-  circles, space, colour as live CSS. A showing, not a consumer.
+  circles, space, color as live CSS. A showing, not a consumer.
 
 Consumed as a git submodule, not an npm package; each app's Vite/tsc compiles the TSX
 directly. Typed TSX; token-based CSS with fallbacks; font identity only — props carry
