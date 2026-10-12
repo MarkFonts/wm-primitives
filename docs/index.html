@@ -296,7 +296,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm{background:var(--bg);color:var(--ink);font-family:var(--ui-font);
   font-optical-sizing:auto;-webkit-font-smoothing:antialiased;min-height:100vh}
 .wm *,.wm *::before,.wm *::after{corner-shape:superellipse(1.2)}
-.wm-col{max-width:1180px;margin:0;padding:0 40px 0 0}
+.wm-col{max-width:1180px;margin:0;padding:0 48px 0 0}
 
 /* ---- Header: one full viewport, set like a poster ----
    Three moves, each with a name in the system:
@@ -350,7 +350,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm6-on:hover,.wm6-off:hover,.wm6-on.drag,.wm6-off.drag{fill:var(--signal);stroke:var(--signal);opacity:1}
 .wm6-on.drag,.wm6-off.drag{cursor:grabbing}
 .wm-eyebrow{position:absolute;top:44px;right:0;z-index:2;writing-mode:vertical-rl;
-  font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
+  font-size:.5625rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
   margin:0;font-variation-settings:"GEOM" 100}
 .wm-stack{position:relative;z-index:4;display:flex;flex-direction:column;
   margin:clamp(16px,7vh,84px) 24px 0 0;font-size:clamp(2.4rem,8.6vw,10rem);line-height:1.07;
@@ -402,7 +402,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wmb-fill{fill:var(--signal);stroke:none}
 .wm6-fill{fill:var(--signal);stroke:none}
 .wm-bendlbl{position:absolute;right:.35em;top:1.15em;z-index:3;writing-mode:vertical-rl;
-  text-decoration:none;font-style:normal;font-size:9px;letter-spacing:.12em;
+  text-decoration:none;font-style:normal;font-size:.5625rem;letter-spacing:.12em;
   text-transform:uppercase;color:var(--ink);font-variation-settings:"GEOM" 100;
   white-space:nowrap}
 .wm6-combg line{stroke:var(--ink);stroke-width:1px;vector-effect:non-scaling-stroke}
@@ -429,29 +429,29 @@ html,body{margin:0;padding:0;background:var(--bg)}
 /* Above the 6, not under it. The rules sat at 3 and the WORDS carried no z-index at
    all, so the hairlines crossed the drawing while the letters were swallowed by it --
    which is exactly how it reads on a phone. */
-.wm-close{position:relative;z-index:3;margin-top:auto;padding-bottom:40px}
-.wm-dek{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:52ch;margin:0 0 40px}
+.wm-close{position:relative;z-index:3;margin-top:auto;padding-bottom:48px}
+.wm-dek{font-size:var(--type-lede-size,1.125rem);line-height:var(--lead-lede,27px);color:var(--ink-2);max-width:52ch;margin:0 0 48px}
 .wm-dek b{color:var(--ink);font-weight:600}
 /* Counts, not a claim. The type section's strip is boxed and spends the accent hue
    because it argues 44-sizes-today AGAINST 7/5/3 -- the hue points at the thing under
    discussion. Nothing here is under discussion, so this takes neither the box nor the
    hue; otherwise two near-identical strips compete and the accent means nothing. */
 .wm-stats{display:flex;flex-wrap:wrap}
-.wm-stat{padding:0 26px;border-left:1px solid var(--line)}
+.wm-stat{padding:0 24px;border-left:1px solid var(--line)}
 .wm-stat:first-child{padding-left:0;border-left:none}
-.wm-stat b{display:block;font-size:30px;line-height:1;font-weight:400;letter-spacing:-.02em;
+.wm-stat b{display:block;font-size:30px;line-height:1;font-weight:400;
   font-variant-numeric:tabular-nums;color:var(--ink);font-variation-settings:"GEOM" 50}
-.wm-stat i{display:block;font-style:normal;font-size:12px;color:var(--ink-3);margin-top:9px}
+.wm-stat i{display:block;font-style:normal;font-size:.75rem;line-height:15px;color:var(--ink-3);margin-top:9px}   /* 30 + 9 + 15 = 54: the block on the 3px line (53 with a normal lead) */
 /* The one button on the poster, and it is not a law: the door to the pages still being
    decided. Hatched, not filled -- extremely thin 45-degree hairlines -- so a work-in-progress
    surface reads as one at a glance. It sits in the counts' row as a fifth item, at the
    counts' own gutter; an auto margin used to push it to the row's far end, which on a
    wide screen is under the drawing (2026-09-26). */
-.wm-wip{display:inline-flex;align-items:baseline;gap:12px;align-self:center;margin-left:26px;padding:12px 18px;text-decoration:none;color:var(--ink);
+.wm-wip{display:inline-flex;align-items:baseline;gap:12px;align-self:center;margin-left:24px;padding:12px 16px;text-decoration:none;color:var(--ink);
   border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
-  font-size:13px;font-weight:600;letter-spacing:.02em;transition:border-color .15s}
-.wm-wip i{font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3)}
+  font-size:.75rem;line-height:15px;font-weight:600;transition:border-color var(--dur-fast,140ms) var(--ease, cubic-bezier(.2,.7,.2,1))}
+.wm-wip i{font-style:normal;font-weight:400;font-size:.75rem;color:var(--ink-3)}
 .wm-wip:hover{border-color:var(--ink-3)}
 /* on the columns below 1024 (Mark's phone, 2026-10-11: "we have a grid"): the four counts two by
    two, six of the twelve columns each, the hairline between the pairs, a line of 24 between the rows */
@@ -526,8 +526,8 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-axis-in::before{content:"";position:absolute;left:22px;top:6px;bottom:6px;width:2px;
   background:var(--line)}
 .wm-axis-in::after{content:"";position:absolute;left:22px;top:6px;width:2px;
-  height:var(--prog-px,0px);background:var(--ink-3);transition:height .18s linear}
-.wm-grp{margin:0 0 20px}
+  height:var(--prog-px,0px);background:var(--ink-3);transition:height var(--dur-med,240ms) var(--ease, cubic-bezier(.2,.7,.2,1))}
+.wm-grp{margin:0 0 24px}
 .wm-grp:last-child{margin-bottom:0}
 /* HIERARCHY, on the house rules: one signal per distinction.
    level  = CASE. label and ui are both 12px in the token table, so caps against sentence
@@ -538,13 +538,13 @@ html,body{margin:0;padding:0;background:var(--bg)}
    No diamond: the rhombus already means "your defaults, baked into the export" in ReCal,
    and spending it as a generic cursor would empty it of that. */
 .wm-lvl0{position:relative;display:block;text-decoration:none;padding:3px 0;
-  font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
-  font-variation-settings:"GEOM" 100;transition:color .15s}
-.wm-lvl0 u{text-decoration:none;font-variant-numeric:tabular-nums;margin-right:10px;opacity:.65}
+  font-size:.75rem;line-height:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
+  font-variation-settings:"GEOM" 100;transition:color var(--dur-fast,140ms) var(--ease, cubic-bezier(.2,.7,.2,1))}
+.wm-lvl0 u{text-decoration:none;font-variant-numeric:tabular-nums;margin-right:12px;color:var(--ink-3)}
 .wm-lvl1{position:relative;display:grid;grid-template-columns:1.5em 1fr;text-decoration:none;padding:3px 0;
-  margin-left:18px;font-size:12px;line-height:1.35;color:var(--ink-3);
-  font-variation-settings:"GEOM" 25;transition:color .15s}
-.wm-lvl1 u{text-decoration:none;font-variant-numeric:tabular-nums;opacity:.65}
+  margin-left:16px;font-size:.75rem;line-height:15px;color:var(--ink-3);
+  font-variation-settings:"GEOM" 25;transition:color var(--dur-fast,140ms) var(--ease, cubic-bezier(.2,.7,.2,1))}
+.wm-lvl1 u{text-decoration:none;font-variant-numeric:tabular-nums;color:var(--ink-3)}
 /* the section tick crosses the rule; the chapter tick sits clear of it, to the right */
 .wm-lvl0::before{content:"";position:absolute;left:-22px;top:50%;width:14px;height:1px;
   background:var(--line)}
@@ -561,7 +561,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   border-radius:50%;corner-shape:round;background:var(--ink)}
 .wm-lvl0.on::before{left:-24px}
 .wm-lvl1.on::before{left:-42px}
-.wm-rail-foot{flex:0 0 auto;margin:14px 0 0;font-size:9px;letter-spacing:.14em;
+.wm-rail-foot{flex:0 0 auto;margin:14px 0 0;font-size:.5625rem;letter-spacing:.12em;
   text-transform:uppercase;color:var(--ink-3);pointer-events:auto}
 
 /* content-visibility:auto was tried here and reverted. It implies contain: layout
@@ -622,7 +622,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
    viewport, where overflow clipped them. It stays in the column and scrolls its own
    overflow instead. */
 .wm-body{position:relative;overflow-x:auto}
-.wm-foot{padding:72px 0 40px;color:var(--ink-3);font-size:12.5px;
+.wm-foot{padding:72px 0 48px;color:var(--ink-3);font-size:.75rem;
   border-top:1px solid var(--line);margin-top:64px;max-width:70ch}
 /* The colophon: the house wordmark, scanned and packed with prose by letterbox.js
    (ported from wordmark.nyc). It is the last thing on the page for the same reason
@@ -702,7 +702,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     background:var(--bg);
     border-bottom:1px solid var(--line)}
   .wm-axis{width:auto;margin-left:0;max-height:none;overflow-x:auto;overflow-y:hidden}
-  .wm-axis-in{display:flex;gap:0;padding:0 20px}
+  .wm-axis-in{display:flex;gap:0;padding:0 24px}
   .wm-axis-in::before,.wm-axis-in::after,.wm-rail-foot{display:none}
   .wm-grp{margin:0;display:flex;align-items:center;flex:0 0 auto}
   .wm-lvl1{display:none}
@@ -746,7 +746,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-chrome{--text:var(--ink);--text-muted:var(--ink-2);--text-dim:var(--ink-3);--border:var(--line);
   --zoom-ground:var(--bg)}
 /* the marks' alpha ink is rgba(var(--text-rgb), a): the page's ink as channels, oklch 93.10% and
-   20.02% with no chroma (232 and 22) */
+   20.02% with no chroma (232 and 22); mirrors --ink, since rgb() needs bare channels */
 .wm-chrome{--text-rgb:232,232,232}
 @media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .wm-chrome{--text-rgb:22,22,22}}
 :root[data-theme="light"] .wm-chrome{--text-rgb:22,22,22}
@@ -763,11 +763,12 @@ html,body{margin:0;padding:0;background:var(--bg)}
    starts under the stack (its 138px at rest, from 6px under the bar). */
 .wm:has(.wm-theme-stack--vertical) .wm-eyebrow{top:156px}
 .wm-key{display:inline-block;box-sizing:border-box;min-width:18px;height:18px;margin:0 1px;padding:0 5px;
-  vertical-align:baseline;font:inherit;font-size:11px;line-height:14px;font-weight:600;
+  vertical-align:baseline;font:inherit;font-size:.75rem;line-height:15px;font-weight:600;
   font-variation-settings:"GEOM" 100;color:var(--ink-2);background:none;cursor:pointer;
-  border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;transition:color .15s,border-color .15s}
+  border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;transition:color var(--dur-fast,140ms) var(--ease, cubic-bezier(.2,.7,.2,1)),border-color var(--dur-fast,140ms) var(--ease, cubic-bezier(.2,.7,.2,1))}
 .wm-key:hover{color:var(--ink);border-color:var(--ink-3)}
 .wm-key[aria-pressed="true"]{color:var(--bg);background:var(--ink);border-color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.wm-wip,.wm-lvl0,.wm-lvl1,.wm-key,.wm-axis-in::after{transition:none}}   /* after the rules it overrides */
 
 /* ---- The overlays, G and L: ONE layer, the content column's (Mark, 2026-10-08: "i want the
    baseline grid and columns to work accurately with the new live area non-native zoom"). It is
@@ -6478,7 +6479,8 @@ html,body{margin:0;padding:0;background:var(--bg)}
   font-family:"Face","CalSansVF",sans-serif;font-weight:700;font-variation-settings:"GEOM" 100,"wght" 700;font-size:40px;line-height:1;   /* Cal Sans Geo Bold (Mark, 2026-10-11) */
   color:var(--ink);cursor:crosshair;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
 /* touch-action none and no callout: a held finger on Safari selected the glyphs instead of pushing them (Mark, 2026-10-11) */
-.wm-fleuron i span,.wm-fleuron .fl-wm span{display:block;will-change:transform;transition:color .5s}
+.wm-fleuron i span,.wm-fleuron .fl-wm span{display:block;will-change:transform;transition:color var(--dur-slow,400ms) var(--ease, cubic-bezier(.2,.7,.2,1))}
+@media (prefers-reduced-motion:reduce){.wm-fleuron i span,.wm-fleuron .fl-wm span{transition:none}}
 /* the stars touch the W: the gap between the two ornament groups IS the WM (Mark, 2026-10-11: "the
    ornament gap is an M"). Each group sits on ONE baseline at one size, the glyphs where the face
    draws them (Mark: "use the actual glyphs' baseline"); centring their boxes had put the star low. */
