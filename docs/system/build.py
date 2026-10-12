@@ -134,7 +134,7 @@ KICKERS = {
     "space":    "A pad scale",
     "color":    "The audit",
     "motion":   "Three durations",
-    "usage":    "Appendix",   # the kicker says what it is; the appendix has no numeral (Mark, 2026-10-11)
+    "usage":    "",   # no kicker: the appendix's numeral is the WORD Appendix, supersized across the columns, and that is its kicker too (Mark, 2026-10-11)
 }
 # The opener's lede: ONE sentence written for the opener, not the page's own lede lifted up -- that
 # one repeated the kicker's words ("One curve" over "One curve, superellipse(1.2), and...") and
@@ -1571,7 +1571,12 @@ for s in secs:
     head = (f'<div class="wm-open{" wm-open--wide" if sid in APPENDIX else ""}"><div class="wm-open-l">'
             f'<p class="wm-kick"><span class="wm-kick-t">{KICKERS.get(sid, "")}</span>'
             + ('' if sid in APPENDIX else f'<span class="wm-dg" data-d="{digit}"><span>{digit}</span></span>') + '</p>'
-            f'<h1 class="wm-mark">{s["label"]}</h1>{FLEURON}</div>'
+            f'<h1 class="wm-mark">{s["label"]}</h1>'
+            # the appendix's word comes AFTER the name in the markup: on a phone the opener snaps as one
+            # unit by its first text, and that must be the name, whose baseline is whole; the word, sized
+            # in vw, is not. The grid places it above regardless of order.
+            + (f'<span class="wm-dg wm-dg--word"><span>Appendix</span></span>' if sid in APPENDIX else '')
+            + f'{FLEURON}</div>'
             f'<p class="wm-open-r wm-lede">{LEDES.get(sid, s["lede"])}</p></div>{numbers_html(sid)}')
     if sid in APPENDIX:
         # shut until pressed: the Collapse primitive's box (collapse.css), measured by the
@@ -2542,6 +2547,18 @@ GRAMMAR_CSS = """
 .wm-sec:first-of-type .wm-sec-head{margin-top:round(nearest, calc(20vh - 54px), 3px)}
 .wm-open{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));column-gap:var(--grid-gutter);align-items:baseline}
 .wm-open-l{grid-column:1 / span 3;position:relative}   /* three columns (Mark, 2026-10-11), so the lede starts on column 4 */
+/* THE APPENDIX'S NUMERAL IS A WORD. "Appendix" at the numeral's size and grey, left on column 1 and
+   running across the columns on its own line above the kicker (Mark, 2026-10-11: "supersizing the
+   grey line ... have it span the columns"); the opener's rows sit below it. */
+@media (min-width:1024px){   /* desktop only: below, the phone opener keeps its own grid and places the word in its first row */
+.wm-open--wide .wm-open-l,.wm-open--wide .wm-kick{display:contents}   /* the word, the kicker's words and the name become the opener grid's own items */
+.wm-open--wide .wm-dg--word{position:static;grid-column:1 / -1;grid-row:1;text-align:left;white-space:nowrap;letter-spacing:-.01em;
+  line-height:135px;margin:0 0 24px;right:auto}
+.wm-open--wide .wm-kick-t{display:none}   /* the appendix has no kicker line; the word is it */
+.wm-open--wide .wm-mark{grid-column:1 / span 4;grid-row:3}
+.wm-open--wide{grid-template-rows:auto auto auto 1fr}   /* the fourth row takes the lede's extra height, so the name stays on the kicker's heels */
+.wm-open--wide .wm-open-r{grid-column:5 / span 6;grid-row:2 / span 3;align-self:start}
+}
 /* the appendix alone (Mark, 2026-10-11: "The evidence / Who uses what" broke both lines in three,
    and the rest stay at three regardless): its kicker block takes four columns and its lede starts
    on column 5, still ending on column 10. The builder sets the class; nothing is measured. */
@@ -2666,10 +2683,14 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
   /* 72vw, capped at 312 (Mark, 2026-10-11: a 0 at 312 ran into the kicker on a 375 screen): the
      widest digit stays in the left half with the right half's column free */
   .wm-mark{grid-column:2;grid-row:2}
-  .wm-open--wide .wm-kick-t,.wm-open--wide .wm-mark{grid-column:1 / span 2}   /* the appendix has no numeral: its words take the whole width */
+  .wm-open--wide .wm-kick-t,.wm-open--wide .wm-mark{grid-column:1 / span 2}
+  .wm-open--wide .wm-dg--word{grid-column:1 / span 2;grid-row:1;align-self:end;font-size:round(down, 18vw, 3px);line-height:1;margin:0 0 24px;white-space:nowrap;color:var(--ink-3)}   /* grey, as the word is on desktop (Mark: "why did u make appendix white") */
+  .wm-open--wide .wm-kick-t{display:none}
+  .wm-open--wide .wm-mark{grid-row:3}
+  .wm-open--wide .wm-open-l{grid-template-rows:1fr auto auto}
   /* the ornament, centred in the screen of space above the number: outlines hairline, the mark filled */
   .wm-fleuron{position:static;translate:none;grid-column:1 / span 2;grid-row:1;align-self:center;justify-self:center;margin-bottom:120px}
-  .wm-lede.wm-open-r{margin-top:24px}   /* two classes: the desktop rule's margin:0 outranked the one-class phone rule and the lede sat on the name */
+  .wm-lede.wm-open-r{margin-top:48px}   /* two classes: the desktop rule's margin:0 outranked the one-class phone rule and the lede sat on the name. 48, not 24 (Mark, 2026-10-11: "push the dek down") */
   .wm-nums{max-width:none}
   .wm-main :is(__IDS__) .wm-hang{position:static;display:block;width:auto;text-align:left;text-wrap:normal}
   .wm-wip{display:none}   /* the hero's WIP button sat over the 6 on a phone (Mark, 2026-10-11); the chapter is in the bar */
