@@ -1568,7 +1568,7 @@ for s in secs:
     # hung right-aligned into the column before the text with its ink on the column edge (--dt) and its
     # baseline on the name's.
     digit = s["num"][-1]
-    head = (f'<div class="wm-open"><div class="wm-open-l">'
+    head = (f'<div class="wm-open{" wm-open--wide" if sid in APPENDIX else ""}"><div class="wm-open-l">'
             f'<p class="wm-kick"><span class="wm-kick-t">{KICKERS.get(sid, "")}</span><span class="wm-dg" data-d="{digit}"><span>{digit}</span></span></p>'
             f'<h1 class="wm-mark">{s["label"]}</h1>{FLEURON}</div>'
             f'<p class="wm-open-r wm-lede">{LEDES.get(sid, s["lede"])}</p></div>{numbers_html(sid)}')
@@ -2541,9 +2541,9 @@ GRAMMAR_CSS = """
 .wm-sec:first-of-type .wm-sec-head{margin-top:round(nearest, calc(20vh - 54px), 3px)}
 .wm-open{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));column-gap:var(--grid-gutter);align-items:baseline}
 .wm-open-l{grid-column:1 / span 3;position:relative}   /* three columns (Mark, 2026-10-11), so the lede starts on column 4 */
-/* less strictly (Mark, 2026-10-11: the appendix's "The evidence / Who uses what" broke both lines in
-   three): an opener whose kicker or name does not fit three columns takes four, and its lede starts
-   on column 5 -- still ending on column 10. The script below measures and sets the class. */
+/* the appendix alone (Mark, 2026-10-11: "The evidence / Who uses what" broke both lines in three,
+   and the rest stay at three regardless): its kicker block takes four columns and its lede starts
+   on column 5, still ending on column 10. The builder sets the class; nothing is measured. */
 .wm-open.wm-open--wide .wm-open-l{grid-column:1 / span 4}
 .wm-open.wm-open--wide .wm-open-r{grid-column:5 / span 6}
 .wm-open-r{grid-column:4 / span 7}   /* columns 4 to 10, one column inside the eleven-column measure (Mark, 2026-10-11: "paragraph 11 and dek stay 10") */
@@ -2690,25 +2690,6 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
 # data-online (the table of roles, which is about the line), and a paragraph of the stage's own prose
 # whose leading is whole 3px units -- prose may not sit between the lines, a figure may.
 STAGES = """
-(function(){
-  /* the opener's kicker block: three columns, or four when its words do not fit three (see .wm-open--wide) */
-  function fit(){
-    if(!matchMedia('(min-width:1024px)').matches) return;
-    [].forEach.call(document.querySelectorAll('.wm-open'),function(o){
-      var l=o.querySelector('.wm-open-l'); if(!l) return;
-      o.classList.remove('wm-open--wide');
-      /* the block's own width IS three columns (--col is a calc in cqw and does not parse) */
-      var three=l.getBoundingClientRect().width, wide=false;
-      [].forEach.call(o.querySelectorAll('.wm-kick-t, .wm-mark'),function(el){
-        var r=document.createRange(); r.selectNodeContents(el);
-        var w=0; [].forEach.call(r.getClientRects(),function(b){w=Math.max(w,b.width)});
-        var ws=el.style.whiteSpace; el.style.whiteSpace='nowrap'; r.selectNodeContents(el); var full=r.getBoundingClientRect().width; el.style.whiteSpace=ws;
-        if(full>three+0.5) wide=true; });
-      if(wide) o.classList.add('wm-open--wide');
-    });
-  }
-  fit(); addEventListener('resize',fit); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fit);
-})();
 (function(){
   var HEADS='h2.wm-h2,h3.wm-h3';
   function own(el){ for(var n=el.firstChild;n;n=n.nextSibling) if(n.nodeType===3&&n.textContent.trim()) return true; return false; }
