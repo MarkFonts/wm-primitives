@@ -2528,7 +2528,7 @@ GRAMMAR_CSS = """
 .wm-sec{max-width:none}
 /* no 1080 cap (Mark, 2026-10-09: nothing reached column 24): a figure runs to the last column, prose keeps its ten */
 .wm-main .wm-body:is(__IDS__){padding-left:0;max-width:none}
-.wm-main :is(__IDS__) :is(p,ul,ol,h2.wm-h2,h3.wm-h3,figcaption,pre){max-width:calc(10 * var(--col) + 9 * var(--grid-gutter))}
+.wm-main :is(__IDS__) :is(p,ul,ol,h2.wm-h2,h3.wm-h3,figcaption,pre){max-width:calc(11 * var(--col) + 10 * var(--grid-gutter))}
 /* a code block keeps the measure too and scrolls inside it, rather than running out to the window (the zoom's markup did) */
 .wm-main :is(__IDS__) pre{overflow-x:auto;box-sizing:border-box}
 /* the opener */
@@ -2540,8 +2540,8 @@ GRAMMAR_CSS = """
 .wm-sec:first-of-type .wm-fleuron{display:none}   /* 42vh, was 20 (Mark, 2026-10-11): the section break lives in this gap on desktop too, a third of the screen each side of it */
 .wm-sec:first-of-type .wm-sec-head{margin-top:round(nearest, calc(20vh - 54px), 3px)}
 .wm-open{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));column-gap:var(--grid-gutter);align-items:baseline}
-.wm-open-l{grid-column:1 / span 4;position:relative}
-.wm-open-r{grid-column:5 / span 8}   /* eight columns (Mark, 2026-10-11): at 26px six wrapped the lede to seven to nine lines */
+.wm-open-l{grid-column:1 / span 3;position:relative}   /* three columns (Mark, 2026-10-11), so the lede starts on column 4 */
+.wm-open-r{grid-column:4 / span 7}   /* columns 4 to 10, one column inside the eleven-column measure (Mark, 2026-10-11: "paragraph 11 and dek stay 10") */
 .wm-kick,.wm-mark{margin:0;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title,30px);
   font-weight:400;letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums}
 .wm-kick{color:var(--ink-3)}
@@ -2554,7 +2554,7 @@ GRAMMAR_CSS = """
 .wm-dg[data-d="0"]{--dt:0.0176}.wm-dg[data-d="1"]{--dt:0.0801}.wm-dg[data-d="2"]{--dt:0.0489}.wm-dg[data-d="3"]{--dt:0.0562}
 .wm-dg[data-d="4"]{--dt:0.0176}.wm-dg[data-d="5"]{--dt:0.0544}.wm-dg[data-d="6"]{--dt:0.0452}.wm-dg[data-d="7"]{--dt:0.0599}
 .wm-dg[data-d="8"]{--dt:0.0581}.wm-dg[data-d="9"]{--dt:0.0526}
-.wm-nums{margin:24px 0 0;max-width:calc(10 * var(--col) + 9 * var(--grid-gutter))}
+.wm-nums{margin:24px 0 0;max-width:calc(11 * var(--col) + 10 * var(--grid-gutter))}
 /* THE SECTION BREAK, on desktop (Mark, 2026-10-11): centred in the gap above the opener, across
    the main column. The same glyphs and physics as the phone's; the phone block below moves it
    into the opener's screen of space instead. */
