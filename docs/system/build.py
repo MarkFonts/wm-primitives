@@ -2756,7 +2756,10 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
   .wm-fleuron{position:static;translate:none;grid-column:1 / span 2;grid-row:1;align-self:center;justify-self:center;margin-bottom:120px}
   .wm-lede.wm-open-r{margin-top:48px}   /* two classes: the desktop rule's margin:0 outranked the one-class phone rule and the lede sat on the name. 48, not 24 (Mark, 2026-10-11: "push the dek down") */
   .wm-nums{max-width:none}
-  .wm-main :is(__IDS__) .wm-hang{position:static;display:block;width:auto;text-align:left;text-wrap:normal}
+  /* 2026-10-13: relative, not static, so the base rule's top:1px (the 12-in-24 label against a 16/24 paragraph) applies
+     on the phone too (right:auto cancels the desktop hang offset). Static ignored it: the stacked label sat 1px (0.98-1.02) off the line at 414 -- the run-ins at
+     24, "Why these two", "Three steps", "No reflow" -- and the .bs-cost labels (top:0, 12-in-15) were already on it. */
+  .wm-main :is(__IDS__) .wm-hang{position:relative;right:auto;display:block;width:auto;text-align:left;text-wrap:normal}
   .wm-wip{display:none}   /* the hero's WIP button sat over the 6 on a phone (Mark, 2026-10-11); the chapter is in the bar */
   .wm-main :is(__IDS__) h2.wm-h2 > u.wm-hang{position:static;display:inline;margin-right:.4em}
   /* a numbered h2 flows as one line on a phone: as a flex row, space-between put the number at

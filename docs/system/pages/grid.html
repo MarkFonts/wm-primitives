@@ -156,7 +156,9 @@ code{font-family:var(--ui-font,"Face",system-ui,sans-serif);font-variation-setti
   font:inherit;font-size:var(--tc-key-fs);line-height:calc(var(--tc-key) - 4px);font-weight:400;font-variation-settings:"GEOM" 100;
   text-align:center;color:var(--ink,#17181a);background:var(--surface-hi,#ebebeb);cursor:pointer;
   border:1px solid var(--ink-3,rgba(23,24,26,.38));border-bottom-width:3px;border-radius:calc(var(--tc-key) / 5);
-  transition:color .15s,background-color .15s,border-color .15s}
+  /* 2026-10-13: literal .15s -> the house duration + ease tokens (same 140ms feel). */
+  transition:color var(--dur-fast,140ms) var(--ease,cubic-bezier(.2,.7,.2,1)),background-color var(--dur-fast,140ms) var(--ease,cubic-bezier(.2,.7,.2,1)),border-color var(--dur-fast,140ms) var(--ease,cubic-bezier(.2,.7,.2,1))}
+@media (prefers-reduced-motion:reduce){.gx-tc .gx-key{transition:none}}
 .gx-tc .gx-key:hover{border-color:var(--ink,#17181a)}
 .gx-tc .gx-key[aria-pressed="true"]{color:var(--bg,#f4f4f4);background:var(--ink,#17181a);border-color:var(--ink,#17181a)}
 @media (min-width:681px){
