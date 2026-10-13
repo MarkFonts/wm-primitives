@@ -1409,7 +1409,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
    horizontal scroller pinned to the top, because a fixed column would eat the width the
    demos need: it breaks out of the margin to both window edges, and the content takes all 12. */
 .wm-main{min-width:0;padding:0}
-.wm-tray{display:none}   /* the phone tray (#111): the phone block below shows it; this rule comes first so that one wins */
+.wm-tray,.wm-tray-scrim,.wm-tray-edge{display:none}   /* the phone tray (#111): the phone block below shows it; this rule comes first so that one wins */
 @media (max-width:1023px){
   .wm-pan{grid-column:1 / -1;grid-row:auto}
   /* the rail is a top bar here, and a bar that stops at the end of the sections would
@@ -1419,8 +1419,8 @@ html,body{margin:0;padding:0;background:var(--bg)}
      frame, and behind this one is a 59,000px document -- the most expensive thing on
      the page, buying a frosting nobody asked for. An opaque ground is what the blur
      was faking anyway. */
-  .wm-rail{position:sticky;top:0;height:auto;width:auto;grid-column:1 / -1;grid-row:1;
-    margin-inline:calc(-1 * var(--grid-margin));
+  .wm-rail{position:sticky;top:10px;height:auto;width:auto;grid-column:1 / -1;grid-row:1;
+    margin-inline:calc(-1 * var(--grid-margin));margin-top:10px;   /* 10 down: the tray's shut band (#111) has the top edge, and the bar is whole under it; pulled open, the tray covers the bar (Mark, 2026-10-13) */
     background:var(--bg);
     border-bottom:1px solid var(--line)}
   .wm-axis{width:auto;margin-left:0;max-height:none;overflow-x:auto;overflow-y:hidden}
@@ -1430,17 +1430,41 @@ html,body{margin:0;padding:0;background:var(--bg)}
   .wm-lvl1{display:none}
   .wm-lvl0{padding:14px 15px}
   .wm-lvl0::before,.wm-lvl0.on::before{display:none}
-  /* THE TRAY (#111; Mark, 2026-10-13, option A of three): on a phone there is no keyboard, so the G and
-     L caps ride at the right end of the bar's own row while the Grid chapter's tool sheet -- the one place
-     the keys are explained -- is in view, and go with it. The chapter names scroll under its fade. The
-     shell's overlay wiring takes these two keys like the sheet's, so the pressed state is one state. */
-  .wm-tray{position:fixed;z-index:96;top:0;right:0;height:var(--bar-h,43px);display:flex;align-items:center;
-    padding:0 24px 0 12px;background:linear-gradient(90deg, transparent, var(--bg) 24px);
-    opacity:0;translate:0 -6px;pointer-events:none;
-    transition:opacity var(--dur-med,240ms) var(--ease,cubic-bezier(.2,.7,.2,1)),translate var(--dur-med,240ms) var(--ease,cubic-bezier(.2,.7,.2,1))}
-  html[data-tray-on] .wm-tray{opacity:1;translate:0 0;pointer-events:auto}
-  .wm-tray .wm-key{min-width:24px;height:24px;line-height:21px;font-size:.9375rem;padding:0 6px;margin:0}
-  .wm-tray .wm-key + .wm-key{margin-left:6px}
+  /* THE TRAY (#111; Mark, 2026-10-13: "ALWAYS ... like the font-proofer mobile style tray"). A phone has
+     no keyboard, so G and L are tiles in a sheet at the TOP edge of the screen, always: font-proofer's
+     faces sheet (its D, the side sheet) turned to the top. Shut, its bottom 10px is a continuous surface
+     band across the screen, over the bar, and EACH TILE SLIDES 12 DOWN so its own bottom edge is the band,
+     its letter further (--shift, measured by the script: the glyph's ink middle onto the band's), so the
+     band cuts the G and the L through their middles; the words stay out of the band until it opens. A tap
+     or a pull on the band opens it; the scrim (ink at 32%, in with the open fraction) takes the tap that
+     shuts. One transform, --tray-p the open fraction. The shell's overlay wiring takes the two tiles like
+     the sheet's caps, so the pressed state is one state. Desktop shows nothing. */
+  .wm-tray{--tray-p:0;--tray-h:75px;--tray-peek:10px;--tray-ease:cubic-bezier(.2,0,0,1);
+    position:fixed;z-index:97;top:0;left:0;right:0;height:var(--tray-h);box-sizing:border-box;padding:12px var(--grid-margin);
+    display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--grid-gutter);   /* ON THE GRID (Mark, 2026-10-13): the page's twelve columns, a tile three of them */
+    isolation:isolate;touch-action:pan-x;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+    translate:0 calc((1 - var(--tray-p)) * (var(--tray-peek) - var(--tray-h)));
+    transition:translate var(--dur-layout,300ms) var(--tray-ease)}
+  .wm-tray.is-drag,.wm-tray.is-drag *,.wm-tray.is-drag::after,.wm-tray.is-drag ~ .wm-tray-scrim{transition:none}
+  .wm-tray::after{content:"";position:absolute;inset:0;z-index:-1;background:var(--surface,var(--bg-elevated));
+    box-shadow:0 2px 12px rgb(0 0 0 / calc(var(--tray-shadow,.18) * var(--tray-p)));transition:box-shadow var(--dur-layout,300ms) var(--tray-ease)}
+  /* the tile: the key's look at a tile's size, 51 tall (17 lines): the letter on a title line (30) over the word on a label line (15), 3 above and 3 below */
+  .wm-tray .wm-tray-tile{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;grid-column:span 3;height:51px;min-width:0;margin:0;padding:0 12px;
+    border:0;border-radius:var(--radius,6px) var(--radius,6px) calc(var(--tray-p) * var(--radius,6px)) calc(var(--tray-p) * var(--radius,6px));   /* shut, the bottom corners are square: the band cuts the tile, it does not round inside it (Mark, 2026-10-13) */
+    background:var(--bg);color:var(--ink-2);text-align:left;font:inherit;line-height:15px;
+    --shift:0px;translate:0 calc((1 - var(--tray-p)) * 12px);clip-path:inset(-6px -6px calc(var(--tray-p) * -4px) -6px);   /* clips on its bottom only, shut: what slides past the band never paints on the bar */
+    transition:translate var(--dur-layout,300ms) var(--tray-ease),border-radius var(--dur-layout,300ms) var(--tray-ease),color var(--dur-fast,140ms) var(--ease),background-color var(--dur-fast,140ms) var(--ease)}
+  .wm-tray .wm-tray-tile[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .wm-tray-tile b{display:block;font-size:var(--type-title-size,1.625rem);line-height:var(--lead-title,30px);font-weight:600;font-variation-settings:"GEOM" 100;
+    translate:0 calc((1 - var(--tray-p)) * var(--shift));transition:translate var(--dur-layout,300ms) var(--tray-ease)}
+  .wm-tray-tile span{display:block;font-size:.75rem;line-height:15px;opacity:var(--tray-p);transition:opacity var(--dur-layout,300ms) var(--tray-ease)}
+  /* the pull zone, shut only: the band and 24px more, over the bar's top; a tap on it goes to what is under it (the script hands it on) */
+  .wm-tray-edge{display:block;position:fixed;z-index:96;top:0;left:0;right:0;height:34px;touch-action:pan-x;-webkit-touch-callout:none}
+  .wm-tray.open ~ .wm-tray-edge,.wm-tray-edge[hidden]{display:none}
+  .wm-tray-scrim{--tray-p:0;display:block;position:fixed;inset:0;z-index:96;background:var(--ink);opacity:calc(.32 * var(--tray-p));pointer-events:none;transition:opacity var(--dur-layout,300ms) var(--tray-ease)}
+  .wm-tray-scrim.on{pointer-events:auto}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .wm-tray::after{--tray-shadow:.5}}
+  :root[data-theme="dark"] .wm-tray::after{--tray-shadow:.5}
   .wm-head{padding:32px 0 0;min-height:0}
   /* THE PHONE HERO (Mark's phone, 2026-10-11: "why is there paragraphs on the six"). The 6 is
      not a full-screen watermark here: it has the headline's region -- half a screen, top-aligned,
@@ -1501,7 +1525,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;transition:color var(--dur-fast,140ms) var(--ease, cubic-bezier(.2,.7,.2,1)),border-color var(--dur-fast,140ms) var(--ease, cubic-bezier(.2,.7,.2,1))}
 .wm-key:hover{color:var(--ink);border-color:var(--ink-3)}
 .wm-key[aria-pressed="true"]{color:var(--bg);background:var(--ink);border-color:var(--ink)}
-@media (prefers-reduced-motion:reduce){.wm-wip,.wm-lvl0,.wm-lvl1,.wm-key,.wm-axis-in::after,.wm-tray{transition:none}}   /* after the rules it overrides */
+@media (prefers-reduced-motion:reduce){.wm-wip,.wm-lvl0,.wm-lvl1,.wm-key,.wm-axis-in::after,.wm-tray,.wm-tray *,.wm-tray::after,.wm-tray-scrim{transition:none}}   /* after the rules it overrides */
 
 /* ---- The overlays, G and L: ONE layer, the content column's (Mark, 2026-10-08: "i want the
    baseline grid and columns to work accurately with the new live area non-native zoom"). It is
@@ -2376,12 +2400,38 @@ CHROME = """
     var k=(e.key||'').toLowerCase();
     if(k==='g') set('cols',!on.cols); else if(k==='l') set('lines',!on.lines);
   });
-  /* the phone tray (#111): shown while the Grid chapter's tool sheet is in view; its height is the bar's */
-  (function(){ var sheet=document.querySelector('.gx-tc'), bar=document.querySelector('.wm-rail'), html=document.documentElement;
-    if(!sheet||!bar||!('IntersectionObserver' in window)) return;
-    function barH(){ html.style.setProperty('--bar-h', bar.getBoundingClientRect().height+'px'); }
-    barH(); addEventListener('resize',barH);
-    new IntersectionObserver(function(es){ if(es.some(function(e){return e.isIntersecting})) html.setAttribute('data-tray-on',''); else html.removeAttribute('data-tray-on'); },{threshold:0}).observe(sheet);
+  /* the phone tray (#111): a tap or a pull on the band opens it, the scrim shuts it; a tap on the pull
+     zone under the band goes to what is under it (the bar). While it is open or being pulled the theme
+     stack is asked to hide (data-hidden, the host's hide). --shift puts each letter's ink middle on the band's. */
+  (function(){ var tray=document.querySelector('.wm-tray'), scrim=document.querySelector('.wm-tray-scrim'), edge=document.querySelector('.wm-tray-edge'); if(!tray||!scrim||!edge) return;
+    var H=75, PEEK=10, travel=H-PEEK, open=false, down=null, phone=matchMedia('(max-width:1023px)');
+    function stack(){ return document.querySelector('.wm-chrome > [data-hide]'); }
+    function setP(p){ tray.style.setProperty('--tray-p',p); scrim.style.setProperty('--tray-p',p); var st=stack(); if(st){ if(p>0) st.setAttribute('data-hidden',''); else st.removeAttribute('data-hidden'); } }
+    function set(o){ open=o; tray.classList.toggle('open',o); scrim.classList.toggle('on',o); setP(o?1:0); }
+    /* the letter's ink middle, read off the glyph (canvas: the ink box about the baseline; the baseline from a probe),
+       onto the band's middle: shut, the tile is 12 down, the band's middle 5 up from the tray's bottom */
+    function shift(){ if(!phone.matches) return; var cv=document.createElement('canvas').getContext('2d');
+      tray.querySelectorAll('.wm-tray-tile').forEach(function(t){ var b=t.querySelector('b'); if(!b||!b.firstChild) return;
+        var cs=getComputedStyle(b); cv.font=cs.fontWeight+' '+cs.fontSize+' '+cs.fontFamily; var m=cv.measureText(b.textContent);
+        var probe=document.createElement('span'); probe.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline'; b.appendChild(probe);
+        var base=probe.getBoundingClientRect().top; probe.remove();
+        var bShift=parseFloat(cs.translate.split(' ')[1]||'0')||0, tShift=parseFloat(getComputedStyle(t).translate.split(' ')[1]||'0')||0;
+        var trayT=parseFloat(getComputedStyle(tray).translate.split(' ')[1]||'0')||0;
+        var mid=base-trayT-(m.actualBoundingBoxAscent-m.actualBoundingBoxDescent)/2-bShift-tShift;   /* the ink middle, open, in the tray's own frame */
+        var trayBottom=tray.getBoundingClientRect().bottom-trayT;
+        var want=trayBottom-PEEK/2;   /* the band's middle, shut, is PEEK/2 above the tray's bottom */
+        t.style.setProperty('--shift',(want-mid-12).toFixed(2)+'px'); }); }
+    function pull(e){ if(e.target.closest('.wm-tray-tile')) return;   /* a tile's tap is its own click (capturing it would retarget the click) */
+      down={y:e.clientY,id:e.pointerId,moved:false,el:e.currentTarget}; e.currentTarget.setPointerCapture(e.pointerId); }
+    function move(e){ if(!down||e.pointerId!==down.id) return; var dy=e.clientY-down.y; if(Math.abs(dy)>4) down.moved=true; if(!down.moved) return;
+      tray.classList.add('is-drag'); setP(Math.min(1,Math.max(0,(open?1:0)+dy/travel))); }
+    function up(e){ if(!down||e.pointerId!==down.id) return; var dy=e.clientY-down.y, moved=down.moved, el=down.el; down=null; tray.classList.remove('is-drag');
+      if(moved){ var p=Math.min(1,Math.max(0,(open?1:0)+dy/travel)); set(open? p>2/3 : p>1/3); return; }
+      if(el===edge){ /* a tap on the pull zone: handed to what is under it */ edge.hidden=true; var u=document.elementFromPoint(e.clientX,e.clientY); edge.hidden=false; if(u&&u!==edge) u.click(); return; }
+      if(el===tray&&!e.target.closest('.wm-tray-tile')) set(!open); }
+    [tray,edge].forEach(function(el){ el.addEventListener('pointerdown',pull); el.addEventListener('pointermove',move); el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up); });
+    scrim.addEventListener('pointerdown',function(){ set(false); });
+    shift(); addEventListener('resize',shift); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(shift);
   })();
   addEventListener('scroll',redraw,{passive:true}); pan.addEventListener('scroll',redraw,{passive:true});
   addEventListener('resize',redraw); addEventListener('wm-zoom',redraw);
@@ -2825,7 +2875,7 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
   </main></div>
   </div>
   <div class="wm-lb"><canvas id="lb-footer" aria-label="WORDMARK"></canvas></div>
-  <div class="wm-chrome"><div class="wm-tray" aria-label="Grid overlays"><button type="button" class="wm-key" data-overlay="cols" aria-pressed="false" aria-label="G, show the columns">G</button><button type="button" class="wm-key" data-overlay="lines" aria-pressed="false" aria-label="L, show the baseline">L</button></div><div data-hide="scroll swipe">
+  <div class="wm-chrome"><div class="wm-tray-scrim"></div><div class="wm-tray-edge"></div><div class="wm-tray" aria-label="Grid overlays"><button type="button" class="wm-key wm-tray-tile" data-overlay="cols" aria-pressed="false" aria-label="G, show the columns"><b>G</b><span>columns</span></button><button type="button" class="wm-key wm-tray-tile" data-overlay="lines" aria-pressed="false" aria-label="L, show the baseline"><b>L</b><span>baseline</span></button></div><div data-hide="scroll swipe">
     <div class="wm-theme" role="group" aria-label="Color scheme">
       <button type="button" class="wm-icon-btn active" data-theme-pick="auto" aria-pressed="true" aria-label="Auto color scheme"><span class="wm-icon" aria-hidden="true" translate="no">brightness_auto</span></button>
       <button type="button" class="wm-icon-btn" data-theme-pick="light" aria-pressed="false" aria-label="Light color scheme"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
