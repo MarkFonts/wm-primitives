@@ -7,7 +7,7 @@ Every token below is the consuming app's to define on its root. `color.css`, `ty
 
 | token | what it is | without it |
 | --- | --- | --- |
-| `--accent` | the colour every active state paints from: the focused value and its rule, the marker, focus rings | controls show no active state -- a focused dial looks like a resting one |
+| `--accent` | the app's override of the house signal, for every active state: the focused value and its rule, the marker, focus rings. The package reads var(--accent, var(--signal)) for fills and var(--signal-ink, var(--accent)) for thin uses | nothing breaks: --signal and --signal-ink (below) supply the house signal |
 | `--axis-label-w` | the dial's name column, a floor (DIAL §5); measure the rail's widest name including the auto pill | defaults to 105px; long names push the tags out of their column (R2) |
 | `--bg` | the page ground | the rail bar and chips paint transparent over whatever the page has |
 | `--bg-elevated` | a raised surface: the boxed value field | falls back to --surface |
@@ -44,5 +44,14 @@ Every token below is the consuming app's to define on its root. `color.css`, `ty
 | `--w-bold` | bold weight number (UiKitBoard only) | gallery only |
 | `--w-default` | default weight number (UiKitBoard only) | gallery only |
 | `--warn` | warning signal colour | a literal amber |
+
+## Defaults the package provides
+
+`color.css` defines these on the root, in both themes. Define `--accent` to override; the package reads `var(--accent, var(--signal))` for fills and `var(--signal-ink, var(--accent))` for thin uses.
+
+| token | what it is |
+| --- | --- |
+| `--signal` | the house signal for fills: handle bodies, filled tracks, chosen grounds, filled marks. Dark #eeff41 (P3 0.9333 1 0.2549); light #96d500 (P3 0.6240 0.8394 0) |
+| `--signal-ink` | the house signal for thin uses: value text, rules, rings, outlines, underlines. Dark #eeff41 (P3 0.9333 1 0.2549); light #557b00 (P3 0.3556 0.4859 0) |
 
 Runtime tokens (`--chevron-stroke`, `--gp-asc`, `--gp-desc`, `--gp-ffs`, `--gp-font`, `--gp-fvs`, `--gp-opsz`, `--locked-pct`, `--pct`, `--stack-drag`) are set by this package's own JS on its own elements and are not a contract with anybody.

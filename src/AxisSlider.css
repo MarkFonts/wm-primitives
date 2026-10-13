@@ -146,8 +146,8 @@
   .slider-number:focus,
   .slider-row:focus-within .slider-number {
     outline: none;
-    color: var(--accent, currentColor);
-    text-decoration-color: var(--accent, currentColor);
+    color: var(--signal-ink, var(--accent, currentColor));
+    text-decoration-color: var(--signal-ink, var(--accent, currentColor));
     text-decoration-thickness: 2px;
   }
 
@@ -224,7 +224,7 @@
      That is the same trap color.css is written to document. The fallback belongs inside
      the var(), where it covers the undefined case without ever being a declaration. */
   .slider-auto--on { color: var(--ok, #00a01e); }
-  .slider-auto:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+  .slider-auto:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }
   .slider-auto-dot { font-size: .7em; position: relative; top: -1px; }
   .slider-auto-word { text-transform: uppercase; letter-spacing: normal; }
   @media (pointer: coarse) { .slider-auto { padding: 6px 0; } }
@@ -309,7 +309,7 @@
   }
   .slider-step-btn svg { display: block; }
   .slider-step-btn:hover { color: var(--text); }
-  .slider-step-btn:focus-visible { outline: 1px solid var(--accent, currentColor); }
+  .slider-step-btn:focus-visible { outline: 1px solid var(--signal-ink, var(--accent, currentColor)); }
 
   /* The press lands as a filled circle behind the chevron. A background on the button
      itself would be a 16x12 pill; this is a true circle sized to the button's short side,
@@ -493,7 +493,7 @@
      default-editing rails. Pairs with `reference` to burn the stock value behind it. */
   .slider-row--diamond input[type="range"]::-webkit-slider-thumb {
     width: 12px; height: 12px; border-radius: 2px;
-    background: var(--marker-default, var(--accent, var(--text)));
+    background: var(--marker-default, var(--accent, var(--signal)));
     transform: rotate(45deg);
     box-shadow: 0 0 0 1px var(--bg);
     /* Centred on the 2px track the same way the round thumb is (above): half the
@@ -502,7 +502,7 @@
   }
   .slider-row--diamond input[type="range"]::-moz-range-thumb {
     width: 12px; height: 12px; border-radius: 2px;
-    background: var(--marker-default, var(--accent, var(--text)));
+    background: var(--marker-default, var(--accent, var(--signal)));
     transform: rotate(45deg);
     box-shadow: 0 0 0 1px var(--bg);
   }
@@ -587,7 +587,7 @@
      a rule that cannot match is worse than a simpler one that can, and this needs no
      :has() support to work. */
   .slider-row--track .slider-track-wrap input[type="range"]:focus-visible {
-    outline: 2px solid var(--accent, currentColor);
+    outline: 2px solid var(--signal-ink, var(--accent, currentColor));
     outline-offset: 2px;
     border-radius: var(--radius, 6px);
   }
@@ -595,7 +595,7 @@
   /* The selection highlight is the browser's, not ours -- it arrives in the OS accent,
      which is the one colour on the row nobody chose. Naming it keeps a selected value
      inside the system. */
-  .slider-number::selection { background: var(--accent, currentColor); color: var(--bg, var(--surface)); }
+  .slider-number::selection { background: var(--accent, var(--signal)); color: var(--bg, var(--surface)); }
 
   /* The bar is a drag surface, so a drag across it must not select the label text -- the
      study sets this on .v2 .bar for the same reason. The number opts back in, or you could

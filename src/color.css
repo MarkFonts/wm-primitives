@@ -39,7 +39,10 @@
  *
  * SCOPE: the seven tokens below are the ones the package reads unguarded -- --text (51
  * reads), --border (39), --text-muted (32), --text-dim (15), --bg (9), --surface (3),
- * --surface-hi (1). Still undefaulted, and still the app's job: --accent, --err, --ok,
+ * --surface-hi (1). Also defaulted: --signal and --signal-ink (the house signal; fill and thin-use ink).
+ * --accent remains the app's override: the package reads var(--accent, var(--signal)) for
+ * fills and var(--signal-ink, var(--accent)) for thin uses. Still undefaulted, and still
+ * the app's job: --accent, --err, --ok,
  * --warn, --muted, --bg-elevated, --bg-hover, --border-subtle, --surface-2,
  * --marker-default, --track-empty, --scrollbar-thumb*, --edit-rail*.
  *
@@ -67,6 +70,12 @@
     --text-muted: rgba(232, 232, 232, .62);  --text-muted: oklch(from var(--text) l c h / var(--a-2));
     --text-dim:   rgba(232, 232, 232, .38);  --text-dim:   oklch(from var(--text) l c h / var(--a-3));
     --border:     rgba(232, 232, 232, .14);  --border:     oklch(from var(--text) l c h / var(--a-line));
+
+    /* The house signal. --accent stays the app's override; the package reads
+       var(--accent, var(--signal)) for fills and var(--signal-ink, var(--accent)) for
+       thin uses (rings, rules, value text), where the light-mode fill is too pale. */
+    --signal:     #eeff41;  --signal:     color(display-p3 0.9333 1 0.2549);
+    --signal-ink: #eeff41;  --signal-ink: color(display-p3 0.9333 1 0.2549);
   }
 
   /* Light. Seven numbers and seven hexes -- the hex half moves too, or a legacy engine
@@ -86,6 +95,8 @@
       --text-muted: oklch(from var(--text) l c h / var(--a-2));
       --text-dim:   oklch(from var(--text) l c h / var(--a-3));
       --border:     oklch(from var(--text) l c h / var(--a-line));
+      --signal:     #96d500;  --signal:     color(display-p3 0.6240 0.8394 0);
+      --signal-ink: #557b00;  --signal-ink: color(display-p3 0.3556 0.4859 0);
     }
   }
 
@@ -105,6 +116,8 @@
     --text-muted: oklch(from var(--text) l c h / var(--a-2));
     --text-dim:   oklch(from var(--text) l c h / var(--a-3));
     --border:     oklch(from var(--text) l c h / var(--a-line));
+    --signal:     #eeff41;  --signal:     color(display-p3 0.9333 1 0.2549);
+    --signal-ink: #eeff41;  --signal-ink: color(display-p3 0.9333 1 0.2549);
   }
 
   :root[data-theme="light"] {
@@ -121,5 +134,7 @@
     --text-muted: oklch(from var(--text) l c h / var(--a-2));
     --text-dim:   oklch(from var(--text) l c h / var(--a-3));
     --border:     oklch(from var(--text) l c h / var(--a-line));
+    --signal:     #96d500;  --signal:     color(display-p3 0.6240 0.8394 0);
+    --signal-ink: #557b00;  --signal-ink: color(display-p3 0.3556 0.4859 0);
   }
 }

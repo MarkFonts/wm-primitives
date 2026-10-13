@@ -376,7 +376,7 @@
   /* The ring is on the BUTTON, not the mark: an outline on an inline glyph traces the
      text box, which is tight to the ink and reads as a mistake. */
   .wm-icon-btn:focus-visible {
-    outline: 2px solid var(--accent, currentColor);
+    outline: 2px solid var(--signal-ink, var(--accent, currentColor));
     outline-offset: 2px;
   }
 

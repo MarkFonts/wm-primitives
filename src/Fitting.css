@@ -85,7 +85,7 @@
 .fit-align-btn:focus { outline: none; }
 /* The ring goes on the button, not the glyph: an outline on an inline mark traces the
    ink and reads as a mistake. */
-.fit-align-btn:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+.fit-align-btn:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }
 @media (pointer: coarse) { .fit-align-btn { width: 44px; height: 44px; } }
 
 /* A sub-switch inside a collapsed section: the rag's budgets, and the H&J disclosure.
@@ -134,9 +134,9 @@
 .fit-chip {
   padding: 0 var(--spacing-02, 6px);
   border-radius: var(--radius-sm, 4px);
-  background: color-mix(in srgb, var(--accent, #7cc4ff) 18%, transparent);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--accent, #7cc4ff) 35%, transparent);
-  color: var(--accent, #7cc4ff);
+  background: color-mix(in srgb, var(--accent, var(--signal, #7cc4ff)) 18%, transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent, var(--signal, #7cc4ff)) 35%, transparent);
+  color: var(--signal-ink, var(--accent, #7cc4ff));
   /* 8px, deliberately below the type scale: the badge has to sit BESIDE its label on a
      narrow rail, and at the system size it wrapped underneath — which is the crowding
      that shortening "glyph scaling" to "glyph" was meant to fix.

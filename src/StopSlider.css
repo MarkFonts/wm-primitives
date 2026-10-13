@@ -56,7 +56,7 @@
   background: color-mix(in srgb, transparent calc(var(--confirm-off, 0) * 100%), var(--text, #e8e8e8));
   color: color-mix(in srgb, var(--text-muted, rgba(232, 232, 232, .62)) calc(var(--confirm-off, 0) * 100%), var(--bg, #0f0f0f));
 }
-.wm-stops-row button:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 1px; }
+.wm-stops-row button:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 1px; }
 
 /* The rail grows out of the right-hand edge, where the grip is parked. */
 .wm-stops-rail {
@@ -88,7 +88,7 @@
 /* No transition while a pointer is driving it: the thumb must track the finger, not chase
    it a third of a second behind. */
 .wm-stops.is-drag .wm-stops-knob, .wm-stops.is-drag .wm-stops-rail { transition: none; }
-.wm-stops-knob:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 3px; }
+.wm-stops-knob:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 3px; }
 
 /* The two dashes that say drag me, gone once it is a thumb. */
 .wm-stops-knob::before, .wm-stops-knob::after {
@@ -113,4 +113,4 @@
 .wm-stops.is-free .wm-stops-reset { opacity: .5; pointer-events: auto; }
 .wm-stops.is-free .wm-stops-reset:hover { opacity: 1; }
 .wm-stops-reset.is-spin { transform: translateY(-50%) rotate(-360deg); }
-.wm-stops-reset:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; opacity: 1; }
+.wm-stops-reset:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; opacity: 1; }

@@ -347,8 +347,8 @@ to be quiet against.
 
 ### Hue is not an ink
 
-`--signal` (`#eeff41` on dark, `#5c6b00` on light) is not part of the ink scale and is
-not one of the five signals.
+`--signal` (`#eeff41` on dark, `#96d500` on light, for fills) and `--signal-ink` (`#eeff41` on dark, `#557b00` on light, for thin uses) are not part of the ink scale and are
+not among the five signals.
 It has exactly one job: **pointing at the thing under discussion** — the value being
 explained, the word a sentence is about, the cell a control is editing. It never marks
 hierarchy and it never means "important."

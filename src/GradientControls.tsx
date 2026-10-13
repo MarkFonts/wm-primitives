@@ -311,7 +311,7 @@ export interface GradientSpec {
 
 export const GRADIENT_DEFAULTS: GradientSpec = {
   kind: 'scrim', ease: EASES.clothoid, stops: 8, angle: 180,
-  from: 'var(--bg)', to: 'var(--accent)', space: 'oklab',
+  from: 'var(--bg)', to: 'var(--accent, var(--signal))', space: 'oklab',
   radius: 24, layers: 6, asMask: false, hold: 0,
   chSpace: 'srgb', chEase: [undefined, undefined, undefined],
 }
@@ -361,7 +361,7 @@ const PRESET_LABEL: Record<EaseName, string> = {
 }
 /* The tokens a ramp is actually built from here. A free field is still there for anything
    else; this is so the common case is not typing `var(--surface-hi)` from memory. */
-const TOKENS = ['var(--bg)', 'var(--surface)', 'var(--surface-hi)', 'var(--text)', 'var(--accent)']
+const TOKENS = ['var(--bg)', 'var(--surface)', 'var(--surface-hi)', 'var(--text)', 'var(--accent, var(--signal))']
 
 export interface GradientControlsProps {
   value: GradientSpec

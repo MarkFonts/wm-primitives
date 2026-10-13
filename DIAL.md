@@ -144,8 +144,9 @@ one has to out-specify anyone. Two consequences that cost an evening:
 
 **Theming from outside, in two sentences.** Every active state the dial paints — the
 focused value and its underline, the marker, the focus rings — comes from **`--accent`**,
-which `color.css` leaves for the app to define. A host that wants its signal colour there
-sets `--accent: var(--signal)` on its root and changes nothing else: no selector, layered
+which `color.css` leaves for the app to define; undefined, the dial reads the package's own
+`--signal` (fills) and `--signal-ink` (thin uses), so the house signal is the default. A host
+that wants a different colour there sets `--accent` on its root and changes nothing else: no selector, layered
 or not, and nothing under `shared/`. And the label is *already* one ink step below the
 value: its `--text-muted` is the same number as `--ink-quiet`, by design.
 

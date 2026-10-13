@@ -44,7 +44,7 @@ it.
 
 Every rule this package writes is inside `@layer wm.*`. **An unlayered rule in your app
 beats any of them, at any specificity, first try.** Theme through tokens
-(`--accent: var(--signal)`), choose behavior through props, and reach in with a
+(the house signal is `--signal` / `--signal-ink`, defaulted in `color.css`; define `--accent` to override it), choose behavior through props, and reach in with a
 selector only as a last resort — where the layer guarantees you win. The header of
 `src/AxisSlider.css` is the long form.
 

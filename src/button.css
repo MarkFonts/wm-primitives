@@ -92,7 +92,7 @@
   }
   .wm-btn:disabled { opacity: .4; cursor: default; }
   .wm-btn:focus { outline: none; }
-  .wm-btn:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+  .wm-btn:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }
   /* Two or more side by side: a row, not a stack. */
   .wm-btn-row { display: flex; gap: var(--spacing-02, 6px); flex-wrap: wrap; }
   .wm-btn-row > .wm-btn { flex: 1 1 auto; }
