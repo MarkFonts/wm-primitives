@@ -134,8 +134,14 @@ code{font-family:var(--ui-font,"Face",system-ui,sans-serif);font-variation-setti
    two lines of 48): it is set to the line's top instead, which cannot grow a line it is shorter
    than, and moved down by --tc-top -- the line box's top over the baseline (its rounded ascent
    plus the floored half-leading) less the cap's height above it -- with `top`, which moves the
-   glyphs and not the layout. */
-.gx-tc{margin:0 0 48px;--tc-key:21px;--tc-key-fs:12px;--tc-top:1px;--tc-n:12;--tc-first:1}
+   glyphs and not the layout.
+   2026-10-13: the letter is on the line too. A button centres its content in the box inside its borders,
+   so line-height alone does not move the letter; --tc-pt / --tc-pb (padding) with --tc-lh do. Measured
+   (cap letter's baseline less the heading's, px): before -5, -6, -4, -6, -8 at phone, 681, 1024, 1152,
+   1312 -- 1, 0, 2, 0, 1 off the 3px line; now -6, -6, -3, -6, -9, all on it. Box heights (21, 24, 30, 36,
+   42) and the 1px / 3px borders are unchanged; the letter moves 1px (up at phone and 1312, down at
+   1024), the rest stay put. */
+.gx-tc{margin:0 0 48px;--tc-key:21px;--tc-key-fs:12px;--tc-top:1px;--tc-lh:15px;--tc-pt:0px;--tc-pb:2px;--tc-n:12;--tc-first:1}
 .gx-tc-in{position:relative;overflow:hidden;background:var(--surface,#fff);border-radius:var(--radius,6px);padding-block:24px 36px}
 .gx-tc-cv{position:absolute;left:0;top:0;pointer-events:none}
 .gx-tc-cols{position:absolute;inset:0;padding-inline:inherit;display:grid;pointer-events:none;
@@ -152,8 +158,8 @@ code{font-family:var(--ui-font,"Face",system-ui,sans-serif);font-variation-setti
 .gx-tc-side p:last-child{margin-bottom:0}
 .gx-tc-side b{color:var(--ink,#17181a);font-weight:600}
 .gx-tc .gx-key{display:inline-block;box-sizing:border-box;height:var(--tc-key);min-width:var(--tc-key);margin:0 .06em;
-  padding:0 calc(var(--tc-key) / 4);vertical-align:top;position:relative;top:var(--tc-top);
-  font:inherit;font-size:var(--tc-key-fs);line-height:calc(var(--tc-key) - 4px);font-weight:400;font-variation-settings:"GEOM" 100;
+  padding:var(--tc-pt) calc(var(--tc-key) / 4) var(--tc-pb);vertical-align:top;position:relative;top:var(--tc-top);
+  font:inherit;font-size:var(--tc-key-fs);line-height:var(--tc-lh);font-weight:400;font-variation-settings:"GEOM" 100;
   text-align:center;color:var(--ink,#17181a);background:var(--surface-hi,#ebebeb);cursor:pointer;
   border:1px solid var(--ink-3,rgba(23,24,26,.38));border-bottom-width:3px;border-radius:calc(var(--tc-key) / 5);
   /* 2026-10-13: literal .15s -> the house duration + ease tokens (same 140ms feel). */
@@ -162,26 +168,26 @@ code{font-family:var(--ui-font,"Face",system-ui,sans-serif);font-variation-setti
 .gx-tc .gx-key:hover{border-color:var(--ink,#17181a)}
 .gx-tc .gx-key[aria-pressed="true"]{color:var(--bg,#f4f4f4);background:var(--ink,#17181a);border-color:var(--ink,#17181a)}
 @media (min-width:681px){
-  .gx-tc{--tc-key:24px;--tc-key-fs:15px;--tc-top:3px}
+  .gx-tc{--tc-key:24px;--tc-key-fs:15px;--tc-top:3px;--tc-lh:20px;--tc-pt:0px;--tc-pb:0px}
   .gx-tc-big{grid-column:2 / span 7;font-size:28px;--lh:30px}
   .gx-tc-side{grid-column:9 / span 3;margin-top:0;padding-top:12px}
   .gx-tc-side p{--lh:15px;margin-bottom:15px}
 }
 @media (min-width:1024px){
-  .gx-tc{--tc-key:30px;--tc-key-fs:18px;--tc-top:5px;--tc-n:18;--tc-first:7}
+  .gx-tc{--tc-key:30px;--tc-key-fs:18px;--tc-top:5px;--tc-lh:26px;--tc-pt:1px;--tc-pb:0px;--tc-n:18;--tc-first:7}
   .gx-tc-in{padding-block:24px 48px}
   .gx-tc-big{grid-column:2 / span 10;font-size:33px;--lh:36px}
   .gx-tc-side{grid-column:13 / span 5;padding-top:15px}
   .gx-tc-side p{--lh:18px;margin-bottom:18px}
 }
 @media (min-width:1152px){
-  .gx-tc{--tc-key:36px;--tc-key-fs:21px;--tc-top:3px}
+  .gx-tc{--tc-key:36px;--tc-key-fs:21px;--tc-top:3px;--tc-lh:32px;--tc-pt:0px;--tc-pb:0px}
   .gx-tc-big{font-size:39px;--lh:42px}
   .gx-tc-side{padding-top:18px}
   .gx-tc-side p{--lh:21px;margin-bottom:21px}
 }
 @media (min-width:1312px){
-  .gx-tc{--tc-key:42px;--tc-key-fs:24px;--tc-top:2px}
+  .gx-tc{--tc-key:42px;--tc-key-fs:24px;--tc-top:2px;--tc-lh:36px;--tc-pt:0px;--tc-pb:2px}
   .gx-tc-in{padding-block:24px 72px}
   .gx-tc-big{font-size:45px;--lh:48px}
   .gx-tc-side{padding-top:21px}
