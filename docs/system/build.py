@@ -254,7 +254,7 @@ PRIMITIVE_CSS_PART = {
 
 # ---------------------------------------------------------------- the line
 # The page is on the grid (GRID.md): <main> is the .wm-lines root. What is on the line is the
-# shell's own copy -- section numbers, the README -- and the Grid part of Type, which is
+# shell's own copy -- chapter openers, the README -- and the Grid part of Type, which is
 # about it. Every other chapter is a STAGE, marked data-nosnap: it sets its own type, and
 # putting it on the line means setting a --lh wherever it sets a size, chapter by chapter.
 # Measured 2026-10-02 at 1440 / 800 / 390 with every chapter on, what each would need:
@@ -1296,7 +1296,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
    galleries beside them read as a page that had got wider. 1080px, Mark's number,
    2026-09-20. The hero stays full-bleed: it is composed for the viewport, not a column. */
 .wm-sec{padding:0;max-width:1080px}
-/* THE OPENER (build.py OPENERS): the marker, one lede, the numbers. On the line: 63 and 24 of
+/* FALLBACK BOX ONLY: the current opener is GRAMMAR_CSS below -- a gigantic numeral (poster-4, 135
+   line, --ink-3) hung in the empty column left of the text, baseline on the name's, a kicker above
+   the name in --ink-3, a one-sentence lede beside; never a small number next to a title.
+   THE OPENER (build.py OPENERS): the marker, one lede, the numbers. On the line: 63 and 24 of
    padding and 57 above, the marker's box 30 (title), 9 to the lede's 27, 24 to the figure. The
    rule above is an inset shadow, not a border, so it adds no height and the opener stays whole units.
    The marker is the title role, 26/30 at 400, and the largest heading on the page: its number
@@ -1309,7 +1312,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-sec{--h-ink:var(--ink);--h-ink-3:var(--ink-3);--h-line:var(--line)}
 .wm-mark{margin:0;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);font-weight:400;
   letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums}
-.wm-mark u{text-decoration:none;color:var(--ink-3)}
+.wm-mark u{text-decoration:none;color:var(--ink-3)}   /* dead: no markup emits it since 2026-10-11 */
 .wm-lede{margin:9px 0 0;max-width:60ch;font-size:var(--type-lede-size,1.125rem);--lh:var(--lead-lede);
   color:var(--ink);text-wrap:pretty}
 /* code in a lede (the appendix's holo.css) at line-height 1, so a second face cannot grow the line */
@@ -2573,9 +2576,10 @@ TAIL = ("" if not LINKED else "\n</body></html>")
 
 # THE TWO HEADING LEVELS (OPENERS above). Scoped through every section's id, so a page's own
 # `#s-x h2` cannot outrank them, and emitted after the sections' CSS, so a tie is the shell's.
-#   h2  the chapter: label 12/15 caps at 400, full ink, a 1px rule. 15 + 5 + 1 = 21, seven
-#       units; 48 above and 15 below, so what follows starts on a line. A note in a nested span
-#       rides the same baseline, sentence case, faint.
+#   h2  the chapter: title role 26/30 at 400, full ink, no rule; 72 above, 12 below. A numbered h2
+#       hangs its number in the hang column (column 6), --ink-3, at the heading's own size
+#       (u.wm-hang), never a micro label. A note in a nested span rides the same baseline, sentence
+#       case, faint.
 #   h3  the sub-subject: lede 18/27 at 400, sentence case, no rule, 24 above and 9 below.
 # The same margins wherever a head sits: the first chapter is 24 + 48 under its opener.
 HEADS_CSS = """
@@ -2598,7 +2602,10 @@ HEADS_CSS = """
 # empty column 6 and its gutter, between the rail and the text (Mark, 2026-10-09: the hang does not spend a
 # content column): the section numeral, list numerals and bullets, a run-in's words, right-aligned to column
 # 6's edge. Prose runs on columns 7-16 and hugs column 7; figures start there too. Captions are the ui role,
-# sentence case, ink-3, at most six columns. The opener is two columns with a fifth of the viewport above it.
+# sentence case, ink-3, at most six columns. The opener is two columns with 42vh (20vh for section zero) above it.
+# Two numeral kinds, both --ink-3: the OPENER's (poster-4, 135 line, hung left of the text, baseline on
+# the name's) and a numbered h2's (the head's own size, hung on column 6). There is no third kind: no
+# label-size number or letter beside a title.
 GRAMMAR_CSS = """
 .wm-main{container-type:inline-size;--col:calc((100cqw - 17 * var(--grid-gutter)) / 18);--hangw:calc(var(--col) + var(--grid-gutter))}
 .wm-sec{max-width:none}
@@ -2608,7 +2615,7 @@ GRAMMAR_CSS = """
 /* a code block keeps the measure too and scrolls inside it, rather than running out to the window (the zoom's markup did) */
 .wm-main :is(__IDS__) pre{overflow-x:auto;box-sizing:border-box}
 /* the opener */
-/* a fifth of the viewport from the section above's last edge to the name's baseline: 30 + 23.5 of it is the kicker line */
+/* 42vh from the section above's last edge to the name's baseline: 30 + 23.5 of it is the kicker line */
 .wm-sec-head{padding:0 0 24px;margin-top:var(--open-gap);box-shadow:none;position:relative;
   --open-gap:round(nearest, calc(42vh - 54px), 3px)}
 /* no break before section zero (Mark, 2026-10-11): the hero is above it, and the gap stays the old 20vh */
@@ -2708,7 +2715,7 @@ GRAMMAR_CSS = """
 }
 u[data-d="0"]{--dt:0.0579}u[data-d="1"]{--dt:0.0995}u[data-d="4"]{--dt:0.037}
 u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="8"],u[data-d="9"]{--dt:0.0787}
-/* below 1024: no hang column to speak of; the numeral is a label before the kicker, the run-in a line above */
+/* below 1024: the numeral is not a label: 72vw (cap 312px) in the left half, kicker over name in the right half, a screen of space before it (THE PHONE OPENER below); run-ins stack a line above. */
 @media (max-width:1023px){
   .wm-main{--col:calc((100cqw - 11 * var(--grid-gutter)) / 12)}
   .wm-main .wm-body:is(__IDS__){max-width:none}

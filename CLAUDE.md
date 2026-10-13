@@ -63,3 +63,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+## House type rules
+
+Chapter heads are the hung gigantic numeral per TYPOGRAPHY.md §VII "Chapter heads", never a micro number or letter beside a heading. That applies to proposal pages too.

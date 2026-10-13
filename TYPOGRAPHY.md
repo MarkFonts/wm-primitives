@@ -439,7 +439,8 @@ The seven roles top out at `display` (45px), and the number is not arbitrary: at
 the last step that still has optical sizing left to give — above it the axis is pinned
 at maximum whatever you do. Text ends where the axis ends, and above that lives
 another instrument: the monster sample. The hero word
-on a family page, the Words scene, a specimen waterfall.
+on a family page, the Words scene, a specimen waterfall. On the system page, poster-4
+sets the chapter numeral (§VII, Chapter heads).
 
 Up there the rules change, and it is worth saying why. At text sizes you name the
 **job**, because size alone does not tell a reader what a thing is. At display sizes
@@ -513,6 +514,19 @@ Expect ~10 genuine one-offs; give those `--type-once-*` and a comment saying why
 **5 · Hold the line.** Lint raw `font-size` outside `type.css`. Then density.
 
 ## VII. House style
+
+### Chapter heads
+
+**Chapter heads.** A chapter opens with a gigantic numeral, not a label. The numeral is
+poster-4 (136 in a 135 line), set in `--ink-3`, hung in the empty column to the left of
+the text with its baseline on the chapter name's. Above the name sits a kicker word in
+`--ink-3`, and a one-sentence lede sits beside them. On a phone the numeral is 72vw (cap
+312px), takes half the columns, and gets a screen of space before it. A numbered h2
+inside a chapter hangs its number in the hang column (column 6), in `--ink-3`, at the
+heading's own size. There is no micro or label-size number or letter beside a title
+anywhere, and the appendix's "A" is the word Appendix, set at the numeral's size. Do not
+rebuild a chapter head from `t-micro` or `t-label`: if a page needs a section marker,
+reuse the opener (`.wm-open`, `.wm-dg`) or `u.wm-hang`.
 
 - **Never let the browser synthesise a style.** Cal Sans has a drawn italic on the
   `ital` axis; `font-style: italic` makes the browser shear the upright instead, which

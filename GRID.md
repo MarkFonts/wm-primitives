@@ -274,7 +274,8 @@ Big type beside small, as rules. Each is held by a spec check where one exists (
 6. **Set an eyebrow or a label on line 0 of its title, one lead above the first baseline, never
    nearer.** With the big text sized to the step its x-height sits on a half line, so the safe
    area above a title is exactly one of its leads: -48 for 45/48. An eyebrow at -30 is inside it,
-   18px short. Check 12.
+   18px short. Check 12. An eyebrow is words above a title. It is never a number or letter beside
+   one; chapter numbers are the hung numerals (TYPOGRAPHY.md §VII).
 7. **Let annotations and one-line blocks keep their own lead.** Micro, label and ui text, and any
    block that runs to one line, share the row's first baseline and nothing after it. They are not
    part of the step, so a 9/12 note beside an 18/27 lede is no conflict.
@@ -503,8 +504,9 @@ In this order. Each step names the trap it was written after.
 - **The system page is on the columns; most of it is not on the line.** The shell is the house
   grid with the house margin -- the rail on 5 of the 24, one empty column, the content from column 7
   to the margin (12 and a top bar below 1024) -- with sections still capped at a 1080px measure.
-  Only the README, the section numbers and the Grid part are on the line; the other chapters are
+  Only the README, the chapter openers (numeral, kicker, name, lede) and the Grid part are on the line; the other chapters are
   stages (docs/system/build.py, `OFF_LINE`, says what each would need). The spec still opts it out of
   the margin check (`ownEdges`), and the check would judge nothing there now anyway: `<main>` sits
   in the zoom control's `overflow-x: auto` pan box, which the check treats as an inset scroller.
   G and L toggle the columns and the lines on it at any time.
+  Chapter heads on it follow TYPOGRAPHY.md §VII, "Chapter heads".

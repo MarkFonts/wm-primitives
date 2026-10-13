@@ -575,7 +575,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
    galleries beside them read as a page that had got wider. 1080px, Mark's number,
    2026-09-20. The hero stays full-bleed: it is composed for the viewport, not a column. */
 .wm-sec{padding:0;max-width:1080px}
-/* THE OPENER (build.py OPENERS): the marker, one lede, the numbers. On the line: 63 and 24 of
+/* FALLBACK BOX ONLY: the current opener is GRAMMAR_CSS below -- a gigantic numeral (poster-4, 135
+   line, --ink-3) hung in the empty column left of the text, baseline on the name's, a kicker above
+   the name in --ink-3, a one-sentence lede beside; never a small number next to a title.
+   THE OPENER (build.py OPENERS): the marker, one lede, the numbers. On the line: 63 and 24 of
    padding and 57 above, the marker's box 30 (title), 9 to the lede's 27, 24 to the figure. The
    rule above is an inset shadow, not a border, so it adds no height and the opener stays whole units.
    The marker is the title role, 26/30 at 400, and the largest heading on the page: its number
@@ -588,7 +591,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-sec{--h-ink:var(--ink);--h-ink-3:var(--ink-3);--h-line:var(--line)}
 .wm-mark{margin:0;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);font-weight:400;
   letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums}
-.wm-mark u{text-decoration:none;color:var(--ink-3)}
+.wm-mark u{text-decoration:none;color:var(--ink-3)}   /* dead: no markup emits it since 2026-10-11 */
 .wm-lede{margin:9px 0 0;max-width:60ch;font-size:var(--type-lede-size,1.125rem);--lh:var(--lead-lede);
   color:var(--ink);text-wrap:pretty}
 /* code in a lede (the appendix's holo.css) at line-height 1, so a second face cannot grow the line */
@@ -6473,7 +6476,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 /* a code block keeps the measure too and scrolls inside it, rather than running out to the window (the zoom's markup did) */
 .wm-main :is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage) pre{overflow-x:auto;box-sizing:border-box}
 /* the opener */
-/* a fifth of the viewport from the section above's last edge to the name's baseline: 30 + 23.5 of it is the kicker line */
+/* 42vh from the section above's last edge to the name's baseline: 30 + 23.5 of it is the kicker line */
 .wm-sec-head{padding:0 0 24px;margin-top:var(--open-gap);box-shadow:none;position:relative;
   --open-gap:round(nearest, calc(42vh - 54px), 3px)}
 /* no break before section zero (Mark, 2026-10-11): the hero is above it, and the gap stays the old 20vh */
@@ -6573,7 +6576,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 }
 u[data-d="0"]{--dt:0.0579}u[data-d="1"]{--dt:0.0995}u[data-d="4"]{--dt:0.037}
 u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="8"],u[data-d="9"]{--dt:0.0787}
-/* below 1024: no hang column to speak of; the numeral is a label before the kicker, the run-in a line above */
+/* below 1024: the numeral is not a label: 72vw (cap 312px) in the left half, kicker over name in the right half, a screen of space before it (THE PHONE OPENER below); run-ins stack a line above. */
 @media (max-width:1023px){
   .wm-main{--col:calc((100cqw - 11 * var(--grid-gutter)) / 12)}
   .wm-main .wm-body:is(#s-readme,#s-type,#s-corners,#s-controls,#s-space,#s-color,#s-motion,#s-usage){max-width:none}
@@ -7097,7 +7100,7 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
       <div class="roles wm-baselines">
         <div class="lbl"><p class="t-ui ink-faint">micro &#183; 9 / 12 &#183; 4 units<br>glyph captions &#183; <span class="spends">size</span></p></div>
         <div class="smp"><p class="t-micro">latin small letter a with ring above</p></div>
-        <div class="lbl"><p class="t-ui ink-faint">label &#183; 12 / 15 &#183; 5 units<br>eyebrows, section heads &#183; <span class="spends">case</span></p></div>
+        <div class="lbl"><p class="t-ui ink-faint">label &#183; 12 / 15 &#183; 5 units<br>run-in words, tags, controls &#183; <span class="spends">case</span></p></div>
         <div class="smp"><p class="t-label">Geometric form</p></div>
         <div class="lbl"><p class="t-ui ink-faint">ui &#183; 12 / 15 &#183; 5 units<br>all chrome &#183; the norm</p></div>
         <div class="smp"><p class="t-ui">Weight 400 &#183; Optical size auto &#183; Reset to defaults</p></div>
