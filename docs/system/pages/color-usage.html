@@ -861,7 +861,7 @@ the ones a value-to-token sweep would silently merge.</p>
      --bg #0f0f0f, --card #191919 against --surface #1a1a1a, --ink #e9e6df against
      #e8e8e8 -- so a theme change never reached them. They inherit now. */
   --gnd:var(--bg); --card:var(--surface); --ink2:var(--ink-2); --ink3:var(--ink-3);
-  --acc:var(--signal);
+  --acc:var(--signal-ink,var(--signal));
   /* warn is A11y orange: one hue, one lightness number per theme */
   --warn:#ff8557; --warn:oklch(var(--l-warn) .165 var(--hue-a11y));
 }

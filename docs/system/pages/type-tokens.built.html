@@ -8,6 +8,7 @@
     --text: #e8e8e8;  --text-rgb: 232, 232, 232;
     --border: #333333;  --border-subtle: #222222;
     --accent: #e8e8e8;  --signal: #eeff41; --signal:color(display-p3 0.9333 1 0.2549);
+    --signal-ink: #eeff41; --signal-ink:color(display-p3 0.9333 1 0.2549);
     --radius: 8px;
     --ui-font: "Face", system-ui, sans-serif;
     --ui-fvs: "GEOM" 25;
@@ -42,20 +43,23 @@
       --bg: #f5faff; --surface-1: #eaf3fb; --surface-2: #ddeaf6;
       --text: #111111; --text-rgb: 17, 17, 17;
       --border: #c4d8eb; --border-subtle: #d9e8f5;
-      --accent: #111111; --signal: #5c6b00; --signal:color(display-p3 0.3608 0.4196 0);
+      --accent: #111111; --signal: #96d500; --signal:color(display-p3 0.6240 0.8394 0);
+      --signal-ink: #557b00; --signal-ink:color(display-p3 0.3556 0.4859 0);
     }
   }
   :root[data-theme="light"] {
     --bg: #f5faff; --surface-1: #eaf3fb; --surface-2: #ddeaf6;
     --text: #111111; --text-rgb: 17, 17, 17;
     --border: #c4d8eb; --border-subtle: #d9e8f5;
-    --accent: #111111; --signal: #5c6b00; --signal:color(display-p3 0.3608 0.4196 0);
+    --accent: #111111; --signal: #96d500; --signal:color(display-p3 0.6240 0.8394 0);
+    --signal-ink: #557b00; --signal-ink:color(display-p3 0.3556 0.4859 0);
   }
   :root[data-theme="dark"] {
     --bg: #0f0f0f; --surface-1: #111111; --surface-2: #1a1a1a;
     --text: #e8e8e8; --text-rgb: 232, 232, 232;
     --border: #333333; --border-subtle: #222222;
     --accent: #e8e8e8; --signal: #eeff41; --signal:color(display-p3 0.9333 1 0.2549);
+    --signal-ink: #eeff41; --signal-ink:color(display-p3 0.9333 1 0.2549);
   }
 
   /* ---- the API ---- */
@@ -115,17 +119,17 @@
   .ledgers ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
   .ledgers li { display: grid; grid-template-columns: 92px 1fr; gap: 14px; align-items: baseline; }
   .ledgers li b { font-weight: 400; }
-  .free b { color: var(--signal); }
+  .free b { color: var(--signal-ink, var(--signal)); }
   .rule { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px;
     margin-top: 26px; display: flex; flex-direction: column; gap: 10px; background: var(--surface-1); }
-  .rule .never { color: var(--signal); }
+  .rule .never { color: var(--signal-ink, var(--signal)); }
 
   /* THE SEVEN ROLES: one table, on the line. A label that ends where its sample's first line
      begins (data-baseline="last"), then the sample at its real size and leading. */
   .roles { display: grid; grid-template-columns: minmax(0, 13rem) minmax(0, 1fr); column-gap: 24px; row-gap: 24px; }
   .roles > div > p { margin: 0; max-width: none; }
   .roles .body p { max-width: 48ch; }
-  .spends { color: var(--signal); }
+  .spends { color: var(--signal-ink, var(--signal)); }
   [data-ov] { position: relative; }
   [data-ov] > canvas { position: absolute; left: 0; top: 0; pointer-events: none; }
   .gx-box { padding: 24px 0; }
@@ -153,7 +157,7 @@
   .landings > div { background: var(--surface-1); padding: 22px 20px;
     display: flex; flex-direction: column; gap: 12px; }
   .landings .lz { display: flex; align-items: baseline; gap: 9px; }
-  .landings .lz b { font-weight: 400; color: var(--signal); letter-spacing: var(--track-caps); }
+  .landings .lz b { font-weight: 400; color: var(--signal-ink, var(--signal)); letter-spacing: var(--track-caps); }
   .landings p { margin: 0; }
 
   /* The same diagnostic string in all four cells - the only way to SEE the axis is to read
@@ -190,9 +194,9 @@
   @media (max-width: 1023px) { .demo, .split { grid-template-columns: 1fr; } }
   .o-small { font-variation-settings: "opsz" 8, var(--ui-fvs); }
   .o-large { font-variation-settings: "opsz" 45, var(--ui-fvs); }
-  .demo b { color: var(--signal); font-weight: 400; }
+  .demo b { color: var(--signal-ink, var(--signal)); font-weight: 400; }
 
-  .split .governed { color: var(--signal); }
+  .split .governed { color: var(--signal-ink, var(--signal)); }
   .split p { margin: 0; }
 
   /* Code pills stay in the Face, at the A11y landing. A system mono is the loudest thing
@@ -255,7 +259,7 @@
     <div class="fix" style="margin-top:26px;">
       <div>
         <div class="t-label ink-quiet">Two signals</div>
-        <div class="t-body" style="font-variation-settings: var(--ui-fvs), &#39;wght&#39; 640; color: var(--signal);">Cal Sans</div>
+        <div class="t-body" style="font-variation-settings: var(--ui-fvs), &#39;wght&#39; 640; color: var(--signal-ink, var(--signal));">Cal Sans</div>
         <p class="t-ui ink-quiet">Heavier <em>and</em> a different hue. Two ways of
           saying &#8220;this is the heading&#8221; &#8212; and the pair is the habit
           hardest to notice, because each half looks reasonable alone.</p>
@@ -277,7 +281,7 @@
     <div class="sec-head">
       <h2>The sixth signal: geom</h2>
       <p class="t-ui ink-quiet">Same size, weight, color, and case &#8212; the letters are
-        simply built differently. Four landings, at <b class="tnum" style="font-weight:400;color:var(--signal);">0
+        simply built differently. Four landings, at <b class="tnum" style="font-weight:400;color:var(--signal-ink, var(--signal));">0
         &#183; 25 &#183; 50 &#183; 100</b>. Each sits in the middle of a pad the font holds
         flat, so the landing is a plateau rather than a point &#8212; which is what makes it
         a decision you can return to instead of a number you happened to drag to.</p>
@@ -760,7 +764,7 @@
 
     <div class="ratio">
       <p class="t-body" style="flex:1; min-width:280px; margin:0;">
-        <b style="font-weight:400; color:var(--signal);">Ratio &#8730;2</b> &#8212; the
+        <b style="font-weight:400; color:var(--signal-ink, var(--signal));">Ratio &#8730;2</b> &#8212; the
         paper ratio, the one the A-series is built on, so every second step doubles
         exactly: 48 &#8594; 96 &#8594; 192. Tailwind&#8217;s 5xl&#8211;9xl walks 1.25,
         1.20, 1.33, 1.33 &#8212; four intervals pretending to be a scale.
@@ -824,8 +828,8 @@
     <div class="inks" style="margin-top:26px;">
       <div>
         <span class="t-ui ink-faint">--signal</span>
-        <span class="t-ui" style="color:var(--signal);">Hue is not an ink, and not one of the six signals.</span>
-        <span class="t-ui ink-faint">#eeff41 &#183; #5c6b00</span>
+        <span class="t-ui" style="color:var(--signal-ink, var(--signal));">Hue is not an ink, and not one of the six signals.</span>
+        <span class="t-ui ink-faint">#eeff41 &#183; #96d500 &#183; #557b00</span>
       </div>
     </div>
     <p class="t-body" style="padding-top:14px; max-width:66ch;">

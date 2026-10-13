@@ -228,6 +228,7 @@ PRIMITIVE_CSS = {
     # chevron.css carries the stepper stroke and its rollover; without it the docs page
     # draws chevrons at the browser's default stroke-width of 1, thinner than anything
     # that ships, since the weight left the SVG attribute so it could answer :hover.
+    "color": ("icon.css", "themeSwitch.css"),
     "controls": ("type.css", "motion.css", "chevron.css", "icon.css", "AxisSlider.css", "AxisTriplet.css", "chip.css", "dialHandle.css",
                  "themeSwitch.css", "zoomControl.css"),
 }
@@ -968,6 +969,7 @@ SHELL = """
   --l-ground:16.84%; --l-surface:21.78%; --l-surface-hi:26.45%; --l-ink:93.10%;
   --a-2:.62; --a-3:.38; --a-line:.14; --l-warn:74%;
   --signal:#eeff41; --signal:oklch(95.19% .2302 var(--hue-signal));
+  --signal-ink:#eeff41; --signal-ink:oklch(95.19% .2302 var(--hue-signal));
   /* the roles. These lines never change between themes -- only the numbers above do. */
   --bg:#0f0f0f;         --bg:oklch(var(--l-ground) 0 0);
   --surface:#1a1a1a;    --surface:oklch(var(--l-surface) 0 0);
@@ -995,20 +997,25 @@ SHELL = """
   :root:not([data-theme="dark"]){
   --l-ground:96.66%; --l-surface:100%; --l-surface-hi:93.92%; --l-ink:20.02%;
     --a-2:.66; --a-3:.42; --a-line:.16; --l-warn:57%; --l-warn:57%;
-    /* the light signal is a different COLOUR, not a step: olive, 4.5 degrees off */
-    --signal:#5c6b00; --signal:oklch(49.43% .1370 120.20);
+    /* the light signal is two tokens: the fill (granny apple green) and the ink, the same hue
+       dark enough to read as text, a rule, or a ring on a light ground */
+    --signal:#96d500; --signal:color(display-p3 0.6240 0.8394 0);
+    --signal-ink:#557b00; --signal-ink:color(display-p3 0.3556 0.4859 0);
   }
 }
 :root[data-theme="dark"]{
   --l-ground:16.84%; --l-surface:21.78%; --l-surface-hi:26.45%; --l-ink:93.10%;
   --a-2:.62; --a-3:.38; --a-line:.14; --l-warn:74%;
   --signal:#eeff41; --signal:oklch(95.19% .2302 var(--hue-signal));
+  --signal-ink:#eeff41; --signal-ink:oklch(95.19% .2302 var(--hue-signal));
 }
 :root[data-theme="light"]{
   --l-ground:96.66%; --l-surface:100%; --l-surface-hi:93.92%; --l-ink:20.02%;
   --a-2:.66; --a-3:.42; --a-line:.16; --l-warn:57%;
-  /* the light signal is a different COLOUR, not a step: olive, 4.5 degrees off */
-  --signal:#5c6b00; --signal:oklch(49.43% .1370 120.20);
+  /* the light signal is two tokens: the fill (granny apple green) and the ink, the same hue
+     dark enough to read as text, a rule, or a ring on a light ground */
+  --signal:#96d500; --signal:color(display-p3 0.6240 0.8394 0);
+  --signal-ink:#557b00; --signal-ink:color(display-p3 0.3556 0.4859 0);
 }
 
 /* The linked build ships bare — no artifact wrapper, no reset — so the UA's 8px body
@@ -1068,7 +1075,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm6-on{fill:var(--ink)}
 .wm6-off{fill:var(--bg);stroke:var(--ink);stroke-width:1.25px;vector-effect:non-scaling-stroke}
 /* a node under your hand is not construction any more */
-.wm6-on:hover,.wm6-off:hover,.wm6-on.drag,.wm6-off.drag{fill:var(--signal);stroke:var(--signal);opacity:1}
+.wm6-on:hover,.wm6-off:hover,.wm6-on.drag,.wm6-off.drag{fill:var(--signal);stroke:var(--signal-ink,var(--signal));opacity:1}
 .wm6-on.drag,.wm6-off.drag{cursor:grabbing}
 .wm-eyebrow{position:absolute;top:44px;right:0;z-index:2;writing-mode:vertical-rl;
   font-size:.5625rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
@@ -1328,7 +1335,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
 .wm-num:first-child{box-shadow:none}
 .wm-num b{font-weight:400}
 .wm-num b{font-weight:400;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title);font-variant-numeric:tabular-nums}
-.wm-num.is-goal b{color:var(--signal)}
+.wm-num.is-goal b{color:var(--signal-ink,var(--signal))}
 .wm-num span{font-size:var(--type-ui-size,.75rem);--lh:var(--lead-ui);line-height:var(--lead-ui);color:var(--ink-2)}
 @media (max-width:600px){
   .wm-nums-row{grid-template-columns:repeat(2,1fr)}
