@@ -526,7 +526,7 @@ inside a chapter hangs its number in the hang column (column 6), in `--ink-3`, a
 heading's own size. There is no micro or label-size number or letter beside a title
 anywhere, and the appendix's "A" is the word Appendix, set at the numeral's size. Do not
 rebuild a chapter head from `t-micro` or `t-label`: if a page needs a section marker,
-reuse the opener (`.wm-open`, `.wm-dg`) or `u.wm-hang`.
+reuse the opener (`.wm-open`, `.wm-dg`) or `u.wm-hang`. The numeral needs a column of its own. If you use this head, remove and unoccupy a column to accommodate it, as the system page does with column 6 between the rail and the text; it is never squeezed into a margin, and nothing else may sit in that column.
 
 - **Never let the browser synthesise a style.** Cal Sans has a drawn italic on the
   `ital` axis; `font-style: italic` makes the browser shear the upright instead, which

@@ -509,4 +509,4 @@ In this order. Each step names the trap it was written after.
   the margin check (`ownEdges`), and the check would judge nothing there now anyway: `<main>` sits
   in the zoom control's `overflow-x: auto` pan box, which the check treats as an inset scroller.
   G and L toggle the columns and the lines on it at any time.
-  Chapter heads on it follow TYPOGRAPHY.md §VII, "Chapter heads".
+  Chapter heads on it follow TYPOGRAPHY.md §VII, "Chapter heads". The numeral occupies column 6, the empty column between the rail and the text; a page that hangs a numeral frees a column for it.

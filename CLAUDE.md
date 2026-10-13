@@ -66,4 +66,4 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## House type rules
 
-Chapter heads are the hung gigantic numeral per TYPOGRAPHY.md §VII "Chapter heads", never a micro number or letter beside a heading. That applies to proposal pages too.
+Chapter heads are the hung gigantic numeral per TYPOGRAPHY.md §VII "Chapter heads", never a micro number or letter beside a heading. That applies to proposal pages too. The numeral needs its own empty column: a page that uses the chapter head gives up a column for it (the system page's column 6), never a margin.
