@@ -206,6 +206,8 @@ code{font-family:var(--ui-font,"Face",system-ui,sans-serif);font-variation-setti
 /* no bleed pad on a stripe: grid.css pads a bleed grid's children by where they stand, and a stripe without a --start
    counted as a column-1 box 24 wide -- 24 + 7 x 24 of padding, 194px in a 29px track */
 .gx-live > i{grid-row:1 / -1;font-style:normal;padding-inline:0}
+/* the stripes are an overlay drawn over the cell, not boxes in the flow: absolute inside the positioned card, still sized by their grid area */
+.gx-live.gx-over > i{position:absolute;inset:auto;z-index:2}
 .gx-live > i u{display:block;padding-top:6px;text-align:center;text-decoration:none;font-size:9px;line-height:12px;font-variant-numeric:tabular-nums;color:rgba(255,40,140,.7)}
 .gx-live > i:nth-child(n+13){display:block}
 .gx-live .gx-tc-cell{grid-row:2;padding:24px var(--grid-gutter,24px);position:relative;z-index:1}
