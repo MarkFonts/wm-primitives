@@ -12,6 +12,29 @@ Newest first.
 
 ---
 
+## 2026-10-13 -- the signal is the package's, in two tokens
+
+**Light mode has its own signal.** The acid #eeff41 that marks a state or a control in the dark was,
+in the light, an olive (#5c6b00) each app wrote for itself, and on the Cal Sans case study it was
+invisible against the ground. Six candidates on a served sheet; Mark chose F, a granny-apple green:
+`--signal` #96d500 for fills (handles, dots, chosen pills, toggles) and `--signal-ink` #557b00 for
+thin uses (value text, underlines, rings, rules, carets). Dark keeps the acid for both. Hex first,
+then the display-p3 form. What it cost: the olive, and the idea that one hue works at every weight.
+
+**The package provides the signal; the controls read it (#116).** color.css declares both tokens in
+every theme block, in `@layer wm.color`. Fills read `var(--accent, var(--signal))`, so an app's
+`--accent` still overrides them; thin uses read `var(--signal-ink, var(--accent, currentColor))`, so
+an app that wants a different ink form sets `--signal-ink` itself. Rejected: accent wins everywhere,
+which would have put a fill color on hairlines in every app that set one. Geometry untouched.
+HOST-CONTRACT, README, DIAL.md, TYPOGRAPHY.md say so; `.tokenlint.json` knows the package tokens.
+
+**The gate catches up (#117).** dist/dial.css rebuilt from src; the 03 Rule check probes
+`--signal-ink`, since its underline is a thin use. The system page's try-it stripes are overlays,
+chapter openers take four columns from 1024 to 1279, and the hung numeral is marked as hanging
+text. Two checks learned decisions already made: an eyebrow one line above its heading is inside
+the safe area (GRID.md §2.6), and the G overlay starts at the pan's edge so the hang columns are
+drawn too (2026-10-09).
+
 ## 2026-10-08 -- the system page: Type's content pass
 
 **One home for each idea.** The waterfall and the grid's "seven roles" were two tables of the same
