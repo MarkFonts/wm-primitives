@@ -12,6 +12,30 @@ Newest first.
 
 ---
 
+## 2026-10-14 -- the grip
+
+**The track bar has a handle now.** #114: Mark's reference tuner had a vertical tick on the
+fill's edge, and ours had nothing to take hold of, because the fill was a gradient stop with
+no thumb at all. The grip is the `::after` of `.slider-label`: 3px wide, 20px tall, `--accent`
+then `--signal`, at `--pct` in the same padding box the fill is painted in, so it cannot drift
+from the edge it marks. Shorter than the bar on purpose: full height only restates the fill's
+edge.
+
+**The shadow is enclosed, by construction.** A drop shadow on the grip would have spilled onto
+the rail, which is what the issue says it must not. The grip's own shadow is inset and
+clip-pathed to its box, and the name and value get a halo in the ground color: invisible on
+the bar, visible only where a letter crosses the acid, which is exactly where legibility is
+lost. It cost two text-shadows on the track variant's label text and nothing elsewhere.
+
+**It cost no layout.** Absolutely positioned, pointer-events none, the range input still owns
+the whole bar, so no hit area was added. Measured with and without: row 34 / bar 34 on a fine
+pointer, row 48 / bar 34 on coarse, identical. Width eases 3 to 5px on hover or engaged on
+`--dur-fast` and `--ease`, off under reduced motion. Fixture: `tests/fixtures/dial-grip.html`.
+Only `variant="track"`; the plain slider is untouched. #114 stays open for the 2-D pad and the
+Color chapter's wording on `--signal` as "take hold".
+
+---
+
 ## 2026-10-13 -- the signal is the package's, in two tokens
 
 **Light mode has its own signal.** The acid #eeff41 that marks a state or a control in the dark was,
