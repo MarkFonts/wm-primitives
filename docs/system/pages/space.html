@@ -2,17 +2,25 @@
 @font-face{font-family:"CalSansVF";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
 @font-face{font-family:"Face";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
 *{box-sizing:border-box}
-body{margin:0;background:#0f0f0f;color:#e8e8e8;font-family:"CalSansVF",system-ui,sans-serif;
+/* The part's own annotation hues (blue bar, orange cap, green met), declared once. They are
+   not host tokens: each reads at 3:1 or better on --surface and --bg in both themes. The chrome
+   values (--sp-surface, --sp-line, --sp-ink-*) hold the part's original dark literals so dark
+   does not move; light maps them to the host tokens. */
+:root{--sp-blue:#4a7fd4;--sp-blue-hi:#6f9ee8;--sp-orange:#e08a63;--sp-green:#5fc678;--sp-bg:#0f0f0f;--sp-ink:#e8e8e8;--sp-surface:#141414;--sp-hair:#111;--sp-fill:#2a2a2a;--sp-fill-2:#252525;--sp-line:#222;--sp-ink-2:#999;--sp-ink-3:#666;--sp-ink-4:#555;--sp-dash:#3a3a3a;--sp-ok:#46c07a;--sp-err:#e0603a;} /* token-lint: allow -- annotation hue, both themes declared */
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--sp-blue:#3b6fcf;--sp-blue-hi:#2d5fc0;--sp-orange:#b84d18;--sp-green:#278043;--sp-bg:var(--bg);--sp-ink:var(--ink);--sp-surface:var(--surface);--sp-hair:var(--bg);--sp-fill:var(--surface-hi);--sp-fill-2:var(--surface-hi);--sp-line:var(--line);--sp-ink-2:var(--ink-2);--sp-ink-3:var(--ink-3);--sp-ink-4:var(--ink-3);--sp-dash:var(--ink-3);--sp-ok:var(--sp-green);--sp-err:var(--sp-orange);}} /* token-lint: allow -- annotation hue, both themes declared */
+:root[data-theme="dark"]{--sp-blue:#4a7fd4;--sp-blue-hi:#6f9ee8;--sp-orange:#e08a63;--sp-green:#5fc678;--sp-bg:#0f0f0f;--sp-ink:#e8e8e8;--sp-surface:#141414;--sp-hair:#111;--sp-fill:#2a2a2a;--sp-fill-2:#252525;--sp-line:#222;--sp-ink-2:#999;--sp-ink-3:#666;--sp-ink-4:#555;--sp-dash:#3a3a3a;--sp-ok:#46c07a;--sp-err:#e0603a;} /* token-lint: allow -- annotation hue, both themes declared */
+:root[data-theme="light"]{--sp-blue:#3b6fcf;--sp-blue-hi:#2d5fc0;--sp-orange:#b84d18;--sp-green:#278043;--sp-bg:var(--bg);--sp-ink:var(--ink);--sp-surface:var(--surface);--sp-hair:var(--bg);--sp-fill:var(--surface-hi);--sp-fill-2:var(--surface-hi);--sp-line:var(--line);--sp-ink-2:var(--ink-2);--sp-ink-3:var(--ink-3);--sp-ink-4:var(--ink-3);--sp-dash:var(--ink-3);--sp-ok:var(--sp-green);--sp-err:var(--sp-orange);} /* token-lint: allow -- annotation hue, both themes declared */
+body{margin:0;background:var(--sp-bg);color:var(--sp-ink);font-family:"CalSansVF",system-ui,sans-serif;
  font-optical-sizing:auto;font-variation-settings:"GEOM" 25;padding:32px 28px 90px}
-h1{font-size:23px;margin:0 0 5px} .lede{color:#999;font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px);margin:0 0 24px;max-width:84ch}
+h1{font-size:23px;margin:0 0 5px} .lede{color:var(--sp-ink-2);font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px);margin:0 0 24px;max-width:84ch}
 h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:34px 0 12px;padding-bottom:7px;
- border-bottom:1px solid #222;display:flex;justify-content:space-between}
-h2 span{color:#666;letter-spacing:0;text-transform:none;font-size:10px}
+ border-bottom:1px solid var(--sp-line);display:flex;justify-content:space-between}
+h2 span{color:var(--sp-ink-3);letter-spacing:0;text-transform:none;font-size:10px}
 /* Cards on the columns (GRID.md rule A): 18 tracks (12 below 1024) = --col, gap = gutter.
    A card spans 6 columns (9 when 6 would leave under 192px of bar room); its contents step in one
    column + one gutter, so label, bar and box start on the next column line. Rows stretch. */
 .steps{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));gap:var(--grid-gutter);align-items:stretch}
-.st{grid-column:span 9;box-sizing:border-box;background:#141414;box-shadow:inset 0 0 0 1px #222;border-radius:10px;
+.st{grid-column:span 9;box-sizing:border-box;background:var(--sp-surface);box-shadow:inset 0 0 0 1px var(--sp-line);border-radius:10px;
  padding:15px var(--grid-gutter) 12px calc(var(--col) + var(--grid-gutter));display:flex;flex-direction:column;gap:9px}
 @container (min-width:880px){.st{grid-column:span 6}}
 @media (max-width:1023px){
@@ -21,29 +29,29 @@ h2 span{color:#666;letter-spacing:0;text-transform:none;font-size:10px}
 }
 @media (max-width:1023px){@container (min-width:600px){.st{grid-column:span 6}}}
 .st:has(.st-u:empty) .st-u,.st-u:empty{display:none}
-.st.hair{background:#111}
+.st.hair{background:var(--sp-hair)}
 .st-n{font-size:12px;line-height:15px;font-family:ui-monospace,Menlo,monospace;display:flex;justify-content:space-between;gap:6px}
-.st-n span{color:#555;font-size:9px}
-.st-bar i{display:block;height:6px;background:#4a7fd4;border-radius:2px}
-.st-box{border:1px dashed #3a3a3a;border-radius:6px}
-.st-box b{display:block;height:20px;min-width:40px;background:#2a2a2a;border-radius:3px}
-.st-u{font-size:9px;color:#555;font-family:ui-monospace,Menlo,monospace}
+.st-n span{color:var(--sp-ink-4);font-size:9px}
+.st-bar i{display:block;height:6px;background:var(--sp-blue);border-radius:2px}
+.st-box{border:1px dashed var(--sp-dash);border-radius:6px}
+.st-box b{display:block;height:20px;min-width:40px;background:var(--sp-fill);border-radius:3px}
+.st-u{font-size:9px;color:var(--sp-ink-4);font-family:ui-monospace,Menlo,monospace}
 table{width:100%;border-collapse:collapse;font-size:12px}
-td,th{padding:6px 10px 6px 0;border-bottom:1px solid #222;text-align:left}
-th{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:#666;font-weight:400}
-.d-v,.d-s{font-family:ui-monospace,Menlo,monospace} .d-c{color:#666;font-family:ui-monospace,Menlo,monospace}
-.d-p{color:#999;font-family:ui-monospace,Menlo,monospace}
-.d-w{color:#555;font-size:10px;font-family:ui-monospace,Menlo,monospace}
-.ok{color:#5fc678} .bad{color:#e08a63}
-.caps{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1px;background:#222;
- border:1px solid #222;border-radius:10px;overflow:hidden}
-.cap{background:#141414;padding:16px;display:flex;flex-direction:column;gap:10px}
-.cap-n{font-size:10px;color:#999;font-family:ui-monospace,Menlo,monospace;display:flex;
+td,th{padding:6px 10px 6px 0;border-bottom:1px solid var(--sp-line);text-align:left}
+th{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--sp-ink-3);font-weight:400}
+.d-v,.d-s{font-family:ui-monospace,Menlo,monospace} .d-c{color:var(--sp-ink-3);font-family:ui-monospace,Menlo,monospace}
+.d-p{color:var(--sp-ink-2);font-family:ui-monospace,Menlo,monospace}
+.d-w{color:var(--sp-ink-4);font-size:10px;font-family:ui-monospace,Menlo,monospace}
+.ok{color:var(--sp-green)} .bad{color:var(--sp-orange)}
+.caps{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1px;background:var(--sp-line);
+ border:1px solid var(--sp-line);border-radius:10px;overflow:hidden}
+.cap{background:var(--sp-surface);padding:16px;display:flex;flex-direction:column;gap:10px}
+.cap-n{font-size:10px;color:var(--sp-ink-2);font-family:ui-monospace,Menlo,monospace;display:flex;
  justify-content:space-between;gap:6px}
-.cap-n span{color:#555}
-.cap-box{position:relative;background:#252525;display:inline-flex;align-items:center;
+.cap-n span{color:var(--sp-ink-4)}
+.cap-box{position:relative;background:var(--sp-fill-2);display:inline-flex;align-items:center;
  justify-content:center;font-size:12px;align-self:flex-start}
-.arc{position:absolute;top:0;bottom:0;left:0;background:rgba(224,138,99,.16);pointer-events:none}
+.arc{position:absolute;top:0;bottom:0;left:0;background:color-mix(in srgb,var(--sp-orange) 16%,transparent);pointer-events:none}
 .arc.r{left:auto;right:0}
 /* type.css — the WORDMARK type tokens. See TYPOGRAPHY.md for the reasoning.
  *
@@ -750,7 +758,7 @@ input[type="range"]::-moz-range-thumb {
    terracotta/orange accent. Zone colors reuse the existing four exactly. */
 
 :root {
-  color-scheme: dark;   /* native form controls (AxisSlider number steppers) render dark */
+  color-scheme: light dark;   /* native form controls follow the page theme */
   /* ── Surfaces (existing dark scale) ── */
   /* Below --bg, and deliberately outside the surface scale. The VMetrics stage is a
      PROOFING GROUND, not a UI surface: the big word sits on it and the metric lines are
@@ -766,14 +774,13 @@ input[type="range"]::-moz-range-thumb {
      only relative colour makes; mixing toward white desaturates. ReCal's zone hues are
      NOT the axis hues (base sits at H 259, the axis at 239.5): left as measured,
      because snapping them would change ReCal. */
+  /* --bg, --surface and --surface-hi are NOT redeclared here: the host's own tokens must reach
+     this part, or the page cannot follow the theme switch. */
   --stage-deep: #000; --stage-deep: oklch(0.00% 0 0);
-  --bg: #0f0f0f; --bg: oklch(16.84% 0 0);
   /* Three steps, house-wide (wm-primitives#3). The old four had --surface-1 at #111 —
      two values above --bg — which is why GlyphPicker's cells were invisible here while
      they read fine in font-proofer off a hardcoded fallback. #111 is gone; what used it
      now sits on --surface. --stage-deep is NOT part of this scale, see above. */
-  --surface: #1a1a1a; --surface: oklch(21.78% 0 0);   /* raised: panels, cards, cells, inputs */
-  --surface-hi: #252525; --surface-hi: oklch(26.45% 0 0);   /* hover / active / selected */
 
   /* ── Text (existing scale) ── */
   --text: #e8e8e8; --text: oklch(93.10% 0 0);
@@ -2092,54 +2099,54 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
 
 
 .caps{grid-template-columns:1fr}
-.cap{background:#141414;padding:18px 20px 40px;display:flex;flex-direction:column;gap:12px}
-.cap-hd{font-size:12px;font-family:ui-monospace,Menlo,monospace;color:#999;display:flex;
+.cap{background:var(--sp-surface);padding:18px 20px 40px;display:flex;flex-direction:column;gap:12px}
+.cap-hd{font-size:12px;font-family:ui-monospace,Menlo,monospace;color:var(--sp-ink-2);display:flex;
  justify-content:space-between;gap:12px}
-.cap-hd b{color:#e8e8e8;font-weight:400}
+.cap-hd b{color:var(--sp-ink);font-weight:400}
 /* the padding-x label floats 26px above the stage (top:-26px) — the margin is its air;
    without it the label lands in the header line and "10px padding-x" reads as one garble */
 .cap-stage{position:relative;align-self:flex-start;margin-top:22px}
-.cap-pill{height:88px;background:#2a2a2a;border-radius:999px;display:inline-flex;align-items:center;
+.cap-pill{height:88px;background:var(--sp-fill);border-radius:999px;display:inline-flex;align-items:center;
  corner-shape:superellipse(1.2)}
-.cap-txt{font-size:30px;color:#e8e8e8}
-.vbar{position:absolute;width:3px;background:#6f9ee8;border-radius:2px}
+.cap-txt{font-size:30px;color:var(--sp-ink)}
+.vbar{position:absolute;width:3px;background:var(--sp-blue-hi);border-radius:2px}
 /* the cap-end marker sits OUTSIDE the pill — ticks above and below, never through the word */
-.tick{position:absolute;left:0;width:1px;background:#e08a63}
+.tick{position:absolute;left:0;width:1px;background:var(--sp-orange)}
 .tick.t{top:-13px;height:11px} .tick.b{bottom:-13px;height:11px}
-.tick-lbl{position:absolute;bottom:-30px;transform:translateX(-50%);font-size:9px;color:#e08a63;
+.tick-lbl{position:absolute;bottom:-30px;transform:translateX(-50%);font-size:9px;color:var(--sp-orange);
  font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
 /* satisfied: the two markers land on the same x, so they stop being two things */
-.cap.met .vbar{background:#5fc678}
-.met-lbl{color:#5fc678}
-.cap-key{display:flex;gap:18px;font-size:10px;color:#666;font-family:ui-monospace,Menlo,monospace}
+.cap.met .vbar{background:var(--sp-green)}
+.met-lbl{color:var(--sp-green)}
+.cap-key{display:flex;gap:18px;font-size:10px;color:var(--sp-ink-3);font-family:ui-monospace,Menlo,monospace}
 .cap-key i{display:inline-block;width:14px;height:2px;vertical-align:middle;margin-right:5px}
-.k-cap{background:#e08a63} .k-txt{background:#6f9ee8}
+.k-cap{background:var(--sp-orange)} .k-txt{background:var(--sp-blue-hi)}
 
 /* Do / Don't -- guidelines framing. Colors are the house status tokens, used for
    judgement (this is right / this is wrong), which is what they are for. */
-.dd{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line,#2a2a2a);
+.dd{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);
   border-radius:10px;overflow:hidden;margin:18px 0 14px}
 .dd-col{padding:20px 22px 8px}
-.dd-col+.dd-col{border-left:1px solid var(--line,#2a2a2a)}
+.dd-col+.dd-col{border-left:1px solid var(--line)}
 .dd-h{font-size:9px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:14px;
   font-variation-settings:"GEOM" 100}
-.dd-do .dd-h{color:var(--ok,#46c07a)}
-.dd-dont .dd-h{color:var(--err,#e0603a)}
+.dd-do .dd-h{color:var(--sp-ok)}
+.dd-dont .dd-h{color:var(--sp-err)}
 .dd-col ul{margin:0;padding:0;list-style:none}
-.dd-col li{margin:0 0 13px;font-size:13px;line-height:1.5;color:var(--text-muted,#999)}
-.dd-col li b{color:var(--text,#e8e8e8);font-weight:600}
+.dd-col li{margin:0 0 13px;font-size:13px;line-height:1.5;color:var(--sp-ink-2)}
+.dd-col li b{color:var(--sp-ink);font-weight:600}
 @media (max-width:720px){.dd{grid-template-columns:1fr}
-  .dd-col+.dd-col{border-left:none;border-top:1px solid var(--line,#2a2a2a)}}
+  .dd-col+.dd-col{border-left:none;border-top:1px solid var(--line)}}
 
 /* Each label is bound to ITS OWN line, and carries that line's color: the blue label
    rides the moving padding bar, the orange one stays on the fixed 0.6r threshold. They
    used to stack above the same tick, so both appeared to measure the same thing. */
-.bar-lbl{position:absolute;top:-26px;transform:translateX(-50%);font-size:9px;color:#6f9ee8;
+.bar-lbl{position:absolute;top:-26px;transform:translateX(-50%);font-size:9px;color:var(--sp-blue-hi);
   font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
-.cap-hd b{color:#e8e8e8;font-weight:400}
+.cap-hd b{color:var(--sp-ink);font-weight:400}
 
-.dd-note{font-size:var(--type-ui-size,.75rem);line-height:var(--type-ui-lead,15px);color:var(--text-muted,#999);margin:15px 0 0;max-width:70ch}
-.dd-note b{color:var(--text,#e8e8e8);font-weight:600}
+.dd-note{font-size:var(--type-ui-size,.75rem);line-height:var(--type-ui-lead,15px);color:var(--sp-ink-2);margin:15px 0 0;max-width:70ch}
+.dd-note b{color:var(--sp-ink);font-weight:600}
 </style>
 <h1>The padding scale</h1>
 <p class="lede">Derived from the live surface, not invented: <b>117</b> padding numbers across

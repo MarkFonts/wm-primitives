@@ -34,26 +34,52 @@
    the other theme restates those too -- including --icon-hdr: 0 in light, which is
    icon.css's own light gate (a chosen mark goes DARKER on a light ground, never to PQ white). */
 .bs-page{ --ui-font: "CalSansVF", system-ui, sans-serif; }
+/* The assembled section pins its own dark ink onto this part, so in the page's light theme
+   the lede and its bold words came out #e8e8e8 on white. Point the host's text tokens at the
+   shell's --ink family (:root's, theme-aware; the section does not override it). Light only,
+   so dark is untouched. --text-rgb has no host token. */
+:root[data-theme="light"] .bs-page{ color: var(--ink, #161616); --text: var(--ink, #161616);
+  --text-muted: var(--ink-2, rgba(22,22,22,.66)); --text-dim: var(--ink-3, rgba(22,22,22,.42));
+  --border: var(--line, rgba(22,22,22,.16)); --text-rgb: 22,22,22; }
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]) .bs-page{ color: var(--ink, #161616); --text: var(--ink, #161616);
+    --text-muted: var(--ink-2, rgba(22,22,22,.66)); --text-dim: var(--ink-3, rgba(22,22,22,.42));
+    --border: var(--line, rgba(22,22,22,.16)); --text-rgb: 22,22,22; }
+}
 .bs-fig{ --ui-font: "CalSansVF", system-ui, sans-serif; font-family: var(--ui-font);
   border-radius: 8px; corner-shape: superellipse(1.2); padding: 1.5rem; min-width: 0; }
-.bs-fig[data-theme="dark"]{ --bg:#0f0f0f; --surface:#1a1a1a; --surface-hi:#252525; --text:#e8e8e8;
+.bs-fig:not([data-theme]), .bs-fig[data-theme="dark"]{ --bg:#0f0f0f; --surface:#1a1a1a; --surface-hi:#252525; --text:#e8e8e8;
   --text-muted:rgba(232,232,232,.62); --text-dim:rgba(232,232,232,.38);
   --border:rgba(232,232,232,.14); --text-rgb:232,232,232; --accent:#eeff41;
   background: var(--bg); color: var(--text); box-shadow: inset 0 0 0 1px var(--border); }
-.bs-fig[data-theme="light"]{ --bg:#f4f4f4; --surface:#ffffff; --surface-hi:#ebebeb; --text:#161616;
+.bs-fig[data-theme="light"], :root[data-theme="light"] .bs-fig:not([data-theme]){ --bg:#f4f4f4; --surface:#ffffff; --surface-hi:#ebebeb; --text:#161616;
   --text-muted:rgba(22,22,22,.66); --text-dim:rgba(22,22,22,.42);
   --border:rgba(22,22,22,.16); --text-rgb:22,22,22; --accent:#5c6b00;
   background: var(--bg); color: var(--text); box-shadow: inset 0 0 0 1px var(--border); }
-.bs-fig[data-theme="dark"] .wm-icon{ --icon-grad: 50; }
-.bs-fig[data-theme="dark"] .wm-menu:not(.active):hover > .wm-icon{ --icon-grad: 100; }
-.bs-fig[data-theme="dark"] .active > .wm-icon{ --icon-grad: 75; }
-.bs-fig[data-theme="light"] .wm-icon{ --icon-grad: 100; }
-.bs-fig[data-theme="light"] .wm-menu:not(.active):hover > .wm-icon{ --icon-grad: 150; }
-.bs-fig[data-theme="light"] .active > .wm-icon{ --icon-grad: 100; --icon-hdr: 0; dynamic-range-limit: standard; }
+.bs-fig:not([data-theme]) .wm-icon, .bs-fig[data-theme="dark"] .wm-icon{ --icon-grad: 50; }
+.bs-fig:not([data-theme]) .wm-menu:not(.active):hover > .wm-icon, .bs-fig[data-theme="dark"] .wm-menu:not(.active):hover > .wm-icon{ --icon-grad: 100; }
+.bs-fig:not([data-theme]) .active > .wm-icon, .bs-fig[data-theme="dark"] .active > .wm-icon{ --icon-grad: 75; }
+.bs-fig[data-theme="light"] .wm-icon, :root[data-theme="light"] .bs-fig:not([data-theme]) .wm-icon{ --icon-grad: 100; }
+.bs-fig[data-theme="light"] .wm-menu:not(.active):hover > .wm-icon, :root[data-theme="light"] .bs-fig:not([data-theme]) .wm-menu:not(.active):hover > .wm-icon{ --icon-grad: 150; }
+.bs-fig[data-theme="light"] .active > .wm-icon, :root[data-theme="light"] .bs-fig:not([data-theme]) .active > .wm-icon{ --icon-grad: 100; --icon-hdr: 0; dynamic-range-limit: standard; }
+
+/* Auto: no data-theme on :root under an OS light preference gets the light figures too. */
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]) .bs-fig:not([data-theme]){ --bg:#f4f4f4; --surface:#ffffff; --surface-hi:#ebebeb; --text:#161616;
+    --text-muted:rgba(22,22,22,.66); --text-dim:rgba(22,22,22,.42);
+    --border:rgba(22,22,22,.16); --text-rgb:22,22,22; --accent:#5c6b00;
+    --bs-sunk: color-mix(in oklab, #000 13%, var(--surface));
+    background: var(--bg); color: var(--text); box-shadow: inset 0 0 0 1px var(--border); }
+  :root:not([data-theme="dark"]) .bs-fig:not([data-theme]) .wm-icon{ --icon-grad: 100; }
+  :root:not([data-theme="dark"]) .bs-fig:not([data-theme]) .wm-menu:not(.active):hover > .wm-icon{ --icon-grad: 150; }
+  :root:not([data-theme="dark"]) .bs-fig:not([data-theme]) .active > .wm-icon{ --icon-grad: 100; --icon-hdr: 0; dynamic-range-limit: standard; }
+  :root:not([data-theme="dark"]) .bs-fig:not([data-theme]) .bs-proof--dark{ display: none; }
+  :root:not([data-theme="dark"]) .bs-fig:not([data-theme]) .bs-proof--light{ display: block; }
+}
 
 /* the sunk ground the study's track and field sit in, per theme (buttons.html --bt-sunk-bg) */
-.bs-fig[data-theme="dark"]{ --bs-sunk: color-mix(in oklab, #000 30%, var(--surface)); }
-.bs-fig[data-theme="light"]{ --bs-sunk: color-mix(in oklab, #000 13%, var(--surface)); }
+.bs-fig:not([data-theme]), .bs-fig[data-theme="dark"]{ --bs-sunk: color-mix(in oklab, #000 30%, var(--surface)); }
+.bs-fig[data-theme="light"], :root[data-theme="light"] .bs-fig:not([data-theme]){ --bs-sunk: color-mix(in oklab, #000 13%, var(--surface)); }
 .bs-fig{ margin: 0 0 1.5rem; padding: 0; overflow: hidden; }
 .bs-toggle{ display: flex; align-items: center; gap: .75rem; margin: 2rem 0; }
 .bs-toggle .bs-cap{ margin: 0; }
@@ -82,8 +108,10 @@
 .bs-st{ display: grid; grid-template-columns: auto 1fr; gap: .5rem .875rem; align-items: center; }
 .bs-st-lab{ font-size: .6875rem; color: var(--text-dim); }
 .bs-proof{ display: block; width: 259px; max-width: 100%; height: auto; }
-.bs-fig[data-theme="dark"] .bs-proof--light{ display: none; }
-.bs-fig[data-theme="light"] .bs-proof--dark{ display: none; }
+.bs-fig:not([data-theme]) .bs-proof--light, .bs-fig[data-theme="dark"] .bs-proof--light{ display: none; }
+/* forced light: the rule above hides the light proof for every un-themed figure, and the dark one is hidden next, so nothing showed (Auto shows the light one via the media block) */
+:root[data-theme="light"] .bs-fig:not([data-theme]) .bs-proof--light{ display: block; }
+.bs-fig[data-theme="light"] .bs-proof--dark, :root[data-theme="light"] .bs-fig:not([data-theme]) .bs-proof--dark{ display: none; }
 
 /* PINNED STATES. A page cannot hover five things at once, so the ladder pins them with
    .s-h / .s-p / .s-f -- the study's method. These are copies of src/button-sets.css's
@@ -142,7 +170,7 @@ modes of equal weight, picked between rather than read, which is the one place w
 earns its space. A row has no edge at rest &mdash; a mark, a label, and the full width of
 the column as its target &mdash; and the ground arrives when it is the one that is on.</p>
 
-<figure class="bs-fig" data-theme="dark">
+<figure class="bs-fig">
   <div class="bs-rack">
     <div class="bs-panel">
       <p class="bs-panel-lab">Already shipping &middot; font-proofer, Preview Mode</p>
@@ -239,7 +267,7 @@ there.</p>
 <div class="bs-toggle">
   <div class="wm-theme" role="group" aria-label="Theme of the figures">
     <button type="button" class="wm-icon-btn" data-bs-theme="light" aria-label="Light" aria-pressed="false"><span class="wm-icon" aria-hidden="true" translate="no">light_mode</span></button>
-    <button type="button" class="wm-icon-btn active" data-bs-theme="dark" aria-label="Dark" aria-pressed="true"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
+    <button type="button" class="wm-icon-btn" data-bs-theme="dark" aria-label="Dark" aria-pressed="false"><span class="wm-icon" aria-hidden="true" translate="no">dark_mode</span></button>
   </div>
   <p class="bs-cap">every figure in this chapter, one theme</p>
 </div>
@@ -251,7 +279,7 @@ law uses &mdash; 1.2 under the pointer, 1.8 held. An editable is the identical r
 <b>dashed</b>. Solid means it happens; dashed means it is yours. The condition is absolute:
 <b>nothing else in the document may be underlined</b>.</p>
 
-<figure class="bs-fig" data-theme="dark">
+<figure class="bs-fig">
   <div class="bs-rack">
     <div class="bs-panel">
       <p class="bs-panel-lab">Buttons</p>
@@ -349,14 +377,29 @@ the secondary formerly 03 in <a href="system/pages/buttons.html">Six ways to say
   // One chosen row per list: the ground moves to the row that was pressed, and the confirm
   // (src/confirm.js, window.wmConfirm, once it ships) blinks it. A page without it still
   // chooses, unconfirmed.
-  // The chapter's one theme toggle: both figures follow it, the page does not.
+  // The chapter's one theme toggle: an override. Until it is used the figures follow the page's theme; after, both hold the chosen one.
+  var forced = false;
+  function mark(t){
+    root.querySelectorAll('[data-bs-theme]').forEach(function(o){
+      var on = o.getAttribute('data-bs-theme') === t; o.classList.toggle('active', on); o.setAttribute('aria-pressed', String(on));
+    });
+  }
+  // Until the toggle is used the buttons just mirror the page's own theme.
+  var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+  function pageTheme(){
+    var a = document.documentElement.getAttribute('data-theme');
+    return a === 'light' || a === 'dark' ? a : (mq && mq.matches ? 'light' : 'dark');
+  }
+  function followPage(){ if (!forced) mark(pageTheme()); }
+  followPage();
+  new MutationObserver(followPage).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  if (mq && mq.addEventListener) mq.addEventListener('change', followPage);
   root.querySelectorAll('[data-bs-theme]').forEach(function(b){
     b.addEventListener('click', function(){
       var t = b.getAttribute('data-bs-theme');
+      forced = true;
       root.querySelectorAll('.bs-fig').forEach(function(f){ f.setAttribute('data-theme', t); });
-      root.querySelectorAll('[data-bs-theme]').forEach(function(o){
-        var on = o === b; o.classList.toggle('active', on); o.setAttribute('aria-pressed', String(on));
-      });
+      mark(t);
     });
   });
   root.addEventListener('click', function(e){
