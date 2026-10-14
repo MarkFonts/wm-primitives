@@ -3,7 +3,7 @@ import { sealed, settle } from '../render/hosts'
 
 /* ReCal's OWN behaviour, the way font-proofer.spec.ts is font-proofer's. The dial and
    theme suites run against ReCal as a host; nothing exercised the instrument around
-   them -- the modes, the rail's panels, the type panel's picker, the specimen sources.
+   them -- the modes, the rail's rows, the Try bar's style picker, the specimen sources.
    These are the cheap ones: they catch a lazy import, a broken preset fetch or a panel
    that no longer opens, on the commit that did it. */
 
@@ -47,35 +47,61 @@ test.describe('ReCal · the instrument around the primitive', () => {
     expect(errors, errors.join('\n')).toEqual([])
   })
 
-  test('the rail walks its panels: Type Matrix, Freezer, Vertical Metrics, and back', async ({ page }) => {
+  test('the rail walks its six rows, one open at a time', async ({ page }) => {
     const errors = await open(page)
-    /* Each seam is a button carrying the next panel's name; going forward swaps the
-       panel and the seam to go back appears with the same name. */
-    for (const name of ['TYPE MATRIX', 'FREEZER', 'VERTICAL METRICS']) {
-      const fwd = page.locator('.rail-seam--down', { hasText: name })
-      await expect(fwd, `seam to ${name}`).toBeVisible()
-      await fwd.click()
-      await page.waitForTimeout(400)
-      await expect(page.locator('.rail-seam--up', { hasText: name }), `${name} is open`).toBeVisible()
+    /* ReCal's rail is a stack of six rows (Shell.tsx RailRow). Each header is a
+       button.rail-seam--row whose aria-expanded says whether its .rail-row-open panel is
+       there; one row is open at a time, and row 1 is open on boot. */
+    const rows = ['Shape', 'Optical size', 'Ascender & Sharpness', 'Type Matrix', 'Freezer', 'Vertical metrics']
+    const seams = page.locator('.rail-seam--row')
+    await expect(seams, 'six rows').toHaveCount(rows.length)
+    for (const [i, name] of rows.entries()) {
+      await expect(seams.nth(i).locator('.rail-seam-lbl'), `row ${i + 1} label`).toHaveText(name)
+      await expect(seams.nth(i).locator('.rail-seam-num'), `row ${i + 1} number`).toHaveText(String(i + 1))
     }
-    await expect(page.locator('.canvas--vm'), 'vertical metrics take the canvas').toBeVisible()
-    for (const name of ['VERTICAL METRICS', 'FREEZER', 'TYPE MATRIX']) {
-      await page.locator('.rail-seam--up', { hasText: name }).click()
-      await page.waitForTimeout(400)
+    await expect(seams.nth(0), 'Shape is open on boot').toHaveAttribute('aria-expanded', 'true')
+    const vm = page.locator('.vmetrics-stage')
+    await expect(vm, 'the metrics stage is not on the canvas yet').toHaveCount(0)
+
+    /* Row 1 is already open on boot and a second click would close it, so the walk starts
+       at row 2 and clicks Shape last. */
+    for (const [i, name] of rows.entries()) {
+      if (i === 0) continue
+      const seam = seams.nth(i)
+      await seam.click()
+      await expect(seam, `${name} is open`).toHaveAttribute('aria-expanded', 'true')
+      await expect(seam.locator('xpath=..').locator('.rail-row-open'), `${name} panel`).toBeVisible()
+      await expect(page.locator('.rail-seam--row[aria-expanded="true"]'), `only ${name} is open`).toHaveCount(1)
+      await expect(page.locator('.rail-row-open'), `only ${name} has a panel`).toHaveCount(1)
+      if (name === 'Vertical metrics') {
+        await expect(vm, 'vertical metrics take the canvas').toBeVisible()
+        await expect(page.locator('.canvas--vm')).toBeVisible()
+      } else {
+        await expect(vm, `${name} leaves the canvas to the scene`).toHaveCount(0)
+      }
     }
+
+    /* And back: Shape reopens, and the canvas is the scene again. */
+    await seams.nth(0).click()
+    await expect(seams.nth(0), 'Shape reopens').toHaveAttribute('aria-expanded', 'true')
+    await expect(seams.nth(0).locator('xpath=..').locator('.rail-row-open'), 'Shape panel').toBeVisible()
+    await expect(page.locator('.rail-seam--row[aria-expanded="true"]')).toHaveCount(1)
+    await expect(vm, 'the metrics stage is gone').toHaveCount(0)
     await expect(page.locator('.rail-title')).toHaveText(/ReCal Builder/)
     expect(errors, errors.join('\n')).toEqual([])
   })
 
-  test('the type panel picks a style, and the readout follows', async ({ page }) => {
+  test('the Try bar picks a style, and the readout follows', async ({ page }) => {
     const errors = await open(page)
     await page.locator('.canvas-bar .mode-btn', { hasText: /^Paragraph$/ }).click()
     await settle(page)
-    const panel = page.locator('.type-panel')
+    /* The floating TYPE panel is gone (ReCal 52cb2a7): the style menu and the Size pill
+       live in the canvas Try bar. */
+    const panel = page.locator('.try')
     await expect(panel).toBeVisible()
     const btn = panel.locator('.style-menu-btn')
     const before = (await btn.textContent())?.trim()
-    const size = panel.locator('.slider-row', { has: page.locator('.slider-label-name', { hasText: /^size$/ }) }).getByRole('spinbutton')
+    const size = panel.locator('.slider-row', { has: page.locator('.slider-label-name', { hasText: /^Size$/ }) }).getByRole('spinbutton')
     const sizeBefore = await size.inputValue()
     await btn.click()
     const list = panel.locator('.ssd-list')
