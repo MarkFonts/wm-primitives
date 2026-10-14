@@ -176,16 +176,13 @@ element — nothing to keep in sync, and it cannot drift from the thumb because 
 thumb.
 
 **The grip.** A `track` bar carries one grab mark: a quiet grey pill, 4px wide with rounded
-ends, 7px off top and bottom (about 55% of the bar). At rest it is `--text-dim` (the label's own
+ends, 6px off top and bottom of the 32px bar, sitting INSIDE the fill with its right edge 6px in from the fill's end (clamped 6px from the bar's left edge at 0, so at 100 it stays 6px inside the right edge); the fill's leading end is rounded with the bar's radius, and one step lighter while the row is live. At rest it is `--text-dim` (the label's own
 ink at its dimmest, a grey on both `--surface-hi` fills in either theme, no new token). The color
 (`--accent`, then `--signal`) appears only on `:hover`, engaged and `:focus-within`, where it also
-widens to 6px. It is the `::after` of `.slider-label`, at `--pct` in the same padding box the fill
-is painted in, so the two cannot drift (`min()` keeps it inside the bar at 100%), at `z-index: -1`
+widens to 6px. It is the `::after` of `.slider-label`, placed from `--pct` in the same padding box the fill
+is painted in, so the two cannot drift, at `z-index: -1`
 inside the label's isolated stacking context: above the fill, behind the text. There is no text
-halo. Where a letter of the name crosses the grip it is inverted: `.slider-label` carries
-`data-name`, and the `::before` repeats the name in `--surface` at the real name's position,
-clipped to the grip's rect, so only glyph pixels inside the grip change. The value is an input and
-cannot be repeated, so it stays crisp and un-inverted. The grip takes no pointer (the range input
+halo and no inversion (tried and dropped): the text keeps its color, and a letter crossing the grip throws a drop shadow onto it: `.slider-label` carries `data-name`, and the `::before` repeats the name in the name's own color (invisible) with a `text-shadow`, clipped to the grip's rect so the shadow never reaches the bar. The shadow is literal `rgba(0,0,0,...)` (no shadow token exists), the one literal in the grip. The name starts after a 20px left slot so the parked grip never overlaps it, and a bar too narrow for name, value and a slot at each end (measured in `AxisSlider.tsx`, `data-compact`) shows the grip only while the row is live. The grip takes no pointer (the range input
 owns the whole bar) and adds nothing to layout: row 48 and bar 32 are unchanged. Not on the other
 variants.
 

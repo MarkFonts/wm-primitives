@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset="utf-8"><title>wmDial grip</title>
 <link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css"><link rel="stylesheet" href="/dial/shared/src/motion.css">
 <link rel="stylesheet" href="/dial/shared/dist/dial.css">
-<style>:root{--ui-font:system-ui;--text-rgb:232,232,232} body{background:var(--bg);color:var(--text);padding:24px;width:360px}[data-theme=light]{--text-rgb:22,22,22}
+<style>*,*::before,*::after{box-sizing:border-box}:root{--ui-font:system-ui;--text-rgb:232,232,232} body{background:var(--bg);color:var(--text);padding:24px;width:360px}[data-theme=light]{--text-rgb:22,22,22}
  #t{display:flex;flex-direction:column;gap:6px} #a{display:flex;flex-direction:column;gap:6px;margin-top:16px;--accent:#ff4fa3}</style>
 </head><body>
 <script>document.documentElement.dataset.theme=new URLSearchParams(location.search).get("theme")||"dark"</script><div id="t"></div><div id="a"></div>
@@ -10,5 +10,12 @@
   for (const [host, ids] of [['t', [0, 37, 100, 37, 7, 7]], ['a', [37]]]) for (const v of ids) {
     const el = document.createElement('div'); document.getElementById(host).appendChild(el)
     wmDial.mount(el, { label: 'Weight', value: v, min: 0, max: 100, step: 1, variant: 'track', onChange() {} })
+    if (host === 'a') { const go = () => { const i = el.querySelector('input[type=range]'); if (i) i.focus({ preventScroll: true }); else requestAnimationFrame(go) }; go() }  // shown engaged: focus-within is the live state
   }
+  { const w = document.createElement('div'); w.id = 'c'; w.style.cssText = 'width:130px;margin-top:16px'; document.body.appendChild(w)
+    wmDial.mount(w, { label: 'Tracking', value: 40, min: 0, max: 100, step: 1, variant: 'track', onChange() {} }) }
+  { const w = document.createElement('div'); w.id = 'c2'; w.style.cssText = 'width:130px;margin-top:6px'; document.body.appendChild(w)
+    wmDial.mount(w, { label: 'Tracking', value: 40, min: 0, max: 100, step: 1, variant: 'track', onChange() {} }) }
+  { const w = document.createElement('div'); w.id = 'x'; w.style.cssText = 'margin-top:16px'; document.body.appendChild(w)   // a letter crossing the grip
+    wmDial.mount(w, { label: 'Weight', value: 14, min: 0, max: 100, step: 1, variant: 'track', onChange() {} }) }
 </script></body></html>
