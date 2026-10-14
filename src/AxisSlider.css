@@ -798,10 +798,10 @@
   .slider-grip-shade { display: none; }
   .slider-row--track .slider-label > .slider-grip-shade {
     display: block;
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,.8)) drop-shadow(0 2px 6px rgba(0,0,0,.65));   /* token-lint: allow -- the one literal, see DIAL.md */
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.8)) drop-shadow(0 3px 12px rgba(0,0,0,.65));   /* token-lint: allow -- the one literal, see DIAL.md */
   }
-  :root[data-theme="light"] .slider-row--track .slider-label > .slider-grip-shade { filter: drop-shadow(0 1px 2px rgba(255,255,255,.8)) drop-shadow(0 2px 6px rgba(255,255,255,.65)); }  /* token-lint: allow */
-  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .slider-row--track .slider-label > .slider-grip-shade { filter: drop-shadow(0 1px 2px rgba(255,255,255,.8)) drop-shadow(0 2px 6px rgba(255,255,255,.65)); } }  /* token-lint: allow */
+  :root[data-theme="light"] .slider-row--track .slider-label > .slider-grip-shade { filter: drop-shadow(0 1px 2px rgba(255,255,255,.8)) drop-shadow(0 3px 12px rgba(255,255,255,.65)); }  /* token-lint: allow */
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .slider-row--track .slider-label > .slider-grip-shade { filter: drop-shadow(0 1px 2px rgba(255,255,255,.8)) drop-shadow(0 3px 12px rgba(255,255,255,.65)); } }  /* token-lint: allow */
   /* the cast layer is the label's own grid, so the copied name and value land on the real ones */
   .slider-row--track .slider-label > .slider-grip-shade > .slider-grip-shade-cast { box-sizing: border-box; overflow: hidden;
     display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; align-content: center; column-gap: 6px;
