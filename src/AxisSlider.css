@@ -570,6 +570,9 @@
     border-radius: var(--radius, 6px);
     corner-shape: superellipse(var(--corner-k, 1.2));
     background:
+      linear-gradient(to right,
+        color-mix(in srgb, var(--border) 55%, transparent) 0 var(--locked-pct, 0%),
+        transparent var(--locked-pct, 0%) 100%),
       linear-gradient(to right, var(--surface-hi) 0 var(--pct, 0%), transparent var(--pct, 0%) 100%),
       var(--surface);
     border: 1px solid var(--border);
@@ -708,16 +711,6 @@
      label sits above the wrap so the marker was covered. Lifting the marker rather than the
      whole wrap keeps the transparent input BELOW the label, which is what leaves the number
      clickable. */
-  .slider-row--track .slider-label::before {
-    content: '';
-    position: absolute; inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(to right,
-      var(--border) 0 var(--locked-pct, 0%),
-      transparent var(--locked-pct, 0%) 100%);
-    opacity: .55;
-    pointer-events: none;
-  }
   /* STOCK, AS A SHORT MARK ON THE BAR'S FOOT. The base rule draws a rhombus, which was
      written to MIRROR the diamond thumb -- so on a bar with no thumb it was a 28px lozenge
      rotated 45 degrees, lying across the row at an angle. A tick would have read as an
@@ -756,45 +749,60 @@
     border-top: 0;
     opacity: 1;
   }
-  /* ── the grip: the handle's grab mark (#114) ─────────────────────────────────
-     A 3px acid bar at the fill's edge. 20px tall (6px off the top and bottom), not full
-     height: full height only restates the fill's edge, and a mark that is shorter than the
-     bar reads as a thing to take hold of. Square-cut -- it is a tick, and a radius on 3px
-     is a pill.
-     Same position math as the fill: the fill is a gradient stop at --pct in the label's
-     padding box, and this is positioned at --pct in the same padding box, so they cannot
-     drift. min() keeps the 3px inside the bar at 100% instead of hanging off its end.
-     BEHIND the text (z-index -1 inside the label's own stacking context), so the value and
-     name stay readable. Where a letter crosses it, the text carries a halo in the ground
-     colour: it is invisible against the bar everywhere else and only shows on the acid, so
-     the shadow that keeps the label legible is enclosed by construction and never reaches
-     the rail. The grip's own shadow is inset and clip-path'd to its box for the same reason.
-     No hit area is added: the opacity-0 range input already covers the whole bar and
-     owns the pointer, so the grip is pointer-events: none. */
+  /* ── the grip: the handle's grab mark (#114, revised) ────────────────────────
+     At rest a quiet GREY pill (--text-dim: the label's own ink at its dimmest, so it is a
+     grey on both --surface-hi fills in light and dark with no new token), 4px wide, rounded
+     ends, 7px off the top and bottom -- 18px of the 32px bar, about 55%. The accent color
+     (--accent, then --signal) is the state, not the resting look: :hover, engaged and
+     :focus-within only.
+     Same position math as the fill: --pct in the label's padding box, min() keeping the
+     whole pill inside the bar at 100%. It is the ::after at z-index -1 inside the label's
+     isolated stacking context: above the label's own background (the fill), below its text.
+     INVERTED INK, NOT A HALO. The old text-shadow halo read as a muddy box around the bar.
+     Now the ::before repeats the name (data-name on .slider-label) in --surface, at exactly
+     the real name's position, and is clipped to the pill's rect -- so only glyph pixels that
+     cross the grip are inverted and nothing leaks outside it. The value is an input and cannot
+     be repeated this way; it stays crisp with no halo.
+     The locked-above overlay that used to live on ::before is a background layer of the label
+     now, so ::before is free. No hit area is added: the range input owns the pointer. */
+  .slider-row--track { --grip-w: 4px; --grip-c: var(--text-dim); }
+  .slider-row--track:hover,
+  .slider-row--track.slider-row--engaged,
+  .slider-row--track:focus-within { --grip-w: 6px; --grip-c: var(--accent, var(--signal)); }
+  .slider-row--track .slider-label { isolation: isolate; }
   .slider-row--track .slider-label::after {
     content: '';
     position: absolute; z-index: -1;
-    top: 6px; bottom: 6px;
-    left: min(var(--pct, 0%), calc(100% - 3px));
-    width: 3px;
-    background: var(--accent, var(--signal));
-    box-shadow:
-      inset -1px 0 0 color-mix(in srgb, #000 28%, transparent),
-      inset 0 -2px 0 color-mix(in srgb, #000 22%, transparent);
-    clip-path: inset(0);
+    top: 7px; bottom: 7px;
+    left: min(var(--pct, 0%), calc(100% - var(--grip-w)));
+    width: var(--grip-w);
+    border-radius: 999px;
+    background: var(--grip-c);
     pointer-events: none;
-    transition: width var(--dur-fast, .12s) var(--ease, ease);
+    transition: width var(--dur-fast, .12s) var(--ease, ease), background-color var(--dur-fast, .12s) var(--ease, ease);
   }
-  .slider-row--track:hover .slider-label::after,
-  .slider-row--track.slider-row--engaged .slider-label::after { width: 5px; }
-  .slider-row--track .slider-label-text,
-  .slider-row--track .slider-value,
-  .slider-row--track .slider-number {
-    text-shadow: 0 0 1px var(--surface), 0 0 2px var(--surface);
+  .slider-row--track .slider-label::before {
+    content: attr(data-name);
+    position: absolute; z-index: 1; inset: 0;
+    box-sizing: border-box;
+    /* bottom padding = the real name's --nudge, so the centred line lands on its baseline */
+    padding: 0 var(--spacing-04, 12px) var(--nudge, 2px);
+    display: grid; align-content: center; justify-content: start;
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem); line-height: var(--type-ui-lead, 15px);
+    white-space: nowrap; overflow: hidden;
+    color: var(--surface);
+    clip-path: inset(7px max(0px, calc(100% - var(--pct, 0%) - var(--grip-w))) 7px min(var(--pct, 0%), calc(100% - var(--grip-w))) round 999px);
+    pointer-events: none;
+    transition: clip-path var(--dur-fast, .12s) var(--ease, ease);
   }
-  .slider-row--track.slider-row--off .slider-label::after { display: none; }
+  /* coarse drops --nudge from the real name (see .slider-label-left above), so the copy does too */
+  @media (pointer: coarse) { .slider-row--track .slider-label::before { padding-bottom: 0; } }
+  .slider-row--track.slider-row--off .slider-label::after,
+  .slider-row--track.slider-row--off .slider-label::before { display: none; }
   @media (prefers-reduced-motion: reduce) {
-    .slider-row--track .slider-label::after { transition: none; }
+    .slider-row--track .slider-label::after,
+    .slider-row--track .slider-label::before { transition: none; }
   }
   /* The bar is the coarse control, so say so on the way in. */
   .slider-row--track .slider-label { cursor: ew-resize; }

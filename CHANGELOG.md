@@ -16,16 +16,20 @@ Newest first.
 
 **The track bar has a handle now.** #114: Mark's reference tuner had a vertical tick on the
 fill's edge, and ours had nothing to take hold of, because the fill was a gradient stop with
-no thumb at all. The grip is the `::after` of `.slider-label`: 3px wide, 20px tall, `--accent`
-then `--signal`, at `--pct` in the same padding box the fill is painted in, so it cannot drift
+no thumb at all. The grip is the `::after` of `.slider-label`: 4px wide, 18px tall, at `--pct` in the same padding box the fill is painted in, so it cannot drift
 from the edge it marks. Shorter than the bar on purpose: full height only restates the fill's
 edge.
 
-**The shadow is enclosed, by construction.** A drop shadow on the grip would have spilled onto
-the rail, which is what the issue says it must not. The grip's own shadow is inset and
-clip-pathed to its box, and the name and value get a halo in the ground color: invisible on
-the bar, visible only where a letter crosses the acid, which is exactly where legibility is
-lost. It cost two text-shadows on the track variant's label text and nothing elsewhere.
+**Revised: grey at rest, color is the state, no halo.** Mark's verdict on the first cut: the
+grip is a muted grey pill (4px, rounded ends, 7px off top and bottom, `--text-dim`) and the
+`--accent` / `--signal` color appears only on hover, engaged and `:focus-within`. The first
+version's text-shadow halo read as a muddy box around the bar and the grip painted over the
+glyphs, so the halo is gone. The label is now an isolated stacking context with the grip behind
+the text, and the name is inverted only where it crosses the grip: `data-name` on `.slider-label`,
+a `::before` copy in `--surface` clipped to the grip's rect (aligned to the real name within
+0.5px, fine and coarse). The value number is an input and cannot be duplicated; it stays crisp
+and un-inverted. The locked-above overlay moved from `::before` to a background layer of the
+label to free it.
 
 **It cost no layout.** Absolutely positioned, pointer-events none, the range input still owns
 the whole bar, so no hit area was added. Measured with and without: row 34 / bar 34 on a fine
