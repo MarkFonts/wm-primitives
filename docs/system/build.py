@@ -56,6 +56,26 @@ def sync_faces():
 
 sync_faces()
 
+# The accent buttons' light (src/accentButton.css) is rendered AVIF in assets/accent/. The CSS says
+# url('../assets/accent/x.avif'), which is right from src/ and wrong from the inlined page, so the
+# page gets its own copy beside it (docs/assets/accent/, tracked, like docs/fonts/) and the linked
+# build points at it; the bundled build carries each file as a data: URI (accent_urls below).
+def sync_accent():
+    import shutil
+    dst = DOCS/"assets"/"accent"; dst.mkdir(parents=True, exist_ok=True)
+    for f in sorted((PKG/"assets"/"accent").glob("*.avif")):
+        if not (dst/f.name).exists() or (dst/f.name).read_bytes() != f.read_bytes():
+            shutil.copy2(f, dst/f.name)
+sync_accent()
+
+def accent_urls(css):
+    def sub(m):
+        if "--linked" in sys.argv:
+            return f"url('assets/accent/{m.group(1)}')"
+        import base64
+        return "url('data:image/avif;base64," + base64.b64encode((PKG/"assets"/"accent"/m.group(1)).read_bytes()).decode() + "')"
+    return re.sub(r"url\('\.\./assets/accent/([\w.-]+)'\)", sub, css)
+
 # The Optical Size Proof is deliberately NOT here: it is a font-proofing instrument, not
 # a page about the design system. (It also embeds CalSansUI.ttf rather than the full
 # variable face, so it could not have shared this page's font anyway.)
@@ -73,7 +93,8 @@ SECTIONS = [
                                        "superellipse(1.2), 2^k, and what opts out"),
     # The confirm rides inside Interface: it is how every control there answers a press
     # that worked (GESTURES.md §14).
-    ("controls", "Interface",         [SD/"controls.html", SD/"confirm.html"], "one dial, five ways; the confirm"),
+    # The accent buttons ride last: two acid buttons, Download and the Try-bar chip, each in two looks.
+    ("controls", "Interface",         [SD/"controls.html", SD/"confirm.html", SD/"accent-buttons.html"], "one dial, five ways; the confirm"),
     ("space",   "Space",         SD/"space.html",        "the pad scale, cap + alignment"),
     # Ramps ride INSIDE Color, as circles ride inside the corner law: a gradient is
     # colour under a curve, and the page has six laws, not seven. (2026-09-19; the branch
@@ -207,8 +228,8 @@ def scope_css(css, root, depth=0):
             parts.append(prelude); continue
         p = prelude.strip()
         low = p.lower()
-        if low.startswith("@keyframes") or low.startswith("@-webkit-keyframes"):
-            parts.append(f"{p}{{{body}}}")           # keyframe steps are not selectors
+        if low.startswith("@keyframes") or low.startswith("@-webkit-keyframes") or low.startswith("@property"):
+            parts.append(f"{p}{{{body}}}")           # keyframe steps and a registered property's descriptors are not selectors
         elif low.startswith("@font-face"):
             continue                                  # declared once, globally
         elif low.startswith("@"):
@@ -251,6 +272,7 @@ PRIMITIVE_CSS_PART = {
     "grid.html": ("type.css", "chip.css"),
     "confirm.html": ("type.css", "motion.css", "button-sets.css", "chip.css", "icon.css"),
     "button-sets.html": ("type.css", "space.css", "icon.css", "themeSwitch.css", "button.css", "button-sets.css"),
+    "accent-buttons.html": ("accentButton.css",),
 }
 
 # ---------------------------------------------------------------- the line
@@ -368,6 +390,7 @@ def build_section(sid, label, path, kicker):
                + "\n".join(re.findall(r'<style[^>]*>(.*?)</style>', ex_raw, re.S))
         ex_css = re.sub(r'/\*.*?\*/', '', ex_css, flags=re.S)
         ex_css = ex_css.replace('<![CDATA[', '').replace(']]>', '')
+        ex_css = accent_urls(ex_css)
         ex_js  = "\n".join(re.findall(r'<script[^>]*>(.*?)</script>', ex_raw, re.S))
         ex_html = re.sub(r'<style[^>]*>.*?</style>', '', ex_raw, flags=re.S)
         ex_html = re.sub(r'<script[^>]*>.*?</script>', '', ex_html, flags=re.S)
