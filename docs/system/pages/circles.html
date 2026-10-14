@@ -1,28 +1,33 @@
 <!doctype html><meta charset=utf-8><title>corners — ReCal only, no COSS</title><style>
 @font-face{font-family:"CalSansVF";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
 @font-face{font-family:"Face";src:url(../../fonts/CalSansVF.ttf);font-weight:400 700}
+/* token-lint: allow -- dark values kept as drawn, light maps to host tokens */
+:root{--cl-surface:#0f0f0f;--cl-card:#141414;--cl-ink:#e8e8e8;--cl-ink-2:#999;--cl-ink-3:#666;--cl-tag:#555;--cl-line:#222;--cl-line2:#333;--cl-on:#e8e8e8;--cl-onink:#0f0f0f;--cl-sw:#2a2a2a;--cl-swedge:#4a4a4a;}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--cl-surface:oklch(var(--l-ground) 0 0);--cl-card:color-mix(in srgb,oklch(var(--l-surface) 0 0) 45%,oklch(var(--l-ground) 0 0));--cl-ink:var(--ink);--cl-ink-2:var(--ink-2);--cl-ink-3:var(--ink-3);--cl-tag:var(--ink-3);--cl-line:var(--line);--cl-line2:var(--line);--cl-on:var(--ink);--cl-onink:oklch(var(--l-ground) 0 0);--cl-sw:oklch(var(--l-surface-hi) 0 0);--cl-swedge:color-mix(in srgb,var(--ink) 27%,oklch(var(--l-ground) 0 0));--bg:oklch(var(--l-ground) 0 0);--surface:oklch(var(--l-surface) 0 0);--surface-hi:oklch(var(--l-surface-hi) 0 0);--text:var(--ink);--text-muted:var(--ink-2);--text-dim:var(--ink-3);--text-faint:color-mix(in srgb,var(--ink) 24%,oklch(var(--l-ground) 0 0));--border:var(--line);--border-subtle:var(--line);--text-rgb:22, 22, 22;color-scheme:light;}}
+:root[data-theme="dark"]{--cl-surface:#0f0f0f;--cl-card:#141414;--cl-ink:#e8e8e8;--cl-ink-2:#999;--cl-ink-3:#666;--cl-tag:#555;--cl-line:#222;--cl-line2:#333;--cl-on:#e8e8e8;--cl-onink:#0f0f0f;--cl-sw:#2a2a2a;--cl-swedge:#4a4a4a;}
+:root[data-theme="light"]{--cl-surface:oklch(var(--l-ground) 0 0);--cl-card:color-mix(in srgb,oklch(var(--l-surface) 0 0) 45%,oklch(var(--l-ground) 0 0));--cl-ink:var(--ink);--cl-ink-2:var(--ink-2);--cl-ink-3:var(--ink-3);--cl-tag:var(--ink-3);--cl-line:var(--line);--cl-line2:var(--line);--cl-on:var(--ink);--cl-onink:oklch(var(--l-ground) 0 0);--cl-sw:oklch(var(--l-surface-hi) 0 0);--cl-swedge:color-mix(in srgb,var(--ink) 27%,oklch(var(--l-ground) 0 0));--bg:oklch(var(--l-ground) 0 0);--surface:oklch(var(--l-surface) 0 0);--surface-hi:oklch(var(--l-surface-hi) 0 0);--text:var(--ink);--text-muted:var(--ink-2);--text-dim:var(--ink-3);--text-faint:color-mix(in srgb,var(--ink) 24%,oklch(var(--l-ground) 0 0));--border:var(--line);--border-subtle:var(--line);--text-rgb:22, 22, 22;color-scheme:light;}
 *{box-sizing:border-box}
-body{margin:0;background:#0f0f0f;color:#e8e8e8;font-family:"CalSansVF",system-ui,sans-serif;
+body{margin:0;background:var(--cl-surface);color:var(--cl-ink);font-family:"CalSansVF",system-ui,sans-serif;
  font-optical-sizing:auto;font-variation-settings:"GEOM" 25;padding:33px 0 90px}   /* no side inset: the page column is the grid */
-h1{font-size:23px;margin:0 0 5px} .lede{color:#999;font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px);margin:0 0 24px;max-width:82ch}
+h1{font-size:23px;margin:0 0 5px} .lede{color:var(--cl-ink-2);font-size:var(--type-body-size,1rem);line-height:var(--type-body-lead,24px);margin:0 0 24px;max-width:82ch}
 h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:32px 0 12px;padding-bottom:7px;
- border-bottom:1px solid #222;display:flex;justify-content:space-between}
-h2 span{color:#666;letter-spacing:0;text-transform:none;font-size:10px}
+ border-bottom:1px solid var(--cl-line);display:flex;justify-content:space-between}
+h2 span{color:var(--cl-ink-3);letter-spacing:0;text-transform:none;font-size:10px}
 .bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}   /* wraps: six buttons and two labels ran past a phone's column (2026-10-11) */
-.bar b{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#666;font-weight:400}
-.bar button{font-family:inherit;font-size:11px;padding:5px 11px;border-radius:999px;border:1px solid #333;
- background:transparent;color:#999;cursor:pointer;corner-shape:superellipse(1.2)}
-.bar button.on{background:#e8e8e8;color:#0f0f0f;border-color:#e8e8e8}
+.bar b{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--cl-ink-3);font-weight:400}
+.bar button{font-family:inherit;font-size:11px;padding:5px 11px;border-radius:999px;border:1px solid var(--cl-line2);
+ background:transparent;color:var(--cl-ink-2);cursor:pointer;corner-shape:superellipse(1.2)}
+.bar button.on{background:var(--cl-on);color:var(--cl-onink);border-color:var(--cl-on)}
 .grid{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));gap:var(--grid-gutter);align-items:stretch;border:0;background:none;border-radius:0;overflow:visible}   /* card-to-grid, rule A: tracks are columns, a card spans 6, its contents step in one column + one gutter */
 .grid4{grid-template-columns:repeat(18,minmax(0,1fr))}
-.c{grid-column:span 6;background:#141414;box-shadow:inset 0 0 0 1px #222;border-radius:10px;
+.c{grid-column:span 6;background:var(--cl-card);box-shadow:inset 0 0 0 1px var(--cl-line);border-radius:10px;
  padding:18px 12px 12px calc(var(--col) + var(--grid-gutter));display:flex;flex-direction:column;gap:9px;min-height:132px}
 @media (max-width:1023px){.c{grid-column:1 / -1}}
 .c-demo{flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.c-name{font-size:12px;line-height:15px} .c-src{font-size:9px;line-height:12px;color:#666;font-family:ui-monospace,Menlo,monospace}
+.c-name{font-size:12px;line-height:15px} .c-src{font-size:9px;line-height:12px;color:var(--cl-ink-3);font-family:ui-monospace,Menlo,monospace}
 .c-n{font-size:9px;line-height:12px;color:#4a7fd4;font-family:ui-monospace,Menlo,monospace}
 .pr{display:flex;align-items:center;gap:9px}
-.tag{font-size:9px;color:#555;font-family:ui-monospace,Menlo,monospace;width:32px;flex:none}
+.tag{font-size:9px;color:var(--cl-tag);font-family:ui-monospace,Menlo,monospace;width:32px;flex:none}
 .pb{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .r21 .zone-chip,.r21 .ssd-chip,.r21 span[style*="999px"],.r21 button[style*="999px"],.r21 .preview-reset{
   --ph:27px;min-height:var(--ph);min-width:calc(var(--ph)*2);
@@ -2018,24 +2023,24 @@ body.past-app .type-panel, body.past-app .dock-download { opacity: 0; pointer-ev
 <div class="grid grid4"><div class="c"><div class="c-demo"><div class="slider-track-wrap" style="width:150px"><input type="range" value="40"></div></div><div class="c-name">slider thumb</div>
   <div class="c-src">AxisSlider.css·89 · shell.css·617 · scenes.css·162</div><div class="c-n">6 decl</div></div><div class="c"><div class="c-demo"><span class="preview-dot"></span></div><div class="c-name">.preview-dot</div>
   <div class="c-src">shell.css</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><span class="mode-throb"></span></div><div class="c-name">.mode-throb</div>
-  <div class="c-src">shell.css</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><span style="width:9px;height:9px;border-radius:50%;background:#e8e8e8;display:inline-block"></span></div><div class="c-name">.gg-geom-dot</div>
-  <div class="c-src">App.css</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><span style="width:14px;height:14px;border-radius:50%;background:#e8e8e8;display:inline-block"></span></div><div class="c-name">.vslider-thumb</div>
-  <div class="c-src">App.css</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><span style="width:16px;height:16px;border-radius:50%;border:2px solid #333;border-top-color:#e8e8e8;display:inline-block"></span></div><div class="c-name">.spinner</div>
+  <div class="c-src">shell.css</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><span style="width:9px;height:9px;border-radius:50%;background:var(--cl-on);display:inline-block"></span></div><div class="c-name">.gg-geom-dot</div>
+  <div class="c-src">App.css</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><span style="width:14px;height:14px;border-radius:50%;background:var(--cl-on);display:inline-block"></span></div><div class="c-name">.vslider-thumb</div>
+  <div class="c-src">App.css</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><span style="width:16px;height:16px;border-radius:50%;border:2px solid var(--cl-line2);border-top-color:var(--cl-on);display:inline-block"></span></div><div class="c-name">.spinner</div>
   <div class="c-src">App.css</div><div class="c-n">1 decl</div></div><div class="c"><div class="c-demo"><input type="radio" checked><input type="radio"></div><div class="c-name">radio input</div>
   <div class="c-src">App.css·2197</div><div class="c-n">2 decl</div></div></div>
 
 <h2>The 5 pills <span>your 2:1 rule — min-width = 2 &times; height</span></h2>
 <div class="grid"><div class="c"><div class="c-name">zone-chip<span class="c-src" style="margin-left:8px">shell.css</span></div>
-      <div class="pr"><span class="tag">today</span><div class="pb"><button class="zone-chip on" data-label="UI" style="background:#e8e8e8;color:#0f0f0f"><span>UI</span></button><button class="zone-chip" data-label="Base" style="color:#6f9ee8"><span>Base</span></button></div></div>
-      <div class="pr"><span class="tag">2:1</span><div class="pb r21"><button class="zone-chip on" data-label="UI" style="background:#e8e8e8;color:#0f0f0f"><span>UI</span></button><button class="zone-chip" data-label="Base" style="color:#6f9ee8"><span>Base</span></button></div></div></div><div class="c"><div class="c-name">ssd-chip<span class="c-src" style="margin-left:8px">StyleScopeDropdown.css</span></div>
+      <div class="pr"><span class="tag">today</span><div class="pb"><button class="zone-chip on" data-label="UI" style="background:var(--cl-on);color:var(--cl-onink)"><span>UI</span></button><button class="zone-chip" data-label="Base" style="color:#6f9ee8"><span>Base</span></button></div></div>
+      <div class="pr"><span class="tag">2:1</span><div class="pb r21"><button class="zone-chip on" data-label="UI" style="background:var(--cl-on);color:var(--cl-onink)"><span>UI</span></button><button class="zone-chip" data-label="Base" style="color:#6f9ee8"><span>Base</span></button></div></div></div><div class="c"><div class="c-name">ssd-chip<span class="c-src" style="margin-left:8px">StyleScopeDropdown.css</span></div>
       <div class="pr"><span class="tag">today</span><div class="pb"><span class="ssd-chip">all</span><span class="ssd-chip ssd-chip--local">local</span></div></div>
       <div class="pr"><span class="tag">2:1</span><div class="pb r21"><span class="ssd-chip">all</span><span class="ssd-chip ssd-chip--local">local</span></div></div></div><div class="c"><div class="c-name">state-tag<span class="c-src" style="margin-left:8px">shell.css</span></div>
-      <div class="pr"><span class="tag">today</span><div class="pb"><span style="border:1px solid #333;padding:3px 9px;font-size:10px;border-radius:999px;display:inline-block">STOCK</span></div></div>
-      <div class="pr"><span class="tag">2:1</span><div class="pb r21"><span style="border:1px solid #333;padding:3px 9px;font-size:10px;border-radius:999px;display:inline-block">STOCK</span></div></div></div><div class="c"><div class="c-name">preview-reset<span class="c-src" style="margin-left:8px">shell.css</span></div>
+      <div class="pr"><span class="tag">today</span><div class="pb"><span style="border:1px solid var(--cl-line2);padding:3px 9px;font-size:10px;border-radius:999px;display:inline-block">STOCK</span></div></div>
+      <div class="pr"><span class="tag">2:1</span><div class="pb r21"><span style="border:1px solid var(--cl-line2);padding:3px 9px;font-size:10px;border-radius:999px;display:inline-block">STOCK</span></div></div></div><div class="c"><div class="c-name">preview-reset<span class="c-src" style="margin-left:8px">shell.css</span></div>
       <div class="pr"><span class="tag">today</span><div class="pb"><button class="preview-reset">Reset</button></div></div>
       <div class="pr"><span class="tag">2:1</span><div class="pb r21"><button class="preview-reset">Reset</button></div></div></div><div class="c"><div class="c-name">pill-reset-btn<span class="c-src" style="margin-left:8px">App.css</span></div>
-      <div class="pr"><span class="tag">today</span><div class="pb"><button style="border-radius:999px;border:1px solid #333;background:none;color:#999;padding:5px 12px;font:inherit;font-size:11px">Reset</button></div></div>
-      <div class="pr"><span class="tag">2:1</span><div class="pb r21"><button style="border-radius:999px;border:1px solid #333;background:none;color:#999;padding:5px 12px;font:inherit;font-size:11px">Reset</button></div></div></div></div>
+      <div class="pr"><span class="tag">today</span><div class="pb"><button style="border-radius:999px;border:1px solid var(--cl-line2);background:none;color:var(--cl-ink-2);padding:5px 12px;font:inherit;font-size:11px">Reset</button></div></div>
+      <div class="pr"><span class="tag">2:1</span><div class="pb r21"><button style="border-radius:999px;border:1px solid var(--cl-line2);background:none;color:var(--cl-ink-2);padding:5px 12px;font:inherit;font-size:11px">Reset</button></div></div></div></div>
 <script>
 const b=document.body;
 document.getElementById('bOff').onclick=e=>{b.removeAttribute('data-force');e.target.classList.add('on');bOn.classList.remove('on')};
