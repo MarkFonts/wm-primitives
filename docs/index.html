@@ -470,18 +470,21 @@ html,body{margin:0;padding:0;background:var(--bg)}
 @media (max-width:1316px){
   .wm-wip{grid-column:1 / span 8}
 }
-/* Two by two, six columns each of the copy's twelve: below 1200 three columns are narrower than the
-   widest caption (measured: 107px caption, 3-column tile 108px at 1200, and it wraps just under). From
-   1024 down it is the same rule on the page's own twelve (Mark's phone, 2026-10-11: "we have a grid"):
-   the hairline in the gutter before the 2nd and 4th only, a line of 24 between the rows. */
+/* One row of four at every desktop width: from 1024 to 1199 (the 3-column tiles are too narrow for
+   the widest caption, 107px, below about 1198) each tile takes FOUR of the eighteen, edges on columns
+   1, 5, 9, 13. Two by two was tried for this band and rejected (Mark, 2026-10-14): the row loses its
+   shape and the drawing runs through the gaps. */
 @media (max-width:1199px){
+  .wm-stat{grid-column:span 4}
+}
+/* Phone, below 1024: two by two on the page's own twelve (Mark's phone, 2026-10-11: "we have a grid"),
+   six columns each, the hairline in the gutter before the 2nd and 4th only, a line of 24 between rows. */
+@media (max-width:1023px){
+  .wm-stats{grid-template-columns:repeat(12,minmax(0,1fr))}
   .wm-stat:nth-child(odd){grid-column:1 / span 6}
   .wm-stat:nth-child(even){grid-column:7 / span 6}
   .wm-stat + .wm-stat::before{display:none}
   .wm-stat:nth-child(even)::before{display:block}
-}
-@media (max-width:1023px){
-  .wm-stats{grid-template-columns:repeat(12,minmax(0,1fr))}
 }
 
 /* ---- The outline is an AXIS, not a sidebar. No panel, no card, no active pill: a
