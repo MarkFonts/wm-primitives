@@ -4326,7 +4326,9 @@ html,body{margin:0;padding:0;background:var(--bg)}
     border-radius: var(--radius, 6px);
     corner-shape: superellipse(var(--corner-k, 1.2));
     background:
-      linear-gradient(to right, var(--surface-hi) 0 var(--pct, 0%), transparent var(--pct, 0%) 100%),
+      linear-gradient(to right,
+        color-mix(in srgb, var(--border) 55%, transparent) 0 var(--locked-pct, 0%),
+        transparent var(--locked-pct, 0%) 100%),
       var(--surface);
     border: 1px solid var(--border);
   }#s-controls .slider-row--track .slider-number,#s-controls .slider-row--track .slider-step,#s-controls .slider-row--track .slider-auto{ pointer-events: auto; }#s-controls .slider-row--track .slider-track-wrap input[type="range"]:focus-visible{
@@ -4345,16 +4347,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     min-width: 2ch;
     max-width: 14ch;   
   }#s-controls .slider-row--track .slider-label{ padding-right: 0; }#s-controls .slider-row--track .slider-step-btn{ width: 12px; }@media (pointer: coarse){#s-controls .slider-row--track .slider-step-btn{ width: 40px; }#s-controls .slider-row--track .slider-value{ padding-right: var(--spacing-02, 8px); }
-  }#s-controls .slider-row--track .slider-suffix{ color: var(--text-muted); }#s-controls .slider-row--track .slider-label::before{
-    content: '';
-    position: absolute; inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(to right,
-      var(--border) 0 var(--locked-pct, 0%),
-      transparent var(--locked-pct, 0%) 100%);
-    opacity: .55;
-    pointer-events: none;
-  }#s-controls .slider-row--track .slider-ref{
+  }#s-controls .slider-row--track .slider-suffix{ color: var(--text-muted); }#s-controls .slider-row--track .slider-ref{
     z-index: 2;
     top: auto; bottom: 0;
     width: 0; height: 0;
@@ -4371,7 +4364,37 @@ html,body{margin:0;padding:0;background:var(--bg)}
     border-bottom: calc(var(--ref-w) / 2) solid rgba(var(--text-rgb, 232, 232, 232), .55);
     border-top: 0;
     opacity: 1;
-  }#s-controls .slider-row--track .slider-label{ cursor: ew-resize; }#s-controls .slider-row--track.slider-row--off .slider-label{ cursor: default; }
+  }#s-controls .slider-row--track{ --grip-w: 4px; --grip-c: var(--text-dim); --grip-in: 6px; --grip-v: 5px; --name-c: color-mix(in srgb, var(--text) calc(var(--a-2, .62) * 100%), var(--surface)); --fill-r: var(--radius, 6px); --fill-c: var(--surface-hi); }#s-controls .slider-row--track:hover,#s-controls .slider-row--track.slider-row--engaged,#s-controls .slider-row--track:focus-within{ --grip-w: 6px; --grip-c: var(--accent, var(--signal)); --fill-c: color-mix(in srgb, var(--surface-hi), var(--text) 8%); }#s-controls .slider-row--track .slider-label{ isolation: isolate; }#s-controls .slider-row--track .slider-label-text{ color: var(--name-c); }#s-controls .slider-row--track .slider-label::after{
+    content: '';
+    position: absolute; z-index: -1;
+    top: var(--grip-v); bottom: var(--grip-v);
+    left: max(var(--grip-in), calc(var(--pct, 0%) - var(--grip-in) - var(--grip-w)));
+    width: var(--grip-w);
+    border-radius: 999px;
+    background: var(--grip-c);
+    pointer-events: none;
+    transition: width var(--dur-fast, .12s) var(--ease, ease), left var(--dur-fast, .12s) var(--ease, ease), background-color var(--dur-fast, .12s) var(--ease, ease);
+  }#s-controls .slider-row--track{ --grip-l: max(var(--grip-in), calc(var(--pct, 0%) - var(--grip-in) - var(--grip-w)));
+    --grip-clip: inset(var(--grip-v) calc(100% - var(--grip-l) - var(--grip-w)) var(--grip-v) var(--grip-l) round 999px);
+    
+    --shade-clip: inset(calc(var(--grip-v) - .5px) calc(100% - var(--grip-l) - var(--grip-w) - .5px) calc(var(--grip-v) - .5px) calc(var(--grip-l) - .5px) round 999px); }#s-controls .slider-row--track .slider-label > .slider-grip-shade,#s-controls .slider-row--track .slider-label > .slider-grip-shade > .slider-grip-shade-cast{
+    position: absolute; z-index: 1; inset: 0; pointer-events: none;
+    clip-path: var(--shade-clip);
+    transition: clip-path var(--dur-fast, .12s) var(--ease, ease);
+  }#s-controls .slider-grip-shade{ display: none; }#s-controls .slider-row--track .slider-label > .slider-grip-shade{
+    display: block;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.8)) drop-shadow(0 3px 12px rgba(0,0,0,.65));   
+  }:root[data-theme="light"] #s-controls .slider-row--track .slider-label > .slider-grip-shade{ filter: drop-shadow(0 1px 2px rgba(255,255,255,.8)) drop-shadow(0 3px 12px rgba(255,255,255,.65)); }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .slider-row--track .slider-label > .slider-grip-shade{ filter: drop-shadow(0 1px 2px rgba(255,255,255,.8)) drop-shadow(0 3px 12px rgba(255,255,255,.65)); } }#s-controls .slider-row--track .slider-label > .slider-grip-shade > .slider-grip-shade-cast{ box-sizing: border-box; overflow: hidden;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; align-content: center; column-gap: 6px;
+    padding: 0 0 0 var(--spacing-04, 12px);
+    font-size: var(--type-ui-size, 0.75rem); line-height: var(--type-ui-lead, 15px); }#s-controls .slider-grip-shade-ph{ visibility: hidden; }#s-controls .slider-grip-shade-value{ display: inline-block; min-width: 2ch; max-width: 14ch; text-align: right; white-space: nowrap;
+    font-family: var(--ui-font, system-ui, sans-serif); font-size: var(--type-ui-size, 0.75rem); font-feature-settings: "tnum";
+    color: var(--text); }#s-controls .slider-row:focus-within .slider-grip-shade-value{ color: var(--signal-ink, var(--accent, currentColor)); }#s-controls .slider-row--track .slider-label > .slider-fill{
+    position: absolute; z-index: -2; top: 0; bottom: 0; left: 0; width: var(--pct, 0%);
+    background: var(--fill-c); border-radius: calc(var(--fill-r) - 1px); corner-shape: superellipse(var(--corner-k, 1.2));
+    pointer-events: none;
+    transition: width var(--dur-fast, .12s) var(--ease, ease), background-color var(--dur-fast, .12s) var(--ease, ease);
+  }:root[data-scrubbing] #s-controls .slider-row--track .slider-label > .slider-fill,:root[data-scrubbing] #s-controls .slider-row--track .slider-label::after,:root[data-scrubbing] #s-controls .slider-row--track .slider-label > .slider-grip-shade,:root[data-scrubbing] #s-controls .slider-row--track .slider-label > .slider-grip-shade > .slider-grip-shade-cast{ transition: none; }#s-controls .slider-row--track .slider-label{ cursor: ew-resize; }#s-controls .slider-row--track.slider-row--off .slider-label{ cursor: default; }
 }#s-controls .triplet-row{
   display: grid;
   
@@ -5362,6 +5385,164 @@ html,body{margin:0;padding:0;background:var(--bg)}
 }@media (min-width:1152px){#s-controls .part-1 .cf-tc-big{font-size:39px;--lh:42px}#s-controls .part-1 .cf-tc-side{padding-top:18px}#s-controls .part-1 .cf-tc-side p,#s-controls .part-1 .cf-speed{--lh:21px;margin-bottom:21px}#s-controls .part-1 .cf-fig{margin-bottom:21px}
 }@media (min-width:1312px){#s-controls .part-1 .cf-tc-in{padding-block:24px 72px}#s-controls .part-1 .cf-tc-big{font-size:45px;--lh:48px}#s-controls .part-1 .cf-tc-side{padding-top:21px}#s-controls .part-1 .cf-tc-side p,#s-controls .part-1 .cf-speed{--lh:24px;margin-bottom:24px}#s-controls .part-1 .cf-fig{margin-bottom:24px}
 }
+@property --ab-p{ syntax: "<number>"; inherits: true; initial-value: 0; }#s-controls .part-2 .wm-accent{
+  
+  --ab-acid: #eeff41;  --ab-acid: color(display-p3 0.9333 1 0.2549);
+  --ab-face: var(--surface);                                   
+  --ab-ink: color-mix(in oklab, var(--ab-acid) 22%, white);    
+  --ab-off-ink: #8a8a8a;                                       
+  --ab-off-line: rgba(255, 255, 255, .09);                     
+
+  position: relative; isolation: isolate;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--spacing-02, 6px);
+  box-sizing: border-box; margin: 0;
+  border: 1px solid transparent;
+  font-family: var(--ui-font); font-size: var(--type-ui-size, .75rem);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}#s-controls .part-2 .wm-accent:disabled{ cursor: default; }#s-controls .part-2 .wm-accent[data-shape="pill"]{
+  padding: 0 16px;
+  border-radius: 999px; corner-shape: round;                   
+  font-weight: 700;
+}#s-controls .part-2 .wm-accent[data-shape="chip"]{
+  block-size: 32px; padding: 0 var(--spacing-04, 12px);
+  border-radius: 8px;                                          
+  corner-shape: superellipse(var(--corner-k, 1.2));
+}#s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"]{ inline-size: 225px; block-size: 32px; }#s-controls .part-2 .wm-accent[data-look="q5"]{ --ab-mt: 14px; --ab-mb: 62px; --ab-mx: 52px; --ab-oy: 47px; }#s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"]{ --ab-mb: 46px; --ab-oy: 46px; }#s-controls .part-2 .wm-accent[data-look="q5"],#s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled),#s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){
+  background:
+    linear-gradient(0deg, color-mix(in srgb, var(--ab-acid) 38%, transparent) 0, color-mix(in srgb, var(--ab-acid) 12%, transparent) 14%, transparent 42%) border-box,
+    linear-gradient(var(--ab-face) 0 0) border-box;
+  color: var(--ab-ink);
+  box-shadow: none; filter: none;
+  
+  transition: transform .08s ease;
+}#s-controls .part-2 .wm-accent[data-look="q5"]::before{
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  inset: -1px 0 0 0; border-radius: inherit; corner-shape: inherit; background: var(--ab-face);
+}#s-controls .part-2 .wm-accent[data-look="q5"]::after{
+  content: ""; position: absolute; z-index: -2; pointer-events: none;
+  inset: calc(-1px - var(--ab-mt)) calc(-1px - var(--ab-mx)) calc(-1px - var(--ab-mb));
+  transform-origin: 50% var(--ab-oy);
+  
+  transition: transform .8s ease, opacity .8s ease;
+}#s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"]::after{ background: url('assets/accent/q5-pill.avif') 0 0 / 100% 100% no-repeat; }#s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"]::after{
+  border: 0 solid transparent;
+  border-image: url('assets/accent/q5-chip.avif') 0 156 0 156 fill / 0 78px 0 78px stretch;
+}#s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled){ transform: none; }#s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled)::after{ transform: scale(1.1); }#s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){ transform: translateY(1px); }#s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled)::after{ transform: scale(.9); opacity: .85; }#s-controls .part-2 .wm-accent[data-look="q5"]:disabled{
+  opacity: 1; filter: none; box-shadow: none; transform: none;
+  background: var(--ab-face);
+  border-color: var(--ab-off-line);
+  color: var(--ab-off-ink); -webkit-text-fill-color: var(--ab-off-ink);
+}#s-controls .part-2 .wm-accent[data-look="q5"]:disabled::before,#s-controls .part-2 .wm-accent[data-look="q5"]:disabled::after{ display: none; }#s-controls .part-2 .wm-accent[data-look="q6n4"],#s-controls .part-2 .wm-accent[data-look="q6n4"]:hover:not(:disabled),#s-controls .part-2 .wm-accent[data-look="q6n4"]:active:not(:disabled){
+  --ab-p: 0;
+  --ab-H: 32px; --ab-XS: 26px;                 
+  --ab-NF: 47; --ab-N0: 8; --ab-N1: 30; --ab-N2: 8;   
+  --ab-q: clamp(0, calc(var(--ab-p) / .4), 1);                   
+  --ab-z: clamp(0, calc((var(--ab-p) - .8) / .2), 1);            
+  --ab-f: calc(clamp(0, calc((var(--ab-p) - .3) / .1), 1) * var(--ab-N0) + clamp(0, calc((var(--ab-p) - .4) / .4), 1) * var(--ab-N1) + var(--ab-z) * var(--ab-N2));
+  --ab-fl: round(down, var(--ab-f), 1);
+  --ab-mt: 10px; --ab-mb: 52px; --ab-mx: 40px;
+  
+  --ab-inkp: color-mix(in srgb, #c9cdb6 calc((1 - min(1, var(--ab-p) * 1.6)) * 100%), oklch(0.84 0.13 116));
+  background: none; box-shadow: none; filter: none;
+  color: var(--ab-inkp);
+  
+  transition: --ab-p .65s cubic-bezier(.45, 0, .2, 1), transform .08s ease;
+}#s-controls .part-2 .wm-accent[data-look="q6n4"][data-shape="chip"]{ --ab-mb: 40px; }#s-controls .part-2 .wm-accent[data-look="q6n4"]:hover:not(:disabled),#s-controls .part-2 .wm-accent[data-look="q6n4"]:active:not(:disabled){ --ab-p: 1; transform: none; }#s-controls .part-2 .wm-accent[data-look="q6n4"]:active:not(:disabled){ transform: translateY(1px); }#s-controls .part-2 .wm-accent[data-look="q6n4"]::before{
+  content: ""; position: absolute; z-index: -2; pointer-events: none;
+  inset: calc(-1px - var(--ab-mt)) calc(-1px - var(--ab-mx)) calc(-1px - var(--ab-mb));
+  opacity: max(0, calc(1 - var(--ab-p) * 1.5));
+}#s-controls .part-2 .wm-accent[data-look="q6n4"][data-shape="chip"]::before{
+  border: 0 solid transparent;
+  border-image: url('assets/accent/q6n4-spill-chip.avif') 0 132 0 132 fill / 0 66px 0 66px stretch;
+}#s-controls .part-2 .wm-accent[data-shape="chip"]{
+  --ab-ff: var(--ab-fade-from, 200%);
+  --ab-fv: linear-gradient(180deg, #000 var(--ab-ff), rgba(0, 0, 0, .6) calc(var(--ab-ff) + 4px), rgba(0, 0, 0, .2) calc(var(--ab-ff) + 8px), transparent calc(var(--ab-ff) + 11px));
+}#s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"]::after{ -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv); }#s-controls .part-2 .wm-accent[data-look="q6n4"][data-shape="chip"]::before{
+  --ab-mid: calc(100% - 132px);
+  --ab-flat: linear-gradient(90deg, rgba(0,0,0,0.000) 0%, rgba(0,0,0,0.100) 10%, rgba(0,0,0,0.170) 20%, rgba(0,0,0,0.217) 30%, rgba(0,0,0,0.244) 40%, rgba(0,0,0,0.253) 50%, rgba(0,0,0,0.244) 60%, rgba(0,0,0,0.217) 70%, rgba(0,0,0,0.170) 80%, rgba(0,0,0,0.100) 90%, rgba(0,0,0,0.000) 100%);
+  -webkit-mask-image: var(--ab-fv), var(--ab-flat); mask-image: var(--ab-fv), var(--ab-flat);
+  -webkit-mask-size: 100% 100%, min(var(--ab-mid), calc(max(0px, calc(10px - var(--ab-mid))) * 1000)) 100%;
+  mask-size: 100% 100%, min(var(--ab-mid), calc(max(0px, calc(10px - var(--ab-mid))) * 1000)) 100%;
+  -webkit-mask-position: 0 0, 50% 0; mask-position: 0 0, 50% 0;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-composite: source-out; mask-composite: subtract;
+}#s-controls .part-2 .wm-accent__face{
+  position: absolute; inset: -1px; z-index: -1; pointer-events: none;
+  border-radius: inherit; corner-shape: inherit; overflow: hidden; isolation: isolate; background: var(--ab-face);
+}#s-controls .part-2 .wm-accent__tone{
+  position: absolute; inset: 0; border-radius: inherit;
+  background: var(--ab-face); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
+  opacity: max(0, calc(1 - var(--ab-p) * 1.6));
+}#s-controls .part-2 .wm-accent__spr{ position: absolute; inset: 0; isolation: isolate; --ab-ov: 3px; container-type: inline-size; }#s-controls .part-2 .wm-accent__bot,#s-controls .part-2 .wm-accent__top,#s-controls .part-2 .wm-accent__cap{ position: absolute; top: 0; bottom: 0; mix-blend-mode: plus-lighter; isolation: isolate; }#s-controls .part-2 .wm-accent__bot,#s-controls .part-2 .wm-accent__top{
+  --ab-x: linear-gradient(90deg, transparent 0, #000 var(--ab-ov), #000 calc(100% - var(--ab-ov)), transparent 100%);
+  left: calc(var(--ab-XS) - var(--ab-ov)); right: calc(var(--ab-XS) - var(--ab-ov));
+  background: url('assets/accent/q6n4-rim-bot.avif') 0 0 / 100% 100% no-repeat;
+  -webkit-mask-image: var(--ab-x); mask-image: var(--ab-x);
+}#s-controls .part-2 .wm-accent__bot{
+  --ab-rx: calc(6px + var(--ab-q) * (50% + 28px));
+  --ab-m: linear-gradient(90deg, transparent calc(50% - var(--ab-rx) - 22px), #000 calc(50% - var(--ab-rx)), #000 calc(50% + var(--ab-rx)), transparent calc(50% + var(--ab-rx) + 22px));
+  
+  --ab-rp: calc(16px * (1 - var(--ab-q)));
+  --ab-e: linear-gradient(90deg, transparent 0, #000 var(--ab-rp), #000 calc(100% - var(--ab-rp)), transparent 100%);
+  
+  --ab-gh: clamp(3px, calc((100cqw - 2 * var(--ab-XS)) * .65 + 2px), 20px);
+  --ab-gp: calc(var(--ab-gh) + (20px - var(--ab-gh)) * clamp(0, calc((var(--ab-p) - .3) / .2), 1));
+  --ab-v: linear-gradient(0deg, #000 var(--ab-gp), transparent calc(var(--ab-gp) + 5px));
+  -webkit-mask-image: var(--ab-m), var(--ab-e), var(--ab-x), var(--ab-v); mask-image: var(--ab-m), var(--ab-e), var(--ab-x), var(--ab-v);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}#s-controls .part-2 .wm-accent__top{ background-image: url('assets/accent/q6n4-rim-top.avif'); opacity: var(--ab-z); }#s-controls .part-2 .wm-accent__cap{
+  width: var(--ab-XS); left: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - var(--ab-ov)), transparent 100%);
+  mask-image: linear-gradient(90deg, #000 calc(100% - var(--ab-ov)), transparent 100%);
+}#s-controls .part-2 .wm-accent__cap--r{ left: auto; right: 0; transform: scaleX(-1); }#s-controls .part-2 .wm-accent__cap .wm-accent__sa,#s-controls .part-2 .wm-accent__cap .wm-accent__sb{
+  position: absolute; inset: 0;
+  background-image: url('assets/accent/q6n4-rim-cap.avif'); background-repeat: no-repeat;
+  background-size: 100% calc(var(--ab-NF) * var(--ab-H));
+  mix-blend-mode: plus-lighter; will-change: background-position, opacity;
+}#s-controls .part-2 .wm-accent__sa{ background-position: 0 calc(var(--ab-fl) * var(--ab-H) * -1); opacity: calc(1 - (var(--ab-f) - var(--ab-fl))); }#s-controls .part-2 .wm-accent__sb{ background-position: 0 calc((var(--ab-fl) + 1) * var(--ab-H) * -1); opacity: calc(var(--ab-f) - var(--ab-fl)); }#s-controls .part-2 .wm-accent__face::after{
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; pointer-events: none;
+  background: url('assets/accent/q6n4-streak-chip.avif') 0 0 / 100% 100% no-repeat;
+  opacity: calc(.9 - clamp(0, calc((var(--ab-p) - .3) / .3), 1) * .7);   
+}#s-controls .part-2 .wm-accent[data-look="q6n4"][data-shape="pill"],#s-controls .part-2 .wm-accent[data-look="q6n4"][data-shape="pill"]:hover:not(:disabled),#s-controls .part-2 .wm-accent[data-look="q6n4"][data-shape="pill"]:active:not(:disabled){
+  --ab-H: 33px;
+  border: 0; inline-size: 227px; block-size: 33px; padding: 0 16px;
+  line-height: 15px;
+}#s-controls .part-2 .wm-accent[data-look="q6n4"][data-shape="pill"]::before{
+  inset: calc(var(--ab-mt) * -1) calc(var(--ab-mx) * -1) calc(var(--ab-mb) * -1);
+  border: 0 solid transparent;
+  border-image: url('assets/accent/q6n4-spill-pill.avif') 0 148 0 148 fill / 0 74px 0 74px stretch;
+}#s-controls .part-2 .wm-accent[data-shape="pill"] .wm-accent__face{ inset: 0; background: #0a0a0a; }#s-controls .part-2 .wm-accent[data-shape="pill"] .wm-accent__tone{
+  background: linear-gradient(180deg, #171717, #0c0c0c); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
+  opacity: max(0, calc(1 - var(--ab-p) * 1.6));
+}#s-controls .part-2 .wm-accent__fr{ position: absolute; inset: 0; isolation: isolate; --ab-f: calc(var(--ab-p) * 47); --ab-fl: round(down, var(--ab-f), 1); }#s-controls .part-2 .wm-accent__fr .wm-accent__sa,#s-controls .part-2 .wm-accent__fr .wm-accent__sb{
+  position: absolute; inset: 0; background-image: url('assets/accent/q6n4-travel-pill.avif'); background-repeat: no-repeat;
+  background-size: 100% 1584px; mix-blend-mode: plus-lighter; will-change: background-position, opacity;
+}#s-controls .part-2 .wm-accent[data-shape="pill"] .wm-accent__face::after{
+  height: 6px; background-image: url('assets/accent/q6n4-streak-pill.avif');
+  opacity: max(.2, calc(.9 - var(--ab-p) * 1.2));
+}#s-controls .part-2 .wm-accent[data-look="q6n4"] .wm-accent__lab{
+  position: relative;
+  --ab-mp: calc((1 - min(1, var(--ab-p) * 1.6)) * 100%);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, oklch(0.95 0.06 112) var(--ab-mp), oklch(0.84 0.13 116)),
+    color-mix(in srgb, #b8b8b3 var(--ab-mp), oklch(0.84 0.13 116)));
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent; -webkit-text-fill-color: transparent;
+}#s-controls .part-2 .wm-accent[data-look="q6n4"] .wm-accent__lab svg{ color: var(--ab-inkp); }#s-controls .part-2 .wm-accent[data-look="q6n4"]:disabled{
+  opacity: 1; transform: none;
+  background: var(--ab-face); border: 1px solid var(--ab-off-line);
+  color: var(--ab-off-ink);
+}#s-controls .part-2 .wm-accent[data-look="q6n4"]:disabled::before,#s-controls .part-2 .wm-accent[data-look="q6n4"]:disabled .wm-accent__face{ display: none; }#s-controls .part-2 .wm-accent[data-look="q6n4"]:disabled .wm-accent__lab{
+  background: none; animation: none; color: var(--ab-off-ink); -webkit-text-fill-color: var(--ab-off-ink);
+}#s-controls .part-2 .wm-accent[data-look="q6n4"]:disabled .wm-accent__lab svg{ color: var(--ab-off-ink); }#s-controls .part-2 *{box-sizing:border-box}#s-controls .part-2{margin:0;color:var(--ink,#17181a);font-family:var(--ui-font,system-ui,sans-serif);font-optical-sizing:auto;
+  font-size:var(--type-body-size,1rem)}#s-controls .part-2 p{margin:0 0 24px;max-width:64ch;color:var(--ink-2,rgba(23,24,26,.62))}#s-controls .part-2 code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-height:1}#s-controls .part-2 table{border-collapse:collapse;width:100%;max-width:720px;margin:0 0 24px}#s-controls .part-2 th,#s-controls .part-2 td{text-align:left;vertical-align:baseline;padding:6px 24px 6px 0;font-size:var(--type-ui-size,.75rem);
+  --lh:var(--lead-ui);line-height:var(--lead-ui,15px);box-shadow:inset 0 -1px var(--line,rgba(23,24,26,.16))}#s-controls .part-2 th{font-weight:400;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3,rgba(23,24,26,.38))}#s-controls .part-2 td{color:var(--ink-2,rgba(23,24,26,.62))}#s-controls .part-2 td:first-child{color:var(--ink,#17181a);white-space:nowrap}@media (max-width:680px){#s-controls .part-2 table{table-layout:fixed}#s-controls .part-2 td,#s-controls .part-2 td:first-child{white-space:normal;overflow-wrap:anywhere}}#s-controls .part-2 .ab-stage{ --ui-font:"CalSansVF",system-ui,sans-serif; --surface:#1a1a1a; --spacing-02:6px; --spacing-04:12px;
+  font-family:var(--ui-font); color:#e8e8e8; background:var(--surface);
+  border-radius:8px; corner-shape:superellipse(1.2); margin:0 0 24px; padding:24px 24px 0;
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:24px; overflow:hidden }#s-controls .part-2 .ab-col{ min-width:0; padding:0 52px }#s-controls .part-2 .ab-cap{ display:block; margin:0 0 6px; font-size:var(--type-micro-size,.5625rem); line-height:12px;
+  letter-spacing:var(--track-caps,.12em); text-transform:uppercase; color:rgba(232,232,232,.38) }#s-controls .part-2 .ab-cap--head{ color:rgba(232,232,232,.62); margin-bottom:24px }#s-controls .part-2 .ab-cell{ min-width:0; padding:0 0 72px }#s-controls .part-2 .ab-set--chip{ display:grid; grid-template-columns:repeat(2,max-content); column-gap:48px }#s-controls .part-2 .ab-set--chip .ab-cell{ padding-bottom:60px }#s-controls .part-2 .ab-cell .wm-accent{ display:inline-flex }@media (max-width:680px){#s-controls .part-2 .ab-stage{ grid-template-columns:minmax(0,1fr) }#s-controls .part-2 .ab-col{ padding:0 24px } }#s-controls .part-2 .wm-accent.ab-hover[data-look="q5"]::after{ transform:scale(1.1) }#s-controls .part-2 .wm-accent.ab-active[data-look="q5"]{ transform:translateY(1px) }#s-controls .part-2 .wm-accent.ab-active[data-look="q5"]::after{ transform:scale(.9); opacity:.85 }#s-controls .part-2 .wm-accent.ab-hover[data-look="q6n4"]{ --ab-p:1 }#s-controls .part-2 .wm-accent.ab-active[data-look="q6n4"]{ --ab-p:1; transform:translateY(1px) }
 #s-controls .wip{max-width:72ch}#s-controls .wip>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2)}#s-controls .wip>p b{color:var(--ink);font-weight:600}#s-controls .wip-list{display:grid;gap:16px;margin:0;padding:0;list-style:none}#s-controls .wip-card{display:block;position:relative;padding:22px 24px;text-decoration:none;color:inherit;
   border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
@@ -6806,7 +6987,7 @@ u[data-d="2"],u[data-d="3"],u[data-d="5"],u[data-d="6"],u[data-d="7"],u[data-d="
 </style>
 <div class="wm">
   <div class="wm-doc">
-  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in"><div class="wm-grp"><a class="wm-lvl0" href="#o-readme"><u data-d="0">00</u>The package</a><a class="wm-lvl1" href="#readme-c1"><u>1</u><span>What you get</span></a><a class="wm-lvl1" href="#readme-c2"><u>2</u><span>What you must supply</span></a><a class="wm-lvl1" href="#readme-c3"><u>3</u><span>How to wire it in, and add a dial</span></a><a class="wm-lvl1" href="#readme-c4"><u>4</u><span>How to override</span></a><a class="wm-lvl1" href="#readme-c5"><u>5</u><span>How you know it shipped</span></a><a class="wm-lvl1" href="#readme-c6"><u></u><span>The rest</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-type"><u data-d="1">01</u>Type</a><a class="wm-lvl1" href="#type-c1"><u></u><span>The budget</span></a><a class="wm-lvl1" href="#type-c2"><u></u><span>The sixth signal: geom</span></a><a class="wm-lvl1" href="#type-c3"><u></u><span>The seven roles</span></a><a class="wm-lvl1" href="#type-c4"><u></u><span>The poster scale</span></a><a class="wm-lvl1" href="#type-c5"><u></u><span>Ink</span></a><a class="wm-lvl1" href="#type-c6"><u></u><span>Why opsz is free</span></a><a class="wm-lvl1" href="#type-c7"><u></u><span>The boundary</span></a><a class="wm-lvl1" href="#type-c8"><u></u><span>The grid</span></a><a class="wm-lvl1" href="#type-c9"><u></u><span>Columns</span></a><a class="wm-lvl1" href="#type-c10"><u></u><span>Baseline</span></a><a class="wm-lvl1" href="#type-c11"><u></u><span>Big type beside small</span></a><a class="wm-lvl1" href="#type-c12"><u></u><span>A row meets</span></a><a class="wm-lvl1" href="#type-c13"><u></u><span>A component moves whole</span></a><a class="wm-lvl1" href="#type-c14"><u></u><span>Breakers and tools</span></a><a class="wm-lvl1" href="#type-c15"><u></u><span>The favicons</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-corners"><u data-d="2">02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1"><u></u><span>The 5 pills</span></a><a class="wm-lvl1" href="#corners-c2"><u></u><span>The radius ladder</span></a><a class="wm-lvl1" href="#corners-c3"><u></u><span>Asymmetric corners</span></a><a class="wm-lvl1" href="#corners-c4"><u></u><span>Corners &#8212; ReCal only</span></a><a class="wm-lvl1" href="#corners-c5"><u></u><span>The 13 circles</span></a><a class="wm-lvl1" href="#corners-c7"><u></u><span>The button</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-controls"><u data-d="3">03</u>Interface</a><a class="wm-lvl1" href="#controls-c1"><u></u><span>Five ways to draw one dial</span></a><a class="wm-lvl1" href="#controls-c2"><u></u><span>The marks</span></a><a class="wm-lvl1" href="#controls-c3"><u></u><span>The chips</span></a><a class="wm-lvl1" href="#controls-c4"><u></u><span>The zoom control</span></a><a class="wm-lvl1" href="#controls-c5"><u></u><span>The theme stack, vertical</span></a><a class="wm-lvl1" href="#controls-c6"><u></u><span>WIP primitives</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-space"><u data-d="4">04</u>Space</a><a class="wm-lvl1" href="#space-c1"><u></u><span>The padding scale</span></a><a class="wm-lvl1" href="#space-c2"><u></u><span>The steps</span></a><a class="wm-lvl1" href="#space-c3"><u></u><span>The cap rule</span></a><a class="wm-lvl1" href="#space-c4"><u></u><span>Use a step</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-color"><u data-d="5">05</u>Color</a><a class="wm-lvl1" href="#color-c1"><u></u><span>Color audit</span></a><a class="wm-lvl1" href="#color-c2"><u></u><span>The signal</span></a><a class="wm-lvl1" href="#color-c3"><u></u><span>The vocabulary</span></a><a class="wm-lvl1" href="#color-c4"><u></u><span>Literal colors outside App.css</span></a><a class="wm-lvl1" href="#color-c5"><u></u><span>The GEOM zones</span></a><a class="wm-lvl1" href="#color-c6"><u></u><span>Ramps</span></a><a class="wm-lvl1" href="#color-c7"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#color-c8"><u></u><span>The edge</span></a><a class="wm-lvl1" href="#color-c9"><u></u><span>Where you mix</span></a><a class="wm-lvl1" href="#color-c10"><u></u><span>Steering a channel</span></a><a class="wm-lvl1" href="#color-c11"><u></u><span>The blur</span></a><a class="wm-lvl1" href="#color-c12"><u></u><span>Banding</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-motion"><u data-d="6">06</u>Motion</a><a class="wm-lvl1" href="#motion-c1"><u></u><span>The durations</span></a><a class="wm-lvl1" href="#motion-c2"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#motion-c3"><u></u><span>Acknowledge and confirm</span></a><a class="wm-lvl1" href="#motion-c4"><u></u><span>The morph</span></a><a class="wm-lvl1" href="#motion-c5"><u></u><span>Reduced motion</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#appendix"><u data-d="A">A</u>Appendix &middot; Who uses what</a></div></div></div>
+  <div class="wm-railcol"><nav class="wm-rail"><div class="wm-axis"><div class="wm-axis-in"><div class="wm-grp"><a class="wm-lvl0" href="#o-readme"><u data-d="0">00</u>The package</a><a class="wm-lvl1" href="#readme-c1"><u>1</u><span>What you get</span></a><a class="wm-lvl1" href="#readme-c2"><u>2</u><span>What you must supply</span></a><a class="wm-lvl1" href="#readme-c3"><u>3</u><span>How to wire it in, and add a dial</span></a><a class="wm-lvl1" href="#readme-c4"><u>4</u><span>How to override</span></a><a class="wm-lvl1" href="#readme-c5"><u>5</u><span>How you know it shipped</span></a><a class="wm-lvl1" href="#readme-c6"><u></u><span>The rest</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-type"><u data-d="1">01</u>Type</a><a class="wm-lvl1" href="#type-c1"><u></u><span>The budget</span></a><a class="wm-lvl1" href="#type-c2"><u></u><span>The sixth signal: geom</span></a><a class="wm-lvl1" href="#type-c3"><u></u><span>The seven roles</span></a><a class="wm-lvl1" href="#type-c4"><u></u><span>The poster scale</span></a><a class="wm-lvl1" href="#type-c5"><u></u><span>Ink</span></a><a class="wm-lvl1" href="#type-c6"><u></u><span>Why opsz is free</span></a><a class="wm-lvl1" href="#type-c7"><u></u><span>The boundary</span></a><a class="wm-lvl1" href="#type-c8"><u></u><span>The grid</span></a><a class="wm-lvl1" href="#type-c9"><u></u><span>Columns</span></a><a class="wm-lvl1" href="#type-c10"><u></u><span>Baseline</span></a><a class="wm-lvl1" href="#type-c11"><u></u><span>Big type beside small</span></a><a class="wm-lvl1" href="#type-c12"><u></u><span>A row meets</span></a><a class="wm-lvl1" href="#type-c13"><u></u><span>A component moves whole</span></a><a class="wm-lvl1" href="#type-c14"><u></u><span>Breakers and tools</span></a><a class="wm-lvl1" href="#type-c15"><u></u><span>The favicons</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-corners"><u data-d="2">02</u>The corner law</a><a class="wm-lvl1" href="#corners-c1"><u></u><span>The 5 pills</span></a><a class="wm-lvl1" href="#corners-c2"><u></u><span>The radius ladder</span></a><a class="wm-lvl1" href="#corners-c3"><u></u><span>Asymmetric corners</span></a><a class="wm-lvl1" href="#corners-c4"><u></u><span>Corners &#8212; ReCal only</span></a><a class="wm-lvl1" href="#corners-c5"><u></u><span>The 13 circles</span></a><a class="wm-lvl1" href="#corners-c7"><u></u><span>The button</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-controls"><u data-d="3">03</u>Interface</a><a class="wm-lvl1" href="#controls-c1"><u></u><span>Five ways to draw one dial</span></a><a class="wm-lvl1" href="#controls-c2"><u></u><span>The marks</span></a><a class="wm-lvl1" href="#controls-c3"><u></u><span>The chips</span></a><a class="wm-lvl1" href="#controls-c4"><u></u><span>The zoom control</span></a><a class="wm-lvl1" href="#controls-c5"><u></u><span>The theme stack, vertical</span></a><a class="wm-lvl1" href="#controls-c6"><u></u><span>Accent buttons</span></a><a class="wm-lvl1" href="#controls-c7"><u></u><span>WIP primitives</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-space"><u data-d="4">04</u>Space</a><a class="wm-lvl1" href="#space-c1"><u></u><span>The padding scale</span></a><a class="wm-lvl1" href="#space-c2"><u></u><span>The steps</span></a><a class="wm-lvl1" href="#space-c3"><u></u><span>The cap rule</span></a><a class="wm-lvl1" href="#space-c4"><u></u><span>Use a step</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-color"><u data-d="5">05</u>Color</a><a class="wm-lvl1" href="#color-c1"><u></u><span>Color audit</span></a><a class="wm-lvl1" href="#color-c2"><u></u><span>The signal</span></a><a class="wm-lvl1" href="#color-c3"><u></u><span>The vocabulary</span></a><a class="wm-lvl1" href="#color-c4"><u></u><span>Literal colors outside App.css</span></a><a class="wm-lvl1" href="#color-c5"><u></u><span>The GEOM zones</span></a><a class="wm-lvl1" href="#color-c6"><u></u><span>Ramps</span></a><a class="wm-lvl1" href="#color-c7"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#color-c8"><u></u><span>The edge</span></a><a class="wm-lvl1" href="#color-c9"><u></u><span>Where you mix</span></a><a class="wm-lvl1" href="#color-c10"><u></u><span>Steering a channel</span></a><a class="wm-lvl1" href="#color-c11"><u></u><span>The blur</span></a><a class="wm-lvl1" href="#color-c12"><u></u><span>Banding</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#o-motion"><u data-d="6">06</u>Motion</a><a class="wm-lvl1" href="#motion-c1"><u></u><span>The durations</span></a><a class="wm-lvl1" href="#motion-c2"><u></u><span>The curve</span></a><a class="wm-lvl1" href="#motion-c3"><u></u><span>Acknowledge and confirm</span></a><a class="wm-lvl1" href="#motion-c4"><u></u><span>The morph</span></a><a class="wm-lvl1" href="#motion-c5"><u></u><span>Reduced motion</span></a></div><div class="wm-grp"><a class="wm-lvl0" href="#appendix"><u data-d="A">A</u>Appendix &middot; Who uses what</a></div></div></div>
     <span class="wm-rail-foot">wm&#8209;primitives</span></nav></div>
   <div class="wm-pan"><main class="wm-main wm-lines">
   <header class="wm-head" data-nosnap>
@@ -8216,7 +8397,70 @@ the target      pans sideways in its own overflow-x: auto box, or a phone widens
 </div>
 
 
-</div><div data-nosnap data-stage><h2 id="controls-c6" class="wm-h2">WIP primitives <span>pages to decide from</span></h2><div class="wip" id="controls-wip"><p class="wm-run"><b class="wm-hang">Nothing here ships</b>A control above has a spec and a test; a page here has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline so it cannot pass for finished.</p><ul class="wip-list"><li><a class="wip-card" href="system/pages/play.html"><u>undecided</u><b>Seven ways to say play</b><i>the one control where a press does two things, drawn seven ways by what carries the difference: the mark, the ring, the word, the ground, the enclosure, the elevation, the surface. All live on one fake ninety-second clip. Superseded in scope by the transport page below &#8212; the bar, not the button, is the instrument &#8212; and kept as the record of the button question. TRANSPORT.md.</i></a></li><li><a class="wip-card" href="system/pages/transport.html"><u>undecided</u><b>Six ways to build the bar</b><i>one transport primitive &#8212; play, scrubber, readouts slot &#8212; in two registers, WORDMAKE's frames and Morf's builds, each schema drawn twice on the same live clocks: Deck, Slate, Ruler, Strip, Cells, Overlay. Decided: one primitive; no stage click; Morf's stops evenly by beat. Undecided: the schema. TRANSPORT.md has the coverage and what none has had.</i></a></li></ul></div></div></div>
+</div><div class="part-2">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+
+
+
+
+
+
+<h2 id="controls-c6" class="wm-h2">Accent buttons <span>AccentButton</span></h2>
+<p>Two acid buttons, each a pill (the Download button) or a chip (a Try-bar toggle that is on). The light is a
+pre-rendered, dithered image behind a near-black face, never a CSS gradient or blur, so it keeps its long falloff
+without banding. Q5 is underlit: a rim along the bottom edge, a spill beneath it, and a light that deepens slowly on
+hover while the face never brightens. Q6 to N4 rests as a pinprick of rim light and, on hover, moves the light from
+beneath to behind: it travels along the bottom edge, round the lower corners and up the sides, and the top edge
+lights all at once.</p>
+
+<div data-nosnap data-stage class="ab-stage">
+<div class="ab-col"><span class="ab-cap ab-cap--head">Q5 &middot; underlit</span>
+<div class="ab-set ab-set--pill">
+  <div class="ab-cell"><span class="ab-cap">pill &middot; rest</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; hover</span><button type="button" class="wm-accent ab-hover" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; pressed</span><button type="button" class="wm-accent ab-active" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; disabled</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill" disabled><span class="wm-accent__lab">Download</span></button></div>
+</div>
+<div class="ab-set ab-set--chip">
+  <div class="ab-cell"><span class="ab-cap">chip &middot; rest</span><button type="button" class="wm-accent" data-look="q5" data-shape="chip"><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; hover</span><button type="button" class="wm-accent ab-hover" data-look="q5" data-shape="chip"><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; pressed</span><button type="button" class="wm-accent ab-active" data-look="q5" data-shape="chip"><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; disabled</span><button type="button" class="wm-accent" data-look="q5" data-shape="chip" disabled><span class="wm-accent__lab">Italic</span></button></div>
+</div></div>
+<div class="ab-col"><span class="ab-cap ab-cap--head">Q6 to N4 &middot; the light travels</span>
+<div class="ab-set ab-set--pill">
+  <div class="ab-cell"><span class="ab-cap">pill &middot; rest</span><button type="button" class="wm-accent" data-look="q6n4" data-shape="pill"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__fr"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; hover</span><button type="button" class="wm-accent ab-hover" data-look="q6n4" data-shape="pill"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__fr"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; pressed</span><button type="button" class="wm-accent ab-active" data-look="q6n4" data-shape="pill"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__fr"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; disabled</span><button type="button" class="wm-accent" data-look="q6n4" data-shape="pill" disabled><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__fr"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Download</span></button></div>
+</div>
+<div class="ab-set ab-set--chip">
+  <div class="ab-cell"><span class="ab-cap">chip &middot; rest</span><button type="button" class="wm-accent" data-look="q6n4" data-shape="chip"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__bot"></i><i class="wm-accent__top"></i><i class="wm-accent__cap"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i><i class="wm-accent__cap wm-accent__cap--r"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; hover</span><button type="button" class="wm-accent ab-hover" data-look="q6n4" data-shape="chip"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__bot"></i><i class="wm-accent__top"></i><i class="wm-accent__cap"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i><i class="wm-accent__cap wm-accent__cap--r"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; pressed</span><button type="button" class="wm-accent ab-active" data-look="q6n4" data-shape="chip"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__bot"></i><i class="wm-accent__top"></i><i class="wm-accent__cap"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i><i class="wm-accent__cap wm-accent__cap--r"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; disabled</span><button type="button" class="wm-accent" data-look="q6n4" data-shape="chip" disabled><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__bot"></i><i class="wm-accent__top"></i><i class="wm-accent__cap"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i><i class="wm-accent__cap wm-accent__cap--r"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Italic</span></button></div>
+</div></div>
+</div>
+
+<p>Disabled is unlit and neutral, a dark face with a faint hairline and a grey label, never a dimmed acid. A
+pressed button sits one pixel down. The pill is a full render at its own size, 225 &times; 32 for Q5 and
+227 &times; 33 for Q6 to N4, so its box is fixed and the host places it. The chip is 32 tall with an 8px radius, and its
+light is a 9-slice of two end pieces and a stretched middle, so one set serves any width. Dark ground only: the face
+is <code>--surface</code>.</p>
+<p><code>&lt;AccentButton look=&quot;q5&quot; shape=&quot;pill&quot;&gt;Download&lt;/AccentButton&gt;</code>, or
+<code>look=&quot;q6n4&quot; shape=&quot;chip&quot;</code>. The images are in <code>assets/accent/</code>, and
+<code>tools/accent/</code> renders them.</p>
+<table>
+  <tr><th>Look</th><th>Shape</th><th>Box</th><th>Light</th></tr>
+  <tr><td>q5</td><td>pill</td><td class="num">225 &times; 32</td><td>one 329 &times; 108 render, scaled on hover</td></tr>
+  <tr><td>q5</td><td>chip</td><td class="num">any &times; 32</td><td>9-slice, 96px reference</td></tr>
+  <tr><td>q6n4</td><td>pill</td><td class="num">227 &times; 33</td><td>48-frame sprite, cross-faded additively</td></tr>
+  <tr><td>q6n4</td><td>chip</td><td class="num">any &times; 32</td><td>end pieces and a stretched rim column</td></tr>
+</table>
+
+</div><div data-nosnap data-stage><h2 id="controls-c7" class="wm-h2">WIP primitives <span>pages to decide from</span></h2><div class="wip" id="controls-wip"><p class="wm-run"><b class="wm-hang">Nothing here ships</b>A control above has a spec and a test; a page here has a choice still to make. Each entry is a proposal page assembled nowhere else, drawn in hairline so it cannot pass for finished.</p><ul class="wip-list"><li><a class="wip-card" href="system/pages/play.html"><u>undecided</u><b>Seven ways to say play</b><i>the one control where a press does two things, drawn seven ways by what carries the difference: the mark, the ring, the word, the ground, the enclosure, the elevation, the surface. All live on one fake ninety-second clip. Superseded in scope by the transport page below &#8212; the bar, not the button, is the instrument &#8212; and kept as the record of the button question. TRANSPORT.md.</i></a></li><li><a class="wip-card" href="system/pages/transport.html"><u>undecided</u><b>Six ways to build the bar</b><i>one transport primitive &#8212; play, scrubber, readouts slot &#8212; in two registers, WORDMAKE's frames and Morf's builds, each schema drawn twice on the same live clocks: Deck, Slate, Ruler, Strip, Cells, Overlay. Decided: one primitive; no stage click; Morf's stops evenly by beat. Undecided: the schema. TRANSPORT.md has the coverage and what none has had.</i></a></li></ul></div></div></div>
 </section>
 <section class="wm-sec">
   <header class="wm-sec-head" id="o-space"><div class="wm-open"><div class="wm-open-l"><p class="wm-kick"><span class="wm-kick-t">A pad scale</span><span class="wm-dg" data-d="4" data-baseline="free"><span>4</span></span></p><h1 class="wm-mark">Space</h1><div class="wm-fleuron" aria-hidden="true"><i class="fl-l"><span>&#9667;</span><span>&#9667;</span><span>&#10023;</span></i><b class="fl-wm"><span>W</span><span>M</span></b><i class="fl-r"><span>&#10023;</span><span>&#9657;</span><span>&#9657;</span></i></div></div><p class="wm-open-r wm-lede">Twelve steps of padding read off the live surface, a cap at the radius, and a rule for when a row may spend a step.</p></div></header>
@@ -10741,6 +10985,7 @@ ROOT.querySelectorAll('.zoom-icons [data-zicon]').forEach(b => b.addEventListene
   new MutationObserver(redraw).observe(big, { attributes: true, attributeFilter: ['style'] });
   draw();
 })();
+
 
 })();
 (function(){var ROOT=document.getElementById('s-color');if(!ROOT)return;

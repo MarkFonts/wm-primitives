@@ -12,6 +12,43 @@ Newest first.
 
 ---
 
+## 2026-10-14 -- the accent buttons
+
+**Mark: ReCal ships "Q5" as its accent button, and "Q6 to N4" is the other option; "both buttons
+become shared components".** `AccentButton` (src/AccentButton.tsx, accentButton.css), `look` q5 or
+q6n4 by `shape` pill or chip, over a native `<button>`. Ported from ReCal's `accent-proto` branch at
+69d1d00, where both were designed against the real controls (the Download button and the Try-bar
+chip) rather than a mock.
+
+- **The light is rendered, not CSS.** Dithered straight-alpha AVIF in `assets/accent/` (76K in all),
+  made by `tools/accent/` (numpy, Pillow; the dither is seeded). A radial or linear gradient bands and cannot
+  hold a falloff this long; the same went for blur. The faces are `--surface`, so the images composite on
+  the ground and the button has no box of its own to show. Dark ground only, by construction.
+- **The pill is a full render at its own size, never stretched:** 225 x 32 for q5, 227 x 33 for q6n4. The
+  box is fixed in the CSS and the host places it. The chip is a 9-slice (two end pieces at the real 8px
+  radius, a stretched middle), so its radius and height are fixed (8, 32) and its width is free. A chip never
+  changes shape between states.
+- **q6n4 ships the logarithmic falloff only.** The prototype carried default, `mid`, `log` and `log2` renders
+  behind a URL switch; Mark chose `log` for this look, and a primitive with a falloff switch would be five times
+  the assets for one answer. q5 keeps the default falloff.
+- **q6n4's frame cross-fade is additive** (`plus-lighter`, A/B on a registered `@property --ab-p`). A normal-blend
+  cross-fade dips at the midpoint, and the dip was the flicker. The rim travels along the bottom, round the lower
+  corners and up the sides; the top lights all at once. Narrow chips needed three fixes the page's block did not:
+  a 3px cross-fade at the 9-slice joins (a fractional-pixel seam), a glow capped to a dome over a middle shorter
+  than the glow, and a mask that flattens the squeezed middle of the spill (a bright hairline under a 53px chip).
+- **One style per control.** Disabled is unlit and neutral, never a dimmed acid; there is no acid hover
+  brightening; hover on q5 deepens the light slowly (the face never brightens), on q6n4 it moves the light behind.
+- **Unlayered CSS.** Unlike the other controls' `@layer wm.controls`, because the point is that a host's
+  `button:hover` (a brightness filter, a ground) must not reach this look. A host with a clip edge near a chip sets
+  `--ab-fade-from`; the pill's spill is the host's to mask.
+- **`lit={false}`** renders a plain `<button>`: a toggle chip whose off state is the host's own control
+  keeps one element across both states, so focus and transitions survive (ReCal's Try bar). Not a third look.
+- **docs/system/build.py:** `@property` passes through scoping, and the part's `url('../assets/accent/...')` is
+  repointed at `docs/assets/accent/` (linked build) or inlined as data URIs (bundled). The page is a part of Interface.
+  `docs/index.html` also picks up the CSS changes of src/ that landed since it was last rebuilt.
+
+---
+
 ## 2026-10-14 -- the grip
 
 **The track bar has a handle now.** #114: Mark's reference tuner had a vertical tick on the

@@ -62,6 +62,12 @@ export type { ThemeSwitchProps } from './src/ThemeSwitch'
 export { THEMES, THEME_KEY, readTheme, applyTheme, bootTheme, mountThemeSwitch } from './src/theme.js'
 export type { Theme } from './src/theme.js'
 
+// AccentButton -- the two acid buttons, Q5 and Q6 to N4, as a pill (the Download button) or a
+// chip. The light is pre-rendered, dithered AVIF (assets/accent/), never a CSS gradient. Dark
+// ground only; the pill is a full render at its own size. Spec: the Interface chapter of the system page.
+export { AccentButton } from './src/AccentButton'
+export type { AccentButtonProps } from './src/AccentButton'
+
 // BlockStyleRail — h1/h2/h3/¶ stacked in the margin of the block being edited, at the
 // bottom of the ink ladder until you reach for them.
 export { BlockStyleRail } from './src/BlockStyleRail'

@@ -1,0 +1,109 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The accent buttons</title>
+<!-- A PART of Interface (build.py folds it into #s-controls after confirm.html). Source for the two
+     acid buttons, Q5 and Q6 to N4, as AccentButton ships them: src/accentButton.css is inlined by
+     build.py (PRIMITIVE_CSS_PART), so the figure is the shipped thing; the markup below is what
+     AccentButton.tsx renders. Hover and pressed cannot be held with a pointer in a still, so those
+     cells carry .ab-hover / .ab-active, which restate the :hover and :active rules' effect
+     (accentButton.css is the authority); the first cell of each set is live. The prose is on the
+     line (motion.html's table); the stage is not (data-nosnap data-stage), as the other parts' demos
+     are, because the buttons are 32 and 33 tall and carry their own light. -->
+<link rel="stylesheet" href="../../src/type.css">
+<link rel="stylesheet" href="../../src/accentButton.css">
+<style>
+@font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype"); font-weight: 400 700; font-display:swap; }
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink,#17181a);font-family:var(--ui-font,system-ui,sans-serif);font-optical-sizing:auto;
+  font-size:var(--type-body-size,1rem)}
+p{margin:0 0 24px;max-width:64ch;color:var(--ink-2,rgba(23,24,26,.62))}
+code{font-family:"PaperMono",ui-monospace,Menlo,monospace;font-size:.85em;line-height:1}
+/* a table on the line: 6 + 15 + 6 = 27 a row, its rule a shadow so it adds no height */
+table{border-collapse:collapse;width:100%;max-width:720px;margin:0 0 24px}
+th,td{text-align:left;vertical-align:baseline;padding:6px 24px 6px 0;font-size:var(--type-ui-size,.75rem);
+  --lh:var(--lead-ui);line-height:var(--lead-ui,15px);box-shadow:inset 0 -1px var(--line,rgba(23,24,26,.16))}
+th{font-weight:400;letter-spacing:var(--track-caps,.12em);text-transform:uppercase;color:var(--ink-3,rgba(23,24,26,.38))}
+td{color:var(--ink-2,rgba(23,24,26,.62))}
+td:first-child{color:var(--ink,#17181a);white-space:nowrap}
+@media (max-width:680px){table{table-layout:fixed} td,td:first-child{white-space:normal;overflow-wrap:anywhere}}
+
+/* THE STAGE: the dark ground the buttons are made for. It states its own --surface, because the
+   faces ARE the ground and the page's may be light. Room at the sides and under each button for
+   the spill (52px beside, 62px under the pill, 46px under a chip), so no light is cut. */
+.ab-stage{ --ui-font:"CalSansVF",system-ui,sans-serif; --surface:#1a1a1a; --spacing-02:6px; --spacing-04:12px;
+  font-family:var(--ui-font); color:#e8e8e8; background:var(--surface);
+  border-radius:8px; corner-shape:superellipse(1.2); margin:0 0 24px; padding:24px 24px 0;
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:24px; overflow:hidden }
+.ab-col{ min-width:0; padding:0 52px }
+.ab-cap{ display:block; margin:0 0 6px; font-size:var(--type-micro-size,.5625rem); line-height:12px;
+  letter-spacing:var(--track-caps,.12em); text-transform:uppercase; color:rgba(232,232,232,.38) }
+.ab-cap--head{ color:rgba(232,232,232,.62); margin-bottom:24px }
+.ab-cell{ min-width:0; padding:0 0 72px }
+.ab-set--chip{ display:grid; grid-template-columns:repeat(2,max-content); column-gap:48px }
+.ab-set--chip .ab-cell{ padding-bottom:60px }
+.ab-cell .wm-accent{ display:inline-flex }
+@media (max-width:680px){ .ab-stage{ grid-template-columns:minmax(0,1fr) } .ab-col{ padding:0 24px } }
+
+/* hover and pressed, held for the still (the real rules are :hover:not(:disabled) and :active) */
+.wm-accent.ab-hover[data-look="q5"]::after{ transform:scale(1.1) }
+.wm-accent.ab-active[data-look="q5"]{ transform:translateY(1px) }
+.wm-accent.ab-active[data-look="q5"]::after{ transform:scale(.9); opacity:.85 }
+.wm-accent.ab-hover[data-look="q6n4"]{ --ab-p:1 }
+.wm-accent.ab-active[data-look="q6n4"]{ --ab-p:1; transform:translateY(1px) }
+</style>
+<body>
+
+<h2>Accent buttons <span>AccentButton</span></h2>
+<p>Two acid buttons, each a pill (the Download button) or a chip (a Try-bar toggle that is on). The light is a
+pre-rendered, dithered image behind a near-black face, never a CSS gradient or blur, so it keeps its long falloff
+without banding. Q5 is underlit: a rim along the bottom edge, a spill beneath it, and a light that deepens slowly on
+hover while the face never brightens. Q6 to N4 rests as a pinprick of rim light and, on hover, moves the light from
+beneath to behind: it travels along the bottom edge, round the lower corners and up the sides, and the top edge
+lights all at once.</p>
+
+<div data-nosnap data-stage class="ab-stage">
+<div class="ab-col"><span class="ab-cap ab-cap--head">Q5 &middot; underlit</span>
+<div class="ab-set ab-set--pill">
+  <div class="ab-cell"><span class="ab-cap">pill &middot; rest</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; hover</span><button type="button" class="wm-accent ab-hover" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; pressed</span><button type="button" class="wm-accent ab-active" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; disabled</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill" disabled><span class="wm-accent__lab">Download</span></button></div>
+</div>
+<div class="ab-set ab-set--chip">
+  <div class="ab-cell"><span class="ab-cap">chip &middot; rest</span><button type="button" class="wm-accent" data-look="q5" data-shape="chip"><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; hover</span><button type="button" class="wm-accent ab-hover" data-look="q5" data-shape="chip"><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; pressed</span><button type="button" class="wm-accent ab-active" data-look="q5" data-shape="chip"><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; disabled</span><button type="button" class="wm-accent" data-look="q5" data-shape="chip" disabled><span class="wm-accent__lab">Italic</span></button></div>
+</div></div>
+<div class="ab-col"><span class="ab-cap ab-cap--head">Q6 to N4 &middot; the light travels</span>
+<div class="ab-set ab-set--pill">
+  <div class="ab-cell"><span class="ab-cap">pill &middot; rest</span><button type="button" class="wm-accent" data-look="q6n4" data-shape="pill"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__fr"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; hover</span><button type="button" class="wm-accent ab-hover" data-look="q6n4" data-shape="pill"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__fr"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; pressed</span><button type="button" class="wm-accent ab-active" data-look="q6n4" data-shape="pill"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__fr"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; disabled</span><button type="button" class="wm-accent" data-look="q6n4" data-shape="pill" disabled><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__fr"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Download</span></button></div>
+</div>
+<div class="ab-set ab-set--chip">
+  <div class="ab-cell"><span class="ab-cap">chip &middot; rest</span><button type="button" class="wm-accent" data-look="q6n4" data-shape="chip"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__bot"></i><i class="wm-accent__top"></i><i class="wm-accent__cap"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i><i class="wm-accent__cap wm-accent__cap--r"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; hover</span><button type="button" class="wm-accent ab-hover" data-look="q6n4" data-shape="chip"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__bot"></i><i class="wm-accent__top"></i><i class="wm-accent__cap"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i><i class="wm-accent__cap wm-accent__cap--r"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; pressed</span><button type="button" class="wm-accent ab-active" data-look="q6n4" data-shape="chip"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__bot"></i><i class="wm-accent__top"></i><i class="wm-accent__cap"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i><i class="wm-accent__cap wm-accent__cap--r"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Italic</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">chip &middot; disabled</span><button type="button" class="wm-accent" data-look="q6n4" data-shape="chip" disabled><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__bot"></i><i class="wm-accent__top"></i><i class="wm-accent__cap"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i><i class="wm-accent__cap wm-accent__cap--r"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Italic</span></button></div>
+</div></div>
+</div>
+
+<p>Disabled is unlit and neutral, a dark face with a faint hairline and a grey label, never a dimmed acid. A
+pressed button sits one pixel down. The pill is a full render at its own size, 225 &times; 32 for Q5 and
+227 &times; 33 for Q6 to N4, so its box is fixed and the host places it. The chip is 32 tall with an 8px radius, and its
+light is a 9-slice of two end pieces and a stretched middle, so one set serves any width. Dark ground only: the face
+is <code>--surface</code>.</p>
+<p><code>&lt;AccentButton look=&quot;q5&quot; shape=&quot;pill&quot;&gt;Download&lt;/AccentButton&gt;</code>, or
+<code>look=&quot;q6n4&quot; shape=&quot;chip&quot;</code>. The images are in <code>assets/accent/</code>, and
+<code>tools/accent/</code> renders them.</p>
+<table>
+  <tr><th>Look</th><th>Shape</th><th>Box</th><th>Light</th></tr>
+  <tr><td>q5</td><td>pill</td><td class="num">225 &times; 32</td><td>one 329 &times; 108 render, scaled on hover</td></tr>
+  <tr><td>q5</td><td>chip</td><td class="num">any &times; 32</td><td>9-slice, 96px reference</td></tr>
+  <tr><td>q6n4</td><td>pill</td><td class="num">227 &times; 33</td><td>48-frame sprite, cross-faded additively</td></tr>
+  <tr><td>q6n4</td><td>chip</td><td class="num">any &times; 32</td><td>end pieces and a stretched rim column</td></tr>
+</table>
+</body>

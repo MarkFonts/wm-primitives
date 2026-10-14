@@ -1,0 +1,337 @@
+/* accentButton.css -- the two acid buttons, "Q5" and "Q6 to N4", pill and chip.
+ *
+ * A near-black face with a rendered light under it. The light is a pre-rendered, dithered AVIF
+ * (assets/accent/, made by tools/accent/) -- never a CSS gradient or blur, which band and cannot
+ * hold a falloff this long. The images are straight-alpha acid, so they composite on any dark
+ * ground; the face IS the ground (var(--surface)), so the button has no box of its own to show.
+ *
+ *   <button class="wm-accent" data-look="q5|q6n4" data-shape="pill|chip">…</button>
+ *
+ *   q5    Underlit, black on black. A rim of light along the bottom edge and a spill beneath it;
+ *         the pale acid label. Rollover deepens the light slowly, the face never brightens.
+ *   q6n4  Rests as Q6, a smoky-glass face with a pinprick of rim light and a metallic label.
+ *         Rollover moves the light from beneath to directly behind: the rim travels along the
+ *         bottom, round the two lower corners and up the sides, and the top edge lights all at
+ *         once. Driven by one registered number, --ab-p, with the frames cross-faded additively.
+ *   pill  The Download button: radius = height / 2, and a FULL render at its own size, never
+ *         stretched. It is 225 x 32 for q5 and 227 x 33 for q6n4 -- the sizes the light was
+ *         rendered for -- so the box is fixed here, and a host places it.
+ *   chip  The Try-bar chip: 32 tall, an 8px rounded rect, and the light is a 9-slice (two end
+ *         pieces that keep their size, a stretched middle), so one set serves any width. The
+ *         end pieces are rendered at the 8px radius, which is therefore fixed.
+ *
+ * One style per control. Disabled is UNLIT and neutral (a dark face, a faint hairline, a grey
+ * label), never a dimmed acid; there is no acid hover brightening, and the shape never changes
+ * between states.
+ *
+ * DARK GROUND ONLY. The faces are --surface and the light is rendered for a near-black behind it.
+ *
+ * Unlayered, on purpose: wm.controls rules lose to any host rule, and a host's `button:hover`
+ * (a brightness filter, a ground) must not reach this look. The selectors carry the state
+ * pseudo-classes themselves for the same reason.
+ *
+ * THE HOST'S TWO JOBS: the spill is wider than the button (52px / 40px), so a host that has a
+ * clip edge near it fades the spill there (ReCal does, at its footer and its window edge): a chip
+ * takes --ab-fade-from (below), the pill is the host's to mask, since its spill is one image the
+ * host can cut; and the pill's box is fixed, so the host gives it room. ::after (q5) and ::before
+ * (q6n4) carry the spill; --ab-mb is how far it reaches below the box.
+ */
+
+@property --ab-p { syntax: "<number>"; inherits: true; initial-value: 0; }
+
+.wm-accent {
+  /* The acid, hex then display-p3 where the screen has it (color.css's --signal, which an app
+     may pin to grey: the light below is rendered acid either way, so this has its own name). */
+  --ab-acid: #eeff41;  --ab-acid: color(display-p3 0.9333 1 0.2549);
+  --ab-face: var(--surface);                                   /* the face is the ground */
+  --ab-ink: color-mix(in oklab, var(--ab-acid) 22%, white);    /* pale acid label (q5, q6n4 lit) */
+  --ab-off-ink: #8a8a8a;                                       /* unlit label: 5.4:1 on the face */
+  --ab-off-line: rgba(255, 255, 255, .09);                     /* unlit hairline */
+
+  position: relative; isolation: isolate;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--spacing-02, 6px);
+  box-sizing: border-box; margin: 0;
+  border: 1px solid transparent;
+  font-family: var(--ui-font); font-size: var(--type-ui-size, .75rem);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.wm-accent:disabled { cursor: default; }
+
+/* the two shapes' boxes */
+.wm-accent[data-shape="pill"] {
+  padding: 0 16px;
+  border-radius: 999px; corner-shape: round;                   /* a pill is a stadium, not a squircle */
+  font-weight: 700;
+}
+.wm-accent[data-shape="chip"] {
+  block-size: 32px; padding: 0 var(--spacing-04, 12px);
+  border-radius: 8px;                                          /* the end pieces are rendered for it */
+  corner-shape: superellipse(var(--corner-k, 1.2));
+}
+.wm-accent[data-look="q5"][data-shape="pill"] { inline-size: 225px; block-size: 32px; }
+
+/* ═════════ Q5 ═════════ */
+.wm-accent[data-look="q5"] { --ab-mt: 14px; --ab-mb: 62px; --ab-mx: 52px; --ab-oy: 47px; }   /* spill reach, and its scale origin */
+.wm-accent[data-look="q5"][data-shape="chip"] { --ab-mb: 46px; --ab-oy: 46px; }
+
+/* The pill: face, rim light along the bottom edge only, pale acid label. */
+.wm-accent[data-look="q5"],
+.wm-accent[data-look="q5"]:hover:not(:disabled),
+.wm-accent[data-look="q5"]:active:not(:disabled) {
+  background:
+    linear-gradient(0deg, color-mix(in srgb, var(--ab-acid) 38%, transparent) 0, color-mix(in srgb, var(--ab-acid) 12%, transparent) 14%, transparent 42%) border-box,
+    linear-gradient(var(--ab-face) 0 0) border-box;
+  color: var(--ab-ink);
+  box-shadow: none; filter: none;
+  /* token-lint: allow -- the press is 80ms, a hair under the confirm's phase; not a state-change step */
+  transition: transform .08s ease;
+}
+/* the face, one px proud of the box so the rim shows only along the bottom */
+.wm-accent[data-look="q5"]::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  inset: -1px 0 0 0; border-radius: inherit; corner-shape: inherit; background: var(--ab-face);
+}
+/* the light: rendered, dithered, spilling down and out from the lower edge */
+.wm-accent[data-look="q5"]::after {
+  content: ""; position: absolute; z-index: -2; pointer-events: none;
+  inset: calc(-1px - var(--ab-mt)) calc(-1px - var(--ab-mx)) calc(-1px - var(--ab-mb));
+  transform-origin: 50% var(--ab-oy);
+  /* token-lint: allow -- the light deepens over .8s: its own timing, approved by eye */
+  transition: transform .8s ease, opacity .8s ease;
+}
+/* the pill has ONE size, so its spill is a single full-size image, not stretched */
+.wm-accent[data-look="q5"][data-shape="pill"]::after { background: url('../assets/accent/q5-pill.avif') 0 0 / 100% 100% no-repeat; }
+/* The chip's spill is a 9-slice: the two end pieces (the corners and their falloff, rendered 2x at
+   the real 8px radius) keep their size, the straight middle is a stretched slice. Reference box 96px;
+   ends are 52px of spill reach + 26px of the box. */
+.wm-accent[data-look="q5"][data-shape="chip"]::after {
+  border: 0 solid transparent;
+  border-image: url('../assets/accent/q5-chip.avif') 0 156 0 156 fill / 0 78px 0 78px stretch;
+}
+
+/* hover: the light deepens slowly, the face never brightens, nothing lifts */
+.wm-accent[data-look="q5"]:hover:not(:disabled) { transform: none; }
+.wm-accent[data-look="q5"]:hover:not(:disabled)::after { transform: scale(1.1); }
+/* pressed: the light tightens, the button sits 1px down */
+.wm-accent[data-look="q5"]:active:not(:disabled) { transform: translateY(1px); }
+.wm-accent[data-look="q5"]:active:not(:disabled)::after { transform: scale(.9); opacity: .85; }
+
+/* disabled is UNLIT: dark face, faint neutral hairline, grey label, no light, no rim */
+.wm-accent[data-look="q5"]:disabled {
+  opacity: 1; filter: none; box-shadow: none; transform: none;
+  background: var(--ab-face);
+  border-color: var(--ab-off-line);
+  color: var(--ab-off-ink); -webkit-text-fill-color: var(--ab-off-ink);
+}
+.wm-accent[data-look="q5"]:disabled::before,
+.wm-accent[data-look="q5"]:disabled::after { display: none; }
+
+/* ═════════ Q6 -> N4 ═════════
+   Rest is Q6: a smoky-glass chip, a pinprick of rim light at the bottom centre, an acid spill
+   beneath, a metallic label. Rollover moves the light from beneath to directly behind: the lit rim
+   travels along the bottom edge, round the two lower corners, up the short sides, and the top
+   edge comes on all at once (N4).
+
+   The pill carries a 48-frame sprite of the whole outline. The chip's light follows its outline at
+   ANY width because it is a 9-slice, all straight-alpha acid, added with plus-lighter in one
+   isolated group, all driven by the one registered --ab-p:
+     --ab-p 0 -> .40   the bottom edge reveals outward from the centre: a 1px-wide column (__bot)
+                       STRETCHED across the middle, behind a center-out mask
+     --ab-p .30 -> .40 the lit edge's glow arrives at each end piece (first 8 frames)
+     --ab-p .40 -> .80 the front enters each end, rounds the lower corner and climbs the short side:
+                       the END pieces (__cap, 26px, mirrored for the right) are rendered frames,
+                       two neighbours cross-faded (A at 1-f, B at f)
+     --ab-p .80 -> 1   the top edge and upper corners light together: one fade, no travelling front
+   The A/B cross-fade is ADDITIVE (plus-lighter), so the pair always sums to one frame's light --
+   a normal-blend cross-fade dips in the middle, and that dip was the flicker. */
+.wm-accent[data-look="q6n4"],
+.wm-accent[data-look="q6n4"]:hover:not(:disabled),
+.wm-accent[data-look="q6n4"]:active:not(:disabled) {
+  --ab-p: 0;
+  --ab-H: 32px; --ab-XS: 26px;                 /* control height; width of the rendered end pieces */
+  --ab-NF: 47; --ab-N0: 8; --ab-N1: 30; --ab-N2: 8;   /* end-piece frames: tail arrives, front travels, top fades in */
+  --ab-q: clamp(0, calc(var(--ab-p) / .4), 1);                   /* bottom edge reveal */
+  --ab-z: clamp(0, calc((var(--ab-p) - .8) / .2), 1);            /* top fade */
+  --ab-f: calc(clamp(0, calc((var(--ab-p) - .3) / .1), 1) * var(--ab-N0) + clamp(0, calc((var(--ab-p) - .4) / .4), 1) * var(--ab-N1) + var(--ab-z) * var(--ab-N2));
+  --ab-fl: round(down, var(--ab-f), 1);
+  --ab-mt: 10px; --ab-mb: 52px; --ab-mx: 40px;
+  /* the label's ink, metallic at rest and pale acid lit, mixed by --ab-p; the chevron borrows it */
+  --ab-inkp: color-mix(in srgb, #c9cdb6 calc((1 - min(1, var(--ab-p) * 1.6)) * 100%), oklch(0.84 0.13 116));
+  background: none; box-shadow: none; filter: none;
+  color: var(--ab-inkp);
+  /* token-lint: allow -- the light's travel is .65s on its own curve, approved by eye; the press is 80ms */
+  transition: --ab-p .65s cubic-bezier(.45, 0, .2, 1), transform .08s ease;
+}
+.wm-accent[data-look="q6n4"][data-shape="chip"] { --ab-mb: 40px; }
+
+/* the light source is behind the button on rollover; pressed keeps that look and drops 1px */
+.wm-accent[data-look="q6n4"]:hover:not(:disabled),
+.wm-accent[data-look="q6n4"]:active:not(:disabled) { --ab-p: 1; transform: none; }
+.wm-accent[data-look="q6n4"]:active:not(:disabled) { transform: translateY(1px); }
+
+/* the under-spill: outside the face, so the face clip below never touches it; fades as the light goes behind */
+.wm-accent[data-look="q6n4"]::before {
+  content: ""; position: absolute; z-index: -2; pointer-events: none;
+  inset: calc(-1px - var(--ab-mt)) calc(-1px - var(--ab-mx)) calc(-1px - var(--ab-mb));
+  opacity: max(0, calc(1 - var(--ab-p) * 1.5));
+}
+/* chips: 9-slice (reference box 96px, ends are 40px of reach + 26px of box) */
+.wm-accent[data-look="q6n4"][data-shape="chip"]::before {
+  border: 0 solid transparent;
+  border-image: url('../assets/accent/q6n4-spill-chip.avif') 0 132 0 132 fill / 0 66px 0 66px stretch;
+}
+
+/* ═════════ the chip's spill at a clip edge, and on a narrow chip ═════════
+   A chip's spill reaches 46px / 40px below the box. A host with a clip edge under the chip (ReCal's
+   window edge, 12px below its Try bar) sets --ab-fade-from, a length from the spill's top (it
+   is the chip's own bottom edge: calc(100% - var(--ab-mb) - 1px)), and the spill fades to nothing over the
+   next 11px. Unset, the fade starts 200% down and nothing shows. */
+.wm-accent[data-shape="chip"] {
+  --ab-ff: var(--ab-fade-from, 200%);
+  --ab-fv: linear-gradient(180deg, #000 var(--ab-ff), rgba(0, 0, 0, .6) calc(var(--ab-ff) + 4px), rgba(0, 0, 0, .2) calc(var(--ab-ff) + 8px), transparent calc(var(--ab-ff) + 11px));
+}
+.wm-accent[data-look="q5"][data-shape="chip"]::after { -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv); }
+
+/* No centre hairline on narrow chips. The q6n4 chip spill is a 9-slice (two 66px ends and a stretchable
+   middle) of a render made for a 96px chip. Its middle is the 44px around the centre, where the spill's x
+   weight (a gaussian, sigma 28.8px) peaks at 1 against .747 at the slice edges. On a narrow chip (Italic is 53px:
+   a 3.5px middle) those 44px are squeezed into ~3px, so the peak shows as a bright vertical hairline under the
+   chip. Squeezing the slices instead would shift the spill off the chip's outline, so the middle is flattened to
+   the slice-edge level: a mask layer exactly as wide as the displayed middle (100% - 132px) removes the squeezed
+   peak (alpha = 1 - .747 / g(x)). The layer only exists on chips whose middle is under 10px wide (size 0
+   otherwise), so every wider chip is unchanged. */
+.wm-accent[data-look="q6n4"][data-shape="chip"]::before {
+  --ab-mid: calc(100% - 132px);
+  --ab-flat: linear-gradient(90deg, rgba(0,0,0,0.000) 0%, rgba(0,0,0,0.100) 10%, rgba(0,0,0,0.170) 20%, rgba(0,0,0,0.217) 30%, rgba(0,0,0,0.244) 40%, rgba(0,0,0,0.253) 50%, rgba(0,0,0,0.244) 60%, rgba(0,0,0,0.217) 70%, rgba(0,0,0,0.170) 80%, rgba(0,0,0,0.100) 90%, rgba(0,0,0,0.000) 100%);
+  -webkit-mask-image: var(--ab-fv), var(--ab-flat); mask-image: var(--ab-fv), var(--ab-flat);
+  -webkit-mask-size: 100% 100%, min(var(--ab-mid), calc(max(0px, calc(10px - var(--ab-mid))) * 1000)) 100%;
+  mask-size: 100% 100%, min(var(--ab-mid), calc(max(0px, calc(10px - var(--ab-mid))) * 1000)) 100%;
+  -webkit-mask-position: 0 0, 50% 0; mask-position: 0 0, 50% 0;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-composite: source-out; mask-composite: subtract;
+}
+
+/* the face: clipped to the pill, holds the tone, the sprite and the bottom streak */
+.wm-accent__face {
+  position: absolute; inset: -1px; z-index: -1; pointer-events: none;
+  border-radius: inherit; corner-shape: inherit; overflow: hidden; isolation: isolate; background: var(--ab-face);
+}
+.wm-accent__tone {
+  position: absolute; inset: 0; border-radius: inherit;
+  background: var(--ab-face); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
+  opacity: max(0, calc(1 - var(--ab-p) * 1.6));
+}
+/* the light, one additive group */
+.wm-accent__spr { position: absolute; inset: 0; isolation: isolate; --ab-ov: 3px; container-type: inline-size; }
+.wm-accent__bot, .wm-accent__top, .wm-accent__cap { position: absolute; top: 0; bottom: 0; mix-blend-mode: plus-lighter; isolation: isolate; }
+/* The middle columns reach --ab-ov under each end piece and the two cross-fade there (the end piece's last
+   --ab-ov px fade out, the column's first --ab-ov px fade in: complementary linear ramps, always on, so the light
+   sums to the same value wherever the sub-pixel boundary falls). Abutting layers with fractional edges (chips sit
+   at x.25, x.77 ...) anti-alias into a dark+bright hairline and the end pieces differ from the column by ~3%,
+   which showed as a vertical seam at the centre of narrow chips. */
+.wm-accent__bot, .wm-accent__top {
+  --ab-x: linear-gradient(90deg, transparent 0, #000 var(--ab-ov), #000 calc(100% - var(--ab-ov)), transparent 100%);
+  left: calc(var(--ab-XS) - var(--ab-ov)); right: calc(var(--ab-XS) - var(--ab-ov));
+  background: url('../assets/accent/q6n4-rim-bot.avif') 0 0 / 100% 100% no-repeat;
+  -webkit-mask-image: var(--ab-x); mask-image: var(--ab-x);
+}
+/* bottom edge: lit outward from the centre. Starts as a ~12px pinprick, soft ends, and is fully
+   open (past both ends) at --ab-p .4. */
+.wm-accent__bot {
+  --ab-rx: calc(6px + var(--ab-q) * (50% + 28px));
+  --ab-m: linear-gradient(90deg, transparent calc(50% - var(--ab-rx) - 22px), #000 calc(50% - var(--ab-rx)), #000 calc(50% + var(--ab-rx)), transparent calc(50% + var(--ab-rx) + 22px));
+  /* the column also fades out over its own two ends while the edge is still opening (a narrow chip's
+     middle is shorter than the glow), so no rectangle shows; at --ab-p .4 the ramp is 0 and the column
+     meets the end pieces exactly. */
+  --ab-rp: calc(16px * (1 - var(--ab-q)));
+  --ab-e: linear-gradient(90deg, transparent 0, #000 var(--ab-rp), #000 calc(100% - var(--ab-rp)), transparent 100%);
+  /* A short lit segment has a round glow; the column's glow is an infinite line's (it rises ~14px with no lateral
+     falloff). Where the column is the only light (a narrow chip: its middle is shorter than the glow, the end
+     pieces are still dark) that read as a vertical pillar, and as hairlines where its edges met the pieces. So the
+     glow is capped to a short dome over narrow middles until the end pieces start lighting, then opens up as they
+     catch up (--ab-p .3 to .5); wide middles (>= 28px) are untouched. */
+  --ab-gh: clamp(3px, calc((100cqw - 2 * var(--ab-XS)) * .65 + 2px), 20px);
+  --ab-gp: calc(var(--ab-gh) + (20px - var(--ab-gh)) * clamp(0, calc((var(--ab-p) - .3) / .2), 1));
+  --ab-v: linear-gradient(0deg, #000 var(--ab-gp), transparent calc(var(--ab-gp) + 5px));
+  -webkit-mask-image: var(--ab-m), var(--ab-e), var(--ab-x), var(--ab-v); mask-image: var(--ab-m), var(--ab-e), var(--ab-x), var(--ab-v);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+.wm-accent__top { background-image: url('../assets/accent/q6n4-rim-top.avif'); opacity: var(--ab-z); }
+/* the end pieces: 26px wide, frames stacked one height apart; the right one is the left one mirrored */
+.wm-accent__cap {
+  width: var(--ab-XS); left: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - var(--ab-ov)), transparent 100%);
+  mask-image: linear-gradient(90deg, #000 calc(100% - var(--ab-ov)), transparent 100%);
+}
+.wm-accent__cap--r { left: auto; right: 0; transform: scaleX(-1); }
+.wm-accent__cap .wm-accent__sa, .wm-accent__cap .wm-accent__sb {
+  position: absolute; inset: 0;
+  background-image: url('../assets/accent/q6n4-rim-cap.avif'); background-repeat: no-repeat;
+  background-size: 100% calc(var(--ab-NF) * var(--ab-H));
+  mix-blend-mode: plus-lighter; will-change: background-position, opacity;
+}
+.wm-accent__sa { background-position: 0 calc(var(--ab-fl) * var(--ab-H) * -1); opacity: calc(1 - (var(--ab-f) - var(--ab-fl))); }
+.wm-accent__sb { background-position: 0 calc((var(--ab-fl) + 1) * var(--ab-H) * -1); opacity: calc(var(--ab-f) - var(--ab-fl)); }
+.wm-accent__face::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; pointer-events: none;
+  background: url('../assets/accent/q6n4-streak-chip.avif') 0 0 / 100% 100% no-repeat;
+  opacity: calc(.9 - clamp(0, calc((var(--ab-p) - .3) / .3), 1) * .7);   /* holds until the stretched edge has taken over */
+}
+
+/* ─── the pill, Q6 -> N4 ───
+   A full render at 227 x 33: the spill is 307 x 95 (a 9-slice, 74px ends), the sprite is 48 frames
+   at 227 x 33, the streak 227 x 6. The pill is square-edged to its image, so it takes no border. */
+.wm-accent[data-look="q6n4"][data-shape="pill"],
+.wm-accent[data-look="q6n4"][data-shape="pill"]:hover:not(:disabled),
+.wm-accent[data-look="q6n4"][data-shape="pill"]:active:not(:disabled) {
+  --ab-H: 33px;
+  border: 0; inline-size: 227px; block-size: 33px; padding: 0 16px;
+  line-height: 15px;
+}
+.wm-accent[data-look="q6n4"][data-shape="pill"]::before {
+  inset: calc(var(--ab-mt) * -1) calc(var(--ab-mx) * -1) calc(var(--ab-mb) * -1);
+  border: 0 solid transparent;
+  border-image: url('../assets/accent/q6n4-spill-pill.avif') 0 148 0 148 fill / 0 74px 0 74px stretch;
+}
+.wm-accent[data-shape="pill"] .wm-accent__face { inset: 0; background: #0a0a0a; }
+.wm-accent[data-shape="pill"] .wm-accent__tone {
+  background: linear-gradient(180deg, #171717, #0c0c0c); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
+  opacity: max(0, calc(1 - var(--ab-p) * 1.6));
+}
+.wm-accent__fr { position: absolute; inset: 0; isolation: isolate; --ab-f: calc(var(--ab-p) * 47); --ab-fl: round(down, var(--ab-f), 1); }
+.wm-accent__fr .wm-accent__sa, .wm-accent__fr .wm-accent__sb {
+  position: absolute; inset: 0; background-image: url('../assets/accent/q6n4-travel-pill.avif'); background-repeat: no-repeat;
+  background-size: 100% 1584px; mix-blend-mode: plus-lighter; will-change: background-position, opacity;
+}
+.wm-accent[data-shape="pill"] .wm-accent__face::after {
+  height: 6px; background-image: url('../assets/accent/q6n4-streak-pill.avif');
+  opacity: max(.2, calc(.9 - var(--ab-p) * 1.2));
+}
+
+/* the label: metallic at rest, pale acid on rollover, one gradient mixed by --ab-p */
+.wm-accent[data-look="q6n4"] .wm-accent__lab {
+  position: relative;
+  --ab-mp: calc((1 - min(1, var(--ab-p) * 1.6)) * 100%);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, oklch(0.95 0.06 112) var(--ab-mp), oklch(0.84 0.13 116)),
+    color-mix(in srgb, #b8b8b3 var(--ab-mp), oklch(0.84 0.13 116)));
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent; -webkit-text-fill-color: transparent;
+}
+/* a mark inside the label (a chevron) cannot be clipped to text: it takes the ink itself */
+.wm-accent[data-look="q6n4"] .wm-accent__lab svg { color: var(--ab-inkp); }
+
+/* disabled is UNLIT: dark face, faint neutral hairline, grey label, no light */
+.wm-accent[data-look="q6n4"]:disabled {
+  opacity: 1; transform: none;
+  background: var(--ab-face); border: 1px solid var(--ab-off-line);
+  color: var(--ab-off-ink);
+}
+.wm-accent[data-look="q6n4"]:disabled::before,
+.wm-accent[data-look="q6n4"]:disabled .wm-accent__face { display: none; }
+.wm-accent[data-look="q6n4"]:disabled .wm-accent__lab {
+  background: none; animation: none; color: var(--ab-off-ink); -webkit-text-fill-color: var(--ab-off-ink);
+}
+.wm-accent[data-look="q6n4"]:disabled .wm-accent__lab svg { color: var(--ab-off-ink); }
