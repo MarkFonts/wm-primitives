@@ -189,8 +189,8 @@
    is the chip's own bottom edge: calc(100% - var(--ab-mb) - 1px)), and the spill fades to nothing over the
    next 11px. Unset, the fade starts 200% down and nothing shows. */
 .wm-accent[data-shape="chip"] {
-  --ab-ff: var(--ab-fade-from, 200%);
-  --ab-fv: linear-gradient(180deg, #000 var(--ab-ff), rgba(0, 0, 0, .6) calc(var(--ab-ff) + 4px), rgba(0, 0, 0, .2) calc(var(--ab-ff) + 8px), transparent calc(var(--ab-ff) + 11px));
+  --ab-fade-from: 200%;
+  --ab-fv: linear-gradient(180deg, #000 var(--ab-fade-from), rgba(0, 0, 0, .6) calc(var(--ab-fade-from) + 4px), rgba(0, 0, 0, .2) calc(var(--ab-fade-from) + 8px), transparent calc(var(--ab-fade-from) + 11px));
 }
 .wm-accent[data-look="q5"][data-shape="chip"]::after { -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv); }
 
