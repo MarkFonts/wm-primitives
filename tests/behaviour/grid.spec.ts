@@ -281,7 +281,7 @@ const SAFE = () => {   // runs in the page; stringified below
   const firstB = memo((e: Element) => { const t = snap.firstLine(e) as Node; return t ? at(t) : NaN })
   const lastB = memo((e: Element) => { const t = lastText(e); return t ? at(t, true) : NaN })
   const geoOf = memo(geo)
-  const pairs: { big: string; other: string; side: 'above' | 'below'; step: number; bigFirst: number; bigLast: number; otherFirst: number; otherLast: number; bigX: string; otherX: string; excused: boolean }[] = []
+  const pairs: { big: string; other: string; side: 'above' | 'below'; step: number; bigFirst: number; bigLast: number; otherFirst: number; otherLast: number; bigX: string; otherX: string; excused: boolean; kick: boolean }[] = []
   for (const big of blocks) {
     const cs = getComputedStyle(big)
     if (!/^H[1-6]$/.test(big.tagName) || big.closest(ANN) || parseFloat(cs.fontSize) < 24 || cs.getPropertyValue('--snap-unit').trim() === '1') continue
@@ -302,7 +302,7 @@ const SAFE = () => {   // runs in the page; stringified below
     }
     for (const [o, side] of [[above?.[0], 'above'], [below?.[0], 'below']] as const) {
       if (!o) continue
-      pairs.push({ big: name(big), other: name(o), side, step, bigFirst: bf, bigLast: bl, otherFirst: firstB(o), otherLast: lastB(o), bigX: tag(big), otherX: tag(o), excused: !!(o.closest('[data-expect-offender="safe"]') || big.closest('[data-expect-offender="safe"]')) })
+      pairs.push({ big: name(big), other: name(o), side, step, bigFirst: bf, bigLast: bl, otherFirst: firstB(o), otherLast: lastB(o), bigX: tag(big), otherX: tag(o), excused: !!(o.closest('[data-expect-offender="safe"]') || big.closest('[data-expect-offender="safe"]')), kick: side === 'above' && o.matches('p.wm-kick') && big.previousElementSibling === o })
     }
   }
   return pairs
@@ -352,6 +352,8 @@ function safeArea(pairs: Awaited<ReturnType<typeof SAFE>>, xh: Record<string, nu
   const push = (p: { excused: boolean }, msg: string) => off.push({ msg, excused: p.excused })
   for (const p of pairs) {
     if (p.side === 'above') {
+      // a p.wm-kick directly over its heading, exactly one 30px line above, is inside the safe area by design (GRID.md §2.6, 2026-10-13)
+      if (p.kick && Math.abs(p.bigFirst - p.otherLast - 30) <= 0.5) continue
       const limit = p.bigFirst - xh[p.bigX] - p.step, short = p.otherLast - limit
       if (short > 0.5) push(p, `${p.other} above ${p.big}: last baseline ${(p.bigFirst - p.otherLast).toFixed(1)}px over its first baseline, inside the safe area (x-height ${xh[p.bigX].toFixed(1)} + step ${p.step} = ${(xh[p.bigX] + p.step).toFixed(1)}), ${short.toFixed(1)}px short`)
     } else {

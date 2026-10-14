@@ -18,15 +18,16 @@ test.describe('system page · G/L under the zoom', () => {
       const ov = document.querySelector('.wm-ov') as HTMLElement, main = document.querySelector('.wm-main') as HTMLElement
       const cs = getComputedStyle(main), n = +cs.getPropertyValue('--grid-cols') - +cs.getPropertyValue('--rail-span') - +cs.getPropertyValue('--rail-gap')
       const g = parseFloat(cs.getPropertyValue('--grid-gutter')), col = (main.offsetWidth - (n - 1) * g) / n
-      const o = ov.getBoundingClientRect(), m = main.getBoundingClientRect()
+      const o = ov.getBoundingClientRect(), m = main.getBoundingClientRect(), pn = ov.parentElement!.getBoundingClientRect()
       const pitch = +ov.dataset.pitch!
-      const stripes = [...document.querySelectorAll('.gx-tc-cols > span')].map(s => (s.getBoundingClientRect().left - m.left) / pitch)
-      return { parent: ov.parentElement!.className, inMain: o.left >= m.left - .5 && o.right <= m.right + .5, fits: o.width <= innerWidth && o.height <= innerHeight,
+      const stripes = [...document.querySelectorAll('.gx-tc-in > i')].map(s => (s.getBoundingClientRect().left - m.left) / pitch)
+      return { parent: ov.parentElement!.className, inPan: o.left >= pn.left - .5 && o.right <= m.right + .5,   // from the pan's edge on purpose (build.py draw(), 2026-10-09): the hang columns 5 and 6 are drawn too
+         fits: o.width <= innerWidth && o.height <= innerHeight,
         pitch, want: (col + g) * 1.3, zoom: main.currentCSSZoom, stripes, display: getComputedStyle(ov).display }
     })
     expect(r.display).toBe('block')
     expect(r.parent).toBe('wm-pan')
-    expect(r.inMain && r.fits).toBe(true)
+    expect(r.inPan && r.fits).toBe(true)
     expect(r.zoom).toBeCloseTo(1.3, 3)
     expect(r.pitch).toBeCloseTo(r.want, 2)
     expect(r.stripes.length).toBeGreaterThan(0)

@@ -1617,7 +1617,7 @@ for s in secs:
     digit = s["num"][-1]
     head = (f'<div class="wm-open{" wm-open--wide" if sid in APPENDIX else ""}"><div class="wm-open-l">'
             f'<p class="wm-kick"><span class="wm-kick-t">{KICKERS.get(sid, "")}</span>'
-            + ('' if sid in APPENDIX else f'<span class="wm-dg" data-d="{digit}"><span>{digit}</span></span>') + '</p>'
+            + ('' if sid in APPENDIX else f'<span class="wm-dg" data-d="{digit}" data-baseline="free"><span>{digit}</span></span>') + '</p>'
             # the appendix's NAME is the word "Appendix", big and grey (Mark, 2026-10-11: "drop 'who
             # uses what', make it a normal column width at a big size"); the section's label stays in the rail
             + (f'<h1 class="wm-mark wm-dg--word">Appendix</h1>' if sid in APPENDIX else f'<h1 class="wm-mark">{s["label"]}</h1>')
@@ -2644,6 +2644,9 @@ GRAMMAR_CSS = """
 .wm-open--wide .wm-open-r{grid-column:1 / span 7;grid-row:2;align-self:start}   /* left on the word's edge, column 1 (Mark, 2026-10-11: "and left align it"), the dek's seven columns */
 }
 .wm-open-r{grid-column:4 / span 7}   /* columns 4 to 10, one column inside the eleven-column measure (Mark, 2026-10-11: "paragraph 11 and dek stay 10") */
+/* 1024-1279: three columns are 89px, narrower than the longest kicker and name ("Principles", "Where it applies" run 97-111px). The name takes four and the
+   lede starts one column later, so no word is wider than its box and the type stays the size it is. */
+@media (min-width:1024px) and (max-width:1279px){ .wm-open:not(.wm-open--wide) .wm-open-l{grid-column:1 / span 4} .wm-open:not(.wm-open--wide) .wm-open-r{grid-column:5 / span 6} }
 .wm-kick,.wm-mark{margin:0;font-size:var(--type-title-size,1.625rem);--lh:var(--lead-title);line-height:var(--lead-title,30px);
   font-weight:400;letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums}
 .wm-kick{color:var(--ink-3)}

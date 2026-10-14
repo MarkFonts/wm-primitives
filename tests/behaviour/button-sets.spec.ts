@@ -22,8 +22,8 @@ const cs = (page: Page, sel: string) => page.evaluate(s => {
 const surfaceHi = (page: Page) => page.evaluate(() => {
   const d = document.createElement('div'); d.style.background = 'var(--surface-hi)'; document.body.append(d)
   const v = getComputedStyle(d).backgroundColor; d.remove(); return v })
-const accent = (page: Page) => page.evaluate(() => {
-  const d = document.createElement('div'); d.style.color = 'var(--accent)'; document.body.append(d)
+const signalInk = (page: Page) => page.evaluate(() => {
+  const d = document.createElement('div'); d.style.color = 'var(--signal-ink)'; document.body.append(d)
   const v = getComputedStyle(d).color; d.remove(); return v })
 const NONE = 'rgba(0, 0, 0, 0)'
 
@@ -71,11 +71,11 @@ for (const theme of ['dark', 'light']) test.describe(theme, () => {
     await page.mouse.up()
   })
 
-  test('chosen: 06 on --surface-hi, 03 on the accent at 1.8', async ({ page }) => {
+  test('chosen: 06 on --surface-hi, 03 on the signal ink at 1.8', async ({ page }) => {
     await open(page, theme)
     expect((await cs(page, '#chosen')).bg).toBe(await surfaceHi(page))
     const on = await cs(page, '#r-on')
-    expect(on.decoColor).toBe(await accent(page))
+    expect(on.decoColor).toBe(await signalInk(page))
     expect(parseFloat(on.thick)).toBeCloseTo(1.8, 1)
   })
 

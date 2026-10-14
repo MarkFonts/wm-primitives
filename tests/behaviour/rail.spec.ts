@@ -8,9 +8,20 @@ import { touchDrag, touchPress, at } from './gesture'
    names are the spec's. */
 
 type RowCfg = NonNullable<(typeof HOSTS)[number]['rows']>[number]
-const rowOf = (page: Page, cfg: RowCfg) =>
-  page.locator(cfg.variant === 'track' ? '.slider-row--track' : '.slider-row:not(.slider-row--track)')
-    .filter({ has: page.locator('.slider-label-name', { hasText: cfg.label }) })
+type HostCfg = (typeof HOSTS)[number]
+
+/* Where a host draws its rows. font-proofer and opsz-proofer draw them in their sidebar
+   panels, labelled in lowercase (`tracking`). ReCal's rail redesign (ReCal 52cb2a7) moved
+   Size / Tracking / Leading out of the floating TYPE panel into the canvas Try bar:
+   `.try` > `.try-pill` > the shared AxisSlider, variant="track", labelled "Tracking". The
+   row is the same component, so every assertion below is unchanged; only the scope and
+   the label's case differ (hosts.ts still carries /^tracking$/ for the other host). */
+const scopeOf = (page: Page, host: HostCfg) => host.name === 'ReCal' ? page.locator('.try') : page
+const labelOf = (host: HostCfg, cfg: RowCfg) => host.name === 'ReCal' && cfg.variant === 'track' ? /^Tracking$/ : cfg.label
+
+const rowOf = (page: Page, host: HostCfg, cfg: RowCfg) =>
+  scopeOf(page, host).locator(cfg.variant === 'track' ? '.slider-row--track' : '.slider-row:not(.slider-row--track)')
+    .filter({ has: page.locator('.slider-label-name', { hasText: labelOf(host, cfg) }) })
     .filter({ visible: true }).first()
 
 const readValue = (row: Locator) => row.locator('input.slider-number').inputValue().then(v => parseFloat(v.replace('\u2212', '-')))
@@ -27,7 +38,7 @@ const heights = (row: Locator) => row.evaluate(el => ({
 }))
 
 for (const host of HOSTS.filter(h => h.gestures !== false && h.rows?.length)) for (const cfg of host.rows!) {
-  const sizeRow = (page: Page) => rowOf(page, cfg)
+  const sizeRow = (page: Page) => rowOf(page, host, cfg)
   test.describe(`${host.name} · ${cfg.variant}`, () => {
     test.beforeEach(async ({ page }) => {
       await sealed(page)
