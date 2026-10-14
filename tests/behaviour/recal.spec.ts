@@ -50,8 +50,8 @@ test.describe('ReCal · the instrument around the primitive', () => {
   test('the rail walks its six rows, one open at a time', async ({ page }) => {
     const errors = await open(page)
     /* ReCal's rail is a stack of six rows (Shell.tsx RailRow). Each header is a
-       button.rail-seam--row whose aria-expanded says whether its .rail-row-open panel is
-       there; one row is open at a time, and row 1 is open on boot. */
+       button.rail-seam--row (inside .rail-seam-head, inside .rail-row) whose aria-expanded says
+       whether its row's .rail-row-open panel is there; one row is open at a time, and row 1 is open on boot. */
     const rows = ['Shape', 'Optical size', 'Ascender & Sharpness', 'Type Matrix', 'Freezer', 'Vertical metrics']
     const seams = page.locator('.rail-seam--row')
     await expect(seams, 'six rows').toHaveCount(rows.length)
@@ -70,7 +70,7 @@ test.describe('ReCal · the instrument around the primitive', () => {
       const seam = seams.nth(i)
       await seam.click()
       await expect(seam, `${name} is open`).toHaveAttribute('aria-expanded', 'true')
-      await expect(seam.locator('xpath=..').locator('.rail-row-open'), `${name} panel`).toBeVisible()
+      await expect(page.locator('.rail-row').nth(i).locator('.rail-row-open'), `${name} panel`).toBeVisible()
       await expect(page.locator('.rail-seam--row[aria-expanded="true"]'), `only ${name} is open`).toHaveCount(1)
       await expect(page.locator('.rail-row-open'), `only ${name} has a panel`).toHaveCount(1)
       if (name === 'Vertical metrics') {
@@ -84,7 +84,7 @@ test.describe('ReCal · the instrument around the primitive', () => {
     /* And back: Shape reopens, and the canvas is the scene again. */
     await seams.nth(0).click()
     await expect(seams.nth(0), 'Shape reopens').toHaveAttribute('aria-expanded', 'true')
-    await expect(seams.nth(0).locator('xpath=..').locator('.rail-row-open'), 'Shape panel').toBeVisible()
+    await expect(page.locator('.rail-row').nth(0).locator('.rail-row-open'), 'Shape panel').toBeVisible()
     await expect(page.locator('.rail-seam--row[aria-expanded="true"]')).toHaveCount(1)
     await expect(vm, 'the metrics stage is gone').toHaveCount(0)
     await expect(page.locator('.rail-title')).toHaveText(/ReCal Builder/)
