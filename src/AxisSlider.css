@@ -756,6 +756,46 @@
     border-top: 0;
     opacity: 1;
   }
+  /* ── the grip: the handle's grab mark (#114) ─────────────────────────────────
+     A 3px acid bar at the fill's edge. 20px tall (6px off the top and bottom), not full
+     height: full height only restates the fill's edge, and a mark that is shorter than the
+     bar reads as a thing to take hold of. Square-cut -- it is a tick, and a radius on 3px
+     is a pill.
+     Same position math as the fill: the fill is a gradient stop at --pct in the label's
+     padding box, and this is positioned at --pct in the same padding box, so they cannot
+     drift. min() keeps the 3px inside the bar at 100% instead of hanging off its end.
+     BEHIND the text (z-index -1 inside the label's own stacking context), so the value and
+     name stay readable. Where a letter crosses it, the text carries a halo in the ground
+     colour: it is invisible against the bar everywhere else and only shows on the acid, so
+     the shadow that keeps the label legible is enclosed by construction and never reaches
+     the rail. The grip's own shadow is inset and clip-path'd to its box for the same reason.
+     No hit area is added: the opacity-0 range input already covers the whole bar and
+     owns the pointer, so the grip is pointer-events: none. */
+  .slider-row--track .slider-label::after {
+    content: '';
+    position: absolute; z-index: -1;
+    top: 6px; bottom: 6px;
+    left: min(var(--pct, 0%), calc(100% - 3px));
+    width: 3px;
+    background: var(--accent, var(--signal));
+    box-shadow:
+      inset -1px 0 0 color-mix(in srgb, #000 28%, transparent),
+      inset 0 -2px 0 color-mix(in srgb, #000 22%, transparent);
+    clip-path: inset(0);
+    pointer-events: none;
+    transition: width var(--dur-fast, .12s) var(--ease, ease);
+  }
+  .slider-row--track:hover .slider-label::after,
+  .slider-row--track.slider-row--engaged .slider-label::after { width: 5px; }
+  .slider-row--track .slider-label-text,
+  .slider-row--track .slider-value,
+  .slider-row--track .slider-number {
+    text-shadow: 0 0 1px var(--surface), 0 0 2px var(--surface);
+  }
+  .slider-row--track.slider-row--off .slider-label::after { display: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .slider-row--track .slider-label::after { transition: none; }
+  }
   /* The bar is the coarse control, so say so on the way in. */
   .slider-row--track .slider-label { cursor: ew-resize; }
   .slider-row--track.slider-row--off .slider-label { cursor: default; }
