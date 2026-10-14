@@ -1187,29 +1187,46 @@ html,body{margin:0;padding:0;background:var(--bg)}
    because it argues 44-sizes-today AGAINST 7/5/3 -- the hue points at the thing under
    discussion. Nothing here is under discussion, so this takes neither the box nor the
    hue; otherwise two near-identical strips compete and the accent means nothing. */
-.wm-stats{display:flex;flex-wrap:wrap}
-.wm-stat{padding:0 24px;border-left:1px solid var(--line)}
-.wm-stat:first-child{padding-left:0;border-left:none}
-.wm-stat b{display:block;font-size:30px;line-height:1;font-weight:400;
-  font-variant-numeric:tabular-nums;color:var(--ink);font-variation-settings:"GEOM" 50}
-.wm-stat i{display:block;font-style:normal;font-size:.75rem;line-height:15px;color:var(--ink-3);margin-top:9px}   /* 30 + 9 + 15 = 54: the block on the 3px line (53 with a normal lead) */
+/* ON THE COLUMNS (Mark, 2026-10-14: "make them align to equal number of columns"). The row is the
+   main's own eighteen (the grammar's --col, 12 below 1024). The tiles are THREE columns each and
+   together take the first TWELVE: the dek above is 52ch, which is 11.97 columns at 1440, so the
+   counts sit inside the copy's measure and stay clear of the 6 drawing. A tile's left edge is a column
+   edge; the hairline hangs in the gutter before it, half a gutter out. The captions are short enough
+   to stay on one line in 3 columns from 1200 up (the widest, "columns, a 3px line", is 107px). */
+.wm-stats{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));column-gap:var(--grid-gutter);row-gap:24px;align-items:start}
+.wm-stat{grid-column:span 3;position:relative;padding:0;border:0}
+.wm-stat + .wm-stat::before{content:"";position:absolute;left:calc(var(--grid-gutter) / -2);top:0;bottom:0;border-left:1px solid var(--line)}
+.wm-stat b{display:block;font-size:31.5px;line-height:1;font-weight:400;
+  font-variant-numeric:tabular-nums;color:var(--ink-3);font-variation-settings:"GEOM" 50}
+.wm-stat i{display:block;font-style:normal;font-size:.75rem;line-height:15px;color:var(--ink-3);margin-top:7.5px}   /* 31.5 + 7.5 + 15 = 54: the block on the 3px line (the numeral's line-height is 1) */
 /* The one button on the poster, and it is not a law: the door to the pages still being
    decided. Hatched, not filled -- extremely thin 45-degree hairlines -- so a work-in-progress
    surface reads as one at a glance. It sits in the counts' row as a fifth item, at the
    counts' own gutter; an auto margin used to push it to the row's far end, which on a
    wide screen is under the drawing (2026-09-26). */
-.wm-wip{display:inline-flex;align-items:baseline;gap:12px;align-self:center;margin-left:24px;padding:12px 16px;text-decoration:none;color:var(--ink);
+.wm-wip{display:inline-flex;align-items:baseline;gap:12px;grid-column:13 / -1;justify-self:start;align-self:center;padding:12px 16px;text-decoration:none;color:var(--ink);
   border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
   font-size:.75rem;line-height:15px;font-weight:600;transition:border-color var(--dur-fast,140ms) var(--ease, cubic-bezier(.2,.7,.2,1))}
 .wm-wip i{font-style:normal;font-weight:400;font-size:.75rem;color:var(--ink-3)}
 .wm-wip:hover{border-color:var(--ink-3)}
-/* on the columns below 1024 (Mark's phone, 2026-10-11: "we have a grid"): the four counts two by
-   two, six of the twelve columns each, the hairline between the pairs, a line of 24 between the rows */
+/* Where the six columns left of the row (13-18) are too narrow for the WIP link (265px, below about
+   1317px of window) it drops to its own row on column 1, as it did on main when the row ran out. */
+@media (max-width:1316px){
+  .wm-wip{grid-column:1 / span 8}
+}
+/* Two by two, six columns each of the copy's twelve: below 1200 three columns are narrower than the
+   widest caption (measured: 107px caption, 3-column tile 108px at 1200, and it wraps just under). From
+   1024 down it is the same rule on the page's own twelve (Mark's phone, 2026-10-11: "we have a grid"):
+   the hairline in the gutter before the 2nd and 4th only, a line of 24 between the rows. */
+@media (max-width:1199px){
+  .wm-stat:nth-child(odd){grid-column:1 / span 6}
+  .wm-stat:nth-child(even){grid-column:7 / span 6}
+  .wm-stat + .wm-stat::before{display:none}
+  .wm-stat:nth-child(even)::before{display:block}
+}
 @media (max-width:1023px){
-  .wm-stats{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--grid-gutter);row-gap:24px}
-  .wm-stat{grid-column:span 6;padding:0;border-left:0}
-  .wm-stat:nth-child(2n){padding-left:var(--grid-gutter);border-left:1px solid var(--line)}
+  .wm-stats{grid-template-columns:repeat(12,minmax(0,1fr))}
 }
 
 /* ---- The outline is an AXIS, not a sidebar. No panel, no card, no active pill: a
@@ -2909,9 +2926,9 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
         left. Each parameter earns its own page as the system grows.</p>
       <div class="wm-stats">
         <div class="wm-stat"><b>6</b><i>laws, one page</i></div>
-        <div class="wm-stat"><b>7</b><i>type roles</i></div>
-        <div class="wm-stat"><b>12</b><i>space steps</i></div>
-        <div class="wm-stat"><b>G2</b><i>corners, as the font is drawn</i></div>
+        <div class="wm-stat"><b>24</b><i>columns, a 3px line</i></div>
+        <div class="wm-stat"><b>7</b><i>apps, every push</i></div>
+        <div class="wm-stat"><b>G²</b><i>corners, as drawn</i></div>
         <a class="wm-wip" href="#controls-wip"><span>WIP primitives</span><i>pages to decide from &#8594;</i></a>
       </div>
     </div>
