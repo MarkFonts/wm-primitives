@@ -25,7 +25,7 @@ grip is a muted grey pill (4px, rounded ends, 7px off top and bottom, `--text-di
 `--accent` / `--signal` color appears only on hover, engaged and `:focus-within`. The first
 version's text-shadow halo read as a muddy box around the bar and the grip painted over the
 glyphs, so the halo is gone. The label is now an isolated stacking context with the grip behind
-the text, and an inverted copy of the name was tried and dropped (it turned letters dark); the same clipped `::before` copy (`data-name`) now carries a drop shadow in the name's own color, so letters crossing the grip throw a shadow onto it only. The locked-above overlay stays a background layer of the label.
+the text, and an inverted copy of the name was tried and dropped (it turned letters dark); a clipped copy of the name (`.slider-grip-shade`) now casts a drop shadow in the name's own color from only the glyph pixels inside the grip, onto the grip only. The locked-above overlay stays a background layer of the label.
 
 **Revised again: inside the fill, a pill fill, and the bar is 32.** The grip now sits inside the fill (right edge 6px in, 20px tall, 6px off top and bottom), the fill's leading end is a pill with the bar's radius and goes one step lighter while live, and the 34px bar was the fixture's missing `box-sizing: border-box` reset (font-proofer and ReCal already render 32), now added to the fixtures. The name has a left slot, and a bar too narrow for it shows the grip only while live.
 

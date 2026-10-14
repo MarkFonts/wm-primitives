@@ -763,12 +763,13 @@
      Same position math as the fill: --pct in the label's padding box, min() keeping the
      whole pill inside the bar at 100%. It is the ::after at z-index -1 inside the label's
      isolated stacking context: above the label's own background (the fill), below its text.
-     A DROP SHADOW THAT LIVES ONLY IN THE GRIP. The ::before repeats the name (data-name on .slider-label) at
-     exactly the real name's position, in the real name's color (so on its own it is invisible), with a real
-     text-shadow, clipped to the grip's rect -- so a letter crossing the grip throws a shadow onto it and the
-     shadow never reaches the bar. No inversion, no halo. The value is an input and cannot be repeated.
+     A DROP SHADOW THAT LIVES ONLY IN THE GRIP. .slider-grip-shade (aria-hidden, from AxisSlider.tsx) repeats the
+     name in the real name's color, so on its own it is invisible. Its child .slider-grip-shade-cast is clipped to the
+     grip's rect FIRST, so only glyph pixels inside the grip exist; the shade then drop-shadows those pixels (filter),
+     and its own clip-path to the same rect keeps the shadow inside the grip. (A text-shadow cannot do this: it is cast
+     by the whole name, so the neighbouring letter leaked a dark band into the grip.) No inversion, no halo.
      The locked-above overlay that used to live on ::before is a background layer of the label
-     now, so ::before is free. No hit area is added: the range input owns the pointer. */
+     now. No hit area is added: the range input owns the pointer. */
   .slider-row--track { --grip-w: 4px; --grip-c: var(--text-dim); --grip-in: 6px; --grip-v: 5px; --grip-slot: 20px; --name-c: color-mix(in srgb, var(--text) calc(var(--a-2, .62) * 100%), var(--surface)); --fill-r: var(--radius, 6px); --fill-c: var(--surface-hi); }
   .slider-row--track:hover,
   .slider-row--track.slider-row--engaged,
@@ -777,7 +778,7 @@
   /* The left slot: the name starts after the parked grip (grip-in + the widest grip + 8px), so at 0 and at
      low values the two never overlap. Padding on the name container, not a transform: nothing vertical moves. */
   /* The name is OPAQUE in the bar: --text-muted is translucent (--a-2), so the grip showed through the letters.
-     Same grey as --text-muted over --surface, but solid; the ::before copy uses it too. */
+     Same grey as --text-muted over --surface, but solid; the grip shade uses it too. */
   .slider-row--track .slider-label-text { color: var(--name-c); }
   .slider-row--track .slider-label-left { padding-left: calc(var(--grip-slot) - var(--spacing-04, 12px)); }
   .slider-row--track .slider-label::after {
@@ -791,34 +792,38 @@
     pointer-events: none;
     transition: width var(--dur-fast, .12s) var(--ease, ease), left var(--dur-fast, .12s) var(--ease, ease), background-color var(--dur-fast, .12s) var(--ease, ease);
   }
-  .slider-row--track .slider-label::before {
-    content: attr(data-name);
-    position: absolute; z-index: 1; inset: 0;
-    box-sizing: border-box;
-    /* bottom padding = the real name's --nudge, left = the label slot, so the copy sits on the real name */
-    padding: 0 var(--spacing-04, 12px) var(--nudge, 2px) var(--grip-slot);
-    display: grid; align-content: center; justify-content: start;
-    font-family: var(--ui-font, system-ui, sans-serif);
-    font-size: var(--type-ui-size, 0.75rem); line-height: var(--type-ui-lead, 15px);
-    white-space: nowrap; overflow: hidden;
-    color: var(--name-c);                           /* the name's own color: invisible but for its shadow */
-    text-shadow: 0 1px 2px rgba(0,0,0,.8), 0 2px 6px rgba(0,0,0,.65);   /* token-lint: allow -- the one literal, see DIAL.md */
-    clip-path: inset(var(--grip-v) calc(100% - max(var(--grip-in), calc(var(--pct, 0%) - var(--grip-in) - var(--grip-w))) - var(--grip-w)) var(--grip-v) max(var(--grip-in), calc(var(--pct, 0%) - var(--grip-in) - var(--grip-w))) round 999px);
-    pointer-events: none;
+  .slider-row--track { --grip-l: max(var(--grip-in), calc(var(--pct, 0%) - var(--grip-in) - var(--grip-w)));
+    --grip-clip: inset(var(--grip-v) calc(100% - var(--grip-l) - var(--grip-w)) var(--grip-v) var(--grip-l) round 999px); }
+  .slider-row--track .slider-label > .slider-grip-shade,
+  .slider-row--track .slider-label > .slider-grip-shade > .slider-grip-shade-cast {
+    position: absolute; z-index: 1; inset: 0; pointer-events: none;
+    clip-path: var(--grip-clip);
     transition: clip-path var(--dur-fast, .12s) var(--ease, ease);
   }
-  :root[data-theme="light"] .slider-row--track .slider-label::before { text-shadow: 0 1px 2px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.4); }  /* token-lint: allow */
+  .slider-grip-shade { display: none; }
+  .slider-row--track .slider-label > .slider-grip-shade {
+    display: block;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.8)) drop-shadow(0 2px 6px rgba(0,0,0,.65));   /* token-lint: allow -- the one literal, see DIAL.md */
+  }
+  :root[data-theme="light"] .slider-row--track .slider-label > .slider-grip-shade { filter: drop-shadow(0 1px 2px rgba(255,255,255,.8)) drop-shadow(0 2px 6px rgba(255,255,255,.65)); }  /* token-lint: allow */
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .slider-row--track .slider-label > .slider-grip-shade { filter: drop-shadow(0 1px 2px rgba(255,255,255,.8)) drop-shadow(0 2px 6px rgba(255,255,255,.65)); } }  /* token-lint: allow */
+  .slider-row--track .slider-label > .slider-grip-shade > .slider-grip-shade-cast { box-sizing: border-box; display: grid; align-content: center; justify-content: start; overflow: hidden;
+    /* bottom padding = the real name's --nudge, left = the label slot, so the copy sits on the real name */
+    padding: 0 var(--spacing-04, 12px) var(--nudge, 2px) var(--grip-slot);
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-size: var(--type-ui-size, 0.75rem); line-height: var(--type-ui-lead, 15px);
+    white-space: nowrap; color: var(--name-c); }
   /* coarse drops --nudge from the real name (see .slider-label-left above), so the copy does too */
-  @media (pointer: coarse) { .slider-row--track .slider-label::before { padding-bottom: 0; } }
-  /* compact (set in AxisSlider.tsx): no room for name + value + a slot at each end, so the grip and its
-     inversion show only while the row is live */
+  @media (pointer: coarse) { .slider-row--track .slider-label > .slider-grip-shade > .slider-grip-shade-cast { padding-bottom: 0; } }
+  /* compact (set in AxisSlider.tsx): no room for name + value + a slot at each end, so the grip shows only while the row is live (its shade too).
   .slider-row--track[data-compact]:not(:hover):not(.slider-row--engaged):not(:focus-within) .slider-label::after,
-  .slider-row--track[data-compact]:not(:hover):not(.slider-row--engaged):not(:focus-within) .slider-label::before { display: none; }
+  .slider-row--track[data-compact]:not(:hover):not(.slider-row--engaged):not(:focus-within) .slider-label > .slider-grip-shade { display: none; }
   .slider-row--track.slider-row--off .slider-label::after,
-  .slider-row--track.slider-row--off .slider-label::before { display: none; }
+  .slider-row--track.slider-row--off .slider-label > .slider-grip-shade { display: none; }
   @media (prefers-reduced-motion: reduce) {
     .slider-row--track .slider-label::after,
-    .slider-row--track .slider-label::before { transition: none; }
+    .slider-row--track .slider-label > .slider-grip-shade,
+    .slider-row--track .slider-label > .slider-grip-shade > .slider-grip-shade-cast { transition: none; }
   }
   /* The bar is the coarse control, so say so on the way in. */
   .slider-row--track .slider-label { cursor: ew-resize; }
