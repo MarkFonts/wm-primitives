@@ -173,7 +173,7 @@
   }
 
   .wm-chip:focus { outline: none; }
-  .wm-chip:is(:focus-visible, :has(> input:focus-visible)) { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+  .wm-chip:is(:focus-visible, :has(> input:focus-visible)) { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }
   .wm-chip:is(:disabled, [aria-disabled="true"]) { opacity: .4; cursor: default; }
 
   @media (pointer: coarse) {

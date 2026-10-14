@@ -85,7 +85,7 @@
     outline: none;
   }
   /* focus shows on the LOZENGE, the thing the keys move -- a ring round the rail was a capsule the size of the column */
-  .wm-hd-rail:focus-visible .wm-hd-pill { outline: 2px solid var(--accent, currentColor); outline-offset: 3px; }
+  .wm-hd-rail:focus-visible .wm-hd-pill { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 3px; }
   /* the hairline runs from the lozenge's centre at min to its centre at max, so the pill (and
      its ring) always covers the line's ends */
   .wm-hd-rail > i {
@@ -153,7 +153,7 @@
     font: inherit; font-size: var(--type-micro-size, 0.5625rem); letter-spacing: var(--track-caps, .12em); text-transform: uppercase;
     color: var(--text-dim, rgba(232, 232, 232, .38)); cursor: pointer;
   }
-  .wm-hd-auto.on { color: var(--ok, var(--accent, currentColor)); }
+  .wm-hd-auto.on { color: var(--ok, var(--signal-ink, var(--accent, currentColor))); }
   /* THE CONFIRM (motion.css, GESTURES.md §14). The lozenge is a mark, all fill: on a reset
      (zoomControl.js, G72) the fill goes for 80ms -- its numerals in ink on the rule -- and
      comes back. The auto switch blinks its on ink. */
@@ -169,7 +169,7 @@
     background: color-mix(in srgb, transparent calc(var(--confirm-off, 0) * 100%), var(--text, #e8e8e8));
     color: color-mix(in srgb, var(--text, #e8e8e8) calc(var(--confirm-off, 0) * 100%), var(--bg, #111));
   }
-  .wm-hd-auto.wm-confirm { color: color-mix(in srgb, var(--text-dim, rgba(232, 232, 232, .38)) calc(var(--confirm-off, 0) * 100%), var(--ok, var(--accent, #e8e8e8))); }
+  .wm-hd-auto.wm-confirm { color: color-mix(in srgb, var(--text-dim, rgba(232, 232, 232, .38)) calc(var(--confirm-off, 0) * 100%), var(--ok, var(--signal-ink, var(--accent, #e8e8e8)))); }
 
   /* vertical: id over rail, the hairline runs down, the lozenge never rotates */
   .wm-hd--vertical { flex-direction: column; gap: var(--spacing-03, 8px); }

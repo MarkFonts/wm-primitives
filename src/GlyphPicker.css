@@ -197,11 +197,11 @@
    It is written as accent-on-bg rather than white-on-black, so it inverts correctly in both
    themes: light fill / dark glyph on a dark page, dark fill / light glyph on a light one. */
 .gp-cell:hover {
-  background: var(--accent, #e8e8e8);
+  background: var(--accent, var(--signal, #e8e8e8));
   color: var(--bg);
 }
 .gp-cell--active {
-  box-shadow: inset 0 0 0 1.5px var(--accent, #e8e8e8);
+  box-shadow: inset 0 0 0 1.5px var(--signal-ink, var(--accent, #e8e8e8));
   background: var(--surface-hi);
 }
 

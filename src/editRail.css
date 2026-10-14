@@ -42,5 +42,5 @@
 .edit-rail--target:focus::before,
 .edit-rail--target:focus-within::before {
   opacity: 1;
-  background: var(--edit-rail-target, var(--accent, currentColor));
+  background: var(--edit-rail-target, var(--accent, var(--signal)));
 }

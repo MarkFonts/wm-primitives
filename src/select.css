@@ -34,7 +34,7 @@
   }
   .wm-select:hover { border-color: var(--text-dim, currentColor); }
   .wm-select:focus { outline: none; }
-  .wm-select:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+  .wm-select:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }
   .wm-select-wrap .wm-chevron {
     position: absolute;
     right: var(--spacing-03, 8px);

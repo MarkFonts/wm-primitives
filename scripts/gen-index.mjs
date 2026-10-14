@@ -107,6 +107,8 @@ for (const t of cfg.hostTokens) {
   const hard = /VANISHES|black on black/.test(without) ? ' **⚠**' : ''
   hc += `| \`${t}\`${hard} | ${what} | ${without} |\n`
 }
+hc += `\n## Defaults the package provides\n\n\`color.css\` defines these on the root, in both themes. Define \`--accent\` to override; the package reads \`var(--accent, var(--signal))\` for fills and \`var(--signal-ink, var(--accent))\` for thin uses.\n\n| token | what it is |\n| --- | --- |\n`
+for (const [t, [what]] of Object.entries(cfg.packageTokens ?? {})) hc += `| \`${t}\` | ${what} |\n`
 hc += `\nRuntime tokens (\`${cfg.runtimeTokens.join('`, `')}\`) are set by this package's own JS on its own elements and are not a contract with anybody.\n`
 writeFileSync(join(ROOT, 'HOST-CONTRACT.md'), hc)
 console.log(`COMPONENTS.md: ${blocks.length} export groups · HOST-CONTRACT.md: ${cfg.hostTokens.length} tokens · consumers: ${Object.keys(consumers).join(', ') || 'none'}`)

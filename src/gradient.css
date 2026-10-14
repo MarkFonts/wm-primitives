@@ -85,7 +85,7 @@
 }
 
 .grad-curve-handle {
-  fill: var(--accent, #e8e8e8);
+  fill: var(--accent, var(--signal, #e8e8e8));
   stroke: var(--bg, #0f0f0f);
   stroke-width: 2;
   cursor: grab;

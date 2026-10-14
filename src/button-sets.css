@@ -131,7 +131,7 @@
   .wm-menu:focus { outline: none; }
   /* Inset: a row is the full width of its column, and an outset ring would cross into the
      gutter beside it. */
-  .wm-menu:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: -2px; }
+  .wm-menu:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }
   .wm-menu.wm-confirm:not(:disabled) {
     transition: none;
     color: var(--text, inherit);
@@ -167,11 +167,11 @@
     text-decoration-color: var(--text, currentColor);
     text-decoration-thickness: var(--stroke-press, 1.8px);
   }
-  .wm-rule.active { text-decoration-color: var(--accent, currentColor); text-decoration-thickness: var(--stroke-press, 1.8px); }
-  .wm-rule[aria-pressed="true"] { text-decoration-color: var(--accent, currentColor); text-decoration-thickness: var(--stroke-press, 1.8px); }
+  .wm-rule.active { text-decoration-color: var(--signal-ink, var(--accent, currentColor)); text-decoration-thickness: var(--stroke-press, 1.8px); }
+  .wm-rule[aria-pressed="true"] { text-decoration-color: var(--signal-ink, var(--accent, currentColor)); text-decoration-thickness: var(--stroke-press, 1.8px); }
   .wm-rule:disabled { color: var(--text-dim, currentColor); text-decoration: none; cursor: default; }
   .wm-rule:focus { outline: none; }
-  .wm-rule:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 3px; }
+  .wm-rule:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 3px; }
   .wm-rule.wm-confirm:not(:disabled) {
     transition: none;
     text-decoration-thickness: calc(var(--hair, 1px) + (var(--stroke-press, 1.8px) - var(--hair, 1px)) * (1 - var(--confirm-off, 0)));
@@ -180,7 +180,7 @@
   /* Chosen keeps its press weight; the blink is the signal going to ink and back. */
   .wm-rule.active.wm-confirm {
     text-decoration-thickness: var(--stroke-press, 1.8px);
-    text-decoration-color: color-mix(in oklab, var(--accent, currentColor) calc(var(--confirm-off, 0) * 100%), var(--text, currentColor));
+    text-decoration-color: color-mix(in oklab, var(--signal-ink, var(--accent, currentColor)) calc(var(--confirm-off, 0) * 100%), var(--text, currentColor));
   }
 
   /* ── variants ───────────────────────────────────────────────────────────── */
@@ -249,10 +249,10 @@
   }
   .wm-field-ed:hover { text-decoration-color: var(--text, currentColor); }
   .wm-field-ed:focus {
-    color: var(--accent, currentColor);
-    text-decoration-color: var(--accent, currentColor);
+    color: var(--signal-ink, var(--accent, currentColor));
+    text-decoration-color: var(--signal-ink, var(--accent, currentColor));
     text-decoration-thickness: 2px;
-    caret-color: var(--accent, currentColor);
+    caret-color: var(--signal-ink, var(--accent, currentColor));
   }
   .wm-field--select {
     align-items: center;
@@ -264,7 +264,7 @@
     text-align: left;
   }
   .wm-field--select:hover { color: var(--text, inherit); }
-  .wm-field--select:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+  .wm-field--select:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }
   .wm-field--select > .wm-icon:last-child { margin-left: auto; }
 
   .wm-menu--display {
@@ -293,7 +293,7 @@
     transition: text-decoration-color var(--dur-fast, 140ms) ease;
   }
   .wm-rule-ed:hover { text-decoration-color: var(--text, currentColor); }
-  .wm-rule-ed:focus { text-decoration-style: solid; text-decoration-color: var(--accent, currentColor); caret-color: var(--accent, currentColor); }
+  .wm-rule-ed:focus { text-decoration-style: solid; text-decoration-color: var(--signal-ink, var(--accent, currentColor)); caret-color: var(--signal-ink, var(--accent, currentColor)); }
   .wm-rule--display {
     min-height: 0;
     font-size: var(--type-title-size, 1.625rem);
