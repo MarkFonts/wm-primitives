@@ -25,11 +25,9 @@ grip is a muted grey pill (4px, rounded ends, 7px off top and bottom, `--text-di
 `--accent` / `--signal` color appears only on hover, engaged and `:focus-within`. The first
 version's text-shadow halo read as a muddy box around the bar and the grip painted over the
 glyphs, so the halo is gone. The label is now an isolated stacking context with the grip behind
-the text, and the name is inverted only where it crosses the grip: `data-name` on `.slider-label`,
-a `::before` copy in `--surface` clipped to the grip's rect (aligned to the real name within
-0.5px, fine and coarse). The value number is an input and cannot be duplicated; it stays crisp
-and un-inverted. The locked-above overlay moved from `::before` to a background layer of the
-label to free it.
+the text, and an inverted copy of the name was tried and dropped (it turned letters dark); the same clipped `::before` copy (`data-name`) now carries a drop shadow in the name's own color, so letters crossing the grip throw a shadow onto it only. The locked-above overlay stays a background layer of the label.
+
+**Revised again: inside the fill, a pill fill, and the bar is 32.** The grip now sits inside the fill (right edge 6px in, 20px tall, 6px off top and bottom), the fill's leading end is a pill with the bar's radius and goes one step lighter while live, and the 34px bar was the fixture's missing `box-sizing: border-box` reset (font-proofer and ReCal already render 32), now added to the fixtures. The name has a left slot, and a bar too narrow for it shows the grip only while live.
 
 **It cost no layout.** Absolutely positioned, pointer-events none, the range input still owns
 the whole bar, so no hit area was added. Measured with and without: row 34 / bar 34 on a fine
