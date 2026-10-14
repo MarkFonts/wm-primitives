@@ -412,7 +412,7 @@ export function AxisSlider({
         </div>,
         document.body,
       )}
-      <div className="slider-label">
+      <div className="slider-label" data-name={label}>
         <span className="slider-label-left">
           <span className={`slider-label-text${tag ? ' slider-label-text--tagged' : ''}`}>
             <span className="slider-label-name">{label}</span>

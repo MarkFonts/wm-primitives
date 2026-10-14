@@ -175,16 +175,19 @@ platform's rather than ours to reimplement. The fill is a gradient stop at `--pc
 element — nothing to keep in sync, and it cannot drift from the thumb because there is no
 thumb.
 
-**The grip.** A `track` bar carries one grab mark: a 3px square-cut bar, 20px tall (6px off
-top and bottom), at the fill's edge. It is the `::after` of `.slider-label`, positioned at
-`--pct` in the same padding box the fill gradient is drawn in, so the two cannot drift
-(`min()` keeps it inside the bar at 100%). Color chain: `--accent`, then `--signal` (granny
-apple in light, acid in dark) -- an app that sets `--accent` colors it, nobody else has to.
-The shadow is enclosed: the grip's own is inset and clipped to its box, and the name and value
-carry a halo in the ground color, which is invisible on the bar and shows only where a letter
-crosses the acid, so no shadow ever reaches the rail. It sits behind the text, takes no
-pointer (the range input still owns the whole bar), widens 3 to 5px on hover or engaged, and
-adds nothing to layout: row 48 and bar 32 are unchanged. Not on the other variants.
+**The grip.** A `track` bar carries one grab mark: a quiet grey pill, 4px wide with rounded
+ends, 7px off top and bottom (about 55% of the bar). At rest it is `--text-dim` (the label's own
+ink at its dimmest, a grey on both `--surface-hi` fills in either theme, no new token). The color
+(`--accent`, then `--signal`) appears only on `:hover`, engaged and `:focus-within`, where it also
+widens to 6px. It is the `::after` of `.slider-label`, at `--pct` in the same padding box the fill
+is painted in, so the two cannot drift (`min()` keeps it inside the bar at 100%), at `z-index: -1`
+inside the label's isolated stacking context: above the fill, behind the text. There is no text
+halo. Where a letter of the name crosses the grip it is inverted: `.slider-label` carries
+`data-name`, and the `::before` repeats the name in `--surface` at the real name's position,
+clipped to the grip's rect, so only glyph pixels inside the grip change. The value is an input and
+cannot be repeated, so it stays crisp and un-inverted. The grip takes no pointer (the range input
+owns the whole bar) and adds nothing to layout: row 48 and bar 32 are unchanged. Not on the other
+variants.
 
 Two features live on the range track and must be painted onto the bar in `track`, or they
 vanish silently: `lockedAbove` and `reference`.
