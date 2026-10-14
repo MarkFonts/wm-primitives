@@ -225,14 +225,13 @@ export function AxisSlider({
   useEffect(() => () => setScrub(false), [])
   // The host contract, checked once per page in dev: HOWTO.md's two silent failures.
   useEffect(() => { if (rowRef.current) checkHostContract(rowRef.current) }, [])
-  /* COMPACT: a track bar too narrow for the name, the value and a grip slot (20px = grip-in + grip-w + 8) at each
-     end shows the grip only while the row is live (AxisSlider.css reads data-compact). Measured, not guessed:
+  /* COMPACT: a track bar too narrow for the name, the value and a grip slot at each end shows the grip only while the row is live (AxisSlider.css reads data-compact). Measured, not guessed:
      the name's own width is not available to CSS. */
   useEffect(() => {
     const row = rowRef.current; if (!row || variant !== 'track') return
     const bar = row.querySelector<HTMLElement>('.slider-label'), name = row.querySelector<HTMLElement>('.slider-label-name'), val = row.querySelector<HTMLElement>('.slider-value')
     if (!bar || !name || !val) return
-    const measure = () => row.toggleAttribute('data-compact', bar.clientWidth < 20 + name.offsetWidth + 6 + val.offsetWidth + 20)
+    const measure = () => row.toggleAttribute('data-compact', bar.clientWidth < 12 + name.offsetWidth + 6 + val.offsetWidth + 20)
     const ro = new ResizeObserver(measure); ro.observe(bar); ro.observe(val); measure()
     return () => ro.disconnect()
   }, [variant, label])
@@ -424,8 +423,19 @@ export function AxisSlider({
         document.body,
       )}
       <div className="slider-label">
+        {variant === 'track' && <span className="slider-fill" aria-hidden="true" />}
         {variant === 'track' && (
-          <span className="slider-grip-shade" aria-hidden="true"><span className="slider-grip-shade-cast"><span className="slider-grip-shade-text">{label}</span></span></span>
+          <span className="slider-grip-shade" aria-hidden="true">
+            <span className="slider-grip-shade-cast">
+              {/* the label's own grid, name and value, so both land on the real ones to the pixel */}
+              <span className="slider-label-left"><span className="slider-label-text"><span className="slider-label-name slider-grip-shade-text">{label}</span></span></span>
+              <span className="slider-value slider-grip-shade-valuebox">
+                <span className="slider-grip-shade-value">{numberValue}</span>
+                {!disabled && <span className="slider-step slider-grip-shade-ph"><span className="slider-step-btn" /><span className="slider-step-btn" /></span>}
+                {suffix && <span className="slider-suffix slider-grip-shade-ph">{suffix}</span>}
+              </span>
+            </span>
+          </span>
         )}
         <span className="slider-label-left">
           <span className={`slider-label-text${tag ? ' slider-label-text--tagged' : ''}`}>
