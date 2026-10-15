@@ -45,6 +45,16 @@ Newest first.
   pressed state (opacity .85) rounds differently by one level in places.
 - Light-mode HDR chips lose their 9-slice footprint mask (Chrome ignores it beside a mask-image); their edges are
   the floor.
+- **The inner glow, SDR too.** Mark, on hover: "a thin bright outline with a dark interior", and "there should STILL be
+  bottom rim". Three losses, measured on the centre line from the rim inward. (1) The SDR art shipped the single 3px
+  exponential, which falls off far faster than the LOG look he approved (the proto's fall sheet: 158 90 76 70 65 60
+  56 54 51 at 1px steps over #1a1a1a; the single exponential gave 164 87 65 54 46 40 36 33 31). The travel sprite and
+  rim pieces are re-rendered with the sheet's two-term 3px / 9px falloff (`gen_inner.py` `log9`: 161 88 72 64 58 53
+  49 46 44), SDR, light b and HDR alike. (2) The HDR planes lifted only the core (round 2's gamma law), so the inner
+  glow stayed at its SDR level beside a 605-nit rim: 1px in from the bottom rim it was 0.03 of the rim against SDR's
+  0.28 (hover). They now scale the SDR light in linear light: 0.21. (3) The streak was an opaque plane ON TOP of the
+  travelling light; on hover its last frame painted the floor over the bottom rim. The pill's streak is now baked
+  into its travel frames at the SDR opacities, the chip's sits under the light pieces.
 
 ---
 

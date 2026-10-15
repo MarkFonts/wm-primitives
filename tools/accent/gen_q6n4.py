@@ -9,8 +9,10 @@ DARK (acid, the black-floor rows of the accent proposal at the 1x falloff; Mark:
            flat (its x peak would squeeze into a hairline on a narrow chip; a PQ plane's brightness is not coverage,
            so the SDR flatten mask cannot correct it)
   rim      cap (47 frames), bot, top on the chip face (#1a1a1a), the 48-frame travel sprite on the pill face
-           (#0a0a0a), V_peak 1.9; the top as 5 fade frames (the SDR fade is an opacity)
-  streak   5 fade frames (the SDR .9 -> 0 fade), V_peak 2.0, on each face
+           (#0a0a0a); the top as 5 fade-in frames (the SDR fade is an opacity). The LOG inner glow (gen_inner 'log9':
+           the two-term 3px / 9px falloff of Mark's fall sheet) scaled in LINEAR light, one factor for the family:
+           the same shape as the SDR art, brighter (lin() below)
+  streak   5 frames at the SDR opacities (.9 at rest to .2 lit), on each face; the light pieces sit above it
   THE CAP: round 2's V_peaks put the dark rim at ~880 nits and the streak at ~990, past Mark's screen's ceiling
   (+400 over white, 605 nits; round 5); a plane brighter than the headroom is tone-mapped whole, floor included
   (a grey box). So each dark layer's V_peak is lowered until its peak is 605: the law lifts only the core, so the
@@ -72,6 +74,36 @@ def capped(A, W, vpk, floor, cap=None):
         lo, hi = (v, hi) if floor + gh.law_r2(A, W, v).max() <= cap else (lo, v)
     return gh.law_r2(A, W, lo)
 
+C_ACID = np.stack(gh.PAL)
+def lin(A, W, o=1.0):
+    """the SDR light itself, linearised: the gamma-encoded acid at alpha o * A, in nits. Scaling it is scaling the light,
+    so the shape -- the rim and the inner glow falling in from it -- is the SDR art's, only brighter. (Round 2's law
+    lifted the core in gamma terms and left the inner glow at its SDR level: beside a 605-nit rim it read as a thin
+    outline round a dark face, Mark's photo of the hero preview.)"""
+    return gh.to_nits((o * A)[..., None] * (W @ C_ACID))
+RIMS = ('rim-cap', 'rim-bot', 'rim-top', 'travel-pill')
+def rim_scale(cap, floor):
+    """one factor for the whole rim family (cap, bot, top, travel), so the chip's pieces meet without a seam"""
+    return (cap - floor) / max(float(lin(*get(f'q6n4-{nm}')).max()) for nm in RIMS)
+# the streak's SDR opacity, frame by frame: .9 at rest to .2 lit (accentButton.css); the light pieces sit ABOVE it
+STREAK_O = [.9 - .7 * i / 4 for i in range(5)]
+
+def travel_with_streak(cap, floor):
+    """the pill: the travel sprite with the streak BAKED IN, frame by frame, at the streak's SDR opacity for that frame's
+    p (max(.2, .9 - 1.2 p)), added in linear light as the SDR layers add. One opaque plane, so neither can cover the
+    other; one factor, so the pair is the SDR pair, brighter. Returns the frames (glow) and the per-frame footprint."""
+    A, W = get('q6n4-travel-pill'); As, Ws = get('q6n4-streak-pill')
+    H = 66; n = A.shape[0] // H; hs = As.shape[0]
+    fr, foot = [], []
+    for f in range(n):
+        p = f / (n - 1); o = max(.2, .9 - 1.2 * p)
+        a, w = A[f * H:(f + 1) * H], W[f * H:(f + 1) * H]
+        g = lin(a, w); g[H - hs:] += lin(As, Ws, o)
+        fa = a.copy(); fa[H - hs:] = np.maximum(fa[H - hs:], As * o)
+        fr.append(g); foot.append(fa)
+    k = (cap - floor) / max(float(x.max()) for x in fr)
+    return [x * k for x in fr], np.concatenate(foot, 0)
+
 fades = lambda g, n: [g * (1 - i / (n - 1)) for i in range(n)]
 ramp = lambda g, n: [g * (i / (n - 1)) for i in range(n)]                   # the top fades IN
 
@@ -81,14 +113,18 @@ def dark():
         A, W = get(f'q6n4-spill-{sh}')
         if sh == 'chip': A, W = flat_mid(A, 132), flat_mid(W, 132)
         peaks.append(emit(fades(capped(A, W, 1.35, DK), 9), DK, f'q6n4-hdr-dark-spill-{sh}'))
-    for sh, fl in (('pill', PILLFACE), ('chip', DK)):
+    for sh, fl in (('chip', DK),):     # the pill's streak is baked into its travel frames
         A, W = get(f'q6n4-streak-{sh}'); mask(A, f'q6n4-hdr-mask-streak-{sh}')
-        peaks.append(emit(fades(capped(A, W, 2.0, fl), 5), fl, f'q6n4-hdr-dark-streak-{sh}'))
-    for nm, fl in (('rim-cap', DK), ('rim-bot', DK), ('travel-pill', PILLFACE)):
+        k = (DARK_CAP - fl) / float(lin(A, W, .9).max())
+        peaks.append(emit([lin(A, W, o) * k for o in STREAK_O], fl, f'q6n4-hdr-dark-streak-{sh}'))
+    K = rim_scale(DARK_CAP, DK)
+    for nm, fl in (('rim-cap', DK), ('rim-bot', DK)):
         A, W = get(f'q6n4-{nm}'); mask(A, f'q6n4-hdr-mask-{nm}')
-        peaks.append(emit([capped(A, W, 1.9, fl)], fl, f'q6n4-hdr-dark-{nm}'))
+        peaks.append(emit([lin(A, W) * K], fl, f'q6n4-hdr-dark-{nm}'))
+    fr, foot = travel_with_streak(DARK_CAP, PILLFACE); mask(foot, 'q6n4-hdr-mask-travel-pill')
+    peaks.append(emit(fr, PILLFACE, 'q6n4-hdr-dark-travel-pill'))
     A, W = get('q6n4-rim-top'); mask(A, 'q6n4-hdr-mask-rim-top')
-    peaks.append(emit(ramp(capped(A, W, 1.9, DK), 5), DK, 'q6n4-hdr-dark-rim-top'))
+    peaks.append(emit(ramp(lin(A, W) * K, 5), DK, 'q6n4-hdr-dark-rim-top'))
     nits = gh.LABEL_NITS
     s = gh.write(gh.field(gh.ACID, nits), np.zeros((16, 16), np.float32), SHIP + 'q6n4-hdr-label.avif')
     gh.set_clli(SHIP + 'q6n4-hdr-label.avif', gh.clli_for(nits))
@@ -121,14 +157,18 @@ def light():
     for sh, (cap, mt, bh) in GEO_L.items():
         g = broad(cap, mt, bh, sh == 'chip')
         emit(fades(g, 9), gh.WHITE_FLOOR_NITS, f'q6n4-hdr-light-spill-{sh}')
-    for sh in ('pill', 'chip'):
+    for sh in ('chip',):
         A, W = get(f'q6n4-streak-{sh}')
-        emit(fades(gh.law_r2(A, W, 2.0), 5), INK, f'q6n4-hdr-light-streak-{sh}', P=gh.PEAK_L)
-    for nm in ('rim-cap', 'rim-bot', 'travel-pill'):
+        k = (gh.PEAK_L - INK) / float(lin(A, W, .9).max())
+        emit([lin(A, W, o) * k for o in STREAK_O], INK, f'q6n4-hdr-light-streak-{sh}')
+    K = rim_scale(gh.PEAK_L, INK)
+    for nm in ('rim-cap', 'rim-bot'):
         A, W = get(f'q6n4-{nm}')
-        emit([gh.law_r2(A, W, 1.9)], INK, f'q6n4-hdr-light-{nm}', P=gh.PEAK_L)
+        emit([lin(A, W) * K], INK, f'q6n4-hdr-light-{nm}')
+    fr, _ = travel_with_streak(gh.PEAK_L, INK)
+    emit(fr, INK, 'q6n4-hdr-light-travel-pill')
     A, W = get('q6n4-rim-top')
-    emit(ramp(gh.law_r2(A, W, 1.9), 5), INK, 'q6n4-hdr-light-rim-top', P=gh.PEAK_L)
+    emit(ramp(lin(A, W) * K, 5), INK, 'q6n4-hdr-light-rim-top')
 
 def light_sdr():
     """treatment b. The spill: the boosted spill (as the light-mode HDR's SDR twin) as an apple coloured shadow."""
