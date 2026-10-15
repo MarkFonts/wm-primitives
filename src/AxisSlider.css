@@ -751,7 +751,7 @@
   /* ── the grip: the handle's grab mark (#114, revised) ────────────────────────
      At rest a quiet GREY pill (--text-dim: the label's own ink at its dimmest, so it is a
      grey on both --surface-hi fills in light and dark with no new token), 4px wide, rounded
-     ends, 5px off the top and bottom of the label's padding box (the bar's 1px border makes that 6px from its edge), 18px of the 30px bar, 60%, so the top and bottom insets are equal. The accent color
+     ends, 4px off the top and bottom of the label's padding box (the bar's 1px border makes that 5px from its edge), a 20px pill in the 28px padding box, so the top and bottom insets are equal. The accent color
      (--accent, then --signal) is the state, not the resting look: :hover, engaged and
      :focus-within only.
      Same position math as the fill: --pct in the label's padding box, min() keeping the
@@ -764,7 +764,7 @@
      by the whole name, so the neighbouring letter leaked a dark band into the grip.) No inversion, no halo.
      The locked-above overlay that used to live on ::before is a background layer of the label
      now. No hit area is added: the range input owns the pointer. */
-  .slider-row--track { --grip-w: 4px; --grip-c: var(--text-dim); --grip-in: 6px; --grip-v: 5px; --name-c: color-mix(in srgb, var(--text) calc(var(--a-2, .62) * 100%), var(--surface)); --fill-r: var(--radius, 6px); --fill-c: var(--surface-hi); }
+  .slider-row--track { --grip-w: 4px; --grip-c: var(--text-dim); --grip-in: 6px; --grip-v: 4px; --name-c: color-mix(in srgb, var(--text) calc(var(--a-2, .62) * 100%), var(--surface)); --fill-r: var(--radius, 6px); --fill-c: var(--surface-hi); }
   .slider-row--track:hover,
   .slider-row--track.slider-row--engaged,
   .slider-row--track:focus-within { --grip-w: 6px; --grip-c: var(--accent, var(--signal)); --fill-c: color-mix(in srgb, var(--surface-hi), var(--text) 8%); }

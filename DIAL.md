@@ -176,7 +176,7 @@ nothing to keep in sync, and it cannot drift from the thumb because there is no
 thumb.
 
 **The grip.** A `track` bar carries one grab mark: a quiet grey pill, 4px wide with rounded
-ends, 6px off top and bottom of the 30px bar (5px inside its 1px border, so an 18px pill), sitting INSIDE the fill with its right edge 6px in from the fill's end (clamped 6px from the bar's left edge at 0, so at 100 it stays 6px inside the right edge); the fill's leading end is rounded with the bar's radius, and one step lighter while the row is live. At rest it is `--text-dim` (the label's own
+ends, 5px off top and bottom of the 30px bar (4px inset plus its 1px border, a 20px pill), sitting INSIDE the fill with its right edge 6px in from the fill's end (clamped 6px from the bar's left edge at 0, so at 100 it stays 6px inside the right edge); the fill's leading end is rounded with the bar's radius, and one step lighter while the row is live. At rest it is `--text-dim` (the label's own
 ink at its dimmest, a grey on both `--surface-hi` fills in either theme, no new token). The color
 (`--accent`, then `--signal`) appears only on `:hover`, engaged and `:focus-within`, where it also
 widens to 6px. It is the `::after` of `.slider-label`, placed from `--pct` in the same padding box the fill

@@ -23,7 +23,7 @@
 }
 .fit-switch {
   flex: 1 1 7rem;               /* room for the longest label on one line */
-  height: 30px;                 /* the dial bar's height, so a rail of both is one rhythm */
+  height: 32px;                 /* the dial bar's height, so a rail of both is one rhythm */
   border-radius: var(--radius, 6px);
   corner-shape: superellipse(var(--corner-k, 1.2));
   background: var(--surface);
