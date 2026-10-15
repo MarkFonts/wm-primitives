@@ -12,6 +12,38 @@ Newest first.
 
 ---
 
+## 2026-10-14 -- q5 in HDR (dark), and q5's light mode
+
+**Mark, on the round-2 accent proposal: "underlit looks magical, ship it", and "text needs HDR too".** On an HDR
+screen, in the dark theme, q5's spill, its rim, and its label go past SDR white. SDR screens are unchanged
+pixel for pixel (measured against main on the system page and in ReCal).
+
+- **Each lit layer is an opaque PQ image whose value is the light** (BT.2020, ST 2084): floor + glow per pixel,
+  in absolute nits, the glow being the SDR art's own light with its core lifted (`tools/accent/gen_hdr.py`, from
+  the proposal's route 2b; q5 keeps the original falloff). Peaks: spill 398 nits, rim 589. A mask only bounds
+  the footprint. The rim is a rendered image now in HDR, carried on the label's `::before`, because the face
+  already uses `::before` and the spill `::after`.
+- **The label is a mask over an acid PQ field** (`background-clip: text`, as icon.css paints an active mark):
+  #eeff41 / display-p3 0.9333 1 0.2549 at 589 nits on its peak channel, the light's own peak, so the text and
+  the light read as one source. PQ 0.6943, 10-bit code 710, under the house bright level (1216, PQ 0.7732).
+- **What it cost, measured.** Chrome clamps `plus-lighter` at SDR white, so the layers are opaque and normal-blended;
+  PQ with alpha decodes transparent, so they carry no alpha; Chrome reads MaxCLL as the content's maximum and clips
+  there, so every file's `clli` box carries its true peak (sips stamps 1000). And any HDR layer under a transform
+  or an opacity below 1 goes through a surface that clamps to SDR, so in HDR the spill does not scale: hover and
+  pressed are 17 pre-rendered frames (scale .9 to 1.1, the low ones dimmed to .85) stepped by a registered
+  `--ab-s` over the same .8s, and pressed drops by `top: 1px` instead of a translate.
+- **The floor is baked: #1a1a1a**, which is every ground q5 sits on (ReCal's rail and Try bar are `--surface`,
+  and so is the face; the docs stage pins it). An opaque plane also covers what is under it, where the SDR light
+  let it show through: a host stacks content inside the spill's reach above the button. ReCal's OFL line under
+  Download needs that; the Try bar's neighbors already sit above the chips.
+- **Light mode, SDR only: ink on paper.** In the light theme q5 is an ink face (#161616) with the spill re-rendered
+  as an apple (#96d500) colored shadow, an apple rim inside the face, and an apple label (`gen_light.py`, treatment
+  b). It was a white face with a pale acid label, nearly invisible on a light ground. No HDR in light mode yet: the
+  white-floor planes are still being reworked. Both themes are gated as color.css gates them, so a host that is
+  dark whatever the OS says has to say so (`data-theme="dark"`).
+
+---
+
 ## 2026-10-14 -- the accent buttons
 
 **Mark: ReCal ships "Q5" as its accent button, and "Q6 to N4" is the other option; "both buttons
