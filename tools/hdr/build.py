@@ -1,5 +1,6 @@
 """One entry point for the HDR light sets:  tools/hdr/build.sh <target> [--ship-avif] [--lossless-report]
 
+  q6n4-dark, q6n4-light   q6n4's light as transparent JXL (the AVIF sets are gen_q6n4.py's, unchanged)
   q5-dark    q5's dark light as transparent JXL (the AVIF dark set is gen_hdr.py's, unchanged)
   q5-light   q5's light-mode light: the transparent JXL set (shipped) and, from the SAME float arrays, the opaque AVIF
              fallback (written to tools/accent/out/hdr-avif/; --ship-avif replaces the shipped AVIFs, which gen_hdr.py
@@ -74,9 +75,49 @@ def q5_dark(ship_avif=False, lossless_report=False):
     t = step(f'encode {len(jobs)} files in parallel ({sum(r[7] != "skipped" for r in rows)} run, the rest unchanged)', t)
     return rows
 
+def q6n4(theme):
+    """q6n4's light, dark or light, as transparent JXL: the same planes as gen_q6n4.py's AVIF sets (the spill's 9 fade
+    frames, the chip's streak frames, the rim cap / bot / top, the 48-frame travel sprite with the pill's streak baked
+    in), each as the light's color at its peak with the coverage hdr.coverage() gives over its floor"""
+    t = time.time()
+    import gen_q6n4 as q, gen_hdr as gh
+    t = step('load the capture (cap.npz)', t)
+    L = []                                                       # (name, frames, floor)
+    if theme == 'dark':
+        cap, F_sp, F_in = q.DARK_CAP, q.DK, q.DK
+        for sh in ('pill', 'chip'):
+            A, W = q.get(f'q6n4-spill-{sh}')
+            if sh == 'chip': A, W = q.flat_mid(A, 132), q.flat_mid(W, 132)
+            L.append((f'spill-{sh}', q.fades(q.capped(A, W, 1.35, q.DK), 9), F_sp))
+    else:
+        cap, F_sp, F_in = gh.PEAK_L, gh.WHITE_FLOOR_NITS, q.INK
+        for sh, (c, mt, bh) in q.GEO_L.items():
+            L.append((f'spill-{sh}', q.fades(q.broad(c, mt, bh, sh == 'chip'), 9), F_sp))
+    A, W = q.get('q6n4-streak-chip'); k = (cap - F_in) / float(q.lin(A, W, .9).max())
+    L.append(('streak-chip', [q.lin(A, W, o) * k for o in q.STREAK_O], F_in))
+    K = q.rim_scale(cap, F_in)
+    for nm in ('rim-cap', 'rim-bot'):
+        L.append((nm, [q.lin(*q.get(f'q6n4-{nm}')) * K], F_in))
+    L.append(('rim-top', q.ramp(q.lin(*q.get('q6n4-rim-top')) * K, 5), F_in))
+    fr, _ = q.travel_with_streak(cap, F_in); L.append(('travel-pill', fr, F_in))
+    t = step(f'render the light ({len(L)} layers, {sum(len(f) for _, f, _ in L)} frames)', t)
+    acid = gh.to_nits(gh.PAL[0]); acid = acid / acid.max(); rng = np.random.default_rng(1330 + (theme == 'light')); px = {}
+    for n, frames, fl in L:
+        g = np.clip(np.concatenate(frames, 0), 0, None); gmax = g.max(-1); pk = fl + float(gmax.max())
+        unit = np.where(gmax[..., None] > 1e-6, g / np.maximum(gmax, 1e-9)[..., None], acid)
+        px[n] = (hdr.rgba(unit * pk, hdr.coverage(gmax, fl, pk), rng=rng), pk)
+    t = step('quantise + dither (16-bit PQ RGBA)', t)
+    jobs = [hdr.Jxl(p, os.path.join(gh.SHIP, f'q6n4-jxl-{theme}-{n}.jxl'), pk) for n, (p, pk) in px.items()]
+    rows, secs = hdr.run(jobs)
+    t = step(f'encode {len(jobs)} files in parallel ({sum(r[7] != "skipped" for r in rows)} run, the rest unchanged)', t)
+    return rows
+
 if __name__ == '__main__':
     target = sys.argv[1] if len(sys.argv) > 1 else 'q5-light'
     T = time.time()
-    rows = {'q5-light': q5_light, 'q5-dark': q5_dark}[target]('--ship-avif' in sys.argv, '--lossless-report' in sys.argv)
+    targets = {'q5-light': lambda: q5_light('--ship-avif' in sys.argv, '--lossless-report' in sys.argv),
+               'q5-dark': lambda: q5_dark(False, '--lossless-report' in sys.argv),
+               'q6n4-dark': lambda: q6n4('dark'), 'q6n4-light': lambda: q6n4('light')}
+    rows = targets[target]()
     print(f'\n{"step":64s} {"time":>7s}'); [print(f'{n:64s} {s:6.2f}s') for n, s in steps]
     print(f'{"total (wall)":64s} {time.time() - T:6.2f}s\n'); print(hdr.table(rows))

@@ -1006,3 +1006,71 @@
     background-size: 100% 100%, 100% 100%;
   }
 }
+
+/* ─── Q6 -> N4 in HDR, JPEG XL ───
+   As q5's: where the browser decodes JPEG XL (html.wm-jxl), q6n4's light is TRANSPARENT -- light only, straight
+   alpha, no floor and no footprint mask, so it composites on any ground (wm-primitives#133). The same planes as the
+   AVIF set above (tools/hdr/build.sh q6n4-dark / q6n4-light, from gen_q6n4.py's own layers): the spill's 9 fade
+   frames, the chip's 5 streak frames, the rim cap / bottom / top, and the 48-frame travel sprite with the pill's
+   streak baked in at its SDR opacities. Each is the light's color at the layer's true peak with the coverage that
+   puts it at the AVIF plane's floor + glow over that plane's ground (hdr.py coverage()): the spill over the page
+   (#1a1a1a dark, white light), the in-face light over the face. The look's own masks stay (the chip's clip-edge
+   fade, the bottom edge opening from the centre); everything else is the AVIF rules': the frame stepping, one frame
+   at a time, `top: 1px`, the in-face light inside the face under the label, the acid label field. data-hdr="avif"
+   keeps a button on the AVIF path. Without wm-jxl none of this matches. */
+@media (dynamic-range: high) and (prefers-color-scheme: dark) {
+  :root.wm-jxl:not([data-theme="light"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"])[data-shape="chip"]::before {
+    border-image-source: url('../assets/accent/q6n4-jxl-dark-spill-chip.jxl'); background: none;   /* one 9-slice: a column under it would add its light twice */
+  }
+  :root.wm-jxl:not([data-theme="light"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"])[data-shape="pill"]::before {
+    border-image-source: url('../assets/accent/q6n4-jxl-dark-spill-pill.jxl'); background: none;   /* one 9-slice: a column under it would add its light twice */
+  }
+  :root.wm-jxl:not([data-theme="light"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__fr .wm-accent__sa { background-image: url('../assets/accent/q6n4-jxl-dark-travel-pill.jxl'); -webkit-mask-image: none; mask-image: none; }
+  :root.wm-jxl:not([data-theme="light"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__cap .wm-accent__sa { background-image: url('../assets/accent/q6n4-jxl-dark-rim-cap.jxl'); -webkit-mask-image: none; mask-image: none; }
+  :root.wm-jxl:not([data-theme="light"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__bot { background-image: url('../assets/accent/q6n4-jxl-dark-rim-bot.jxl');
+    -webkit-mask-image: var(--ab-m), var(--ab-e), var(--ab-v); mask-image: var(--ab-m), var(--ab-e), var(--ab-v); }
+  :root.wm-jxl:not([data-theme="light"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__top { background-image: url('../assets/accent/q6n4-jxl-dark-rim-top.jxl'); -webkit-mask: none; mask: none; }
+  :root.wm-jxl:not([data-theme="light"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__face::after { background-image: url('../assets/accent/q6n4-jxl-dark-streak-chip.jxl'); -webkit-mask: none; mask: none; }
+}
+@media (dynamic-range: high) {
+  :root.wm-jxl[data-theme="dark"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"])[data-shape="chip"]::before {
+    border-image-source: url('../assets/accent/q6n4-jxl-dark-spill-chip.jxl'); background: none;   /* one 9-slice: a column under it would add its light twice */
+  }
+  :root.wm-jxl[data-theme="dark"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"])[data-shape="pill"]::before {
+    border-image-source: url('../assets/accent/q6n4-jxl-dark-spill-pill.jxl'); background: none;   /* one 9-slice: a column under it would add its light twice */
+  }
+  :root.wm-jxl[data-theme="dark"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__fr .wm-accent__sa { background-image: url('../assets/accent/q6n4-jxl-dark-travel-pill.jxl'); -webkit-mask-image: none; mask-image: none; }
+  :root.wm-jxl[data-theme="dark"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__cap .wm-accent__sa { background-image: url('../assets/accent/q6n4-jxl-dark-rim-cap.jxl'); -webkit-mask-image: none; mask-image: none; }
+  :root.wm-jxl[data-theme="dark"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__bot { background-image: url('../assets/accent/q6n4-jxl-dark-rim-bot.jxl');
+    -webkit-mask-image: var(--ab-m), var(--ab-e), var(--ab-v); mask-image: var(--ab-m), var(--ab-e), var(--ab-v); }
+  :root.wm-jxl[data-theme="dark"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__top { background-image: url('../assets/accent/q6n4-jxl-dark-rim-top.jxl'); -webkit-mask: none; mask: none; }
+  :root.wm-jxl[data-theme="dark"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__face::after { background-image: url('../assets/accent/q6n4-jxl-dark-streak-chip.jxl'); -webkit-mask: none; mask: none; }
+}
+@media (dynamic-range: high) and (prefers-color-scheme: light) {
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"])[data-shape="chip"]::before {
+    border-image-source: url('../assets/accent/q6n4-jxl-light-spill-chip.jxl'); background: none;   /* one 9-slice: a column under it would add its light twice */
+  }
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"])[data-shape="pill"]::before {
+    border-image-source: url('../assets/accent/q6n4-jxl-light-spill-pill.jxl'); background: none;   /* one 9-slice: a column under it would add its light twice */
+  }
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__fr .wm-accent__sa { background-image: url('../assets/accent/q6n4-jxl-light-travel-pill.jxl'); -webkit-mask-image: none; mask-image: none; }
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__cap .wm-accent__sa { background-image: url('../assets/accent/q6n4-jxl-light-rim-cap.jxl'); -webkit-mask-image: none; mask-image: none; }
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__bot { background-image: url('../assets/accent/q6n4-jxl-light-rim-bot.jxl');
+    -webkit-mask-image: var(--ab-m), var(--ab-e), var(--ab-v); mask-image: var(--ab-m), var(--ab-e), var(--ab-v); }
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__top { background-image: url('../assets/accent/q6n4-jxl-light-rim-top.jxl'); -webkit-mask: none; mask: none; }
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__face::after { background-image: url('../assets/accent/q6n4-jxl-light-streak-chip.jxl'); -webkit-mask: none; mask: none; }
+}
+@media (dynamic-range: high) {
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"])[data-shape="chip"]::before {
+    border-image-source: url('../assets/accent/q6n4-jxl-light-spill-chip.jxl'); background: none;   /* one 9-slice: a column under it would add its light twice */
+  }
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"])[data-shape="pill"]::before {
+    border-image-source: url('../assets/accent/q6n4-jxl-light-spill-pill.jxl'); background: none;   /* one 9-slice: a column under it would add its light twice */
+  }
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__fr .wm-accent__sa { background-image: url('../assets/accent/q6n4-jxl-light-travel-pill.jxl'); -webkit-mask-image: none; mask-image: none; }
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__cap .wm-accent__sa { background-image: url('../assets/accent/q6n4-jxl-light-rim-cap.jxl'); -webkit-mask-image: none; mask-image: none; }
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__bot { background-image: url('../assets/accent/q6n4-jxl-light-rim-bot.jxl');
+    -webkit-mask-image: var(--ab-m), var(--ab-e), var(--ab-v); mask-image: var(--ab-m), var(--ab-e), var(--ab-v); }
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__top { background-image: url('../assets/accent/q6n4-jxl-light-rim-top.jxl'); -webkit-mask: none; mask: none; }
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q6n4"]:not([data-hdr="avif"]) .wm-accent__face::after { background-image: url('../assets/accent/q6n4-jxl-light-streak-chip.jxl'); -webkit-mask: none; mask: none; }
+}
