@@ -378,7 +378,7 @@ export function AxisSlider({
       /* HYSTERESIS, and this is the bug that made "drag from anywhere" not work. Deciding
          on the FIRST sample past 3px, then killing the gesture outright when it looked
          vertical, meant a finger that rolled slightly on the way down -- which is most of
-         them, on a 32px bar -- lost the drag before it began, with no way back. What was
+         them, on a 30px bar -- lost the drag before it began, with no way back. What was
          left was whatever the native input does: jump on tap, drag only from the thumb.
          So: wait for 6px of real movement, and only concede to the scroller when the
          gesture is CLEARLY vertical (1.5x). Anything ambiguous stays ours, and a gesture
