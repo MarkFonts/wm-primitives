@@ -60,6 +60,20 @@ Newest first.
 
 ---
 
+## 2026-10-14 -- the track bar is 30px, and two icons join the face
+
+**ReCal asked for the `track` bar at 30px so its pills sit on the 3px line; it carried a local override until now.**
+`.slider-label` `min-height` 32px to 30px, in the base rule and the coarse-pointer resting shelf (the row stays 48,
+the engaged bar stays 48). The grip stays a 20px pill (Mark's call): the label has a 1px border, so the padding box is 28 and
+`--grip-v` goes 5px to 4px, which is 5px from the bar's edge. Top and bottom insets are equal, measured at DPR 4. Alignment is untouched: the 29px line is a
+horizontal left edge (16 rail + 1 border + 12 padding), and a height does not move it. `Fitting.css` `.fit-switch`
+is still 32px and its comment says it matches the dial bar; a follow-up. DIAL.md and GESTURES.md said 32 and now say 30.
+
+**`text_increase` and `format_letter_spacing` are in the Material Symbols subset** (96 ligatures, 66,796 bytes, cut with
+`scripts/cut-icon-subset.py`; `?v=96` in `src/icon.css`). Nothing draws them yet.
+
+---
+
 ## 2026-10-14 -- q5 in HDR, and q5's light mode
 
 **Mark, on the round-2 accent proposal: "underlit looks magical, ship it", and "text needs HDR too".** On an HDR

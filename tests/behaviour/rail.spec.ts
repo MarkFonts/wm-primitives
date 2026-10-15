@@ -120,7 +120,7 @@ for (const host of HOSTS.filter(h => h.gestures !== false && h.rows?.length)) fo
         test.skip(cfg.variant !== 'track', 'engagement is the track variant\'s design')
         const row = sizeRow(page); const r = range(row)
         const rest = await heights(row)
-        expect(rest.row).toBe(48); expect(rest.bar).toBe(32)
+        expect(rest.row).toBe(48); expect(rest.bar).toBe(30)
         const p = await at(r, 0.5)
         const gesture = touchDrag(page, r, [p, { x: p.x + 20, y: p.y }, { x: p.x + 40, y: p.y }], { hold: 600 })
         await page.waitForTimeout(300)
@@ -133,7 +133,7 @@ for (const host of HOSTS.filter(h => h.gestures !== false && h.rows?.length)) fo
         await page.waitForTimeout(1900)
         expect(await engaged(row), 'released after 3s').toBe(false)
         const after = await heights(row)
-        expect(after.row).toBe(48); expect(after.bar).toBe(32)
+        expect(after.row).toBe(48); expect(after.bar).toBe(30)
       })
     })
 
