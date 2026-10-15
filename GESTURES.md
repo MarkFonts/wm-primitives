@@ -23,7 +23,7 @@ Every threshold in one place, so a test and the code cannot drift on a constant.
 | concede to the scroller when | **dy > 1.5 × dx** | same block, three times: rail, field, stepper |
 | engaged bar holds after lift | **3000ms** | `release()` |
 | stepper hold: first repeat after / then every | **400ms / 60ms** | `startStep()` |
-| coarse-pointer row / resting bar / engaged bar | **48 / 32 / 48px** | `AxisSlider.css` `@media (pointer: coarse)` |
+| coarse-pointer row / resting bar / engaged bar | **48 / 30 / 48px** | `AxisSlider.css` `@media (pointer: coarse)` |
 | input inset inside the resting bar | **3px top, 5px bottom** | same — finger aims with its visible top edge |
 | reference marker clamp from either end | **5px** | `clamp(5px, %, calc(100% − 5px))` |
 | shift-arrow coarse step | **×10** | field `onKeyDown` |
@@ -74,7 +74,7 @@ for by the platform (G18). Every rule in this section is for **touch and pen**
 | id | gesture | promise | commit |
 | --- | --- | --- | --- |
 | G11 | any press on the row, field, or stepper | the bar grows to fill the row while the pointer is down, with **no timer running** — a touch that is still happening cannot time out | `d14ae6a` |
-| G12 | lift | the bar stays full for 3000ms, then returns to 32px | `0a0429c` |
+| G12 | lift | the bar stays full for 3000ms, then returns to 30px | `0a0429c` |
 | G13 | at every moment of G11–G12 | the **row is 48px**; nothing above or below it moves. Only the bar and the input inset change | `0a0429c` |
 | G14 | a second press inside the 3000ms | the timer is cleared, not restarted-on-top; the bar never blinks | `d14ae6a` |
 | G15 | `prefers-reduced-motion: reduce` | the bar changes size without a transition | `0a0429c` |

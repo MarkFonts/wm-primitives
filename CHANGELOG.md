@@ -12,6 +12,20 @@ Newest first.
 
 ---
 
+## 2026-10-14 -- the track bar is 30px, and two icons join the face
+
+**ReCal asked for the `track` bar at 30px so its pills sit on the 3px line; it carried a local override until now.**
+`.slider-label` `min-height` 32px to 30px, in the base rule and the coarse-pointer resting shelf (the row stays 48,
+the engaged bar stays 48). The grip keeps `--grip-v: 5px`: the label has a 1px border, so that is 6px from the bar's
+edge as before, and the pill goes from 20px to 18px (the padding box is 28, not 30, so a 20px pill would take
+`--grip-v: 4px`). Top and bottom insets are equal, measured at DPR 4. Alignment is untouched: the 29px line is a
+horizontal left edge (16 rail + 1 border + 12 padding), and a height does not move it. `Fitting.css` `.fit-switch`
+follows to 30px, since its comment says it matches the dial bar. DIAL.md and GESTURES.md said 32 and, in DIAL.md's case,
+a 6px inset that was already right only counted from the edge; both now say what is drawn.
+
+**`text_increase` and `format_letter_spacing` are in the Material Symbols subset** (96 ligatures, 66,796 bytes, cut with
+`scripts/cut-icon-subset.py`; `?v=96` in `src/icon.css`). Nothing draws them yet.
+
 ## 2026-10-14 -- the accent buttons
 
 **Mark: ReCal ships "Q5" as its accent button, and "Q6 to N4" is the other option; "both buttons

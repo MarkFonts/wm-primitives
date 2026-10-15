@@ -566,7 +566,7 @@
   .slider-row--track .slider-label {
     position: relative; z-index: 1;
     pointer-events: none;                     /* the bar underneath owns the press */
-    min-height: 32px; padding: 0 var(--spacing-04, 12px);
+    min-height: 30px; padding: 0 var(--spacing-04, 12px);
     border-radius: var(--radius, 6px);
     corner-shape: superellipse(var(--corner-k, 1.2));
     background:
@@ -621,7 +621,7 @@
   @media (pointer: coarse) {
     .slider-row--track { min-height: 48px; justify-content: center; }
     .slider-row--track .slider-label {
-      min-height: 32px;
+      min-height: 30px;
       transition: min-height var(--dur-fast, .12s) ease;
     }
     .slider-row--track .slider-track-wrap { top: 3px; bottom: 5px; }
@@ -751,7 +751,7 @@
   /* ── the grip: the handle's grab mark (#114, revised) ────────────────────────
      At rest a quiet GREY pill (--text-dim: the label's own ink at its dimmest, so it is a
      grey on both --surface-hi fills in light and dark with no new token), 4px wide, rounded
-     ends, 7px off the top and bottom -- 18px of the 32px bar, about 55%. The accent color
+     ends, 5px off the top and bottom of the label's padding box (the bar's 1px border makes that 6px from its edge), 18px of the 30px bar, 60%, so the top and bottom insets are equal. The accent color
      (--accent, then --signal) is the state, not the resting look: :hover, engaged and
      :focus-within only.
      Same position math as the fill: --pct in the label's padding box, min() keeping the

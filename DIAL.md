@@ -176,14 +176,14 @@ nothing to keep in sync, and it cannot drift from the thumb because there is no
 thumb.
 
 **The grip.** A `track` bar carries one grab mark: a quiet grey pill, 4px wide with rounded
-ends, 6px off top and bottom of the 32px bar, sitting INSIDE the fill with its right edge 6px in from the fill's end (clamped 6px from the bar's left edge at 0, so at 100 it stays 6px inside the right edge); the fill's leading end is rounded with the bar's radius, and one step lighter while the row is live. At rest it is `--text-dim` (the label's own
+ends, 6px off top and bottom of the 30px bar (5px inside its 1px border, so an 18px pill), sitting INSIDE the fill with its right edge 6px in from the fill's end (clamped 6px from the bar's left edge at 0, so at 100 it stays 6px inside the right edge); the fill's leading end is rounded with the bar's radius, and one step lighter while the row is live. At rest it is `--text-dim` (the label's own
 ink at its dimmest, a grey on both `--surface-hi` fills in either theme, no new token). The color
 (`--accent`, then `--signal`) appears only on `:hover`, engaged and `:focus-within`, where it also
 widens to 6px. It is the `::after` of `.slider-label`, placed from `--pct` in the same padding box the fill
 is painted in, so the two cannot drift, at `z-index: -1`
 inside the label's isolated stacking context: above the fill, behind the text. There is no text
 halo and no inversion (tried and dropped): the text keeps its color, and a letter crossing the grip throws a drop shadow onto it: `aria-hidden` spans (`.slider-grip-shade` > `-cast` > the label's own grid, rendered by `AxisSlider.tsx` for `track`) repeat the name and the displayed value in their own colors (invisible): the cast layer is clipped to the grip's rect first, so only glyph pixels inside the grip cast a `drop-shadow`, and the shade's own clip keeps that shadow inside the grip (a `text-shadow` leaked the neighbouring letter's shadow into the grip). The shadow is `drop-shadow(0 1px 2px .8) drop-shadow(0 3px 12px .65)` (white in light), literal `rgba(0,0,0,...)`/white (no shadow token exists), the one literal in the grip. The name keeps the bar's 12px padding (the parked grip sits inside it), and a bar too narrow for name, value and a slot at each end (measured in `AxisSlider.tsx`, `data-compact`) shows the grip only while the row is live. The grip takes no pointer (the range input
-owns the whole bar) and adds nothing to layout: row 48 and bar 32 are unchanged. Not on the other
+owns the whole bar) and adds nothing to layout: row 48 and bar 30 are unchanged. Not on the other
 variants.
 
 Two features live on the range track and must be painted onto the bar in `track`, or they
