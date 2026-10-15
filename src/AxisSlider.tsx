@@ -225,13 +225,14 @@ export function AxisSlider({
   useEffect(() => () => setScrub(false), [])
   // The host contract, checked once per page in dev: HOWTO.md's two silent failures.
   useEffect(() => { if (rowRef.current) checkHostContract(rowRef.current) }, [])
+  const [barW, setBarW] = useState(0)
   /* COMPACT: a track bar too narrow for the name, the value and a grip slot at each end shows the grip only while the row is live (AxisSlider.css reads data-compact). Measured, not guessed:
      the name's own width is not available to CSS. */
   useEffect(() => {
     const row = rowRef.current; if (!row || variant !== 'track') return
     const bar = row.querySelector<HTMLElement>('.slider-label'), name = row.querySelector<HTMLElement>('.slider-label-name'), val = row.querySelector<HTMLElement>('.slider-value')
     if (!bar || !name || !val) return
-    const measure = () => row.toggleAttribute('data-compact', bar.clientWidth < 12 + name.offsetWidth + 6 + val.offsetWidth + 20)
+    const measure = () => { row.toggleAttribute('data-compact', bar.clientWidth < 12 + name.offsetWidth + 6 + val.offsetWidth + 20); setBarW(bar.clientWidth) }
     const ro = new ResizeObserver(measure); ro.observe(bar); ro.observe(val); measure()
     return () => ro.disconnect()
   }, [variant, label])
@@ -408,6 +409,9 @@ export function AxisSlider({
   // custom property on every row rather than a second code path for one variant.
   const shownValue = isAuto ? (autoValue ?? (min + max) / 2) : (value as number)
   const valuePct = Math.max(0, Math.min(100, ((shownValue - min) / (max - min)) * 100))
+  // EMPTY: a fill under 3px is not a fill, and the grip, clamped to the bar's left end, sits on
+  // the host's icon there. Both hide until the value moves clear (AxisSlider.css reads data-empty).
+  const empty = variant === 'track' && barW > 0 && valuePct * barW / 100 < 3
 
   return (
     <div
@@ -415,6 +419,7 @@ export function AxisSlider({
       className={`slider-row${disabled ? ' slider-row--off' : ''}${variant !== 'default' ? ` slider-row--${variant}` : ''}${field === 'box' ? ' slider-row--boxed' : ''}${engaged ? ' slider-row--engaged' : ''}`}
       onWheel={onWheel}
       style={{ '--pct': `${valuePct}%` } as CSSProperties}
+      data-empty={empty || undefined}
     >
       {hintPos && createPortal(
         <div className="slider-auto-hint" style={{ top: hintPos.top, left: hintPos.left }}>
