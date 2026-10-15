@@ -414,13 +414,51 @@
   :root[data-theme="light"] .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab svg { color: var(--ab-acid); }
 }
 
+/* ─── Q5 in HDR (dark), JPEG XL ───
+   The dark light as transparent JXL, as the light one below: the same planes as the AVIF set above (the shipped
+   spill's footprint at 398 nits, the rim at 589, the 17 frames), as the light's colour at its peak with the same
+   coverage (hdr.py coverage()), no floor and no mask, so it sits on any ground (tools/hdr/build.sh q5-dark).
+   Everything else is the AVIF dark rules'. */
+@media (dynamic-range: high) and (prefers-color-scheme: dark) {
+  :root.wm-jxl:not([data-theme="light"]) .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="pill"]::after {
+    background: url('../assets/accent/q5-jxl-dark-pill.jxl') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
+    -webkit-mask-image: none; mask-image: none;
+  }
+  :root.wm-jxl:not([data-theme="light"]) .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="chip"]::after {
+    border-image-source: url('../assets/accent/q5-jxl-dark-chip.jxl'); background: none;
+    -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv);
+  }
+  :root.wm-jxl:not([data-theme="light"]) .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="pill"] .wm-accent__lab::before {
+    background: url('../assets/accent/q5-jxl-dark-rim-pill.jxl') 0 0 / 100% 100% no-repeat; -webkit-mask: none; mask: none;
+  }
+  :root.wm-jxl:not([data-theme="light"]) .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="chip"] .wm-accent__lab::before {
+    border-image-source: url('../assets/accent/q5-jxl-dark-rim-chip.jxl'); background: none; -webkit-mask-box-image: none;
+  }
+}
+@media (dynamic-range: high) {
+  :root.wm-jxl[data-theme="dark"] .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="pill"]::after {
+    background: url('../assets/accent/q5-jxl-dark-pill.jxl') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
+    -webkit-mask-image: none; mask-image: none;
+  }
+  :root.wm-jxl[data-theme="dark"] .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="chip"]::after {
+    border-image-source: url('../assets/accent/q5-jxl-dark-chip.jxl'); background: none;
+    -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv);
+  }
+  :root.wm-jxl[data-theme="dark"] .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="pill"] .wm-accent__lab::before {
+    background: url('../assets/accent/q5-jxl-dark-rim-pill.jxl') 0 0 / 100% 100% no-repeat; -webkit-mask: none; mask: none;
+  }
+  :root.wm-jxl[data-theme="dark"] .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="chip"] .wm-accent__lab::before {
+    border-image-source: url('../assets/accent/q5-jxl-dark-rim-chip.jxl'); background: none; -webkit-mask-box-image: none;
+  }
+}
+
 /* ─── Q5 in HDR (light), JPEG XL ───
    Where the browser decodes JPEG XL (html.wm-jxl, set by src/jxl.js), the light is TRANSPARENT: light only, straight
    alpha, no baked floor and no mask, so it composites on ANY ground with no box (wm-primitives#133). Same light as the
    AVIF set above -- broad 300 at the +200 step, peak 405 nits, acid, the 17 state frames stepped from --ab-s, the rim
-   inside the ink face -- encoded as its colour at the peak with coverage alpha = glow / (peak - floor), so over the
-   ground it was baked for it composites to the AVIF plane's floor + glow, and over any other ground it is the same
-   light. Dithered alpha (8-bit steps); JXL distance 1 / alpha distance 1 (tools/hdr/build.sh q5-light). Everything
+   inside the ink face -- encoded as its colour at the peak with the coverage that, composited in the page's
+   gamma-encoded space, puts it at the AVIF plane's floor + glow over the ground that plane was baked for
+   (tools/hdr/hdr.py coverage()); over any other ground it is the same light. Dithered alpha (8-bit steps); JXL distance 1 / alpha distance 1 (tools/hdr/build.sh q5-light). Everything
    else is the AVIF rules': the frames, `top: 1px`, no transform or opacity on the light, the label above it, the acid
    label field. The button keeps its ink ground (the AVIF path drops it for its opaque plane). data-hdr="avif" on a
    button keeps it on the AVIF path (the docs' side-by-side). Without wm-jxl none of this matches. */

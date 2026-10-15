@@ -1,5 +1,6 @@
 """One entry point for the HDR light sets:  tools/hdr/build.sh <target> [--ship-avif] [--lossless-report]
 
+  q5-dark    q5's dark light as transparent JXL (the AVIF dark set is gen_hdr.py's, unchanged)
   q5-light   q5's light-mode light: the transparent JXL set (shipped) and, from the SAME float arrays, the opaque AVIF
              fallback (written to tools/accent/out/hdr-avif/; --ship-avif replaces the shipped AVIFs, which gen_hdr.py
              made and which are otherwise left byte for byte as they are)
@@ -26,7 +27,7 @@ def q5_light(ship_avif=False, lossless_report=False):
     def transparent(glow, floor, rng):
         gmax = glow.max(-1)
         unit = np.where(gmax[..., None] > 1e-6, glow / np.maximum(gmax, 1e-9)[..., None], acid)
-        return hdr.rgba(unit * P, np.clip(gmax / (P - floor), 0, 1), rng=rng)
+        return hdr.rgba(unit * P, hdr.coverage(gmax, floor, P), rng=rng)
     rng = np.random.default_rng(133); light = {}
     for name, (c, mt, bh) in gh.GEO_L.items():                 # the spill: 17 state frames, one sheet
         glow = gh.broad(cap, c, mt, bh)
@@ -48,9 +49,34 @@ def q5_light(ship_avif=False, lossless_report=False):
     t = step(f'encode {len(jobs)} files in parallel ({sum(r[7] != "skipped" for r in rows)} run, the rest unchanged)', t)
     return rows
 
+def q5_dark(ship_avif=False, lossless_report=False):
+    """q5's dark light: the same planes as gen_hdr.py's dark set (the shipped log spill's footprint at 398 nits, the rim
+    at 589 on the #1a1a1a face), as transparent JXL: the colour at the peak, its coverage from hdr.coverage()"""
+    t = time.time()
+    import gen_hdr as gh
+    z = np.load(gh.CAPF); cap = {k: z[k] for k in ('q5-pill|A', 'q5-pill|W', 'q5-chip|A', 'q5-chip|W', 'q5-rim-pill|A', 'q5-rim-pill|W', 'q5-rim-chip|A', 'q5-rim-chip|W')}
+    t = step('load the capture (cap.npz)', t)
+    light = {}
+    for name, (c, vpk) in gh.LAYERS.items():                     # spills: 17 frames (gen_hdr.bake frames them); rims
+        plane, glow, fl = gh.bake(cap, c, vpk); light[name] = (np.clip(glow, 0, None), fl, float(plane.max()))
+    t = step('render the light (17 frames x 2 shapes, 2 rims)', t)
+    acid = gh.to_nits(gh.PAL[0]); acid = acid / acid.max(); rng = np.random.default_rng(134); px = {}
+    for n, (g, fl, pk) in light.items():
+        gmax = g.max(-1); unit = np.where(gmax[..., None] > 1e-6, g / np.maximum(gmax, 1e-9)[..., None], acid)
+        px[n] = (hdr.rgba(unit * pk, hdr.coverage(gmax, fl, pk), rng=rng), pk)
+    t = step('quantise + dither (16-bit PQ RGBA)', t)
+    jobs = [hdr.Jxl(p, os.path.join(gh.SHIP, n.replace('q5-hdr-dark', 'q5-jxl-dark') + '.jxl'), pk) for n, (p, pk) in px.items()]
+    if lossless_report:
+        rep = os.path.join(ACC, 'out/jxl-report/'); os.makedirs(rep, exist_ok=True)
+        for d, a, tag in ((0.2, 0, 'd0.2'), (0, 0, 'lossless')):
+            jobs += [hdr.Jxl(p, os.path.join(rep, n.replace('q5-hdr-dark', 'q5-jxl-dark') + f'-{tag}.jxl'), pk, distance=d, alpha_distance=a) for n, (p, pk) in px.items()]
+    rows, secs = hdr.run(jobs)
+    t = step(f'encode {len(jobs)} files in parallel ({sum(r[7] != "skipped" for r in rows)} run, the rest unchanged)', t)
+    return rows
+
 if __name__ == '__main__':
     target = sys.argv[1] if len(sys.argv) > 1 else 'q5-light'
     T = time.time()
-    rows = {'q5-light': q5_light}[target]('--ship-avif' in sys.argv, '--lossless-report' in sys.argv)
+    rows = {'q5-light': q5_light, 'q5-dark': q5_dark}[target]('--ship-avif' in sys.argv, '--lossless-report' in sys.argv)
     print(f'\n{"step":64s} {"time":>7s}'); [print(f'{n:64s} {s:6.2f}s') for n, s in steps]
     print(f'{"total (wall)":64s} {time.time() - T:6.2f}s\n'); print(hdr.table(rows))

@@ -80,7 +80,7 @@ td:first-child{color:var(--ink,#17181a);white-space:nowrap}
 @media (dynamic-range: high) and (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .ab-stage{ row-gap:24px }
   :root:not([data-theme="dark"]) .ab-col{ overflow:clip }
   :root:not([data-theme="dark"]) .ab-col .ab-cap{ position:relative; z-index:1 }
-  :root:not([data-theme="dark"]) .ab-col .ab-set--pill .ab-cell{ padding-bottom:222px }
+  :root:not([data-theme="dark"]) .ab-col .ab-set--pill .ab-cell, :root:not([data-theme="dark"]) .ab-col .ab-set--jxl .ab-cell{ padding-bottom:222px }
   :root:not([data-theme="dark"]) .ab-col .ab-set--chip{ grid-template-columns:max-content }
   :root:not([data-theme="dark"]) .ab-col .ab-set--chip .ab-cell{ padding-bottom:192px }
   :root:not([data-theme="dark"]) .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
@@ -89,7 +89,7 @@ td:first-child{color:var(--ink,#17181a);white-space:nowrap}
 @media (dynamic-range: high){ :root[data-theme="light"] .ab-stage{ row-gap:24px }
   :root[data-theme="light"] .ab-col{ overflow:clip }
   :root[data-theme="light"] .ab-col .ab-cap{ position:relative; z-index:1 }
-  :root[data-theme="light"] .ab-col .ab-set--pill .ab-cell{ padding-bottom:222px }
+  :root[data-theme="light"] .ab-col .ab-set--pill .ab-cell, :root[data-theme="light"] .ab-col .ab-set--jxl .ab-cell{ padding-bottom:222px }
   :root[data-theme="light"] .ab-col .ab-set--chip{ grid-template-columns:max-content }
   :root[data-theme="light"] .ab-col .ab-set--chip .ab-cell{ padding-bottom:192px }
   :root[data-theme="light"] .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
@@ -105,12 +105,17 @@ td:first-child{color:var(--ink,#17181a);white-space:nowrap}
   letter-spacing:var(--track-caps,.12em); text-transform:uppercase; opacity:.62 }
 .ab-rail-ofl{ position:relative; z-index:1; font-size:var(--type-ui-size,.75rem); line-height:15px; opacity:.62 }
 .ab-set--rail .ab-cell{ padding-bottom:72px }
-/* JPEG XL vs the AVIF fallback, and one transparent light on five grounds (wm-primitives#133). The grounds clip the
-   light at their edges (overflow: clip keeps HDR); on the AVIF path the white-floor plane shows as a box on any ground
-   that is not white, which is the point of the JXL path. */
-.ab-path{ margin:0 0 12px; font-size:var(--type-ui-size,.75rem); line-height:15px; max-width:none }
+/* JPEG XL vs the AVIF fallback, and one transparent light on five grounds (wm-primitives#133), in either theme. The
+   grounds clip the light at their edges (overflow: clip keeps HDR). */
+.ab-path{ position:relative; z-index:1; margin:0 0 12px; font-size:var(--type-ui-size,.75rem); line-height:15px; max-width:none }
 .ab-set--jxl .ab-cell{ padding-bottom:72px }
 .ab-set--grounds{ display:grid; gap:12px; padding-bottom:48px }
+/* the grounds show the JPEG XL light or nothing: an AVIF plane bakes its floor, and on a ground it was not baked for it
+   is a slab. Without html.wm-jxl the grounds are hidden and the note says why. */
+.ab-ground{ display:none !important }
+:root.wm-jxl .ab-ground{ display:grid !important }
+.ab-nojxl{ position:relative; z-index:1; margin:0; font-size:var(--type-ui-size,.75rem); line-height:15px; max-width:none }
+:root.wm-jxl .ab-nojxl{ display:none }
 .ab-ground{ position:relative; height:300px; padding-top:48px; box-sizing:border-box; border-radius:8px; overflow:clip; display:grid; place-items:start center }
 .ab-ground .ab-cap{ position:absolute; left:12px; top:9px; z-index:1; margin:0; mix-blend-mode:difference; color:#fff }
 .ab-ground--white{ background:#fff } .ab-ground--grey{ background:#f4f4f4 } .ab-ground--black{ background:#0f0f0f }
@@ -150,7 +155,8 @@ lights all at once.</p>
   <div class="ab-cell"><span class="ab-cap">pill &middot; AVIF fallback (opaque, white floor) &middot; live</span><button type="button" class="wm-accent" data-hdr="avif" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
 </div>
 <div class="ab-set ab-set--grounds">
-  <span class="ab-cap">light theme, JPEG XL &middot; one light on five grounds</span>
+  <span class="ab-cap">JPEG XL &middot; one light on five grounds (this theme)</span>
+  <p class="ab-nojxl">This browser has no JPEG XL, so nothing is shown here: the AVIF fallback bakes its ground into the light, and on any other ground it shows as a box.</p>
   <div class="ab-ground ab-ground--white"><span class="ab-cap">white</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
   <div class="ab-ground ab-ground--grey"><span class="ab-cap">grey</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
   <div class="ab-ground ab-ground--black"><span class="ab-cap">black</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>

@@ -51,6 +51,17 @@ def rgba(nits_rgb, alpha, rng=None, dither=True):
         a = np.where((a > 0) & (a < 1), np.rint(a * 255 + tri) / 255, a)
     return np.rint(np.dstack([np.clip(c, 0, 1), np.clip(a, 0, 1)[..., None]]) * 65535).astype(np.uint16)
 
+def enc(nits):
+    """the extended sRGB curve on nits / 203 (203 = SDR white): the gamma-encoded space a browser composites in"""
+    x = np.maximum(np.asarray(nits, np.float64), 0) / 203.0
+    return np.where(x <= 0.0031308, x * 12.92, 1.055 * np.power(x, 1 / 2.4) - 0.055)
+
+def coverage(glow_max, floor, peak):
+    """the alpha that puts a light of colour `peak` over `floor` at floor + glow, compositing in the gamma-encoded space
+    (as the page does): a = (enc(floor + glow) - enc(floor)) / (enc(peak) - enc(floor)). A linear-light alpha, glow /
+    (peak - floor), is far too small in a long tail over a dark floor (a 5-nit glow on 2 nits came out at 1/7)."""
+    return np.clip((enc(floor + glow_max) - enc(floor)) / (enc(peak) - enc(floor)), 0, 1)
+
 def pam16(px, path):
     """raw 16-bit PAM (RGB_ALPHA), big-endian, straight from the array"""
     h, w = px.shape[:2]
