@@ -22,7 +22,10 @@ import { sealed, settle } from '../render/hosts'
    2026-09-27). The probe is a zero-size inline-block before the first text node, so a
    flex button or a two-line caption reports its first line, not its box. */
 
-type Line = { x: number; why: string; open?: string }
+/* A line is a number, or a GRID line: { in, column } is the left edge of that column of the
+   element's own CSS grid, read from its resolved tracks and gap in the page, so the expectation
+   moves with the grid (its width, its columns) and is never a sum typed by hand. */
+type Line = { x: number; grid?: { in: string; column: number }; why: string; open?: string }
 type Region = { where: string; selectors: string[]; lines: Record<string, Line> }
 type Pair = { a: string; b: string; why: string; every?: boolean }
 type Host = { url: string; regions: Record<string, Region>; baselines?: { modes?: string; pairs: Pair[]; steady?: { selector: string; why: string } } }
@@ -42,6 +45,22 @@ for (const [host, h] of Object.entries(SPEC.hosts)) {
 
       const problems: string[] = []
       const census: string[] = []
+      for (const r of Object.values(h.regions)) for (const [name, l] of Object.entries(r.lines)) {
+        if (!l.grid) continue
+        const x = await page.evaluate(({ sel, column }) => {
+          const el = document.querySelector(sel)
+          if (!el) return null
+          const cs = getComputedStyle(el), box = el.getBoundingClientRect()
+          const tracks = cs.gridTemplateColumns.split(' ').map(parseFloat)
+          if (tracks.length < column || tracks.some(isNaN)) return null
+          const gap = parseFloat(cs.columnGap) || 0
+          let x = box.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft)
+          for (let i = 0; i < column - 1; i++) x += tracks[i] + gap
+          return +x.toFixed(1)
+        }, { sel: l.grid.in, column: l.grid.column })
+        expect(x, `${host} ${name}: ${l.grid.in} is not a grid with ${l.grid.column} columns`).not.toBeNull()
+        l.x = x!
+      }
       for (const [region, r] of Object.entries(h.regions)) {
         const found = await page.evaluate(sel => {
           const out: { t: string; cls: string; x: number; left: number }[] = []
