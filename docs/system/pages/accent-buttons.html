@@ -54,44 +54,58 @@ td:first-child{color:var(--ink,#17181a);white-space:nowrap}
    (accentButton.css "Q5 in HDR": no transform, no opacity) */
 @media (dynamic-range: high){ :root[data-theme="dark"] .ab-cap{ position:relative; z-index:1 }
   :root[data-theme="dark"] .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
-  :root[data-theme="dark"] .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }
+  :root[data-theme="dark"] .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none }
+  :root[data-theme="dark"] .wm-accent.ab-active[data-look="q6n4"]{ top:1px; transform:none } }
 @media (dynamic-range: high) and (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .ab-cap{ position:relative; z-index:1 }
   :root:not([data-theme="light"]) .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
-  :root:not([data-theme="light"]) .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }
-/* LIGHT THEME: Q5 has a light mode (an ink face, an apple light, rendered for a white ground), so its column takes
-   the light --surface; Q6 to N4 has none yet and keeps its dark ground */
+  :root:not([data-theme="light"]) .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none }
+  :root:not([data-theme="light"]) .wm-accent.ab-active[data-look="q6n4"]{ top:1px; transform:none } }
+/* LIGHT THEME: both looks have a light mode (an ink face, an apple light, rendered for a white ground), so the
+   columns take the light --surface */
 @media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .ab-stage{ background:none; padding:0 }
   :root:not([data-theme="dark"]) .ab-col{ padding:24px 52px 0; border-radius:8px; corner-shape:superellipse(1.2); background:var(--surface) }
-  :root:not([data-theme="dark"]) .ab-col--q5{ --surface:#ffffff; --surface-hi:#ebebeb; --bg:#f4f4f4; --text-dim:rgba(22,22,22,.42); --border:rgba(22,22,22,.16); color:#161616 }
-  :root:not([data-theme="dark"]) .ab-col--q5 .ab-cap{ color:rgba(22,22,22,.42) }
-  :root:not([data-theme="dark"]) .ab-col--q5 .ab-cap--head{ color:rgba(22,22,22,.66) } }
+  :root:not([data-theme="dark"]) .ab-col{ --surface:#ffffff; --surface-hi:#ebebeb; --bg:#f4f4f4; --text-dim:rgba(22,22,22,.42); --border:rgba(22,22,22,.16); color:#161616 }
+  :root:not([data-theme="dark"]) .ab-col .ab-cap{ color:rgba(22,22,22,.42) }
+  :root:not([data-theme="dark"]) .ab-col .ab-cap--head{ color:rgba(22,22,22,.66) } }
 :root[data-theme="light"] .ab-stage{ background:none; padding:0 }
 :root[data-theme="light"] .ab-col{ padding:24px 52px 0; border-radius:8px; corner-shape:superellipse(1.2); background:var(--surface) }
-:root[data-theme="light"] .ab-col--q5{ --surface:#ffffff; --surface-hi:#ebebeb; --bg:#f4f4f4; --text-dim:rgba(22,22,22,.42); --border:rgba(22,22,22,.16); color:#161616 }
-:root[data-theme="light"] .ab-col--q5 .ab-cap{ color:rgba(22,22,22,.42) }
-:root[data-theme="light"] .ab-col--q5 .ab-cap--head{ color:rgba(22,22,22,.66) }
+:root[data-theme="light"] .ab-col{ --surface:#ffffff; --surface-hi:#ebebeb; --bg:#f4f4f4; --text-dim:rgba(22,22,22,.42); --border:rgba(22,22,22,.16); color:#161616 }
+:root[data-theme="light"] .ab-col .ab-cap{ color:rgba(22,22,22,.42) }
+:root[data-theme="light"] .ab-col .ab-cap--head{ color:rgba(22,22,22,.66) }
 @media (max-width:680px){ :root[data-theme="light"] .ab-col{ padding:24px 24px 0 } }
 @media (max-width:680px) and (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .ab-col{ padding:24px 24px 0 } }
-/* HDR (light theme): Q5's broad light reaches 130px beside and 185px below the pill, and every plane is opaque, so
-   Q5 takes the whole width, the cells are spaced so no two planes overlap, the card clips them on its own white,
+/* HDR (light theme): the broad light reaches 130px beside and 185px below the pill, and every plane is opaque, so
+   each look takes the whole width, the cells are spaced so no two planes overlap, the card clips them on its own white,
    and the captions sit above the light */
 @media (dynamic-range: high) and (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .ab-stage{ grid-template-columns:minmax(0,1fr); row-gap:24px }
-  :root:not([data-theme="dark"]) .ab-col--q5{ padding:24px 130px 0; overflow:hidden }
-  :root:not([data-theme="dark"]) .ab-col--q5 .ab-cap{ position:relative; z-index:1 }
-  :root:not([data-theme="dark"]) .ab-col--q5 .ab-set--pill .ab-cell{ padding-bottom:222px }
-  :root:not([data-theme="dark"]) .ab-col--q5 .ab-set--chip{ column-gap:222px }
-  :root:not([data-theme="dark"]) .ab-col--q5 .ab-set--chip .ab-cell{ padding-bottom:192px }
+  :root:not([data-theme="dark"]) .ab-col{ padding:24px 130px 0; overflow:hidden }
+  :root:not([data-theme="dark"]) .ab-col .ab-cap{ position:relative; z-index:1 }
+  :root:not([data-theme="dark"]) .ab-col .ab-set--pill .ab-cell{ padding-bottom:222px }
+  :root:not([data-theme="dark"]) .ab-col .ab-set--chip{ column-gap:222px }
+  :root:not([data-theme="dark"]) .ab-col .ab-set--chip .ab-cell{ padding-bottom:192px }
   :root:not([data-theme="dark"]) .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
-  :root:not([data-theme="dark"]) .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }
+  :root:not([data-theme="dark"]) .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none }
+  :root:not([data-theme="dark"]) .wm-accent.ab-active[data-look="q6n4"]{ top:1px; transform:none } }
 @media (dynamic-range: high){ :root[data-theme="light"] .ab-stage{ grid-template-columns:minmax(0,1fr); row-gap:24px }
-  :root[data-theme="light"] .ab-col--q5{ padding:24px 130px 0; overflow:hidden }
-  :root[data-theme="light"] .ab-col--q5 .ab-cap{ position:relative; z-index:1 }
-  :root[data-theme="light"] .ab-col--q5 .ab-set--pill .ab-cell{ padding-bottom:222px }
-  :root[data-theme="light"] .ab-col--q5 .ab-set--chip{ column-gap:222px }
-  :root[data-theme="light"] .ab-col--q5 .ab-set--chip .ab-cell{ padding-bottom:192px }
+  :root[data-theme="light"] .ab-col{ padding:24px 130px 0; overflow:hidden }
+  :root[data-theme="light"] .ab-col .ab-cap{ position:relative; z-index:1 }
+  :root[data-theme="light"] .ab-col .ab-set--pill .ab-cell{ padding-bottom:222px }
+  :root[data-theme="light"] .ab-col .ab-set--chip{ column-gap:222px }
+  :root[data-theme="light"] .ab-col .ab-set--chip .ab-cell{ padding-bottom:192px }
   :root[data-theme="light"] .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
-  :root[data-theme="light"] .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }
+  :root[data-theme="light"] .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none }
+  :root[data-theme="light"] .wm-accent.ab-active[data-look="q6n4"]{ top:1px; transform:none } }
 .wm-accent.ab-active[data-look="q6n4"]{ --ab-p:1; transform:translateY(1px) }
+/* A BOUNDED PILL: ReCal's Download, at the foot of a 264px rail. The rail does not clip; the button is told where its
+   light must have faded (accentButton.css, BOUNDS): "In your download" 14px above, the rail's edges 16 and 23px
+   beside, the window 38px below. The dashed line is the rail. */
+.ab-rail{ width:264px; box-sizing:border-box; padding:0 23px 15px 16px; display:grid; gap:8px;
+  outline:1px dashed color-mix(in srgb, currentColor 30%, transparent); outline-offset:0 }
+.ab-rail-k{ position:relative; z-index:1; margin-bottom:6px; font-size:var(--type-micro-size,.5625rem); line-height:12px;
+  letter-spacing:var(--track-caps,.12em); text-transform:uppercase; opacity:.62 }
+.ab-rail-ofl{ position:relative; z-index:1; font-size:var(--type-ui-size,.75rem); line-height:15px; opacity:.62 }
+.ab-bounded{ --ab-fade-top:14px; --ab-fade-right:23px; --ab-fade-bottom:38px; --ab-fade-left:16px; --ab-fade-soft:12px }
+.ab-set--rail .ab-cell{ padding-bottom:72px }
 </style>
 <body>
 
@@ -116,6 +130,9 @@ lights all at once.</p>
   <div class="ab-cell"><span class="ab-cap">chip &middot; hover</span><button type="button" class="wm-accent ab-hover" data-look="q5" data-shape="chip"><span class="wm-accent__lab">Italic</span></button></div>
   <div class="ab-cell"><span class="ab-cap">chip &middot; pressed</span><button type="button" class="wm-accent ab-active" data-look="q5" data-shape="chip"><span class="wm-accent__lab">Italic</span></button></div>
   <div class="ab-cell"><span class="ab-cap">chip &middot; disabled</span><button type="button" class="wm-accent" data-look="q5" data-shape="chip" disabled><span class="wm-accent__lab">Italic</span></button></div>
+</div>
+<div class="ab-set ab-set--rail">
+  <div class="ab-cell"><span class="ab-cap">pill &middot; bounded, a 264px rail &middot; live</span><div class="ab-rail"><span class="ab-rail-k">In your download</span><button type="button" class="wm-accent ab-bounded" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button><span class="ab-rail-ofl">By downloading you accept the OFL 1.1</span></div></div>
 </div></div>
 <div class="ab-col"><span class="ab-cap ab-cap--head">Q6 to N4 &middot; the light travels</span>
 <div class="ab-set ab-set--pill">
@@ -142,7 +159,13 @@ each lit layer is a PQ image whose value is the light itself, floor plus glow, p
 is acid at that same peak, painted through the glyphs. On an SDR screen it is exactly the button above. The images
 bake the #1a1a1a ground they sit on. In the light theme Q5 is ink on paper: an ink face, an apple light below it,
 and an apple label. On an HDR display the light theme's Q5 is lit in acid instead, a broad light that peaks at
-605 nits on the white ground, with an acid label at the same peak.</p>
+405 nits on the white ground, with an acid label at 605.</p>
+<p>Q6 to N4 has the same HDR light, dark and light: the spill, the travelling rim, the streak,
+and the label, whose resting ink thins to show acid as the light comes on. The travelling light steps one frame at
+a time instead of cross-fading. Both looks show their HDR only on an HDR display.</p>
+<p>A host bounds the light instead of clipping it: <code>--ab-fade-top</code>, <code>-right</code>, <code>-bottom</code>
+and <code>-left</code> on the button say how far from its edge the light must have faded, over
+<code>--ab-fade-soft</code> (16px). The bounded pill above is ReCal's Download, at the foot of its rail.</p>
 <p><code>&lt;AccentButton look=&quot;q5&quot; shape=&quot;pill&quot;&gt;Download&lt;/AccentButton&gt;</code>, or
 <code>look=&quot;q6n4&quot; shape=&quot;chip&quot;</code>. The images are in <code>assets/accent/</code>, and
 <code>tools/accent/</code> renders them.</p>

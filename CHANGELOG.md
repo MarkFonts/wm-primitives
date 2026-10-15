@@ -12,6 +12,42 @@ Newest first.
 
 ---
 
+## 2026-10-14 -- q6n4 in HDR and in light mode; bounds instead of clips
+
+**Mark approved q6n4 as briefed: "light = Broad 300, acid, white floor; dark = acid HDR".** q6n4 gets what q5 got in
+#128, built the same way (opaque PQ planes, floor + glow, true-peak MaxCLL; `tools/accent/gen_q6n4.py`).
+
+- **Nothing HDR fades or moves by opacity or transform.** The spill's fade is 9 frames and the streak's 5, stepped
+  from `--ab-p`; the travelling light and the chip's end pieces show one frame at a time (the A/B cross-fade was an
+  opacity, so frame B is hidden in HDR); the top edge fades in over 5 frames; the press is `top: 1px`; the face, the
+  sprite group and the frames drop their isolation, blend modes and `will-change`. Measured headless: in every state,
+  no HDR layer or ancestor up to the button has an opacity under 1, a transform, or a blend mode.
+- **Dark:** acid on #1a1a1a (the ground, the chip face) and #0a0a0a (the pill face). The spill keeps the SHIPPED
+  spill's footprint at a modest 398 nits (Mark, on the hero preview, of the boosted one: "the black is too far
+  out"), so it reads as the SDR light, brighter. The in-face light's cores (round 2 had them at ~880-990 nits, past
+  his screen's ceiling, where Chrome tone-maps the whole plane and its floor greys into a box) peak at 605. q5's dark
+  set already follows the same standard (the shipped footprint, 398 / 589) and is unchanged.
+- **Light, both looks, at the +200 step.** Mark: "300 / 408 is best for both". The broad-300 spill and the in-face
+  light peak at 405 (MaxCLL true peak); q5's light set is re-baked from 605 to match. The band below the pill stays
+  near 300: q5 298 / 300 / 300 / 262 / 224 nits at 8 / 16 / 32 / 64 / 96px, q6n4 323 / 311 / 300 / 259 / 222. The
+  labels stay at 605 ("the white is finally visible"). On SDR, treatment b (an ink face, apple light, a label from the
+  light ink to apple).
+- **Even sides.** Chrome decodes a PQ AVIF with an odd width or height as fully transparent; the generators assert
+  even sides.
+- **The label** is two layers: the resting ink over a flat acid PQ field at 605. The ink thins as the light comes
+  on, so the HDR acid comes through.
+- **Bounds.** A light-mode HDR pill's spill is 485 x 257, and ReCal's `.dl-act` clipped it hard to its rectangle:
+  a glowing slab with straight edges. A clip or mask on an ancestor would also take the HDR away. So a host now
+  bounds the light on the button: `--ab-fade-top / -right / -bottom / -left` (how far from the button's edge the light
+  has reached nothing) and `--ab-fade-soft` (16px). It is a layer of each spill's own mask, intersected with its
+  footprint, in SDR and HDR, both themes, both looks. `--ab-fade-from` (a chip at a clip edge) stays as it was. The
+  docs show ReCal's Download bounded in a 264px rail. Cost: the q5 pill's SDR spill carries a mask now, and its
+  pressed state (opacity .85) rounds differently by one level in places.
+- Light-mode HDR chips lose their 9-slice footprint mask (Chrome ignores it beside a mask-image); their edges are
+  the floor.
+
+---
+
 ## 2026-10-14 -- q5 in HDR, and q5's light mode
 
 **Mark, on the round-2 accent proposal: "underlit looks magical, ship it", and "text needs HDR too".** On an HDR
