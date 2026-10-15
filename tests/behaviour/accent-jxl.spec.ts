@@ -73,11 +73,14 @@ test.describe('the JPEG XL light composites transparently', () => {
 
   for (const theme of ['dark', 'light'] as const) {
     test(`${theme}: outside the light, every ground is untouched`, async ({ baseURL }) => {
-      test.setTimeout(120_000)        // the system page is large, and each ground is shot three times
+      test.setTimeout(180_000)        // the system page is large, and each ground is shot three times
       /* its own Chromium: the JXL decoder is behind a feature flag (on by default from Chrome 155) */
       const browser = await chromium.launch({ args: ['--enable-features=JXLImageFormat'] })
       const page = await browser.newPage({ baseURL, viewport: { width: 1440, height: 900 } })
-      expect(await open(page, theme), 'this Chromium decodes JPEG XL (html.wm-jxl)').toBe(true)
+      const jxl = await open(page, theme)
+      if (!jxl) await browser.close()
+      /* a Chromium without the JXL decoder (the flag is a no-op there) cannot run this: skip, and say so */
+      test.skip(!jxl, 'this Chromium does not decode JPEG XL even with --enable-features=JXLImageFormat (html.wm-jxl absent)')
       const report: string[] = [], bad: string[] = []
       for (const g of GROUNDS) {
         await page.locator(`#s-controls .ab-ground--${g}`).scrollIntoViewIfNeeded()

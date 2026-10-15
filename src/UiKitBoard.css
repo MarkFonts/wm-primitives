@@ -221,8 +221,10 @@
 
 .ui-seg {
   font-family: var(--ui-font, inherit); display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-.ui-seg > span { padding: 6px 13px; font-size: var(--type-ui-size); color: var(--text-muted); border-left: 1px solid var(--border); }
-.ui-seg > span:first-child { border-left: none; }
+/* toggleGroup.css makes the holder a pill, so each segment nests inside it as a pill too:
+   a square segment (and a divider stub between round ones) read as a box in a round hole. */
+.ui-seg > span { padding: 6px 13px; font-size: var(--type-ui-size); color: var(--text-muted);
+  border-radius: 999px; corner-shape: superellipse(var(--corner-k, 1.2)); }
 .ui-seg > span.on { background: var(--text); color: var(--bg); }
 
 .ui-nav { display: flex; flex-direction: column; gap: 1px; }
