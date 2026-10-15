@@ -12,7 +12,7 @@ Newest first.
 
 ---
 
-## 2026-10-14 -- q6n4 in HDR and in light mode; bounds instead of clips
+## 2026-10-14 -- q6n4 in HDR and in light mode; containing the light
 
 **Mark approved q6n4 as briefed: "light = Broad 300, acid, white floor; dark = acid HDR".** q6n4 gets what q5 got in
 #128, built the same way (opaque PQ planes, floor + glow, true-peak MaxCLL; `tools/accent/gen_q6n4.py`).
@@ -36,15 +36,14 @@ Newest first.
   even sides.
 - **The label** is two layers: the resting ink over a flat acid PQ field at 605. The ink thins as the light comes
   on, so the HDR acid comes through.
-- **Bounds.** A light-mode HDR pill's spill is 485 x 257, and ReCal's `.dl-act` clipped it hard to its rectangle:
-  a glowing slab with straight edges. A clip or mask on an ancestor would also take the HDR away. So a host now
-  bounds the light on the button: `--ab-fade-top / -right / -bottom / -left` (how far from the button's edge the light
-  has reached nothing) and `--ab-fade-soft` (16px). It is a layer of each spill's own mask, intersected with its
-  footprint, in SDR and HDR, both themes, both looks. `--ab-fade-from` (a chip at a clip edge) stays as it was. The
-  docs show ReCal's Download bounded in a 264px rail. Cost: the q5 pill's SDR spill carries a mask now, and its
-  pressed state (opacity .85) rounds differently by one level in places.
-- Light-mode HDR chips lose their 9-slice footprint mask (Chrome ignores it beside a mask-image); their edges are
-  the floor.
+- **Containing the light: `overflow: clip`.** A light-mode HDR pill's spill is 485 x 257, wider than ReCal's rail.
+  To contain the light, give its box `overflow: clip`: it stops hard at the box's edge (Mark rejected a feathered
+  bound twice) and keeps the HDR, since a clip is not a scroll container. Never a mask, `overflow: hidden` on a
+  scroller, opacity, or transform on an ancestor. ReCal #45 clips its rail footer; the docs show the same pill in a
+  264px rail, and the stage and the light-mode cards clip rather than hide. The face clips its in-face light the
+  same way in HDR. A feathered-bounds API (`--ab-fade-top` and friends) was tried in this PR and removed.
+- Light-mode HDR chips lose their 9-slice footprint mask (Chrome ignores it beside a mask-image, and the chip keeps
+  `--ab-fade-from`); their edges are the floor.
 - **The inner glow and the bottom rim, in HDR.** Mark, on hover: "a thin bright outline with a dark interior", and
   "there should STILL be bottom rim". The SDR art is right: its LOG inner glow (the single 3px exponential) matches his
   reference sheet (proto3/mid-fall.png, the LOG column, to within 1 level from the rim inward). The HDR lost it twice.

@@ -34,7 +34,7 @@ td:first-child{color:var(--ink,#17181a);white-space:nowrap}
 .ab-stage{ --ui-font:"CalSansVF",system-ui,sans-serif; --surface:#1a1a1a; --spacing-02:6px; --spacing-04:12px;
   font-family:var(--ui-font); color:#e8e8e8; background:var(--surface);
   border-radius:8px; corner-shape:superellipse(1.2); margin:0 0 24px; padding:24px 24px 0;
-  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:24px; overflow:hidden }
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:24px; overflow:clip }
 .ab-col{ min-width:0; padding:0 52px }
 .ab-cap{ display:block; margin:0 0 6px; font-size:var(--type-micro-size,.5625rem); line-height:12px;
   letter-spacing:var(--track-caps,.12em); text-transform:uppercase; color:rgba(232,232,232,.38) }
@@ -75,36 +75,35 @@ td:first-child{color:var(--ink,#17181a);white-space:nowrap}
 @media (max-width:680px){ :root[data-theme="light"] .ab-col{ padding:24px 24px 0 } }
 @media (max-width:680px) and (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .ab-col{ padding:24px 24px 0 } }
 /* HDR (light theme): the broad light reaches 130px beside and 185px below the pill, and every plane is opaque, so
-   each look takes the whole width, the cells are spaced so no two planes overlap, the card clips them on its own white,
-   and the captions sit above the light */
-@media (dynamic-range: high) and (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .ab-stage{ grid-template-columns:minmax(0,1fr); row-gap:24px }
-  :root:not([data-theme="dark"]) .ab-col{ padding:24px 130px 0; overflow:hidden }
+   the cells are spaced (and the chips stacked) so no two planes overlap, each card stops the light hard at its edge
+   with overflow: clip (a clip, not a scroller or a mask, keeps the HDR), and the captions sit above the light */
+@media (dynamic-range: high) and (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .ab-stage{ row-gap:24px }
+  :root:not([data-theme="dark"]) .ab-col{ overflow:clip }
   :root:not([data-theme="dark"]) .ab-col .ab-cap{ position:relative; z-index:1 }
   :root:not([data-theme="dark"]) .ab-col .ab-set--pill .ab-cell{ padding-bottom:222px }
-  :root:not([data-theme="dark"]) .ab-col .ab-set--chip{ column-gap:222px }
+  :root:not([data-theme="dark"]) .ab-col .ab-set--chip{ grid-template-columns:max-content }
   :root:not([data-theme="dark"]) .ab-col .ab-set--chip .ab-cell{ padding-bottom:192px }
   :root:not([data-theme="dark"]) .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
   :root:not([data-theme="dark"]) .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none }
   :root:not([data-theme="dark"]) .wm-accent.ab-active[data-look="q6n4"]{ top:1px; transform:none } }
-@media (dynamic-range: high){ :root[data-theme="light"] .ab-stage{ grid-template-columns:minmax(0,1fr); row-gap:24px }
-  :root[data-theme="light"] .ab-col{ padding:24px 130px 0; overflow:hidden }
+@media (dynamic-range: high){ :root[data-theme="light"] .ab-stage{ row-gap:24px }
+  :root[data-theme="light"] .ab-col{ overflow:clip }
   :root[data-theme="light"] .ab-col .ab-cap{ position:relative; z-index:1 }
   :root[data-theme="light"] .ab-col .ab-set--pill .ab-cell{ padding-bottom:222px }
-  :root[data-theme="light"] .ab-col .ab-set--chip{ column-gap:222px }
+  :root[data-theme="light"] .ab-col .ab-set--chip{ grid-template-columns:max-content }
   :root[data-theme="light"] .ab-col .ab-set--chip .ab-cell{ padding-bottom:192px }
   :root[data-theme="light"] .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
   :root[data-theme="light"] .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none }
   :root[data-theme="light"] .wm-accent.ab-active[data-look="q6n4"]{ top:1px; transform:none } }
 .wm-accent.ab-active[data-look="q6n4"]{ --ab-p:1; transform:translateY(1px) }
-/* A BOUNDED PILL: ReCal's Download, at the foot of a 264px rail. The rail does not clip; the button is told where its
-   light must have faded (accentButton.css, BOUNDS): "In your download" 14px above, the rail's edges 16 and 23px
-   beside, the window 38px below. The dashed line is the rail. */
-.ab-rail{ width:264px; box-sizing:border-box; padding:0 23px 15px 16px; display:grid; gap:8px;
+/* A PILL IN A 264px RAIL: ReCal's Download, at the foot of its rail. The rail is `overflow: clip`, so the light stops
+   hard at its edges and adds no scroll; the text above and below the pill is lifted over the light (positioned, later
+   in the tree). The dashed line is the rail. */
+.ab-rail{ width:264px; box-sizing:border-box; padding:12px 23px 15px 16px; display:grid; gap:8px; overflow:clip;
   outline:1px dashed color-mix(in srgb, currentColor 30%, transparent); outline-offset:0 }
 .ab-rail-k{ position:relative; z-index:1; margin-bottom:6px; font-size:var(--type-micro-size,.5625rem); line-height:12px;
   letter-spacing:var(--track-caps,.12em); text-transform:uppercase; opacity:.62 }
 .ab-rail-ofl{ position:relative; z-index:1; font-size:var(--type-ui-size,.75rem); line-height:15px; opacity:.62 }
-.ab-bounded{ --ab-fade-top:14px; --ab-fade-right:23px; --ab-fade-bottom:38px; --ab-fade-left:16px; --ab-fade-soft:12px }
 .ab-set--rail .ab-cell{ padding-bottom:72px }
 </style>
 <body>
@@ -132,7 +131,7 @@ lights all at once.</p>
   <div class="ab-cell"><span class="ab-cap">chip &middot; disabled</span><button type="button" class="wm-accent" data-look="q5" data-shape="chip" disabled><span class="wm-accent__lab">Italic</span></button></div>
 </div>
 <div class="ab-set ab-set--rail">
-  <div class="ab-cell"><span class="ab-cap">pill &middot; bounded, a 264px rail &middot; live</span><div class="ab-rail"><span class="ab-rail-k">In your download</span><button type="button" class="wm-accent ab-bounded" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button><span class="ab-rail-ofl">By downloading you accept the OFL 1.1</span></div></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; in a 264px rail &middot; live</span><div class="ab-rail"><span class="ab-rail-k">In your download</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button><span class="ab-rail-ofl">By downloading you accept the OFL 1.1</span></div></div>
 </div></div>
 <div class="ab-col"><span class="ab-cap ab-cap--head">Q6 to N4 &middot; the light travels</span>
 <div class="ab-set ab-set--pill">
@@ -163,9 +162,8 @@ and an apple label. On an HDR display the light theme's Q5 is lit in acid instea
 <p>Q6 to N4 has the same HDR light, dark and light: the spill, the travelling rim, the streak,
 and the label, whose resting ink thins to show acid as the light comes on. The travelling light steps one frame at
 a time instead of cross-fading. Both looks show their HDR only on an HDR display.</p>
-<p>A host bounds the light instead of clipping it: <code>--ab-fade-top</code>, <code>-right</code>, <code>-bottom</code>
-and <code>-left</code> on the button say how far from its edge the light must have faded, over
-<code>--ab-fade-soft</code> (16px). The bounded pill above is ReCal's Download, at the foot of its rail.</p>
+<p>To contain the light, give its box <code>overflow: clip</code>. Never a mask, <code>overflow: hidden</code> on a
+scroller, opacity, or transform on an ancestor. The pill in a rail above is ReCal's Download, at the foot of its rail.</p>
 <p><code>&lt;AccentButton look=&quot;q5&quot; shape=&quot;pill&quot;&gt;Download&lt;/AccentButton&gt;</code>, or
 <code>look=&quot;q6n4&quot; shape=&quot;chip&quot;</code>. The images are in <code>assets/accent/</code>, and
 <code>tools/accent/</code> renders them.</p>

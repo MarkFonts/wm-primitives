@@ -73,3 +73,6 @@ ACCENT_CAP=out/cap.npz .venv/bin/python gen_q6n4.py          # q6n4's HDR sets, 
 Every PQ file carries its true peak as MaxCLL: a stamp below it clips, the 1000 sips writes tone-maps. And every
 PQ file has even sides: Chrome decodes a PQ AVIF with an odd width or height as fully transparent (`gen_hdr.write`
 asserts it).
+
+To contain the light, give its box `overflow: clip`. Never a mask, `overflow: hidden` on a scroller, opacity, or
+transform on an ancestor.
