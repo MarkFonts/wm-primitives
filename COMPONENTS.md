@@ -18,6 +18,7 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `ThemeSwitch` | ThemeSwitch -- Auto / Light / Dark, both looks (marks, words) over one engine. The engine is plain JS so a page without React (Kernpare) drives the same control with mountThemeSwitch(); the head-script stamp before first… | font-proofer, ReCal, GliffDiff | GESTURES.md §8 |
 | `THEMES` `THEME_KEY` `readTheme` `applyTheme` `bootTheme` `mountThemeSwitch` | The theme engine itself, for a page without React (bootTheme in a head script). | Kernpare, ReCal | GESTURES.md §8 |
 | `AccentButton` | AccentButton -- the two acid buttons, Q5 and Q6 to N4, as a pill (the Download button) or a chip. The light is pre-rendered, dithered AVIF (assets/accent/), never a CSS gradient. Dark ground only; the pill is a full rend… | ReCal | — |
+| `wmJxl` | html.wm-jxl when the browser decodes JPEG XL (src/jxl.js, a plain script; AccentButton imports it). wmJxl() -> Promise<boolean>. | — | — |
 | `BlockStyleRail` | BlockStyleRail — h1/h2/h3/¶ stacked in the margin of the block being edited, at the bottom of the ink ladder until you reach for them. | font-proofer | — |
 | `makeGlyphSets` `parseCmapRanges` `isSupported` `enumerateCmap` | Glyph-set matching + cmap parsing (Glyphs scene). Each app composes its own extra groups / alternates on top of the shared base groups. | font-proofer, ReCal | — |
 | `nbMinus` | A real minus (U+2212) for readouts, never a hyphen. | font-proofer, ReCal | — |

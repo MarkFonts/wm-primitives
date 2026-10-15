@@ -80,7 +80,7 @@ td:first-child{color:var(--ink,#17181a);white-space:nowrap}
 @media (dynamic-range: high) and (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .ab-stage{ row-gap:24px }
   :root:not([data-theme="dark"]) .ab-col{ overflow:clip }
   :root:not([data-theme="dark"]) .ab-col .ab-cap{ position:relative; z-index:1 }
-  :root:not([data-theme="dark"]) .ab-col .ab-set--pill .ab-cell{ padding-bottom:222px }
+  :root:not([data-theme="dark"]) .ab-col .ab-set--pill .ab-cell, :root:not([data-theme="dark"]) .ab-col .ab-set--jxl .ab-cell{ padding-bottom:222px }
   :root:not([data-theme="dark"]) .ab-col .ab-set--chip{ grid-template-columns:max-content }
   :root:not([data-theme="dark"]) .ab-col .ab-set--chip .ab-cell{ padding-bottom:192px }
   :root:not([data-theme="dark"]) .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
@@ -89,7 +89,7 @@ td:first-child{color:var(--ink,#17181a);white-space:nowrap}
 @media (dynamic-range: high){ :root[data-theme="light"] .ab-stage{ row-gap:24px }
   :root[data-theme="light"] .ab-col{ overflow:clip }
   :root[data-theme="light"] .ab-col .ab-cap{ position:relative; z-index:1 }
-  :root[data-theme="light"] .ab-col .ab-set--pill .ab-cell{ padding-bottom:222px }
+  :root[data-theme="light"] .ab-col .ab-set--pill .ab-cell, :root[data-theme="light"] .ab-col .ab-set--jxl .ab-cell{ padding-bottom:222px }
   :root[data-theme="light"] .ab-col .ab-set--chip{ grid-template-columns:max-content }
   :root[data-theme="light"] .ab-col .ab-set--chip .ab-cell{ padding-bottom:192px }
   :root[data-theme="light"] .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
@@ -105,6 +105,22 @@ td:first-child{color:var(--ink,#17181a);white-space:nowrap}
   letter-spacing:var(--track-caps,.12em); text-transform:uppercase; opacity:.62 }
 .ab-rail-ofl{ position:relative; z-index:1; font-size:var(--type-ui-size,.75rem); line-height:15px; opacity:.62 }
 .ab-set--rail .ab-cell{ padding-bottom:72px }
+/* JPEG XL vs the AVIF fallback, and one transparent light on five grounds (wm-primitives#133), in either theme. The
+   grounds clip the light at their edges (overflow: clip keeps HDR). */
+.ab-path{ position:relative; z-index:1; margin:0 0 12px; font-size:var(--type-ui-size,.75rem); line-height:15px; max-width:none }
+.ab-set--jxl .ab-cell{ padding-bottom:72px }
+.ab-set--grounds{ display:grid; gap:12px; padding-bottom:48px }
+/* the grounds show the JPEG XL light or nothing: an AVIF plane bakes its floor, and on a ground it was not baked for it
+   is a slab. Without html.wm-jxl the grounds are hidden and the note says why. */
+.ab-ground{ display:none !important }
+:root.wm-jxl .ab-ground{ display:grid !important }
+.ab-nojxl{ position:relative; z-index:1; margin:0; font-size:var(--type-ui-size,.75rem); line-height:15px; max-width:none }
+:root.wm-jxl .ab-nojxl{ display:none }
+.ab-ground{ position:relative; height:300px; padding-top:48px; box-sizing:border-box; border-radius:8px; overflow:clip; display:grid; place-items:start center }
+.ab-ground .ab-cap{ position:absolute; left:12px; top:9px; z-index:1; margin:0; mix-blend-mode:difference; color:#fff }
+.ab-ground--white{ background:#fff } .ab-ground--grey{ background:#f4f4f4 } .ab-ground--black{ background:#0f0f0f }
+.ab-ground--gradient{ background:linear-gradient(90deg, #fff, #ff8a3d 40%, #3d6bff 70%, #0f0f0f) }
+.ab-ground--checker{ background:repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0 / 24px 24px }
 </style>
 <body>
 
@@ -132,7 +148,22 @@ lights all at once.</p>
 </div>
 <div class="ab-set ab-set--rail">
   <div class="ab-cell"><span class="ab-cap">pill &middot; in a 264px rail &middot; live</span><div class="ab-rail"><span class="ab-rail-k">In your download</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button><span class="ab-rail-ofl">By downloading you accept the OFL 1.1</span></div></div>
-</div></div>
+</div>
+<div class="ab-set ab-set--jxl">
+  <p class="ab-path" data-ab-path>Checking which path this browser takes&hellip;</p>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; JPEG XL (transparent) &middot; live</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-cell"><span class="ab-cap">pill &middot; AVIF fallback (opaque, white floor) &middot; live</span><button type="button" class="wm-accent" data-hdr="avif" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+</div>
+<div class="ab-set ab-set--grounds">
+  <span class="ab-cap">JPEG XL &middot; one light on five grounds (this theme)</span>
+  <p class="ab-nojxl">This browser has no JPEG XL, so nothing is shown here: the AVIF fallback bakes its ground into the light, and on any other ground it shows as a box.</p>
+  <div class="ab-ground ab-ground--white"><span class="ab-cap">white</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-ground ab-ground--grey"><span class="ab-cap">grey</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-ground ab-ground--black"><span class="ab-cap">black</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-ground ab-ground--gradient"><span class="ab-cap">gradient</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+  <div class="ab-ground ab-ground--checker"><span class="ab-cap">checker</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
+</div>
+</div>
 <div class="ab-col"><span class="ab-cap ab-cap--head">Q6 to N4 &middot; the light travels</span>
 <div class="ab-set ab-set--pill">
   <div class="ab-cell"><span class="ab-cap">pill &middot; rest</span><button type="button" class="wm-accent" data-look="q6n4" data-shape="pill"><i class="wm-accent__face" aria-hidden="true"><i class="wm-accent__tone"></i><i class="wm-accent__spr"><i class="wm-accent__fr"><i class="wm-accent__sa"></i><i class="wm-accent__sb"></i></i></i></i><span class="wm-accent__lab">Download</span></button></div>
@@ -174,4 +205,15 @@ scroller, opacity, or transform on an ancestor. The pill in a rail above is ReCa
   <tr><td>q6n4</td><td>pill</td><td class="num">227 &times; 33</td><td>48-frame sprite, cross-faded additively</td></tr>
   <tr><td>q6n4</td><td>chip</td><td class="num">any &times; 32</td><td>end pieces and a stretched rim column</td></tr>
 </table>
+<script>
+/* which HDR path this browser takes (src/jxl.js sets html.wm-jxl; the shell runs it) */
+(function () {
+  var el = document.querySelector('[data-ab-path]'); if (!el) return
+  var hdr = matchMedia('(dynamic-range: high)').matches
+  var say = function (jxl) { el.textContent = 'This browser: ' + (jxl ? 'the JPEG XL path (transparent HDR light).' : 'the AVIF fallback (no JPEG XL here).') + ' HDR display: ' + (hdr ? 'yes.' : 'no, so both show the SDR look.') }
+  /* the shell's scripts (jxl.js among them) run after this part's: ask once the page has loaded */
+  var ask = function () { if (window.wmJxl) window.wmJxl().then(say); else say(document.documentElement.classList.contains('wm-jxl')) }
+  if (document.readyState === 'complete') ask(); else addEventListener('load', ask)
+})()
+</script>
 </body>

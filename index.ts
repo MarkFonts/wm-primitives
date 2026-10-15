@@ -66,6 +66,8 @@ export type { Theme } from './src/theme.js'
 // chip. The light is pre-rendered, dithered AVIF (assets/accent/), never a CSS gradient. Dark
 // ground only; the pill is a full render at its own size. Spec: the Interface chapter of the system page.
 export { AccentButton } from './src/AccentButton'
+// html.wm-jxl when the browser decodes JPEG XL (src/jxl.js, a plain script; AccentButton imports it). wmJxl() -> Promise<boolean>.
+export { wmJxl } from './src/jxl.js'
 export type { AccentButtonProps } from './src/AccentButton'
 
 // BlockStyleRail — h1/h2/h3/¶ stacked in the margin of the block being edited, at the

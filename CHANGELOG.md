@@ -12,6 +12,36 @@ Newest first.
 
 ---
 
+## 2026-10-15 -- q5's light in JPEG XL: transparent HDR, AVIF as the fallback
+
+**wm-primitives#133, Mark: go.** JPEG XL carries transparent HDR, which AVIF cannot in Chrome (PQ + alpha decodes
+fully transparent), and the floor-plus-glow baking, its masks and its boxes all exist to work around that. So where
+the browser decodes JXL, q5's light-mode light is now TRANSPARENT: light only, straight alpha, no floor, no mask. It
+sits on any ground with no box (the docs show one light on white, #f4f4f4, black, a gradient and a checkerboard).
+
+- **Detection: `src/jxl.js`.** CSS cannot ask which formats decode, and the two paths are different structures, so a
+  one-pixel JXL is decoded once and `html.wm-jxl` set (exported as `wmJxl()`; AccentButton imports it; the docs shell
+  runs it). Safari decodes JXL; Chrome behind `chrome://flags/#enable-jxl-image-format`, by default from 155. Without
+  the class nothing changes: Chrome without the flag is pixel-identical to main.
+- **The same light.** Broad 300 at the +200 step (peak 405 nits), acid, the 17 state frames as one sheet stepped by
+  `--ab-s`, the rim inside the ink face: the colour at the peak, with the coverage that, composited in the page's
+  gamma-encoded space, puts it at the AVIF plane's floor + glow over the ground that plane was baked for
+  (`tools/hdr/hdr.py` `coverage()`; a linear-light alpha left a dark spill's tail at a seventh of its light). The dark
+  set is the same (`tools/hdr/build.sh q5-dark`: the shipped spill's footprint at 398 nits, the rim at 589). The docs'
+  five grounds show the JXL light for the current theme, or a note where there is no JXL: never an AVIF plane on a
+  ground it was not baked for. The alpha is dithered on 8-bit steps.
+  Animated JXL does not play on iOS, so sprites stay stills stepped by CSS. `data-hdr="avif"` keeps one button on
+  the AVIF path.
+- **Sizes.** Near-lossless (`-d 0.2`, alpha lossless) is 1,228 KB for the pill sheet and lossless 1,328 KB: the
+  dithered alpha over 8.5 megapixels is what costs. Shipped at distance 1 with alpha distance 1: pill 75 KB, chip
+  47 KB, rims 2 and 1 KB (the AVIF fallback is 54 / 39 / 1 / 1); dark: 56 / 37 / 2 / 1.
+- **`tools/hdr/`: one encoder, one command.** `tools/hdr/build.sh q5-light` reads the capture once, renders the
+  light once, and encodes JXL and AVIF from the same float arrays: numpy throughout, raw 16-bit PAM into cjxl (no PNG),
+  a hash per asset so unchanged files are skipped, the encoders in parallel, a timing and a size table. 12 s cold,
+  5 s warm; the encodes dominate (cjxl and sips on 8.5-megapixel sheets).
+
+---
+
 ## 2026-10-15 -- the grip stays at an empty track
 
 - **#135 hid the grip with the under-3px fill; only the fill hides now.** Mark: "why did the handle go away". The
@@ -19,6 +49,8 @@ Newest first.
 - **The threshold is the corner, not 3px.** The stub Mark meant is the fill showing 2-3px LEFT of the grip, which
   the fill's 7px radius cannot draw ("that can't be seen or fit inside the radii of the bars"). The fill now waits
   until it reaches grip-in + grip-w + fill-r - 1 (17px on ReCal's Try bar), read from the bar's own variables.
+
+---
 
 ## 2026-10-15 -- an empty track drops its grip; the gallery's segments nest
 
@@ -31,6 +63,8 @@ Newest first.
 - **UiKitBoard's `.ui-seg > span` segments are pills.** toggleGroup.css made the holder a pill, and the gallery's
   spans (not buttons) kept radius 0: a square fill in a round hole. They take the same 999px superellipse; the
   dividers go, since a stub between two round segments reads as a fault.
+
+---
 
 ## 2026-10-14 -- q6n4 in HDR and in light mode; containing the light
 
