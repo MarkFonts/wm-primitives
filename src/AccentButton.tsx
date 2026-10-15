@@ -10,6 +10,7 @@
 // is where q6n4 paints its metallic text; a Chevron there takes the same ink.
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import './accentButton.css'
+import './jxl.js'          // html.wm-jxl when this browser decodes JPEG XL: q5's transparent HDR light (accentButton.css)
 
 export interface AccentButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   /** `q5`: underlit, the light deepens on hover. `q6n4`: the light travels round the rim on hover. */

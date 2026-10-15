@@ -414,6 +414,51 @@
   :root[data-theme="light"] .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab svg { color: var(--ab-acid); }
 }
 
+/* ─── Q5 in HDR (light), JPEG XL ───
+   Where the browser decodes JPEG XL (html.wm-jxl, set by src/jxl.js), the light is TRANSPARENT: light only, straight
+   alpha, no baked floor and no mask, so it composites on ANY ground with no box (wm-primitives#133). Same light as the
+   AVIF set above -- broad 300 at the +200 step, peak 405 nits, acid, the 17 state frames stepped from --ab-s, the rim
+   inside the ink face -- encoded as its colour at the peak with coverage alpha = glow / (peak - floor), so over the
+   ground it was baked for it composites to the AVIF plane's floor + glow, and over any other ground it is the same
+   light. Dithered alpha (8-bit steps); JXL distance 1 / alpha distance 1 (tools/hdr/build.sh q5-light). Everything
+   else is the AVIF rules': the frames, `top: 1px`, no transform or opacity on the light, the label above it, the acid
+   label field. The button keeps its ink ground (the AVIF path drops it for its opaque plane). data-hdr="avif" on a
+   button keeps it on the AVIF path (the docs' side-by-side). Without wm-jxl none of this matches. */
+@media (dynamic-range: high) and (prefers-color-scheme: light) {
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q5"]:not([data-hdr="avif"]), :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q5"]:not([data-hdr="avif"]):hover:not(:disabled), :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q5"]:not([data-hdr="avif"]):active:not(:disabled) { background: var(--ab-face); }
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="pill"]::after {
+    background: url('../assets/accent/q5-jxl-light-pill.jxl') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
+    -webkit-mask-image: none; mask-image: none;
+  }
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="chip"]::after {
+    border-image-source: url('../assets/accent/q5-jxl-light-chip.jxl'); background: none;
+    -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv);
+  }
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="pill"] .wm-accent__lab::before {
+    background: url('../assets/accent/q5-jxl-light-rim-pill.jxl') 0 0 / 100% 100% no-repeat; -webkit-mask: none; mask: none;
+  }
+  :root.wm-jxl:not([data-theme="dark"]) .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="chip"] .wm-accent__lab::before {
+    border-image-source: url('../assets/accent/q5-jxl-light-rim-chip.jxl'); background: none; -webkit-mask-box-image: none;
+  }
+}
+@media (dynamic-range: high) {
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q5"]:not([data-hdr="avif"]), :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q5"]:not([data-hdr="avif"]):hover:not(:disabled), :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q5"]:not([data-hdr="avif"]):active:not(:disabled) { background: var(--ab-face); }
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="pill"]::after {
+    background: url('../assets/accent/q5-jxl-light-pill.jxl') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
+    -webkit-mask-image: none; mask-image: none;
+  }
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="chip"]::after {
+    border-image-source: url('../assets/accent/q5-jxl-light-chip.jxl'); background: none;
+    -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv);
+  }
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="pill"] .wm-accent__lab::before {
+    background: url('../assets/accent/q5-jxl-light-rim-pill.jxl') 0 0 / 100% 100% no-repeat; -webkit-mask: none; mask: none;
+  }
+  :root.wm-jxl[data-theme="light"] .wm-accent[data-look="q5"]:not([data-hdr="avif"])[data-shape="chip"] .wm-accent__lab::before {
+    border-image-source: url('../assets/accent/q5-jxl-light-rim-chip.jxl'); background: none; -webkit-mask-box-image: none;
+  }
+}
+
 /* ═════════ Q6 -> N4 ═════════
    Rest is Q6: a smoky-glass chip, a pinprick of rim light at the bottom centre, an acid spill
    beneath, a metallic label. Rollover moves the light from beneath to directly behind: the lit rim

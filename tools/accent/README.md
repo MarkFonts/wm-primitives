@@ -76,3 +76,22 @@ asserts it).
 
 To contain the light, give its box `overflow: clip`. Never a mask, `overflow: hidden` on a scroller, opacity, or
 transform on an ancestor.
+
+## q5's light in JPEG XL (transparent HDR)
+
+Where the browser decodes JPEG XL (`html.wm-jxl`, set by `src/jxl.js`), q5's light-mode light is a TRANSPARENT HDR
+image: light only, straight alpha, no baked floor and no mask, so it sits on any ground with no box
+(wm-primitives#133). The AVIF set above stays as the fallback. One command builds it, from the capture, in seconds:
+
+```bash
+PYTHON=.venv/bin/python ../hdr/build.sh q5-light                     # JXL to assets/accent/, AVIF from the same arrays to out/hdr-avif/
+PYTHON=.venv/bin/python ../hdr/build.sh q5-light --lossless-report   # also near-lossless (-d 0.2) and lossless JXL, for the sizes
+```
+
+| shipped file | what | made by |
+| --- | --- | --- |
+| `q5-jxl-light-pill.jxl`, `-chip` | the broad-300 spill, 17 state frames as one sheet, peak 405, Rec.2100 PQ, straight alpha | `tools/hdr/build.sh q5-light` |
+| `q5-jxl-light-rim-pill.jxl`, `-chip` | the rim inside the ink face, peak 405 | `tools/hdr/build.sh q5-light` |
+
+`tools/hdr/hdr.py` is the shared encoder (JXL and AVIF from the same float arrays: true-peak stamps, even AVIF sides,
+a hash per asset so unchanged ones are skipped, encodes in parallel); `tools/hdr/build.py` holds the targets.
