@@ -226,13 +226,16 @@ export function AxisSlider({
   // The host contract, checked once per page in dev: HOWTO.md's two silent failures.
   useEffect(() => { if (rowRef.current) checkHostContract(rowRef.current) }, [])
   const [barW, setBarW] = useState(0)
+  const [fillMin, setFillMin] = useState(0)   // px: the fill must reach past the grip by more than its own corner
   /* COMPACT: a track bar too narrow for the name, the value and a grip slot at each end shows the grip only while the row is live (AxisSlider.css reads data-compact). Measured, not guessed:
      the name's own width is not available to CSS. */
   useEffect(() => {
     const row = rowRef.current; if (!row || variant !== 'track') return
     const bar = row.querySelector<HTMLElement>('.slider-label'), name = row.querySelector<HTMLElement>('.slider-label-name'), val = row.querySelector<HTMLElement>('.slider-value')
     if (!bar || !name || !val) return
-    const measure = () => { row.toggleAttribute('data-compact', bar.clientWidth < 12 + name.offsetWidth + 6 + val.offsetWidth + 20); setBarW(bar.clientWidth) }
+    const measure = () => { row.toggleAttribute('data-compact', bar.clientWidth < 12 + name.offsetWidth + 6 + val.offsetWidth + 20); setBarW(bar.clientWidth)
+      const cs = getComputedStyle(bar), px = (v: string) => parseFloat(cs.getPropertyValue(v)) || 0
+      setFillMin(px('--grip-in') + px('--grip-w') + px('--fill-r') - 1) }
     const ro = new ResizeObserver(measure); ro.observe(bar); ro.observe(val); measure()
     return () => ro.disconnect()
   }, [variant, label])
@@ -409,9 +412,11 @@ export function AxisSlider({
   // custom property on every row rather than a second code path for one variant.
   const shownValue = isAuto ? (autoValue ?? (min + max) / 2) : (value as number)
   const valuePct = Math.max(0, Math.min(100, ((shownValue - min) / (max - min)) * 100))
-  // EMPTY: a fill under 3px is not a fill, so it hides (AxisSlider.css reads data-empty). The grip
-  // stays at any value -- Mark, 2026-10-15, when #135 hid it too: "why did the handle go away".
-  const empty = variant === 'track' && barW > 0 && valuePct * barW / 100 < 3
+  // EMPTY: the fill hides until the part of it left of the grip clears the fill's own corner
+  // radius (AxisSlider.css reads data-empty). Short of that it is a 2-3px stub the radius eats --
+  // Mark: "that can't be seen or fit inside the radii of the bars". The grip stays at any value:
+  // #135 hid it too, and "why did the handle go away".
+  const empty = variant === 'track' && barW > 0 && valuePct * barW / 100 < fillMin
 
   return (
     <div

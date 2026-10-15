@@ -16,6 +16,9 @@ Newest first.
 
 - **#135 hid the grip with the under-3px fill; only the fill hides now.** Mark: "why did the handle go away". The
   handle is how you know there is a slider; a dial at its minimum still shows it.
+- **The threshold is the corner, not 3px.** The stub Mark meant is the fill showing 2-3px LEFT of the grip, which
+  the fill's 7px radius cannot draw ("that can't be seen or fit inside the radii of the bars"). The fill now waits
+  until it reaches grip-in + grip-w + fill-r - 1 (17px on ReCal's Try bar), read from the bar's own variables.
 
 ## 2026-10-15 -- an empty track drops its grip; the gallery's segments nest
 
