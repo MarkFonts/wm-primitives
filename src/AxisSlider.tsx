@@ -409,8 +409,8 @@ export function AxisSlider({
   // custom property on every row rather than a second code path for one variant.
   const shownValue = isAuto ? (autoValue ?? (min + max) / 2) : (value as number)
   const valuePct = Math.max(0, Math.min(100, ((shownValue - min) / (max - min)) * 100))
-  // EMPTY: a fill under 3px is not a fill, and the grip, clamped to the bar's left end, sits on
-  // the host's icon there. Both hide until the value moves clear (AxisSlider.css reads data-empty).
+  // EMPTY: a fill under 3px is not a fill, so it hides (AxisSlider.css reads data-empty). The grip
+  // stays at any value -- Mark, 2026-10-15, when #135 hid it too: "why did the handle go away".
   const empty = variant === 'track' && barW > 0 && valuePct * barW / 100 < 3
 
   return (

@@ -12,6 +12,11 @@ Newest first.
 
 ---
 
+## 2026-10-15 -- the grip stays at an empty track
+
+- **#135 hid the grip with the under-3px fill; only the fill hides now.** Mark: "why did the handle go away". The
+  handle is how you know there is a slider; a dial at its minimum still shows it.
+
 ## 2026-10-15 -- an empty track drops its grip; the gallery's segments nest
 
 - **Under 3px of fill, the track slider shows neither fill nor grip** (`data-empty`, measured in AxisSlider.tsx
