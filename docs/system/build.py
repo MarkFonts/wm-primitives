@@ -221,7 +221,20 @@ def scope_selector(sel, root):
         return f'{root} {rest}' if rest else root
     return f'{root} {sel}'
 
-def scope_css(css, root, depth=0):
+# Props the PAGE themes. src/type.css declares a FALLBACK for one inside `@layer wm.type { :root
+# {...} }` ("An app on the system overrides both"), and space.html / corner-law.html carry
+# pasted copies. Rescoped onto a section or part, that :root lands ON the element, and a
+# declaration on the element beats the value inherited from the page whatever its layer or
+# specificity -- so the dark fallback froze --text-rgb at 232,232,232 inside the part, and
+# every rgba(var(--text-rgb), a) in it (icons, button sets, ink levels) stayed light on the
+# light ground. Layered :root rules lose it here; the section's own page CSS (or .wm-chrome)
+# declares the themed value. Untouched: UNLAYERED bare :root rules, which are a page's own
+# theme (controls.html's bare :root is its light default), qualified rules, and anything in
+# an @media block.
+PAGE_THEMED = ("--text-rgb",)
+_THEMED_DECL = re.compile(r'(?<![\w-])(?:' + "|".join(re.escape(p) for p in PAGE_THEMED) + r')\s*:[^;{}]*;?')
+
+def scope_css(css, root, depth=0, bare=False):
     parts = []
     for prelude, body in split_rules(css):
         if body is None:
@@ -233,9 +246,12 @@ def scope_css(css, root, depth=0):
         elif low.startswith("@font-face"):
             continue                                  # declared once, globally
         elif low.startswith("@"):
-            parts.append(f"{p}{{{scope_css(body, root, depth+1)}}}")
+            parts.append(f"{p}{{{scope_css(body, root, depth+1, low.startswith('@layer') and (depth == 0 or bare))}}}")
         else:
             sels = ",".join(scope_selector(s, root) for s in p.split(",") if s.strip())
+            m = [ROOTISH.match(x.strip()) for x in p.split(",") if x.strip()]
+            if bare and any(x and not x.group(2) and not x.group(3).strip() for x in m):
+                body = _THEMED_DECL.sub("", body)
             parts.append(f"{sels}{{{body}}}")
     return "".join(parts)
 

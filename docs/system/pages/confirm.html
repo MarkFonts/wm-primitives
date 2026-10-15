@@ -20,13 +20,6 @@
 @font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype"); font-weight: 400 700; font-display:swap; }
 /* Standalone only: the assembled page has these on the chapter. */
 .cf{ --ui-font: "CalSansVF", system-ui, sans-serif; font-family: var(--ui-font); color: var(--ink, #e8e8e8); }
-/* The marks' alpha ink is rgba(var(--text-rgb), a). type.css's fallback (232,232,232, src/type.css:64)
-   is scoped onto this part and shadows the chapter's per-theme value, so in light every mark drew
-   as pale ink on white. Restated here per theme (the same 232 / 22 the chapter and .wm-chrome carry). */
-.cf{--text-rgb:232,232,232}
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .cf{--text-rgb:22,22,22}}
-:root[data-theme="light"] .cf{--text-rgb:22,22,22}
-:root[data-theme="dark"] .cf{--text-rgb:232,232,232}
 
 /* THE CARD -- .gx-tc's rules, one for one (pages/grid.html), under cf- names so the two parts
    cannot reach each other. The steps per width are its: 22/24 on a phone with the column under
