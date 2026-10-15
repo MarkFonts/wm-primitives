@@ -829,9 +829,7 @@
   .slider-row--track[data-compact]:not(:hover):not(.slider-row--engaged):not(:focus-within) .slider-label > .slider-grip-shade { display: none; }
   .slider-row--track.slider-row--off .slider-label::after,
   .slider-row--track.slider-row--off .slider-label > .slider-grip-shade { display: none; }
-  /* empty (set in AxisSlider.tsx): the fill is under 3px, so the fill and the clamped grip both go. */
-  .slider-row--track[data-empty] .slider-label::after,
-  .slider-row--track[data-empty] .slider-label > .slider-grip-shade,
+  /* empty (set in AxisSlider.tsx): a fill too short to clear its corner left of the grip goes. The grip stays: it is the handle. */
   .slider-row--track[data-empty] .slider-label > .slider-fill { display: none; }
   @media (prefers-reduced-motion: reduce) {
     .slider-row--track .slider-label::after,
