@@ -204,8 +204,37 @@ def run_boost():
     spill('q6n4-spillB-pill', 227, 33, Q6B['mb_pill'], 16.5, 'btn')
     spill('q6n4-spillB-chip', 96, 32, Q6B['mb_chip'], 8.0, 'chip')
 
+# ---------- q5's light-mode HDR spill: a broad shoulder under the core (accent proposal, round 5b) ----------
+# Mark (round 5): +400 (605 nits) is his screen's ceiling; "can you make more of the falloff closer to 300 or 240".
+# He picked "broad 300" for q5 on the white floor. Two renders on one LARGE canvas per shape:
+#   core      q5's spill, exact parameters (the original Lorentzian, gen_assets.q5)
+#   shoulder  a long, smooth super-Lorentzian on the same rounded-rect distance (same downward stretch, same weights):
+#             S(dd) = 1 / (1 + (dd / R)^4), windowed to zero by `reach`. A shoulder, not a shelf. gen_hdr.py mixes them.
+# The canvas is big enough that both reach zero by their own falloff, well inside its edges, so no box shows.
+B5 = {  # name: (bw, bh, R_corner, mx, mt, mb, pref)
+    'b5-q5-pill': (225, 32, 16.0, 130, 40, 185, 'btn'), 'b5-q5-chip': (96, 32, 8.0, 110, 36, 160, 'chip')}
+SH_R, SH_REACH = 42.0, 100.0
+def run_broad():
+    for nm, (bw, bh, R, mx, mt, mb, pref) in B5.items():
+        ns = ga_ns(); ns['R'] = R; k = 1.0 if pref == 'btn' else 0.62
+        ns['bloom'](nm + '-core', bw, bh, mx, mt, mb, ns['w_bottom'], (0.14, 0.10, 0.055), (2.5, 10.0 * k + 2, 28.0 * k + 4), (1.0, 1.2, 1.5), 64 * k + 14)
+        Rs = SH_R * (1.0 if pref == 'btn' else 0.8)
+        def sh(d, a_, r_, p_, reach_, Rs=Rs):
+            d = np.maximum(d, 0); I = 1 / (1 + (d / Rs) ** 4)
+            w = np.clip((SH_REACH - d) / (SH_REACH * 0.5), 0, 1); return I * w * w * (3 - 2 * w)
+        ns['falloff'] = sh
+        ns['bloom'](nm + '-sh', bw, bh, mx, mt, mb, ns['w_bottom'], (1.0,), (1.0,), (1.0,), SH_REACH)
+        A = CAP[nm + '-core'][0]; S2 = CAP[nm + '-sh'][0]
+        print(f'{nm}: canvas {A.shape[1]//2} x {A.shape[0]//2} css; at the canvas edges core max {max(A[0].max(), A[-1].max(), A[:,0].max(), A[:,-1].max()):.4f}, shoulder max {max(S2[0].max(), S2[-1].max(), S2[:,0].max(), S2[:,-1].max()):.4f}')
+
 if __name__ == '__main__':
     out = os.environ.get('ACCENT_CAP', 'out/cap.npz')
+    if sys.argv[1:] == ['broad']:                          # add the broad renders to an existing capture
+        z = np.load(out); keys = {k.split('|')[0] for k in z.files}
+        for k in keys: CAP[k] = (z[k + '|A'], z[k + '|W'])
+        run_broad()
+        np.savez_compressed(out, **{k + '|A': v[0] for k, v in CAP.items()}, **{k + '|W': v[1] for k, v in CAP.items()})
+        sys.exit(0)
     if sys.argv[1:] == ['boost']:
         z = np.load(out); keys = {k.split('|')[0] for k in z.files}
         for k in keys: CAP[k] = (z[k + '|A'], z[k + '|W'])

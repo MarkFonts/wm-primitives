@@ -144,11 +144,12 @@
   border: 0 solid transparent; border-image-slice: 0 52 0 52 fill; border-image-width: 0 26px 0 26px; border-image-repeat: stretch;
 }
 
-/* ─── Q5 in light mode (SDR only) ───
+/* ─── Q5 in light mode ───
    Ink on paper: an ink face (#161616) on the light ground, the spill re-rendered as a colored shadow in granny apple
    (#96d500; its tail toward the light --signal-ink, #557b00), the rim rendered in apple inside the face, and an apple
    label (tools/accent/gen_light.py, treatment b). Disabled stays unlit: a --surface-hi face, the hairline, a dim
-   label. No HDR in light mode yet. Gated as color.css gates its themes, so it is stated twice. */
+   label. On an HDR screen light mode goes further: "Q5 in HDR (light)", below. Gated as color.css gates its
+   themes, so it is stated twice. */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .wm-accent[data-look="q5"] {
     --ab-face: #161616;                                          /* the ink face (light --text); the rim is rendered on it */
@@ -212,7 +213,7 @@
    already the floor; untrimmed, its top overhung ReCal's Try bar by a pixel. A chip is fractional-width, and its
    opaque 9-slice joins anti-alias to a 1px dark line, so the plane's own center column is painted under each
    9-slice, where it shows only in those pixels.
-   DARK THEME ONLY (light mode has no HDR yet), gated as color.css gates its themes, so stated twice. An SDR
+   DARK THEME (light mode has its own set, below), gated as color.css gates its themes, so stated twice. An SDR
    screen never matches either block. */
 @media (dynamic-range: high) {
   :root[data-theme="dark"] .wm-accent[data-look="q5"], :root[data-theme="dark"] .wm-accent[data-look="q5"]:hover:not(:disabled), :root[data-theme="dark"] .wm-accent[data-look="q5"]:active:not(:disabled) {
@@ -299,6 +300,105 @@
     -webkit-background-clip: text; background-clip: text;
   }
   :root:not([data-theme="light"]) .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab svg { color: var(--ab-acid); }
+}
+
+/* ─── Q5 in HDR (light) ───
+   Mark picked the accent proposal's round 5b, "broad 300", at +400 ("broad 300. ship it. perfect."): acid light on
+   the white floor, the same construction and the same traps as the dark set above (opaque PQ, true-peak MaxCLL,
+   frames instead of a transform or an opacity, pressed by `top: 1px`). The differences:
+     spill   q5-hdr-light-pill / -chip: the core plus a long, smooth shoulder (tools/accent/capture.py broad), on a
+             larger canvas -- 130px beside, 40px above, 185px below the pill (110 / 36 / 160 for a chip) -- so the
+             band 32px below the button sits at 300 nits. Floor #ffffff (the house light --surface q5 sits on), at
+             PQ code 595, 205 nits, just above page white; peak 605 nits (PQ 0.6972), +400 over the floor
+     rim     q5-hdr-light-rim-pill / -chip, acid inside the ink face (floor #161616), peak 605 nits
+     label   acid over a flat PQ field, its peak channel at 605 nits: PQ 0.6972, 10-bit code 713
+   The chip's spill takes its footprint as a 9-slice mask (-webkit-mask-box-image), which Chrome honors only with
+   no mask-image, so in light HDR a chip ignores --ab-fade-from. No host has a light-mode chip at a clip edge today.
+   The canvas is large and opaque: anything inside it must stack above the button (see the dark notes).
+   On an SDR screen light mode is the ink-on-paper button above. Gated as color.css gates its themes. */
+@media (dynamic-range: high) and (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"][data-shape="pill"] { --ab-mt: 40px; --ab-mx: 130px; --ab-mb: 185px; }    /* the broad canvas, 485 x 257 */
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"][data-shape="chip"] { --ab-mt: 36px; --ab-mx: 110px; --ab-mb: 160px; }    /* 9-slice of a 316 x 228 canvas */
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"], :root:not([data-theme="dark"]) .wm-accent[data-look="q5"]:hover:not(:disabled), :root:not([data-theme="dark"]) .wm-accent[data-look="q5"]:active:not(:disabled) {
+    background: none; dynamic-range-limit: no-limit;
+    transform: none;
+    /* token-lint: allow -- the light's own .8s (its frames), and the 80ms press */
+    transition: --ab-s .8s ease, top .08s ease;
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"]:hover:not(:disabled) { --ab-s: 1.1; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"]:active:not(:disabled) { --ab-s: .9; top: 1px; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"]::after, :root:not([data-theme="dark"]) .wm-accent[data-look="q5"]:hover:not(:disabled)::after, :root:not([data-theme="dark"]) .wm-accent[data-look="q5"]:active:not(:disabled)::after {
+    transform: none; opacity: 1; transition: none;
+    --ab-f: round(nearest, calc((var(--ab-s) - .9) * 80), 1);
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"][data-shape="pill"]::after {
+    background: url('../assets/accent/q5-hdr-light-pill.avif') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
+    -webkit-mask: url('../assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat;
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"][data-shape="chip"]::after {
+    -webkit-mask-image: none; mask-image: none;
+    border-image-source: url('../assets/accent/q5-hdr-light-chip.avif');
+    border-image-slice: calc(var(--ab-f) * 456) 272 calc((16 - var(--ab-f)) * 456) 272 fill; border-image-width: 0 136px 0 136px;
+    -webkit-mask-box-image: url('../assets/accent/q5-hdr-light-mask-chip.avif') 0 272 0 272 / 0 136px 0 136px stretch;
+    background: url('../assets/accent/q5-hdr-light-chip.avif') 50% calc(var(--ab-f) * 6.25%) / 40000% 1700% no-repeat;
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before {
+    background: url('../assets/accent/q5-hdr-light-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+    -webkit-mask: url('../assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"][data-shape="chip"] .wm-accent__lab::before {
+    border-image-source: url('../assets/accent/q5-hdr-light-rim-chip.avif');
+    background: url('../assets/accent/q5-hdr-light-rim-chip.avif') 50% 0 / 40000% 100% no-repeat;
+    -webkit-mask-box-image: url('../assets/accent/q5-hdr-mask-rim-chip.avif') 0 52 0 52 / 0 26px 0 26px stretch;
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab {
+    color: transparent; -webkit-text-fill-color: transparent;
+    background: url('../assets/accent/q5-hdr-light-label.avif') 0 0 / 100% 100%;
+    -webkit-background-clip: text; background-clip: text;
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab svg { color: var(--ab-acid); }
+}
+@media (dynamic-range: high) {
+  :root[data-theme="light"] .wm-accent[data-look="q5"][data-shape="pill"] { --ab-mt: 40px; --ab-mx: 130px; --ab-mb: 185px; }    /* the broad canvas, 485 x 257 */
+  :root[data-theme="light"] .wm-accent[data-look="q5"][data-shape="chip"] { --ab-mt: 36px; --ab-mx: 110px; --ab-mb: 160px; }    /* 9-slice of a 316 x 228 canvas */
+  :root[data-theme="light"] .wm-accent[data-look="q5"], :root[data-theme="light"] .wm-accent[data-look="q5"]:hover:not(:disabled), :root[data-theme="light"] .wm-accent[data-look="q5"]:active:not(:disabled) {
+    background: none; dynamic-range-limit: no-limit;
+    transform: none;
+    /* token-lint: allow -- the light's own .8s (its frames), and the 80ms press */
+    transition: --ab-s .8s ease, top .08s ease;
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q5"]:hover:not(:disabled) { --ab-s: 1.1; }
+  :root[data-theme="light"] .wm-accent[data-look="q5"]:active:not(:disabled) { --ab-s: .9; top: 1px; }
+  :root[data-theme="light"] .wm-accent[data-look="q5"]::after, :root[data-theme="light"] .wm-accent[data-look="q5"]:hover:not(:disabled)::after, :root[data-theme="light"] .wm-accent[data-look="q5"]:active:not(:disabled)::after {
+    transform: none; opacity: 1; transition: none;
+    --ab-f: round(nearest, calc((var(--ab-s) - .9) * 80), 1);
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q5"][data-shape="pill"]::after {
+    background: url('../assets/accent/q5-hdr-light-pill.avif') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
+    -webkit-mask: url('../assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat;
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q5"][data-shape="chip"]::after {
+    -webkit-mask-image: none; mask-image: none;
+    border-image-source: url('../assets/accent/q5-hdr-light-chip.avif');
+    border-image-slice: calc(var(--ab-f) * 456) 272 calc((16 - var(--ab-f)) * 456) 272 fill; border-image-width: 0 136px 0 136px;
+    -webkit-mask-box-image: url('../assets/accent/q5-hdr-light-mask-chip.avif') 0 272 0 272 / 0 136px 0 136px stretch;
+    background: url('../assets/accent/q5-hdr-light-chip.avif') 50% calc(var(--ab-f) * 6.25%) / 40000% 1700% no-repeat;
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before {
+    background: url('../assets/accent/q5-hdr-light-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+    -webkit-mask: url('../assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q5"][data-shape="chip"] .wm-accent__lab::before {
+    border-image-source: url('../assets/accent/q5-hdr-light-rim-chip.avif');
+    background: url('../assets/accent/q5-hdr-light-rim-chip.avif') 50% 0 / 40000% 100% no-repeat;
+    -webkit-mask-box-image: url('../assets/accent/q5-hdr-mask-rim-chip.avif') 0 52 0 52 / 0 26px 0 26px stretch;
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab {
+    color: transparent; -webkit-text-fill-color: transparent;
+    background: url('../assets/accent/q5-hdr-light-label.avif') 0 0 / 100% 100%;
+    -webkit-background-clip: text; background-clip: text;
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab svg { color: var(--ab-acid); }
 }
 
 /* ═════════ Q6 -> N4 ═════════

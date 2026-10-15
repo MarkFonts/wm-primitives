@@ -39,8 +39,9 @@ writers (and renders q5's rim, which ships as a CSS gradient in SDR), so every s
 
 ```bash
 ACCENT_CAP=out/cap.npz .venv/bin/python capture.py           # the captured light, out/cap.npz (~40 s)
+ACCENT_CAP=out/cap.npz .venv/bin/python capture.py broad     # adds the light-mode spill's core and shoulder (b5-q5-*)
 swiftc -O pq_write.swift -o out/pq_write
-ACCENT_CAP=out/cap.npz .venv/bin/python gen_hdr.py           # q5's HDR set, written straight to assets/accent/
+ACCENT_CAP=out/cap.npz .venv/bin/python gen_hdr.py           # q5's HDR sets, dark and light, straight to assets/accent/
 .venv/bin/python gen_hdr.py clli                             # restamp MaxCLL only (the MAXCLL switch at the top)
 ACCENT_CAP=out/cap.npz ACCENT_LIGHT_OUT=out/light/ .venv/bin/python gen_light.py   # light-mode SDR art; ships b-q5-*
 ```
@@ -50,7 +51,11 @@ ACCENT_CAP=out/cap.npz ACCENT_LIGHT_OUT=out/light/ .venv/bin/python gen_light.py
 | `q5-hdr-dark-pill.avif`, `-chip` | the spill, opaque PQ, floor #1a1a1a, 17 state frames stacked | `gen_hdr.py` |
 | `q5-hdr-dark-rim-pill.avif`, `-chip` | the rim inside the face, opaque PQ, floor #1a1a1a | `gen_hdr.py` |
 | `q5-hdr-dark-label.avif` | flat acid PQ field for the label | `gen_hdr.py` |
-| `q5-hdr-mask-pill.avif`, `-rim-pill`, `-rim-chip` | footprint masks (straight alpha) | `gen_hdr.py` |
+| `q5-hdr-mask-pill.avif`, `-rim-pill`, `-rim-chip` | footprint masks (straight alpha); the rim masks serve both themes | `gen_hdr.py` |
+| `q5-hdr-light-pill.avif`, `-chip` | light mode: the "broad 300" spill (core + shoulder, +400, peak 605), floor #ffffff, 17 state frames | `gen_hdr.py` (from `capture.py broad`) |
+| `q5-hdr-light-rim-pill.avif`, `-chip` | light mode: acid rim inside the ink face (floor #161616), peak 605 | `gen_hdr.py` |
+| `q5-hdr-light-label.avif` | light mode: flat acid PQ field at 605 | `gen_hdr.py` |
+| `q5-hdr-light-mask-pill.avif`, `-chip` | light mode: footprints of the widest frame (the chip's is a 9-slice mask) | `gen_hdr.py` |
 | `q5-light-pill.avif`, `-chip`, `-rim-pill`, `-rim-chip` | light mode: `b-q5-pill`, `b-q5-chip`, `b-q5-rim-pill`, `b-q5-rim-chip` | `gen_light.py` |
 
 `gen_light.py` renders the whole light proposal (treatments a, b, c and masks); only treatment b's q5 files ship.

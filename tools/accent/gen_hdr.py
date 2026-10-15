@@ -4,7 +4,8 @@ so where the glow dies the image is exactly the floor it sits on, and a mask-ima
 The glow is the SDR art's own light (capture.py runs the shipped generators with hooks in place of their
 writers; q5's spill keeps the ORIGINAL falloff), lifted in gamma terms by boost(A) = 1 + b (A / A_pk)^2, which
 leaves the tail where the SDR art has it and raises only the core to V_peak. Ported from the round-2 accent
-proposal (route 2b): q5, acid, DARK only. q6n4 has no HDR set, and q5's light mode is still being designed.
+proposal (route 2b): q5, acid. q6n4 has no HDR set. The light-mode set (acid on the white floor) is the proposal's
+round 5b, "broad 300" at +400, which Mark picked ("broad 300. ship it. perfect."): see LIGHT MODE below.
 
 THE FLOOR (measured in the consumers, not assumed -- the plane bakes its floor, so a mismatch is a faint box):
   spill on #1a1a1a   ReCal's rail under Download (.rail-dl) and its Try bar (.try) are both var(--surface),
@@ -12,6 +13,8 @@ THE FLOOR (measured in the consumers, not assumed -- the plane bakes its floor, 
                      is oklch(21.78% 0 0) = #1a1a1a to within 0.01 of a level.
   rim   on #1a1a1a   the face, which is var(--surface) too.
 So every surface q5 sits on is one floor, and one set serves all of them. A new ground needs its own bake (FLOOR).
+In light mode q5 sits on the house light --surface, #ffffff (color.css; the docs stage pins it). The floor is put
+on PQ code 595, just above 203 nits, so it cannot decode under page white. The rim's floor is the ink face, #161616.
 Colour: acid, display-p3 components mixed by the capture's core / tail / hot weights, linearised, P3 -> BT.2020. Encode: ST 2084 inverse EOTF, triangular dither at 10-bit steps, 16-bit raw
 -> pq_write (Swift, itur_2100_PQ) -> PNG -> sips -s format avif.
 
@@ -170,8 +173,64 @@ def field(rgb_p3, nits, side=16):
     unit = to_nits(p3(*rgb_p3))                              # the colour at SDR level, nits per channel
     return np.broadcast_to(unit * nits / unit.max(), (side, side, 3)).copy()   # peak channel lands on `nits`
 
+# ═══════════ LIGHT MODE: acid on the white floor, round 5b "broad 300" at +400 ═══════════
+# glow = Kc * core + H * shoulder (capture.py broad): the core is q5's spill under its own law, unit peak; the
+# shoulder a long super-Lorentzian. H is solved so the band 32px below the button sits at 300 nits on the peak
+# channel, and Kc so the brightest pixel is exactly PEAK_L -- +400 over the floor, Mark's screen's ceiling -- so
+# MaxCLL is the true peak. The rim (on the ink face) and the label field are scaled to the same peak.
+def pq_inv(code):
+    m1, m2, c1, c2, c3 = 0.1593017578125, 78.84375, 0.8359375, 18.8515625, 18.6875
+    e = np.float64(code) ** (1 / m2)
+    return 10000 * (np.maximum(e - c1, 0) / (c2 - c3 * e)) ** (1 / m1)
+WHITE_FLOOR_NITS = float(pq_inv(595 / 1023))
+PEAK_L, TARGET_L, VPEAK_LIGHT_SPILL, FACE_L = 605.0, 300.0, 1.9, 22   # FACE_L: #161616, the light ink face
+GEO_L = {'q5-hdr-light-pill': ('b5-q5-pill', 40, 32), 'q5-hdr-light-chip': ('b5-q5-chip', 36, 32)}   # capture, mt, button h
+RIM_L = {'q5-hdr-light-rim-pill': 'q5-rim-pill', 'q5-hdr-light-rim-chip': 'q5-rim-chip'}
+LABEL_L = 'q5-hdr-light-label'
+LIGHT = list(GEO_L) + list(RIM_L) + [LABEL_L]
+
+def law_r2(A, W, vpk):                     # the gamma-space law above, unit-free
+    apk = float(A.max()); b = vpk / apk - 1
+    return to_nits((A * (1 + b * (A / apk) ** 2))[..., None] * (W @ np.stack(PAL)))
+
+def broad(z, cap, mt, bh):
+    core = law_r2(z[cap + '-core|A'], z[cap + '-core|W'], VPEAK_LIGHT_SPILL); core = core / core.max()
+    S = z[cap + '-sh|A']; col = to_nits(PAL[0]); shl = S[..., None] * (col / col.max())
+    cx = core.shape[1] // 2; r32 = int(round((mt + bh) * 2)) + 64          # 32px below the button, 2x
+    ipk = np.unravel_index(core.max(-1).argmax(), core.shape[:2]); s_pk = float(S[ipk])
+    total = lambda H: WHITE_FLOOR_NITS + (PEAK_L - WHITE_FLOOR_NITS - H * s_pk) * core + H * shl
+    lo, hi = 0.0, 400.0
+    for _ in range(40):                                                      # solve H: the band at TARGET_L
+        H = (lo + hi) / 2
+        lo, hi = (H, hi) if total(H)[r32, cx].max() < TARGET_L else (lo, H)
+    return total(H) - WHITE_FLOOR_NITS
+
+def light(z, rows):
+    for name, (cap, mt, bh) in GEO_L.items():
+        glow = broad(z, cap, mt, bh)
+        fr = [resample(glow, sc, mt + bh + 1) * (1 - 0.15 * np.clip((1 - sc) / 0.1, 0, 1)) for sc in np.linspace(S0, S1, NF)]
+        big = fr[-1].max(-1); t = np.clip(big / 1.0, 0, 1); mm = t * t * (3 - 2 * t)   # footprint: > 1 nit in the widest frame
+        mpath = SHIP + name.replace('light-', 'light-mask-') + '.avif'
+        from PIL import Image
+        Image.fromarray(np.dstack([np.full(big.shape + (3,), 255, np.uint8), np.rint(mm * 255).astype(np.uint8)]), 'RGBA').save(mpath, quality=92, speed=4)
+        g = np.concatenate(fr, 0); plane = WHITE_FLOOR_NITS + np.clip(g, 0, None)
+        s = write(plane, (g.max(-1) > 0.01).astype(np.float32), SHIP + name + '.avif')
+        pk = float(plane.max()); open(OUT + name + '.peak', 'w').write(f'{pk:.3f}'); set_clli(SHIP + name + '.avif', clli_for(pk))
+        rows.append(f'{name:22s} floor {WHITE_FLOOR_NITS:6.2f} nits (code 595)  peak {pk:6.1f} nits (PQ {pq(pk):.4f})  MaxCLL {clli_for(pk):4d}  '
+                    f'{NF} frames {plane.shape[1]} x {plane.shape[0]}  {s/1024:5.1f} KB  (mask {os.path.getsize(mpath)/1024:.1f} KB)')
+    fl = grey_nits(FACE_L)
+    for name, cap in RIM_L.items():
+        g = law_r2(z[cap + '|A'], z[cap + '|W'], 1.6); g = g * (PEAK_L - fl) / g.max(); plane = fl + g
+        s = write(plane, (g.max(-1) > 0.01).astype(np.float32), SHIP + name + '.avif')
+        pk = float(plane.max()); open(OUT + name + '.peak', 'w').write(f'{pk:.3f}'); set_clli(SHIP + name + '.avif', clli_for(pk))
+        rows.append(f'{name:22s} floor {fl:6.2f} nits (the ink face)  peak {pk:6.1f} nits (PQ {pq(pk):.4f})  MaxCLL {clli_for(pk):4d}  {s/1024:5.1f} KB')
+    s = write(field(ACID, PEAK_L), np.zeros((16, 16), np.float32), SHIP + LABEL_L + '.avif')
+    open(OUT + LABEL_L + '.peak', 'w').write(f'{PEAK_L:.3f}'); set_clli(SHIP + LABEL_L + '.avif', clli_for(PEAK_L))
+    rows.append(f'{LABEL_L:22s} acid field, peak channel {PEAK_L:6.1f} nits = PQ {pq(PEAK_L):.4f} (10-bit code {pq(PEAK_L) * 1023:5.1f})  '
+                f'MaxCLL {clli_for(PEAK_L):4d}  {s/1024:5.1f} KB')
+
 if __name__ == '__main__' and sys.argv[1:] == ['clli']:
-    for name in list(LAYERS) + [LABEL]:
+    for name in list(LAYERS) + [LABEL] + LIGHT:
         pk = float(open(OUT + name + '.peak').read())
         set_clli(SHIP + name + '.avif', clli_for(pk)); print(name, get_clli(SHIP + name + '.avif'))
     sys.exit()
@@ -202,4 +261,5 @@ if __name__ == '__main__':
     set_clli(SHIP + LABEL + '.avif', clli_for(nits))           # a flat field's true peak is its level
     rows.append(f'{LABEL:22s} acid field, peak channel {nits:6.1f} nits = PQ {pq(nits):.4f} (10-bit code {pq(nits) * 1023:5.1f})  '
                 f'MaxCLL {clli_for(nits):4d}  {s/1024:5.1f} KB')
+    light(z, rows)
     print('\n'.join(rows))

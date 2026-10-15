@@ -12,7 +12,7 @@ Newest first.
 
 ---
 
-## 2026-10-14 -- q5 in HDR (dark), and q5's light mode
+## 2026-10-14 -- q5 in HDR, and q5's light mode
 
 **Mark, on the round-2 accent proposal: "underlit looks magical, ship it", and "text needs HDR too".** On an HDR
 screen, in the dark theme, q5's spill, its rim, and its label go past SDR white. SDR screens are unchanged
@@ -36,11 +36,17 @@ pixel for pixel (measured against main on the system page and in ReCal).
   and so is the face; the docs stage pins it). An opaque plane also covers what is under it, where the SDR light
   let it show through: a host stacks content inside the spill's reach above the button. ReCal's OFL line under
   Download needs that; the Try bar's neighbors already sit above the chips.
-- **Light mode, SDR only: ink on paper.** In the light theme q5 is an ink face (#161616) with the spill re-rendered
-  as an apple (#96d500) colored shadow, an apple rim inside the face, and an apple label (`gen_light.py`, treatment
-  b). It was a white face with a pale acid label, nearly invisible on a light ground. No HDR in light mode yet: the
-  white-floor planes are still being reworked. Both themes are gated as color.css gates them, so a host that is
-  dark whatever the OS says has to say so (`data-theme="dark"`).
+- **Light mode: ink on paper.** In the light theme q5 is an ink face (#161616) with the spill re-rendered as an
+  apple (#96d500) colored shadow, an apple rim inside the face, and an apple label (`gen_light.py`, treatment b).
+  It was a white face with a pale acid label, nearly invisible on a light ground. Both themes are gated as color.css
+  gates them, so a host that is dark whatever the OS says has to say so (`data-theme="dark"`).
+- **Light mode in HDR: acid, "broad 300".** Mark, on round 5b of the proposal: "broad 300. ship it. perfect." On the
+  white floor (#ffffff, PQ code 595, 205 nits) the spill is q5's core plus a long, smooth shoulder, solved so the
+  band 32px below the button sits at 300 nits and the peak is exactly +400 (605 nits, MaxCLL 605, his screen's
+  ceiling). The canvas is large (130px beside, 185px below the pill), so the docs give the light-theme q5 the full
+  width and space its cells. The rim is acid inside the ink face; the label is acid at 605 (PQ 0.6972). Earlier
+  white-floor rounds failed on MaxCLL 203 (it clips the whole plane to a cream slab), which is why true peak is the
+  rule. A light-mode chip's spill takes a 9-slice footprint mask, so it ignores `--ab-fade-from`.
 
 ---
 
