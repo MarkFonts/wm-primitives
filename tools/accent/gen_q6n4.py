@@ -9,9 +9,9 @@ DARK (acid, the black-floor rows of the accent proposal at the 1x falloff; Mark:
            flat (its x peak would squeeze into a hairline on a narrow chip; a PQ plane's brightness is not coverage,
            so the SDR flatten mask cannot correct it)
   rim      cap (47 frames), bot, top on the chip face (#1a1a1a), the 48-frame travel sprite on the pill face
-           (#0a0a0a); the top as 5 fade-in frames (the SDR fade is an opacity). The LOG inner glow (gen_inner 'log9':
-           the two-term 3px / 9px falloff of Mark's fall sheet) scaled in LINEAR light, one factor for the family:
-           the same shape as the SDR art, brighter (lin() below)
+           (#0a0a0a); the top as 5 fade-in frames (the SDR fade is an opacity). The LOG inner glow (gen_inner 'log', the single 3px
+           exponential: measured against Mark's reference sheet, proto3/mid-fall.png, to within 1 level) scaled in
+           LINEAR light, one factor for the family: the same shape as the SDR art, brighter (lin() below)
   streak   5 frames at the SDR opacities (.9 at rest to .2 lit), on each face; the light pieces sit above it
   THE CAP: round 2's V_peaks put the dark rim at ~880 nits and the streak at ~990, past Mark's screen's ceiling
   (+400 over white, 605 nits; round 5); a plane brighter than the headroom is tone-mapped whole, floor included

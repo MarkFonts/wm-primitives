@@ -10,7 +10,7 @@ python3 -m venv .venv && .venv/bin/pip install numpy pillow      # Pillow 11.3+ 
 ACCENT_OUT=out/ .venv/bin/python gen_assets.py     # chip spills, streaks, rim-cap/bot/top (the default falloff)
 ACCENT_OUT=out/ .venv/bin/python gen_dl.py         # the q5 pill (225 x 32)
 ACCENT_OUT=out/ .venv/bin/python gen_log.py log    # the faster, logarithmic falloff (q6-spill-*-log, q5-under-*-log)
-ACCENT_OUT=out/ .venv/bin/python gen_inner.py ship log9  # the inner glow: travel sprite and rim pieces, the two-term log falloff
+ACCENT_OUT=out/ .venv/bin/python gen_inner.py ship log   # the inner glow: travel sprite and rim pieces, log falloff
 ```
 
 Re-rendered from this directory the images match the shipped ones to within encoder noise (mean
@@ -26,11 +26,10 @@ difference under 0.4 of 255). The dither is seeded, so a render is repeatable. `
 | `q6n4-spill-chip.avif` | `q6-spill-chip-log` | `gen_log.py log` |
 | `q6n4-streak-pill.avif` | `q6-streak-btn` | `render.py` |
 | `q6n4-streak-chip.avif` | `q6-streak-chip` | `gen_assets.py` |
-| `q6n4-travel-pill.avif` | `q6n4-travel-btn-log9` | `gen_inner.py ship log9` (from `sprite.py`) |
-| `q6n4-rim-bot.avif`, `-top`, `-cap` | `rim-bot-log9`, `rim-top-log9`, `rim-cap-log9` | `gen_inner.py ship log9` (from `gen_assets.py`) |
+| `q6n4-travel-pill.avif` | `q6n4-travel-btn-log` | `gen_inner.py ship log` (from `sprite.py`) |
+| `q6n4-rim-bot.avif`, `-top`, `-cap` | `rim-bot-log`, `rim-top-log`, `rim-cap-log` | `gen_inner.py ship log` (from `gen_assets.py`) |
 
-q6n4 ships the log falloff only. Its inner glow is `log9`, the two-term 3px / 9px falloff of the LOG look Mark approved
-(the accent proto's fall sheet); the single-exponential `log` that shipped first fell off too fast and read as an outline. Ported from ReCal `accent-proto` at the commit named in the PR.
+q6n4 ships the log falloff only. Ported from ReCal `accent-proto` at the commit named in the PR.
 
 ## q5 in HDR, and q5's light mode
 

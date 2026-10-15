@@ -13,10 +13,7 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__)); SCR = os.path.dirname(HERE)
 ASSETS = os.environ.get('ACCENT_OUT', 'out/')
 # single exponentials: the spill's two-term mix (.55/.45 with a 9 / 5.5px tail) left the pill centre lit; here the inward falloff is ONE exponential
-VAR = {'mid': ((1.0, 5.5), (0.0, 9.0)), 'log': ((1.0, 3.0), (0.0, 9.0)), 'log2': ((1.0, 2.0), (0.0, 5.5)),
-       # the LOG look Mark approved (the ReCal proto's fall sheet, "Q6N4 log", hovered): the spill's own two-term mix,
-       # 3px and 9px, so the light falls in from the rim and the centre stays softly lit. Shipped since the q6n4 HDR PR.
-       'log9': ((0.55, 3.0), (0.45, 9.0))}
+VAR = {'mid': ((1.0, 5.5), (0.0, 9.0)), 'log': ((1.0, 3.0), (0.0, 9.0)), 'log2': ((1.0, 2.0), (0.0, 5.5))}
 
 def K0(x):
     x = np.asarray(x, np.float64); out = np.empty_like(x)

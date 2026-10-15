@@ -80,7 +80,7 @@ def run_blooms():
 
 def run_rim():
     import gen_inner
-    ns = ga_ns(kernel=gen_inner.kern('log9'))
+    ns = ga_ns(kernel=gen_inner.kern('log'))
     got = []
     ns['HOOK_TO8'] = lambda A, C: got.append((A.copy(), C.copy()))
     ns['OUT'] = os.environ.get('TMPDIR', '/tmp') + '/'; ns['PREV'] = ns['OUT']
@@ -103,7 +103,7 @@ def run_sprite():
               "print(name, strip.shape, round(os.path.getsize(path) / 1024, 1), 'KB')"):
         assert o in s, o; s = s.replace(o, "pass")
     fr = []
-    ns = {'__name__': 'spr', 'KG': gen_inner.kern('log9'), 'HOOK_SPR': lambda A, C: fr.append((A.copy(), C.copy()))}
+    ns = {'__name__': 'spr', 'KG': gen_inner.kern('log'), 'HOOK_SPR': lambda A, C: fr.append((A.copy(), C.copy()))}
     a = sys.argv; sys.argv = ['sprite.py']; exec(compile(s, 'sprite.py', 'exec'), ns); sys.argv = a
     ns['build']('q6n4-travel-pill', 227, 33)                             # = q6n4-travel-pill.avif (gen_inner ship log)
     CAP['q6n4-travel-pill'] = (np.concatenate([f[0] for f in fr], 0).astype(np.float32),
@@ -160,7 +160,7 @@ def lorentz(d2):   # the original rim glow kernel (q5's falloff family)
 
 def run_new():
     import gen_inner
-    logk = gen_inner.kern('log9')
+    logk = gen_inner.kern('log')
     def bottom(h, R):   # the bottom edge and lower corners, fading up the short sides
         return lambda px, py: np.clip((py - (h - R - 2)) / (R + 2), 0, 1) ** 1.5
     def top(h, R):
