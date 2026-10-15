@@ -13,8 +13,8 @@
  *   import { wmJxl } from '@markfonts/wm-primitives'     // or <script src="src/jxl.js">
  *   wmJxl().then(ok => …)                                // html.wm-jxl is already set when ok is true
  */
-const WM_JXL_PROBE = 'data:image/jxl;base64,/woAELCguBAIABAAGABLGIsVggE='   // 1 x 1, transparent, lossless (20 bytes)
-let wmJxlProbe = null
+const WM_JXL_PROBE = 'data:image/jxl;base64,/woAELCguBAIABAAGABLGIsVggE=';  // 1 x 1, transparent, lossless (20 bytes)
+let wmJxlProbe = null;
 
 export function wmJxl() {
   if (wmJxlProbe) return wmJxlProbe
@@ -32,5 +32,7 @@ export function wmJxl() {
   return wmJxlProbe
 }
 
-if (typeof window !== 'undefined') window.wmJxl = wmJxl
-wmJxl()
+if (typeof window !== 'undefined') window.wmJxl = wmJxl;
+// The semicolon matters: the docs shell concatenates plain scripts, and a bare `wmJxl()` before a line that opens
+// with `(` is called again with that line as its argument.
+wmJxl();
