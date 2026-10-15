@@ -41,7 +41,7 @@ async function open(page: Page, theme: 'dark' | 'light') {
 type Box = { x: number; y: number; w: number; h: number }
 async function boxes(page: Page, ground: string) {
   return page.evaluate(g => {
-    const cell = document.querySelector(`#s-controls .ab-ground--${g}`) as HTMLElement
+    const cell = document.querySelector(`#s-controls [data-ab-look="q5"] .ab-ground--${g}`) as HTMLElement
     const btn = cell.querySelector('.wm-accent') as HTMLElement
     const c = cell.getBoundingClientRect(), b = btn.getBoundingClientRect(), cs = getComputedStyle(btn)
     const px = (v: string) => parseFloat(cs.getPropertyValue(v)) || 0
@@ -68,7 +68,7 @@ async function grab(page: Page, clip: Box) {
   }, buf.toString('base64'))
 }
 
-test.describe('the JPEG XL light composites transparently', () => {
+test.describe('the JPEG XL light composites transparently (q5)', () => {
   test.skip(({ browserName, hasTouch }) => browserName !== 'chromium' || !!hasTouch, 'Chromium with its JXL flag, one profile')
 
   for (const theme of ['dark', 'light'] as const) {
@@ -83,14 +83,14 @@ test.describe('the JPEG XL light composites transparently', () => {
       test.skip(!jxl, 'this Chromium does not decode JPEG XL even with --enable-features=JXLImageFormat (html.wm-jxl absent)')
       const report: string[] = [], bad: string[] = []
       for (const g of GROUNDS) {
-        await page.locator(`#s-controls .ab-ground--${g}`).scrollIntoViewIfNeeded()
+        await page.locator(`#s-controls [data-ab-look="q5"] .ab-ground--${g}`).scrollIntoViewIfNeeded()
         await page.waitForTimeout(400)
         const bx = await boxes(page, g)
         expect(bx.afterImage, `${g}: the spill is the JXL one`).toContain('.jxl')
         expect(bx.rimContent, `${g}: the rim is drawn`).not.toBe('none')
         const pts = [...corners(bx.after, 8, bx.cell).map(p => ['spill', ...p]), ...corners(bx.rim, 2, bx.cell).map(p => ['rim', ...p])] as [string, number, number][]
         const hide = (gg: string, how: string) => page.evaluate(([gg, how]) => {
-          const b = document.querySelector(`#s-controls .ab-ground--${gg} .wm-accent`) as HTMLElement
+          const b = document.querySelector(`#s-controls [data-ab-look="q5"] .ab-ground--${gg} .wm-accent`) as HTMLElement
           b.style.visibility = how === 'button' ? 'hidden' : ''; b.classList.toggle('jxl-spec-nospill', how === 'spill')
         }, [gg, how])
         await page.evaluate(() => { document.getElementById('jxl-spec')!.textContent += '.jxl-spec-nospill::after { display: none !important }' })
@@ -104,6 +104,92 @@ test.describe('the JPEG XL light composites transparently', () => {
           const d = Math.max(...[0, 1, 2].map(k => Math.abs(img.data[i + k] - bare.data[i + k])))
           report.push(`${theme} ${g} ${what} (${x},${y}): ${img.data.slice(i, i + 3).join(',')} vs ${bare.data.slice(i, i + 3).join(',')} -> ${d}`)
           if (d > 2) bad.push(report[report.length - 1])
+        }
+      }
+      console.log(report.join('\n'))
+      await browser.close()
+      expect(bad, bad.join('\n')).toEqual([])
+    })
+  }
+})
+
+/* Q6 -> N4 the same way: the q6n4 grounds (a pill over a chip on each), the checkerboard and the gradient, in BOTH
+   themes, at rest, at --ab-p .5 and at 1 (set on the buttons, transitions off). For each button:
+     the spill   ::before, 8px in from each corner of its box (inset -1px - --ab-mt / mx / mb), clipped to the ground
+     the face    1px in from each corner of the button's box -- outside the face's radius, where the in-face light
+                 (the travel sprite, the rim cap / bottom / top, the streak) would show if any layer were a
+                 rectangle. Sampled with both spills off
+   against the same pixel with that button hidden, within 2 levels. The chip sits in the pill's spill, so the chip's
+   reference keeps the pill: the pill is sampled against the bare ground, the chip against the ground plus the pill.
+   Both grounds are shot at once: five screenshots a state. */
+test.describe('the JPEG XL light composites transparently (q6n4)', () => {
+  test.skip(({ browserName, hasTouch }) => browserName !== 'chromium' || !!hasTouch, 'Chromium with its JXL flag, one profile')
+
+  for (const theme of ['dark', 'light'] as const) {
+    test(`${theme}: outside the light, every ground is untouched, at rest, half lit, and lit`, async ({ baseURL }) => {
+      test.setTimeout(300_000)       // fifteen shots of the large system page
+      const browser = await chromium.launch({ args: ['--enable-features=JXLImageFormat'] })
+      const page = await browser.newPage({ baseURL, viewport: { width: 1440, height: 900 } })
+      const jxl = await open(page, theme)
+      if (!jxl) await browser.close()
+      test.skip(!jxl, 'this Chromium does not decode JPEG XL even with --enable-features=JXLImageFormat (html.wm-jxl absent)')
+      const sel = (g: string) => `#s-controls [data-ab-look="q6n4"] .ab-ground--${g}`
+      await page.evaluate(() => { document.getElementById('jxl-spec')!.textContent +=
+        '.jxl-spec-nospill::before { display: none !important } #s-controls [data-ab-look="q6n4"] .ab-ground { height: 352px !important }' })
+      /* the gradient comes first on the page: its top 24px down the viewport, the checker below it */
+      await page.evaluate(q => document.querySelector(q)!.scrollIntoView({ block: 'start' }), sel('gradient'))
+      await page.evaluate(q => window.scrollBy(0, document.querySelector(q)!.getBoundingClientRect().top - 24), sel('gradient'))
+      await page.waitForTimeout(400)
+      const area = await page.evaluate(qs => {                       // the two grounds' union, shot at once
+        const r = qs.map(q => document.querySelector(q)!.getBoundingClientRect())
+        const x = Math.floor(Math.min(...r.map(b => b.left))), y = Math.floor(Math.min(...r.map(b => b.top)))
+        return { x, y, w: Math.ceil(Math.max(...r.map(b => b.right))) - x, h: Math.ceil(Math.max(...r.map(b => b.bottom))) - y }
+      }, GROUNDS.map(sel))
+      expect(area.y, 'both grounds are in the viewport').toBeGreaterThanOrEqual(0)
+      expect(area.y + area.h, 'both grounds are in the viewport').toBeLessThanOrEqual(900)
+      const set = (p: string, hide: string, nospill: boolean) => page.evaluate(([p, hide, nospill]) => {
+        for (const b of document.querySelectorAll<HTMLElement>('#s-controls [data-ab-look="q6n4"] .wm-accent')) {
+          b.style.transition = 'none'; b.style.setProperty('--ab-p', p as string)
+          b.style.visibility = hide === b.dataset.shape || hide === 'both' ? 'hidden' : ''
+          b.classList.toggle('jxl-spec-nospill', nospill as boolean)
+        }
+      }, [p, hide, nospill] as const)
+      const shot = async () => { await page.waitForTimeout(250); return grab(page, area) }
+      const at = (img: { w: number; data: number[] }, x: number, y: number) => {
+        const i = ((y - area.y) * img.w + (x - area.x)) * 4; return img.data.slice(i, i + 3)
+      }
+      const report: string[] = [], bad: string[] = []
+      for (const p of ['0', '.5', '1']) {
+        await set(p, '', false); const all = await shot()               // both buttons
+        await set(p, '', true); const faces = await shot()              // both, spills off
+        await set(p, 'chip', false); const pill = await shot()          // the pill alone
+        await set(p, 'chip', true); const pillFace = await shot()       // the pill alone, its spill off
+        await set(p, 'both', false); const bare = await shot()          // the ground
+        await set(p, '', false)
+        const ref = { pill: { spill: [pill, bare], face: [pillFace, bare] }, chip: { spill: [all, pill], face: [faces, pillFace] } }
+        for (const g of GROUNDS) {
+          const bx = await page.evaluate(q => {
+            const cell = document.querySelector(q) as HTMLElement, c = cell.getBoundingClientRect()
+            return { cell: { x: c.left, y: c.top, w: c.width, h: c.height }, btn: Array.from(cell.querySelectorAll<HTMLElement>('.wm-accent')).map(btn => {
+              const b = btn.getBoundingClientRect(), cs = getComputedStyle(btn), px = (v: string) => parseFloat(cs.getPropertyValue(v)) || 0
+              const sa = btn.querySelector('.wm-accent__fr .wm-accent__sa, .wm-accent__cap .wm-accent__sa') as HTMLElement
+              return { shape: btn.dataset.shape as 'pill' | 'chip',
+                spill: { x: b.left - px('--ab-mx') - 1, y: b.top - px('--ab-mt') - 1, w: b.width + 2 * px('--ab-mx') + 2, h: b.height + px('--ab-mt') + px('--ab-mb') + 2 },
+                face: { x: b.left, y: b.top, w: b.width, h: b.height },
+                spillImage: getComputedStyle(btn, '::before').borderImageSource, lightImage: getComputedStyle(sa).backgroundImage }
+            }) }
+          }, sel(g))
+          for (const b of bx.btn) {
+            expect(b.spillImage, `${g} ${b.shape}: the spill is the JXL one`).toContain('.jxl')
+            expect(b.lightImage, `${g} ${b.shape}: the in-face light is the JXL one`).toContain('.jxl')
+            const pts = [...corners(b.spill, 8, bx.cell).map(q => ['spill', ...q]), ...corners(b.face, 1, bx.cell).map(q => ['face', ...q])] as ['spill' | 'face', number, number][]
+            for (const [what, x, y] of pts) {
+              const [img, base] = ref[b.shape][what], v = at(img, x, y), r = at(base, x, y)
+              const d = Math.max(...[0, 1, 2].map(k => Math.abs(v[k] - r[k])))
+              report.push(`${theme} p=${p} ${g} ${b.shape} ${what} (${x},${y}): ${v.join(',')} vs ${r.join(',')} -> ${d}`)
+              if (d > 2) bad.push(report[report.length - 1])
+            }
+          }
         }
       }
       console.log(report.join('\n'))

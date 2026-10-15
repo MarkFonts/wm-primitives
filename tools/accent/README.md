@@ -77,7 +77,7 @@ asserts it).
 To contain the light, give its box `overflow: clip`. Never a mask, `overflow: hidden` on a scroller, opacity, or
 transform on an ancestor.
 
-## q5's light in JPEG XL (transparent HDR)
+## q5's and q6n4's light in JPEG XL (transparent HDR)
 
 Where the browser decodes JPEG XL (`html.wm-jxl`, set by `src/jxl.js`), q5's light-mode light is a TRANSPARENT HDR
 image: light only, straight alpha, no baked floor and no mask, so it sits on any ground with no box
@@ -86,12 +86,17 @@ image: light only, straight alpha, no baked floor and no mask, so it sits on any
 ```bash
 PYTHON=.venv/bin/python ../hdr/build.sh q5-light                     # JXL to assets/accent/, AVIF from the same arrays to out/hdr-avif/
 PYTHON=.venv/bin/python ../hdr/build.sh q5-light --lossless-report   # also near-lossless (-d 0.2) and lossless JXL, for the sizes
+PYTHON=.venv/bin/python ../hdr/build.sh q5-dark                      # q5's dark light
+PYTHON=.venv/bin/python ../hdr/build.sh q6n4-dark                    # q6n4's light, from gen_q6n4.py's own layers (and q6n4-light)
 ```
 
 | shipped file | what | made by |
 | --- | --- | --- |
 | `q5-jxl-light-pill.jxl`, `-chip` | the broad-300 spill, 17 state frames as one sheet, peak 405, Rec.2100 PQ, straight alpha | `tools/hdr/build.sh q5-light` |
 | `q5-jxl-light-rim-pill.jxl`, `-chip` | the rim inside the ink face, peak 405 | `tools/hdr/build.sh q5-light` |
+| `q6n4-jxl-{dark,light}-spill-pill.jxl`, `-spill-chip` | q6n4's spill, 9 fade frames (dark 399, light 405 / 364) | `tools/hdr/build.sh q6n4-dark`, `q6n4-light` |
+| `q6n4-jxl-{dark,light}-travel-pill.jxl` | the 48-frame travel sprite, the pill's streak baked in (dark 605, light 405) | the same |
+| `q6n4-jxl-{dark,light}-rim-cap.jxl`, `-rim-bot`, `-rim-top`, `-streak-chip` | the chip's in-face light: end pieces, bottom edge, top edge's 5 frames, the streak's 5 frames | the same |
 
 `tools/hdr/hdr.py` is the shared encoder (JXL and AVIF from the same float arrays: true-peak stamps, even AVIF sides,
 a hash per asset so unchanged ones are skipped, encodes in parallel); `tools/hdr/build.py` holds the targets.

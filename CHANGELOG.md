@@ -12,6 +12,25 @@ Newest first.
 
 ---
 
+## 2026-10-15 -- q6n4's light in JPEG XL
+
+**wm-primitives#133, stage 2.** q6n4 takes the same path as q5: where the browser decodes JPEG XL (`html.wm-jxl`),
+its light is transparent HDR JXL -- light only, straight alpha, no floor, no footprint mask -- in both themes. A
+format change, not a new look: the layers are `gen_q6n4.py`'s own (the shipped single-exponential inner glow, the
+bottom rim lit at every p, the #1a1a1a face, acid in dark, Broad 300 at 405 in light), each encoded at its true peak
+with `hdr.coverage()` over the ground its AVIF plane bakes (`tools/hdr/build.sh q6n4-dark`, `q6n4-light`).
+
+- **Fourteen files, 295 KB in all** (the travel sprites 91 and 87 KB). The spill's 9 fade frames, the chip's 5
+  streak frames, the rim cap / bottom / top, and the 48-frame travel sprite with the pill's streak baked in at its
+  SDR opacities, as #129 did.
+- **The look's own masks stay.** The chip's clip-edge fade and the bottom edge opening from the centre are part of
+  the animation; only the footprint masks go. The spill is one 9-slice with no column painted under it, which would
+  add its light twice.
+- **Proven on the page.** `accent-jxl.spec.ts` samples the q6n4 grounds too: pill and chip, at rest, half lit, and
+  lit, in both themes, every spill corner and every face corner against the ground with that button hidden: 96
+  samples a theme, all exact.
+- **The AVIF path is unchanged**, and `data-hdr="avif"` still holds a button on it.
+
 ## 2026-10-15 -- q5's light in JPEG XL: transparent HDR, AVIF as the fallback
 
 **wm-primitives#133, Mark: go.** JPEG XL carries transparent HDR, which AVIF cannot in Chrome (PQ + alpha decodes
