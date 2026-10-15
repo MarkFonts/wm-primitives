@@ -12,6 +12,53 @@ Newest first.
 
 ---
 
+## 2026-10-14 -- q6n4 in HDR and in light mode; containing the light
+
+**Mark approved q6n4 as briefed: "light = Broad 300, acid, white floor; dark = acid HDR".** q6n4 gets what q5 got in
+#128, built the same way (opaque PQ planes, floor + glow, true-peak MaxCLL; `tools/accent/gen_q6n4.py`).
+
+- **Nothing HDR fades or moves by opacity or transform.** The spill's fade is 9 frames and the streak's 5, stepped
+  from `--ab-p`; the travelling light and the chip's end pieces show one frame at a time (the A/B cross-fade was an
+  opacity, so frame B is hidden in HDR); the top edge fades in over 5 frames; the press is `top: 1px`; the face, the
+  sprite group and the frames drop their isolation, blend modes and `will-change`. Measured headless: in every state,
+  no HDR layer or ancestor up to the button has an opacity under 1, a transform, or a blend mode.
+- **Dark:** acid on #1a1a1a (the ground and both faces). The spill keeps the SHIPPED
+  spill's footprint at a modest 398 nits (Mark, on the hero preview, of the boosted one: "the black is too far
+  out"), so it reads as the SDR light, brighter. The in-face light's cores (round 2 had them at ~880-990 nits, past
+  his screen's ceiling, where Chrome tone-maps the whole plane and its floor greys into a box) peak at 605. q5's dark
+  set already follows the same standard (the shipped footprint, 398 / 589) and is unchanged.
+- **Light, both looks, at the +200 step.** Mark: "300 / 408 is best for both". The broad-300 spill and the in-face
+  light peak at 405 (MaxCLL true peak); q5's light set is re-baked from 605 to match. The band below the pill stays
+  near 300: q5 298 / 300 / 300 / 262 / 224 nits at 8 / 16 / 32 / 64 / 96px, q6n4 323 / 311 / 300 / 259 / 222. The
+  labels stay at 605 ("the white is finally visible"). On SDR, treatment b (an ink face, apple light, a label from the
+  light ink to apple).
+- **Even sides.** Chrome decodes a PQ AVIF with an odd width or height as fully transparent; the generators assert
+  even sides.
+- **The label** is two layers: the resting ink over a flat acid PQ field at 605. The ink thins as the light comes
+  on, so the HDR acid comes through.
+- **Containing the light: `overflow: clip`.** A light-mode HDR pill's spill is 485 x 257, wider than ReCal's rail.
+  To contain the light, give its box `overflow: clip`: it stops hard at the box's edge (Mark rejected a feathered
+  bound twice) and keeps the HDR, since a clip is not a scroll container. Never a mask, `overflow: hidden` on a
+  scroller, opacity, or transform on an ancestor. ReCal #45 clips its rail footer; the docs show the same pill in a
+  264px rail, and the stage and the light-mode cards clip rather than hide. The face clips its in-face light the
+  same way in HDR. A feathered-bounds API (`--ab-fade-top` and friends) was tried in this PR and removed.
+- Light-mode HDR chips lose their 9-slice footprint mask (Chrome ignores it beside a mask-image, and the chip keeps
+  `--ab-fade-from`); their edges are the floor.
+- **The inner glow and the bottom rim, in HDR.** Mark, on hover: "a thin bright outline with a dark interior", and
+  "there should STILL be bottom rim". The SDR art is right: its LOG inner glow (the single 3px exponential) matches his
+  reference sheet (proto3/mid-fall.png, the LOG column, to within 1 level from the rim inward). The HDR lost it twice.
+  (1) Its planes lifted only the core (round 2's gamma law), so the inner glow stayed at its SDR level beside a
+  605-nit rim: 1px in from the bottom rim it was 0.03 of the rim against SDR's 0.3. They now scale the SDR light in
+  linear light, one factor for the rim pieces and the travel sprite, so the shape is the SDR shape, brighter.
+  (2) The streak was an opaque plane ON TOP of the travelling light; on hover its last frame painted the floor over
+  the bottom rim. The pill's streak is now baked into its travel frames at the SDR opacities (.9 at rest to .2 lit),
+  added in linear light; the chip's sits under the light pieces.
+- **The pill's face is the ground, #1a1a1a, as the chip's (SDR too).** Mark's reference sheet (proto3/mid-fall.png) was
+  rendered on --surface: its lit face reads 26 at the centre, and 24-25 under the fading tone at p .5. A later
+  #0a0a0a override in the proto, ported in #122, left the hovered pill near-black inside.
+
+---
+
 ## 2026-10-14 -- the track bar is 30px, and two icons join the face
 
 **ReCal asked for the `track` bar at 30px so its pills sit on the 3px line; it carried a local override until now.**
@@ -23,6 +70,8 @@ is still 32px and its comment says it matches the dial bar; a follow-up. DIAL.md
 
 **`text_increase` and `format_letter_spacing` are in the Material Symbols subset** (96 ligatures, 66,796 bytes, cut with
 `scripts/cut-icon-subset.py`; `?v=96` in `src/icon.css`). Nothing draws them yet.
+
+---
 
 ## 2026-10-14 -- q5 in HDR, and q5's light mode
 

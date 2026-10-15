@@ -212,18 +212,33 @@ def run_boost():
 #             S(dd) = 1 / (1 + (dd / R)^4), windowed to zero by `reach`. A shoulder, not a shelf. gen_hdr.py mixes them.
 # The canvas is big enough that both reach zero by their own falloff, well inside its edges, so no box shows.
 B5 = {  # name: (bw, bh, R_corner, mx, mt, mb, pref)
-    'b5-q5-pill': (225, 32, 16.0, 130, 40, 185, 'btn'), 'b5-q5-chip': (96, 32, 8.0, 110, 36, 160, 'chip')}
+    'b5-q5-pill': (225, 32, 16.0, 130, 40, 185, 'btn'), 'b5-q5-chip': (96, 32, 8.0, 110, 36, 160, 'chip'),
+    'b5-q6n4-pill': (227, 33, 16.5, 130, 30, 185, 'btn'), 'b5-q6n4-chip': (96, 32, 8.0, 110, 26, 160, 'chip')}
 SH_R, SH_REACH = 42.0, 100.0
 def run_broad():
     for nm, (bw, bh, R, mx, mt, mb, pref) in B5.items():
         ns = ga_ns(); ns['R'] = R; k = 1.0 if pref == 'btn' else 0.62
-        ns['bloom'](nm + '-core', bw, bh, mx, mt, mb, ns['w_bottom'], (0.14, 0.10, 0.055), (2.5, 10.0 * k + 2, 28.0 * k + 4), (1.0, 1.2, 1.5), 64 * k + 14)
+        if 'q5' in nm:
+            wfn = ns['w_bottom']
+            ns['bloom'](nm + '-core', bw, bh, mx, mt, mb, wfn, (0.14, 0.10, 0.055), (2.5, 10.0 * k + 2, 28.0 * k + 4), (1.0, 1.2, 1.5), 64 * k + 14)
+        else:                                              # q6n4: the boosted log spill (Q6B), its sideways gaussian weight
+            sx = bw * 0.30
+            def wfn(x, y, cx, cy, bh_, sx=sx):
+                sg = 1 / (1 + np.exp(-((y - cy) / (bh_ * 0.4))))
+                return (0.03 + 0.97 * sg) * np.exp(-0.5 * ((x - cx) / sx) ** 2)
+            def lf(d, a_, r_, p_, reach_, t1=3.0, t2=14.0, rc=60.0):
+                d = np.maximum(d, 0); I0 = sum(a_)
+                I = I0 * (0.55 * np.exp(-d / t1) + 0.45 * np.exp(-d / t2))
+                w = np.clip((rc - d) / (rc * 0.5), 0, 1); return I * w * w * (3 - 2 * w)
+            ns['falloff'] = lf
+            ns['bloom'](nm + '-core', bw, bh, mx, mt, mb, wfn, tuple(Q6B['gain'] * v for v in (0.17, 0.12, 0.065)),
+                        (2.5, 9.0 * k + 2, 26.0 * k + 4), (1.0, 1.2, 1.5), 56 * k + 14)
         Rs = SH_R * (1.0 if pref == 'btn' else 0.8)
         def sh(d, a_, r_, p_, reach_, Rs=Rs):
             d = np.maximum(d, 0); I = 1 / (1 + (d / Rs) ** 4)
             w = np.clip((SH_REACH - d) / (SH_REACH * 0.5), 0, 1); return I * w * w * (3 - 2 * w)
         ns['falloff'] = sh
-        ns['bloom'](nm + '-sh', bw, bh, mx, mt, mb, ns['w_bottom'], (1.0,), (1.0,), (1.0,), SH_REACH)
+        ns['bloom'](nm + '-sh', bw, bh, mx, mt, mb, wfn, (1.0,), (1.0,), (1.0,), SH_REACH)
         A = CAP[nm + '-core'][0]; S2 = CAP[nm + '-sh'][0]
         print(f'{nm}: canvas {A.shape[1]//2} x {A.shape[0]//2} css; at the canvas edges core max {max(A[0].max(), A[-1].max(), A[:,0].max(), A[:,-1].max()):.4f}, shoulder max {max(S2[0].max(), S2[-1].max(), S2[:,0].max(), S2[:,-1].max()):.4f}')
 

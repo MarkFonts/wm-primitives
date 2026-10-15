@@ -35,9 +35,13 @@
  *
  * THE HOST'S TWO JOBS: the spill is wider than the button (52px / 40px), so a host that has a
  * clip edge near it fades the spill there (ReCal does, at its footer and its window edge): a chip
- * takes --ab-fade-from (below), the pill is the host's to mask, since its spill is one image the
- * host can cut; and the pill's box is fixed, so the host gives it room. ::after (q5) and ::before
+ * takes --ab-fade-from (below), the pill's light is the host's to contain (CONTAINING THE LIGHT, below);
+ * and the pill's box is fixed, so the host gives it room. ::after (q5) and ::before
  * (q6n4) carry the spill; --ab-mb is how far it reaches below the box.
+ *
+ * CONTAINING THE LIGHT. To contain the light, give its box `overflow: clip`. Never a mask, `overflow: hidden` on a
+ * scroller, opacity, or transform on an ancestor: on an HDR screen each sends the light through a surface that
+ * clamps it to SDR. A clip stops it hard at the box's edge, which is the look (ReCal's rail footer does this).
  */
 
 @property --ab-p { syntax: "<number>"; inherits: true; initial-value: 0; }
@@ -230,7 +234,9 @@
   }
   :root[data-theme="dark"] .wm-accent[data-look="q5"][data-shape="pill"]::after {
     background: url('../assets/accent/q5-hdr-dark-pill.avif') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
-    -webkit-mask: url('../assets/accent/q5-hdr-mask-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q5-hdr-mask-pill.avif') 0 0 / 100% 100% no-repeat;
+    -webkit-mask-image: url('../assets/accent/q5-hdr-mask-pill.avif'); mask-image: url('../assets/accent/q5-hdr-mask-pill.avif');
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-composite: source-in; mask-composite: intersect;
   }
   :root[data-theme="dark"] .wm-accent[data-look="q5"][data-shape="chip"]::after {
     border-image-source: url('../assets/accent/q5-hdr-dark-chip.avif');
@@ -273,7 +279,9 @@
   }
   :root:not([data-theme="light"]) .wm-accent[data-look="q5"][data-shape="pill"]::after {
     background: url('../assets/accent/q5-hdr-dark-pill.avif') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
-    -webkit-mask: url('../assets/accent/q5-hdr-mask-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q5-hdr-mask-pill.avif') 0 0 / 100% 100% no-repeat;
+    -webkit-mask-image: url('../assets/accent/q5-hdr-mask-pill.avif'); mask-image: url('../assets/accent/q5-hdr-mask-pill.avif');
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-composite: source-in; mask-composite: intersect;
   }
   :root:not([data-theme="light"]) .wm-accent[data-look="q5"][data-shape="chip"]::after {
     border-image-source: url('../assets/accent/q5-hdr-dark-chip.avif');
@@ -303,17 +311,18 @@
 }
 
 /* ─── Q5 in HDR (light) ───
-   Mark picked the accent proposal's round 5b, "broad 300", at +400 ("broad 300. ship it. perfect."): acid light on
+   Mark picked the accent proposal's round 5b, "broad 300" ("broad 300. ship it. perfect."), now at +200: acid light on
    the white floor, the same construction and the same traps as the dark set above (opaque PQ, true-peak MaxCLL,
    frames instead of a transform or an opacity, pressed by `top: 1px`). The differences:
      spill   q5-hdr-light-pill / -chip: the core plus a long, smooth shoulder (tools/accent/capture.py broad), on a
              larger canvas -- 130px beside, 40px above, 185px below the pill (110 / 36 / 160 for a chip) -- so the
-             band 32px below the button sits at 300 nits. Floor #ffffff (the house light --surface q5 sits on), at
-             PQ code 595, 205 nits, just above page white; peak 605 nits (PQ 0.6972), +400 over the floor
-     rim     q5-hdr-light-rim-pill / -chip, acid inside the ink face (floor #161616), peak 605 nits
+             band below the button sits near 300 nits. Floor #ffffff (the house light --surface q5 sits on), at
+             PQ code 595, 205 nits, just above page white; peak 405 nits (PQ 0.6539), +200 over the floor (Mark, on
+             the hero preview: "300 / 408 is best for both"; it shipped at +400 in #128)
+     rim     q5-hdr-light-rim-pill / -chip, acid inside the ink face (floor #161616), peak 405 nits
      label   acid over a flat PQ field, its peak channel at 605 nits: PQ 0.6972, 10-bit code 713
-   The chip's spill takes its footprint as a 9-slice mask (-webkit-mask-box-image), which Chrome honors only with
-   no mask-image, so in light HDR a chip ignores --ab-fade-from. No host has a light-mode chip at a clip edge today.
+   The chip's spill has no footprint mask (a 9-slice one, -webkit-mask-box-image, is ignored by Chrome beside a
+   mask-image, and the chip keeps --ab-fade-from): its edges are the floor.
    The canvas is large and opaque: anything inside it must stack above the button (see the dark notes).
    On an SDR screen light mode is the ink-on-paper button above. Gated as color.css gates its themes. */
 @media (dynamic-range: high) and (prefers-color-scheme: light) {
@@ -333,13 +342,15 @@
   }
   :root:not([data-theme="dark"]) .wm-accent[data-look="q5"][data-shape="pill"]::after {
     background: url('../assets/accent/q5-hdr-light-pill.avif') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
-    -webkit-mask: url('../assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat;
+    -webkit-mask-image: url('../assets/accent/q5-hdr-light-mask-pill.avif'); mask-image: url('../assets/accent/q5-hdr-light-mask-pill.avif');
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-composite: source-in; mask-composite: intersect;
   }
   :root:not([data-theme="dark"]) .wm-accent[data-look="q5"][data-shape="chip"]::after {
-    -webkit-mask-image: none; mask-image: none;
+    -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv);
+    -webkit-mask-composite: source-in; mask-composite: intersect;
     border-image-source: url('../assets/accent/q5-hdr-light-chip.avif');
     border-image-slice: calc(var(--ab-f) * 456) 272 calc((16 - var(--ab-f)) * 456) 272 fill; border-image-width: 0 136px 0 136px;
-    -webkit-mask-box-image: url('../assets/accent/q5-hdr-light-mask-chip.avif') 0 272 0 272 / 0 136px 0 136px stretch;
     background: url('../assets/accent/q5-hdr-light-chip.avif') 50% calc(var(--ab-f) * 6.25%) / 40000% 1700% no-repeat;
   }
   :root:not([data-theme="dark"]) .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before {
@@ -375,13 +386,15 @@
   }
   :root[data-theme="light"] .wm-accent[data-look="q5"][data-shape="pill"]::after {
     background: url('../assets/accent/q5-hdr-light-pill.avif') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
-    -webkit-mask: url('../assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat;
+    -webkit-mask-image: url('../assets/accent/q5-hdr-light-mask-pill.avif'); mask-image: url('../assets/accent/q5-hdr-light-mask-pill.avif');
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-composite: source-in; mask-composite: intersect;
   }
   :root[data-theme="light"] .wm-accent[data-look="q5"][data-shape="chip"]::after {
-    -webkit-mask-image: none; mask-image: none;
+    -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv);
+    -webkit-mask-composite: source-in; mask-composite: intersect;
     border-image-source: url('../assets/accent/q5-hdr-light-chip.avif');
     border-image-slice: calc(var(--ab-f) * 456) 272 calc((16 - var(--ab-f)) * 456) 272 fill; border-image-width: 0 136px 0 136px;
-    -webkit-mask-box-image: url('../assets/accent/q5-hdr-light-mask-chip.avif') 0 272 0 272 / 0 136px 0 136px stretch;
     background: url('../assets/accent/q5-hdr-light-chip.avif') 50% calc(var(--ab-f) * 6.25%) / 40000% 1700% no-repeat;
   }
   :root[data-theme="light"] .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before {
@@ -568,7 +581,10 @@
   border: 0 solid transparent;
   border-image: url('../assets/accent/q6n4-spill-pill.avif') 0 148 0 148 fill / 0 74px 0 74px stretch;
 }
-.wm-accent[data-shape="pill"] .wm-accent__face { inset: 0; background: #0a0a0a; }
+/* the pill's face is the ground, as the chip's: Mark's approved reference (the accent proto's mid-fall sheet) was
+   rendered on --surface (#1a1a1a: its lit face reads 26 at the centre, 24-25 under the fading tone at p .5); a later
+   #0a0a0a override in the proto, ported here first, left the hovered pill's interior near-black */
+.wm-accent[data-shape="pill"] .wm-accent__face { inset: 0; background: var(--ab-face); }
 .wm-accent[data-shape="pill"] .wm-accent__tone {
   background: linear-gradient(180deg, #171717, #0c0c0c); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
   opacity: max(0, calc(1 - var(--ab-p) * 1.6));
@@ -608,3 +624,302 @@
   background: none; animation: none; color: var(--ab-off-ink); -webkit-text-fill-color: var(--ab-off-ink);
 }
 .wm-accent[data-look="q6n4"]:disabled .wm-accent__lab svg { color: var(--ab-off-ink); }
+
+/* ─── Q6 -> N4 in light mode ───
+   Ink on paper, as q5's: an ink face (#161616) and tone, the spill (the boosted one the HDR set uses) as an apple
+   colored shadow, the rim pieces, travel sprite and streak rendered in apple, and the label from the light ink
+   (--surface into --text) to apple as the light comes on (tools/accent/gen_q6n4.py, gen_light.py treatment b).
+   Gated as color.css gates its themes, so stated twice. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] {
+    --ab-off-ink: var(--text-dim, rgba(22, 22, 22, .42)); --ab-off-line: var(--border, rgba(22, 22, 22, .16));
+    --ab-rest1: color-mix(in srgb, var(--surface, #ffffff) 90%, var(--text, #161616));
+    --ab-rest2: color-mix(in srgb, var(--surface, #ffffff) 64%, var(--text, #161616));
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"], :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:hover:not(:disabled), :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:active:not(:disabled) {
+    --ab-inkp: color-mix(in srgb, var(--ab-rest1) calc((1 - min(1, var(--ab-p) * 1.6)) * 100%), var(--ab-apple));
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="pill"], :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="pill"]:hover:not(:disabled), :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="pill"]:active:not(:disabled) { --ab-mb: 76px; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="chip"], :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="chip"]:hover:not(:disabled), :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="chip"]:active:not(:disabled) { --ab-mb: 62px; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__face { background: #161616; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__tone { background: #161616; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bg, #f4f4f4) 10%, transparent); }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="chip"]::before { border-image-source: url('../assets/accent/q6n4-light-spill-chip.avif'); }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="pill"]::before { border-image-source: url('../assets/accent/q6n4-light-spill-pill.avif'); }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__face::after { background-image: url('../assets/accent/q6n4-light-streak-chip.avif'); }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="pill"] .wm-accent__face::after { background-image: url('../assets/accent/q6n4-light-streak-pill.avif'); }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__fr .wm-accent__sa, :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__fr .wm-accent__sb { background-image: url('../assets/accent/q6n4-light-travel-pill.avif'); }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__cap .wm-accent__sa, :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__cap .wm-accent__sb { background-image: url('../assets/accent/q6n4-light-rim-cap.avif'); }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__bot { background-image: url('../assets/accent/q6n4-light-rim-bot.avif'); }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__top { background-image: url('../assets/accent/q6n4-light-rim-top.avif'); }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__lab {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--ab-rest1) var(--ab-mp), var(--ab-apple)), color-mix(in srgb, var(--ab-rest2) var(--ab-mp), var(--ab-apple)));
+    -webkit-background-clip: text; background-clip: text;
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:disabled { background: var(--surface-hi, #ebebeb); }
+}
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] {
+    --ab-off-ink: var(--text-dim, rgba(22, 22, 22, .42)); --ab-off-line: var(--border, rgba(22, 22, 22, .16));
+    --ab-rest1: color-mix(in srgb, var(--surface, #ffffff) 90%, var(--text, #161616));
+    --ab-rest2: color-mix(in srgb, var(--surface, #ffffff) 64%, var(--text, #161616));
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"], :root[data-theme="light"] .wm-accent[data-look="q6n4"]:hover:not(:disabled), :root[data-theme="light"] .wm-accent[data-look="q6n4"]:active:not(:disabled) {
+    --ab-inkp: color-mix(in srgb, var(--ab-rest1) calc((1 - min(1, var(--ab-p) * 1.6)) * 100%), var(--ab-apple));
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="pill"], :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="pill"]:hover:not(:disabled), :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="pill"]:active:not(:disabled) { --ab-mb: 76px; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="chip"], :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="chip"]:hover:not(:disabled), :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="chip"]:active:not(:disabled) { --ab-mb: 62px; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__face { background: #161616; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__tone { background: #161616; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bg, #f4f4f4) 10%, transparent); }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="chip"]::before { border-image-source: url('../assets/accent/q6n4-light-spill-chip.avif'); }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="pill"]::before { border-image-source: url('../assets/accent/q6n4-light-spill-pill.avif'); }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__face::after { background-image: url('../assets/accent/q6n4-light-streak-chip.avif'); }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="pill"] .wm-accent__face::after { background-image: url('../assets/accent/q6n4-light-streak-pill.avif'); }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__fr .wm-accent__sa, :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__fr .wm-accent__sb { background-image: url('../assets/accent/q6n4-light-travel-pill.avif'); }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__cap .wm-accent__sa, :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__cap .wm-accent__sb { background-image: url('../assets/accent/q6n4-light-rim-cap.avif'); }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__bot { background-image: url('../assets/accent/q6n4-light-rim-bot.avif'); }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__top { background-image: url('../assets/accent/q6n4-light-rim-top.avif'); }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__lab {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--ab-rest1) var(--ab-mp), var(--ab-apple)), color-mix(in srgb, var(--ab-rest2) var(--ab-mp), var(--ab-apple)));
+    -webkit-background-clip: text; background-clip: text;
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"]:disabled { background: var(--surface-hi, #ebebeb); }
+
+/* ─── Q6 -> N4 in HDR ───
+   As q5's (above): opaque PQ planes, floor + glow, every file's MaxCLL its true peak, and nothing HDR under a
+   transform or an opacity below 1. So the spill's fade is 9 frames and the streak's 5, both stepped from --ab-p;
+   the travelling light and the chip's end pieces show ONE frame at a time (the A/B cross-fade is an opacity:
+   frame B is hidden); the top edge fades in over 5 frames; the press is `top: 1px`; and the face, the sprite group
+   and the frames lose their isolation and blend modes (both force a surface). tools/accent/gen_q6n4.py.
+     dark    acid on #1a1a1a (the ground and both faces): the shipped log spill's
+             footprint at a modest 398 nits (PQ 0.6521, as q5's), so it reads as the SDR light, brighter; the rim
+             pieces, the 48-frame travel sprite and the streak, their cores lowered to peak at 605 nits (PQ 0.6972),
+             Mark's screen's ceiling (a brighter plane is tone-mapped whole, floor included, and shows as a box)
+     light   acid on the white floor (#ffffff, PQ code 595): round 5b's "broad 300" spill at the +200 step (Mark: "300 /
+             408 is best for both"; peak 405, PQ 0.6539; the chip's 363, its flattened middle), the in-face light on
+             the ink face (#161616) at 405
+     label   the resting ink is a layer over a flat acid PQ field at 605 nits (PQ 0.6972, 10-bit code 713); it
+             thins as --ab-p rises (--ab-mp), so the HDR acid comes through as the light comes on
+   THE STREAK. Both it and the rim are opaque here, and a streak on top hid the lit bottom rim on hover. The pill's
+   streak is baked INTO the travel frames, at its SDR opacity for each frame (.9 at rest to .2 lit), added in linear
+   light as the SDR layers add, so the bottom rim is lit at every p; the chip's keeps its own frames (the SDR
+   opacities) and sits UNDER the light pieces (z-index on the sprite group). The in-face light is the SDR light scaled in linear light, so its inner glow falls in from the rim
+   exactly as the SDR art's does, brighter (tools/accent/gen_q6n4.py lin()).
+   The spill canvases: in dark the shipped SDR spill's own (Mark, on the hero preview: the boosted spill's "black is
+   too far out"), held at 52px / 40px below through every state; in light 30 / 130 / 185 (26 / 110 / 160 for a chip). A spill has no footprint mask (its edges are the floor), so it keeps --ab-fade-from.
+   The chip's 9-slice middle is held flat in the plane itself (the SDR flatten mask cannot correct a brightness), and
+   its center column is painted under each 9-slice, as q5's. */
+@media (dynamic-range: high) {
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"][data-shape="pill"], :root[data-theme="dark"] .wm-accent[data-look="q6n4"][data-shape="pill"]:hover:not(:disabled), :root[data-theme="dark"] .wm-accent[data-look="q6n4"][data-shape="pill"]:active:not(:disabled) { --ab-mb: 52px; }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"][data-shape="chip"], :root[data-theme="dark"] .wm-accent[data-look="q6n4"][data-shape="chip"]:hover:not(:disabled), :root[data-theme="dark"] .wm-accent[data-look="q6n4"][data-shape="chip"]:active:not(:disabled) { --ab-mb: 40px; }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"], :root[data-theme="dark"] .wm-accent[data-look="q6n4"]:hover:not(:disabled), :root[data-theme="dark"] .wm-accent[data-look="q6n4"]:active:not(:disabled) {
+    dynamic-range-limit: no-limit; transform: none;
+    /* token-lint: allow -- the light's travel is .65s on its own curve; the press is 80ms */
+    transition: --ab-p .65s cubic-bezier(.45, 0, .2, 1), top .08s ease;
+  }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"]:active:not(:disabled) { top: 1px; }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"]::before { opacity: 1; --ab-g: round(nearest, calc(min(1, var(--ab-p) * 1.5) * 8), 1); }   /* spill: 9 fade frames */
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"][data-shape="chip"]::before {
+    -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-position: 0 0; mask-position: 0 0;
+    -webkit-mask-composite: source-in; mask-composite: intersect;
+    border-image-source: url('../assets/accent/q6n4-hdr-dark-spill-chip.avif');
+    border-image-slice: calc(var(--ab-g) * 164) 132 calc((8 - var(--ab-g)) * 164) 132 fill; border-image-width: 0 66px 0 66px;
+    background: url('../assets/accent/q6n4-hdr-dark-spill-chip.avif') 50% calc(var(--ab-g) * 12.5%) / 40000% 900% no-repeat;
+  }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"][data-shape="pill"]::before {
+    border-image-source: url('../assets/accent/q6n4-hdr-dark-spill-pill.avif');
+    border-image-slice: calc(var(--ab-g) * 190) 148 calc((8 - var(--ab-g)) * 190) 148 fill; border-image-width: 0 74px 0 74px;
+    background: url('../assets/accent/q6n4-hdr-dark-spill-pill.avif') 50% calc(var(--ab-g) * 12.5%) / 40000% 900% no-repeat;
+  }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__face, :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__spr, :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__fr { isolation: auto; }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__face { overflow: clip; }   /* a clip, not a scroll container: the in-face light keeps its HDR */
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__spr, :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__fr, :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__bot, :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__top, :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__cap,
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__sa, :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__sb { mix-blend-mode: normal; isolation: auto; will-change: auto; }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__spr { z-index: 1; }   /* the light above the streak: opaque, so it must not cover the bottom rim */
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__sa { opacity: 1; }                       /* one frame at a time: a cross-fade needs an opacity */
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__sb { display: none; }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__sa { -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-position: 0 calc(var(--ab-fl) * var(--ab-H) * -1); mask-position: 0 calc(var(--ab-fl) * var(--ab-H) * -1); }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__fr .wm-accent__sa { background-image: url('../assets/accent/q6n4-hdr-dark-travel-pill.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-travel-pill.avif'); mask-image: url('../assets/accent/q6n4-hdr-mask-travel-pill.avif'); -webkit-mask-size: 100% 1584px; mask-size: 100% 1584px; }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__cap .wm-accent__sa { background-image: url('../assets/accent/q6n4-hdr-dark-rim-cap.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-rim-cap.avif'); mask-image: url('../assets/accent/q6n4-hdr-mask-rim-cap.avif');
+    -webkit-mask-size: 100% calc(var(--ab-NF) * var(--ab-H)); mask-size: 100% calc(var(--ab-NF) * var(--ab-H)); }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__bot { background-image: url('../assets/accent/q6n4-hdr-dark-rim-bot.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-rim-bot.avif'), var(--ab-m), var(--ab-e), var(--ab-v); mask-image: url('../assets/accent/q6n4-hdr-mask-rim-bot.avif'), var(--ab-m), var(--ab-e), var(--ab-v);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__top { opacity: 1; --ab-zk: round(nearest, calc(var(--ab-z) * 4), 1);   /* 5 frames, fading IN; none at 0 */
+    background: url('../assets/accent/q6n4-hdr-dark-rim-top.avif') 0 calc(var(--ab-zk) * 25%) / 100% calc(500% * min(1, var(--ab-z) * 1000)) no-repeat;
+    -webkit-mask: url('../assets/accent/q6n4-hdr-mask-rim-top.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q6n4-hdr-mask-rim-top.avif') 0 0 / 100% 100% no-repeat; }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"] .wm-accent__face::after { opacity: 1; --ab-k: round(nearest, calc(clamp(0, (var(--ab-p) - .3) / .3, 1) * 4), 1);   /* streak: 5 frames, the SDR .9 -> .2 */
+    background: url('../assets/accent/q6n4-hdr-dark-streak-chip.avif') 0 calc(var(--ab-k) * 25%) / 100% 500% no-repeat;
+    -webkit-mask: url('../assets/accent/q6n4-hdr-mask-streak-chip.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q6n4-hdr-mask-streak-chip.avif') 0 0 / 100% 100% no-repeat; }
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"][data-shape="pill"] .wm-accent__face::after { display: none; }   /* baked into the travel frames */
+  :root[data-theme="dark"] .wm-accent[data-look="q6n4"]:not(:disabled) .wm-accent__lab {   /* the resting ink over the acid field, thinning as the light comes on */
+    background-image:
+      linear-gradient(180deg, color-mix(in srgb, oklch(0.95 0.06 112) var(--ab-mp), transparent), color-mix(in srgb, #b8b8b3 var(--ab-mp), transparent)),
+      url('../assets/accent/q6n4-hdr-label.avif');
+    background-size: 100% 100%, 100% 100%;
+  }
+}
+@media (dynamic-range: high) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"][data-shape="pill"], :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"][data-shape="pill"]:hover:not(:disabled), :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"][data-shape="pill"]:active:not(:disabled) { --ab-mb: 52px; }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"][data-shape="chip"], :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"][data-shape="chip"]:hover:not(:disabled), :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"][data-shape="chip"]:active:not(:disabled) { --ab-mb: 40px; }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"], :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"]:hover:not(:disabled), :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"]:active:not(:disabled) {
+    dynamic-range-limit: no-limit; transform: none;
+    /* token-lint: allow -- the light's travel is .65s on its own curve; the press is 80ms */
+    transition: --ab-p .65s cubic-bezier(.45, 0, .2, 1), top .08s ease;
+  }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"]:active:not(:disabled) { top: 1px; }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"]::before { opacity: 1; --ab-g: round(nearest, calc(min(1, var(--ab-p) * 1.5) * 8), 1); }   /* spill: 9 fade frames */
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"][data-shape="chip"]::before {
+    -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-position: 0 0; mask-position: 0 0;
+    -webkit-mask-composite: source-in; mask-composite: intersect;
+    border-image-source: url('../assets/accent/q6n4-hdr-dark-spill-chip.avif');
+    border-image-slice: calc(var(--ab-g) * 164) 132 calc((8 - var(--ab-g)) * 164) 132 fill; border-image-width: 0 66px 0 66px;
+    background: url('../assets/accent/q6n4-hdr-dark-spill-chip.avif') 50% calc(var(--ab-g) * 12.5%) / 40000% 900% no-repeat;
+  }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"][data-shape="pill"]::before {
+    border-image-source: url('../assets/accent/q6n4-hdr-dark-spill-pill.avif');
+    border-image-slice: calc(var(--ab-g) * 190) 148 calc((8 - var(--ab-g)) * 190) 148 fill; border-image-width: 0 74px 0 74px;
+    background: url('../assets/accent/q6n4-hdr-dark-spill-pill.avif') 50% calc(var(--ab-g) * 12.5%) / 40000% 900% no-repeat;
+  }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__face, :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__spr, :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__fr { isolation: auto; }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__face { overflow: clip; }   /* a clip, not a scroll container: the in-face light keeps its HDR */
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__spr, :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__fr, :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__bot, :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__top, :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__cap,
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__sa, :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__sb { mix-blend-mode: normal; isolation: auto; will-change: auto; }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__spr { z-index: 1; }   /* the light above the streak: opaque, so it must not cover the bottom rim */
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__sa { opacity: 1; }                       /* one frame at a time: a cross-fade needs an opacity */
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__sb { display: none; }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__sa { -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-position: 0 calc(var(--ab-fl) * var(--ab-H) * -1); mask-position: 0 calc(var(--ab-fl) * var(--ab-H) * -1); }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__fr .wm-accent__sa { background-image: url('../assets/accent/q6n4-hdr-dark-travel-pill.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-travel-pill.avif'); mask-image: url('../assets/accent/q6n4-hdr-mask-travel-pill.avif'); -webkit-mask-size: 100% 1584px; mask-size: 100% 1584px; }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__cap .wm-accent__sa { background-image: url('../assets/accent/q6n4-hdr-dark-rim-cap.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-rim-cap.avif'); mask-image: url('../assets/accent/q6n4-hdr-mask-rim-cap.avif');
+    -webkit-mask-size: 100% calc(var(--ab-NF) * var(--ab-H)); mask-size: 100% calc(var(--ab-NF) * var(--ab-H)); }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__bot { background-image: url('../assets/accent/q6n4-hdr-dark-rim-bot.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-rim-bot.avif'), var(--ab-m), var(--ab-e), var(--ab-v); mask-image: url('../assets/accent/q6n4-hdr-mask-rim-bot.avif'), var(--ab-m), var(--ab-e), var(--ab-v);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__top { opacity: 1; --ab-zk: round(nearest, calc(var(--ab-z) * 4), 1);   /* 5 frames, fading IN; none at 0 */
+    background: url('../assets/accent/q6n4-hdr-dark-rim-top.avif') 0 calc(var(--ab-zk) * 25%) / 100% calc(500% * min(1, var(--ab-z) * 1000)) no-repeat;
+    -webkit-mask: url('../assets/accent/q6n4-hdr-mask-rim-top.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q6n4-hdr-mask-rim-top.avif') 0 0 / 100% 100% no-repeat; }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"] .wm-accent__face::after { opacity: 1; --ab-k: round(nearest, calc(clamp(0, (var(--ab-p) - .3) / .3, 1) * 4), 1);   /* streak: 5 frames, the SDR .9 -> .2 */
+    background: url('../assets/accent/q6n4-hdr-dark-streak-chip.avif') 0 calc(var(--ab-k) * 25%) / 100% 500% no-repeat;
+    -webkit-mask: url('../assets/accent/q6n4-hdr-mask-streak-chip.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q6n4-hdr-mask-streak-chip.avif') 0 0 / 100% 100% no-repeat; }
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"][data-shape="pill"] .wm-accent__face::after { display: none; }   /* baked into the travel frames */
+  :root:not([data-theme="light"]) .wm-accent[data-look="q6n4"]:not(:disabled) .wm-accent__lab {   /* the resting ink over the acid field, thinning as the light comes on */
+    background-image:
+      linear-gradient(180deg, color-mix(in srgb, oklch(0.95 0.06 112) var(--ab-mp), transparent), color-mix(in srgb, #b8b8b3 var(--ab-mp), transparent)),
+      url('../assets/accent/q6n4-hdr-label.avif');
+    background-size: 100% 100%, 100% 100%;
+  }
+}
+@media (dynamic-range: high) and (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="pill"], :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="pill"]:hover:not(:disabled), :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="pill"]:active:not(:disabled) { --ab-mt: 30px; --ab-mx: 130px; --ab-mb: 185px; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="chip"], :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="chip"]:hover:not(:disabled), :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="chip"]:active:not(:disabled) { --ab-mt: 26px; --ab-mx: 110px; --ab-mb: 160px; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"], :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:hover:not(:disabled), :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:active:not(:disabled) {
+    dynamic-range-limit: no-limit; transform: none;
+    /* token-lint: allow -- the light's travel is .65s on its own curve; the press is 80ms */
+    transition: --ab-p .65s cubic-bezier(.45, 0, .2, 1), top .08s ease;
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:active:not(:disabled) { top: 1px; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]::before { opacity: 1; --ab-g: round(nearest, calc(min(1, var(--ab-p) * 1.5) * 8), 1); }   /* spill: 9 fade frames */
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="chip"]::before {
+    -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-position: 0 0; mask-position: 0 0;
+    -webkit-mask-composite: source-in; mask-composite: intersect;
+    border-image-source: url('../assets/accent/q6n4-hdr-light-spill-chip.avif');
+    border-image-slice: calc(var(--ab-g) * 436) 272 calc((8 - var(--ab-g)) * 436) 272 fill; border-image-width: 0 136px 0 136px;
+    background: url('../assets/accent/q6n4-hdr-light-spill-chip.avif') 50% calc(var(--ab-g) * 12.5%) / 40000% 900% no-repeat;
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="pill"]::before {
+    border-image-source: url('../assets/accent/q6n4-hdr-light-spill-pill.avif');
+    border-image-slice: calc(var(--ab-g) * 496) 328 calc((8 - var(--ab-g)) * 496) 328 fill; border-image-width: 0 164px 0 164px;
+    background: url('../assets/accent/q6n4-hdr-light-spill-pill.avif') 50% calc(var(--ab-g) * 12.5%) / 40000% 900% no-repeat;
+  }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__face, :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__spr, :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__fr { isolation: auto; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__face { overflow: clip; }   /* a clip, not a scroll container: the in-face light keeps its HDR */
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__spr, :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__fr, :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__bot, :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__top, :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__cap,
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__sa, :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__sb { mix-blend-mode: normal; isolation: auto; will-change: auto; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__spr { z-index: 1; }   /* the light above the streak: opaque, so it must not cover the bottom rim */
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__sa { opacity: 1; }                       /* one frame at a time: a cross-fade needs an opacity */
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__sb { display: none; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__sa { -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-position: 0 calc(var(--ab-fl) * var(--ab-H) * -1); mask-position: 0 calc(var(--ab-fl) * var(--ab-H) * -1); }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__fr .wm-accent__sa { background-image: url('../assets/accent/q6n4-hdr-light-travel-pill.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-travel-pill.avif'); mask-image: url('../assets/accent/q6n4-hdr-mask-travel-pill.avif'); -webkit-mask-size: 100% 1584px; mask-size: 100% 1584px; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__cap .wm-accent__sa { background-image: url('../assets/accent/q6n4-hdr-light-rim-cap.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-rim-cap.avif'); mask-image: url('../assets/accent/q6n4-hdr-mask-rim-cap.avif');
+    -webkit-mask-size: 100% calc(var(--ab-NF) * var(--ab-H)); mask-size: 100% calc(var(--ab-NF) * var(--ab-H)); }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__bot { background-image: url('../assets/accent/q6n4-hdr-light-rim-bot.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-rim-bot.avif'), var(--ab-m), var(--ab-e), var(--ab-v); mask-image: url('../assets/accent/q6n4-hdr-mask-rim-bot.avif'), var(--ab-m), var(--ab-e), var(--ab-v);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__top { opacity: 1; --ab-zk: round(nearest, calc(var(--ab-z) * 4), 1);   /* 5 frames, fading IN; none at 0 */
+    background: url('../assets/accent/q6n4-hdr-light-rim-top.avif') 0 calc(var(--ab-zk) * 25%) / 100% calc(500% * min(1, var(--ab-z) * 1000)) no-repeat;
+    -webkit-mask: url('../assets/accent/q6n4-hdr-mask-rim-top.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q6n4-hdr-mask-rim-top.avif') 0 0 / 100% 100% no-repeat; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"] .wm-accent__face::after { opacity: 1; --ab-k: round(nearest, calc(clamp(0, (var(--ab-p) - .3) / .3, 1) * 4), 1);   /* streak: 5 frames, the SDR .9 -> .2 */
+    background: url('../assets/accent/q6n4-hdr-light-streak-chip.avif') 0 calc(var(--ab-k) * 25%) / 100% 500% no-repeat;
+    -webkit-mask: url('../assets/accent/q6n4-hdr-mask-streak-chip.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q6n4-hdr-mask-streak-chip.avif') 0 0 / 100% 100% no-repeat; }
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"][data-shape="pill"] .wm-accent__face::after { display: none; }   /* baked into the travel frames */
+  :root:not([data-theme="dark"]) .wm-accent[data-look="q6n4"]:not(:disabled) .wm-accent__lab {   /* the resting ink over the acid field, thinning as the light comes on */
+    background-image:
+      linear-gradient(180deg, color-mix(in srgb, var(--ab-rest1) var(--ab-mp), transparent), color-mix(in srgb, var(--ab-rest2) var(--ab-mp), transparent)),
+      url('../assets/accent/q6n4-hdr-label.avif');
+    background-size: 100% 100%, 100% 100%;
+  }
+}
+@media (dynamic-range: high) {
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="pill"], :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="pill"]:hover:not(:disabled), :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="pill"]:active:not(:disabled) { --ab-mt: 30px; --ab-mx: 130px; --ab-mb: 185px; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="chip"], :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="chip"]:hover:not(:disabled), :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="chip"]:active:not(:disabled) { --ab-mt: 26px; --ab-mx: 110px; --ab-mb: 160px; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"], :root[data-theme="light"] .wm-accent[data-look="q6n4"]:hover:not(:disabled), :root[data-theme="light"] .wm-accent[data-look="q6n4"]:active:not(:disabled) {
+    dynamic-range-limit: no-limit; transform: none;
+    /* token-lint: allow -- the light's travel is .65s on its own curve; the press is 80ms */
+    transition: --ab-p .65s cubic-bezier(.45, 0, .2, 1), top .08s ease;
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"]:active:not(:disabled) { top: 1px; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"]::before { opacity: 1; --ab-g: round(nearest, calc(min(1, var(--ab-p) * 1.5) * 8), 1); }   /* spill: 9 fade frames */
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="chip"]::before {
+    -webkit-mask-image: var(--ab-fv); mask-image: var(--ab-fv);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-position: 0 0; mask-position: 0 0;
+    -webkit-mask-composite: source-in; mask-composite: intersect;
+    border-image-source: url('../assets/accent/q6n4-hdr-light-spill-chip.avif');
+    border-image-slice: calc(var(--ab-g) * 436) 272 calc((8 - var(--ab-g)) * 436) 272 fill; border-image-width: 0 136px 0 136px;
+    background: url('../assets/accent/q6n4-hdr-light-spill-chip.avif') 50% calc(var(--ab-g) * 12.5%) / 40000% 900% no-repeat;
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="pill"]::before {
+    border-image-source: url('../assets/accent/q6n4-hdr-light-spill-pill.avif');
+    border-image-slice: calc(var(--ab-g) * 496) 328 calc((8 - var(--ab-g)) * 496) 328 fill; border-image-width: 0 164px 0 164px;
+    background: url('../assets/accent/q6n4-hdr-light-spill-pill.avif') 50% calc(var(--ab-g) * 12.5%) / 40000% 900% no-repeat;
+  }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__face, :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__spr, :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__fr { isolation: auto; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__face { overflow: clip; }   /* a clip, not a scroll container: the in-face light keeps its HDR */
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__spr, :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__fr, :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__bot, :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__top, :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__cap,
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__sa, :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__sb { mix-blend-mode: normal; isolation: auto; will-change: auto; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__spr { z-index: 1; }   /* the light above the streak: opaque, so it must not cover the bottom rim */
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__sa { opacity: 1; }                       /* one frame at a time: a cross-fade needs an opacity */
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__sb { display: none; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__sa { -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-position: 0 calc(var(--ab-fl) * var(--ab-H) * -1); mask-position: 0 calc(var(--ab-fl) * var(--ab-H) * -1); }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__fr .wm-accent__sa { background-image: url('../assets/accent/q6n4-hdr-light-travel-pill.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-travel-pill.avif'); mask-image: url('../assets/accent/q6n4-hdr-mask-travel-pill.avif'); -webkit-mask-size: 100% 1584px; mask-size: 100% 1584px; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__cap .wm-accent__sa { background-image: url('../assets/accent/q6n4-hdr-light-rim-cap.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-rim-cap.avif'); mask-image: url('../assets/accent/q6n4-hdr-mask-rim-cap.avif');
+    -webkit-mask-size: 100% calc(var(--ab-NF) * var(--ab-H)); mask-size: 100% calc(var(--ab-NF) * var(--ab-H)); }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__bot { background-image: url('../assets/accent/q6n4-hdr-light-rim-bot.avif');
+    -webkit-mask-image: url('../assets/accent/q6n4-hdr-mask-rim-bot.avif'), var(--ab-m), var(--ab-e), var(--ab-v); mask-image: url('../assets/accent/q6n4-hdr-mask-rim-bot.avif'), var(--ab-m), var(--ab-e), var(--ab-v);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__top { opacity: 1; --ab-zk: round(nearest, calc(var(--ab-z) * 4), 1);   /* 5 frames, fading IN; none at 0 */
+    background: url('../assets/accent/q6n4-hdr-light-rim-top.avif') 0 calc(var(--ab-zk) * 25%) / 100% calc(500% * min(1, var(--ab-z) * 1000)) no-repeat;
+    -webkit-mask: url('../assets/accent/q6n4-hdr-mask-rim-top.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q6n4-hdr-mask-rim-top.avif') 0 0 / 100% 100% no-repeat; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"] .wm-accent__face::after { opacity: 1; --ab-k: round(nearest, calc(clamp(0, (var(--ab-p) - .3) / .3, 1) * 4), 1);   /* streak: 5 frames, the SDR .9 -> .2 */
+    background: url('../assets/accent/q6n4-hdr-light-streak-chip.avif') 0 calc(var(--ab-k) * 25%) / 100% 500% no-repeat;
+    -webkit-mask: url('../assets/accent/q6n4-hdr-mask-streak-chip.avif') 0 0 / 100% 100% no-repeat; mask: url('../assets/accent/q6n4-hdr-mask-streak-chip.avif') 0 0 / 100% 100% no-repeat; }
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"][data-shape="pill"] .wm-accent__face::after { display: none; }   /* baked into the travel frames */
+  :root[data-theme="light"] .wm-accent[data-look="q6n4"]:not(:disabled) .wm-accent__lab {   /* the resting ink over the acid field, thinning as the light comes on */
+    background-image:
+      linear-gradient(180deg, color-mix(in srgb, var(--ab-rest1) var(--ab-mp), transparent), color-mix(in srgb, var(--ab-rest2) var(--ab-mp), transparent)),
+      url('../assets/accent/q6n4-hdr-label.avif');
+    background-size: 100% 100%, 100% 100%;
+  }
+}
