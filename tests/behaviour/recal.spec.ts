@@ -99,22 +99,31 @@ test.describe('ReCal · the instrument around the primitive', () => {
        live in the canvas Try bar. */
     const panel = page.locator('.try')
     await expect(panel).toBeVisible()
+    /* The trigger is an icon and the fixed label "Styles" (ReCal #44), so it says nothing about
+       the pick: the menu's own selection and the preview's size are what change. */
     const btn = panel.locator('.style-menu-btn')
-    const before = (await btn.textContent())?.trim()
     const size = panel.locator('.slider-row', { has: page.locator('.slider-label-name', { hasText: /^Size$/ }) }).getByRole('spinbutton')
     const sizeBefore = await size.inputValue()
     await btn.click()
     const list = panel.locator('.ssd-list')
     await expect(list).toBeVisible()
+    const selected = list.locator('.ssd-row[aria-selected="true"] .ssd-name')
+    const before = (await selected.first().textContent())?.trim()
     /* Pick the first row that is not the current one. */
     const row = list.locator('.ssd-row:not(.on)').first()
     const picked = (await row.locator('.ssd-name').textContent())?.trim()
+    expect(picked).toBeTruthy()
+    expect(picked).not.toBe(before)
     await row.click()
     await expect(list).toHaveCount(0)
-    await expect(btn).not.toHaveText(before ?? '')
-    expect((await btn.textContent())?.trim()).toBe(picked)
     /* A different style is a different size, which is what the panel exists to show. */
     await expect(size).not.toHaveValue(sizeBefore)
+    /* and the menu, reopened, has the pick selected and nothing else */
+    await btn.click()
+    await expect(list).toBeVisible()
+    await expect(selected).toHaveCount(1)
+    await expect(selected).toHaveText(picked!)
+    await page.keyboard.press('Escape')
     expect(errors, errors.join('\n')).toEqual([])
   })
 

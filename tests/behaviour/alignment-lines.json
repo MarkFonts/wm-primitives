@@ -64,8 +64,8 @@
      ],
      "lines": {
       "tabs": {
-       "x": 296,
-       "why": "canvas 264 + bar padding 24 + tab button padding 8; Words, and the mode label under it (shell.css: 32px = 24 + 8)"
+       "grid": { "in": ".canvas-bar", "column": 2 },
+       "why": "the left edge of column 2 of the canvas's house grid (24 columns, gutter 24, no margin: a tool bleeds), read from the .canvas-bar grid's own tracks; Words sits on it (ReCal #44, the float Try bar)"
       },
       "submenu": {
        "x": 458,
