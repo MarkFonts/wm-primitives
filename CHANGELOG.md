@@ -22,7 +22,7 @@ Newest first.
   opacity, so frame B is hidden in HDR); the top edge fades in over 5 frames; the press is `top: 1px`; the face, the
   sprite group and the frames drop their isolation, blend modes and `will-change`. Measured headless: in every state,
   no HDR layer or ancestor up to the button has an opacity under 1, a transform, or a blend mode.
-- **Dark:** acid on #1a1a1a (the ground, the chip face) and #0a0a0a (the pill face). The spill keeps the SHIPPED
+- **Dark:** acid on #1a1a1a (the ground and both faces). The spill keeps the SHIPPED
   spill's footprint at a modest 398 nits (Mark, on the hero preview, of the boosted one: "the black is too far
   out"), so it reads as the SDR light, brighter. The in-face light's cores (round 2 had them at ~880-990 nits, past
   his screen's ceiling, where Chrome tone-maps the whole plane and its floor greys into a box) peak at 605. q5's dark
@@ -54,6 +54,9 @@ Newest first.
   (2) The streak was an opaque plane ON TOP of the travelling light; on hover its last frame painted the floor over
   the bottom rim. The pill's streak is now baked into its travel frames at the SDR opacities (.9 at rest to .2 lit),
   added in linear light; the chip's sits under the light pieces.
+- **The pill's face is the ground, #1a1a1a, as the chip's (SDR too).** Mark's reference sheet (proto3/mid-fall.png) was
+  rendered on --surface: its lit face reads 26 at the centre, and 24-25 under the fading tone at p .5. A later
+  #0a0a0a override in the proto, ported in #122, left the hovered pill near-black inside.
 
 ---
 

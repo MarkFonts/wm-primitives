@@ -609,7 +609,10 @@
   border: 0 solid transparent;
   border-image: url('../assets/accent/q6n4-spill-pill.avif') 0 148 0 148 fill / 0 74px 0 74px stretch;
 }
-.wm-accent[data-shape="pill"] .wm-accent__face { inset: 0; background: #0a0a0a; }
+/* the pill's face is the ground, as the chip's: Mark's approved reference (the accent proto's mid-fall sheet) was
+   rendered on --surface (#1a1a1a: its lit face reads 26 at the centre, 24-25 under the fading tone at p .5); a later
+   #0a0a0a override in the proto, ported here first, left the hovered pill's interior near-black */
+.wm-accent[data-shape="pill"] .wm-accent__face { inset: 0; background: var(--ab-face); }
 .wm-accent[data-shape="pill"] .wm-accent__tone {
   background: linear-gradient(180deg, #171717, #0c0c0c); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
   opacity: max(0, calc(1 - var(--ab-p) * 1.6));
@@ -714,7 +717,7 @@
    the travelling light and the chip's end pieces show ONE frame at a time (the A/B cross-fade is an opacity:
    frame B is hidden); the top edge fades in over 5 frames; the press is `top: 1px`; and the face, the sprite group
    and the frames lose their isolation and blend modes (both force a surface). tools/accent/gen_q6n4.py.
-     dark    acid on #1a1a1a (the ground and the chip face) and #0a0a0a (the pill face): the shipped log spill's
+     dark    acid on #1a1a1a (the ground and both faces): the shipped log spill's
              footprint at a modest 398 nits (PQ 0.6521, as q5's), so it reads as the SDR light, brighter; the rim
              pieces, the 48-frame travel sprite and the streak, their cores lowered to peak at 605 nits (PQ 0.6972),
              Mark's screen's ceiling (a brighter plane is tone-mapped whole, floor included, and shows as a box)

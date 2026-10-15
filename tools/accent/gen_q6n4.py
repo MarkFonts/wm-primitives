@@ -8,8 +8,7 @@ DARK (acid, the black-floor rows of the accent proposal at the 1x falloff; Mark:
            gamma-space law at V_peak 1.35 as q5's (~400 nits), so it reads as the SDR light, brighter; 9 fade frames (the SDR fade, opacity max(0, 1 - 1.5 p)); floor #1a1a1a. The chip's 9-slice middle is held
            flat (its x peak would squeeze into a hairline on a narrow chip; a PQ plane's brightness is not coverage,
            so the SDR flatten mask cannot correct it)
-  rim      cap (47 frames), bot, top on the chip face (#1a1a1a), the 48-frame travel sprite on the pill face
-           (#0a0a0a); the top as 5 fade-in frames (the SDR fade is an opacity). The LOG inner glow (gen_inner 'log', the single 3px
+  rim      cap (47 frames), bot, top on the chip face, the 48-frame travel sprite on the pill face (both #1a1a1a); the top as 5 fade-in frames (the SDR fade is an opacity). The LOG inner glow (gen_inner 'log', the single 3px
            exponential: measured against Mark's reference sheet, proto3/mid-fall.png, to within 1 level) scaled in
            LINEAR light, one factor for the family: the same shape as the SDR art, brighter (lin() below)
   streak   5 frames at the SDR opacities (.9 at rest to .2 lit), on each face; the light pieces sit above it
@@ -62,7 +61,8 @@ def mask(A, name, thresh=None):
     rows.append(f'{name:30s} mask  {s/1024:5.1f} KB')
 
 DARK_CAP = 605.0                  # the dark in-face light's ceiling (Mark's screen, round 5)
-DK, PILLFACE, INK = gh.grey_nits(26), gh.grey_nits(10), gh.grey_nits(22)    # #1a1a1a, #0a0a0a, #161616
+DK, INK = gh.grey_nits(26), gh.grey_nits(22)    # #1a1a1a (the ground, and both faces: --surface), #161616
+PILLFACE = DK
 def capped(A, W, vpk, floor, cap=None):
     """round 2's law at V_peak, or lower: the largest V_peak whose plane peaks at or under `cap` nits"""
     cap = cap or DARK_CAP
