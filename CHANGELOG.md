@@ -12,6 +12,18 @@ Newest first.
 
 ---
 
+## 2026-10-15 -- an empty track drops its grip; the gallery's segments nest
+
+- **Under 3px of fill, the track slider shows neither fill nor grip** (`data-empty`, measured in AxisSlider.tsx
+  from the bar's width). Mark, on ReCal's Try bar: at the bottom of a dial the grip clamps to the bar's left end and
+  sits on the host's icon, a lit blob with no fill behind it. A dial resting at its minimum (ReCal's Weight at
+  400) now shows no grip until it moves.
+- **The compact, disabled and reduced-motion grip rules were dead since eefd852.** Collapsing the compact comment to
+  one line lost its `*/`, so everything up to the next comment close was commented out. Closed again.
+- **UiKitBoard's `.ui-seg > span` segments are pills.** toggleGroup.css made the holder a pill, and the gallery's
+  spans (not buttons) kept radius 0: a square fill in a round hole. They take the same 999px superellipse; the
+  dividers go, since a stub between two round segments reads as a fault.
+
 ## 2026-10-14 -- q6n4 in HDR and in light mode; containing the light
 
 **Mark approved q6n4 as briefed: "light = Broad 300, acid, white floor; dark = acid HDR".** q6n4 gets what q5 got in
