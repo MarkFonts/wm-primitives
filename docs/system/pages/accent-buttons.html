@@ -50,6 +50,47 @@ td:first-child{color:var(--ink,#17181a);white-space:nowrap}
 .wm-accent.ab-active[data-look="q5"]{ transform:translateY(1px) }
 .wm-accent.ab-active[data-look="q5"]::after{ transform:scale(.9); opacity:.85 }
 .wm-accent.ab-hover[data-look="q6n4"]{ --ab-p:1 }
+/* HDR (dark theme): Q5's light is opaque, so the captions it reaches sit above it; the held states step its frames
+   (accentButton.css "Q5 in HDR": no transform, no opacity) */
+@media (dynamic-range: high){ :root[data-theme="dark"] .ab-cap{ position:relative; z-index:1 }
+  :root[data-theme="dark"] .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
+  :root[data-theme="dark"] .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }
+@media (dynamic-range: high) and (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .ab-cap{ position:relative; z-index:1 }
+  :root:not([data-theme="light"]) .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
+  :root:not([data-theme="light"]) .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }
+/* LIGHT THEME: Q5 has a light mode (an ink face, an apple light, rendered for a white ground), so its column takes
+   the light --surface; Q6 to N4 has none yet and keeps its dark ground */
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .ab-stage{ background:none; padding:0 }
+  :root:not([data-theme="dark"]) .ab-col{ padding:24px 52px 0; border-radius:8px; corner-shape:superellipse(1.2); background:var(--surface) }
+  :root:not([data-theme="dark"]) .ab-col--q5{ --surface:#ffffff; --surface-hi:#ebebeb; --bg:#f4f4f4; --text-dim:rgba(22,22,22,.42); --border:rgba(22,22,22,.16); color:#161616 }
+  :root:not([data-theme="dark"]) .ab-col--q5 .ab-cap{ color:rgba(22,22,22,.42) }
+  :root:not([data-theme="dark"]) .ab-col--q5 .ab-cap--head{ color:rgba(22,22,22,.66) } }
+:root[data-theme="light"] .ab-stage{ background:none; padding:0 }
+:root[data-theme="light"] .ab-col{ padding:24px 52px 0; border-radius:8px; corner-shape:superellipse(1.2); background:var(--surface) }
+:root[data-theme="light"] .ab-col--q5{ --surface:#ffffff; --surface-hi:#ebebeb; --bg:#f4f4f4; --text-dim:rgba(22,22,22,.42); --border:rgba(22,22,22,.16); color:#161616 }
+:root[data-theme="light"] .ab-col--q5 .ab-cap{ color:rgba(22,22,22,.42) }
+:root[data-theme="light"] .ab-col--q5 .ab-cap--head{ color:rgba(22,22,22,.66) }
+@media (max-width:680px){ :root[data-theme="light"] .ab-col{ padding:24px 24px 0 } }
+@media (max-width:680px) and (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .ab-col{ padding:24px 24px 0 } }
+/* HDR (light theme): Q5's broad light reaches 130px beside and 185px below the pill, and every plane is opaque, so
+   Q5 takes the whole width, the cells are spaced so no two planes overlap, the card clips them on its own white,
+   and the captions sit above the light */
+@media (dynamic-range: high) and (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .ab-stage{ grid-template-columns:minmax(0,1fr); row-gap:24px }
+  :root:not([data-theme="dark"]) .ab-col--q5{ padding:24px 130px 0; overflow:hidden }
+  :root:not([data-theme="dark"]) .ab-col--q5 .ab-cap{ position:relative; z-index:1 }
+  :root:not([data-theme="dark"]) .ab-col--q5 .ab-set--pill .ab-cell{ padding-bottom:222px }
+  :root:not([data-theme="dark"]) .ab-col--q5 .ab-set--chip{ column-gap:222px }
+  :root:not([data-theme="dark"]) .ab-col--q5 .ab-set--chip .ab-cell{ padding-bottom:192px }
+  :root:not([data-theme="dark"]) .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
+  :root:not([data-theme="dark"]) .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }
+@media (dynamic-range: high){ :root[data-theme="light"] .ab-stage{ grid-template-columns:minmax(0,1fr); row-gap:24px }
+  :root[data-theme="light"] .ab-col--q5{ padding:24px 130px 0; overflow:hidden }
+  :root[data-theme="light"] .ab-col--q5 .ab-cap{ position:relative; z-index:1 }
+  :root[data-theme="light"] .ab-col--q5 .ab-set--pill .ab-cell{ padding-bottom:222px }
+  :root[data-theme="light"] .ab-col--q5 .ab-set--chip{ column-gap:222px }
+  :root[data-theme="light"] .ab-col--q5 .ab-set--chip .ab-cell{ padding-bottom:192px }
+  :root[data-theme="light"] .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }
+  :root[data-theme="light"] .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }
 .wm-accent.ab-active[data-look="q6n4"]{ --ab-p:1; transform:translateY(1px) }
 </style>
 <body>
@@ -63,7 +104,7 @@ beneath to behind: it travels along the bottom edge, round the lower corners and
 lights all at once.</p>
 
 <div data-nosnap data-stage class="ab-stage">
-<div class="ab-col"><span class="ab-cap ab-cap--head">Q5 &middot; underlit</span>
+<div class="ab-col ab-col--q5"><span class="ab-cap ab-cap--head">Q5 &middot; underlit</span>
 <div class="ab-set ab-set--pill">
   <div class="ab-cell"><span class="ab-cap">pill &middot; rest</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
   <div class="ab-cell"><span class="ab-cap">pill &middot; hover</span><button type="button" class="wm-accent ab-hover" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
@@ -96,6 +137,12 @@ pressed button sits one pixel down. The pill is a full render at its own size, 2
 227 &times; 33 for Q6 to N4, so its box is fixed and the host places it. The chip is 32 tall with an 8px radius, and its
 light is a 9-slice of two end pieces and a stretched middle, so one set serves any width. Dark ground only: the face
 is <code>--surface</code>.</p>
+<p>Q5 has an HDR light. On an HDR display, in the dark theme, its spill, its rim, and its label go past SDR white:
+each lit layer is a PQ image whose value is the light itself, floor plus glow, peaking at 589 nits, and the label
+is acid at that same peak, painted through the glyphs. On an SDR screen it is exactly the button above. The images
+bake the #1a1a1a ground they sit on. In the light theme Q5 is ink on paper: an ink face, an apple light below it,
+and an apple label. On an HDR display the light theme's Q5 is lit in acid instead, a broad light that peaks at
+605 nits on the white ground, with an acid label at the same peak.</p>
 <p><code>&lt;AccentButton look=&quot;q5&quot; shape=&quot;pill&quot;&gt;Download&lt;/AccentButton&gt;</code>, or
 <code>look=&quot;q6n4&quot; shape=&quot;chip&quot;</code>. The images are in <code>assets/accent/</code>, and
 <code>tools/accent/</code> renders them.</p>

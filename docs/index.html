@@ -5415,9 +5415,10 @@ html,body{margin:0;padding:0;background:var(--bg)}
 }@media (min-width:1152px){#s-controls .part-1 .cf-tc-big{font-size:39px;--lh:42px}#s-controls .part-1 .cf-tc-side{padding-top:18px}#s-controls .part-1 .cf-tc-side p,#s-controls .part-1 .cf-speed{--lh:21px;margin-bottom:21px}#s-controls .part-1 .cf-fig{margin-bottom:21px}
 }@media (min-width:1312px){#s-controls .part-1 .cf-tc-in{padding-block:24px 72px}#s-controls .part-1 .cf-tc-big{font-size:45px;--lh:48px}#s-controls .part-1 .cf-tc-side{padding-top:21px}#s-controls .part-1 .cf-tc-side p,#s-controls .part-1 .cf-speed{--lh:24px;margin-bottom:24px}#s-controls .part-1 .cf-fig{margin-bottom:24px}
 }
-@property --ab-p{ syntax: "<number>"; inherits: true; initial-value: 0; }#s-controls .part-2 .wm-accent{
+@property --ab-p{ syntax: "<number>"; inherits: true; initial-value: 0; }@property --ab-s{ syntax: "<number>"; inherits: true; initial-value: 1; }#s-controls .part-2 .wm-accent{
   
   --ab-acid: #eeff41;  --ab-acid: color(display-p3 0.9333 1 0.2549);
+  --ab-apple: #96d500;  --ab-apple: color(display-p3 0.6240 0.8394 0);   
   --ab-face: var(--surface);                                   
   --ab-ink: color-mix(in oklab, var(--ab-acid) 22%, white);    
   --ab-off-ink: #8a8a8a;                                       
@@ -5464,7 +5465,139 @@ html,body{margin:0;padding:0;background:var(--bg)}
   background: var(--ab-face);
   border-color: var(--ab-off-line);
   color: var(--ab-off-ink); -webkit-text-fill-color: var(--ab-off-ink);
-}#s-controls .part-2 .wm-accent[data-look="q5"]:disabled::before,#s-controls .part-2 .wm-accent[data-look="q5"]:disabled::after{ display: none; }#s-controls .part-2 .wm-accent[data-look="q6n4"],#s-controls .part-2 .wm-accent[data-look="q6n4"]:hover:not(:disabled),#s-controls .part-2 .wm-accent[data-look="q6n4"]:active:not(:disabled){
+}#s-controls .part-2 .wm-accent[data-look="q5"]:disabled::before,#s-controls .part-2 .wm-accent[data-look="q5"]:disabled::after{ display: none; }#s-controls .part-2 .wm-accent[data-look="q5"] .wm-accent__lab::before{ position: absolute; z-index: -1; pointer-events: none; inset: -1px 0 0 0; }#s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before{ border-radius: 999px; corner-shape: round; }#s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"] .wm-accent__lab::before{
+  border-radius: 8px; corner-shape: superellipse(var(--corner-k, 1.2));
+  border: 0 solid transparent; border-image-slice: 0 52 0 52 fill; border-image-width: 0 26px 0 26px; border-image-repeat: stretch;
+}@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]{
+    --ab-face: #161616;                                          
+    --ab-ink: var(--ab-apple);
+    --ab-off-ink: var(--text-dim, rgba(22, 22, 22, .42)); --ab-off-line: var(--border, rgba(22, 22, 22, .16));
+  }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"],:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled),:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){ background: var(--ab-face); }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]::before{ box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg, #f4f4f4) 10%, transparent); }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"]::after{ background-image: url('assets/accent/q5-light-pill.avif'); }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"]::after{ border-image-source: url('assets/accent/q5-light-chip.avif'); }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab::before{ content: ""; }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before{ background: url('assets/accent/q5-light-rim-pill.avif') 0 0 / 100% 100% no-repeat; }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"] .wm-accent__lab::before{ border-image-source: url('assets/accent/q5-light-rim-chip.avif'); }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:disabled{ background: var(--surface-hi, #ebebeb); }
+}:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]{
+    --ab-face: #161616;                                          
+    --ab-ink: var(--ab-apple);
+    --ab-off-ink: var(--text-dim, rgba(22, 22, 22, .42)); --ab-off-line: var(--border, rgba(22, 22, 22, .16));
+  }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"],:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled),:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){ background: var(--ab-face); }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]::before{ box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg, #f4f4f4) 10%, transparent); }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"]::after{ background-image: url('assets/accent/q5-light-pill.avif'); }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"]::after{ border-image-source: url('assets/accent/q5-light-chip.avif'); }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab::before{ content: ""; }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before{ background: url('assets/accent/q5-light-rim-pill.avif') 0 0 / 100% 100% no-repeat; }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"] .wm-accent__lab::before{ border-image-source: url('assets/accent/q5-light-rim-chip.avif'); }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:disabled{ background: var(--surface-hi, #ebebeb); }@media (dynamic-range: high){:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"],:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled),:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){
+    background: none; dynamic-range-limit: no-limit;
+    transform: none;
+    
+    transition: --ab-s .8s ease, top .08s ease;
+  }:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled){ --ab-s: 1.1; }:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){ --ab-s: .9; top: 1px; }:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"]::after,:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled)::after,:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled)::after{
+    transform: none; opacity: 1; transition: none;
+    --ab-f: round(nearest, calc((var(--ab-s) - .9) * 80), 1);    
+  }:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"]::after{
+    background: url('assets/accent/q5-hdr-dark-pill.avif') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
+    -webkit-mask: url('assets/accent/q5-hdr-mask-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('assets/accent/q5-hdr-mask-pill.avif') 0 0 / 100% 100% no-repeat;
+  }:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"]::after{
+    border-image-source: url('assets/accent/q5-hdr-dark-chip.avif');
+    border-image-slice: calc(var(--ab-f) * 184) 156 calc((16 - var(--ab-f)) * 184) 156 fill;
+    background: url('assets/accent/q5-hdr-dark-chip.avif') 50% calc(var(--ab-f) * 6.25%) / 40000% 1700% no-repeat;
+    --ab-foot-y: linear-gradient(180deg, transparent 2px, #000 3px, #000 calc(100% - 3px), transparent calc(100% - 2px));
+    --ab-foot-x: linear-gradient(90deg, transparent 1px, #000 2px, #000 calc(100% - 2px), transparent calc(100% - 1px));
+    -webkit-mask-image: var(--ab-fv), var(--ab-foot-y), var(--ab-foot-x); mask-image: var(--ab-fv), var(--ab-foot-y), var(--ab-foot-x);
+    -webkit-mask-composite: source-in; mask-composite: intersect;
+  }:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab::before{ content: ""; }:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before{
+    background: url('assets/accent/q5-hdr-dark-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+    -webkit-mask: url('assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+  }:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"] .wm-accent__lab::before{
+    border-image-source: url('assets/accent/q5-hdr-dark-rim-chip.avif');
+    background: url('assets/accent/q5-hdr-dark-rim-chip.avif') 50% 0 / 40000% 100% no-repeat;
+    -webkit-mask-box-image: url('assets/accent/q5-hdr-mask-rim-chip.avif') 0 52 0 52 / 0 26px 0 26px stretch;
+  }:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab{
+    color: transparent; -webkit-text-fill-color: transparent;
+    background: url('assets/accent/q5-hdr-dark-label.avif') 0 0 / 100% 100%;
+    -webkit-background-clip: text; background-clip: text;
+  }:root[data-theme="dark"] #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab svg{ color: var(--ab-acid); }
+}@media (dynamic-range: high) and (prefers-color-scheme: dark){:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"],:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled),:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){
+    background: none; dynamic-range-limit: no-limit;
+    transform: none;
+    
+    transition: --ab-s .8s ease, top .08s ease;
+  }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled){ --ab-s: 1.1; }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){ --ab-s: .9; top: 1px; }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"]::after,:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled)::after,:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled)::after{
+    transform: none; opacity: 1; transition: none;
+    --ab-f: round(nearest, calc((var(--ab-s) - .9) * 80), 1);    
+  }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"]::after{
+    background: url('assets/accent/q5-hdr-dark-pill.avif') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
+    -webkit-mask: url('assets/accent/q5-hdr-mask-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('assets/accent/q5-hdr-mask-pill.avif') 0 0 / 100% 100% no-repeat;
+  }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"]::after{
+    border-image-source: url('assets/accent/q5-hdr-dark-chip.avif');
+    border-image-slice: calc(var(--ab-f) * 184) 156 calc((16 - var(--ab-f)) * 184) 156 fill;
+    background: url('assets/accent/q5-hdr-dark-chip.avif') 50% calc(var(--ab-f) * 6.25%) / 40000% 1700% no-repeat;
+    --ab-foot-y: linear-gradient(180deg, transparent 2px, #000 3px, #000 calc(100% - 3px), transparent calc(100% - 2px));
+    --ab-foot-x: linear-gradient(90deg, transparent 1px, #000 2px, #000 calc(100% - 2px), transparent calc(100% - 1px));
+    -webkit-mask-image: var(--ab-fv), var(--ab-foot-y), var(--ab-foot-x); mask-image: var(--ab-fv), var(--ab-foot-y), var(--ab-foot-x);
+    -webkit-mask-composite: source-in; mask-composite: intersect;
+  }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab::before{ content: ""; }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before{
+    background: url('assets/accent/q5-hdr-dark-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+    -webkit-mask: url('assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+  }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"] .wm-accent__lab::before{
+    border-image-source: url('assets/accent/q5-hdr-dark-rim-chip.avif');
+    background: url('assets/accent/q5-hdr-dark-rim-chip.avif') 50% 0 / 40000% 100% no-repeat;
+    -webkit-mask-box-image: url('assets/accent/q5-hdr-mask-rim-chip.avif') 0 52 0 52 / 0 26px 0 26px stretch;
+  }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab{
+    color: transparent; -webkit-text-fill-color: transparent;
+    background: url('assets/accent/q5-hdr-dark-label.avif') 0 0 / 100% 100%;
+    -webkit-background-clip: text; background-clip: text;
+  }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab svg{ color: var(--ab-acid); }
+}@media (dynamic-range: high) and (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"]{ --ab-mt: 40px; --ab-mx: 130px; --ab-mb: 185px; }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"]{ --ab-mt: 36px; --ab-mx: 110px; --ab-mb: 160px; }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"],:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled),:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){
+    background: none; dynamic-range-limit: no-limit;
+    transform: none;
+    
+    transition: --ab-s .8s ease, top .08s ease;
+  }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled){ --ab-s: 1.1; }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){ --ab-s: .9; top: 1px; }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]::after,:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled)::after,:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled)::after{
+    transform: none; opacity: 1; transition: none;
+    --ab-f: round(nearest, calc((var(--ab-s) - .9) * 80), 1);
+  }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"]::after{
+    background: url('assets/accent/q5-hdr-light-pill.avif') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
+    -webkit-mask: url('assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat;
+  }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"]::after{
+    -webkit-mask-image: none; mask-image: none;
+    border-image-source: url('assets/accent/q5-hdr-light-chip.avif');
+    border-image-slice: calc(var(--ab-f) * 456) 272 calc((16 - var(--ab-f)) * 456) 272 fill; border-image-width: 0 136px 0 136px;
+    -webkit-mask-box-image: url('assets/accent/q5-hdr-light-mask-chip.avif') 0 272 0 272 / 0 136px 0 136px stretch;
+    background: url('assets/accent/q5-hdr-light-chip.avif') 50% calc(var(--ab-f) * 6.25%) / 40000% 1700% no-repeat;
+  }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before{
+    background: url('assets/accent/q5-hdr-light-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+    -webkit-mask: url('assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+  }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"] .wm-accent__lab::before{
+    border-image-source: url('assets/accent/q5-hdr-light-rim-chip.avif');
+    background: url('assets/accent/q5-hdr-light-rim-chip.avif') 50% 0 / 40000% 100% no-repeat;
+    -webkit-mask-box-image: url('assets/accent/q5-hdr-mask-rim-chip.avif') 0 52 0 52 / 0 26px 0 26px stretch;
+  }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab{
+    color: transparent; -webkit-text-fill-color: transparent;
+    background: url('assets/accent/q5-hdr-light-label.avif') 0 0 / 100% 100%;
+    -webkit-background-clip: text; background-clip: text;
+  }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab svg{ color: var(--ab-acid); }
+}@media (dynamic-range: high){:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"]{ --ab-mt: 40px; --ab-mx: 130px; --ab-mb: 185px; }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"]{ --ab-mt: 36px; --ab-mx: 110px; --ab-mb: 160px; }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"],:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled),:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){
+    background: none; dynamic-range-limit: no-limit;
+    transform: none;
+    
+    transition: --ab-s .8s ease, top .08s ease;
+  }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled){ --ab-s: 1.1; }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled){ --ab-s: .9; top: 1px; }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]::after,:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:hover:not(:disabled)::after,:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:active:not(:disabled)::after{
+    transform: none; opacity: 1; transition: none;
+    --ab-f: round(nearest, calc((var(--ab-s) - .9) * 80), 1);
+  }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"]::after{
+    background: url('assets/accent/q5-hdr-light-pill.avif') 0 calc(var(--ab-f) * 6.25%) / 100% 1700% no-repeat;
+    -webkit-mask: url('assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('assets/accent/q5-hdr-light-mask-pill.avif') 0 0 / 100% 100% no-repeat;
+  }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"]::after{
+    -webkit-mask-image: none; mask-image: none;
+    border-image-source: url('assets/accent/q5-hdr-light-chip.avif');
+    border-image-slice: calc(var(--ab-f) * 456) 272 calc((16 - var(--ab-f)) * 456) 272 fill; border-image-width: 0 136px 0 136px;
+    -webkit-mask-box-image: url('assets/accent/q5-hdr-light-mask-chip.avif') 0 272 0 272 / 0 136px 0 136px stretch;
+    background: url('assets/accent/q5-hdr-light-chip.avif') 50% calc(var(--ab-f) * 6.25%) / 40000% 1700% no-repeat;
+  }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before{
+    background: url('assets/accent/q5-hdr-light-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+    -webkit-mask: url('assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat; mask: url('assets/accent/q5-hdr-mask-rim-pill.avif') 0 0 / 100% 100% no-repeat;
+  }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"][data-shape="chip"] .wm-accent__lab::before{
+    border-image-source: url('assets/accent/q5-hdr-light-rim-chip.avif');
+    background: url('assets/accent/q5-hdr-light-rim-chip.avif') 50% 0 / 40000% 100% no-repeat;
+    -webkit-mask-box-image: url('assets/accent/q5-hdr-mask-rim-chip.avif') 0 52 0 52 / 0 26px 0 26px stretch;
+  }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab{
+    color: transparent; -webkit-text-fill-color: transparent;
+    background: url('assets/accent/q5-hdr-light-label.avif') 0 0 / 100% 100%;
+    -webkit-background-clip: text; background-clip: text;
+  }:root[data-theme="light"] #s-controls .part-2 .wm-accent[data-look="q5"]:not(:disabled) .wm-accent__lab svg{ color: var(--ab-acid); }
+}#s-controls .part-2 .wm-accent[data-look="q6n4"],#s-controls .part-2 .wm-accent[data-look="q6n4"]:hover:not(:disabled),#s-controls .part-2 .wm-accent[data-look="q6n4"]:active:not(:disabled){
   --ab-p: 0;
   --ab-H: 32px; --ab-XS: 26px;                 
   --ab-NF: 47; --ab-N0: 8; --ab-N1: 30; --ab-N2: 8;   
@@ -5572,7 +5705,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   font-family:var(--ui-font); color:#e8e8e8; background:var(--surface);
   border-radius:8px; corner-shape:superellipse(1.2); margin:0 0 24px; padding:24px 24px 0;
   display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:24px; overflow:hidden }#s-controls .part-2 .ab-col{ min-width:0; padding:0 52px }#s-controls .part-2 .ab-cap{ display:block; margin:0 0 6px; font-size:var(--type-micro-size,.5625rem); line-height:12px;
-  letter-spacing:var(--track-caps,.12em); text-transform:uppercase; color:rgba(232,232,232,.38) }#s-controls .part-2 .ab-cap--head{ color:rgba(232,232,232,.62); margin-bottom:24px }#s-controls .part-2 .ab-cell{ min-width:0; padding:0 0 72px }#s-controls .part-2 .ab-set--chip{ display:grid; grid-template-columns:repeat(2,max-content); column-gap:48px }#s-controls .part-2 .ab-set--chip .ab-cell{ padding-bottom:60px }#s-controls .part-2 .ab-cell .wm-accent{ display:inline-flex }@media (max-width:680px){#s-controls .part-2 .ab-stage{ grid-template-columns:minmax(0,1fr) }#s-controls .part-2 .ab-col{ padding:0 24px } }#s-controls .part-2 .wm-accent.ab-hover[data-look="q5"]::after{ transform:scale(1.1) }#s-controls .part-2 .wm-accent.ab-active[data-look="q5"]{ transform:translateY(1px) }#s-controls .part-2 .wm-accent.ab-active[data-look="q5"]::after{ transform:scale(.9); opacity:.85 }#s-controls .part-2 .wm-accent.ab-hover[data-look="q6n4"]{ --ab-p:1 }#s-controls .part-2 .wm-accent.ab-active[data-look="q6n4"]{ --ab-p:1; transform:translateY(1px) }
+  letter-spacing:var(--track-caps,.12em); text-transform:uppercase; color:rgba(232,232,232,.38) }#s-controls .part-2 .ab-cap--head{ color:rgba(232,232,232,.62); margin-bottom:24px }#s-controls .part-2 .ab-cell{ min-width:0; padding:0 0 72px }#s-controls .part-2 .ab-set--chip{ display:grid; grid-template-columns:repeat(2,max-content); column-gap:48px }#s-controls .part-2 .ab-set--chip .ab-cell{ padding-bottom:60px }#s-controls .part-2 .ab-cell .wm-accent{ display:inline-flex }@media (max-width:680px){#s-controls .part-2 .ab-stage{ grid-template-columns:minmax(0,1fr) }#s-controls .part-2 .ab-col{ padding:0 24px } }#s-controls .part-2 .wm-accent.ab-hover[data-look="q5"]::after{ transform:scale(1.1) }#s-controls .part-2 .wm-accent.ab-active[data-look="q5"]{ transform:translateY(1px) }#s-controls .part-2 .wm-accent.ab-active[data-look="q5"]::after{ transform:scale(.9); opacity:.85 }#s-controls .part-2 .wm-accent.ab-hover[data-look="q6n4"]{ --ab-p:1 }@media (dynamic-range: high){:root[data-theme="dark"] #s-controls .part-2 .ab-cap{ position:relative; z-index:1 }:root[data-theme="dark"] #s-controls .part-2 .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }:root[data-theme="dark"] #s-controls .part-2 .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }@media (dynamic-range: high) and (prefers-color-scheme: dark){:root:not([data-theme="light"]) #s-controls .part-2 .ab-cap{ position:relative; z-index:1 }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }:root:not([data-theme="light"]) #s-controls .part-2 .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .part-2 .ab-stage{ background:none; padding:0 }:root:not([data-theme="dark"]) #s-controls .part-2 .ab-col{ padding:24px 52px 0; border-radius:8px; corner-shape:superellipse(1.2); background:var(--surface) }:root:not([data-theme="dark"]) #s-controls .part-2 .ab-col--q5{ --surface:#ffffff; --surface-hi:#ebebeb; --bg:#f4f4f4; --text-dim:rgba(22,22,22,.42); --border:rgba(22,22,22,.16); color:#161616 }:root:not([data-theme="dark"]) #s-controls .part-2 .ab-col--q5 .ab-cap{ color:rgba(22,22,22,.42) }:root:not([data-theme="dark"]) #s-controls .part-2 .ab-col--q5 .ab-cap--head{ color:rgba(22,22,22,.66) } }:root[data-theme="light"] #s-controls .part-2 .ab-stage{ background:none; padding:0 }:root[data-theme="light"] #s-controls .part-2 .ab-col{ padding:24px 52px 0; border-radius:8px; corner-shape:superellipse(1.2); background:var(--surface) }:root[data-theme="light"] #s-controls .part-2 .ab-col--q5{ --surface:#ffffff; --surface-hi:#ebebeb; --bg:#f4f4f4; --text-dim:rgba(22,22,22,.42); --border:rgba(22,22,22,.16); color:#161616 }:root[data-theme="light"] #s-controls .part-2 .ab-col--q5 .ab-cap{ color:rgba(22,22,22,.42) }:root[data-theme="light"] #s-controls .part-2 .ab-col--q5 .ab-cap--head{ color:rgba(22,22,22,.66) }@media (max-width:680px){:root[data-theme="light"] #s-controls .part-2 .ab-col{ padding:24px 24px 0 } }@media (max-width:680px) and (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .part-2 .ab-col{ padding:24px 24px 0 } }@media (dynamic-range: high) and (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .part-2 .ab-stage{ grid-template-columns:minmax(0,1fr); row-gap:24px }:root:not([data-theme="dark"]) #s-controls .part-2 .ab-col--q5{ padding:24px 130px 0; overflow:hidden }:root:not([data-theme="dark"]) #s-controls .part-2 .ab-col--q5 .ab-cap{ position:relative; z-index:1 }:root:not([data-theme="dark"]) #s-controls .part-2 .ab-col--q5 .ab-set--pill .ab-cell{ padding-bottom:222px }:root:not([data-theme="dark"]) #s-controls .part-2 .ab-col--q5 .ab-set--chip{ column-gap:222px }:root:not([data-theme="dark"]) #s-controls .part-2 .ab-col--q5 .ab-set--chip .ab-cell{ padding-bottom:192px }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }:root:not([data-theme="dark"]) #s-controls .part-2 .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }@media (dynamic-range: high){:root[data-theme="light"] #s-controls .part-2 .ab-stage{ grid-template-columns:minmax(0,1fr); row-gap:24px }:root[data-theme="light"] #s-controls .part-2 .ab-col--q5{ padding:24px 130px 0; overflow:hidden }:root[data-theme="light"] #s-controls .part-2 .ab-col--q5 .ab-cap{ position:relative; z-index:1 }:root[data-theme="light"] #s-controls .part-2 .ab-col--q5 .ab-set--pill .ab-cell{ padding-bottom:222px }:root[data-theme="light"] #s-controls .part-2 .ab-col--q5 .ab-set--chip{ column-gap:222px }:root[data-theme="light"] #s-controls .part-2 .ab-col--q5 .ab-set--chip .ab-cell{ padding-bottom:192px }:root[data-theme="light"] #s-controls .part-2 .wm-accent.ab-hover[data-look="q5"]{ --ab-s:1.1 }:root[data-theme="light"] #s-controls .part-2 .wm-accent.ab-active[data-look="q5"]{ --ab-s:.9; top:1px; transform:none } }#s-controls .part-2 .wm-accent.ab-active[data-look="q6n4"]{ --ab-p:1; transform:translateY(1px) }
 #s-controls .wip{max-width:72ch}#s-controls .wip>p{font-size:var(--type-lede-size,1.125rem);line-height:var(--type-lede-lead,1.5);margin:0 0 28px;color:var(--ink-2)}#s-controls .wip>p b{color:var(--ink);font-weight:600}#s-controls .wip-list{display:grid;gap:16px;margin:0;padding:0;list-style:none}#s-controls .wip-card{display:block;position:relative;padding:22px 24px;text-decoration:none;color:inherit;
   border:1px solid var(--line);border-radius:var(--radius,6px);corner-shape:superellipse(var(--corner-k,1.2));
   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 .5px,transparent .5px 3px);
@@ -8456,7 +8589,7 @@ beneath to behind: it travels along the bottom edge, round the lower corners and
 lights all at once.</p>
 
 <div data-nosnap data-stage class="ab-stage">
-<div class="ab-col"><span class="ab-cap ab-cap--head">Q5 &middot; underlit</span>
+<div class="ab-col ab-col--q5"><span class="ab-cap ab-cap--head">Q5 &middot; underlit</span>
 <div class="ab-set ab-set--pill">
   <div class="ab-cell"><span class="ab-cap">pill &middot; rest</span><button type="button" class="wm-accent" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
   <div class="ab-cell"><span class="ab-cap">pill &middot; hover</span><button type="button" class="wm-accent ab-hover" data-look="q5" data-shape="pill"><span class="wm-accent__lab">Download</span></button></div>
@@ -8489,6 +8622,12 @@ pressed button sits one pixel down. The pill is a full render at its own size, 2
 227 &times; 33 for Q6 to N4, so its box is fixed and the host places it. The chip is 32 tall with an 8px radius, and its
 light is a 9-slice of two end pieces and a stretched middle, so one set serves any width. Dark ground only: the face
 is <code>--surface</code>.</p>
+<p>Q5 has an HDR light. On an HDR display, in the dark theme, its spill, its rim, and its label go past SDR white:
+each lit layer is a PQ image whose value is the light itself, floor plus glow, peaking at 589 nits, and the label
+is acid at that same peak, painted through the glyphs. On an SDR screen it is exactly the button above. The images
+bake the #1a1a1a ground they sit on. In the light theme Q5 is ink on paper: an ink face, an apple light below it,
+and an apple label. On an HDR display the light theme's Q5 is lit in acid instead, a broad light that peaks at
+605 nits on the white ground, with an acid label at the same peak.</p>
 <p><code>&lt;AccentButton look=&quot;q5&quot; shape=&quot;pill&quot;&gt;Download&lt;/AccentButton&gt;</code>, or
 <code>look=&quot;q6n4&quot; shape=&quot;chip&quot;</code>. The images are in <code>assets/accent/</code>, and
 <code>tools/accent/</code> renders them.</p>
