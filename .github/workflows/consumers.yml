@@ -219,7 +219,7 @@ jobs:
         run: python3 scripts/lint-icons.py
       - name: COMPONENTS.md, HOST-CONTRACT.md and the icon census must match their inputs
         env:
-          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html,WORDMAKE=hosts/wordmarktools/wordmake/src,GliffDiff=hosts/wordmarktools/gliffdiff/src,wordmark.nyc=hosts/wordmark/calsans/index.html
+          WM_CONSUMERS: font-proofer=hosts/font-proofer/src,ReCal=hosts/ReCal/src,opsz-proofer=hosts/wordmarktools/opsz-proofer,Kernpare=hosts/wordmarktools/kernpare/index.html,WORDMAKE=hosts/wordmarktools/wordmake/src,GliffDiff=hosts/wordmarktools/gliffdiff/src,wordmark.nyc=hosts/wordmark
         run: |
           node scripts/gen-index.mjs
           if ! git diff --quiet -- COMPONENTS.md HOST-CONTRACT.md docs/system/icons.json; then

@@ -5,18 +5,18 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 
 | export | what | drawn by | spec |
 | --- | --- | --- | --- |
-| `StyleScopeList` `StyleScopeDropdown` | The named-style / scope picker: rows + label + spec chips, single- or multi-select. | font-proofer, ReCal, WORDMAKE | — |
+| `StyleScopeList` `StyleScopeDropdown` | The named-style / scope picker: rows + label + spec chips, single- or multi-select. | font-proofer, ReCal, WORDMAKE, wordmark.nyc | — |
 | `InlineEmphasisBubble` | A one-word emphasis toggle that sits in the text it marks up. | font-proofer, ReCal | — |
 | `placeCaretAtStart` `placeCaretAtEnd` `placeCaretAtOffset` `caretCharOffset` | Caret capture and restore for contentEditable blocks. | font-proofer, ReCal | — |
-| `splitInlineMarkup` `isPlainRun` | The inline-markup tokeniser the editable blocks share. | font-proofer, ReCal | — |
+| `splitInlineMarkup` `isPlainRun` | The inline-markup tokeniser the editable blocks share. | font-proofer, ReCal, wordmark.nyc | — |
 | `UiKitBoard` | UI-kit board (component gallery preview). JS module — consumers on tsc need allowJs. | font-proofer, ReCal, wordmark.nyc | — |
-| `AxisSlider` | The dial: one number on one axis, with a rail, a field and a stepper. Four variants. The spec is DIAL.md, the promises GESTURES.md, the tests tests/behaviour. | font-proofer, ReCal, opsz-proofer, Kernpare, WORDMAKE, GliffDiff | DIAL.md + GESTURES.md |
+| `AxisSlider` | The dial: one number on one axis, with a rail, a field and a stepper. Four variants. The spec is DIAL.md, the promises GESTURES.md, the tests tests/behaviour. | font-proofer, ReCal, opsz-proofer, Kernpare, WORDMAKE, GliffDiff, wordmark.nyc | DIAL.md + GESTURES.md |
 | `AxisTriplet` | min / desired / max as ONE control. Extracted from ReCal's H&J rail, which had the right layout on native number inputs -- platform steppers that cannot be themed and a hyphen where a minus belongs. | — | GESTURES.md §9 |
 | `StopSlider` | Named stops with a thumb that travels between them -- a different control from the dial, not a variant of it. Extracted from docs card 04 (SLIDERS.md, row 13) for WORDMAKE's GEOM rail; it takes its stops as a prop and na… | WORDMAKE | DIAL.md §7 |
-| `Chevron` | The one chevron, at the house angle, with a stroke derived from its width. | font-proofer, ReCal, GliffDiff | SLIDERS.md (icon census) |
-| `Icon` | Icon — a Material Symbols mark on the same axes as the type beside it. The HOST loads the font (see Icon.tsx for the link tag and its four axes); this exports the component and the ink/weight contract only. | font-proofer, ReCal, WORDMAKE, GliffDiff | GESTURES.md §10 |
-| `ThemeSwitch` | ThemeSwitch -- Auto / Light / Dark, both looks (marks, words) over one engine. The engine is plain JS so a page without React (Kernpare) drives the same control with mountThemeSwitch(); the head-script stamp before first… | font-proofer, ReCal, GliffDiff | GESTURES.md §8 |
-| `THEMES` `THEME_KEY` `readTheme` `applyTheme` `bootTheme` `mountThemeSwitch` | The theme engine itself, for a page without React (bootTheme in a head script). | Kernpare, ReCal, wordmark.nyc | GESTURES.md §8 |
+| `Chevron` | The one chevron, at the house angle, with a stroke derived from its width. | font-proofer, ReCal, GliffDiff, wordmark.nyc | SLIDERS.md (icon census) |
+| `Icon` | Icon — a Material Symbols mark on the same axes as the type beside it. The HOST loads the font (see Icon.tsx for the link tag and its four axes); this exports the component and the ink/weight contract only. | font-proofer, ReCal, WORDMAKE, GliffDiff, wordmark.nyc | GESTURES.md §10 |
+| `ThemeSwitch` | ThemeSwitch -- Auto / Light / Dark, both looks (marks, words) over one engine. The engine is plain JS so a page without React (Kernpare) drives the same control with mountThemeSwitch(); the head-script stamp before first… | font-proofer, ReCal, GliffDiff, wordmark.nyc | GESTURES.md §8 |
+| `THEMES` `THEME_KEY` `readTheme` `applyTheme` `bootTheme` `mountThemeSwitch` | The theme engine itself, for a page without React (bootTheme in a head script). | wordmark.nyc, Kernpare, ReCal | GESTURES.md §8 |
 | `AccentButton` | AccentButton -- the two acid buttons, Q5 and Q6 to N4, as a pill (the Download button) or a chip. The light is pre-rendered, dithered AVIF (assets/accent/), never a CSS gradient. Dark ground only; the pill is a full rend… | ReCal | — |
 | `wmJxl` | html.wm-jxl when the browser decodes JPEG XL (src/jxl.js, a plain script; AccentButton imports it). wmJxl() -> Promise<boolean>. | — | — |
 | `BlockStyleRail` | BlockStyleRail — h1/h2/h3/¶ stacked in the margin of the block being edited, at the bottom of the ink ladder until you reach for them. | font-proofer | — |
@@ -24,15 +24,15 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `nbMinus` | A real minus (U+2212) for readouts, never a hyphen. | font-proofer, ReCal | — |
 | `EditableTextBlock` | Canonical contentEditable text-block lifecycle (raw-while-focused, commit-on-blur, caret capture/restore). Pairs with caret.ts + editRail.css. | font-proofer, ReCal, WORDMAKE | — |
 | `GlyphPicker` `measureGlyphMetrics` | Interactive glyph browser: equal-sized cell grid + viewer/U+ readout, search, copy-to-clipboard, ssXX alternate groups (wm-primitives #2). | font-proofer, ReCal, WORDMAKE | — |
-| `createLetterbox` `JEROME` | The letterbox: the house wordmark scanned and packed with prose (Charlie Clark's pretext effect). Plain-JS engine, because wordmark.nyc and this repo's system page script-tag it directly, and ReCal's landing pages load i… | ReCal | README (letterbox) |
-| `wmConfirm` | wmConfirm -- the click confirm: on a press that WORKED, the control's press look blinks off 80ms, on 80ms, then it settles (GESTURES.md §14). Adds .wm-confirm, which runs the one keyframe in motion.css; no-op under reduc… | — | — |
-| `ROLES` `POSTER` `INK` `TRACK_CAPS` `LANDINGS` `typeStyle` `ink` | Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/ --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so importing it cannot reach existing markup. Apps import… | Kernpare, WORDMAKE, font-proofer, ReCal, opsz-proofer, GliffDiff | TYPOGRAPHY.md |
+| `createLetterbox` `JEROME` | The letterbox: the house wordmark scanned and packed with prose (Charlie Clark's pretext effect). Plain-JS engine, because wordmark.nyc and this repo's system page script-tag it directly, and ReCal's landing pages load i… | ReCal, wordmark.nyc | README (letterbox) |
+| `wmConfirm` | wmConfirm -- the click confirm: on a press that WORKED, the control's press look blinks off 80ms, on 80ms, then it settles (GESTURES.md §14). Adds .wm-confirm, which runs the one keyframe in motion.css; no-op under reduc… | wordmark.nyc | — |
+| `ROLES` `POSTER` `INK` `TRACK_CAPS` `LANDINGS` `typeStyle` `ink` | Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/ --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so importing it cannot reach existing markup. Apps import… | Kernpare, WORDMAKE, wordmark.nyc, font-proofer, ReCal, opsz-proofer, GliffDiff | TYPOGRAPHY.md |
 | `Collapse` | A disclosure box that measures its own content, so a section's height is never a number anyone has to keep up to date. Used by the fitting panel's two sections. | font-proofer, WORDMAKE | — |
 | `FittingControls` `fittingMode` `AlignmentButtons` `ALIGNMENTS` `FittedParagraph` | The line-fitting controls. The engine above is consumed directly by static pages; this is the interface both paragraph views render — font-proofer in its sidebar, ReCal in the floating Type panel. Alignment stays with th… | font-proofer, ReCal, WORDMAKE | FITTING-MAP.md |
 | `SpecimenNav` | Long public-domain works: authored whole in specimens/<slug>.txt, served as the chunks build-specimens.mjs cuts at each FORM FEED, fetched only as far as the reader asks. The tail control travels with the loader: both ap… | font-proofer, ReCal | — |
 | `PARA_STYLE_ORDER` `PARA_STYLE_LABEL` `PARA_STYLE_DEFAULTS` `fitOptionsFor` | The four paragraph styles both paragraph views show, and the one-liner that turns a style plus the font's H&J bands into fit options. The keys, labels, numbers and the resolver only; each app keeps the font fields it dra… | ReCal, font-proofer | — |
 | *(types only)* | — | — | FITTING-MAP.md |
-| `EASES` `resolveEase` `bezierPoint` `bezierY` `rampStops` `scrim` `maskRamp` `blend` `blurLayers` `declaration` `channelBlend` `resolveRGB` `CHANNEL_NAMES` | Gradients — the shape of a ramp, and the three things a ramp can carry. The package already faded in three places and spelled it two ways; one of those spellings was the two-stop fade the other one wrote a paragraph expl… | WORDMAKE, ReCal, GliffDiff, font-proofer | GRADIENTS.md |
+| `EASES` `resolveEase` `bezierPoint` `bezierY` `rampStops` `scrim` `maskRamp` `blend` `blurLayers` `declaration` `channelBlend` `resolveRGB` `CHANNEL_NAMES` | Gradients — the shape of a ramp, and the three things a ramp can carry. The package already faded in three places and spelled it two ways; one of those spellings was the two-stop fade the other one wrote a paragraph expl… | WORDMAKE, ReCal, GliffDiff, wordmark.nyc, font-proofer | GRADIENTS.md |
 | `ProgressiveBlur` `CurveEditor` `ChannelCurves` `GradientControls` `GradientPreview` `gradientCss` `GRADIENT_DEFAULTS` | A scrim and a blend are declarations and need no component. Progressive blur is not a declaration — it is a stack of masked backdrop layers, so it is DOM, and the stack is here once instead of in each consumer (where the… | — | — |
 
 CSS-only modules (imported from an app's entry stylesheet, nothing to export): `src/button.css`, `src/button-sets.css`, `src/grid.css`, `src/chip.css`, `src/select.css`, `src/motion.css`, `src/color.css`.
@@ -41,7 +41,7 @@ CSS-only modules (imported from an app's entry stylesheet, nothing to export): `
 
 The Material Symbols subset (`fonts/MaterialSymbolsOutlined.woff2`, 96 ligatures) sorted by whether anything draws each one. The ligature list is read from the font and the drawing from the sources of font-proofer, ReCal, opsz-proofer, Kernpare, WORDMAKE, GliffDiff, wordmark.nyc, wm-primitives, system page, so removing a mark is a search, not a guess. The system page shows the same three lists with their glyphs.
 
-### Used (57)
+### Used (58)
 
 Drawn by at least one app. Who draws it is in the second column.
 
@@ -91,6 +91,7 @@ Drawn by at least one app. Who draws it is in the second column.
 | `match_word` | GliffDiff |
 | `mystery` | GliffDiff, system page, wm-primitives |
 | `pageview` | system page |
+| `play_arrow` | wordmark.nyc |
 | `queue_play_next` | WORDMAKE |
 | `restart_alt` | wordmark.nyc |
 | `search` | wm-primitives |
@@ -105,8 +106,8 @@ Drawn by at least one app. Who draws it is in the second column.
 | `zoom_in` | wm-primitives |
 | `zoom_out` | wm-primitives |
 
-### Ready (39)
+### Ready (38)
 
 In the subset, drawn by nothing yet.
 
-`arrow_back` `arrow_forward` `book` `book_2` `book_3` `book_4` `book_5` `book_6` `book_ribbon` `brand_family` `call_merge` `edit` `edit_document` `edit_note` `emoji_symbols` `font_download` `format_quote` `glyphs` `hdr_auto` `hdr_auto_select` `hdr_enhanced_select` `hdr_off` `hdr_off_select` `hdr_on_select` `match_case` `match_case_off` `pause` `play_arrow` `public` `redo` `script` `serif` `slab_serif` `star` `subscript` `superscript` `type_specimen` `undo` `visibility_off`
+`arrow_back` `arrow_forward` `book` `book_2` `book_3` `book_4` `book_5` `book_6` `book_ribbon` `brand_family` `call_merge` `edit` `edit_document` `edit_note` `emoji_symbols` `font_download` `format_quote` `glyphs` `hdr_auto` `hdr_auto_select` `hdr_enhanced_select` `hdr_off` `hdr_off_select` `hdr_on_select` `match_case` `match_case_off` `pause` `public` `redo` `script` `serif` `slab_serif` `star` `subscript` `superscript` `type_specimen` `undo` `visibility_off`

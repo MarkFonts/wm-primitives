@@ -163,6 +163,9 @@
   "pageview": [
    "system page"
   ],
+  "play_arrow": [
+   "wordmark.nyc"
+  ],
   "queue_play_next": [
    "WORDMAKE"
   ],
@@ -238,7 +241,6 @@
   "match_case",
   "match_case_off",
   "pause",
-  "play_arrow",
   "public",
   "redo",
   "script",

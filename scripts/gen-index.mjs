@@ -24,7 +24,7 @@ const DEFAULT = {
   'Kernpare': '../wordmarktools/kernpare/index.html',
   'WORDMAKE': '../wordmarktools/wordmake/src',
   'GliffDiff': '../wordmarktools/gliffdiff/src',
-  'wordmark.nyc': '../wordmark/calsans/index.html',   // the case study; the repo also holds the apps' built bundles
+  'wordmark.nyc': '../wordmark',   // the site's own pages and js; built app bundles live under assets/, which walk() skips
 }
 const spec = process.env.WM_CONSUMERS
   ? Object.fromEntries(process.env.WM_CONSUMERS.split(',').map(p => p.split('=')))
@@ -35,7 +35,7 @@ function walk(p, out = []) {
   const st = statSync(p)
   if (st.isFile()) { if (EXT.has(extname(p))) out.push(p); return out }
   for (const f of readdirSync(p)) {
-    if (f === 'node_modules' || f === 'shared' || f === 'dist' || f.startsWith('.')) continue
+    if (f === 'node_modules' || f === 'shared' || f === 'dist' || f === 'assets' || f.startsWith('.')) continue
     walk(join(p, f), out)
   }
   return out
