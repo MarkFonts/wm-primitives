@@ -38,7 +38,9 @@ def q5_light(ship_avif=False, lossless_report=False):
     for name, c in gh.RIM_L.items():                           # the rim, inside the ink face
         light[name] = (gh.rim_glow(cap, c, P - INK), INK)        # the SDR rim's shape (gen_hdr.rim_glow)
     t = step('render the light (17 frames x 2 shapes, 2 rims)', t)
-    px = {n: transparent(g, fl, rng) for n, (g, fl) in light.items()}
+    # the spills' glow is already one colour (the acid shoulder carries the tail); the rims get one too (constant_light)
+    px = {n: transparent(g, fl, rng) if n in gh.GEO_L else hdr.rgba(*hdr.constant_light(g, fl, P, acid), rng=rng)
+          for n, (g, fl) in light.items()}
     t = step('quantise + dither (16-bit PQ RGBA)', t)
     jobs = [hdr.Jxl(px[n], os.path.join(gh.SHIP, n.replace('q5-hdr-light', 'q5-jxl-light') + '.jxl'), P) for n in light]
     avif_dir = gh.SHIP if ship_avif else os.path.join(ACC, 'out/hdr-avif/'); os.makedirs(avif_dir, exist_ok=True)
@@ -53,7 +55,8 @@ def q5_light(ship_avif=False, lossless_report=False):
 
 def q5_dark(ship_avif=False, lossless_report=False):
     """q5's dark light: the same planes as gen_hdr.py's dark set (the shipped log spill's footprint at 398 nits, the rim
-    at 589 on the #1a1a1a face), as transparent JXL: the colour at the peak, its coverage from hdr.coverage()"""
+    at 589 on the #1a1a1a face), as transparent JXL: one acid colour at the peak, all of the falloff in alpha
+    (hdr.constant_light: the luminance hdr.coverage() gave, without the drifting hue)"""
     t = time.time()
     import gen_hdr as gh
     z = np.load(gh.CAPF); cap = {k: z[k] for k in ('q5-pill|A', 'q5-pill|W', 'q5-chip|A', 'q5-chip|W', 'q5-rim-pill|A', 'q5-rim-pill|W', 'q5-rim-chip|A', 'q5-rim-chip|W')}
@@ -63,9 +66,8 @@ def q5_dark(ship_avif=False, lossless_report=False):
         plane, glow, fl = gh.bake(cap, c, vpk); light[name] = (np.clip(glow, 0, None), fl, float(plane.max()))
     t = step('render the light (17 frames x 2 shapes, 2 rims)', t)
     acid = gh.to_nits(gh.PAL[0]); acid = acid / acid.max(); rng = np.random.default_rng(134); px = {}
-    for n, (g, fl, pk) in light.items():
-        gmax = g.max(-1); unit = np.where(gmax[..., None] > 1e-6, g / np.maximum(gmax, 1e-9)[..., None], acid)
-        px[n] = (hdr.rgba(unit * pk, hdr.coverage(gmax, fl, pk), rng=rng), pk)
+    for n, (g, fl, pk) in light.items():                         # one colour, the acid; the falloff in alpha
+        px[n] = (hdr.rgba(*hdr.constant_light(g, fl, pk, acid), rng=rng), pk)
     t = step('quantise + dither (16-bit PQ RGBA)', t)
     jobs = [hdr.Jxl(p, os.path.join(gh.SHIP, n.replace('q5-hdr-dark', 'q5-jxl-dark') + '.jxl'), pk) for n, (p, pk) in px.items()]
     if lossless_report:
@@ -76,10 +78,32 @@ def q5_dark(ship_avif=False, lossless_report=False):
     t = step(f'encode {len(jobs)} files in parallel ({sum(r[7] != "skipped" for r in rows)} run, the rest unchanged)', t)
     return rows
 
+def hot_hue(gh, W):
+    """the colour at full level of a captured light's palette weights W (core / tail / hot), with the TAIL folded into
+    the core: the SDR ramp's drift toward a pale olive by distance is not carried into a transparent HDR light, the
+    streak's white-hot core is. Unit peak channel, per pixel."""
+    Wf = W.copy(); Wf[..., 0] += Wf[..., 1]; Wf[..., 1] = 0
+    h = gh.to_nits(Wf @ np.stack(gh.PAL)); return h / np.maximum(h.max(-1, keepdims=True), 1e-9)
+
+def travel_hue(q, gh, acid):
+    """the travel sprite's colour, frame by frame: acid, and over the bottom rows the pill's baked streak mixed in by
+    its share of the light (gen_q6n4.travel_with_streak, the same frames and opacities)"""
+    A, W = q.get('q6n4-travel-pill'); As, Ws = q.get('q6n4-streak-pill'); s_hue = hot_hue(gh, Ws)
+    H = 66; n = A.shape[0] // H; hs = As.shape[0]; out = []
+    for f in range(n):
+        o = max(.2, .9 - 1.2 * f / (n - 1))
+        h = np.broadcast_to(acid, (H, A.shape[1], 3)).copy()
+        gt = q.lin(A[f * H:(f + 1) * H], W[f * H:(f + 1) * H])[H - hs:].max(-1)[..., None]
+        gs = q.lin(As, Ws, o).max(-1)[..., None]
+        h[H - hs:] = np.where(gt + gs > 0, (gt * acid + gs * s_hue) / np.maximum(gt + gs, 1e-12), acid)
+        out.append(h / h.max(-1, keepdims=True))
+    return np.concatenate(out, 0)
+
 def q6n4(theme):
     """q6n4's light, dark or light, as transparent JXL: the same planes as gen_q6n4.py's AVIF sets (the spill's 9 fade
     frames, the chip's streak frames, the rim cap / bot / top, the 48-frame travel sprite with the pill's streak baked
-    in), each as the light's color at its peak with the coverage hdr.coverage() gives over its floor"""
+    in), each as ONE colour at its peak with all of the falloff in alpha (hdr.constant_light, the luminance
+    hdr.coverage() gave over its floor); the light spills, already one colour, as they were"""
     t = time.time()
     import gen_q6n4 as q, gen_hdr as gh
     t = step('load the capture (cap.npz)', t)
@@ -103,10 +127,18 @@ def q6n4(theme):
     fr, _ = q.travel_with_streak(cap, F_in); L.append(('travel-pill', fr, F_in))
     t = step(f'render the light ({len(L)} layers, {sum(len(f) for _, f, _ in L)} frames)', t)
     acid = gh.to_nits(gh.PAL[0]); acid = acid / acid.max(); rng = np.random.default_rng(1330 + (theme == 'light')); px = {}
+    # ONE colour per layer, the falloff in alpha (hdr.constant_light): the acid, except the streak's white-hot core
+    # (gen_assets.q6_streak's 65% mix toward (255, 255, 240), the palette's 'hot'), which is the look and is kept as a
+    # colour that does not change with level. The light spills already store one colour and are left as they are.
+    A, W = q.get('q6n4-streak-chip'); s_hue = hot_hue(gh, W)
+    hue = {'streak-chip': np.concatenate([s_hue] * len(q.STREAK_O), 0), 'travel-pill': travel_hue(q, gh, acid)}
     for n, frames, fl in L:
         g = np.clip(np.concatenate(frames, 0), 0, None); gmax = g.max(-1); pk = fl + float(gmax.max())
-        unit = np.where(gmax[..., None] > 1e-6, g / np.maximum(gmax, 1e-9)[..., None], acid)
-        px[n] = (hdr.rgba(unit * pk, hdr.coverage(gmax, fl, pk), rng=rng), pk)
+        if theme == 'light' and n.startswith('spill-'):
+            unit = np.where(gmax[..., None] > 1e-6, g / np.maximum(gmax, 1e-9)[..., None], acid)
+            px[n] = (hdr.rgba(unit * pk, hdr.coverage(gmax, fl, pk), rng=rng), pk)
+        else:
+            px[n] = (hdr.rgba(*hdr.constant_light(g, fl, pk, hue.get(n, acid)), rng=rng), pk)
     t = step('quantise + dither (16-bit PQ RGBA)', t)
     jobs = [hdr.Jxl(p, os.path.join(gh.SHIP, f'q6n4-jxl-{theme}-{n}.jxl'), pk) for n, (p, pk) in px.items()]
     rows, secs = hdr.run(jobs)
@@ -126,9 +158,8 @@ def q5_rim(theme):
     light = {n: gh.rim_glow(cap, c, pk - fl) for n, c in names.items()}
     t = step(f'render the rim ({len(light)} pieces)', t)
     acid = gh.to_nits(gh.PAL[0]); acid = acid / acid.max(); rng = np.random.default_rng(1340 + (theme == 'light')); px = {}
-    for n, g in light.items():
-        gmax = g.max(-1); unit = np.where(gmax[..., None] > 1e-6, g / np.maximum(gmax, 1e-9)[..., None], acid)
-        px[n] = hdr.rgba(unit * pk, hdr.coverage(gmax, fl, pk), rng=rng)
+    for n, g in light.items():                                   # one colour, the acid; the falloff in alpha
+        px[n] = hdr.rgba(*hdr.constant_light(g, fl, pk, acid), rng=rng)
     t = step('quantise + dither (16-bit PQ RGBA)', t)
     jobs = [hdr.Jxl(px[n], os.path.join(gh.SHIP, n.replace('-hdr-', '-jxl-') + '.jxl'), pk) for n in light]
     jobs += [hdr.Avif(fl + g, (g.max(-1) > 0.01).astype(np.float32), os.path.join(gh.SHIP, n + '.avif'), fl + float(g.max())) for n, g in light.items()]

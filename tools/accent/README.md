@@ -98,5 +98,12 @@ PYTHON=.venv/bin/python ../hdr/build.sh q6n4-dark                    # q6n4's li
 | `q6n4-jxl-{dark,light}-travel-pill.jxl` | the 48-frame travel sprite, the pill's streak baked in (dark 605, light 405) | the same |
 | `q6n4-jxl-{dark,light}-rim-cap.jxl`, `-rim-bot`, `-rim-top`, `-streak-chip` | the chip's in-face light: end pieces, bottom edge, top edge's 5 frames, the streak's 5 frames | the same |
 
+Every JXL light stores ONE colour, the acid at its true peak (the streak's white-hot core excepted), with all of the
+falloff in alpha (`hdr.constant_light()`): the alpha is solved per pixel so the composite over the layer's floor has the
+luminance the old encoding gave. Storing the glow's own colour (`glow / max(glow)`) carried the SDR ramp's pale tail
+(`gen_assets.finish`'s TAIL, "scattering on a matte surface") and the gamma law's lean toward blue at low levels up to
+the peak: a pale ~400-600-nit colour at low alpha, which iPhone Safari tone-mapped into a grey-teal band (wordmark#69).
+The AVIF planes keep it; there the tail sits at about 1 nit and cannot show.
+
 `tools/hdr/hdr.py` is the shared encoder (JXL and AVIF from the same float arrays: true-peak stamps, even AVIF sides,
 a hash per asset so unchanged ones are skipped, encodes in parallel); `tools/hdr/build.py` holds the targets.

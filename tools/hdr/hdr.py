@@ -17,6 +17,7 @@ and skipped when its output already matches; jobs run in parallel (the encoders 
 
   import hdr
   px = hdr.rgba(nits_rgb, alpha)                         # floats -> 16-bit PQ RGBA (dithered alpha)
+  px = hdr.rgba(*hdr.constant_light(glow, floor, peak, acid))   # one colour, the falloff in alpha
   rows, secs = hdr.run([hdr.Jxl(px, 'x.jxl', peak), hdr.Avif(nits, lit, 'x.avif', peak)])
   print(hdr.table(rows))
 """
@@ -61,6 +62,42 @@ def coverage(glow_max, floor, peak):
     (as the page does): a = (enc(floor + glow) - enc(floor)) / (enc(peak) - enc(floor)). A linear-light alpha, glow /
     (peak - floor), is far too small in a long tail over a dark floor (a 5-nit glow on 2 nits came out at 1/7)."""
     return np.clip((enc(floor + glow_max) - enc(floor)) / (enc(peak) - enc(floor)), 0, 1)
+
+def dec(e):
+    """enc()'s inverse: the gamma-encoded value -> nits"""
+    e = np.maximum(np.asarray(e, np.float64), 0)
+    return np.where(e <= 0.04045, e / 12.92, ((e + 0.055) / 1.055) ** 2.4) * 203.0
+
+LUMA = np.array([0.2627, 0.6780, 0.0593])                # BT.2020 luminance weights (the arrays are linear BT.2020 nits)
+
+def composite(rgb, a, floor):
+    """what the page shows: `rgb` (nits) at straight alpha `a` over a grey `floor` (nits), composited in the
+    gamma-encoded space, per channel -> nits"""
+    a = np.asarray(a, np.float64)[..., None]
+    return dec(enc(floor) + a * (enc(rgb) - enc(floor)))
+
+def constant_light(glow, floor, peak, hue=None, iters=32):
+    """ONE colour per asset, all of the falloff in alpha (wm-primitives, jxl-drift). glow: H x W x 3 nits over `floor`.
+    hue: the colour at full level, (3,) for the whole asset or H x W x 3 (the streak's white-hot core, kept); its
+    brightest channel is put at `peak`. The alpha is solved, per pixel, so the composite over `floor` has the
+    LUMINANCE the old encoding gave (the glow's own colour at the peak, hdr.coverage()): the shape is unchanged, and
+    only the hue stops drifting. The old encoding stored glow / max(glow), which carried the SDR ramp's pale tail and
+    the gamma law's own lean toward blue at low levels up to the peak; at low alpha that read as a pale ~400-nit
+    colour, and iPhone Safari tone-mapped it into a grey-teal band (wordmark#69). Returns (rgb nits, alpha)."""
+    g = np.clip(np.asarray(glow, np.float64), 0, None); gmax = g.max(-1)
+    hue = np.asarray(hue, np.float64)
+    unit = np.where(gmax[..., None] > 1e-6, g / np.maximum(gmax, 1e-9)[..., None], hue / hue.max(-1, keepdims=True))
+    a0 = coverage(gmax, floor, peak)
+    target = composite(unit * peak, a0, floor) @ LUMA
+    col = np.broadcast_to(hue / hue.max(-1, keepdims=True) * peak, g.shape)
+    y0, y1 = composite(col, np.zeros_like(a0), floor) @ LUMA, composite(col, np.ones_like(a0), floor) @ LUMA
+    assert np.all(y1 > y0), 'the colour must be brighter than the floor'
+    lo, hi = np.zeros_like(a0), np.ones_like(a0)
+    for _ in range(iters):                               # monotonic in a: bisect
+        mid = (lo + hi) / 2; up = composite(col, mid, floor) @ LUMA < target
+        lo, hi = np.where(up, mid, lo), np.where(up, hi, mid)
+    a = np.where(a0 > 0, (lo + hi) / 2, 0.0)
+    return np.ascontiguousarray(col), a
 
 def pam16(px, path):
     """raw 16-bit PAM (RGB_ALPHA), big-endian, straight from the array"""
