@@ -12,6 +12,28 @@ Newest first.
 
 ---
 
+## 2026-10-18 -- the JPEG XL light is one color; alpha carries the falloff
+
+The transparent JXLs stored each pixel's light in its OWN color (`glow / max(glow)` at the peak), so the stored color
+drifted from acid toward a pale near-white as alpha fell: blue/green .07 at the core, up to .35-.46 in the last tail
+(q5 dark spill and rims, every q6n4 dark layer, the q6n4 rims, streak, and travel in both themes). Two causes stacked: the
+SDR art's ramp toward a pale olive by distance (`gen_assets.finish`'s TAIL, "scattering on a matte surface"), and the
+gamma-space law's own lean toward blue at low levels, both lifted to 400-600 nits. In the opaque AVIF that tail sits at
+about 1 nit and cannot show. In a transparent JXL it is a pale 400-600-nit color at low alpha, and iPhone Safari
+tone-maps it into a grey-teal band at the outer falloff (seen on the wordmark hero port, wordmark#69, fixed there the
+same way).
+
+Now every drifting layer stores ONE color, the acid at its true peak, and all of the falloff is in alpha
+(`hdr.constant_light()`). The alpha is solved per pixel so the composite over the layer's floor has the luminance the
+old encoding gave, so the shape does not move: decoded and composited over the floor, the light is within 0.3% of the
+shipped one at every level (5px box), and the rims' inward falloff (#129, #142) matches row for row within dither. The one
+exception is the streak's white-hot core (`q6_streak`'s 65% mix toward (255, 255, 240), the palette's `hot`): it is
+the look, not drift, so it keeps its color, now one that does not change with level. The light-mode spills already
+stored one color (the acid shoulder carries their tail) and are byte for byte unchanged, as is every AVIF. True-peak
+stamps, straight alpha, dither, sizes, and frame layouts are as they were. 18 files, 356 KB -> 209 KB.
+
+---
+
 ## 2026-10-18 -- q5's HDR rim keeps the SDR rim's shape
 
 q5's HDR rim had the "core-only lift" q6n4 lost in #129: its law lifted the rim's core in gamma terms and left the
