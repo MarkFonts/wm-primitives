@@ -123,7 +123,7 @@ def mask_footprint(A, path):
     Image.fromarray(np.dstack([np.full(A.shape + (3,), 255, np.uint8), a8]), 'RGBA').save(path, quality=92, speed=4)
     return os.path.getsize(path)
 
-# shipped name -> (capture name, V_peak in gamma terms): spill 1.35 = ~400 nits, rim 1.6 = ~590
+# shipped name -> (capture name, V_peak in gamma terms): spill 1.35 = ~400 nits; the rims ignore theirs (RIM_PEAK_D)
 LAYERS = {
     'q5-hdr-dark-pill':     ('q5-pill',     1.35),
     'q5-hdr-dark-chip':     ('q5-chip',     1.35),
@@ -157,7 +157,22 @@ def frames(z, cap):
         out.append((resample(A, sc, OY[cap]) * m, resample(W, sc, OY[cap])))
     return out
 
+# THE RIM keeps the SDR rim's SHAPE (wm-primitives, q5-rim-shape): the SDR light linearised and scaled in linear light
+# by ONE factor shared by both pieces, so the brightest pixel is the peak it had and the falloff inward is the SDR
+# art's. The gamma-space law below lifted only the core: 1px into the HDR rim was .032 of the rim, against the SDR
+# art's .143 -- a hard line on an unlit face, the "core-only lift" q6n4 lost in #129 (gen_q6n4.py lin()).
+RIM_CAPS = ('q5-rim-pill', 'q5-rim-chip')
+RIM_PEAK_D = 589.08             # the dark rim's plane peak, as shipped before (MaxCLL 590)
+def rim_sdr(z, cap):
+    return to_nits(z[cap + '|A'][..., None] * (z[cap + '|W'] @ np.stack(PAL)))
+def rim_glow(z, cap, glow_peak):
+    """the SDR rim in linear light, times the one factor that puts the brighter piece's peak at glow_peak"""
+    return rim_sdr(z, cap) * (glow_peak / max(float(rim_sdr(z, c).max()) for c in RIM_CAPS))
+
 def bake(z, cap, vpk):
+    if cap in RIM_CAPS:                                   # the rim: the SDR shape, scaled (above); vpk is the spills'
+        fl = grey_nits(FLOOR); glow = rim_glow(z, cap, RIM_PEAK_D - fl)
+        return fl + glow, glow, fl
     A, Wt = z[cap + '|A'], z[cap + '|W']
     apk0 = float(A.max())
     if cap in FRAMED:
@@ -229,7 +244,7 @@ def light(z, rows):
                     f'{NF} frames {plane.shape[1]} x {plane.shape[0]}  {s/1024:5.1f} KB')
     fl = grey_nits(FACE_L)
     for name, cap in RIM_L.items():
-        g = law_r2(z[cap + '|A'], z[cap + '|W'], 1.6); g = g * (PEAK_L - fl) / g.max(); plane = fl + g
+        g = rim_glow(z, cap, PEAK_L - fl); plane = fl + g          # the SDR shape, one factor for both pieces
         s = write(plane, (g.max(-1) > 0.01).astype(np.float32), SHIP + name + '.avif')
         pk = float(plane.max()); open(OUT + name + '.peak', 'w').write(f'{pk:.3f}'); set_clli(SHIP + name + '.avif', clli_for(pk))
         rows.append(f'{name:22s} floor {fl:6.2f} nits (the ink face)  peak {pk:6.1f} nits (PQ {pq(pk):.4f})  MaxCLL {clli_for(pk):4d}  {s/1024:5.1f} KB')

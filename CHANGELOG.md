@@ -12,6 +12,18 @@ Newest first.
 
 ---
 
+## 2026-10-18 -- q5's HDR rim keeps the SDR rim's shape
+
+q5's HDR rim had the "core-only lift" q6n4 lost in #129: its law lifted the rim's core in gamma terms and left the
+light falling in from it at its SDR level, so 1px into the HDR rim was .032 of the rim, against the SDR art's .143 --
+a hard line round an unlit face. The rim pieces are now the SDR rim in linear light, times one factor shared by the
+pill and the chip, peaking where they did (589 nits dark, 405 light). Both paths, both themes: the opaque AVIFs and
+the transparent JXLs (`tools/hdr/build.sh q5-rim-dark`, `q5-rim-light`, which write both from the same arrays). The
+spills, the footprint masks, and SDR are unchanged. The largest gap from the SDR profile over the first 8px, decoded
+from the JXLs, is .008 (it was .249).
+
+---
+
 ## 2026-10-15 -- q6n4's light in JPEG XL
 
 **wm-primitives#133, stage 2.** q6n4 takes the same path as q5: where the browser decodes JPEG XL (`html.wm-jxl`),
