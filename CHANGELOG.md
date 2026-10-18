@@ -12,6 +12,18 @@ Newest first.
 
 ---
 
+## 2026-10-18 -- unpinning `auto` clamps like every other write
+
+**wm-primitives#9, part 1.** The `auto` pill's auto-to-number write was the one write in `AxisSlider` that did not clamp:
+typed entry, the arrow keys, wheel and drag all pass through `Math.min(max, Math.max(min, ...))`, the pill handed
+`autoValue` over as it came. A host that gave it a size rather than an optical size (font-proofer, 200 on an 8-45 `opsz`)
+wrote 200 into `font-variation-settings` while the thumb sat at 45 and the field read 200. The pill now clamps to
+[min, max]. Clamping alone only lands on 45, a different wrong answer, so the host half (font-proofer passes the opsz
+its size resolves to) is the other half of the fix. `dist/dial.js` rebuilt; `tests/fixtures/dial.html` gains an `opsz` dial parked on auto with
+`autoValue: 200`, and `dial-bundle.spec.ts` asserts the unpin writes 45.
+
+---
+
 ## 2026-10-18 -- q5's HDR rim keeps the SDR rim's shape
 
 q5's HDR rim had the "core-only lift" q6n4 lost in #129: its law lifted the rim's core in gamma terms and left the

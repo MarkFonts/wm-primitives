@@ -35,6 +35,15 @@ test.describe('wmDial contract', () => {
     expect(await page.evaluate(() => [db.get(), log[log.length - 1]])).toEqual([30, ['b', 30]])
   })
 
+  test('unpinning auto clamps autoValue to the axis, like every other write', async ({ page }) => {
+    const pill = page.locator('#c .slider-auto')
+    await pill.click()
+    expect(await page.evaluate(() => [dc.get(), log[log.length - 1]])).toEqual([45, ['c', 45]])
+    expect(await page.locator('#c input.slider-number').inputValue()).toBe('45')
+    await pill.click()
+    expect(await page.evaluate(() => dc.get())).toBe('auto')
+  })
+
   test('destroy empties the host; mountTheme draws the marks and stamps the root', async ({ page }) => {
     await page.evaluate(() => da.destroy()); await page.waitForTimeout(50)
     expect(await page.locator('#a .slider-row').count()).toBe(0)
