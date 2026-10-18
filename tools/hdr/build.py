@@ -1,5 +1,6 @@
 """One entry point for the HDR light sets:  tools/hdr/build.sh <target> [--ship-avif] [--lossless-report]
 
+  q5-rim-dark, q5-rim-light   q5's rim alone, AVIF and JXL from the same arrays (the SDR rim's shape, gen_hdr.rim_glow)
   q6n4-dark, q6n4-light   q6n4's light as transparent JXL (the AVIF sets are gen_q6n4.py's, unchanged)
   q5-dark    q5's dark light as transparent JXL (the AVIF dark set is gen_hdr.py's, unchanged)
   q5-light   q5's light-mode light: the transparent JXL set (shipped) and, from the SAME float arrays, the opaque AVIF
@@ -35,7 +36,7 @@ def q5_light(ship_avif=False, lossless_report=False):
         fr = [gh.resample(glow, sc, mt + bh + 1) * (1 - 0.15 * np.clip((1 - sc) / 0.1, 0, 1)) for sc in np.linspace(gh.S0, gh.S1, gh.NF)]
         light[name] = (np.clip(np.concatenate(fr, 0), 0, None), F)
     for name, c in gh.RIM_L.items():                           # the rim, inside the ink face
-        g = gh.law_r2(cap[c + '|A'], cap[c + '|W'], 1.6); light[name] = (g * (P - INK) / g.max(), INK)
+        light[name] = (gh.rim_glow(cap, c, P - INK), INK)        # the SDR rim's shape (gen_hdr.rim_glow)
     t = step('render the light (17 frames x 2 shapes, 2 rims)', t)
     px = {n: transparent(g, fl, rng) for n, (g, fl) in light.items()}
     t = step('quantise + dither (16-bit PQ RGBA)', t)
@@ -112,12 +113,36 @@ def q6n4(theme):
     t = step(f'encode {len(jobs)} files in parallel ({sum(r[7] != "skipped" for r in rows)} run, the rest unchanged)', t)
     return rows
 
+def q5_rim(theme):
+    """q5's rim alone, dark or light, for BOTH paths from the same arrays: the opaque PQ AVIF (floor + glow, the
+    shipped footprint masks unchanged) and the transparent JXL. The SDR rim in linear light, one factor for both
+    pieces (gen_hdr.rim_glow), peaking where it did; the spills are left alone"""
+    t = time.time()
+    import gen_hdr as gh
+    z = np.load(gh.CAPF); cap = {k: z[k] for c in gh.RIM_CAPS for k in (c + '|A', c + '|W')}
+    t = step('load the capture (cap.npz)', t)
+    if theme == 'dark': fl, pk, names = gh.grey_nits(gh.FLOOR), gh.RIM_PEAK_D, {n: c for n, (c, _) in gh.LAYERS.items() if c in gh.RIM_CAPS}
+    else: fl, pk, names = gh.grey_nits(gh.FACE_L), gh.PEAK_L, gh.RIM_L
+    light = {n: gh.rim_glow(cap, c, pk - fl) for n, c in names.items()}
+    t = step(f'render the rim ({len(light)} pieces)', t)
+    acid = gh.to_nits(gh.PAL[0]); acid = acid / acid.max(); rng = np.random.default_rng(1340 + (theme == 'light')); px = {}
+    for n, g in light.items():
+        gmax = g.max(-1); unit = np.where(gmax[..., None] > 1e-6, g / np.maximum(gmax, 1e-9)[..., None], acid)
+        px[n] = hdr.rgba(unit * pk, hdr.coverage(gmax, fl, pk), rng=rng)
+    t = step('quantise + dither (16-bit PQ RGBA)', t)
+    jobs = [hdr.Jxl(px[n], os.path.join(gh.SHIP, n.replace('-hdr-', '-jxl-') + '.jxl'), pk) for n in light]
+    jobs += [hdr.Avif(fl + g, (g.max(-1) > 0.01).astype(np.float32), os.path.join(gh.SHIP, n + '.avif'), fl + float(g.max())) for n, g in light.items()]
+    rows, secs = hdr.run(jobs)
+    t = step(f'encode {len(jobs)} files in parallel ({sum(r[7] != "skipped" for r in rows)} run, the rest unchanged)', t)
+    return rows
+
 if __name__ == '__main__':
     target = sys.argv[1] if len(sys.argv) > 1 else 'q5-light'
     T = time.time()
     targets = {'q5-light': lambda: q5_light('--ship-avif' in sys.argv, '--lossless-report' in sys.argv),
                'q5-dark': lambda: q5_dark(False, '--lossless-report' in sys.argv),
-               'q6n4-dark': lambda: q6n4('dark'), 'q6n4-light': lambda: q6n4('light')}
+               'q6n4-dark': lambda: q6n4('dark'), 'q6n4-light': lambda: q6n4('light'),
+               'q5-rim-dark': lambda: q5_rim('dark'), 'q5-rim-light': lambda: q5_rim('light')}
     rows = targets[target]()
     print(f'\n{"step":64s} {"time":>7s}'); [print(f'{n:64s} {s:6.2f}s') for n, s in steps]
     print(f'{"total (wall)":64s} {time.time() - T:6.2f}s\n'); print(hdr.table(rows))

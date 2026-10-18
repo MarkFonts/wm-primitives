@@ -51,11 +51,11 @@ ACCENT_CAP=out/cap.npz .venv/bin/python gen_q6n4.py          # q6n4's HDR sets, 
 | shipped file | what | script |
 | --- | --- | --- |
 | `q5-hdr-dark-pill.avif`, `-chip` | the spill, opaque PQ, floor #1a1a1a, 17 state frames stacked | `gen_hdr.py` |
-| `q5-hdr-dark-rim-pill.avif`, `-chip` | the rim inside the face, opaque PQ, floor #1a1a1a | `gen_hdr.py` |
+| `q5-hdr-dark-rim-pill.avif`, `-chip` | the rim inside the face, opaque PQ, floor #1a1a1a: the SDR rim in linear light, one factor for both pieces, peak 589 | `gen_hdr.py`, or `../hdr/build.sh q5-rim-dark` (with the JXL) |
 | `q5-hdr-dark-label.avif` | flat acid PQ field for the label | `gen_hdr.py` |
 | `q5-hdr-mask-pill.avif`, `-rim-pill`, `-rim-chip` | footprint masks (straight alpha); the rim masks serve both themes | `gen_hdr.py` |
 | `q5-hdr-light-pill.avif`, `-chip` | light mode: the "broad 300" spill (core + shoulder, +200, peak 405), floor #ffffff, 17 state frames | `gen_hdr.py` (from `capture.py broad`) |
-| `q5-hdr-light-rim-pill.avif`, `-chip` | light mode: acid rim inside the ink face (floor #161616), peak 405 | `gen_hdr.py` |
+| `q5-hdr-light-rim-pill.avif`, `-chip` | light mode: acid rim inside the ink face (floor #161616), the SDR rim's shape, peak 405 | `gen_hdr.py`, or `../hdr/build.sh q5-rim-light` (with the JXL) |
 | `q5-hdr-light-label.avif` | light mode: flat acid PQ field at 605 | `gen_hdr.py` |
 | `q5-hdr-light-mask-pill.avif` | light mode: footprint of the widest frame (a chip's spill takes none) | `gen_hdr.py` |
 | `q6n4-hdr-dark-spill-pill.avif`, `-chip` | the shipped log spill's footprint, floor #1a1a1a, 9 fade frames, peak 398 | `gen_q6n4.py` |
