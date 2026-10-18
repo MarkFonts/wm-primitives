@@ -10,6 +10,7 @@
  * consumers.yml fails a push that changed either input without regenerating. */
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs'
 import { join, resolve, extname } from 'node:path'
+import { execFileSync } from 'node:child_process'
 
 const ROOT = resolve(new URL('..', import.meta.url).pathname)
 const idx = readFileSync(process.env.WM_INDEX ?? join(ROOT, 'index.ts'), 'utf8')
@@ -23,6 +24,7 @@ const DEFAULT = {
   'Kernpare': '../wordmarktools/kernpare/index.html',
   'WORDMAKE': '../wordmarktools/wordmake/src',
   'GliffDiff': '../wordmarktools/gliffdiff/src',
+  'wordmark.nyc': '../wordmark',   // the site's own pages and js; built app bundles live under assets/, which walk() skips
 }
 const spec = process.env.WM_CONSUMERS
   ? Object.fromEntries(process.env.WM_CONSUMERS.split(',').map(p => p.split('=')))
@@ -33,7 +35,7 @@ function walk(p, out = []) {
   const st = statSync(p)
   if (st.isFile()) { if (EXT.has(extname(p))) out.push(p); return out }
   for (const f of readdirSync(p)) {
-    if (f === 'node_modules' || f === 'shared' || f === 'dist' || f.startsWith('.')) continue
+    if (f === 'node_modules' || f === 'shared' || f === 'dist' || f === 'assets' || f.startsWith('.')) continue
     walk(join(p, f), out)
   }
   return out
@@ -83,20 +85,58 @@ for (const b of blocks) {
   md += `| ${names || '*(types only)*'} | ${what || '—'} | ${by.join(', ') || '—'} | ${specFor(b.from)} |\n`
 }
 if (cssOnly.length) md += `\nCSS-only modules (imported from an app's entry stylesheet, nothing to export): ${cssOnly.map(c => '`' + c + '`').join(', ')}.\n`
-/* ---- the marks: which Material Symbols name each consumer draws ---- */
-const marks = {}
-for (const [name, text] of Object.entries(consumers)) {
-  const found = new Set([...text.matchAll(/<Icon\s+name=["']([a-z_0-9]+)/g)].map(m => m[1]))
-  for (const m of text.matchAll(/material-symbols-outlined["'][^>]*>\s*([a-z_0-9]+)\s*</g)) found.add(m[1])
-  for (const n of found) (marks[n] ??= new Set()).add(name)
+/* ---- the marks: USED, READY, MISSING ----
+ * The subset font's ligature list (read from the font by lint-icons.py --names) against
+ * everything that draws a Material Symbols name. USED: at least one app draws it. READY:
+ * the face carries it and nothing draws it yet. MISSING: an app names it (an <Icon name>
+ * or a raw ligature, the sure forms) and the face cannot draw it. Never hand-kept: the
+ * system page reads docs/system/icons.json, which this writes. */
+const subset = execFileSync('python3', [join(ROOT, 'scripts/lint-icons.py'), '--names'], { encoding: 'utf8' }).split('\n').filter(Boolean)
+const inSubset = new Set(subset)
+// Who draws: every consumer, plus the primitive's own src/ and the system page's pages, plus the
+// public site when it is checked out (WM_CONSUMERS names it; the default finds a sibling).
+const markSources = { ...consumers }
+const own = walk(join(ROOT, 'src'))
+if (own.length) markSources['wm-primitives'] = own.map(f => readFileSync(f, 'utf8')).join('\n')
+const pages = walk(join(ROOT, 'docs/system/pages'))
+if (pages.length) markSources['system page'] = pages.map(f => readFileSync(f, 'utf8')).join('\n')
+const SURE = [
+  /<Icon\b[^>]*?\bname=\{?["']([a-z][a-z0-9_]*)["']/g,
+  /material-symbols-outlined[^"']*["'][^>]*>\s*([a-z][a-z0-9_]*)\s*</g,
+  /\bicon:\s*["']([a-z][a-z0-9_]*)["']/g,   // dialHandle's icon option
+]
+const marks = {}, sure = {}
+for (const [name, text] of Object.entries(markSources)) {
+  const hit = new Set(), certain = new Set()
+  for (const re of SURE) for (const m of text.matchAll(re)) { hit.add(m[1]); certain.add(m[1]) }
+  // name={cond ? 'a' : 'b'}: the quoted branches (not a compared value like type === 'p'); zoomControl's flyer('search')
+  for (const m of text.matchAll(/<Icon\b[^>]*?\bname=\{([^}]*)\}/g)) for (const v of m[1].matchAll(/[?:]\s*["']([a-z][a-z0-9_]*)["']/g)) { hit.add(v[1]); certain.add(v[1]) }
+  for (const m of text.matchAll(/\bflyer\(\s*["']([a-z][a-z0-9_]*)["']/g)) hit.add(m[1])
+  for (const m of text.matchAll(/\bICONS\s*=\s*\{([^}]*)\}/g)) for (const v of m[1].matchAll(/["']([a-z][a-z0-9_]*)["']/g)) hit.add(v[1])
+  // a file that draws icons may keep its names in a table: a quoted two-word literal that IS a ligature counts (not on the system page, whose tables are glosses)
+  if (name !== 'system page' && /<Icon\b|material-symbols-outlined/.test(text)) for (const m of text.matchAll(/["']([a-z]+(?:_[a-z0-9]+)+)["']/g)) if (inSubset.has(m[1])) hit.add(m[1])
+  for (const n of hit) (marks[n] ??= new Set()).add(name)
+  for (const n of certain) if (!inSubset.has(n) && name !== 'system page') (sure[n] ??= new Set()).add(name)
 }
-// The switch's three are drawn by the primitive, not named by any host: scanning hosts
-// for them made the table depend on which branch a laptop had checked out.
+// The switch's three are drawn by the primitive, not named by any host.
 for (const n of ['brightness_auto', 'light_mode', 'dark_mode']) (marks[n] ??= new Set()).add('ThemeSwitch (every host that mounts it)')
-const ownMarks = new Set([...idx.matchAll(/'([a-z_0-9]+)'/g)].map(m => m[1]).filter(() => false))
-if (Object.keys(marks).length) {
-  md += `\n## Marks\n\nMaterial Symbols names each consumer draws (\`<Icon name>\` and raw ligatures), so removing one is a search, not a guess. The subset font carries what \`scripts/\` last cut; a name here that is not in it prints as text.\n\n| mark | drawn by |\n| --- | --- |\n`
-  for (const [n, who] of Object.entries(marks).sort()) md += `| \`${n}\` | ${[...who].join(', ')} |\n`
+const census = {
+  used: Object.fromEntries(subset.filter(n => marks[n]).map(n => [n, [...marks[n]].sort()])),
+  ready: subset.filter(n => !marks[n]),
+  missing: Object.fromEntries(Object.keys(sure).sort().map(n => [n, [...sure[n]].sort()])),
+}
+if (Object.keys(consumers).length) {
+  const nUsed = Object.keys(census.used).length, nMiss = Object.keys(census.missing).length
+  const cell = n => '`' + n + '`'
+  md += `\n## Marks\n\nThe Material Symbols subset (\`fonts/MaterialSymbolsOutlined.woff2\`, ${subset.length} ligatures) sorted by whether anything draws each one. The ligature list is read from the font and the drawing from the sources of ${Object.keys(markSources).join(', ')}, so removing a mark is a search, not a guess. The system page shows the same three lists with their glyphs.\n\n`
+  md += `### Used (${nUsed})\n\nDrawn by at least one app. Who draws it is in the second column.\n\n| mark | drawn by |\n| --- | --- |\n`
+  for (const [n, who] of Object.entries(census.used)) md += `| ${cell(n)} | ${who.join(', ')} |\n`
+  md += `\n### Ready (${census.ready.length})\n\nIn the subset, drawn by nothing yet.\n\n${census.ready.map(cell).join(' ')}\n`
+  if (nMiss) {
+    md += `\n### Missing (${nMiss})\n\nNamed by an app, not in the subset: it prints as text, or as stray glyphs, in an app that loads the subset. (WORDMAKE loads the whole family.)\n\n| mark | named by |\n| --- | --- |\n`
+    for (const [n, who] of Object.entries(census.missing)) md += `| ${cell(n)} | ${who.join(', ')} |\n`
+  }
+  writeFileSync(join(ROOT, 'docs/system/icons.json'), JSON.stringify(census, null, 1) + '\n')
 }
 writeFileSync(join(ROOT, 'COMPONENTS.md'), md)
 

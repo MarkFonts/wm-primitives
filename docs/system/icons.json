@@ -1,0 +1,257 @@
+{
+ "used": {
+  "add": [
+   "WORDMAKE",
+   "font-proofer"
+  ],
+  "add_photo_alternate": [
+   "WORDMAKE"
+  ],
+  "align_horizontal_center": [
+   "WORDMAKE"
+  ],
+  "blur_on": [
+   "WORDMAKE"
+  ],
+  "bookmark": [
+   "wordmark.nyc"
+  ],
+  "brightness_auto": [
+   "ThemeSwitch (every host that mounts it)",
+   "wm-primitives",
+   "wordmark.nyc"
+  ],
+  "calendar_month": [
+   "font-proofer"
+  ],
+  "check": [
+   "wm-primitives"
+  ],
+  "chevron_left": [
+   "wordmark.nyc"
+  ],
+  "chevron_right": [
+   "wordmark.nyc"
+  ],
+  "close": [
+   "WORDMAKE",
+   "font-proofer"
+  ],
+  "content_copy": [
+   "wm-primitives"
+  ],
+  "crop": [
+   "WORDMAKE"
+  ],
+  "dark_mode": [
+   "ThemeSwitch (every host that mounts it)",
+   "wm-primitives",
+   "wordmark.nyc"
+  ],
+  "delete": [
+   "WORDMAKE"
+  ],
+  "discover_tune": [
+   "ReCal",
+   "font-proofer"
+  ],
+  "feature_search": [
+   "system page"
+  ],
+  "fit_page_height": [
+   "WORDMAKE"
+  ],
+  "fit_page_width": [
+   "WORDMAKE"
+  ],
+  "fit_width": [
+   "system page"
+  ],
+  "format_align_center": [
+   "WORDMAKE",
+   "system page",
+   "wm-primitives"
+  ],
+  "format_align_justify": [
+   "WORDMAKE",
+   "wm-primitives"
+  ],
+  "format_align_left": [
+   "WORDMAKE",
+   "system page",
+   "wm-primitives"
+  ],
+  "format_align_right": [
+   "WORDMAKE",
+   "system page",
+   "wm-primitives"
+  ],
+  "format_bold": [
+   "wm-primitives"
+  ],
+  "format_h1": [
+   "ReCal",
+   "wm-primitives"
+  ],
+  "format_h2": [
+   "ReCal",
+   "wm-primitives"
+  ],
+  "format_h3": [
+   "ReCal",
+   "wm-primitives"
+  ],
+  "format_italic": [
+   "ReCal",
+   "font-proofer",
+   "wm-primitives"
+  ],
+  "format_letter_spacing": [
+   "ReCal"
+  ],
+  "format_line_spacing": [
+   "ReCal",
+   "system page"
+  ],
+  "format_paragraph": [
+   "GliffDiff",
+   "ReCal",
+   "font-proofer",
+   "system page",
+   "wm-primitives"
+  ],
+  "format_shapes": [
+   "GliffDiff"
+  ],
+  "forms_add_on": [
+   "font-proofer"
+  ],
+  "grid_view": [
+   "font-proofer"
+  ],
+  "insert_text": [
+   "font-proofer"
+  ],
+  "keyboard_arrow_down": [
+   "WORDMAKE",
+   "wm-primitives"
+  ],
+  "keyboard_arrow_up": [
+   "WORDMAKE",
+   "font-proofer"
+  ],
+  "layers": [
+   "GliffDiff"
+  ],
+  "light_mode": [
+   "ThemeSwitch (every host that mounts it)",
+   "wm-primitives",
+   "wordmark.nyc"
+  ],
+  "line_weight": [
+   "ReCal",
+   "system page"
+  ],
+  "match_word": [
+   "GliffDiff"
+  ],
+  "mystery": [
+   "GliffDiff",
+   "system page",
+   "wm-primitives"
+  ],
+  "pageview": [
+   "system page"
+  ],
+  "play_arrow": [
+   "wordmark.nyc"
+  ],
+  "queue_play_next": [
+   "WORDMAKE"
+  ],
+  "restart_alt": [
+   "wordmark.nyc"
+  ],
+  "search": [
+   "wm-primitives"
+  ],
+  "settings_backup_restore": [
+   "WORDMAKE",
+   "font-proofer",
+   "wm-primitives"
+  ],
+  "sync_alt": [
+   "Kernpare",
+   "ReCal",
+   "system page"
+  ],
+  "text_fields": [
+   "GliffDiff",
+   "ReCal",
+   "font-proofer",
+   "system page"
+  ],
+  "text_increase": [
+   "ReCal"
+  ],
+  "text_rotation_none": [
+   "WORDMAKE"
+  ],
+  "text_select_start": [
+   "WORDMAKE"
+  ],
+  "visibility": [
+   "wordmark.nyc"
+  ],
+  "warning": [
+   "Kernpare"
+  ],
+  "zoom_in": [
+   "wm-primitives"
+  ],
+  "zoom_out": [
+   "wm-primitives"
+  ]
+ },
+ "ready": [
+  "arrow_back",
+  "arrow_forward",
+  "book",
+  "book_2",
+  "book_3",
+  "book_4",
+  "book_5",
+  "book_6",
+  "book_ribbon",
+  "brand_family",
+  "call_merge",
+  "edit",
+  "edit_document",
+  "edit_note",
+  "emoji_symbols",
+  "font_download",
+  "format_quote",
+  "glyphs",
+  "hdr_auto",
+  "hdr_auto_select",
+  "hdr_enhanced_select",
+  "hdr_off",
+  "hdr_off_select",
+  "hdr_on_select",
+  "match_case",
+  "match_case_off",
+  "pause",
+  "public",
+  "redo",
+  "script",
+  "serif",
+  "slab_serif",
+  "star",
+  "subscript",
+  "superscript",
+  "type_specimen",
+  "undo",
+  "visibility_off"
+ ],
+ "missing": {}
+}

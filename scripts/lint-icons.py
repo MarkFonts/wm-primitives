@@ -133,4 +133,9 @@ def main():
         return 1
     print('lint-icons: clean'); return 0
 
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    # --names: the shipped subset's ligature names, one per line. gen-index.mjs reads the
+    # list this way, so the used/ready/missing census starts from the font and not a copy.
+    if '--names' in sys.argv:
+        print('\n'.join(sorted(shipped_names()))); sys.exit(0)
+    sys.exit(main())

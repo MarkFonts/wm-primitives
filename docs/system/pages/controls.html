@@ -28,7 +28,7 @@
      own name, in words. That is the exact failure a drifting icon_names list produces, and
      it was already live here.
      The font comes from icon.css now, which build.py inlines and whose @font-face points
-     at the woff2 synced into docs/fonts/. One face, every mark. -->
+     at the woff2 synced into docs/fonts/. One face, every icon. -->
 <!-- Source for section 03. Written standalone: `body` is the section, `&` means the
      section element itself, and the theme sits on :root, which is where the document
      puts it. The faces are the ones the assembled page declares -- CalSansVF and
@@ -585,7 +585,7 @@
 &.always-arrows .d:hover .d-unit, &.always-arrows .d:focus-within .d-unit, &.touch .d:hover .d-unit, &.touch .d:focus-within .d-unit{ opacity: .78; }
 &.always-arrows .d .f .arrows, &.touch .d .f .arrows { opacity: 1; }
 
-/* ── the marks grid ────────────────────────────────────────────────────────────
+/* ── the icons grid ────────────────────────────────────────────────────────────
    Page furniture only. Everything INSIDE a cell is the primitive's own -- .wm-icon and
    .wm-chevron come from icon.css and chevron.css, which build.py inlines, so this grid
    cannot show a mark that differs from what ships. */
@@ -614,14 +614,16 @@
 .marks--chev .mark svg { margin: var(--pad-4, 16px) 0; overflow: visible; }
 .mark-name {
   font-family: ui-monospace, Menlo, monospace;
-  font-size: var(--type-micro-size, 10px);
-  color: var(--text-muted);
-  word-break: break-all;
+  font-size: var(--type-ui-size, 12px);
+  color: var(--ink, var(--text));
+  word-break: normal; overflow-wrap: normal;
+  user-select: text;
 }
 .mark-use {
   font-size: var(--type-micro-size, 10px);
-  color: var(--text-dim);
+  color: var(--ink-3, var(--text-dim));
 }
+.icon-n{font-size:var(--type-micro-size, 10px);font-weight:400;color:var(--ink-3, var(--text-dim));letter-spacing:0;margin-left:.5em;vertical-align:.1em}
 .mark-apps {
   font-size: var(--type-micro-size, 10px);
   letter-spacing: var(--track-caps);
@@ -693,11 +695,13 @@
 .marks-wrap > .lede{grid-column:1 / span 2;grid-row:1 / span 2;align-self:start;margin:0;padding-right:var(--grid-gutter)}
 .marks-wrap > .marks{display:contents}
 .marks .mark{display:flex;flex-direction:column;align-items:flex-start;text-align:left;box-sizing:border-box;margin:0;padding:16px 12px}
-.marks .mark .mark-name{word-break:break-word}
+.marks .mark .mark-name{word-break:normal;overflow-wrap:normal;color:var(--ink,var(--text));font-size:var(--type-ui-size,.75rem);line-height:15px;opacity:1}
+.marks .mark .mark-use{color:var(--ink-3,var(--text-dim));line-height:15px}
 @media (max-width:1023px){
   .marks-wrap{grid-template-columns:repeat(3,minmax(0,1fr))}
   .marks-wrap > .lede{grid-column:1 / -1;grid-row:auto}
 }
+@media (max-width:520px){ .marks-wrap{grid-template-columns:repeat(2,minmax(0,1fr))} }   /* a phone: two to a row, so a long name breaks once, not three times */
 .toolbar{position:relative;padding:0;background:none;border:0;margin:var(--spacing-06,24px) 0 var(--spacing-06,24px)}
 .toolbar > span{position:absolute;right:calc(100% + var(--grid-gutter));top:0;width:calc(2 * var(--col) + var(--grid-gutter));text-align:right;margin:0;line-height:27px}
 @media (max-width:1023px){
@@ -733,28 +737,34 @@ scroll.</p>
 
 <div class="grid" id="t-grid"></div>
 
-<h2 class="marks-h">The marks</h2>
+<h2 class="marks-h">Icons</h2>
 <p class="lede">Two families, and the split is not taste. <b>Material Symbols</b> for anything
-that is a <i>symbol</i>: it is a variable font, so a mark answers the pointer by pressing
+that is a <i>symbol</i>: it is a variable font, so an icon answers the pointer by pressing
 harder rather than by swapping drawings, and it themes on <code>GRAD</code> without moving
 its own metrics. <b>The house chevron</b> for every chevron, because Material&rsquo;s
 <code>opsz</code> axis bottoms out at 20 and a dial&rsquo;s stepper is six pixels tall &mdash;
 a glyph drawn for 20px used at 6 is the 20px drawing scaled down, stroke and all. A stroked
 path has no floor.</p>
 
-<h3 class="marks-h3">Drawn today</h3>
-<div class="marks-wrap"><p class="lede">Every Material name any app calls upon &mdash; wm-primitives, font-proofer, ReCal, Kernpare,
-opsz-proofer, WORDMAKE, GliffDiff, and this page &mdash; with what it means and who draws it. All of them
-are in the one shipped face: an 81-name subset in <code>fonts/</code>, cut by
-<code>scripts/cut-icon-subset.py</code>, and <code>lint-icons.py</code> fails an app on a name
-outside it. (WORDMAKE still ships the whole family for itself.) The stepper&rsquo;s arrows are
-not here: a stepper is the house chevron, not a Material mark.</p>
+<h3 class="marks-h3">Used <span class="icon-n" data-n="used"></span></h3>
+<div class="marks-wrap"><p class="lede">Drawn by at least one app. The shipped face is a __SUBSET_N__-name subset in
+<code>fonts/</code>, cut by <code>scripts/cut-icon-subset.py</code>, and <code>lint-icons.py</code> fails an app on a
+name outside it. Both lists are read from the font&rsquo;s ligature table and the apps&rsquo; own sources by
+<code>scripts/gen-index.mjs</code>, never kept by hand; hover an icon to see which apps draw it. (WORDMAKE still ships the
+whole family for itself.) The stepper&rsquo;s arrows are not here: a stepper is the house chevron, not a Material icon.</p>
 <div class="marks" id="m-icons"></div></div>
 
-<h3 class="marks-h3">In the face, waiting for a use</h3>
-<div class="marks-wrap"><p class="lede">The type tools&rsquo; vocabulary, cut into the face 2026-09-26 so a proofer or a
-specimen page can reach for one without a font rebuild. Each moves up the day an app draws it.</p>
+<h3 class="marks-h3">Ready <span class="icon-n" data-n="ready"></span></h3>
+<div class="marks-wrap"><p class="lede">In the face, drawn by no app yet, so one can be reached for without a font
+rebuild. Each moves up to Used the day an app draws it.</p>
 <div class="marks" id="m-icons-full"></div></div>
+
+<div id="m-icons-missing-wrap" hidden>
+<h3 class="marks-h3">Missing <span class="icon-n" data-n="missing"></span></h3>
+<div class="marks-wrap"><p class="lede">An app names it and the face cannot draw it: in an app that loads the subset it
+prints as stray glyphs. Add it to the subset, or use another name.</p>
+<div class="marks" id="m-icons-missing"></div></div>
+</div>
 
 <h3 class="marks-h3">Chevrons</h3>
 <div class="marks-wrap"><p class="lede">One drawing, one angle (34.6&deg;), three sizes. The stroke is derived from the
@@ -1703,95 +1713,138 @@ toggle('t-arrows', 'always-arrows', false);
 })();
 
 
-/* ── the marks grid ────────────────────────────────────────
+/* ── the icons grid ────────────────────────────────────────
    Rendered from the same component contract the apps use -- .wm-icon carries the axes
-   and the ink. The page draws from the FULL face (build.py), so it can show every mark
-   any app calls upon, and says which face each one ships in: `subset` is the 25-name
-   face in fonts/ that font-proofer, ReCal, Kernpare and opsz-proofer load; `full` is
-   the whole family, which WORDMAKE ships itself and this page draws from.
-   Indexed 2026-09-26 across every app; lint-icons.py holds the apps to the subset. */
-const MDS = [
-  // [name, what it means, apps that draw it]  -- every one is in the shipped face
-  ['format_align_left','align left',       ['wm-primitives','WORDMAKE']],
-  ['format_align_center','align center',   ['wm-primitives','WORDMAKE']],
-  ['format_align_right','align right',     ['wm-primitives','WORDMAKE']],
-  ['format_align_justify','justify',       ['wm-primitives','WORDMAKE']],
-  ['format_h1','heading 1',                ['wm-primitives','font-proofer']],
-  ['format_h2','heading 2',                ['wm-primitives','font-proofer']],
-  ['format_h3','heading 3',                ['wm-primitives','font-proofer']],
-  ['format_paragraph','paragraph',         ['wm-primitives','font-proofer','GliffDiff']],
-  ['format_bold','bold',                   ['wm-primitives']],
-  ['format_italic','italic',               ['wm-primitives']],
-  ['settings_backup_restore','reset',      ['font-proofer','WORDMAKE']],
-  ['discover_tune','settings flyout',      ['font-proofer']],
-  ['forms_add_on','multi-select',          ['font-proofer']],
-  ['content_copy','copy',                  ['wm-primitives']],
-  ['check','copied',                       ['wm-primitives']],
-  ['calendar_month','cal.com',             ['font-proofer']],
-  ['insert_text','big word',               ['font-proofer']],
-  ['text_fields','type scale / waterfall', ['font-proofer','GliffDiff']],
-  ['grid_view','glyphs',                   ['font-proofer']],
-  ['brightness_auto','theme auto',         ['wm-primitives','font-proofer']],
-  ['light_mode','theme light',             ['wm-primitives','font-proofer']],
-  ['dark_mode','theme dark',               ['wm-primitives','font-proofer']],
-  ['warning','save state',                 ['Kernpare']],
-  ['add','add a line',                     ['WORDMAKE']],
-  ['add_photo_alternate','add an image',   ['WORDMAKE']],
-  ['blur_on','blur',                       ['WORDMAKE']],
-  ['close','close',                        ['WORDMAKE']],
-  ['crop','crop',                          ['WORDMAKE']],
-  ['delete','delete',                      ['WORDMAKE']],
-  ['queue_play_next','queue next',         ['WORDMAKE']],
-  ['fit_page_width','fit width',           ['WORDMAKE']],
-  ['fit_page_height','fit height',         ['WORDMAKE']],
-  ['text_rotation_none','no rotation',     ['WORDMAKE']],
-  ['text_select_start','select start',     ['WORDMAKE']],
-  ['align_horizontal_center','center',     ['WORDMAKE']],
-  ['fit_width','fit width (v3 dial)',      ['system page']],
-  ['line_weight','weight (v3 dial)',       ['system page']],
-  ['format_line_spacing','leading (v3 dial)', ['system page']],
-  ['mystery','opsz auto (v3 dial) / metrics', ['system page','GliffDiff']],
-  ['format_shapes','characters',          ['GliffDiff']],
-  ['layers','overlay',                    ['GliffDiff']],
-  ['sync_alt','reverse / compare',        ['Kernpare','ReCal']],
-  ['bookmark','bookmarks on X',          ['wordmark.nyc']],
-  ['call_merge','three became one',       ['wordmark.nyc']],
-  ['star','stars on GitHub',              ['wordmark.nyc']],
-  ['public','open source',                ['wordmark.nyc']],
-  ['match_word','spacing',                ['GliffDiff']],
-];
-/* In the face, waiting for a use: the type tools' vocabulary, chosen 2026-09-26. Each one
-   moves to the grid above the day an app draws it. */
-const READY = [
-  ['glyphs','glyphs'], ['emoji_symbols','symbols'], ['type_specimen','specimen'],
-  ['brand_family','family'], ['font_download','font file'], ['serif','serif'],
-  ['script','script'], ['slab_serif','slab'], ['edit','edit'], ['edit_document','edit document'],
-  ['edit_note','edit note'], ['format_quote','quote'],
-  ['hdr_auto','HDR auto'], ['hdr_auto_select','HDR auto select'], ['hdr_enhanced_select','HDR enhanced'],
-  ['hdr_off','HDR off'], ['hdr_off_select','HDR off select'], ['hdr_on_select','HDR on select'],
-  ['match_case','match case'], ['match_case_off','match case off'],
-  ['subscript','subscript'], ['superscript','superscript'],
-  ['book','book'], ['book_2','book 2'], ['book_3','book 3'], ['book_4','book 4'], ['book_5','book 5'],
-  ['book_6','book 6'], ['book_ribbon','book ribbon'],
-  ['restart_alt','restart'], ['undo','undo'], ['redo','redo'],
-];
+   and the ink. The page draws from the FULL face (build.py), so it can show every icon
+   in the subset, and one an app names that the subset lacks.
+   THE THREE LISTS ARE NOT KEPT HERE. scripts/gen-index.mjs sorts the subset font's ligatures
+   into used (some app draws it), ready (none does) and missing (an app names it, the face
+   lacks it), and writes docs/system/icons.json; build.py puts that in place of the marker.
+   Only the plain-words gloss under a name is written here, and an icon without one shows none. */
+const CENSUS = /*ICON_CENSUS*/null;
+const GLOSS = {
+  'add': 'add a line',
+  'add_photo_alternate': 'add an image',
+  'align_horizontal_center': 'center',
+  'arrow_back': 'back',
+  'arrow_forward': 'forward',
+  'blur_on': 'blur',
+  'book': 'book',
+  'book_2': 'book 2',
+  'book_3': 'book 3',
+  'book_4': 'book 4',
+  'book_5': 'book 5',
+  'book_6': 'book 6',
+  'book_ribbon': 'book ribbon',
+  'bookmark': 'bookmarks on X',
+  'brand_family': 'family',
+  'brightness_auto': 'theme auto',
+  'calendar_month': 'cal.com',
+  'call_merge': 'three became one',
+  'check': 'copied',
+  'chevron_left': 'previous',
+  'chevron_right': 'next',
+  'close': 'close',
+  'content_copy': 'copy',
+  'crop': 'crop',
+  'dark_mode': 'theme dark',
+  'delete': 'delete',
+  'discover_tune': 'settings flyout',
+  'edit': 'edit',
+  'edit_document': 'edit document',
+  'edit_note': 'edit note',
+  'emoji_symbols': 'symbols',
+  'feature_search': 'zoom: find a feature',
+  'fit_page_height': 'fit height',
+  'fit_page_width': 'fit width',
+  'fit_width': 'fit width (v3 dial)',
+  'font_download': 'font file',
+  'format_align_center': 'align center',
+  'format_align_justify': 'justify',
+  'format_align_left': 'align left',
+  'format_align_right': 'align right',
+  'format_bold': 'bold',
+  'format_h1': 'heading 1',
+  'format_h2': 'heading 2',
+  'format_h3': 'heading 3',
+  'format_italic': 'italic',
+  'format_letter_spacing': 'letter spacing',
+  'format_line_spacing': 'leading (v3 dial)',
+  'format_paragraph': 'paragraph',
+  'format_quote': 'quote',
+  'format_shapes': 'characters',
+  'forms_add_on': 'multi-select',
+  'glyphs': 'glyphs',
+  'grid_view': 'glyphs',
+  'hdr_auto': 'HDR auto',
+  'hdr_auto_select': 'HDR auto select',
+  'hdr_enhanced_select': 'HDR enhanced',
+  'hdr_off': 'HDR off',
+  'hdr_off_select': 'HDR off select',
+  'hdr_on_select': 'HDR on select',
+  'insert_text': 'big word',
+  'keyboard_arrow_down': 'open / down',
+  'keyboard_arrow_up': 'close / up',
+  'layers': 'overlay',
+  'light_mode': 'theme light',
+  'line_weight': 'weight (v3 dial)',
+  'match_case': 'match case',
+  'match_case_off': 'match case off',
+  'match_word': 'spacing',
+  'mystery': 'opsz auto (v3 dial) / metrics',
+  'pageview': 'zoom: page view',
+  'pause': 'pause',
+  'play_arrow': 'play',
+  'public': 'open source',
+  'queue_play_next': 'queue next',
+  'redo': 'redo',
+  'restart_alt': 'restart',
+  'script': 'script',
+  'search': 'search',
+  'serif': 'serif',
+  'settings_backup_restore': 'reset',
+  'slab_serif': 'slab',
+  'star': 'stars on GitHub',
+  'subscript': 'subscript',
+  'superscript': 'superscript',
+  'sync_alt': 'reverse / compare',
+  'text_fields': 'type scale / waterfall',
+  'text_increase': 'text size up',
+  'text_rotation_none': 'no rotation',
+  'text_select_start': 'select start',
+  'type_specimen': 'specimen',
+  'undo': 'undo',
+  'visibility': 'views',
+  'visibility_off': 'hidden',
+  'warning': 'save state',
+  'zoom_in': 'zoom in',
+  'zoom_out': 'zoom out'
+};
 (() => {
-  const host = document.getElementById('m-icons');
-  const ready = document.getElementById('m-icons-full');
-  const cell = (name, use, apps) => {
+  if (!CENSUS) return;
+  const cell = (name, apps) => {
     const c = mk('figure', 'mark');
     const m = mk('span', 'wm-icon material-symbols-outlined');
     m.textContent = name; m.setAttribute('translate', 'no');
     m.style.fontSize = '24px';
     m.style.setProperty('--icon-opsz', '24');
-    const n = mk('figcaption', 'mark-name'); n.innerHTML = name.replace(/_/g, '_<wbr>');  // a long name breaks at its underscores, never inside a word
-    const u = mk('span', 'mark-use'); u.textContent = use;
-    c.append(m, n, u);
-    if (apps) { const a = mk('span', 'mark-apps'); a.textContent = apps.join(' · '); c.append(a); }
+    // (a span, not a figcaption: the page's figcaption rule greys every caption to ink-3) the name is the thing people search and copy: first, full ink, whole text selectable, breaking only at underscores
+    const n = mk('span', 'mark-name'); n.innerHTML = name.replace(/_/g, '_<wbr>');
+    c.append(m, n);
+    if (GLOSS[name]) { const u = mk('span', 'mark-use'); u.textContent = GLOSS[name]; c.append(u); }
+    if (apps && apps.length) c.title = apps.join(', ');
     return c;
   };
-  for (const [name, use, apps] of MDS) host.appendChild(cell(name, use, apps));
-  for (const [name, use] of READY) ready.appendChild(cell(name, use, null));
+  const fill = (id, key, names, appsOf) => {
+    const host = document.getElementById(id);
+    for (const n of names) host.appendChild(cell(n, appsOf && appsOf[n]));
+    const k = document.querySelector('.icon-n[data-n="' + key + '"]');
+    if (k) k.textContent = names.length;
+  };
+  fill('m-icons', 'used', Object.keys(CENSUS.used), CENSUS.used);
+  fill('m-icons-full', 'ready', CENSUS.ready, null);
+  const miss = Object.keys(CENSUS.missing);
+  if (miss.length) { document.getElementById('m-icons-missing-wrap').hidden = false; fill('m-icons-missing', 'missing', miss, CENSUS.missing); }
 })();
 
 /* The three chevrons that actually ship, at the sizes they ship at. Named by size rather

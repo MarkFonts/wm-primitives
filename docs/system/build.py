@@ -166,7 +166,7 @@ LEDES = {
     "readme":   "One dial, one switch, one set of tokens, built once and proven in every app before it counts as shipped.",
     "type":     "Seven sizes with their leadings, every one on the 3px line, and a sixth signal, geom, that only the face can give.",
     "corners":  "Every corner rounds the way Cal Sans is drawn, superellipse at 1.2 on a ladder of radii, and the true circles are counted so nothing else can pass for one.",
-    "controls": "Five ways to draw the same dial, the marks that travel with it, and the chips, toggles, and zoom that share its grammar.",
+    "controls": "Five ways to draw the same dial, the icons that travel with it, and the chips, toggles, and zoom that share its grammar.",
     "space":    "Twelve steps of padding read off the live surface, a cap at the radius, and a rule for when a row may spend a step.",
     "color":    "Six hundred and ninety-two declarations, a hundred and eighty values, and the three ramps every one of them has to come from.",
     "motion":   "Three durations and one curve, so a change reads as the same gesture wherever it happens, and the confirm that proves a press landed.",
@@ -336,6 +336,22 @@ def asset_src(m):
     return f'src="data:{mime};base64,{base64.b64encode(f.read_bytes()).decode()}"'
 
 # ---------------------------------------------------------------- per section
+def fill_icon_census(raw):
+    """The Icons part of Interface: the used / ready / missing lists and the subset's size.
+    docs/system/icons.json is written by scripts/gen-index.mjs from the subset font and the
+    apps' sources; the size is read from the font here, so no number on the page is typed."""
+    import importlib.util, json
+    census = json.loads((HERE / "icons.json").read_text())
+    try:
+        spec = importlib.util.spec_from_file_location("lint_icons", PKG / "scripts" / "lint-icons.py")
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        n = len(mod.shipped_names())
+    except Exception:
+        n = len(census["used"]) + len(census["ready"])      # fontTools missing: the census was cut from the same font
+    assert "/*ICON_CENSUS*/null" in raw and "__SUBSET_N__" in raw
+    return raw.replace("/*ICON_CENSUS*/null", json.dumps(census)).replace("__SUBSET_N__", str(n))
+
+
 def build_section(sid, label, path, kicker):
     """`path` may be a list. Extra sources fold into the SAME section under a wrapper
     class -- corner-law and circles share fourteen class names (.bar, .grid, .tag,
@@ -346,6 +362,8 @@ def build_section(sid, label, path, kicker):
     else:
         extras = []
     raw = path.read_text(errors="replace")
+    if path.name == "controls.html":
+        raw = fill_icon_census(raw)
     raw = re.sub(r'@font-face\s*\{.*?\}', '', raw, flags=re.S)
     # A page may link the primitives' own stylesheets so it renders standalone. Those are
     # inlined below from src/ instead, so the link would be a second copy and a 404 in the
@@ -969,9 +987,9 @@ LINKED = "--linked" in sys.argv
 # it changes every <i> and <em> in the assembled document and that is a typography decision,
 # not a build fix. docs/system/pages/buttons.html carries the worked example.
 
-# THE SYSTEM PAGE DRAWS FROM THE FULL FACE. The package ships a 75-ligature subset of
+# THE SYSTEM PAGE DRAWS FROM THE FULL FACE. The package ships a subset of
 # Material Symbols (icon.css says so; scripts/lint-icons.py holds the apps to it), and this
-# page draws marks the apps never do -- fit_width, format_line_spacing, line_weight -- which
+# page draws icons the apps never do -- fit_width, format_line_spacing, line_weight -- which
 # came out as the letters F, L and M with the subset (2026-09-21). So docs/fonts/ carries the
 # complete variable face beside the synced subset: 3.98MB, 4284 ligatures, Google's own
 # woff2 (gstatic v373), NOT in SYNCED_FACES because nothing in fonts/ is its source. The
