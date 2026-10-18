@@ -125,15 +125,18 @@ for (const host of HOSTS.filter(h => h.gestures !== false && h.rows?.length)) fo
         const gesture = touchDrag(page, r, [p, { x: p.x + 20, y: p.y }, { x: p.x + 40, y: p.y }], { hold: 600 })
         await page.waitForTimeout(300)
         expect(await engaged(row)).toBe(true)
-        const during = await heights(row)
-        expect(during.row).toBe(48); expect(during.bar).toBe(48)
+        // The bar eases 30 -> 48 (a ~.15s min-height transition, part of the design). WebKit only advances it on a
+        // rendering update, so a fixed-delay read on a slow runner can land mid-ease (47.09, 47.94, 47.98 seen on CI).
+        // Poll for the end state instead; the row must hold 48 throughout.
+        await expect.poll(async () => (await heights(row)).bar, { timeout: 600 }).toBe(48)
+        expect((await heights(row)).row).toBe(48)
         await gesture
         await page.waitForTimeout(1500)
         expect(await engaged(row), 'still engaged 1.5s after lift').toBe(true)
         await page.waitForTimeout(1900)
         expect(await engaged(row), 'released after 3s').toBe(false)
-        const after = await heights(row)
-        expect(after.row).toBe(48); expect(after.bar).toBe(30)
+        await expect.poll(async () => (await heights(row)).bar, { timeout: 600 }).toBe(30)
+        expect((await heights(row)).row).toBe(48)
       })
     })
 

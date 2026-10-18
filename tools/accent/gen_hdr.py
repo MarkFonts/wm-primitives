@@ -94,6 +94,7 @@ def write(nits, lit, path):
     c10 = np.clip(np.rint(code + tri), 0, 1023)
     u16 = np.rint(c10 * 65535 / 1023).astype('<u2')
     H, W = u16.shape[:2]
+    assert H % 2 == 0 and W % 2 == 0, f'{path}: {W} x {H} -- Chrome decodes a PQ AVIF with an odd side as fully transparent'
     raw = np.dstack([u16, np.full((H, W, 1), 65535, '<u2')])
     name = os.path.basename(path)[:-5]
     rp, pp = TMP + name + '.u16', TMP + name + '.png'
@@ -118,6 +119,7 @@ def mask_footprint(A, path):
     t = np.clip(A / T_FOOT, 0, 1); m = t * t * (3 - 2 * t)
     n = rng.random(A.shape) + rng.random(A.shape) - 1.0
     a8 = np.clip(np.rint(m * 255 + n * (m > 0) * (m < 1)), 0, 255).astype(np.uint8)
+    assert A.shape[0] % 2 == 0 and A.shape[1] % 2 == 0, f'{path}: odd mask size {A.shape}'   # kept even, as the planes
     Image.fromarray(np.dstack([np.full(A.shape + (3,), 255, np.uint8), a8]), 'RGBA').save(path, quality=92, speed=4)
     return os.path.getsize(path)
 
@@ -176,14 +178,17 @@ def field(rgb_p3, nits, side=16):
 # ═══════════ LIGHT MODE: acid on the white floor, round 5b "broad 300" at +400 ═══════════
 # glow = Kc * core + H * shoulder (capture.py broad): the core is q5's spill under its own law, unit peak; the
 # shoulder a long super-Lorentzian. H is solved so the band 32px below the button sits at 300 nits on the peak
-# channel, and Kc so the brightest pixel is exactly PEAK_L -- +400 over the floor, Mark's screen's ceiling -- so
+# channel (as far as the peak allows), and Kc so the brightest pixel is exactly PEAK_L -- +200 over the floor: Mark,
+# on the hero preview, "300 / 408 is best for both" (round 5b shipped +400, 605) -- so
 # MaxCLL is the true peak. The rim (on the ink face) and the label field are scaled to the same peak.
 def pq_inv(code):
     m1, m2, c1, c2, c3 = 0.1593017578125, 78.84375, 0.8359375, 18.8515625, 18.6875
     e = np.float64(code) ** (1 / m2)
     return 10000 * (np.maximum(e - c1, 0) / (c2 - c3 * e)) ** (1 / m1)
 WHITE_FLOOR_NITS = float(pq_inv(595 / 1023))
-PEAK_L, TARGET_L, VPEAK_LIGHT_SPILL, FACE_L = 605.0, 300.0, 1.9, 22   # FACE_L: #161616, the light ink face
+PEAK_L, TARGET_L, VPEAK_LIGHT_SPILL, FACE_L = 405.0, 300.0, 1.9, 22   # FACE_L: #161616, the light ink face
+LABEL_NITS = 605.0              # the light label stays at 605 (Mark: "the white is finally visible")
+PROFILE_PX = (8, 16, 32, 64, 96)
 GEO_L = {'q5-hdr-light-pill': ('b5-q5-pill', 40, 32), 'q5-hdr-light-chip': ('b5-q5-chip', 36, 32)}   # capture, mt, button h
 RIM_L = {'q5-hdr-light-rim-pill': 'q5-rim-pill', 'q5-hdr-light-rim-chip': 'q5-rim-chip'}
 LABEL_L = 'q5-hdr-light-label'
@@ -199,11 +204,14 @@ def broad(z, cap, mt, bh):
     cx = core.shape[1] // 2; r32 = int(round((mt + bh) * 2)) + 64          # 32px below the button, 2x
     ipk = np.unravel_index(core.max(-1).argmax(), core.shape[:2]); s_pk = float(S[ipk])
     total = lambda H: WHITE_FLOOR_NITS + (PEAK_L - WHITE_FLOOR_NITS - H * s_pk) * core + H * shl
-    lo, hi = 0.0, 400.0
+    lo, hi = 0.0, min(400.0, (PEAK_L - WHITE_FLOOR_NITS) / s_pk)           # Kc >= 0: the core never goes negative
     for _ in range(40):                                                      # solve H: the band at TARGET_L
         H = (lo + hi) / 2
         lo, hi = (H, hi) if total(H)[r32, cx].max() < TARGET_L else (lo, H)
-    return total(H) - WHITE_FLOOR_NITS
+    pl = total(H); yb = int(round((mt + bh) * 2))
+    prof = '  '.join(f'{d}px {pl[yb + 2 * d - 1, cx].max():.0f}' for d in PROFILE_PX if yb + 2 * d - 1 < pl.shape[0])
+    print(f'{cap}: H {H:.1f}  Kc {PEAK_L - WHITE_FLOOR_NITS - H * s_pk:.1f}  peak-channel nits below the button: {prof}')
+    return pl - WHITE_FLOOR_NITS
 
 def light(z, rows):
     for name, (cap, mt, bh) in GEO_L.items():
@@ -212,22 +220,23 @@ def light(z, rows):
         big = fr[-1].max(-1); t = np.clip(big / 1.0, 0, 1); mm = t * t * (3 - 2 * t)   # footprint: > 1 nit in the widest frame
         mpath = SHIP + name.replace('light-', 'light-mask-') + '.avif'
         from PIL import Image
-        Image.fromarray(np.dstack([np.full(big.shape + (3,), 255, np.uint8), np.rint(mm * 255).astype(np.uint8)]), 'RGBA').save(mpath, quality=92, speed=4)
+        if 'pill' in name:      # the pill's only: a chip's spill takes no footprint mask (accentButton.css)
+            Image.fromarray(np.dstack([np.full(big.shape + (3,), 255, np.uint8), np.rint(mm * 255).astype(np.uint8)]), 'RGBA').save(mpath, quality=92, speed=4)
         g = np.concatenate(fr, 0); plane = WHITE_FLOOR_NITS + np.clip(g, 0, None)
         s = write(plane, (g.max(-1) > 0.01).astype(np.float32), SHIP + name + '.avif')
         pk = float(plane.max()); open(OUT + name + '.peak', 'w').write(f'{pk:.3f}'); set_clli(SHIP + name + '.avif', clli_for(pk))
         rows.append(f'{name:22s} floor {WHITE_FLOOR_NITS:6.2f} nits (code 595)  peak {pk:6.1f} nits (PQ {pq(pk):.4f})  MaxCLL {clli_for(pk):4d}  '
-                    f'{NF} frames {plane.shape[1]} x {plane.shape[0]}  {s/1024:5.1f} KB  (mask {os.path.getsize(mpath)/1024:.1f} KB)')
+                    f'{NF} frames {plane.shape[1]} x {plane.shape[0]}  {s/1024:5.1f} KB')
     fl = grey_nits(FACE_L)
     for name, cap in RIM_L.items():
         g = law_r2(z[cap + '|A'], z[cap + '|W'], 1.6); g = g * (PEAK_L - fl) / g.max(); plane = fl + g
         s = write(plane, (g.max(-1) > 0.01).astype(np.float32), SHIP + name + '.avif')
         pk = float(plane.max()); open(OUT + name + '.peak', 'w').write(f'{pk:.3f}'); set_clli(SHIP + name + '.avif', clli_for(pk))
         rows.append(f'{name:22s} floor {fl:6.2f} nits (the ink face)  peak {pk:6.1f} nits (PQ {pq(pk):.4f})  MaxCLL {clli_for(pk):4d}  {s/1024:5.1f} KB')
-    s = write(field(ACID, PEAK_L), np.zeros((16, 16), np.float32), SHIP + LABEL_L + '.avif')
-    open(OUT + LABEL_L + '.peak', 'w').write(f'{PEAK_L:.3f}'); set_clli(SHIP + LABEL_L + '.avif', clli_for(PEAK_L))
-    rows.append(f'{LABEL_L:22s} acid field, peak channel {PEAK_L:6.1f} nits = PQ {pq(PEAK_L):.4f} (10-bit code {pq(PEAK_L) * 1023:5.1f})  '
-                f'MaxCLL {clli_for(PEAK_L):4d}  {s/1024:5.1f} KB')
+    s = write(field(ACID, LABEL_NITS), np.zeros((16, 16), np.float32), SHIP + LABEL_L + '.avif')
+    open(OUT + LABEL_L + '.peak', 'w').write(f'{LABEL_NITS:.3f}'); set_clli(SHIP + LABEL_L + '.avif', clli_for(LABEL_NITS))
+    rows.append(f'{LABEL_L:22s} acid field, peak channel {LABEL_NITS:6.1f} nits = PQ {pq(LABEL_NITS):.4f} (10-bit code {pq(LABEL_NITS) * 1023:5.1f})  '
+                f'MaxCLL {clli_for(LABEL_NITS):4d}  {s/1024:5.1f} KB')
 
 if __name__ == '__main__' and sys.argv[1:] == ['clli']:
     for name in list(LAYERS) + [LABEL] + LIGHT:

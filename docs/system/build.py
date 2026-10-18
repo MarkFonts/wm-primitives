@@ -56,14 +56,15 @@ def sync_faces():
 
 sync_faces()
 
-# The accent buttons' light (src/accentButton.css) is rendered AVIF in assets/accent/. The CSS says
+# The accent buttons' light (src/accentButton.css) is rendered AVIF (and, for the transparent HDR path, JPEG XL)
+# in assets/accent/. The CSS says
 # url('../assets/accent/x.avif'), which is right from src/ and wrong from the inlined page, so the
 # page gets its own copy beside it (docs/assets/accent/, tracked, like docs/fonts/) and the linked
 # build points at it; the bundled build carries each file as a data: URI (accent_urls below).
 def sync_accent():
     import shutil
     dst = DOCS/"assets"/"accent"; dst.mkdir(parents=True, exist_ok=True)
-    for f in sorted((PKG/"assets"/"accent").glob("*.avif")):
+    for f in sorted([*(PKG/"assets"/"accent").glob("*.avif"), *(PKG/"assets"/"accent").glob("*.jxl")]):
         if not (dst/f.name).exists() or (dst/f.name).read_bytes() != f.read_bytes():
             shutil.copy2(f, dst/f.name)
 sync_accent()
@@ -73,7 +74,8 @@ def accent_urls(css):
         if "--linked" in sys.argv:
             return f"url('assets/accent/{m.group(1)}')"
         import base64
-        return "url('data:image/avif;base64," + base64.b64encode((PKG/"assets"/"accent"/m.group(1)).read_bytes()).decode() + "')"
+        mime = "image/jxl" if m.group(1).endswith(".jxl") else "image/avif"
+        return f"url('data:{mime};base64," + base64.b64encode((PKG/"assets"/"accent"/m.group(1)).read_bytes()).decode() + "')"
     return re.sub(r"url\('\.\./assets/accent/([\w.-]+)'\)", sub, css)
 
 # The Optical Size Proof is deliberately NOT here: it is a font-proofing instrument, not
@@ -2397,7 +2399,7 @@ CHROME_CSS = "".join(c if ord(c) < 128 else f"\\{ord(c):04X} " for c in CHROME_C
 # confirm.js first, its `export` stripped (this is a classic script): window.wmConfirm, which
 # zoomControl.js and the Interface chapter's demos call on a press that worked (GESTURES.md §14).
 CHROME_JS = "".join(re.sub(r'^export ', '', (HERE.parent.parent / "src" / f).read_text(), flags=re.M) + "\n"
-                    for f in ("confirm.js", "zoomControl.js", "themeStack.js"))
+                    for f in ("confirm.js", "zoomControl.js", "themeStack.js", "jxl.js"))
 CHROME_JS = "".join(c if ord(c) < 128 else f"\\u{ord(c):04X}" for c in CHROME_JS)
 
 # The marks' placement. A row on a desktop; on a phone -- its own rule, as themeSwitch.css asks of
