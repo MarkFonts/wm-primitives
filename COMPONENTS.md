@@ -23,7 +23,7 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `makeGlyphSets` `parseCmapRanges` `isSupported` `enumerateCmap` | Glyph-set matching + cmap parsing (Glyphs scene). Each app composes its own extra groups / alternates on top of the shared base groups. | font-proofer, ReCal | — |
 | `nbMinus` | A real minus (U+2212) for readouts, never a hyphen. | font-proofer, ReCal | — |
 | `EditableTextBlock` | Canonical contentEditable text-block lifecycle (raw-while-focused, commit-on-blur, caret capture/restore). Pairs with caret.ts + editRail.css. | font-proofer, ReCal, WORDMAKE | — |
-| `GlyphPicker` `measureGlyphMetrics` | Interactive glyph browser: equal-sized cell grid + viewer/U+ readout, search, copy-to-clipboard, ssXX alternate groups (wm-primitives #2). | font-proofer, ReCal, WORDMAKE | — |
+| `GlyphPicker` `measureGlyphMetrics` | Interactive glyph browser: equal-sized cell grid + viewer/U+ readout, search, copy-to-clipboard, ssXX alternate groups (wm-primitives #2). | font-proofer, ReCal, WORDMAKE, GliffDiff | — |
 | `createLetterbox` `JEROME` | The letterbox: the house wordmark scanned and packed with prose (Charlie Clark's pretext effect). Plain-JS engine, because wordmark.nyc and this repo's system page script-tag it directly, and ReCal's landing pages load i… | ReCal, wordmark.nyc | README (letterbox) |
 | `wmConfirm` | wmConfirm -- the click confirm: on a press that WORKED, the control's press look blinks off 80ms, on 80ms, then it settles (GESTURES.md §14). Adds .wm-confirm, which runs the one keyframe in motion.css; no-op under reduc… | wordmark.nyc | — |
 | `ROLES` `POSTER` `INK` `TRACK_CAPS` `LANDINGS` `typeStyle` `ink` | Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/ --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so importing it cannot reach existing markup. Apps import… | Kernpare, WORDMAKE, wordmark.nyc, font-proofer, ReCal, opsz-proofer, GliffDiff | TYPOGRAPHY.md |
@@ -41,7 +41,7 @@ CSS-only modules (imported from an app's entry stylesheet, nothing to export): `
 
 The Material Symbols subset (`fonts/MaterialSymbolsOutlined.woff2`, 96 ligatures) sorted by whether anything draws each one. The ligature list is read from the font and the drawing from the sources of font-proofer, ReCal, opsz-proofer, Kernpare, WORDMAKE, GliffDiff, wordmark.nyc, wm-primitives, system page, so removing a mark is a search, not a guess. The system page shows the same three lists with their glyphs.
 
-### Used (58)
+### Used (59)
 
 Drawn by at least one app. Who draws it is in the second column.
 
@@ -62,7 +62,7 @@ Drawn by at least one app. Who draws it is in the second column.
 | `crop` | WORDMAKE |
 | `dark_mode` | ThemeSwitch (every host that mounts it), wm-primitives, wordmark.nyc |
 | `delete` | WORDMAKE |
-| `discover_tune` | ReCal, font-proofer |
+| `discover_tune` | GliffDiff, ReCal, font-proofer |
 | `feature_search` | system page |
 | `fit_page_height` | WORDMAKE |
 | `fit_page_width` | WORDMAKE |
@@ -81,6 +81,7 @@ Drawn by at least one app. Who draws it is in the second column.
 | `format_paragraph` | GliffDiff, ReCal, font-proofer, system page, wm-primitives |
 | `format_shapes` | GliffDiff |
 | `forms_add_on` | font-proofer |
+| `glyphs` | GliffDiff |
 | `grid_view` | font-proofer |
 | `insert_text` | font-proofer |
 | `keyboard_arrow_down` | WORDMAKE, wm-primitives |
@@ -95,7 +96,7 @@ Drawn by at least one app. Who draws it is in the second column.
 | `queue_play_next` | WORDMAKE |
 | `restart_alt` | wordmark.nyc |
 | `search` | wm-primitives |
-| `settings_backup_restore` | WORDMAKE, font-proofer, wm-primitives |
+| `settings_backup_restore` | GliffDiff, WORDMAKE, font-proofer, wm-primitives |
 | `sync_alt` | Kernpare, ReCal, system page |
 | `text_fields` | GliffDiff, ReCal, font-proofer, system page |
 | `text_increase` | ReCal |
@@ -106,8 +107,8 @@ Drawn by at least one app. Who draws it is in the second column.
 | `zoom_in` | wm-primitives |
 | `zoom_out` | wm-primitives |
 
-### Ready (38)
+### Ready (37)
 
 In the subset, drawn by nothing yet.
 
-`arrow_back` `arrow_forward` `book` `book_2` `book_3` `book_4` `book_5` `book_6` `book_ribbon` `brand_family` `call_merge` `edit` `edit_document` `edit_note` `emoji_symbols` `font_download` `format_quote` `glyphs` `hdr_auto` `hdr_auto_select` `hdr_enhanced_select` `hdr_off` `hdr_off_select` `hdr_on_select` `match_case` `match_case_off` `pause` `public` `redo` `script` `serif` `slab_serif` `star` `subscript` `superscript` `type_specimen` `undo` `visibility_off`
+`arrow_back` `arrow_forward` `book` `book_2` `book_3` `book_4` `book_5` `book_6` `book_ribbon` `brand_family` `call_merge` `edit` `edit_document` `edit_note` `emoji_symbols` `font_download` `format_quote` `hdr_auto` `hdr_auto_select` `hdr_enhanced_select` `hdr_off` `hdr_off_select` `hdr_on_select` `match_case` `match_case_off` `pause` `public` `redo` `script` `serif` `slab_serif` `star` `subscript` `superscript` `type_specimen` `undo` `visibility_off`
