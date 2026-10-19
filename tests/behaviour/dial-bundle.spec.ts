@@ -44,6 +44,20 @@ test.describe('wmDial contract', () => {
     expect(await page.evaluate(() => dc.get())).toBe('auto')
   })
 
+  test('a press on an arrow that drags left out of it becomes a rail drag, not one step', async ({ page }) => {
+    // A value at max sits under the arrows; grabbing it there lands on an arrow. The arrow is
+    // 12px wide, so a real drag leaves it before 6px of movement registers.
+    await page.evaluate(() => db.set(30)); await page.waitForTimeout(50)
+    const down = page.locator('#b .slider-step-btn').nth(1); const a = (await down.boundingBox())!
+    const r = (await page.locator('#b input[type=range]').boundingBox())!
+    await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2); await page.mouse.down()
+    await page.mouse.move(a.x - 20, a.y + a.height / 2)
+    await page.mouse.move(r.x + r.width * 0.5, a.y + a.height / 2, { steps: 5 })
+    await page.mouse.up(); await page.waitForTimeout(100)
+    const v = await page.evaluate(() => db.get()) as number
+    expect(v).toBeLessThan(20); expect(v).toBeGreaterThan(10)
+  })
+
   test('destroy empties the host; mountTheme draws the marks and stamps the root', async ({ page }) => {
     await page.evaluate(() => da.destroy()); await page.waitForTimeout(50)
     expect(await page.locator('#a .slider-row').count()).toBe(0)

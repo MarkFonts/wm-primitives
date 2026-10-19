@@ -12,6 +12,17 @@ Newest first.
 
 ---
 
+## 2026-10-19 -- a drag that starts on the arrows leaves them sideways
+
+A value parked under the step arrows (opsz at 45) could only be stepped, not dragged: press there, drag left, and it
+took one step and stopped. The arrows already handed a horizontal drag on to the rail, but only after 6px of movement,
+and an arrow is 12px wide, so a mouse drag was off the button -- and the button stopped hearing it -- before the
+hand-over could fire. Leaving an arrow sideways mid-press now goes live as a rail drag; leaving it vertically still just
+stops the repeat. `dist/dial.js` rebuilt; `dial-bundle.spec.ts` drags out of the down arrow at max and fails on the old
+bundle.
+
+---
+
 ## 2026-10-18 -- unpinning `auto` clamps like every other write
 
 **wm-primitives#9, part 1.** The `auto` pill's auto-to-number write was the one write in `AxisSlider` that did not clamp:

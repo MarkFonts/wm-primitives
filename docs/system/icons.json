@@ -52,6 +52,7 @@
    "WORDMAKE"
   ],
   "discover_tune": [
+   "GliffDiff",
    "ReCal",
    "font-proofer"
   ],
@@ -126,6 +127,9 @@
   "forms_add_on": [
    "font-proofer"
   ],
+  "glyphs": [
+   "GliffDiff"
+  ],
   "grid_view": [
    "font-proofer"
   ],
@@ -176,6 +180,7 @@
    "wm-primitives"
   ],
   "settings_backup_restore": [
+   "GliffDiff",
    "WORDMAKE",
    "font-proofer",
    "wm-primitives"
@@ -231,7 +236,6 @@
   "emoji_symbols",
   "font_download",
   "format_quote",
-  "glyphs",
   "hdr_auto",
   "hdr_auto_select",
   "hdr_enhanced_select",
