@@ -310,6 +310,17 @@ export function AxisSlider({
      happen immediately, and focus() is called on the way up if it turned out to be a tap. */
   const numDrag = useRef<{ x: number; y: number; id: number; live: boolean } | null>(null)
   const stepDrag = useRef<{ x: number; y: number; id: number; live: boolean } | null>(null)
+  /* A press on an arrow that turns into a horizontal drag: cancel the repeat and carry on as
+     a rail drag from where the press began. */
+  const stepGoLive = (e: ReactPointerEvent<Element>, d: { x: number; y: number; id: number; live: boolean }) => {
+    d.live = true
+    setScrub(true)
+    stopStep()
+    dragRef.current = { x: d.x, y: d.y, id: d.id, live: true, v0: valueRef.current }
+    capture(e, d.id)
+    const el = rangeRef.current
+    if (el) { const v = valueAt(e.clientX, el); if (v != null) queueValue(v) }
+  }
   const onNumDown = (e: ReactPointerEvent<HTMLInputElement>) => {
     if (disabled || e.pointerType === 'mouse' || numFocused) return
     e.preventDefault()
@@ -593,13 +604,7 @@ export function AxisSlider({
                     const dx = Math.abs(e.clientX - d.x), dy = Math.abs(e.clientY - d.y)
                     if (dx < 6 && dy < 6) return
                     if (dy > dx * 1.5) { stepDrag.current = null; return }
-                    d.live = true
-                    setScrub(true)
-                    stopStep()
-                    dragRef.current = { x: d.x, y: d.y, id: d.id, live: true, v0: valueRef.current }
-                    capture(e, d.id)
-                    const el = rangeRef.current
-                    if (el) { const v = valueAt(e.clientX, el); if (v != null) queueValue(v) }
+                    stepGoLive(e, d)
                   }}
                   /* THE CONFIRM: on the lift of a press that took its one step -- not one that
                      repeated, became a rail drag (G29) or went to the scroller (G30); G88. */
@@ -609,7 +614,18 @@ export function AxisSlider({
                     stepDrag.current = null; dragRef.current = null; stopStep(); flushValue(); release()
                     if (one) wmConfirm(e.currentTarget)
                   }}
-                  onPointerLeave={stopStep}
+                  /* LEAVING SIDEWAYS IS A DRAG, NOT A LET-GO. An arrow is 12px wide, so the 6px
+                     test above is the arrow's own edge: a mouse drag left out of it, which is
+                     what grabbing a value parked under the arrows (opsz at 45) looks like, was
+                     usually off the button before a move ever counted, and the press died
+                     after its one step. Mouse isn't captured until the drag goes live, so the
+                     leave is the last event the arrow gets; a horizontal one goes live here. */
+                  onPointerLeave={e => {
+                    const d = stepDrag.current
+                    if (d && !d.live && e.pointerId === d.id && e.pointerType !== 'touch'
+                      && Math.abs(e.clientX - d.x) * 1.5 >= Math.abs(e.clientY - d.y)) { stepGoLive(e, d); return }
+                    stopStep()
+                  }}
                   onPointerCancel={e => { stepDrag.current = null; dragRef.current = null; stopStep(); flushValue(); release() }}
                 >
                   <svg viewBox="0 0 10 6" width="10" height="6" aria-hidden="true">
