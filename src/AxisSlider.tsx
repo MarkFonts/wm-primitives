@@ -465,7 +465,7 @@ export function AxisSlider({
               className={`slider-auto${isAuto ? ' slider-auto--on' : ''}`}
               aria-pressed={isAuto}
               title={isAuto ? 'auto — tap for a number' : 'follow the optical size automatically'}
-              onClick={() => onChange(isAuto ? (autoValue ?? min) : 'auto')}
+              onClick={() => onChange(isAuto ? Math.min(max, Math.max(min, autoValue ?? min)) : 'auto')}
             >
               {/* ● on, ○ off — Cal Sans' own circle/uni25CF, NOT • bullet and ◦ openbullet.
                   Those are the marks this wants, and they cannot be used: they are drawn at
