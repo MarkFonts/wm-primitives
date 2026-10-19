@@ -42,6 +42,7 @@ test.describe('wmDial contract', () => {
     expect(await page.locator('#c input.slider-number').inputValue()).toBe('45')
     await pill.click()
     expect(await page.evaluate(() => dc.get())).toBe('auto')
+  })
 
   test('a press on an arrow that drags left out of it becomes a rail drag, not one step', async ({ page }) => {
     // A value at max sits under the arrows; grabbing it there lands on an arrow. The arrow is
