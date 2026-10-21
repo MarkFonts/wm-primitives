@@ -12,6 +12,28 @@ Newest first.
 
 ---
 
+## 2026-10-20 -- a pinch keeps your place; a phone toolbar no longer moves you
+
+Reported from a phone: on the system page, a pinch flung the reader somewhere else entirely, and further down the
+page the screen kept jumping up and down. Two causes, both in `zoomControl.js`.
+
+**The fling.** The zoom grows the target from its top-left (G62) and nothing touched the scroll, so a pinch half way
+down left `scrollY` where it was while the text above it grew 1.5x: the reader landed 7,000-45,000px up the page
+(measured on iPhone WebKit and Pixel Chromium, one pinch to 150% in each chapter). A captured pinch, touch pinch or
+ctrl+wheel now passes its focal point; the element under it is measured before and after and the nearest scroller on
+each axis is moved by the difference (G93). Arithmetic on the target's box was tried first and drifted up to 200px,
+because the page does not grow uniformly (viewport units, the grid's snapped margins). After: within 7px everywhere.
+The buttons, keys, rail and reset keep the top-left anchor.
+
+**The shaking.** On every window resize the control took the zoom off to re-measure the target's width and put it
+back. A phone toolbar showing or hiding resizes the window as a scroll turns; with the zoom off for that one layout
+the document was its unzoomed height and the browser clamped `scrollY` to it. Anywhere past the unzoomed page's
+length (the later chapters at 150%), each toolbar change threw the reader back up, by as much as 100,000px at 200%,
+and scrolling down again brought the toolbar back. Only a width change re-measures now, and the scroll is restored
+once the zoom is back on (G94). `tests/behaviour/system-zoom.spec.ts` covers both, and fails on the old page.
+
+---
+
 ## 2026-10-19 -- a drag that starts on the arrows leaves them sideways
 
 A value parked under the step arrows (opsz at 45) could only be stepped, not dragged: press there, drag left, and it
