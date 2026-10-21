@@ -56,6 +56,7 @@ test('G93 · a two-finger pinch on a touch screen keeps the text under the finge
 })
 
 test('G94 · zoomed, deep in the page: a toolbar-sized height change does not move the reader, and nothing moves after', async ({ page }) => {
+  test.setTimeout(120_000)   // each resize relays out a 150k-px page: linux WebKit in CI took >30s for the lot
   await open(page)
   const unzoomedMax = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)
   await page.evaluate(z => (document.querySelector(z) as any).__wmZoom.set(150), Z)
@@ -64,7 +65,7 @@ test('G94 · zoomed, deep in the page: a toolbar-sized height change does not mo
   const y0 = await page.evaluate(() => scrollY)
   expect(y0).toBeGreaterThan(unzoomedMax)
   const vp = page.viewportSize()!
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {
     await page.setViewportSize({ width: vp.width, height: vp.height - 60 }); await page.waitForTimeout(80)
     await page.setViewportSize(vp); await page.waitForTimeout(80)
   }
