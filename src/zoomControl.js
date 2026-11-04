@@ -127,13 +127,41 @@
       });
     };
 
+    // THE FOCAL POINT (a pinch's centre, a ctrl+wheel's pointer): the content under it stays under
+    // it. The zoom grows the target from its top-left, so without this a pinch half way down a long
+    // page left scrollY where it was and threw the reader to text z times further up. Each axis is
+    // corrected on the target's nearest box that scrolls on it, else the document.
+    const scroller = (n, x) => {
+      for (let p = n.parentElement; p && p !== document.body && p !== document.documentElement; p = p.parentElement) {
+        const o = getComputedStyle(p)[x ? 'overflowX' : 'overflowY'];
+        if (/auto|scroll/.test(o) && (x ? p.scrollWidth > p.clientWidth : p.scrollHeight > p.clientHeight)) return p;
+      }
+      return document.scrollingElement || document.documentElement;
+    };
+    // The anchor is the element under the point, not arithmetic on the target's box: a zoomed
+    // page does not grow uniformly (viewport units, sticky boxes, the grid's snapped margins),
+    // so x z from the top-left drifted by up to 200px half way down the system page.
+    const pin = at => {
+      const n = at && document.elementFromPoint(at.x, at.y);
+      if (!n || !targets.some(t => t.contains(n))) return null;
+      const r = n.getBoundingClientRect();
+      return { n, t: targets.find(t => t.contains(n)), u: (at.x - r.left) / (r.width || 1), w: (at.y - r.top) / (r.height || 1), at };
+    };
+    const hold = p => {
+      const r = p.n.getBoundingClientRect();
+      const dx = r.left + p.u * r.width - p.at.x, dy = r.top + p.w * r.height - p.at.y;
+      if (Math.abs(dx) >= .5) scroller(p.t, true).scrollLeft += dx;
+      if (Math.abs(dy) >= .5) scroller(p.t, false).scrollTop += dy;
+    };
+
     let value = 100, open = !collapse;
     // one key for both: "170", or "170 open" / "170 closed" when the control collapses -- a
     // reader that only wants the number still gets it from parseFloat
     const store = () => { try { localStorage.setItem(key, String(value) + (collapse ? (open ? ' open' : ' closed') : '')); } catch { /* private mode */ } };
-    const set = (v, save = true) => {
+    const set = (v, save = true, at = null) => {
       v = snap(Number(v));
       if (!Number.isFinite(v)) return;
+      const p = pin(at);
       value = v;
       read.textContent = fmt(v);
       note.textContent = fmt(v);
@@ -144,6 +172,7 @@
       zoomTarget(v / 100);
       if (save) store();
       el.dispatchEvent(new CustomEvent('wm-zoom', { detail: v, bubbles: true }));
+      if (p) hold(p);   // after the event: a host may make the pan a scroller on it (the system page does)
     };
 
     // THE RESET, animated: the lozenge slides home to 100 over --dur-med while the readout counts
@@ -478,17 +507,18 @@
       wake();
       pinch = (pinch ?? value) * Math.exp(-e.deltaY / 100);
       pinch = Math.min(max, Math.max(min, pinch));
-      if (snap(pinch) !== value) set(pinch);
+      if (snap(pinch) !== value) set(pinch, true, { x: e.clientX, y: e.clientY });
       clearTimeout(onWheel.t); onWheel.t = setTimeout(() => { pinch = null; }, 200);
     };
     const onGesture = e => {
       e.preventDefault();
       if (e.type === 'gesturestart') { gestureFrom = value; pendingClose = false; wake(); return; }
-      if (e.type === 'gesturechange') { const v = snap(gestureFrom * e.scale); if (v !== value) set(v); }
+      if (e.type === 'gesturechange') { const v = snap(gestureFrom * e.scale); if (v !== value) set(v, true, Number.isFinite(e.clientX) ? { x: e.clientX, y: e.clientY } : mid()); }
     };
     const touches = new Map(), gestures = 'ongesturestart' in window;
     let pinchFrom = null;   // { d, v }: the distance at the second touch-down, and the value then
     const dist = () => { const [a, b] = [...touches.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+    const mid = () => { if (touches.size !== 2) return null; const [a, b] = [...touches.values()]; return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; };
     const onTouchDown = e => {
       if (e.pointerType !== 'touch') return;
       touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -500,7 +530,7 @@
       if (touches.size !== 2 || !pinchFrom || gestures) return;
       e.preventDefault();
       const v = snap(pinchFrom.v * dist() / pinchFrom.d);
-      if (v !== value) set(v);
+      if (v !== value) set(v, true, mid());
     };
     const onTouchUp = e => {
       touches.delete(e.pointerId);
@@ -530,7 +560,21 @@
     };
     if (capture) document.addEventListener('keydown', onChord, true);
 
-    const resize = () => { fit(); if (targets.length && value !== 100) { base = null; zoomTarget(value / 100); } };
+    // Only a change of WIDTH re-measures: the base is a width and a margin. A phone's toolbar
+    // showing or hiding resizes the window's height on every scroll that turns, and the re-measure
+    // takes the zoom off for a layout -- the document shrinks to its unzoomed height and the
+    // browser clamps scrollY to it, so deep in a zoomed page each toolbar change threw the reader
+    // back up (the "shaking"). When it does re-measure, the scroll is put back once the zoom is on.
+    let lastW = innerWidth;
+    const resize = () => {
+      fit();
+      if (innerWidth === lastW) return;
+      lastW = innerWidth;
+      if (!targets.length || value === 100) return;
+      const sx = scrollX, sy = scrollY;
+      base = null; zoomTarget(value / 100);
+      scrollTo(sx, sy);
+    };
     window.addEventListener('resize', resize);
 
     const api = {
