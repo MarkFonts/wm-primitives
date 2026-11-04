@@ -11,6 +11,8 @@
 // .coss-b use --w-bold, so raising the default raises both. Italic text maps to the ital
 // axis on top of the current variation settings (--vs).
 import './UiKitBoard.css'
+import './skeleton.css'
+import { skeletonize, skeletonHTML, sheenMask, paint } from './skeletonize'
 import { useState, useEffect, useLayoutEffect, useRef, Fragment } from 'react'
 import { motion, useMotionValue, useMotionValueEvent } from 'motion/react'
 import { useDragScroll } from './useDragScroll'
@@ -155,19 +157,41 @@ const TOGGLE_ACTIVE = [1, 0, 2, 1]
 
 // Skeleton placeholder sized to the tile's estimated body height (and full width) so the
 // card reserves ~the right box → minimal reflow/thrash when the real content resolves.
-function SkeletonBlock({ h }) {
-  return <div className="ui-sk" style={{ height: Math.max(44, h), width: '100%', borderRadius: 8 }} />
-}
-
-// Wraps a tile body: shows the sized skeleton first, then reveals the real content after a
-// short staggered delay — so newly mounted tiles (initial + lazy-loaded) load in smoothly.
-function Reveal({ children, h }) {
+function Reveal({ children }) {
   const [on, setOn] = useState(false)
+  const [fallback] = useState(() => document.fonts?.status !== 'loaded') // only when fonts are not in yet
+  const wrap = useRef(null), ovl = useRef(null), block = useRef(null)
   useEffect(() => {
     const t = setTimeout(() => setOn(true), 350 + Math.random() * 450)
     return () => clearTimeout(t)
   }, [])
-  return on ? <div className="ui-fade-in" style={{ width: '100%' }}>{children}</div> : <SkeletonBlock h={h} />
+  // One read pass over the hidden real content, after fonts are ready (sync when they already are).
+  // The overlay is filled imperatively (no second React render); the one-block fallback shows until then.
+  useLayoutEffect(() => {
+    let live = true
+    const read = () => {
+      if (!live || !wrap.current) return
+      const s = skeletonize(wrap.current.firstElementChild), html = skeletonHTML(s), mask = sheenMask(s)
+      paint(() => {
+        if (!live || !ovl.current) return
+        ovl.current.innerHTML = html
+        const sheen = ovl.current.lastChild; sheen.style.maskImage = sheen.style.webkitMaskImage = mask
+        if (block.current) block.current.style.display = 'none'
+      })
+    }
+    if (document.fonts?.status === 'loaded') read(); else document.fonts?.ready.then(read)
+    return () => { live = false }
+  }, [])
+  // Real content is always in flow and always decides the height; the placeholders only cover it.
+  return (
+    <div ref={wrap} style={{ width: '100%', position: 'relative' }}>
+      <div className={on ? 'ui-fade-in' : undefined} style={{ width: '100%', visibility: on ? undefined : 'hidden' }}>{children}</div>
+      {!on && <>
+        {fallback && <div ref={block} className="ui-skb" style={{ inset: 0, borderRadius: 8 }} />}
+        <div ref={ovl} className="ui-skl" aria-hidden="true" />
+      </>}
+    </div>
+  )
 }
 
 // Functioning dropdown menu: opens on click, closes on outside-click, with a live toggle.
@@ -597,8 +621,8 @@ const INIT_SIDE = 6   // columns each side of centre at start (→ ~12 columns)
 const OVERSCAN_PX = 600 // keep this much extra mounted past each visible edge
 const COL_W = 270, COL_WIDE_W = 420, COL_GAP = 16
 
-// Real measured tile heights (incl. header) — used to fill columns AND to size the loading
-// skeleton so the card reserves ~the right box (minimal reflow when content resolves).
+// Real measured tile heights (incl. header) — used to fill columns. (The loading skeleton no
+// longer needs them: it is measured from the tile's own hidden content, see Reveal.)
 const EST = {
   Button: 199, Input: 213, Select: 282, Tabs: 200, Accordion: 275, Alert: 200, Badge: 168,
   Table: 354, Avatar: 168, Switch: 185, Slider: 185, Tooltip: 185, Command: 243, Pagination: 185,
@@ -665,6 +689,20 @@ export default function UiKitBoard({ fontStyle, weight = 400, boldWeight = 700, 
   const [right, setRight] = useState(INIT_SIDE)
   const [rows, setRows] = useState(1)
   const stripRef = useRef(null)
+  // Tiles mount only once the host's font is in: text laid out in the fallback face changes height at the swap,
+  // and the skeleton is measured from that layout. The face is read from the board's own computed style, so
+  // it is whatever the host passed in `fontStyle` (a var() stack included), never a name hard-coded here.
+  const [fontReady, setFontReady] = useState(false)
+  useEffect(() => {
+    let live = true
+    const done = () => { if (live) setFontReady(true) }
+    const family = stripRef.current && getComputedStyle(stripRef.current.querySelector('.coss-board') || stripRef.current).fontFamily
+    if (!family || !document.fonts?.load) done()
+    else Promise.all([weight, boldWeight].map(w => document.fonts.load(`${w} 16px ${family}`))).then(done, done)
+    const guard = setTimeout(done, 3000)
+    return () => { live = false; clearTimeout(guard) }
+  }, [])
+
   const baseX = useRef(0)
   const panX = useMotionValue(0)
   const panY = useMotionValue(0)
@@ -793,7 +831,7 @@ export default function UiKitBoard({ fontStyle, weight = 400, boldWeight = 700, 
     <div className="ukit-strip" ref={stripRef} {...bind()}
       style={topMask ? { maskImage: topMask, WebkitMaskImage: topMask } : undefined}>
       <motion.div className="coss-board" style={{ ...style, x: panX, y: panY }}>
-        {cols.map(({ c, x, tiles }) => (
+        {fontReady && cols.map(({ c, x, tiles }) => (
           <div key={c} className="coss-col" style={{ left: x, width: colWidth(c) }}>
             {tiles.map(p => (
               <div key={p.key} className={`coss-card${p.pop ? ' coss-card--pop' : ''}`}>
@@ -801,7 +839,7 @@ export default function UiKitBoard({ fontStyle, weight = 400, boldWeight = 700, 
                   <div className="coss-card-name">{p.name}</div>
                   <div className="ukit-card-desc">{p.desc}</div>
                 </div>
-                <div className="coss-card-body"><Reveal h={(EST[p.name] ?? 200) - 118}>{p.node}</Reveal></div>
+                <div className="coss-card-body"><Reveal>{p.node}</Reveal></div>
               </div>
             ))}
           </div>
