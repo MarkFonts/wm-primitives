@@ -12,6 +12,18 @@ Newest first.
 
 ---
 
+## 2026-11-04 -- the loading skeleton is measured from the tile, not guessed
+
+**UiKitBoard.** A tile used to show one grey block sized from the `EST` table of tile heights, then swap to the real content, which was a different height, so rows jumped. The real content now stays laid out under `visibility: hidden` and decides the height; the placeholder is drawn on top of it. One read pass (`src/skeletonize.js`) walks the hidden content: one bar per rendered text line (`Range.getClientRects`, so wrapped text gets the right number and length of lines), one shape per control at its measured rect and its own computed radius. Painted containers keep a 1px outline. Corners are the house law (`border-radius` plus `corner-shape: superellipse(var(--corner-k))`; circles `round`), so Safari falls back to plain radius like every other control. One shimmer per tile: a static silhouette mask on a wrapper, one transform-animated gradient inside it, colored from `--text` so it holds in light and dark; `prefers-reduced-motion` turns it off. Idea from Skullet by Lochie Axon, own implementation, no dependency.
+
+The board now waits for the face the host passed in `fontStyle` (read from the board's computed style, so a `var()` stack works; 3s guard) before mounting tiles: text laid out in the fallback face changes height at the swap, and the skeleton is measured from that layout. `EST` stays, for filling columns only; `Reveal` loses its `h` prop; the old `.ui-sk` block and `coss-sk` keyframes are gone from `UiKitBoard.css`.
+
+Cost, measured on a demo build at 4x CPU, median of 10: first paint 200ms to 436ms (one-block version: 292ms), total blocking time 51ms to 153ms, all tiles revealed 1,024ms to 1,118ms. The read pass over 108 tiles is about 81ms of that at 4x. Shimmer main-thread time is the same as the one-block version (203 vs 206 ms/s) and about the same as before (181). 0 tile or row height changes at 1440 and 375, dark and light.
+
+Separately: `.ui-btn--block` gets `box-sizing: border-box`. It is `width: 100%` plus 26px of padding, so on a host with no global reset the Login tile's Continue button stuck out 28px past its column.
+
+---
+
 ## 2026-10-19 -- a drag that starts on the arrows leaves them sideways
 
 A value parked under the step arrows (opsz at 45) could only be stepped, not dragged: press there, drag left, and it

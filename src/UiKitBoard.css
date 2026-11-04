@@ -97,7 +97,7 @@
 .ui-btn--primary { background: var(--text); color: var(--bg); border-color: var(--text); }
 .ui-btn--ghost { border-color: transparent; }
 .ui-btn--sm { padding: 6px 10px; font-size: var(--type-ui-size); }
-.ui-btn--block { width: 100%; }
+.ui-btn--block { width: 100%; box-sizing: border-box; }
 
 .ui-label { display: block; font-size: var(--type-ui-size); margin-bottom: 6px; }
 .ui-field {
@@ -238,13 +238,6 @@
 
 .ui-sep { height: 1px; background: var(--border-subtle, var(--border)); margin: 5px 0; }
 
-/* Skeleton — the one particle that IS grey bars (a loading placeholder). */
-.ui-sk { background: var(--surface-hi, #383838); border-radius: 6px; position: relative; overflow: hidden; }
-.ui-sk::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .07), transparent); animation: coss-sk 1.4s infinite; }
-.ui-sk--circle { border-radius: 50%; flex: 0 0 auto; }
-@keyframes coss-sk { to { transform: translateX(100%); } }
-@media (prefers-reduced-motion: reduce) { .ui-sk::after { animation: none; } }
 .ui-fade-in { animation: coss-fade .35s ease; }
 @keyframes coss-fade { from { opacity: .25; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .ui-fade-in { animation: none; } }

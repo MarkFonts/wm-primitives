@@ -1,0 +1,15 @@
+/* Tile skeleton: bars at the measured rects of the hidden real content (see skeletonize.js).
+   Corners: the house law from corners.css -- border-radius + corner-shape: superellipse(var(--corner-k)).
+   Circles use corner-shape: round, same as .ui-sk--circle there. Class names avoid "coss-"/"calcom-"
+   (corners.css makes those namespaces round). */
+.ui-skl { position: absolute; inset: 0; pointer-events: none; --sk-bar: var(--surface-hi, #383838);
+  --sk-sheen: color-mix(in srgb, var(--text, #fff) 10%, transparent); }
+.ui-skb { position: absolute; background: var(--sk-bar); corner-shape: superellipse(var(--corner-k, 1.2)); }
+.ui-skb--frame { background: none; border: 1px solid var(--sk-bar); box-sizing: border-box; }
+.ui-skb--circle { corner-shape: round; }
+/* One sheen per tile: a static silhouette mask on the wrapper, one transform-animated gradient inside. */
+.ui-skl-sheen { position: absolute; inset: 0; overflow: hidden; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.ui-skl-sheen > i { position: absolute; inset: 0; transform: translateX(-100%); will-change: transform;
+  background: linear-gradient(90deg, transparent, var(--sk-sheen), transparent); animation: ui-skl-sweep 1.4s infinite; }
+@keyframes ui-skl-sweep { to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .ui-skl-sheen > i { animation: none; opacity: 0; } }
