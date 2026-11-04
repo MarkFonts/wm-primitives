@@ -336,3 +336,21 @@ its own handler, after the work succeeded; the same for the case study's `.ui-*`
 **Not promised (§14).** The `--switch` chip keeps its **dashed** edge through the whole blink:
 dashed is its rest look, and the receipt must not solidify it (Mark has not ruled; the rest look
 is the safe one).
+
+## 15 · The focus guard
+
+`src/iosFocusGuard.js` (`iosFocusGuard(el, { caret })`), used by `EditableTextBlock` with layer 1
+only. Tested in `tests/behaviour/ios-focus-guard.spec.ts` against
+`tests/fixtures/ios-guard.html`, with a faked iOS user agent and synthetic touches: **the
+scroll it exists to stop only happens on a real iPhone**, so the tests cover the logic and
+never the fix.
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G95 | anything, off iOS | no listeners, no writes. iOS is `iP(hone\|ad\|od)` in the UA, or `Mac` with `maxTouchPoints > 1` | ios-focus-guard |
+| G96 | a tap focuses the element | for 700ms from the focus, the window and every scroller around it (`overflow: hidden` ones too) are put back where they were at the touch. Nothing that didn't move is written to | ios-focus-guard |
+| G97 | a touchmove anywhere, during or before the hold | the hold ends and the reader's scroll stands | ios-focus-guard |
+| G98 | a tap the keyboard would cover: `tapY + 48` not under `visualViewport.height` if the keyboard is open (height under 80% of `innerHeight`), else `height * 0.55` | neither layer acts; iOS reveals the line | ios-focus-guard |
+| G99 | a focus with no tap behind it, or over 500ms after the finger lifted, or a tap already spent by a focus | no hold: Enter moving to the next block never pulls the page back | ios-focus-guard |
+| G100 | a quick tap with `caret: true` on an unfocused contenteditable | `touchend` prevented, focus with `preventScroll`, caret placed at the tap. Left to iOS: a drag, a press over 400ms, an element already focused, a textarea | ios-focus-guard |
+| G101 | the guarded element is replaced during the focus (`EditableTextBlock`'s key) | the hold carries on, and the replacement's guard takes over the touchmove. With no guard left, the hold stops | ios-focus-guard |

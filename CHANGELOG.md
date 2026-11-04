@@ -12,6 +12,16 @@ Newest first.
 
 ---
 
+## 2026-11-04 -- tapping into text on an iPhone leaves the page where it was
+
+**`iosFocusGuard`, wired into `EditableTextBlock`.** iPhone Safari flung the page when a tap focused editable text (3,000px+ seen); desktop and Chrome's phone emulation don't show it. The likely cause is iOS's reveal scroll, on focus and again as the keyboard opens, inferred and not logged. The fix was confirmed on Mark's iPhone on the Framer components; this is that fix as one file (`src/iosFocusGuard.js`), plain JS so a page without React can import or copy it. Off iOS it adds no listeners.
+
+Three things differ from the Framer hook, because the primitive has surfaces those cards don't. It holds **every scroller around the element**, not just the window: ReCal's phone layout scrolls `.stage-scroll` and font-proofer's `.preview-area`, inside `overflow: hidden` shells, so a window-only guard would have been a no-op on both. The **tap is shared across guards** and a hold outlives the guard that started it, because `EditableTextBlock` replaces its element during the focus (its key), which would otherwise cancel the hold on the first frame. A tap also **expires**, since with a shared tap a stale one would pull the page back on a later programmatic focus, such as Enter moving to the next block.
+
+`EditableTextBlock` uses layer 1 only. Layer 2 (`caret: true`) takes the focus itself on touchend to stop the scroll from starting, but this component throws away the element it would focus, and its caret capture listens for the mousedown layer 2 suppresses. Tested with a faked UA and synthetic touches; the fix itself can only be judged on a phone. GESTURES.md §15.
+
+---
+
 ## 2026-11-04 -- the loading skeleton is measured from the tile, not guessed
 
 **UiKitBoard.** A tile used to show one grey block sized from the `EST` table of tile heights, then swap to the real content, which was a different height, so rows jumped. The real content now stays laid out under `visibility: hidden` and decides the height; the placeholder is drawn on top of it. One read pass (`src/skeletonize.js`) walks the hidden content: one bar per rendered text line (`Range.getClientRects`, so wrapped text gets the right number and length of lines), one shape per control at its measured rect and its own computed radius. Painted containers keep a 1px outline. Corners are the house law (`border-radius` plus `corner-shape: superellipse(var(--corner-k))`; circles `round`), so Safari falls back to plain radius like every other control. One shimmer per tile: a static silhouette mask on a wrapper, one transform-animated gradient inside it, colored from `--text` so it holds in light and dark; `prefers-reduced-motion` turns it off. Idea from Skullet by Lochie Axon, own implementation, no dependency.

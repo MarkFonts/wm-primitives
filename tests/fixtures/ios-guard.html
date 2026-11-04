@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8"><title>iosFocusGuard contract</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html, body { margin: 0; font: 16px/24px system-ui; }
+  body { height: 6000px; }
+  #win { height: 40px; }
+  #shell { height: 400px; overflow: hidden; }
+  #scroll { height: 400px; overflow-y: auto; }
+  #tall { height: 4000px; padding-top: 100px; box-sizing: border-box; }
+  #plain { height: 40px; }
+  [contenteditable], textarea { display: block; width: 300px; }
+</style>
+</head><body>
+<!-- GESTURES.md §15 (G95-G101). The shape of the phone shells: a tall window, an overflow:hidden
+     box, and the box that scrolls inside it. No React here; #etb is where the spec mounts
+     EditableTextBlock, and this module import is how a plain page uses the guard. -->
+<div id="win" contenteditable>window scroller text</div>
+<div id="shell"><div id="scroll"><div id="tall">
+  <div id="inner" contenteditable>inner scroller text</div>
+  <textarea id="ta" rows="1">textarea text</textarea>
+  <div id="wrap"><div id="wrapped" contenteditable>wrapped text</div></div>
+  <div id="etb"></div>
+</div></div></div>
+<script type="module">
+  import { iosFocusGuard } from '/dial/shared/src/iosFocusGuard.js'
+  window.iosFocusGuard = iosFocusGuard
+  window.ready = true
+</script>
+</body></html>

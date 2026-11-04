@@ -11,6 +11,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode, FormEvent, KeyboardEvent } from 'react'
 import { placeCaretAtOffset, caretCharOffset } from './caret'
+import { iosFocusGuard } from './iosFocusGuard.js'
 
 export interface EditableTextBlockProps {
   value: string
@@ -39,6 +40,12 @@ export function EditableTextBlock({
   const focused = controlled ? focusedProp : focusedState
   const elRef = useRef<HTMLDivElement | null>(null)
   const pending = useRef<number | null>(null)
+  /* iPhone: tapping in leaves the page where it was. Re-attached on the focus flip because that
+     replaces the element (see the key below), and ahead of the effect below so the new element
+     is guarded before it takes focus. Layer 1 only. `caret: true` focuses the element the flip is
+     about to discard and suppresses the mousedown that captures `pending`, and the keyboard
+     can't be tested through that hand-off off a real phone. */
+  useLayoutEffect(() => iosFocusGuard(elRef.current), [focused])
   /* Remounting on the focus flip (see the key below) drops the browser's focus with the
      old element, so it has to be taken again here -- and the caret replaced, which this
      effect already did. Guarded on activeElement so a block that is focused for any other
