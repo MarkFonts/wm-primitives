@@ -12,6 +12,16 @@ Newest first.
 
 ---
 
+## 2026-11-06 -- Chrome on iPhone shrinks everything with the keyboard
+
+**`iosFocusGuard` now measures "is the keyboard open" against the viewport it saw before the keyboard, not the current `innerHeight`.** A debug HUD on Mark's iPhone, on wordmark.nyc/calsans (MarkFonts/wordmark#72): Chrome resizes the layout viewport with the keyboard, so `innerHeight` and `visualViewport.height` both went 817 to 435 and never differed. `keyboardOpen` stayed false, the room collapsed to 435 * 0.55 = 239, and the hold skipped 29 of 32 frames on a line at y 297 that the keyboard wasn't covering. It now compares against the tallest `innerHeight` seen at this width, updated at attach and at each touch: a baseline from the touch alone would read the keyboard as closed whenever it's already up. A new width is a rotation and starts over. Safari keeps its `innerHeight` (815 throughout), so nothing changes there.
+
+**What this doesn't fix, and can't.** The same resize shrinks `vh`, `svh`, `dvh`, and `lvh`. On /calsans that took 566pt out of the blocks above the type tester with `scrollY` at 0, which is what the phone showed as the jump. With no scroll there is nothing for a scroll guard to put back, so the page has to hold those heights itself (GESTURES.md §15).
+
+**The hold stays 700ms.** Measured moves, from the touch: Chrome on the phone +238, Safari on the phone +179, the simulator +143 and +474, each pulled back within a few ms. One simulator run moved 54pt at +848, just after its hold ended at +800; two more didn't repeat it. One unrepeated simulator reading isn't a reason to lengthen it.
+
+---
+
 ## 2026-11-04 -- tapping into text on an iPhone leaves the page where it was
 
 **`iosFocusGuard`, wired into `EditableTextBlock`.** iPhone Safari flung the page when a tap focused editable text (3,000px+ seen); desktop and Chrome's phone emulation don't show it. The likely cause is iOS's reveal scroll, on focus and again as the keyboard opens, inferred and not logged. The fix was confirmed on Mark's iPhone on the Framer components; this is that fix as one file (`src/iosFocusGuard.js`), plain JS so a page without React can import or copy it. Off iOS it adds no listeners.

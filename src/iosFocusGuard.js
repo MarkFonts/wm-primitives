@@ -24,7 +24,11 @@
  *
  * Neither layer touches a tap the keyboard would cover, where iOS's scroll is the one wanted.
  * The tap point stands in for the caret. The keyboard takes about 45% of the screen before
- * it's measurable.
+ * it's measurable. "Is it open" compares against the tallest viewport seen at this width, not
+ * the current innerHeight: Chrome on iPhone resizes the layout viewport with the keyboard, so
+ * innerHeight and visualViewport.height shrink together (817 to 435 measured) and never differ.
+ * That also shrinks every CSS viewport unit, which moves any layout sized in them with no
+ * scroll at all. No scroll means nothing here can put it back: that's the page's to prevent.
  *
  * THE TAP IS SHARED BY EVERY GUARD ON THE PAGE, not kept per element, and a running hold outlives
  * the guard that started it. EditableTextBlock swaps its element for a new one during the focus,
@@ -41,16 +45,23 @@ const HOLD_MS = 700, QUICK_TAP_MS = 400, TAP_EXPIRES_MS = 500
 let tap = null     // the touch in play, until a focus spends it
 let frame = 0      // the running hold
 let guards = 0     // the live guards, who share one touchmove listener
+let fullHeight = 0, fullWidth = 0 // the tallest innerHeight seen at this width: the keyboard-free viewport
 
 const stopHold = () => { cancelAnimationFrame(frame); frame = 0 }
 const onWindowTouchMove = () => { tap = null; stopHold() }
+
+// Taken when the keyboard is down, or was already counted. A new width is a rotation: start over.
+function noteViewport() {
+  if (window.innerWidth !== fullWidth) { fullWidth = window.innerWidth; fullHeight = 0 }
+  fullHeight = Math.max(fullHeight, window.innerHeight)
+}
 
 // Would the line at this height stay clear of the keyboard? Asked again every frame of a hold,
 // because the keyboard becomes measurable partway through it.
 function clearsKeyboard(y) {
   const vv = window.visualViewport
   if (!vv) return false
-  const keyboardOpen = vv.height < window.innerHeight * 0.8
+  const keyboardOpen = vv.height < fullHeight * 0.8
   return y + 48 < (keyboardOpen ? vv.height : vv.height * 0.55)
 }
 
@@ -86,9 +97,11 @@ export function iosFocusGuard(el, { caret = false } = {}) {
   const ua = navigator.userAgent
   const isIOS = IOS.test(ua) || (/Mac/.test(ua) && navigator.maxTouchPoints > 1)
   if (!el || !isIOS) return () => {}
+  noteViewport()
 
   const onTouchStart = e => {
     stopHold()
+    noteViewport()
     tap = e.touches.length > 1 ? null : {
       y: e.touches[0].clientY, at: performance.now(), ended: null,
       saved: scrollersAround(el), windowY: window.scrollY,

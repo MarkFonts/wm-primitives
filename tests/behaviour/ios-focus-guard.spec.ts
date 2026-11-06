@@ -192,6 +192,51 @@ test.describe('on iOS', () => {
     expect((await run(252, 300)).win).toBeGreaterThan(SAVED.win)
   })
 
+  // Chrome on iPhone resizes the layout viewport with the keyboard: innerHeight falls with
+  // visualViewport.height (817 to 435 on the phone), so comparing the two never sees it open.
+  const chromeRun = (y: number, viewport: number, width = VIEW.width) => page.evaluate(async ([y, viewport, width]) => {
+    const w = window as any
+    Object.defineProperty(window, 'innerWidth', { get: () => width, configurable: true })
+    window.scrollTo({ top: 200, behavior: 'instant' as ScrollBehavior })
+    w.$('scroll').scrollTop = 60; w.$('shell').scrollTop = 0
+    w.touch(w.$('inner'), 'touchstart', 50, y); w.touch(w.$('inner'), 'touchend', 50, y)
+    w.$('inner').focus({ preventScroll: true })
+    // The keyboard arrives during the hold, as it does on the phone: both heights at once.
+    Object.defineProperty(window, 'innerHeight', { get: () => viewport, configurable: true })
+    w.keyboard(viewport)
+    const end = await w.reveal(200)
+    w.$('inner').blur()
+    await w.wait(750)
+    return end
+  }, [y, viewport, width] as const)
+
+  test('G98 · Chrome on iPhone: both heights shrink, and the line above the keyboard is still held', async () => {
+    await guard(page, 'inner')
+    // 300 is under 80% of the 664 taken at the touch, so the room is 300, not 300 * 0.55 = 165.
+    expect(await chromeRun(251, 300)).toEqual(SAVED)
+    expect((await chromeRun(252, 300)).win).toBeGreaterThan(SAVED.win)
+  })
+
+  test('G98 · Chrome on iPhone: with the keyboard already up at the touch, it still counts as open', async () => {
+    await guard(page, 'inner')
+    await page.evaluate(() => {
+      const w = window as any
+      Object.defineProperty(window, 'innerHeight', { get: () => 300, configurable: true })
+      w.keyboard(300)
+    })
+    // The next touch reads innerHeight 300; the 664 seen before it is still the viewport without a keyboard.
+    expect(await chromeRun(251, 300)).toEqual(SAVED)
+    expect((await chromeRun(252, 300)).win).toBeGreaterThan(SAVED.win)
+  })
+
+  test('G98 · a new width is a rotation: the old height no longer says the keyboard is open', async () => {
+    await guard(page, 'inner')
+    expect(await chromeRun(100, 300)).toEqual(SAVED)
+    // 390 wide, it was 664 tall. Rotated, 300 is the whole screen and the keyboard is still to come: the room is 165.
+    expect(await chromeRun(116, 300, 664)).toEqual(SAVED)
+    expect((await chromeRun(117, 300, 664)).win).toBeGreaterThan(SAVED.win)
+  })
+
   test('G99 · a tap that got no focus does not hold a later one', async () => {
     await guard(page, 'inner')
     const end = await page.evaluate(async () => {

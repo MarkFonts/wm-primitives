@@ -345,12 +345,17 @@ only. Tested in `tests/behaviour/ios-focus-guard.spec.ts` against
 scroll it exists to stop only happens on a real iPhone**, so the tests cover the logic and
 never the fix.
 
+**The guard only undoes scrolls.** Chrome on iPhone resizes the layout viewport with the keyboard, and
+`vh`, `svh`, `dvh`, `lvh`, and `innerHeight` all shrink with it (817 to 435 measured). Anything sized in
+them above the editable changes height, and the page moves with `scrollY` at 0, so there is nothing to
+put back. A page with viewport-sized blocks above an editable has to hold those heights itself.
+
 | id | gesture | promise | commit |
 | --- | --- | --- | --- |
 | G95 | anything, off iOS | no listeners, no writes. iOS is `iP(hone\|ad\|od)` in the UA, or `Mac` with `maxTouchPoints > 1` | ios-focus-guard |
 | G96 | a tap focuses the element | for 700ms from the focus, the window and every scroller around it (`overflow: hidden` ones too) are put back where they were at the touch. Nothing that didn't move is written to | ios-focus-guard |
 | G97 | a touchmove anywhere, during or before the hold | the hold ends and the reader's scroll stands | ios-focus-guard |
-| G98 | a tap the keyboard would cover: `tapY + 48` not under `visualViewport.height` if the keyboard is open (height under 80% of `innerHeight`), else `height * 0.55` | neither layer acts; iOS reveals the line | ios-focus-guard |
+| G98 | a tap the keyboard would cover: `tapY + 48` not under `visualViewport.height` if the keyboard is open (height under 80% of the tallest `innerHeight` seen at this width, taken at each touch, because Chrome on iPhone shrinks `innerHeight` with the keyboard), else `height * 0.55` | neither layer acts; iOS reveals the line | ios-focus-guard |
 | G99 | a focus with no tap behind it, or over 500ms after the finger lifted, or a tap already spent by a focus | no hold: Enter moving to the next block never pulls the page back | ios-focus-guard |
 | G100 | a quick tap with `caret: true` on an unfocused contenteditable | `touchend` prevented, focus with `preventScroll`, caret placed at the tap. Left to iOS: a drag, a press over 400ms, an element already focused, a textarea | ios-focus-guard |
 | G101 | the guarded element is replaced during the focus (`EditableTextBlock`'s key) | the hold carries on, and the replacement's guard takes over the touchmove. With no guard left, the hold stops | ios-focus-guard |
