@@ -149,6 +149,11 @@ export type {
 // outcomes; an app calls it on its own successes. Also on window for plain scripts.
 export { wmConfirm } from './src/confirm.js'
 
+// iosFocusGuard -- iPhone Safari flings the page when a tap focuses editable text; this holds
+// the window and every scroller around el where they were. Plain JS and one file, so a page
+// without React imports it or copies it. No-op off iOS. EditableTextBlock already uses it.
+export { iosFocusGuard } from './src/iosFocusGuard.js'
+
 // Colour tokens. color.css is additive like type.css and motion.css -- it declares the
 // ramp (--bg/--surface/--surface-hi/--text/--text-muted/--text-dim/--border) and styles
 // no element. A theme is seven numbers, not a second palette. It sits in @layer wm.color

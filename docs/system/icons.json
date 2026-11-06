@@ -13,6 +13,9 @@
   "blur_on": [
    "WORDMAKE"
   ],
+  "book_2": [
+   "font-proofer"
+  ],
   "bookmark": [
    "wordmark.nyc"
   ],
@@ -222,7 +225,6 @@
   "arrow_back",
   "arrow_forward",
   "book",
-  "book_2",
   "book_3",
   "book_4",
   "book_5",

@@ -26,6 +26,7 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `GlyphPicker` `measureGlyphMetrics` | Interactive glyph browser: equal-sized cell grid + viewer/U+ readout, search, copy-to-clipboard, ssXX alternate groups (wm-primitives #2). | font-proofer, ReCal, WORDMAKE, GliffDiff | — |
 | `createLetterbox` `JEROME` | The letterbox: the house wordmark scanned and packed with prose (Charlie Clark's pretext effect). Plain-JS engine, because wordmark.nyc and this repo's system page script-tag it directly, and ReCal's landing pages load i… | ReCal, wordmark.nyc | README (letterbox) |
 | `wmConfirm` | wmConfirm -- the click confirm: on a press that WORKED, the control's press look blinks off 80ms, on 80ms, then it settles (GESTURES.md §14). Adds .wm-confirm, which runs the one keyframe in motion.css; no-op under reduc… | wordmark.nyc | — |
+| `iosFocusGuard` | iosFocusGuard -- iPhone Safari flings the page when a tap focuses editable text; this holds the window and every scroller around el where they were. Plain JS and one file, so a page without React imports it or copies it.… | — | — |
 | `ROLES` `POSTER` `INK` `TRACK_CAPS` `LANDINGS` `typeStyle` `ink` | Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/ --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so importing it cannot reach existing markup. Apps import… | Kernpare, WORDMAKE, wordmark.nyc, font-proofer, ReCal, opsz-proofer, GliffDiff | TYPOGRAPHY.md |
 | `Collapse` | A disclosure box that measures its own content, so a section's height is never a number anyone has to keep up to date. Used by the fitting panel's two sections. | font-proofer, WORDMAKE | — |
 | `FittingControls` `fittingMode` `AlignmentButtons` `ALIGNMENTS` `FittedParagraph` | The line-fitting controls. The engine above is consumed directly by static pages; this is the interface both paragraph views render — font-proofer in its sidebar, ReCal in the floating Type panel. Alignment stays with th… | font-proofer, ReCal, WORDMAKE | FITTING-MAP.md |
@@ -41,7 +42,7 @@ CSS-only modules (imported from an app's entry stylesheet, nothing to export): `
 
 The Material Symbols subset (`fonts/MaterialSymbolsOutlined.woff2`, 96 ligatures) sorted by whether anything draws each one. The ligature list is read from the font and the drawing from the sources of font-proofer, ReCal, opsz-proofer, Kernpare, WORDMAKE, GliffDiff, wordmark.nyc, wm-primitives, system page, so removing a mark is a search, not a guess. The system page shows the same three lists with their glyphs.
 
-### Used (59)
+### Used (60)
 
 Drawn by at least one app. Who draws it is in the second column.
 
@@ -51,6 +52,7 @@ Drawn by at least one app. Who draws it is in the second column.
 | `add_photo_alternate` | WORDMAKE |
 | `align_horizontal_center` | WORDMAKE |
 | `blur_on` | WORDMAKE |
+| `book_2` | font-proofer |
 | `bookmark` | wordmark.nyc |
 | `brightness_auto` | ThemeSwitch (every host that mounts it), wm-primitives, wordmark.nyc |
 | `calendar_month` | font-proofer |
@@ -107,8 +109,8 @@ Drawn by at least one app. Who draws it is in the second column.
 | `zoom_in` | wm-primitives |
 | `zoom_out` | wm-primitives |
 
-### Ready (37)
+### Ready (36)
 
 In the subset, drawn by nothing yet.
 
-`arrow_back` `arrow_forward` `book` `book_2` `book_3` `book_4` `book_5` `book_6` `book_ribbon` `brand_family` `call_merge` `edit` `edit_document` `edit_note` `emoji_symbols` `font_download` `format_quote` `hdr_auto` `hdr_auto_select` `hdr_enhanced_select` `hdr_off` `hdr_off_select` `hdr_on_select` `match_case` `match_case_off` `pause` `public` `redo` `script` `serif` `slab_serif` `star` `subscript` `superscript` `type_specimen` `undo` `visibility_off`
+`arrow_back` `arrow_forward` `book` `book_3` `book_4` `book_5` `book_6` `book_ribbon` `brand_family` `call_merge` `edit` `edit_document` `edit_note` `emoji_symbols` `font_download` `format_quote` `hdr_auto` `hdr_auto_select` `hdr_enhanced_select` `hdr_off` `hdr_off_select` `hdr_on_select` `match_case` `match_case_off` `pause` `public` `redo` `script` `serif` `slab_serif` `star` `subscript` `superscript` `type_specimen` `undo` `visibility_off`
