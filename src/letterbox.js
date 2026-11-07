@@ -94,13 +94,15 @@ var DEFAULTS = {
   speckle:         null,      // {share, groups, speed, to, layer}
   layers:          null,      // {front: [canvas], groups, speed, minWidth}
   // HDR, opt-in: {gain, twinkle}. Paints with WebGPU on an HDR display (or `?hdr` in the
-  // URL) in a browser that has it; everywhere else, and always with `layers`, the 2D
-  // path runs unchanged and this is ignored.
+  // URL) in a browser that has it; everywhere else the 2D
+  // path runs unchanged and this is ignored. With `layers` every canvas gets its own
+  // WebGPU context on one device.
   //   gain     every glyph's brightness as a multiple of SDR white; 1 is today's ink.
   //   twinkle  {mode, share, groups, speed, peak}, or null for a steady fill. A seeded
   //            `share` of glyphs rises from `gain` to `peak` and back. 'stars' gives each
   //            its own phase and period and a brief flash; 'groups' uses the speckle's
   //            phased waves on `groups` groups.
+  // Light on dark only: with ink darker than half luminance every glyph holds `gain`.
   hdr:             null,
   // 'display-p3' gives the canvas a wide buffer, so a P3 token paints as the neon it
   // is instead of being clamped back into sRGB on the way in.
@@ -230,9 +232,8 @@ export function createLetterbox(canvasEl, config) {
   var POOL = (CFG.pool || JEROME).repeat(CFG.poolRepeat);
 
   /* GPU or 2D, decided ONCE: a canvas that has handed out a 2D context can never give
-     a WebGPU one, so this cannot be re-asked on resize. The juggle stays Canvas 2D --
-     it needs two stacked canvases with the page between them, and `layers` wins. */
-  var useGPU = !!HDR && !LYR && !!navigator.gpu &&
+     a WebGPU one, so this cannot be re-asked on resize. */
+  var useGPU = !!HDR && !!navigator.gpu &&
     ((window.matchMedia && matchMedia('(dynamic-range: high)').matches) ||
      new URLSearchParams(location.search).has('hdr'));
 
@@ -250,7 +251,7 @@ export function createLetterbox(canvasEl, config) {
 
   // allCtxs[0] is the back canvas (this one); allCtxs[1+] are the juggle's front layers.
   var allEls  = [canvasEl].concat(LYR ? LYR.front : []);
-  // The GPU path owns the canvas outright, so it takes no 2D context here.
+  // The GPU path owns every canvas outright, so it takes no 2D context here.
   var allCtxs = useGPU ? [null] : allEls.map(context);
   // Refreshed per build so a breakpoint crossing takes effect on resize.
   var splitActive = false;
@@ -336,7 +337,7 @@ export function createLetterbox(canvasEl, config) {
 
   /* ---- buildAllChars ------------------------------------------------------ */
   function buildAllChars(CW, layoutCW, heroH) {
-    splitActive = !!LYR && allCtxs.length > 1 &&
+    splitActive = !!LYR && allEls.length > 1 &&
                   window.matchMedia('(min-width: ' + LYR.minWidth + 'px)').matches;
 
     var refSize  = 200;
@@ -545,8 +546,8 @@ export function createLetterbox(canvasEl, config) {
     '@group(0) @binding(0) var<uniform> u: U;',
     '@group(0) @binding(1) var samp: sampler;',
     '@group(0) @binding(2) var atlas: texture_2d<f32>;',
-    'struct VSIn { @builtin(vertex_index) vi: u32, @location(0) rect: vec4f, @location(1) uv: vec4f, @location(2) col: vec4f };',
-    'struct VSOut { @builtin(position) pos: vec4f, @location(0) uv: vec2f, @location(1) col: vec4f };',
+    'struct VSIn { @builtin(vertex_index) vi: u32, @location(0) rect: vec4f, @location(1) uv: vec4f, @location(2) col: vec4f, @location(3) extra: vec4f };',
+    'struct VSOut { @builtin(position) pos: vec4f, @location(0) uv: vec2f, @location(1) col: vec4f, @location(2) alpha: f32 };',
     '@vertex fn vs(in: VSIn) -> VSOut {',
     '  let corner = vec2f(f32(in.vi & 1u), f32(in.vi >> 1u));',
     '  let px = in.rect.xy + corner * in.rect.zw;',
@@ -555,11 +556,12 @@ export function createLetterbox(canvasEl, config) {
     '  o.pos = vec4f(clip, 0.0, 1.0);',
     '  o.uv = mix(in.uv.xy, in.uv.zw, corner);',
     '  o.col = in.col;',
+    '  o.alpha = in.extra.x;',
     '  return o;',
     '}',
     '@fragment fn fs(in: VSOut) -> @location(0) vec4f {',
     '  let cov = textureSample(atlas, samp, in.uv).a;',
-    '  return vec4f(in.col.rgb * in.col.a * cov, cov);',   // premultiplied; col.a is the gain
+    '  return vec4f(in.col.rgb * in.col.a * cov * in.alpha, cov * in.alpha);',   // premultiplied; col.a is the gain, alpha the juggle's
     '}',
   ].join('\n');
 
@@ -615,28 +617,33 @@ export function createLetterbox(canvasEl, config) {
     return navigator.gpu.requestAdapter().then(function (adapter) {
       if (!adapter) return false;
       return adapter.requestDevice().then(function (device) {
-        var ctx = canvasEl.getContext('webgpu');
         var cfg = { device: device, format: 'rgba16float', alphaMode: 'premultiplied',
                     toneMapping: { mode: 'extended' } };
         if (CFG.colorSpace === 'display-p3') { cfg.colorSpace = 'display-p3'; p3On = true; }
-        try { ctx.configure(cfg); }
-        catch (e) { p3On = false; delete cfg.colorSpace; ctx.configure(cfg); }
+        // One context per canvas (the juggle's front layers too), all on the one device.
+        var layers = allEls.map(function (el) {
+          var ctx = el.getContext('webgpu');
+          try { ctx.configure(cfg); }
+          catch (e) { p3On = false; delete cfg.colorSpace; ctx.configure(cfg); }
+          return { ctx: ctx, ibuf: null, idata: null, icap: 0 };
+        });
         var mod = device.createShaderModule({ code: SHADER });
         var pipeline = device.createRenderPipeline({
           layout: 'auto',
-          vertex: { module: mod, entryPoint: 'vs', buffers: [{ arrayStride: 48, stepMode: 'instance', attributes: [
+          vertex: { module: mod, entryPoint: 'vs', buffers: [{ arrayStride: 64, stepMode: 'instance', attributes: [
             { shaderLocation: 0, offset: 0,  format: 'float32x4' },
             { shaderLocation: 1, offset: 16, format: 'float32x4' },
-            { shaderLocation: 2, offset: 32, format: 'float32x4' } ] }] },
+            { shaderLocation: 2, offset: 32, format: 'float32x4' },
+            { shaderLocation: 3, offset: 48, format: 'float32x4' } ] }] },
           fragment: { module: mod, entryPoint: 'fs', targets: [{ format: 'rgba16float', blend: {
             color: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
             alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' } } }] },
           primitive: { topology: 'triangle-strip' },
         });
-        gpu = { device: device, ctx: ctx, pipeline: pipeline,
+        gpu = { device: device, layers: layers, pipeline: pipeline,
                 sampler: device.createSampler({ magFilter: 'linear', minFilter: 'linear', mipmapFilter: 'linear' }),
                 ubuf: device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }),
-                ibuf: null, idata: null, icap: 0, bind: null, atlas: null };
+                bind: null, atlas: null };
         return true;
       });
     }).catch(function () { return false; });
@@ -673,15 +680,24 @@ export function createLetterbox(canvasEl, config) {
     if (!gpu || !gpu.atlas) return;
     var inkC = resolveColour(CFG.ink, CFG.inkFallback);
     var sigC = SPK ? resolveColour(SPK.to || CFG.signal, CFG.signalFallback) : inkC;
+    // HDR is light on dark. Dark ink driven past itself is not a glow, so below half
+    // luminance every glyph holds the base gain this frame and a theme toggle just works.
+    var dark = (0.2126 * inkC[0] + 0.7152 * inkC[1] + 0.0722 * inkC[2]) / 255 < 0.5;
 
+    // Back canvas always; the juggle's front copy only while the split is on, like the 2D
+    // painter. A front canvas that is skipped was cleared by the resize that hid it.
+    var drawn = splitActive ? 2 : 1;
     var N = chars.length;
-    if (!gpu.ibuf || gpu.icap < N) {
-      if (gpu.ibuf) gpu.ibuf.destroy();
-      gpu.icap  = Math.max(N, 256);
-      gpu.ibuf  = gpu.device.createBuffer({ size: gpu.icap * 48, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
-      gpu.idata = new Float32Array(gpu.icap * 12);
+    for (var li = 0; li < drawn; li++) {
+      var L = gpu.layers[li];
+      if (!L.ibuf || L.icap < N) {
+        if (L.ibuf) L.ibuf.destroy();
+        L.icap  = Math.max(N, 256);
+        L.ibuf  = gpu.device.createBuffer({ size: L.icap * 64, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
+        L.idata = new Float32Array(L.icap * 16);
+      }
     }
-    var D = gpu.idata, A = gpu.atlas, n = 0;
+    var D = gpu.layers[0].idata, F = splitActive ? gpu.layers[1].idata : null, A = gpu.atlas, n = 0;
 
     var radius   = isMouseDown ? 250 : 100;
     var strength = isMouseDown ? 105 : 35;
@@ -698,28 +714,43 @@ export function createLetterbox(canvasEl, config) {
       var uv = A.map[c.ch];
       if (!uv) continue;
 
-      var col = speckleMix(c, inkC, sigC, nowMs) || inkC;
-
-      var o = n * 12;
+      var mix  = speckleMix(c, inkC, sigC, nowMs);
+      var gain = dark ? 1 : glyphGain(i, nowMs);
+      var o = n * 16;
+      var back = (mix && !c.afront) ? mix : inkC;
       D[o]     = c.x - A.pad * k;  D[o + 1] = ty - A.pad * k;
       D[o + 2] = A.cell * k;       D[o + 3] = A.cell * k;
       D[o + 4] = uv[0]; D[o + 5] = uv[1]; D[o + 6] = uv[2]; D[o + 7] = uv[3];
-      D[o + 8] = col[0] / 255; D[o + 9] = col[1] / 255; D[o + 10] = col[2] / 255;
-      D[o + 11] = glyphGain(i, nowMs);
+      D[o + 8] = back[0] / 255; D[o + 9] = back[1] / 255; D[o + 10] = back[2] / 255;
+      D[o + 11] = gain;
+      D[o + 12] = 1;
+
+      // JUGGLE -- the same quad for the front canvas, at the 2D painter's phased alpha.
+      if (F) {
+        var ja = 0.5 + 0.5 * Math.sin(nowMs * LYR.speed + c.jphase);
+        var front = (mix && c.afront) ? mix : inkC;
+        for (var q = 0; q < 8; q++) F[o + q] = D[o + q];
+        F[o + 8] = front[0] / 255; F[o + 9] = front[1] / 255; F[o + 10] = front[2] / 255;
+        F[o + 11] = gain;
+        F[o + 12] = ja * ja;
+      }
       n++;
     }
 
-    gpu.device.queue.writeBuffer(gpu.ibuf, 0, D.buffer, 0, n * 48);
     gpu.device.queue.writeBuffer(gpu.ubuf, 0, new Float32Array([CW, CH, 0, 0]));
     var enc = gpu.device.createCommandEncoder();
-    var pass = enc.beginRenderPass({ colorAttachments: [{
-      view: gpu.ctx.getCurrentTexture().createView(),
-      clearValue: { r: 0, g: 0, b: 0, a: 0 }, loadOp: 'clear', storeOp: 'store' }] });
-    pass.setPipeline(gpu.pipeline);
-    pass.setBindGroup(0, gpu.bind);
-    pass.setVertexBuffer(0, gpu.ibuf);
-    pass.draw(4, n);
-    pass.end();
+    for (var pi = 0; pi < drawn; pi++) {
+      var P = gpu.layers[pi];
+      gpu.device.queue.writeBuffer(P.ibuf, 0, (pi ? F : D).buffer, 0, n * 64);
+      var pass = enc.beginRenderPass({ colorAttachments: [{
+        view: P.ctx.getCurrentTexture().createView(),
+        clearValue: { r: 0, g: 0, b: 0, a: 0 }, loadOp: 'clear', storeOp: 'store' }] });
+      pass.setPipeline(gpu.pipeline);
+      pass.setBindGroup(0, gpu.bind);
+      pass.setVertexBuffer(0, P.ibuf);
+      pass.draw(4, n);
+      pass.end();
+    }
     gpu.device.queue.submit([enc.finish()]);
   }
 
@@ -814,7 +845,7 @@ export function createLetterbox(canvasEl, config) {
     (CFG.pointer === 'canvas' ? canvasEl : document).removeEventListener('mouseleave', onLeave);
     if (CFG.autoResize) window.removeEventListener('resize', onResize);
     observer.disconnect();
-    if (gpu && gpu.ctx) { try { gpu.ctx.unconfigure(); } catch (e) {} }
+    if (gpu) gpu.layers.forEach(function (L) { try { L.ctx.unconfigure(); } catch (e) {} });
     if (mq && mq.removeEventListener) mq.removeEventListener('change', redraw);
   }
 

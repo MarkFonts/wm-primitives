@@ -12,6 +12,14 @@ Newest first.
 
 ---
 
+## 2026-11-07 -- the juggle on the GPU path, and dark ink stays put
+
+**`layers` no longer sends the letterbox back to Canvas 2D.** Every canvas, the back one and the juggle's front ones, now gets its own `webgpu` context, configured identically on ONE device (`rgba16float`, premultiplied, extended tone mapping), sharing one pipeline, sampler and atlas. Each canvas has its own instance buffer and its own render pass per frame. The front copy carries the 2D painter's phased alpha (`ja * ja`) in a fourth instance attribute, and the speckle's `afront` picks the acid copy exactly as it does in 2D. When the breakpoint turns the split off, only the back canvas is drawn. This is what wordmark.nyc's footer needs: it is the one site that runs the juggle, so the letters between the canvases shimmer over the work images, now with the twinkle on top.
+
+**HDR is a light-on-dark effect, so the painter skips it when the ink is dark.** Each frame the ink's relative luminance is computed, and below 0.5 every glyph holds the base gain: no twinkle. wordmark.nyc has a light theme, and driving dark ink past itself is not a glow. A light theme shows the plain letterbox; toggling to dark brings the glow back with no rebuild, because the ink is resolved every frame anyway.
+
+---
+
 ## 2026-11-07 -- the letterbox fill goes HDR
 
 **`createLetterbox` takes an opt-in `hdr: {gain, twinkle}`, and with it the fill glows on an HDR display.** Canvas 2D could never carry it: `fillStyle` clamps at white, the rec2100 canvas is still behind a flag, and the DOM-mask route that works for display type failed at 10px. What does ship, unflagged, in Chrome is an `rgba16float` WebGPU canvas under `toneMapping: 'extended'`, where a colour above 1.0 displays brighter than SDR white. The 10px fill DOES glow there, measured on Mark's display. That overturns the earlier "display sizes only" rule, which was about the DOM route and never about this one. Found in franguzmanx/geist-serif-anamorphosis, which uses the same configuration.
