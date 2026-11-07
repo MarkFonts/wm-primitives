@@ -20,7 +20,7 @@ Newest first.
 
 **The atlas rasterizes every mip level with the font at that level's size.** The first attempt downsampled one 128px drawing and softened the 10px fill; an exact-size atlas was sharp at rest and went soft under the cursor. Now level 0 is four times the device fill size (the cursor's scale peak), each level half the last down to 4px, so at rest the sampler lands on the level drawn at the fill size and a pushed glyph reads a real larger raster.
 
-**The gate is decided once per letterbox**, because a canvas that has handed out a 2D context cannot later give a WebGPU one: `hdr` set, `navigator.gpu` present, an HDR display (or `?hdr` in the URL), and no `layers` (the juggle stays Canvas 2D). Otherwise the 2D path runs as before; if the adapter or device fails, it falls back to 2D. The cursor physics and the speckle mix are now single functions both painters call. Headless Chrome holds 60 fps with two engines of 936 glyphs each at about 17% of the main thread.
+**The gate is decided once per letterbox**, because a canvas that has handed out a 2D context cannot later give a WebGPU one: `hdr` set, `navigator.gpu` present, an HDR display (or `?hdr` in the URL), and no `layers` (the juggle stays Canvas 2D). Otherwise the 2D path runs as before; if the adapter or device fails, it falls back to 2D. The cursor physics and the speckle mix are now single functions both painters call. Headless Chrome held 60 fps on the spike page, where a GPU engine and a 2D engine of 936 glyphs each ran side by side, at about 17% of the main thread.
 
 ---
 
