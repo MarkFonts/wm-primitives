@@ -12,6 +12,12 @@ Newest first.
 
 ---
 
+## 2026-11-07 -- letterbox.d.ts learns the hdr config
+
+`createLetterbox` already took `hdr: { gain, twinkle }` and TS consumers could not pass it; the type has it now. Types only, no behavior change.
+
+---
+
 ## 2026-11-07 -- the juggle on the GPU path, and dark ink stays put
 
 **`layers` no longer sends the letterbox back to Canvas 2D.** Every canvas, the back one and the juggle's front ones, now gets its own `webgpu` context, configured identically on ONE device (`rgba16float`, premultiplied, extended tone mapping), sharing one pipeline, sampler and atlas. Each canvas has its own instance buffer and its own render pass per frame. The front copy carries the 2D painter's phased alpha (`ja * ja`) in a fourth instance attribute, and the speckle's `afront` picks the acid copy exactly as it does in 2D. When the breakpoint turns the split off, only the back canvas is drawn. This is what wordmark.nyc's footer needs: it is the one site that runs the juggle, so the letters between the canvases shimmer over the work images, now with the twinkle on top.
