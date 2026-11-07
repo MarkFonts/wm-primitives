@@ -31,6 +31,29 @@ export interface LetterboxLayers {
   minWidth?: number
 }
 
+/**
+ * Paint with WebGPU into an HDR canvas on an HDR display (or with `?hdr` in the URL) in a
+ * browser that has it; everywhere else the Canvas 2D path runs unchanged. Light on dark
+ * only: ink darker than half luminance holds `gain`.
+ */
+export interface LetterboxHdr {
+  /** Every glyph's brightness as a multiple of SDR white. Default 1, today's ink. */
+  gain?: number
+  /** A seeded share of glyphs rises from `gain` to `peak` and back. null = steady fill. */
+  twinkle?: {
+    /** 'stars' gives each glyph its own phase and period; 'groups' uses phased waves. Default 'stars'. */
+    mode?: 'stars' | 'groups'
+    /** Fraction of glyphs that twinkle. Default 1/6. */
+    share?: number
+    /** Phase groups in 'groups' mode. Default 5. */
+    groups?: number
+    /** Radians per ms. Default 0.0016. */
+    speed?: number
+    /** Peak brightness as a multiple of SDR white. Default 2.5. */
+    peak?: number
+  } | null
+}
+
 export interface LetterboxConfig {
   words?: string[]
   largeFontFamily?: string
@@ -71,6 +94,7 @@ export interface LetterboxConfig {
   colorSpace?: 'srgb' | 'display-p3'
   speckle?: LetterboxSpeckle | null
   layers?: LetterboxLayers | null
+  hdr?: LetterboxHdr | null
   autoResize?: boolean
 }
 
