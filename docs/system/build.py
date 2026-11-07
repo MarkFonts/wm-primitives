@@ -1472,6 +1472,13 @@ html,body{margin:0;padding:0;background:var(--bg)}
  *   inlined below):  speckle.share (1/6) . speckle.groups (5) . speckle.speed (~4s)
  *   fillSize (10px) . minFillSize (6px) . axes (SHRP 0-100)
  *
+ *   `hdr` is the glow. On an HDR display, in a browser with WebGPU (Chrome), the glyphs
+ *   are painted by the GPU instead of Canvas 2D, which clamps every colour at white and
+ *   has nowhere brighter to go; a seeded sixth of them flare past the page's white and
+ *   settle back. Safari and SDR screens get the Canvas 2D letterbox they have always
+ *   had, and `?hdr` on the URL forces the GPU path on any screen. The glyphs are the
+ *   font's own rasters, drawn at each size they are shown at, not one picture shrunk.
+ *
  *   It is the same engine as the footer on wordmark.nyc, which runs two canvases so
  *   that work images can sit between the layers -- the primitive's `layers` option.
  *   There are no images here, so this one stays on a single canvas and computes the
@@ -2547,6 +2554,9 @@ var lb = createLetterbox(document.getElementById('lb-footer'), {
   // two-canvas juggle wordmark.nyc runs: nothing sits between the layers here, so the
   // split would buy an extra canvas and no effect.
   speckle:         { share: 1 / 6, groups: 5 },
+  // Opt-in glow: gain 1 is the ink as it is, and a sixth of the glyphs flash to 2.5 times
+  // SDR white. Gated inside the primitive; where it does not apply this key is ignored.
+  hdr:             { gain: 1, twinkle: { mode: 'stars', share: 1 / 6, peak: 2.5 } },
   // The acid is a P3-SCALED token now, so the canvas needs a P3 buffer to hold it --
   // an sRGB buffer would clamp the speckle back to the hex the page falls back to.
   colorSpace:      'display-p3',
