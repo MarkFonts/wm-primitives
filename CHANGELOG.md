@@ -12,6 +12,18 @@ Newest first.
 
 ---
 
+## 2026-11-07 -- the letterbox fill goes HDR
+
+**`createLetterbox` takes an opt-in `hdr: {gain, twinkle}`, and with it the fill glows on an HDR display.** Canvas 2D could never carry it: `fillStyle` clamps at white, the rec2100 canvas is still behind a flag, and the DOM-mask route that works for display type failed at 10px. What does ship, unflagged, in Chrome is an `rgba16float` WebGPU canvas under `toneMapping: 'extended'`, where a colour above 1.0 displays brighter than SDR white. The 10px fill DOES glow there, measured on Mark's display. That overturns the earlier "display sizes only" rule, which was about the DOM route and never about this one. Found in franguzmanx/geist-serif-anamorphosis, which uses the same configuration.
+
+**The twinkle is a sixth of the glyphs, each on its own seeded phase and period, rising from gain 1 to a peak of 2.5 and back (`mode: 'stars'`).** A `'groups'` mode reuses the speckle's phased waves. Both are seeded, so a resize brings back the same pattern.
+
+**The atlas rasterizes every mip level with the font at that level's size.** The first attempt downsampled one 128px drawing and softened the 10px fill; an exact-size atlas was sharp at rest and went soft under the cursor. Now level 0 is four times the device fill size (the cursor's scale peak), each level half the last down to 4px, so at rest the sampler lands on the level drawn at the fill size and a pushed glyph reads a real larger raster.
+
+**The gate is decided once per letterbox**, because a canvas that has handed out a 2D context cannot later give a WebGPU one: `hdr` set, `navigator.gpu` present, an HDR display (or `?hdr` in the URL), and no `layers` (the juggle stays Canvas 2D). Otherwise the 2D path runs as before; if the adapter or device fails, it falls back to 2D. The cursor physics and the speckle mix are now single functions both painters call. Headless Chrome held 60 fps on the spike page, where a GPU engine and a 2D engine of 936 glyphs each ran side by side, at about 17% of the main thread.
+
+---
+
 ## 2026-11-06 -- Chrome on iPhone shrinks everything with the keyboard
 
 **`iosFocusGuard` now measures "is the keyboard open" against the viewport it saw before the keyboard, not the current `innerHeight`.** A debug HUD on Mark's iPhone, on wordmark.nyc/calsans (MarkFonts/wordmark#72): Chrome resizes the layout viewport with the keyboard, so `innerHeight` and `visualViewport.height` both went 817 to 435 and never differed. `keyboardOpen` stayed false, the room collapsed to 435 * 0.55 = 239, and the hold skipped 29 of 32 frames on a line at y 297 that the keyboard wasn't covering. It now compares against the tallest `innerHeight` seen at this width, updated at attach and at each touch: a baseline from the touch alone would read the keyboard as closed whenever it's already up. A new width is a rotation and starts over. Safari keeps its `innerHeight` (815 throughout), so nothing changes there.

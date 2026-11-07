@@ -24,6 +24,14 @@
  *      the back copy is hidden and only the fading front copy shows, so those letters
  *      shimmer over the image. Gate it with `layers.minWidth`.
  *
+ * A third, opt-in, changes the paint rather than the colour:
+ *
+ *   -- HDR (`hdr`) paints with WebGPU instead of Canvas 2D, because a 2D canvas clamps
+ *      every colour at SDR white and has nowhere above it to put a glow. An rgba16float
+ *      swap chain under extended tone mapping does, so a glyph's `gain` can exceed 1 and
+ *      shine past the page. Gated once per letterbox (see `useGPU`); anything that fails
+ *      the gate gets the Canvas 2D letterbox exactly as it always was.
+ *
  * ASCII ONLY. docs/system/build.py inlines this file into a single HTML document and
  * asserts it; the one non-ASCII character the engine needs (a thin space) is written
  * as an escape rather than as itself.
@@ -85,6 +93,15 @@ var DEFAULTS = {
   pointer:         'window',
   speckle:         null,      // {share, groups, speed, to, layer}
   layers:          null,      // {front: [canvas], groups, speed, minWidth}
+  // HDR, opt-in: {gain, twinkle}. Paints with WebGPU on an HDR display (or `?hdr` in the
+  // URL) in a browser that has it; everywhere else, and always with `layers`, the 2D
+  // path runs unchanged and this is ignored.
+  //   gain     every glyph's brightness as a multiple of SDR white; 1 is today's ink.
+  //   twinkle  {mode, share, groups, speed, peak}, or null for a steady fill. A seeded
+  //            `share` of glyphs rises from `gain` to `peak` and back. 'stars' gives each
+  //            its own phase and period and a brief flash; 'groups' uses the speckle's
+  //            phased waves on `groups` groups.
+  hdr:             null,
   // 'display-p3' gives the canvas a wide buffer, so a P3 token paints as the neon it
   // is instead of being clamped back into sRGB on the way in.
   colorSpace:      'srgb',
@@ -97,6 +114,8 @@ var SPECKLE_DEFAULTS = {
   layer: 'back',   // 'back' | 'front' | 'split' -- which canvas the speckle paints on
 };
 var LAYER_DEFAULTS   = { front: [], groups: 3, speed: 0.0016, minWidth: 0 };
+var HDR_DEFAULTS     = { gain: 1, twinkle: null };
+var TWINKLE_DEFAULTS = { mode: 'stars', share: 1 / 6, groups: 5, speed: 0.0016, peak: 2.5 };
 
 
 /* ---- colour --------------------------------------------------------------- */
@@ -205,8 +224,17 @@ export function createLetterbox(canvasEl, config) {
   var SPK = CFG.speckle ? Object.assign({}, SPECKLE_DEFAULTS, CFG.speckle) : null;
   var LYR = CFG.layers  ? Object.assign({}, LAYER_DEFAULTS,   CFG.layers)  : null;
 
+  var HDR = CFG.hdr ? Object.assign({}, HDR_DEFAULTS, CFG.hdr) : null;
+  var TW  = HDR && HDR.twinkle ? Object.assign({}, TWINKLE_DEFAULTS, HDR.twinkle) : null;
+
   var POOL = (CFG.pool || JEROME).repeat(CFG.poolRepeat);
 
+  /* GPU or 2D, decided ONCE: a canvas that has handed out a 2D context can never give
+     a WebGPU one, so this cannot be re-asked on resize. The juggle stays Canvas 2D --
+     it needs two stacked canvases with the page between them, and `layers` wins. */
+  var useGPU = !!HDR && !LYR && !!navigator.gpu &&
+    ((window.matchMedia && matchMedia('(dynamic-range: high)').matches) ||
+     new URLSearchParams(location.search).has('hdr'));
 
   var p3On = false;
   function context(el) {
@@ -222,7 +250,8 @@ export function createLetterbox(canvasEl, config) {
 
   // allCtxs[0] is the back canvas (this one); allCtxs[1+] are the juggle's front layers.
   var allEls  = [canvasEl].concat(LYR ? LYR.front : []);
-  var allCtxs = allEls.map(context);
+  // The GPU path owns the canvas outright, so it takes no 2D context here.
+  var allCtxs = useGPU ? [null] : allEls.map(context);
   // Refreshed per build so a breakpoint crossing takes effect on resize.
   var splitActive = false;
 
@@ -396,6 +425,50 @@ export function createLetterbox(canvasEl, config) {
     return Math.ceil(yOff + totalH + botPad);
   }
 
+  /* ---- per-glyph steps, shared by both painters so they cannot drift ----------- */
+  // The cursor push, damping and scale. Leaves the glyph's position in c.x, c.y.
+  function step(c, mp, radius, strength, scalePk) {
+    if (mp) {
+      var rx   = (c.hx + c.dx) - mp.x;
+      var ry   = (c.hy + c.dy) - mp.y;
+      var dist = Math.sqrt(rx * rx + ry * ry);
+      if (dist < radius && dist > 0) {
+        var f = (1 - dist / radius) * strength * 0.3;
+        c.dx += (rx / dist) * f;
+        c.dy += (ry / dist) * f;
+      }
+    }
+    c.dx *= 0.94;
+    c.dy *= 0.94;
+
+    c.x = c.hx + c.dx;
+    c.y = c.hy + c.dy;
+    var target = 1;
+
+    if (mp) {
+      var d2 = Math.sqrt((c.x - mp.x) * (c.x - mp.x) + (c.y - mp.y) * (c.y - mp.y));
+      if (d2 < radius) target = 1 + (scalePk - 1) * (1 - d2 / radius);
+    }
+    // Grows at once, so a glyph meets the cursor, but shrinks on an ease. Releasing the
+    // button (radius 250 -> 100, peak 6 -> 4) or leaving the box used to snap every
+    // swollen glyph back to fill size in one frame while its position was still easing
+    // home; in HDR that read as the white dropping to grey all at once.
+    if (c.s === undefined || target >= c.s) c.s = target;
+    else if (c.s - target < 0.002) c.s = target;
+    else c.s += (target - c.s) * 0.1;
+    return c.s;
+  }
+
+  // The speckle's colour for this glyph this frame, or null when it stays ink.
+  function speckleMix(c, inkC, sigC, nowMs) {
+    if (!SPK || !c.acid) return null;
+    var a = 0.5 + 0.5 * Math.sin(nowMs * SPK.speed + c.aphase);
+    a = a * a;   // squared, so a glyph reads as ink for most of the cycle
+    return [inkC[0] + (sigC[0] - inkC[0]) * a,
+            inkC[1] + (sigC[1] - inkC[1]) * a,
+            inkC[2] + (sigC[2] - inkC[2]) * a];
+  }
+
   /* ---- drawFrame ---------------------------------------------------------- */
   function drawGlyph(g, c, tx, ty, scale, fillFont) {
     if (scale > 1.05) {
@@ -409,6 +482,7 @@ export function createLetterbox(canvasEl, config) {
   }
 
   function drawFrame(chars, CW, CH, dpr, mp, nowMs) {
+    if (useGPU) return drawFrameGPU(chars, CW, CH, dpr, mp, nowMs);
     var inkC     = resolveColour(CFG.ink, CFG.inkFallback);
     // The speckle's target: its own `to` when set, else the config's signal hue. Set
     // `to` to the ink colour for a speckle that brightens without changing hue.
@@ -436,38 +510,14 @@ export function createLetterbox(canvasEl, config) {
     for (var i = 0; i < chars.length; i++) {
       var c = chars[i];
 
-      if (mp) {
-        var rx   = (c.hx + c.dx) - mp.x;
-        var ry   = (c.hy + c.dy) - mp.y;
-        var dist = Math.sqrt(rx * rx + ry * ry);
-        if (dist < radius && dist > 0) {
-          var f = (1 - dist / radius) * strength * 0.3;
-          c.dx += (rx / dist) * f;
-          c.dy += (ry / dist) * f;
-        }
-      }
-      c.dx *= 0.94;
-      c.dy *= 0.94;
-
-      var tx2 = c.hx + c.dx;
-      var ty2 = c.hy + c.dy;
-      var scale = 1;
-
-      if (mp) {
-        var d2 = Math.sqrt((tx2 - mp.x) * (tx2 - mp.x) + (ty2 - mp.y) * (ty2 - mp.y));
-        if (d2 < radius) scale = 1 + (scalePk - 1) * (1 - d2 / radius);
-      }
+      var scale = step(c, mp, radius, strength, scalePk);
+      var tx2 = c.x;
+      var ty2 = c.y;
 
       // SPECKLE -- one paint, at a colour mixed for this glyph this frame. On a P3
       // canvas that colour is the P3-scaled acid, which is where the neon comes from.
-      var acidStr = null;
-      if (SPK && c.acid) {
-        var a = 0.5 + 0.5 * Math.sin(nowMs * SPK.speed + c.aphase);
-        a = a * a;   // squared, so a glyph reads as ink for most of the cycle
-        acidStr = paintColour([inkC[0] + (sigC[0] - inkC[0]) * a,
-                               inkC[1] + (sigC[1] - inkC[1]) * a,
-                               inkC[2] + (sigC[2] - inkC[2]) * a], p3On);
-      }
+      var mix     = speckleMix(c, inkC, sigC, nowMs);
+      var acidStr = mix ? paintColour(mix, p3On) : null;
 
       var backStr = (acidStr && !c.afront) ? acidStr : inkStr;
       if (backStr !== cur) { allCtxs[0].fillStyle = backStr; cur = backStr; }
@@ -486,10 +536,210 @@ export function createLetterbox(canvasEl, config) {
     }
   }
 
+  /* ---- drawFrame (WebGPU) -------------------------------------------------- */
+  /* Glyphs come from an atlas of the font's own rasters, white on transparent, drawn as
+     instanced quads. The fragment shader multiplies the COLOUR by the glyph's gain (not
+     the coverage), so gain above 1 is brighter than SDR white and the edges stay put. */
+  var SHADER = [
+    'struct U { size: vec2f, pad: vec2f };',
+    '@group(0) @binding(0) var<uniform> u: U;',
+    '@group(0) @binding(1) var samp: sampler;',
+    '@group(0) @binding(2) var atlas: texture_2d<f32>;',
+    'struct VSIn { @builtin(vertex_index) vi: u32, @location(0) rect: vec4f, @location(1) uv: vec4f, @location(2) col: vec4f };',
+    'struct VSOut { @builtin(position) pos: vec4f, @location(0) uv: vec2f, @location(1) col: vec4f };',
+    '@vertex fn vs(in: VSIn) -> VSOut {',
+    '  let corner = vec2f(f32(in.vi & 1u), f32(in.vi >> 1u));',
+    '  let px = in.rect.xy + corner * in.rect.zw;',
+    '  let clip = vec2f(px.x / u.size.x * 2.0 - 1.0, 1.0 - px.y / u.size.y * 2.0);',
+    '  var o: VSOut;',
+    '  o.pos = vec4f(clip, 0.0, 1.0);',
+    '  o.uv = mix(in.uv.xy, in.uv.zw, corner);',
+    '  o.col = in.col;',
+    '  return o;',
+    '}',
+    '@fragment fn fs(in: VSOut) -> @location(0) vec4f {',
+    '  let cov = textureSample(atlas, samp, in.uv).a;',
+    '  return vec4f(in.col.rgb * in.col.a * cov, cov);',   // premultiplied; col.a is the gain
+    '}',
+  ].join('\n');
+
+  var gpu = null, gpuReady = false, pendingInit = false;
+
+  /* Every mip level is rasterized with the font at that level's size, not shrunk from
+     the one above: level 0 at four times the device fill size (the cursor's scale peak),
+     each level half the last, down to 4px. At rest a glyph is 1/4 of a level-0 texel
+     per device pixel, so the sampler lands on the level drawn at exactly the fill size
+     -- the font's own pixels -- and a glyph the cursor has swollen reads a larger raster. */
+  function buildAtlas(device) {
+    var p0 = Math.ceil(FILL_SZ * dpr * 4), levels = 1;
+    while (p0 / Math.pow(2, levels) >= 4) levels++;
+    var unit = Math.pow(2, levels - 1);          // cells stay whole pixels at every level
+    var pad  = Math.ceil(p0 * 0.2);
+    var cell = Math.ceil((Math.ceil(p0 * 1.35) + pad * 2) / unit) * unit;
+    var seen = {}, list = [];
+    for (var i = 0; i < POOL.length; i++) {
+      var ch = POOL[i] === ' ' ? '\u2009' : POOL[i];
+      if (!seen[ch]) { seen[ch] = true; list.push(ch); }
+    }
+    var cols = Math.ceil(Math.sqrt(list.length)), rowsN = Math.ceil(list.length / cols);
+    var W = cols * cell, H = rowsN * cell;
+    var tex = device.createTexture({
+      size: [W, H], mipLevelCount: levels, format: 'rgba8unorm',
+      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+    });
+    for (var L = 0; L < levels; L++) {
+      var s = 1 / Math.pow(2, L);
+      var oc = document.createElement('canvas');
+      oc.width = W * s; oc.height = H * s;
+      var c = oc.getContext('2d');
+      c.font = CFG.fillWeight + ' ' + (p0 * s) + 'px ' + CFG.fillFontFamily;
+      if (CFG.fvs) c.fontVariationSettings = CFG.fvs;
+      if (CFG.ffs) c.fontFeatureSettings = CFG.ffs;
+      c.textBaseline = 'top';
+      c.fillStyle = '#fff';
+      for (var k = 0; k < list.length; k++) {
+        c.fillText(list[k], (k % cols) * cell * s + pad * s, Math.floor(k / cols) * cell * s + pad * s);
+      }
+      device.queue.copyExternalImageToTexture(
+        { source: oc }, { texture: tex, mipLevel: L, premultipliedAlpha: true }, [oc.width, oc.height]);
+    }
+    var map = {};
+    for (var m = 0; m < list.length; m++) {
+      var cx = (m % cols) * cell, cy = Math.floor(m / cols) * cell;
+      map[list[m]] = [cx / W, cy / H, (cx + cell) / W, (cy + cell) / H];
+    }
+    return { tex: tex, map: map, cell: cell, pad: pad, px: p0 };
+  }
+
+  function setupGPU() {
+    return navigator.gpu.requestAdapter().then(function (adapter) {
+      if (!adapter) return false;
+      return adapter.requestDevice().then(function (device) {
+        var ctx = canvasEl.getContext('webgpu');
+        var cfg = { device: device, format: 'rgba16float', alphaMode: 'premultiplied',
+                    toneMapping: { mode: 'extended' } };
+        if (CFG.colorSpace === 'display-p3') { cfg.colorSpace = 'display-p3'; p3On = true; }
+        try { ctx.configure(cfg); }
+        catch (e) { p3On = false; delete cfg.colorSpace; ctx.configure(cfg); }
+        var mod = device.createShaderModule({ code: SHADER });
+        var pipeline = device.createRenderPipeline({
+          layout: 'auto',
+          vertex: { module: mod, entryPoint: 'vs', buffers: [{ arrayStride: 48, stepMode: 'instance', attributes: [
+            { shaderLocation: 0, offset: 0,  format: 'float32x4' },
+            { shaderLocation: 1, offset: 16, format: 'float32x4' },
+            { shaderLocation: 2, offset: 32, format: 'float32x4' } ] }] },
+          fragment: { module: mod, entryPoint: 'fs', targets: [{ format: 'rgba16float', blend: {
+            color: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
+            alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' } } }] },
+          primitive: { topology: 'triangle-strip' },
+        });
+        gpu = { device: device, ctx: ctx, pipeline: pipeline,
+                sampler: device.createSampler({ magFilter: 'linear', minFilter: 'linear', mipmapFilter: 'linear' }),
+                ubuf: device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }),
+                ibuf: null, idata: null, icap: 0, bind: null, atlas: null };
+        return true;
+      });
+    }).catch(function () { return false; });
+  }
+
+  // FILL_SZ and dpr change on resize, so the atlas is rebuilt on every init.
+  function rebuildAtlas() {
+    if (gpu.atlas) gpu.atlas.tex.destroy();
+    gpu.atlas = buildAtlas(gpu.device);
+    gpu.bind = gpu.device.createBindGroup({ layout: gpu.pipeline.getBindGroupLayout(0), entries: [
+      { binding: 0, resource: { buffer: gpu.ubuf } },
+      { binding: 1, resource: gpu.sampler },
+      { binding: 2, resource: gpu.atlas.tex.createView() } ] });
+  }
+
+  // Gain: the base, raised toward `peak` by a seeded share of glyphs.
+  function glyphGain(i, nowMs) {
+    var gain = HDR.gain;
+    if (TW && (TW.share >= 1 || seededFrac(i, 23) < TW.share)) {
+      var env, TAU = 6.2832;
+      if (TW.mode === 'stars') {
+        var sn = Math.sin(nowMs * TW.speed * (0.6 + seededFrac(i, 59)) + seededFrac(i, 41) * TAU);
+        env = sn > 0 ? Math.pow(sn, 6) : 0;
+      } else {
+        var w = 0.5 + 0.5 * Math.sin(nowMs * TW.speed + Math.floor(seededFrac(i, 5) * TW.groups) * (TAU / TW.groups));
+        env = w * w;
+      }
+      gain += (TW.peak - gain) * env;
+    }
+    return gain;
+  }
+
+  function drawFrameGPU(chars, CW, CH, dpr, mp, nowMs) {
+    if (!gpu || !gpu.atlas) return;
+    var inkC = resolveColour(CFG.ink, CFG.inkFallback);
+    var sigC = SPK ? resolveColour(SPK.to || CFG.signal, CFG.signalFallback) : inkC;
+
+    var N = chars.length;
+    if (!gpu.ibuf || gpu.icap < N) {
+      if (gpu.ibuf) gpu.ibuf.destroy();
+      gpu.icap  = Math.max(N, 256);
+      gpu.ibuf  = gpu.device.createBuffer({ size: gpu.icap * 48, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
+      gpu.idata = new Float32Array(gpu.icap * 12);
+    }
+    var D = gpu.idata, A = gpu.atlas, n = 0;
+
+    var radius   = isMouseDown ? 250 : 100;
+    var strength = isMouseDown ? 105 : 35;
+    var scalePk  = isMouseDown ? 6   : 4;
+
+    for (var i = 0; i < N; i++) {
+      var c = chars[i];
+      var scale = step(c, mp, radius, strength, scalePk);
+
+      // The same placement drawGlyph() makes, as a quad over the atlas cell.
+      var sz = scale > 1.05 ? FILL_SZ * scale : FILL_SZ;
+      var ty = scale > 1.05 ? c.y - (sz - FILL_SZ) * 0.5 : c.y;
+      var k  = sz / A.px;    // CSS px per level-0 texel
+      var uv = A.map[c.ch];
+      if (!uv) continue;
+
+      var col = speckleMix(c, inkC, sigC, nowMs) || inkC;
+
+      var o = n * 12;
+      D[o]     = c.x - A.pad * k;  D[o + 1] = ty - A.pad * k;
+      D[o + 2] = A.cell * k;       D[o + 3] = A.cell * k;
+      D[o + 4] = uv[0]; D[o + 5] = uv[1]; D[o + 6] = uv[2]; D[o + 7] = uv[3];
+      D[o + 8] = col[0] / 255; D[o + 9] = col[1] / 255; D[o + 10] = col[2] / 255;
+      D[o + 11] = glyphGain(i, nowMs);
+      n++;
+    }
+
+    gpu.device.queue.writeBuffer(gpu.ibuf, 0, D.buffer, 0, n * 48);
+    gpu.device.queue.writeBuffer(gpu.ubuf, 0, new Float32Array([CW, CH, 0, 0]));
+    var enc = gpu.device.createCommandEncoder();
+    var pass = enc.beginRenderPass({ colorAttachments: [{
+      view: gpu.ctx.getCurrentTexture().createView(),
+      clearValue: { r: 0, g: 0, b: 0, a: 0 }, loadOp: 'clear', storeOp: 'store' }] });
+    pass.setPipeline(gpu.pipeline);
+    pass.setBindGroup(0, gpu.bind);
+    pass.setVertexBuffer(0, gpu.ibuf);
+    pass.draw(4, n);
+    pass.end();
+    gpu.device.queue.submit([enc.finish()]);
+  }
+
   /* ---- init / loop -------------------------------------------------------- */
   var chars = [], rafId = null, rafResize = null, mp = null, CW = 0, CH = 0, dpr = 1;
 
   function init() {
+    if (useGPU && !gpuReady) {
+      if (!pendingInit) {
+        pendingInit = true;
+        setupGPU().then(function (ok) {
+          pendingInit = false;
+          // No adapter or device: the canvas has been given nothing yet, so 2D still works.
+          if (!ok) { useGPU = false; p3On = false; allCtxs = allEls.map(context); }
+          gpuReady = ok;
+          init();
+        });
+      }
+      return;
+    }
     dpr = window.devicePixelRatio || 1;
     var parentW = Math.floor(canvasEl.parentElement.getBoundingClientRect().width);
     var capW    = isFinite(CFG.maxWidth) ? CFG.maxWidth : parentW;
@@ -515,6 +765,7 @@ export function createLetterbox(canvasEl, config) {
       el.height = Math.round(CH * dpr);
     }
 
+    if (useGPU) rebuildAtlas();
     chars = buildAllChars(CW, CW, heroH);
     drawFrame(chars, CW, CH, dpr, mp, performance.now());
     if (!rafId) rafId = requestAnimationFrame(loop);
@@ -563,6 +814,7 @@ export function createLetterbox(canvasEl, config) {
     (CFG.pointer === 'canvas' ? canvasEl : document).removeEventListener('mouseleave', onLeave);
     if (CFG.autoResize) window.removeEventListener('resize', onResize);
     observer.disconnect();
+    if (gpu && gpu.ctx) { try { gpu.ctx.unconfigure(); } catch (e) {} }
     if (mq && mq.removeEventListener) mq.removeEventListener('change', redraw);
   }
 
