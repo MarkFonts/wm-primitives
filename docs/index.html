@@ -13890,13 +13890,20 @@ export function createLetterbox(canvasEl, config) {
 
     c.x = c.hx + c.dx;
     c.y = c.hy + c.dy;
-    var scale = 1;
+    var target = 1;
 
     if (mp) {
       var d2 = Math.sqrt((c.x - mp.x) * (c.x - mp.x) + (c.y - mp.y) * (c.y - mp.y));
-      if (d2 < radius) scale = 1 + (scalePk - 1) * (1 - d2 / radius);
+      if (d2 < radius) target = 1 + (scalePk - 1) * (1 - d2 / radius);
     }
-    return scale;
+    // Grows at once, so a glyph meets the cursor, but shrinks on an ease. Releasing the
+    // button (radius 250 -> 100, peak 6 -> 4) or leaving the box used to snap every
+    // swollen glyph back to fill size in one frame while its position was still easing
+    // home; in HDR that read as the white dropping to grey all at once.
+    if (c.s === undefined || target >= c.s) c.s = target;
+    else if (c.s - target < 0.002) c.s = target;
+    else c.s += (target - c.s) * 0.1;
+    return c.s;
   }
 
   // The speckle's colour for this glyph this frame, or null when it stays ink.
