@@ -55,7 +55,7 @@ const PAGES = [
   // and --edge-l/--edge-r 20px below 1080 (build-time shell CSS). It is the one page that
   // opts out of the margin check; it cannot be data-nosnap'd, its copy IS on the line.
   { name: 'system page', url: '/grid/index.html', ownEdges: true },
-  { name: 'Cal Sans case study', url: '/wordmark/calsans/', dir: process.env.WORDMARK_DIR ?? resolve('../wordmark') },
+  { name: 'Cal Sans case study', url: '/wordmark/cal-sans/', dir: process.env.WORDMARK_DIR ?? resolve('../wordmark') },
   { name: 'homepage', url: '/wordmark/index.html', dir: process.env.WORDMARK_DIR ?? resolve('../wordmark') },
   // A tool and a page in one fixture: a .wm-grid--bleed root (no margin, text one gutter in),
   // and a margined root with breakers, a .wm-cols inside one, and a flagged macOS shot.

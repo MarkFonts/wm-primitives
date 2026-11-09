@@ -96,7 +96,8 @@ SECTIONS = [
     # The confirm rides inside Interface: it is how every control there answers a press
     # that worked (GESTURES.md §14).
     # The accent buttons ride last: two acid buttons, Download and the Try-bar chip, each in two looks.
-    ("controls", "Interface",         [SD/"controls.html", SD/"confirm.html", SD/"accent-buttons.html"], "one dial, five ways; the confirm"),
+    # The toast rides after the confirm (2026-11-08): its action is the confirm's first customer.
+    ("controls", "Interface",         [SD/"controls.html", SD/"confirm.html", SD/"toast.html", SD/"accent-buttons.html"], "one dial, five ways; the confirm; the toast"),
     ("space",   "Space",         SD/"space.html",        "the pad scale, cap + alignment"),
     # Ramps ride INSIDE Color, as circles ride inside the corner law: a gradient is
     # colour under a curve, and the page has six laws, not seven. (2026-09-19; the branch
@@ -291,6 +292,7 @@ PRIMITIVE_CSS_PART = {
     "confirm.html": ("type.css", "motion.css", "button-sets.css", "chip.css", "icon.css"),
     "button-sets.html": ("type.css", "space.css", "icon.css", "themeSwitch.css", "button.css", "button-sets.css"),
     "accent-buttons.html": ("accentButton.css",),
+    "toast.html": ("type.css", "motion.css", "icon.css", "button-sets.css", "toast.css"),
 }
 
 # ---------------------------------------------------------------- the line
@@ -2409,6 +2411,34 @@ CHROME_JS = "".join(re.sub(r'^export ', '', (HERE.parent.parent / "src" / f).rea
                     for f in ("confirm.js", "zoomControl.js", "themeStack.js", "jxl.js"))
 CHROME_JS = "".join(c if ord(c) < 128 else f"\\u{ord(c):04X}" for c in CHROME_JS)
 
+# THE TOAST lives on <body>, outside every section, so no section's scoped copy of its CSS can reach
+# it: the shell carries it, as it carries the chrome. toast.css names only .wm-toast* and goes in
+# unscoped; the 06 buttons, the marks and the durations inside it are scoped to its region,
+# .wm-toasts, the way the chrome's are scoped to .wm-chrome. toast.js runs as the shell's, in its
+# own function (its import of confirm.js stripped: CHROME_JS above declared wmConfirm already),
+# and is window.wmToast to the Interface chapter's toast part.
+TOAST_CSS = re.sub(r'/\*.*?\*/', '', (HERE.parent.parent / "src" / "toast.css").read_text(), flags=re.S) + scope_css(re.sub(r'/\*.*?\*/', '', "".join(
+    (HERE.parent.parent / "src" / f).read_text() for f in ("motion.css", "icon.css", "button-sets.css")), flags=re.S), ".wm-toasts")
+# The page writes --ink*, the toast reads --text*: the region maps them, as .wm-chrome does in SHELL.
+TOAST_CSS += (".wm-toasts{--text:var(--ink);--text-muted:var(--ink-2);--text-dim:var(--ink-3);--border:var(--line);"
+              "--text-rgb:232,232,232}"
+              '@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .wm-toasts{--text-rgb:22,22,22}}'
+              ':root[data-theme="light"] .wm-toasts{--text-rgb:22,22,22}')
+TOAST_CSS = "".join(c if ord(c) < 128 else f"\\{ord(c):04X} " for c in TOAST_CSS)
+# The page is the toast's host, so it does what HOST-CONTRACT asks of one: --toast-top clears its
+# own chrome, the colour-scheme row in the top right corner (under the top bar below 1024). Measured
+# when a toast is asked for, to the 3px line, since the row moves with the bar.
+TOAST_CLEAR = """function clear() {
+  var r = document.querySelector('.wm-chrome .wm-theme-row'); if (!r) return
+  var b = r.getBoundingClientRect().bottom
+  if (b > 0) document.documentElement.style.setProperty('--toast-top', Math.ceil(b / 3) * 3 + 'px')
+}
+"""
+TOAST_JS = "(function(){\n" + re.sub(r'^(import .*|export )', '', (HERE.parent.parent / "src" / "toast.js").read_text(), flags=re.M) \
+    + "\nwindow.wmToast = function (o) { clear(); return toast(o) }\n" \
+    + TOAST_CLEAR + "})();\n"
+TOAST_JS = "".join(c if ord(c) < 128 else f"\\u{ord(c):04X}" for c in TOAST_JS)
+
 # The marks' placement. A row on a desktop; on a phone -- its own rule, as themeSwitch.css asks of
 # a host -- the vertical stack, the zoom opening down, hidden by a scroll down or a swipe up.
 # Under the top bar (below 1024) the cluster rests under it (data-below). The zoom's class is
@@ -2951,6 +2981,7 @@ def hang_h2_number(page):
 page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 <style>{FONTS}{GRID_CSS}{SHELL}
 {CHROME_CSS}
+{TOAST_CSS}
 {css_parts}
 {HEADS_CSS}
 {GRAMMAR_CSS}
@@ -3002,6 +3033,7 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 <script>{GRID_JS}</script>
 <script>{CHROME_JS}
 {CHROME}</script>
+<script>{TOAST_JS}</script>
 <script type="module">{LETTERBOX}
 {LB_BOOT}</script>{GLOSS}{TAIL}
 """

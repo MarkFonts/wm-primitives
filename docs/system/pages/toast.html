@@ -1,0 +1,74 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The toast</title>
+<!-- A part of Interface (build.py folds it into #s-controls after the confirm). The heading and
+     the prose are on the line; the figure and the triggers are a stage. The specimen is a
+     .wm-toast drawn in place; the triggers call the real thing, src/toast.js, which the shell
+     carries (TOAST_JS) because a toast mounts on <body>, outside any section's scope.
+     The primitives' own files, for standalone viewing: build.py strips these links and inlines
+     the same files from src/ (PRIMITIVE_CSS_PART). -->
+<link rel="stylesheet" href="../../src/type.css">
+<link rel="stylesheet" href="../../src/motion.css">
+<link rel="stylesheet" href="../../src/icon.css">
+<link rel="stylesheet" href="../../src/button-sets.css">
+<link rel="stylesheet" href="../../src/toast.css">
+<style>
+@font-face{ font-family:"CalSansVF"; src:url("../../fonts/CalSansVF.ttf") format("truetype"); font-weight: 400 700; font-display:swap; }
+.ts-stage{ display:grid; gap:24px; margin:0 0 48px; font-family:var(--ui-font, system-ui, sans-serif) }
+.ts-fig{ margin:0 }
+.ts-lab{ display:block; margin:0 0 6px; font-size:9px; line-height:12px; letter-spacing:var(--track-caps,.12em);
+  text-transform:uppercase; color:var(--ink-3,rgba(232,232,232,.38)) }
+/* The specimen wears the PAGE's tokens, as the live toast on <body> does (TOAST_CSS), not the
+   Interface stage's own palette around it -- otherwise the two plates disagree on one screen. */
+.ts-fig .wm-toast{ pointer-events:none; --surface-hi:oklch(var(--l-surface-hi) 0 0);
+  --text:oklch(var(--l-ink) 0 0); --text-muted:oklch(var(--l-ink) 0 0 / var(--a-2)); --text-dim:oklch(var(--l-ink) 0 0 / var(--a-3));
+  --border:oklch(var(--l-ink) 0 0 / var(--a-line)); --radius:8px }
+.ts-go{ display:flex; flex-wrap:wrap; gap:var(--tick,3px) }
+</style>
+
+<h2>Toast <span>toast()</span></h2>
+<p>One line of news in a corner, with at most one thing to do. It adds no look to the system:
+the ground is <code>--surface-hi</code>, the surface the contract names for menus and popovers, with
+the one hairline, the house corner, and a cast shadow that is black in both themes. The action is
+06 Menu with its mark, and the dismiss is 06&rsquo;s icon-only form, so 03 Rule never shares the plate.</p>
+<p>It rests top right on a desktop and at the bottom on a phone, full width, near the thumb. That
+is CSS, not an option; a host clears its own chrome with <code>--toast-top</code> and
+<code>--toast-bottom</code>. Every toast leaves after <code>--dur-hint</code>, three seconds, unless it
+persists, and the clock stops while the pointer or focus is inside it. The action blinks its confirm,
+then runs, then the toast goes. One at a time; a toast with the same <code>id</code> updates in place.</p>
+
+<div class="ts-stage" data-nosnap data-stage>
+  <figure class="ts-fig" aria-hidden="true"><span class="ts-lab">plate &middot; at rest</span>
+    <div class="wm-toast">
+      <div class="wm-toast-text"><div class="wm-toast-title">New version available</div>
+        <div class="wm-toast-line">Your proof and settings stay as they are.</div></div>
+      <button type="button" class="wm-menu" tabindex="-1"><span class="wm-icon" aria-hidden="true" translate="no">restart_alt</span>Reload</button>
+      <button type="button" class="wm-menu wm-menu--mark" tabindex="-1" aria-label="Dismiss"><span class="wm-icon wm-menu-mark--sm" aria-hidden="true" translate="no">close</span></button>
+    </div>
+  </figure>
+  <figure class="ts-fig"><span class="ts-lab">try it</span>
+    <div class="ts-go">
+      <button type="button" class="wm-menu" data-ts="update"><span class="wm-icon" aria-hidden="true" translate="no">restart_alt</span>New version</button>
+      <button type="button" class="wm-menu" data-ts="copied"><span class="wm-icon" aria-hidden="true" translate="no">content_copy</span>Glyph copied</button>
+      <button type="button" class="wm-menu" data-ts="saved"><span class="wm-icon" aria-hidden="true" translate="no">bookmark</span>Persists</button>
+    </div>
+  </figure>
+</div>
+
+<script>
+(function(){
+  var go = document.querySelector('.ts-go'); if (!go) return;
+  var T = {
+    update: { id: 'update', title: 'New version available', line: 'Your proof and settings stay as they are.',
+              action: { label: 'Reload', mark: 'restart_alt', onClick: function(){} } },
+    copied: { title: 'Glyph copied', line: 'ß U+00DF is on the clipboard.' },
+    saved:  { title: 'Kerning saved to the source', persist: true }
+  };
+  go.addEventListener('click', function(e){
+    var b = e.target.closest('[data-ts]'); if (!b || !window.wmToast) return;
+    if (window.wmConfirm) window.wmConfirm(b);
+    window.wmToast(T[b.getAttribute('data-ts')]);
+  });
+})();
+</script>

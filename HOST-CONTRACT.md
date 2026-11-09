@@ -36,6 +36,8 @@ Every token below is the consuming app's to define on its root. `color.css`, `ty
 | `--text` **⚠** | full ink | everything inherits the page colour -- on a dark page with no ramp that is black on black (HOWTO, silent failure 2) |
 | `--text-dim` | the faint step: tags, ranges, resting chevrons | same as --text; the hierarchy flattens |
 | `--text-muted` | the quiet step: labels. By design the same number as --ink-quiet | same as --text; labels and values look alike |
+| `--toast-bottom` | where the toast rests on a phone, from the viewport's bottom: set it to clear a bottom bar or flap, safe-area inset included (toast.css adds --spacing-04) | env(safe-area-inset-bottom), the home indicator's strip. It reads 0 unless the host's viewport meta carries viewport-fit=cover, which is harmless: without cover the viewport already stops short of the strip. A bottom bar is not cleared |
+| `--toast-top` | where the toast rests on a desktop, from the viewport's top: set it to the height of the host's top bar so the toast sits under it (toast.css adds --spacing-04) | 0: the toast sits 12px from the top of the viewport, over a top bar if there is one |
 | `--track-empty` | the unfilled part of a rail | falls back to --border |
 | `--ui-font` | the chrome face -- every control's type | system-ui, on purpose (HOWTO) |
 | `--ui-fvs` | its font-variation-settings, for a variable chrome face | none |
