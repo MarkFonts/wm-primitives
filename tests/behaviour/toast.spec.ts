@@ -71,12 +71,18 @@ test.describe('the toast', () => {
   })
 
   test('the clock reads --dur-hint off the toast', async ({ page }) => {
+    // 600ms instead of 3s. Measured from the page's own clock, not the test runner's: a
+    // slow emulated phone (CI's iphone project) can spend a few hundred ms between the
+    // evaluate and the first assertion, which made fixed 450/350ms waits flaky.
     await page.addStyleTag({ content: ':root { --dur-hint: 600ms }' })
     await show(page, { title: 'Quick' })
-    await page.waitForTimeout(450)
-    await expect(live(page)).toHaveCount(1)
-    await page.waitForTimeout(350)
-    await expect(live(page)).toHaveCount(0)
+    const gone = await page.evaluate((sel) => new Promise<number>(res => {
+      const t0 = performance.now()
+      const tick = () => document.querySelector(sel) ? requestAnimationFrame(tick) : res(performance.now() - t0)
+      requestAnimationFrame(tick)
+    }), `${T}:not([data-state="exit"])`)
+    expect(gone).toBeGreaterThan(450)     // not the 3s default, and not instant
+    expect(gone).toBeLessThan(1500)
   })
 
   test('pauses while the pointer is inside, resumes with what was left', async ({ page, hasTouch }) => {
