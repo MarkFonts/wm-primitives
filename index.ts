@@ -149,6 +149,14 @@ export type {
 // outcomes; an app calls it on its own successes. Also on window for plain scripts.
 export { wmConfirm } from './src/confirm.js'
 
+// toast -- one line of news in a corner, with at most one thing to do: Plate, --surface-hi,
+// the hairline, the house corner, a 06 Menu action and a 06 mark to dismiss. Top right on a
+// desktop, the bottom on a phone (CSS, not an option; --toast-top / --toast-bottom clear the
+// host's chrome). Leaves after --dur-hint unless persist; one at a time; same id updates in
+// place. Plain JS for Kernpare; the host imports src/toast.css beside button-sets.css.
+export { toast } from './src/toast.js'
+export type { ToastOptions, ToastAction, ToastHandle } from './src/toast.js'
+
 // iosFocusGuard -- iPhone Safari flings the page when a tap focuses editable text; this holds
 // the window and every scroller around el where they were. Plain JS and one file, so a page
 // without React imports it or copies it. No-op off iOS. EditableTextBlock already uses it.

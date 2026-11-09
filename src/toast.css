@@ -1,0 +1,134 @@
+/* toast.css -- the toast's look: Plate (Mark, 2026-11-08). Companion to toast.js.
+ *
+ * ONE LINE OF NEWS IN A CORNER, WITH AT MOST ONE THING TO DO. It adds no look to the system:
+ * the ground is --surface-hi, which the host contract already names for "menus, popovers";
+ * the edge is the one hairline; the corner is the house corner; the action is 06 Menu
+ * (button-sets.css), and so is the dismiss, in 06's icon-only form. 03 Rule never enters it:
+ * a panel uses one set, never both.
+ *
+ *   .wm-toasts           the region, one per page, on <body>; toast.js mounts it
+ *   .wm-toast            the plate: 45px, fifteen units; 400 wide at most on a desktop
+ *   .wm-toast-text       the text column: .wm-toast-title (full ink), .wm-toast-line (quiet)
+ *   .wm-toast > .wm-menu          the action, with its leading mark if the caller gave one
+ *   .wm-toast > .wm-menu--mark    the dismiss: `close` at the small size (.wm-menu-mark--sm)
+ *
+ * THE NUMBERS. Text edge 1 + --spacing-04 = 13 on the left. 4 on the right, so the dismiss
+ * mark's own 8 does the inset there (4 + 8 = 12 to the glyph's box). ui role, both lines.
+ * On a coarse pointer 06 grows to 45 and the plate to 48, sixteen units, so the 44 floor and
+ * the line both hold.
+ *
+ * WHERE IS CSS, NOT AN OPTION. The region is position: fixed on <body>, so there is no
+ * container to query; the breakpoint is the house phone rule, the one themeSwitch.css asks a
+ * host to put the vertical stack on: `(max-width: 768px), (pointer: coarse)`.
+ *   desktop  top right, under the host's chrome: --toast-top (default 0) + 12. Enters from above.
+ *   phone    the bottom, full width less 12 each side, near the thumb: --toast-bottom (default
+ *            env(safe-area-inset-bottom), which is 0 unless the host's viewport meta carries
+ *            viewport-fit=cover) + 12. Enters from below.
+ * Both are HOST TOKENS (HOST-CONTRACT.md): a host with a top bar or a bottom flap sets them to
+ * clear it.
+ *
+ * THE SHADOW is a cast shadow, black in BOTH themes -- only the pressure changes (BUTTONS.md
+ * §4: a shadow keyed to the ink turns white in light and lights the plate from below). drop-
+ * shadow, not box-shadow, because a box-shadow follows border-radius and not corner-shape
+ * (corners.css); a filter shadows what was painted, the house corner included.
+ *
+ * MOTION: in on --dur-med, out on --dur-fast, both on --ease; opacity and 12px of travel from
+ * the edge it rests against. Reduced motion keeps the opacity and drops the travel.
+ *
+ * NO COMMA INSIDE :is() OR :not(): the system page's assembler splits selector lists on every
+ * comma (button-sets.css says why). */
+@layer wm.controls {
+  .wm-toasts {
+    position: fixed;
+    z-index: 1000;
+    top: calc(var(--toast-top, 0px) + var(--spacing-04, 12px));
+    right: var(--spacing-04, 12px);
+    bottom: auto;
+    left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    max-width: calc(100% - 2 * var(--spacing-04, 12px));
+    pointer-events: none;
+    --toast-from: 0 calc(-1 * var(--spacing-04, 12px));   /* arrives from the edge it rests against */
+  }
+
+  .wm-toast {
+    /* the cast shadow, dark ground: two pressures, black */
+    --toast-shadow: drop-shadow(0 2px 3px rgb(0 0 0 / .45)) drop-shadow(0 9px 24px rgb(0 0 0 / .55));
+    pointer-events: auto;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    min-height: 45px;   /* fifteen units */
+    max-width: 400px;
+    padding: 0 var(--spacing-01, 4px) 0 var(--spacing-04, 12px);
+    font-family: var(--ui-font, system-ui, sans-serif);
+    font-variation-settings: var(--ui-fvs, normal);
+    color: var(--text, inherit);
+    background: var(--surface-hi, var(--surface));
+    border: 1px solid var(--border);
+    border-radius: var(--radius, 8px);
+    corner-shape: superellipse(var(--corner-k, 1.2));
+    filter: var(--toast-shadow);
+    transition: opacity var(--dur-med, 240ms) var(--ease, ease), translate var(--dur-med, 240ms) var(--ease, ease);
+  }
+  .wm-toast[data-state="enter"] { opacity: 0; translate: var(--toast-from); }
+  .wm-toast[data-state="exit"] {
+    opacity: 0;
+    translate: var(--toast-from);
+    transition-duration: var(--dur-fast, 140ms);
+  }
+
+  .wm-toast-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--spacing-02, 6px) var(--spacing-04, 12px) var(--spacing-02, 6px) 0;
+    overflow-wrap: anywhere;
+  }
+  .wm-toast-title {
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 15px);
+    color: var(--text, inherit);
+  }
+  .wm-toast-line {
+    font-size: var(--type-ui-size, 0.75rem);
+    line-height: var(--type-ui-lead, 15px);
+    color: var(--text-muted, currentColor);
+  }
+  .wm-toast > .wm-menu { flex: 0 0 auto; }
+  .wm-toast > .wm-menu--mark { padding: 0 var(--spacing-03, 8px); }
+
+  /* the cast shadow, light ground: the same black at a lighter pressure */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .wm-toast {
+      --toast-shadow: drop-shadow(0 1px 2px rgb(0 0 0 / .10)) drop-shadow(0 9px 24px rgb(0 0 0 / .14));
+    }
+  }
+  :root[data-theme="light"] .wm-toast {
+    --toast-shadow: drop-shadow(0 1px 2px rgb(0 0 0 / .10)) drop-shadow(0 9px 24px rgb(0 0 0 / .14));
+  }
+
+  @media (pointer: coarse) {
+    .wm-toast { min-height: 48px; }   /* sixteen units: 06's 45 inside the two hairlines */
+  }
+
+  /* the phone: the bottom, full width, from below */
+  @media (max-width: 768px), (pointer: coarse) {
+    .wm-toasts {
+      top: auto;
+      right: var(--spacing-04, 12px);
+      bottom: calc(var(--toast-bottom, env(safe-area-inset-bottom, 0px)) + var(--spacing-04, 12px));
+      left: var(--spacing-04, 12px);
+      align-items: stretch;
+      max-width: none;
+      --toast-from: 0 var(--spacing-04, 12px);
+    }
+    .wm-toast { max-width: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wm-toast[data-state="enter"] { translate: none; }
+    .wm-toast[data-state="exit"] { translate: none; }
+  }
+}

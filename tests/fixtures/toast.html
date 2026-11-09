@@ -1,0 +1,46 @@
+<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><title>toast contract</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+  /* ?theme=light|dark, for the screenshots; dark otherwise, as confirm.html */
+  (function () { var t = new URLSearchParams(location.search).get('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t })()
+</script>
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css">
+<link rel="stylesheet" href="/dial/shared/src/motion.css"><link rel="stylesheet" href="/dial/shared/src/space.css">
+<link rel="stylesheet" href="/dial/shared/src/corners.css"><link rel="stylesheet" href="/dial/shared/src/icon.css">
+<link rel="stylesheet" href="/dial/shared/src/chip.css"><link rel="stylesheet" href="/dial/shared/src/button-sets.css">
+<link rel="stylesheet" href="/dial/shared/src/toast.css">
+<style>
+  @font-face { font-family: "CalSansVF"; src: url('/dial/shared/fonts/CalSansVF.woff2') format('woff2'); font-weight: 100 900; font-display: block; }
+  :root { --ui-font: "CalSansVF", system-ui, sans-serif; --radius: 8px; --text-rgb: 232, 232, 232; }
+  :root[data-theme="light"] { --text-rgb: 22, 22, 22; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--ui-font); }
+  main { padding: 24px; max-width: 640px; }
+  h1 { font-size: var(--type-title-size); line-height: var(--type-title-lead); font-weight: 400; margin: 0 0 12px; }
+  p { font-size: var(--type-body-size); line-height: var(--type-body-lead); color: var(--text-muted); margin: 0 0 24px; }
+</style>
+</head><body>
+<!-- toast.js + toast.css on a page with no React. The specs drive window.toast directly;
+     the chips are for a person. -->
+<main>
+  <h1>Sphinx of black quartz, judge my vow.</h1>
+  <p>Proofing is reading with suspicion. Every pair is a question about the space between two
+    letters, and every size asks it again.</p>
+  <div class="wm-chip-row">
+    <button type="button" class="wm-chip" id="t-update">New version</button>
+    <button type="button" class="wm-chip" id="t-copied">Glyph copied</button>
+    <button type="button" class="wm-chip" id="t-persist">Persists</button>
+  </div>
+</main>
+<script type="module">
+  import { toast } from '/dial/shared/src/toast.js'
+  window.toast = toast
+  window.ran = 0
+  window.update = (extra = {}) => toast({
+    id: 'update', title: 'New version available', line: 'Your proof and settings stay as they are.',
+    action: { label: 'Reload', mark: 'restart_alt', onClick: () => { window.ran++; window.ranAt = performance.now() } }, ...extra,
+  })
+  document.getElementById('t-update').onclick = () => window.update()
+  document.getElementById('t-copied').onclick = () => toast({ title: 'Glyph copied', line: 'ß U+00DF is on the clipboard.' })
+  document.getElementById('t-persist').onclick = () => toast({ title: 'Kerning saved to the source', persist: true })
+  window.ready = true
+</script></body></html>
