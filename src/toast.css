@@ -38,6 +38,13 @@
  * NO COMMA INSIDE :is() OR :not(): the system page's assembler splits selector lists on every
  * comma (button-sets.css says why). */
 @layer wm.controls {
+  /* The two host tokens' defaults, declared at the root as themeSwitch.css declares --stack-top,
+     so a host's own unlayered :root rule beats them -- and so a consumer's token lint, which
+     reads this file with the contract list it copied, finds them declared rather than missing. */
+  :root {
+    --toast-top: 0px;
+    --toast-bottom: env(safe-area-inset-bottom, 0px);
+  }
   .wm-toasts {
     position: fixed;
     z-index: 1000;
