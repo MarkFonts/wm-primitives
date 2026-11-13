@@ -12,6 +12,21 @@ Newest first.
 
 ---
 
+## 2026-11-27 -- the tests stop counting as visitors
+
+Every page the behaviour and render tests open is a real host build, and the hosts carry their
+Google tag in the HTML, so each CI run and each laptop run was a visit in the live GA
+properties. In the week to 2026-11-11 that was about a third of wordmark.nyc's users: one view
+each, 0 seconds, on `/font-proofer/...`, `/wordmark/index.html`, and `/wordmark/calsans/`, paths
+only `tests/serve.mjs` serves. Since Wordproof moved to its own stream (G-DM2JYW1G84), the
+`/font-proofer/` runs would have landed there instead. `serve.mjs` now drops the
+`googletagmanager.com` loader from every HTML file it serves; the inline `gtag()` stub only
+queues into `dataLayer` and sends nothing without it, and nothing visual changes. Checked in
+Chromium against the wordmark site: the old server let a page load send `gtag/js` and a
+`g/collect` hit, the new one sends nothing to Google. Files on disk are untouched.
+
+---
+
 ## 2026-11-26 -- the scrollover: wordmark.nyc's marquee hover becomes a primitive
 
 The pill hover from wordmark.nyc (`css/marquee.css` + `js/marquee.js`, 2026-11-11) is now `src/scrollover.css` +
