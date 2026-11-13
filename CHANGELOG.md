@@ -12,6 +12,21 @@ Newest first.
 
 ---
 
+## 2026-11-12 -- the tests stop counting as visitors
+
+Every page the behaviour and render tests open is a real host build, and the hosts carry their
+Google tag in the HTML, so each CI run and each laptop run was a visit in the live GA
+properties. In the week to 2026-11-11 that was about a third of wordmark.nyc's users: one view
+each, 0 seconds, on `/font-proofer/...`, `/wordmark/index.html`, and `/wordmark/calsans/`, paths
+only `tests/serve.mjs` serves. Since Wordproof moved to its own stream (G-DM2JYW1G84), the
+`/font-proofer/` runs would have landed there instead. `serve.mjs` now drops the
+`googletagmanager.com` loader from every HTML file it serves; the inline `gtag()` stub only
+queues into `dataLayer` and sends nothing without it, and nothing visual changes. Checked in
+Chromium against the wordmark site: the old server let a page load send `gtag/js` and a
+`g/collect` hit, the new one sends nothing to Google. Files on disk are untouched.
+
+---
+
 ## 2026-11-08 -- the toast: Plate
 
 **`toast({ title, line?, action?, persist?, id? })` returns `{ close, update }`, with its look in `src/toast.css`.** Four designs were drawn on the house tokens (Plate, Sentence, Tab, and Pill), and Mark chose Plate. It adds no look to the system: a `--surface-hi` ground (the surface the contract names for menus and popovers), the one hairline, the house corner, and a 06 Menu action with its mark. The dismiss is 06's icon-only form with `close` at the small size, so 03 Rule never shares the plate. The plate is 45px, fifteen units, and 48 on a coarse pointer, where 06 grows to its 45. The text edge is 1 + `--spacing-04`. Both lines use the ui role: the title at full ink, the line at `--text-muted`. Plain JS like `confirm.js`, because Kernpare has no React and a service worker's `controllerchange` fires outside any component tree.
