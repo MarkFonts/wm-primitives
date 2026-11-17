@@ -26,7 +26,7 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `GlyphPicker` `measureGlyphMetrics` | Interactive glyph browser: equal-sized cell grid + viewer/U+ readout, search, copy-to-clipboard, ssXX alternate groups (wm-primitives #2). | font-proofer, ReCal, WORDMAKE, GliffDiff | — |
 | `createLetterbox` `JEROME` | The letterbox: the house wordmark scanned and packed with prose (Charlie Clark's pretext effect). Plain-JS engine, because wordmark.nyc and this repo's system page script-tag it directly, and ReCal's landing pages load i… | ReCal, wordmark.nyc | README (letterbox) |
 | `wmConfirm` | wmConfirm -- the click confirm: on a press that WORKED, the control's press look blinks off 80ms, on 80ms, then it settles (GESTURES.md §14). Adds .wm-confirm, which runs the one keyframe in motion.css; no-op under reduc… | wordmark.nyc | — |
-| `toast` | toast -- one line of news in a corner, with at most one thing to do: Plate, --surface-hi, the hairline, the house corner, a 06 Menu action and a 06 mark to dismiss. Top right on a desktop, the bottom on a phone (CSS, not… | Kernpare, wordmark.nyc | — |
+| `toast` | toast -- one line of news in a corner, with at most one thing to do: Plate, --surface-hi, the hairline, the house corner, a 06 Menu action and a 06 mark to dismiss. Top right on a desktop, the bottom on a phone (CSS, not… | font-proofer, Kernpare, wordmark.nyc | — |
 | `iosFocusGuard` | iosFocusGuard -- iPhone Safari flings the page when a tap focuses editable text; this holds the window and every scroller around el where they were. Plain JS and one file, so a page without React imports it or copies it.… | font-proofer, ReCal, opsz-proofer, GliffDiff, wordmark.nyc | — |
 | `ROLES` `POSTER` `INK` `TRACK_CAPS` `LANDINGS` `typeStyle` `ink` | Type tokens (TYPOGRAPHY.md). type.css is additive — it defines --type-*/--poster-*/ --ink-*/--track-caps and the opt-in `t-*` classes, and styles no element type, so importing it cannot reach existing markup. Apps import… | Kernpare, WORDMAKE, wordmark.nyc, font-proofer, ReCal, opsz-proofer, GliffDiff | TYPOGRAPHY.md |
 | `Collapse` | A disclosure box that measures its own content, so a section's height is never a number anyone has to keep up to date. Used by the fitting panel's two sections. | font-proofer, WORDMAKE | — |
@@ -34,7 +34,7 @@ Do not edit; CI fails a stale copy. The "drawn by" column is read from each cons
 | `SpecimenNav` | Long public-domain works: authored whole in specimens/<slug>.txt, served as the chunks build-specimens.mjs cuts at each FORM FEED, fetched only as far as the reader asks. The tail control travels with the loader: both ap… | font-proofer, ReCal | — |
 | `PARA_STYLE_ORDER` `PARA_STYLE_LABEL` `PARA_STYLE_DEFAULTS` `fitOptionsFor` | The four paragraph styles both paragraph views show, and the one-liner that turns a style plus the font's H&J bands into fit options. The keys, labels, numbers and the resolver only; each app keeps the font fields it dra… | ReCal, font-proofer | — |
 | *(types only)* | — | — | FITTING-MAP.md |
-| `EASES` `resolveEase` `bezierPoint` `bezierY` `rampStops` `scrim` `maskRamp` `blend` `blurLayers` `declaration` `channelBlend` `resolveRGB` `CHANNEL_NAMES` | Gradients — the shape of a ramp, and the three things a ramp can carry. The package already faded in three places and spelled it two ways; one of those spellings was the two-stop fade the other one wrote a paragraph expl… | WORDMAKE, ReCal, GliffDiff, wordmark.nyc, font-proofer | GRADIENTS.md |
+| `EASES` `resolveEase` `bezierPoint` `bezierY` `rampStops` `scrim` `maskRamp` `blend` `blurLayers` `declaration` `channelBlend` `resolveRGB` `CHANNEL_NAMES` | Gradients — the shape of a ramp, and the three things a ramp can carry. The package already faded in three places and spelled it two ways; one of those spellings was the two-stop fade the other one wrote a paragraph expl… | font-proofer, WORDMAKE, ReCal, GliffDiff, wordmark.nyc | GRADIENTS.md |
 | `ProgressiveBlur` `CurveEditor` `ChannelCurves` `GradientControls` `GradientPreview` `gradientCss` `GRADIENT_DEFAULTS` | A scrim and a blend are declarations and need no component. Progressive blur is not a declaration — it is a stack of masked backdrop layers, so it is DOM, and the stack is here once instead of in each consumer (where the… | — | — |
 
 CSS-only modules (imported from an app's entry stylesheet, nothing to export): `src/button.css`, `src/button-sets.css`, `src/grid.css`, `src/chip.css`, `src/select.css`, `src/motion.css`, `src/color.css`.
@@ -97,7 +97,7 @@ Drawn by at least one app. Who draws it is in the second column.
 | `pageview` | system page |
 | `play_arrow` | wordmark.nyc |
 | `queue_play_next` | WORDMAKE |
-| `restart_alt` | wordmark.nyc |
+| `restart_alt` | font-proofer, wordmark.nyc |
 | `search` | wm-primitives |
 | `settings_backup_restore` | GliffDiff, WORDMAKE, font-proofer, wm-primitives |
 | `sync_alt` | Kernpare, ReCal, system page |
