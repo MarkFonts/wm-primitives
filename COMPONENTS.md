@@ -43,7 +43,7 @@ CSS-only modules (imported from an app's entry stylesheet, nothing to export): `
 
 The Material Symbols subset (`fonts/MaterialSymbolsOutlined.woff2`, 98 ligatures) sorted by whether anything draws each one. The ligature list is read from the font and the drawing from the sources of font-proofer, ReCal, opsz-proofer, Kernpare, WORDMAKE, GliffDiff, wordmark.nyc, wm-primitives, system page, so removing a mark is a search, not a guess. The system page shows the same three lists with their glyphs.
 
-### Used (60)
+### Used (62)
 
 Drawn by at least one app. Who draws it is in the second column.
 
@@ -84,9 +84,11 @@ Drawn by at least one app. Who draws it is in the second column.
 | `format_paragraph` | GliffDiff, ReCal, font-proofer, system page, wm-primitives |
 | `format_shapes` | GliffDiff |
 | `forms_add_on` | font-proofer |
+| `forum` | font-proofer |
 | `glyphs` | GliffDiff |
 | `grid_view` | font-proofer |
 | `insert_text` | font-proofer |
+| `key` | font-proofer |
 | `keyboard_arrow_down` | WORDMAKE, wm-primitives |
 | `keyboard_arrow_up` | WORDMAKE, font-proofer |
 | `layers` | GliffDiff |
@@ -110,8 +112,8 @@ Drawn by at least one app. Who draws it is in the second column.
 | `zoom_in` | wm-primitives |
 | `zoom_out` | wm-primitives |
 
-### Ready (38)
+### Ready (36)
 
 In the subset, drawn by nothing yet.
 
-`arrow_back` `arrow_forward` `book` `book_3` `book_4` `book_5` `book_6` `book_ribbon` `brand_family` `call_merge` `edit` `edit_document` `edit_note` `emoji_symbols` `font_download` `format_quote` `forum` `hdr_auto` `hdr_auto_select` `hdr_enhanced_select` `hdr_off` `hdr_off_select` `hdr_on_select` `key` `match_case` `match_case_off` `pause` `public` `redo` `script` `serif` `slab_serif` `star` `subscript` `superscript` `type_specimen` `undo` `visibility_off`
+`arrow_back` `arrow_forward` `book` `book_3` `book_4` `book_5` `book_6` `book_ribbon` `brand_family` `call_merge` `edit` `edit_document` `edit_note` `emoji_symbols` `font_download` `format_quote` `hdr_auto` `hdr_auto_select` `hdr_enhanced_select` `hdr_off` `hdr_off_select` `hdr_on_select` `match_case` `match_case_off` `pause` `public` `redo` `script` `serif` `slab_serif` `star` `subscript` `superscript` `type_specimen` `undo` `visibility_off`

@@ -130,6 +130,9 @@
   "forms_add_on": [
    "font-proofer"
   ],
+  "forum": [
+   "font-proofer"
+  ],
   "glyphs": [
    "GliffDiff"
   ],
@@ -137,6 +140,9 @@
    "font-proofer"
   ],
   "insert_text": [
+   "font-proofer"
+  ],
+  "key": [
    "font-proofer"
   ],
   "keyboard_arrow_down": [
@@ -239,14 +245,12 @@
   "emoji_symbols",
   "font_download",
   "format_quote",
-  "forum",
   "hdr_auto",
   "hdr_auto_select",
   "hdr_enhanced_select",
   "hdr_off",
   "hdr_off_select",
   "hdr_on_select",
-  "key",
   "match_case",
   "match_case_off",
   "pause",
