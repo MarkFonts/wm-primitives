@@ -177,6 +177,7 @@
    "WORDMAKE"
   ],
   "restart_alt": [
+   "font-proofer",
    "wordmark.nyc"
   ],
   "search": [
@@ -238,12 +239,14 @@
   "emoji_symbols",
   "font_download",
   "format_quote",
+  "forum",
   "hdr_auto",
   "hdr_auto_select",
   "hdr_enhanced_select",
   "hdr_off",
   "hdr_off_select",
   "hdr_on_select",
+  "key",
   "match_case",
   "match_case_off",
   "pause",
