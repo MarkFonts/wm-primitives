@@ -12,6 +12,12 @@ Newest first.
 
 ---
 
+## 2026-11-19 -- `forum` and `key` join the face
+
+**The icon subset is recut with `scripts/cut-icon-subset.py forum key`: 98 ligatures, 132 glyphs, 66,796 to 69,284 bytes (+2.4KB).** font-proofer's new Thread UI preview tab draws `forum`, and its password gate draws `key`. Until now it shipped the full 3.98MB face to get the two, and with the subset carrying them it can go back to the 69KB one. The cut is from the in-repo full face (Material Symbols 2.971, FILL, GRAD, opsz, and wght unchanged). The 96 marks already in the subset keep their glyphs, with outlines and gvar deltas hash-identical to the last cut. Both new ligatures resolve to drawn glyphs (`uniE0BF`, `uniE73C`). The face URL moves to `?v=98` in `src/icon.css` and `dist/dial.css`, so a cached copy doesn't draw the new names as letters. The census (COMPONENTS.md, `docs/system/icons.json`) picks the two up at the next `gen-index` run.
+
+---
+
 ## 2026-11-08 -- the toast: Plate
 
 **`toast({ title, line?, action?, persist?, id? })` returns `{ close, update }`, with its look in `src/toast.css`.** Four designs were drawn on the house tokens (Plate, Sentence, Tab, and Pill), and Mark chose Plate. It adds no look to the system: a `--surface-hi` ground (the surface the contract names for menus and popovers), the one hairline, the house corner, and a 06 Menu action with its mark. The dismiss is 06's icon-only form with `close` at the small size, so 03 Rule never shares the plate. The plate is 45px, fifteen units, and 48 on a coarse pointer, where 06 grows to its 45. The text edge is 1 + `--spacing-04`. Both lines use the ui role: the title at full ink, the line at `--text-muted`. Plain JS like `confirm.js`, because Kernpare has no React and a service worker's `controllerchange` fires outside any component tree.
