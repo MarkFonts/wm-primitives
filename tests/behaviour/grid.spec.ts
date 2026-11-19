@@ -95,7 +95,10 @@ const LAYOUT = () => {   // runs in the page; stringified below
     const c = getComputedStyle(el); if (c.display === 'inline' || c.overflowX !== 'visible' || c.whiteSpace === 'nowrap') continue;
     const b = el.getBoundingClientRect(); if (b.width < 1) continue;
     let extent = -Infinity;
-    for (const k of el.children) { const kc = getComputedStyle(k); if (vis(k) && kc.position !== 'absolute' && kc.position !== 'fixed') extent = Math.max(extent, box(k).right); }
+    // a child pulled past its parent by a negative margin is a bleed on purpose (a full-bleed
+    // photo on a phone): judge where its parent put it, the rect less that margin, as for a shot
+    const laid = (k: Element, kc: CSSStyleDeclaration) => k.matches('[data-shot="mac"], [data-shot="mac"] > img') ? box(k).right : box(k).right - Math.max(0, -parseFloat(kc.marginRight) || 0)
+    for (const k of el.children) { const kc = getComputedStyle(k); if (vis(k) && kc.position !== 'absolute' && kc.position !== 'fixed') extent = Math.max(extent, laid(k, kc)); }
     if ([...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) { const rg = document.createRange(); rg.selectNodeContents(el); extent = Math.max(extent, rg.getBoundingClientRect().right); }
     if (extent > b.right + 2) narrow.push(`${el.tagName.toLowerCase()}.${(el.className + '').split(' ')[0]} is ${Math.round(b.width)}px wide with ${Math.round(extent - b.left)}px inside`);
   }
@@ -390,7 +393,11 @@ const MARGIN = () => {   // runs in the page; stringified below
   for (const el of snap.blocks as Element[]) {
     if (el.closest('[data-nosnap]') || /absolute|fixed/.test(getComputedStyle(el).position) || inset(el)) continue;
     const rg = document.createRange(); rg.selectNodeContents(el);
-    const rects = [...rg.getClientRects()].filter(r => r.width > 0 && r.height > 0); if (!rects.length) continue;
+    // a block that clips its own overflow (a pill whose marquee track runs far past it) shows
+    // only what is inside its box: its text is judged clamped to that box
+    const own = getComputedStyle(el).overflowX !== 'visible' ? el.getBoundingClientRect() : null
+    const rects = [...rg.getClientRects()].map(r => own ? { left: Math.max(r.left, own.left), right: Math.min(r.right, own.right), width: Math.min(r.right, own.right) - Math.max(r.left, own.left), height: r.height } : r)
+      .filter(r => r.width > 0 && r.height > 0); if (!rects.length) continue;
     const left = Math.min(...rects.map(r => r.left)), right = Math.max(...rects.map(r => r.right)); n++;
     minLeft = Math.min(minLeft, left); if (!clipped(el)) maxRight = Math.max(maxRight, right);
     const name = `${el.tagName.toLowerCase()}.${(el.getAttribute('class') || '').split(' ')[0]}`;

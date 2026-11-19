@@ -47,14 +47,14 @@ test.describe('ReCal · the instrument around the primitive', () => {
     expect(errors, errors.join('\n')).toEqual([])
   })
 
-  test('the rail walks its six rows, one open at a time', async ({ page }) => {
+  test('the rail walks its seven rows, one open at a time', async ({ page }) => {
     const errors = await open(page)
-    /* ReCal's rail is a stack of six rows (Shell.tsx RailRow). Each header is a
+    /* ReCal's rail is a stack of seven rows (Shell.tsx RailRow; Subset joined in ReCal#62). Each header is a
        button.rail-seam--row (inside .rail-seam-head, inside .rail-row) whose aria-expanded says
        whether its row's .rail-row-open panel is there; one row is open at a time, and row 1 is open on boot. */
-    const rows = ['Shape', 'Optical size', 'Ascender & Sharpness', 'Type Matrix', 'Freezer', 'Vertical metrics']
+    const rows = ['Shape', 'Optical size', 'Ascender & Sharpness', 'Type Matrix', 'Freezer', 'Vertical metrics', 'Subset']
     const seams = page.locator('.rail-seam--row')
-    await expect(seams, 'six rows').toHaveCount(rows.length)
+    await expect(seams, 'seven rows').toHaveCount(rows.length)
     for (const [i, name] of rows.entries()) {
       await expect(seams.nth(i).locator('.rail-seam-lbl'), `row ${i + 1} label`).toHaveText(name)
       await expect(seams.nth(i).locator('.rail-seam-num'), `row ${i + 1} number`).toHaveText(String(i + 1))

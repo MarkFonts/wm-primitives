@@ -108,11 +108,24 @@ for (const host of HOSTS.filter(h => h.gestures !== false && h.rows?.length)) fo
         const row = sizeRow(page); const r = range(row)
         expect(await scrubbing(page)).toBe(false)
         const p = await at(r, 0.4)
-        // hold at the end of the move so the attribute can be read mid-gesture -- polled,
-        // not read at a fixed delay: a slow runner had not begun dispatching at 150ms
-        const mid = touchDrag(page, r, [p, { x: p.x + 20, y: p.y }, { x: p.x + 50, y: p.y }], { hold: 900 })
-        await expect.poll(() => scrubbing(page), { timeout: 700 }).toBe(true)
-        await mid
+        // The page writes its own timeline: every change of the attribute, and the finger's down
+        // and up, in the order they happened. Read from outside, mid-hold, it was a race the
+        // test kept losing: on a slow runner a heavy host (ReCal re-rasters its specimen on every
+        // value) holds the main thread past the hold, the lift's timer runs before the read does,
+        // and the read only ever saw the flag off -- though the flag had been on throughout.
+        await page.evaluate(() => {
+          const log: string[] = (window as any).__scrubLog = []
+          new MutationObserver(() => log.push(document.documentElement.hasAttribute('data-scrubbing') ? 'on' : 'off'))
+            .observe(document.documentElement, { attributes: true, attributeFilter: ['data-scrubbing'] })
+          // capture on the window: the record of the finger lands before any handler can react to it
+          addEventListener('pointerdown', () => log.push('down'), true)
+          addEventListener('pointerup', () => log.push('up'), true)
+        })
+        await touchDrag(page, r, [p, { x: p.x + 20, y: p.y }, { x: p.x + 50, y: p.y }], { hold: 900 })
+        // MutationObserver records are delivered as a microtask; one evaluate later they are in
+        const log = await page.evaluate(() => (window as any).__scrubLog as string[])
+        // on once the drag goes live, held to the lift (no 'off' between), off at or after the lift
+        expect(log, 'the flag comes on after touch-down, stays on until the lift, and comes off after it').toEqual(['down', 'on', 'up', 'off'])
         expect(await scrubbing(page)).toBe(false)
       })
 
