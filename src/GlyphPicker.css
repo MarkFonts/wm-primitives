@@ -148,7 +148,7 @@
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius, 8px);
+  border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
   outline: none;
 }
 .gp-search:focus { border-color: var(--text-dim); }
@@ -185,7 +185,7 @@
   color: var(--text);
   background: var(--surface);
   border: none;
-  border-radius: var(--radius, 8px);
+  border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
   cursor: pointer;
   padding: 0;
 }

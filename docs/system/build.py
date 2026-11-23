@@ -2407,9 +2407,23 @@ CHROME_CSS = scope_css(re.sub(r'/\*.*?\*/', '', "".join(
 CHROME_CSS = "".join(c if ord(c) < 128 else f"\\{ord(c):04X} " for c in CHROME_CSS)
 # confirm.js first, its `export` stripped (this is a classic script): window.wmConfirm, which
 # zoomControl.js and the Interface chapter's demos call on a press that worked (GESTURES.md §14).
+# corners.js too: the eased corner law's flag (?corners=eased, or the corner law's Law toggle) flips the
+# whole page, so its pill finder runs on the document, not on a section.
 CHROME_JS = "".join(re.sub(r'^export ', '', (HERE.parent.parent / "src" / f).read_text(), flags=re.M) + "\n"
-                    for f in ("confirm.js", "zoomControl.js", "themeStack.js", "jxl.js"))
+                    for f in ("confirm.js", "zoomControl.js", "themeStack.js", "jxl.js", "corners.js"))
 CHROME_JS = "".join(c if ord(c) < 128 else f"\\u{ord(c):04X}" for c in CHROME_JS)
+
+# THE EASED CORNER LAW (corners.css, behind :root[data-corners="eased"]). Only its flagged rules come in,
+# unscoped: they are qualified by the root attribute, so they reach every chapter's primitives and nothing
+# changes until the flag is set. The page keeps its own copy of today's law (.wm *, below). --corner-scale
+# is declared here because no section carries corners.css's :root.
+_corners = re.sub(r'/\*.*?\*/', '', (HERE.parent.parent / "src" / "corners.css").read_text(), flags=re.S)
+EASED_CSS = ":root{--corner-scale:1}" + "".join(
+    r.strip() + "}" for r in _corners.split("}") if 'data-corners' in r.split("{")[0])
+EASED_CSS = re.sub(r'\s+', ' ', EASED_CSS)
+assert "clip-path: shape(" in EASED_CSS and "--corner-scale: 1.125" in EASED_CSS, "corners.css lost its eased rules"
+# ?corners=eased opens the page with the flag on (the corner law's Law toggle writes it back).
+CORNERS_BOOT = "(function(){var c=new URLSearchParams(location.search).get('corners');if(c)document.documentElement.dataset.corners=c})();"
 
 # THE TOAST lives on <body>, outside every section, so no section's scoped copy of its CSS can reach
 # it: the shell carries it, as it carries the chrome. toast.css names only .wm-toast* and goes in
@@ -2982,6 +2996,7 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 <style>{FONTS}{GRID_CSS}{SHELL}
 {CHROME_CSS}
 {TOAST_CSS}
+{EASED_CSS}
 {css_parts}
 {HEADS_CSS}
 {GRAMMAR_CSS}
@@ -3031,7 +3046,8 @@ page = f"""{HEAD}<title>wm-primitives &mdash; the system</title>
 {SPY}</script>
 <script>{STAGES}{APPX}</script>
 <script>{GRID_JS}</script>
-<script>{CHROME_JS}
+<script>{CORNERS_BOOT}
+{CHROME_JS}
 {CHROME}</script>
 <script>{TOAST_JS}</script>
 <script type="module">{LETTERBOX}

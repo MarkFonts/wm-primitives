@@ -24,7 +24,7 @@
 .fit-switch {
   flex: 1 1 7rem;               /* room for the longest label on one line */
   height: 32px;                 /* the dial bar's height, so a rail of both is one rhythm */
-  border-radius: var(--radius, 6px);
+  border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
   corner-shape: superellipse(var(--corner-k, 1.2));
   background: var(--surface);
   border: 1px solid var(--border);
@@ -133,7 +133,7 @@
    that up as the same thing. */
 .fit-chip {
   padding: 0 var(--spacing-02, 6px);
-  border-radius: var(--radius-sm, 4px);
+  border-radius: calc(var(--radius-sm, 4px) * var(--corner-scale, 1));
   background: color-mix(in srgb, var(--accent, var(--signal, #7cc4ff)) 18%, transparent);
   box-shadow: 0 0 8px color-mix(in srgb, var(--accent, var(--signal, #7cc4ff)) 35%, transparent);
   color: var(--signal-ink, var(--accent, #7cc4ff));

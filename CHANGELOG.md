@@ -12,6 +12,24 @@ Newest first.
 
 ---
 
+## 2026-11-23 -- the eased corner law, behind a flag
+
+**A second corner law, `<html data-corners="eased">`, off by default. Rects keep `superellipse(1.2)` with every radius ×1.125; pills get a clothoid-eased cap (e = 15%) drawn with `clip-path: shape()`.** Mark chose it from the rendered G2 audit and the live corner bench: the squircle bulges into the box of the radius it was given, and on a pill any superellipse above 1 flattens the nose. The spec is CHROME.md "Corners". Without the attribute, nothing changes a pixel.
+
+**Rects.** Every primitive's radius is now `calc(<r> * var(--corner-scale, 1))`, 66 declarations across 16 files, and corners.css sets `--corner-scale: 1.125` under the flag (8px → 9px). The one concentric radius, `.wm-menu-seg`, scales its inner part and keeps its 3px gap. The q5 accent chip's rendered light was cut for an 8px corner. At 9px the box is 1px rounder than the render, which is soft enough not to show, but it has not been re-rendered.
+
+**Pills: the clip is the sliver, not the pill.** This was the hard part. A clip-path clips the element's border, box-shadow, outline and children, which would have taken out the 2px focus ring that just shipped (#161), the lozenge's ring of ground, and the accent pill's spill. The eased cap lies inside the round cap everywhere, at most 0.0035 r away. So the clip is evenodd: a box 4000px past the element, minus the round stadium, plus the eased stadium. That removes only the sliver between the two caps, from a fill forced to `corner-shape: round`. Everything outside the box survives untouched, so focus rings, shadows, spills and overhangs need no per-component pattern. Borders and the inset press ring are still drawn by the engine, and only their outer edge moves to the eased curve. Pixel-diffed against the bench's own `shape()` at 200px, the fill is four times closer than round, and the leftover is antialiasing. Rejected: clipping to the pill itself (needs a wrapper or pseudo for every ring, shadow and spill), a pure-CSS `shape()` (its x coordinates need the height as a length, and no unit gives an element its own height), and a height-scaled `mask` (it clips exactly like a clip does, and it would put the accent's HDR light through a mask).
+
+**Pills are found by numbers, not names: `src/corners.js` (`wmCorners`).** It marks any element, or any `::before`/`::after`, with radius ≥ half the short side, long side ≥ 1.15× short, and short side ≥ 8px, then writes `--pill-s`. It is kept true by a ResizeObserver and a class/childList MutationObserver. It found 322 pills and 16 pill pseudo-elements on the system page (12k elements) in about 200ms. The 8px floor is not only economy. Below 8px the eased cap is within 0.014px of round, and the dial's 4–6px grip, clipped under its own shade layer, composited the shade's cast as two white discs in Chrome 153. `--pill-ease: off` opts out an element, subtree or pseudo-element, and the font-proofer mimics carry it. The accent pill's `corner-shape: round` ("a stadium") becomes the eased cap like every other pill.
+
+**The cap rule (space.css) is recomputed:** under the flag it is `padding-x ≥ 0.7 r` for both shapes (95% of the height by 0.70 r on the eased pill and 0.69 r on a ×1.125 rect). ssd-chip, at 6px on an ~18px pill, drops from 98.9% to 94%. That is noted, not changed.
+
+**The system page** carries the flag's rules and `corners.js` in its shell. The corner law chapter has a Today / Eased toggle, and `?corners=eased` opens the page with the flag on.
+
+**Tests:** `tests/behaviour/corners.spec.ts` (C1–C5) on `tests/fixtures/corners.html`. With the flag off nothing is marked. With it on, rects are ×1.125, every pill (and a pill `::after`) carries the clip on a round cap, the clip follows a resize and goes when the flag goes, and the focus ring's pixels are present and unchanged on a 28px chip, a 200px pill, an 8px button and the house chip.
+
+---
+
 ## 2026-11-23 -- collections from the keyboard: StyleScopeList and GlyphPicker
 
 **Both pickers can now be used from the keyboard, and a screen reader can tell what they are. The look is unchanged: rest and open states are pixel-identical to main on the fixture, and the new focus rings show on `:focus-visible` only.** The audit's findings were the same for both. Every row and every glyph cell was its own Tab stop (hundreds of them in a picker), there were no arrow keys, and the roles were half there: a listbox with no keyboard behind it, and a glyph grid named only by `title`. The rules are GESTURES.md §16, G126 to G136. The ids start 25 past main's highest (G101) because two other branches were adding rows on the same day.

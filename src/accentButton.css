@@ -76,7 +76,7 @@
 }
 .wm-accent[data-shape="chip"] {
   block-size: 32px; padding: 0 var(--spacing-04, 12px);
-  border-radius: 8px;                                          /* the end pieces are rendered for it */
+  border-radius: calc(8px * var(--corner-scale, 1));                                          /* the end pieces are rendered for it */
   corner-shape: superellipse(var(--corner-k, 1.2));
 }
 .wm-accent[data-look="q5"][data-shape="pill"] { inline-size: 225px; block-size: 32px; }
@@ -144,7 +144,7 @@
 .wm-accent[data-look="q5"] .wm-accent__lab::before { position: absolute; z-index: -1; pointer-events: none; inset: -1px 0 0 0; }
 .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before { border-radius: 999px; corner-shape: round; }
 .wm-accent[data-look="q5"][data-shape="chip"] .wm-accent__lab::before {
-  border-radius: 8px; corner-shape: superellipse(var(--corner-k, 1.2));
+  border-radius: calc(8px * var(--corner-scale, 1)); corner-shape: superellipse(var(--corner-k, 1.2));
   border: 0 solid transparent; border-image-slice: 0 52 0 52 fill; border-image-width: 0 26px 0 26px; border-image-repeat: stretch;
 }
 

@@ -42,7 +42,7 @@
   background: var(--text);
   color: var(--bg);
   border: none;
-  border-radius: var(--radius, 6px);
+  border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
   letter-spacing: var(--track-caps);

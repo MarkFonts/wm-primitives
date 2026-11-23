@@ -90,7 +90,7 @@
     color: var(--text-muted, rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62)));
     background: transparent;
     border: 0;
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     cursor: pointer;
     white-space: nowrap;
@@ -199,7 +199,7 @@
     display: flex;
     padding: var(--tick, 3px);
     gap: var(--tick, 3px);
-    border-radius: calc(var(--radius, 8px) + var(--tick, 3px));
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1) + var(--tick, 3px));   /* concentric: the inner radius scales, the gap does not */
     corner-shape: superellipse(var(--corner-k, 1.2));
     background: color-mix(in oklab, var(--bg, #0f0f0f) 70%, black);
   }
@@ -211,7 +211,7 @@
     box-sizing: border-box;
     min-height: 36px;
     width: 100%;
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     overflow: hidden;
     font-family: var(--ui-font, system-ui, sans-serif);
