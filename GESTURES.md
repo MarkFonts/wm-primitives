@@ -371,3 +371,36 @@ Five gaps from the accessibility audit. Tested in `tests/behaviour/a11y-oneoffs.
 | G104 | the `InlineEmphasisBubble` | `role="toolbar"` ("Text emphasis") of two real buttons with `aria-pressed` for what the selection already is. A mouse press still acts on mousedown and keeps the selection; Enter / Space acts on the click (`detail` 0), so one press never fires twice. Pressing again takes the marker off, and the selection stays on the same words | a11y-oneoffs |
 | G105 | Cmd+I / Cmd+B (Ctrl on non-Mac) in an `EditableTextBlock` with `emphasis` | the same toggle as the bubble (`src/emphasis.ts`), written as `*` / `**` text, never the browser's `<i>` / `<b>`. `***x***` is both. No selection: the key is swallowed and nothing is written. Without the `emphasis` prop the keys are the browser's | a11y-oneoffs |
 | G106 | keyboard focus on the toggle group, theme marks, zoom control, toast, and the triplet field | the house 2px ring (`--signal-ink`), by `:focus-visible` only: a click never draws it | a11y-oneoffs |
+
+## 17 · Overlays: popover, menu, dialog
+
+`src/overlays.tsx`: `usePopoverTrigger`, `Popover` (or the `usePopoverPanel` hook, for a panel
+that renders its own root), `Menu` + `MenuItem`, `Dialog`, `useOverlayClose`. Behavior only:
+every element is the host's, with the host's class, where the host renders it (no portal, no
+positioning, no style). Built on React Aria's low-level hooks (`useOverlay`, `useOverlayTrigger`,
+`useModalOverlay`, `FocusScope`). Not in `index.ts`: import the file by path once the app has
+`react-aria` and `react-stately` installed. Tested in `tests/behaviour/overlays.spec.ts` on
+`tests/fixtures/overlays.html`, the page bundled from `tests/fixtures/overlays-entry.tsx`.
+
+**G107–G111 are unused**: this section was written beside §16 and started at G112 so neither renumbered the other.
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G112 | any render | the trigger carries `aria-haspopup` (`dialog` for a panel, `true` for a menu, `listbox`), `aria-expanded`, and while open `aria-controls` = the panel's id. The panel has `role` = its type and `tabindex="-1"`; every other prop the host gives lands on it untouched | overlays |
+| G113 | Escape (focus inside), a press outside, focus leaving (Tab out, a field pressed elsewhere), the trigger again | a non-modal panel closes. The outside press **lands**: the page under a non-modal panel is live, so one press closes the panel and does what it does there, pointerdown included (a dial under it starts its drag). A press on the trigger is the toggle, never close-then-reopen | overlays |
+| G114 | it opens | focus moves in, without scrolling: a panel takes it on **itself**, never on a field (on a phone a field raises the keyboard); a child with `autoFocus` takes it instead. A menu or listbox lands on its chosen item (`aria-checked` / `aria-selected`), else the first | overlays |
+| G115 | it closes | focus goes back to the trigger, unless it already went somewhere on purpose (Tab out, a press on another field). A trigger that takes no ref (AccentButton on React 18) is found by its `aria-controls` at the open | overlays |
+| G116 | overlays inside overlays | only the topmost answers Escape: a menu inside a dialog closes first, focus back on its trigger inside the dialog; the next Escape closes the dialog | overlays |
+| G117 | Escape in a text field inside the panel | if the field answered it (blurred itself, as the dial's value field does, or prevented the key, as the triplet does) the panel **stays**, focus comes back to the panel, and the next Escape closes it. A field that ignored the key: the panel closes. Mid-composition (IME): nothing | overlays |
+| G118 | ArrowDown / ArrowUp / Home / End in a menu or listbox | focus walks the items (`menuitem`, `menuitemradio`, `menuitemcheckbox`, `option`), wrapping, skipping disabled ones. On the closed trigger ArrowDown opens onto the chosen item (else the first), ArrowUp onto the last. Tab leaves and closes | overlays |
+| G119 | an item pressed, or Enter / Space on it | `onAction` runs, then the menu closes and focus is back on the trigger (`closeOnAction={false}` keeps it open). `selected` makes it a `menuitemradio` with `aria-checked`. A disabled item does nothing and the menu stays | overlays |
+| G120 | a modal opens | everything outside the panel and its scrim is `inert` and the page does not scroll (React Aria's `usePreventScroll`, the scrollbar's width padded back); both are given back on close | overlays |
+| G121 | Escape, a press on the scrim, the panel's own close | the modal closes (the scrim only while `isDismissable`, the default). The scrim press does not land: the page under it is inert. Tab and Shift+Tab wrap inside the panel | overlays |
+| G122 | a modal opens, then closes | focus to the panel (or the `autoFocus` child), and back to the opener once the inert is lifted | overlays |
+| G123 | the dial and the iOS focus guard | a dial inside a panel drags and takes Escape (G117) without closing it, even when the drag ends outside. A non-modal panel adds no touch listener: under `iosFocusGuard` (§15) a tap into an editable outside closes the panel by its blur, and focus stays in the text. The modal's scroll lock is React Aria's own iOS handling; a guarded editable inside an open modal is not promised | overlays |
+| G124 | `prefers-reduced-motion: reduce`, or not | the primitive has no motion: open and close are immediate, and every focus move is `preventScroll` (an item brought into view jumps, `block: nearest`). A host that animates its panel does it in its own CSS, behind `prefers-reduced-motion: no-preference` | overlays |
+
+**Not promised (§17).** Positioning: the panel sits where the host's CSS puts it, and keeping it
+inside a box (ReCal's `useKeepInside`) stays the host's. Typeahead in menus. Submenus. The
+VoiceOver re-announce React Aria's `useDialog` does on iOS (it is not used: its focus runs once
+on mount, and a hook-form panel mounts closed).

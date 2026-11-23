@@ -246,3 +246,10 @@ export type { Triple, ChannelSpace, ChannelBlendOptions } from './src/gradient'
 export { ProgressiveBlur, CurveEditor, ChannelCurves, GradientControls, GradientPreview, gradientCss, GRADIENT_DEFAULTS } from './src/GradientControls'
 export type { ProgressiveBlurProps, CurveEditorProps, GradientControlsProps,
               GradientSpec, GradientKind } from './src/GradientControls'
+
+// Overlays (src/overlays.tsx -- deliberately NOT exported here): usePopoverTrigger, Popover,
+// usePopoverPanel, Menu, MenuItem, Dialog, useOverlayClose -- Escape, the outside press, focus in
+// and back, the trigger's ARIA, a modal's inert page and trap, on React Aria. It needs the
+// react-aria and react-stately peers, which no consumer has installed yet, and font-proofer and
+// ReCal import this barrel: one re-export here would break both builds. Import the file by path
+// after `npm i react-aria react-stately`. GESTURES.md §16.
