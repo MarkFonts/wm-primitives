@@ -4,7 +4,7 @@
  * scaled by --pill-s no longer serves every size, and there is nothing left to GENERATE into
  * corners.css. This file imports the same solver and answers two questions about it.
  *
- *   node scripts/gen-pill-shape.mjs            table, per ratio: L, nose radius, fit error at
+ *   node scripts/gen-pill-shape.mjs            table for the choke (1.2): L, nose radius, fit error at
  *                                              96px, and how far the eased cap lies inside the
  *                                              round one (the sliver the clip removes)
  *   node scripts/gen-pill-shape.mjs --check    the same, and exit 1 if any fit is over 0.05px
@@ -50,11 +50,11 @@ function audit(ratio) {
 
 let bad = 0
 console.log('ratio   L/h     fit err @96px   sliver @32px   sliver @96px')
-for (let r = 1.15; r <= 1.3001; r += 0.01) {
-  const q = audit(+r.toFixed(2)), px = q.err * AT
+for (const r of [pillRatio(24)]) {   // one choke for every height: 1.2
+  const q = audit(r), px = q.err * AT
   const flag = px > LIMIT_PX || q.out > 1e-6
   if (flag) bad++
   console.log(`${q.ratio.toFixed(2)}   ${q.L.toFixed(4)}   ${px.toFixed(4)}px         ${(q.sliver * 32).toFixed(3)}px        ${(q.sliver * 96).toFixed(3)}px${flag ? '   <-- FAIL' : ''}`)
 }
-console.log(`ramp: 24px ${pillRatio(24)}, 32px ${pillRatio(32)}, 48px ${pillRatio(48)}, 96px ${pillRatio(96)}, 160px ${pillRatio(160)}`)
+console.log(`choke: ${[24, 32, 48, 96, 160].map(h => h + 'px ' + pillRatio(h)).join(', ')}`)
 if (args.includes('--check') && bad) { console.error(`${bad} ratio(s) out of tolerance`); process.exit(1) }

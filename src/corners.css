@@ -24,10 +24,10 @@
  *   - Pills cannot be done with corner-shape (any superellipse above 1 flattens the nose:
  *     curvature 0 at the extreme). They get an eased cap, drawn as a clip-path shape() -- and the
  *     clip is NOT the pill: it is everything except the hair-thin sliver between the round cap and
- *     the eased one (at most 0.0066 h). So focus rings, shadows, spills and overhanging children
+ *     the eased one (at most 0.003 h). So focus rings, shadows, spills and overhanging children
  *     are never clipped, and the engine still draws the border and the press ring. The cap keeps
  *     the round one's depth (nose at the end, h/2 deep) and chokes the curve in: it leaves the
- *     straight 1.30 x (h/2) from the end on a 24px pill, easing to 1.15 x at 96px and above.
+ *     straight 1.2 x (h/2) from the end, at every height.
  *     That depends on the height, so corners.js (radius >= half the short side, any element or its
  *     ::before/::after) builds each pill's shape() and writes it, with the short side, to
  *     --pill-clip and --pill-s.
@@ -109,8 +109,8 @@ input[type="range"]::-moz-range-thumb { corner-shape: round; }
    corners.js marks a pill with data-wm-pill="x" (horizontal) or "y" (vertical), writes its short
    side to --pill-s and the shape() built for its height to --pill-clip; a pill ::before / ::after
    is marked on its host as data-wm-pill-b / data-wm-pill-a, with --pill-s-b / --pill-clip-b (and
-   -a). The shape is built per pill because the cap's choke follows the height (1.30 x h/2 at
-   24px, easing to 1.15 x at 96px). The cap underneath must be the round one, because the clip
+   -a). The shape is built per pill because it is cached by choke ratio and a pill's own size is
+   a number the clip is written against (the choke is 1.2 x h/2 at every height). The cap underneath must be the round one, because the clip
    only removes what lies between round and eased -- a superellipse nose would survive it -- so
    corner-shape is forced round. !important because pills declare their own corner-shape at every
    specificity (chip, seg, grip, lozenge), and accentButton's ::before inherits.

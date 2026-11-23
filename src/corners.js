@@ -16,8 +16,8 @@
  *     are ignored on purpose -- sliders write --pct every frame, and so does this file;
  *   - takes every mark off again when the attribute goes.
  *
- * The clip only removes the sliver between the round cap and the eased one (at most 0.0066 h, at
- * a 1.30 choke), so a size that is a frame stale moves an almost invisible sliver; the observers
+ * The clip only removes the sliver between the round cap and the eased one (at most 0.003 h, at
+ * a 1.2 choke), so a size that is a frame stale moves an almost invisible sliver; the observers
  * re-measure before the next paint.
  *
  * Pills under 8px on the short side are left round (MIN_S, below). An element, a subtree or a
@@ -27,9 +27,9 @@
 
 const MARK = 'data-wm-pill'
 const PSEUDO = [['::before', 'data-wm-pill-b', '--pill-s-b', '--pill-clip-b'], ['::after', 'data-wm-pill-a', '--pill-s-a', '--pill-clip-a']]
-// The curve leaves the straight L = ratio/2 x s from each end, so a pill shorter than ratio x s (1.3 s at most)
+// The curve leaves the straight L = ratio/2 x s from each end, so a pill shorter than ratio x s (1.2 s)
 // would have its two caps cross: it stays round.
-// Below 8px the eased cap is within 0.05px of round (0.0066 h), so a clip would change nothing a
+// Below 8px the eased cap is within 0.03px of round (0.003 h), so a clip would change nothing a
 // screen can show. Skipping them is not only economy: the dial's 4-6px grip sits under its shade
 // layer (AxisSlider.css, .slider-grip-shade: clip-path + drop-shadow), and Chrome 153 composited the
 // shade's light cast through a clipped grip as two white discs at its ends.
@@ -42,15 +42,13 @@ const SHAPE_OK = typeof CSS !== 'undefined' && CSS.supports('clip-path', 'shape(
 // Mark's rule (CHROME.md "Corners"): the cap is chosen by its CHOKE, L : (h/2), where L is the
 // distance from the pill's end to where the curve leaves the straight. A round cap is 1:1. The
 // depth never changes -- the nose touches the end, the cap is h/2 deep, CSS radius stays h/2 --
-// only the choke moves, and it moves with the height: 1.30 at 24px tall, easing to 1.15 at 96px,
-// held at both ends. A tall pill has room to bend early and a short one does not.
-const RATIO_HI = 1.3, RATIO_LO = 1.15, H_HI = 24, H_LO = 96
+// only the choke moves. Mark's call is one choke for every pill: 1.2, at every height. (A
+// 1.3 -> 1.15 ramp with height was built and replaced; pillRatio stays the one place a height
+// could matter again, and the shape cache is keyed by ratio.)
+const RATIO = 1.2
 
-/** The choke ratio L : (h/2) for a pill h px tall, to 0.01. */
-export function pillRatio(h) {
-  const r = RATIO_HI - (RATIO_HI - RATIO_LO) * (h - H_HI) / (H_LO - H_HI)
-  return Math.round(Math.min(RATIO_HI, Math.max(RATIO_LO, r)) * 100) / 100
-}
+/** The choke ratio L : (h/2) for a pill h px tall: 1.2 at every height. */
+export function pillRatio(h) { return RATIO }
 
 // One quarter of the cap, walked from the straight to the nose: straight -> curvature ramps
 // linearly from 0 over length T -> a circular arc of radius 1 -> the nose, G2 throughout.
@@ -86,7 +84,7 @@ function capPoints(ratio) {
 }
 
 // Knots of the three cubics per quarter, as fractions of the quarter's arc length. Tuned (see
-// scripts/gen-pill-shape.mjs --check) so the worst fit error over every ratio is 0.00016 h (0.015px on a 96px pill).
+// scripts/gen-pill-shape.mjs --check) so the worst fit error over every ratio is 0.00014 h (0.014px on a 96px pill).
 const KNOTS = [0, 0.22, 0.42, 1]
 
 // Hermite cubic through P0..P3 with the known tangents at both ends, handles solved by least

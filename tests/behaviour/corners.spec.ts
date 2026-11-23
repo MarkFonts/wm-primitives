@@ -5,7 +5,7 @@ import { test, expect, type Page } from '@playwright/test'
    1.125, puts the eased clip on every pill (found by numbers, not class names) and on a pill
    ::after, leaves circles and small pills alone, and does NOT clip the focus ring. With the
    flag off nothing is marked and nothing is clipped. The cap's choke follows the pill's height
-   (1.30 at 24px tall, 1.15 at 96px and above), its depth never does (C6). The look itself is
+   fixed 1.2:1 at every height, its depth never moves (C6). The look itself is
    judged by the renders. */
 
 async function open(page: Page, q = '') {
@@ -18,8 +18,8 @@ async function open(page: Page, q = '') {
 const style = (page: Page, sel: string, prop: string, pseudo?: string) =>
   page.locator(sel).evaluate((e, [p, ps]) => getComputedStyle(e, ps || null).getPropertyValue(p), [prop, pseudo ?? ''] as const)
 
-// The choke ratio L : (h/2) for a pill h px tall, written out again here on purpose: Mark's ramp.
-const ramp = (h: number) => Math.round(Math.min(1.3, Math.max(1.15, 1.3 - 0.15 * (h - 24) / 72)) * 100) / 100
+// The choke ratio L : (h/2), written out again here on purpose: Mark's call, 1.2 at every height.
+const ramp = (_h: number) => 1.2
 
 // Evaluate a pill's --pill-clip (the raw string on its inline style, var(--pill-s) and all) for a
 // box w x h with short side s, and return the eased cap's geometry: where the curve leaves the
@@ -108,7 +108,7 @@ test.describe('the eased corner law', () => {
     await open(page, '?corners=eased')
     await page.locator('#pill200').evaluate(e => { (e as HTMLElement).style.height = '120px' })
     await expect.poll(() => style(page, '#pill200', '--pill-s')).toBe('120.00px')
-    // a resize rebuilds the shape for the new height: 40px tall is a 1.27 choke, L = 0.635 h
+    // a resize rebuilds the shape for the new height: the choke stays 1.2, so L = 0.6 h
     await page.locator('#pill200').evaluate(e => { (e as HTMLElement).style.height = '40px' })
     await expect.poll(async () => (await cap(page, '#pill200')).s).toBeCloseTo(40, 1)
     expect((await cap(page, '#pill200')).L).toBeCloseTo(40 * ramp(40) / 2, 1)
@@ -119,12 +119,11 @@ test.describe('the eased corner law', () => {
     await expect.poll(() => page.locator('#chip28').getAttribute('data-wm-pill')).toBe('x')
   })
 
-  test('C6 · the choke follows the height (1.30 at 24px tall to 1.15 at 96px, held), the depth never does', async ({ page }) => {
+  test('C6 · the choke is 1.2:1 at every height, and the depth never moves', async ({ page }) => {
     await open(page, '?corners=eased')
     for (const h of [24, 32, 48, 96, 160]) {
       const sel = '#h' + h, c = await cap(page, sel)
       expect(c.s, sel).toBeCloseTo(h, 1)
-      expect(ramp(h), `ramp(${h})`).toBeCloseTo({ 24: 1.3, 32: 1.28, 48: 1.25, 96: 1.15, 160: 1.15 }[h]!, 2)
       // L : (h/2) is the ratio, so L is ratio x h/2 from the end (+-0.3px)
       expect(Math.abs(c.L - ramp(h) * h / 2), `${sel} L=${c.L.toFixed(2)} want ${(ramp(h) * h / 2).toFixed(2)}`).toBeLessThan(0.3)
       // the nose touches the end (x = W) and the cap is h/2 deep (y = h/2), whatever the choke
@@ -133,8 +132,8 @@ test.describe('the eased corner law', () => {
       // and the CSS radius is still h/2
       expect(parseFloat(await style(page, sel, 'border-top-left-radius')), sel).toBeGreaterThanOrEqual(h / 2)
     }
-    // the ratio has fallen with height: the 24px cap bends in earlier, per h, than the 96px one
-    expect((await cap(page, '#h24')).L / 24).toBeGreaterThan((await cap(page, '#h96')).L / 96 + 0.05)
+    // the same fraction of the height at 24px and 96px: nothing follows the height
+    expect(Math.abs((await cap(page, '#h24')).L / 24 - (await cap(page, '#h96')).L / 96)).toBeLessThan(0.01)
     // the pseudo-element path builds the same shape from its own size variable
     const a = await cap(page, '#pseudo', '--pill-clip-a')
     expect(Math.abs(a.L - ramp(a.s) * a.s / 2)).toBeLessThan(0.3)

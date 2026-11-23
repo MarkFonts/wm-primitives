@@ -102,21 +102,17 @@ done with `corner-shape`: any superellipse above 1 flattens the nose (curvature 
 extreme). They get an eased cap, chosen by its **choke**: L : (h/2), where L is the distance
 from the pill's end to where the curve leaves the straight. A round cap is 1:1. The depth never
 changes (the nose touches the end, the cap is h/2 deep, the CSS radius stays h/2); only the choke
-moves, and it moves with the pill's height:
+moves, and it is one number for every pill:
 
-    ratio(h) = clamp(1.15, 1.3 − 0.15 · (h − 24) / 72, 1.3), rounded to 0.01
+    ratio = 1.2   (L = 0.6 h from the end, at every height)
 
-| pill height | 24 and below | 32 | 48 | 96 and above |
-| --- | --- | --- | --- | --- |
-| choke L : (h/2) | 1.30 | 1.28 | 1.25 | 1.15 |
-
-A short pill has little straight to spend and a tall one has room to bend early, so the choke
-eases from 1.3:1 at 24px tall to 1.15:1 at 96px and holds at both ends. Per quarter the cap is a
+Mark chose it fixed. (A ramp, 1.3:1 at 24px tall easing to 1.15:1 at 96px, was built first and
+replaced.) Per quarter the cap is a
 straight, a linear curvature ramp (length T), a circular arc (radius R) and the nose, G2
 throughout. For unit R, T is bisected in [0, π] until the end's x/y equals the ratio, then the
 curve is scaled so y = h/2. It is drawn with `clip-path: shape()` (Chrome 135, Safari 18.4,
 Firefox 148; elsewhere plain round), three cubics per quarter, built by `corners.js`
-(`pillRatio`, `pillCap`, `pillShape`) for each pill's own ratio and cached by ratio. The fit
+(`pillRatio`, `pillCap`, `pillShape`) and cached by ratio, so a page holds one shape per axis. The fit
 is within 0.015px of the exact curve at 96px tall; `node scripts/gen-pill-shape.mjs --check`
 audits it.
 
@@ -125,13 +121,13 @@ box-shadow, outline, children. So the clip is *everything except the sliver betw
 cap and the eased one*: evenodd of a box 4000px past the element, the round stadium (exact
 arcs), and the eased stadium. The pill underneath is forced to `corner-shape: round`, so its
 own fill is the round stadium, and the clip shaves it to the eased one. The eased cap lies
-inside the round one everywhere, by at most 0.0066 h at the 1.30 choke (0.16px on a 24px pill)
-and 0.0017 h at 1.15 (0.17px on a 96px pill), so:
+inside the round one everywhere, by at most 0.003 h at the 1.2 choke (0.07px on a 24px pill,
+0.29px on a 96px one), so:
 
 | paint | what happens under the flag |
 | --- | --- |
 | fill | the eased cap, exactly (pixel-diffed against the bench's own clip: 4× closer than round at 200px) |
-| border, inset press ring, confirm blink | drawn by the engine on the round curve; the clip trims their outer edge to the eased one (≤ 0.0066 h) |
+| border, inset press ring, confirm blink | drawn by the engine on the round curve; the clip trims their outer edge to the eased one (≤ 0.003 h) |
 | focus ring (`outline`, any offset ≥ 0) | **not clipped**: it lies outside the round box, which the clip keeps whole. Still the engine's round ring, 2px off the body |
 | box-shadow, a ring of ground (`.wm-hd-pill`), the accent pill's spill | not clipped, same reason |
 | children that overhang the box | not clipped, except where they cross the sliver |
@@ -146,8 +142,8 @@ shadow exactly as a clip does, and the accent button's HDR light must never pass
 mask).
 
 **`corners.js`** finds the pills, because "pill" is a numbers decision, not a class: radius
-≥ half the short side, long side ≥ ratio × short (at most 1.3×; shorter and the two caps would
-cross), short side ≥ 8px (below that the eased cap is within 0.05px of round). It marks
+≥ half the short side, long side ≥ 1.2 × short (shorter and the two caps would
+cross), short side ≥ 8px (below that the eased cap is within 0.03px of round). It marks
 `data-wm-pill="x" | "y"` with `--pill-s` and `--pill-clip` (the `shape()` for that height; a
 vertical pill, like a grip, is `y`), and a pill `::before` / `::after` on its host as
 `data-wm-pill-b` / `data-wm-pill-a` with `--pill-s-b` / `--pill-clip-b` (and `-a`). A ResizeObserver on every rounded element and a
@@ -158,8 +154,7 @@ sliver. Without `shape()` support corners.js marks nothing, so a pill keeps toda
 mimics carry it). Without `corners.js` a pill keeps today's corner.
 
 **The cap rule** (space.css) under the flag is `padding-x ≥ 0.7 r` for both shapes. On the
-pill the choke moves the number a little: 95% of the height is reached at 0.70 r at 1.15 and 0.73 r at
-1.30, 99% at 0.89 r and 0.97 r (round: 0.69 r and 0.86 r).
+pill at the 1.2 choke, 95% of the height is reached at 0.71 r and 99% at 0.91 r (round: 0.69 r and 0.86 r).
 
 Spec: `tests/behaviour/corners.spec.ts` (C1–C6) on `tests/fixtures/corners.html`.
 

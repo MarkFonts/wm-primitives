@@ -58,14 +58,16 @@
  *     padding-x  >=  0.7 x border-radius          (the radius as WRITTEN, before --corner-scale)
  *
  * Both shapes land on the same number. A pill's eased cap keeps the round depth and chokes the
- * curve in (it leaves the straight L = 0.65 h from the end at 24px tall, easing to 0.575 h at 96px
- * and above), so it gives the height back more slowly than the superellipse did: 95% by 0.70r at
- * 96px and 0.73r at 24px, 99% by 0.89r and 0.97r (circle: 0.69r, 0.86r).
+ * curve in (it leaves the straight L = 0.6 h from the end, at every height), so it gives the
+ * height back more slowly than the superellipse did: 95% by 0.71r, 99% by 0.91r (circle: 0.69r,
+ * 0.86r).
  * A rect keeps superellipse(1.2) on a radius grown by 1.125, so its numbers above scale by 1.125:
  * 95% by 0.69r, 99% by 0.91r of the written radius.
  *
- * Under the flag the house chip (12px on a 27px pill, 0.89r) keeps 98%. ssd-chip (6px on an ~18px
- * pill, 0.67r) drops from 98.9% to 93% -- just under the 95% line; left as it is, noted here.
+ * Under the flag, measured at the 1.2 choke, height at the text edge: zone-chip / the house chip
+ * (12px on a 27px pill, 0.89r) keeps 98.8% (round: 99.4%). ssd-chip as the system page draws it
+ * (7px on a 16px pill, 0.88r) keeps 98.6%. The older "6px on an ~18px pill" figure (0.67r) would
+ * be 93.7%, just under the 95% line. Nothing is changed; noted here.
  */
 
 /* ── The alignment rule ───────────────────────────────────────────────────────────
