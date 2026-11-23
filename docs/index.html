@@ -1103,7 +1103,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     block-size: 27px;   
     font-family: var(--ui-font, system-ui, sans-serif);
     color: var(--text-muted, rgba(232, 232, 232, .62));
-  }.wm-chrome .wm-zoom-box{ display: flex; align-items: center; justify-content: flex-end; flex: 1 1 auto; min-inline-size: 0; block-size: 100%; }.wm-chrome .wm-zoom .wm-icon-btn{
+  }.wm-chrome .wm-zoom .wm-icon-btn:focus-visible{ outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }.wm-chrome .wm-zoom .wm-hd-rail:focus-visible{ outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }.wm-chrome .wm-zoom-box{ display: flex; align-items: center; justify-content: flex-end; flex: 1 1 auto; min-inline-size: 0; block-size: 100%; }.wm-chrome .wm-zoom .wm-icon-btn{
     --icon-btn-pad: 0;   
     flex: none;
     inline-size: 27px;
@@ -1157,7 +1157,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     grid-template-columns: max-content;
     justify-items: stretch;
     row-gap: var(--spacing-02, 6px);
-  }.wm-chrome .wm-theme-stack > :first-child{ justify-content: flex-end; min-block-size: 27px; }.wm-chrome .wm-theme-stack > .wm-zoom[data-collapse]{ justify-self: end; }.wm-chrome .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]){ justify-self: stretch; }.wm-chrome .wm-theme-row{ display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }.wm-chrome .wm-theme-row > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }.wm-chrome .wm-theme-stack > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }@media (pointer: coarse){.wm-chrome .wm-theme-stack > :first-child{ min-block-size: 33px; }.wm-chrome .wm-theme-stack > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }.wm-chrome .wm-theme-row{ min-block-size: 33px; }.wm-chrome .wm-theme-row > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
+  }.wm-chrome .wm-theme-stack > :first-child{ justify-content: flex-end; min-block-size: 27px; }.wm-chrome .wm-theme-stack > .wm-zoom[data-collapse]{ justify-self: end; }.wm-chrome .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]){ justify-self: stretch; }.wm-chrome .wm-theme .wm-icon-btn:focus-visible{ outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }.wm-chrome .wm-theme-row{ display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }.wm-chrome .wm-theme-row > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }.wm-chrome .wm-theme-stack > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }@media (pointer: coarse){.wm-chrome .wm-theme-stack > :first-child{ min-block-size: 33px; }.wm-chrome .wm-theme-stack > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }.wm-chrome .wm-theme-row{ min-block-size: 33px; }.wm-chrome .wm-theme-row > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
   }
 }@layer wm.icon{@media (pointer: coarse){.wm-chrome :is(.wm-theme-stack,.wm-chrome .wm-theme-row) > .wm-theme .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
   }
@@ -1215,7 +1215,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     color: var(--text, inherit);
     background: var(--surface-hi, var(--surface));
     border: 1px solid var(--border);
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     filter: var(--toast-shadow);
     transition: opacity var(--dur-med, 240ms) var(--ease, ease), translate var(--dur-med, 240ms) var(--ease, ease);
@@ -1243,6 +1243,8 @@ html,body{margin:0;padding:0;background:var(--bg)}
     line-height: var(--type-ui-lead, 15px);
     color: var(--text-muted, currentColor);
   }
+  
+  .wm-toast :is(button, [tabindex]):focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }
   .wm-toast > .wm-menu { flex: 0 0 auto; }
   .wm-toast > .wm-menu--mark { padding: 0 var(--spacing-03, 8px); }
 
@@ -1431,7 +1433,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     color: var(--text-muted, rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62)));
     background: transparent;
     border: 0;
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     cursor: pointer;
     white-space: nowrap;
@@ -1491,7 +1493,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     display: flex;
     padding: var(--tick, 3px);
     gap: var(--tick, 3px);
-    border-radius: calc(var(--radius, 8px) + var(--tick, 3px));
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1) + var(--tick, 3px));   
     corner-shape: superellipse(var(--corner-k, 1.2));
     background: color-mix(in oklab, var(--bg, #0f0f0f) 70%, black);
   }.wm-toasts .wm-menu-seg > .wm-menu{ flex: 1 1 0; min-height: 30px; }.wm-toasts .wm-field{
@@ -1500,7 +1502,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     box-sizing: border-box;
     min-height: 36px;
     width: 100%;
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     overflow: hidden;
     font-family: var(--ui-font, system-ui, sans-serif);
@@ -1581,6 +1583,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   }:root[data-theme="light"] .wm-toasts .wm-menu:not(.active):not(:disabled):hover > .wm-icon:not(.wm-icon--off){ --icon-grad: 150; }
 }
 .wm-toasts{--text:var(--ink);--text-muted:var(--ink-2);--text-dim:var(--ink-3);--border:var(--line);--text-rgb:232,232,232}@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .wm-toasts{--text-rgb:22,22,22}}:root[data-theme="light"] .wm-toasts{--text-rgb:22,22,22}
+:root{--corner-scale:1}:root[data-corners="eased"] { --corner-scale: 1.125;}:root[data-corners="eased"] [data-wm-pill], :root[data-corners="eased"] [data-wm-pill-b]::before, :root[data-corners="eased"] [data-wm-pill-a]::after { corner-shape: round !important;}:root[data-corners="eased"] [data-wm-pill] { clip-path: var(--pill-clip) !important;}:root[data-corners="eased"] [data-wm-pill-b]::before { clip-path: var(--pill-clip-b) !important;}:root[data-corners="eased"] [data-wm-pill-a]::after { clip-path: var(--pill-clip-a) !important;}
 /* ===== readme ===== */
 #s-readme .readme{max-width:72ch;font-size:var(--type-body-size,1rem)}#s-readme .readme p{margin:0 0 15px}#s-readme .readme ul,#s-readme .readme ol{margin:0 0 15px;padding-left:1.3em}#s-readme .readme li{margin:0 0 6px}#s-readme .readme code{font-family:"PaperMono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}#s-readme .readme a{color:inherit;text-decoration:underline;text-underline-offset:.15em;text-decoration-color:var(--dim,currentColor)}#s-readme .readme a:hover{text-decoration-color:currentColor}
 
@@ -4116,7 +4119,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     grid-template-columns: max-content;
     justify-items: stretch;
     row-gap: var(--spacing-02, 6px);
-  }#s-corners .part-2 .wm-theme-stack > :first-child{ justify-content: flex-end; min-block-size: 27px; }#s-corners .part-2 .wm-theme-stack > .wm-zoom[data-collapse]{ justify-self: end; }#s-corners .part-2 .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]){ justify-self: stretch; }#s-corners .part-2 .wm-theme-row{ display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }#s-corners .part-2 .wm-theme-row > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }#s-corners .part-2 .wm-theme-stack > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }@media (pointer: coarse){#s-corners .part-2 .wm-theme-stack > :first-child{ min-block-size: 33px; }#s-corners .part-2 .wm-theme-stack > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }#s-corners .part-2 .wm-theme-row{ min-block-size: 33px; }#s-corners .part-2 .wm-theme-row > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
+  }#s-corners .part-2 .wm-theme-stack > :first-child{ justify-content: flex-end; min-block-size: 27px; }#s-corners .part-2 .wm-theme-stack > .wm-zoom[data-collapse]{ justify-self: end; }#s-corners .part-2 .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]){ justify-self: stretch; }#s-corners .part-2 .wm-theme .wm-icon-btn:focus-visible{ outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }#s-corners .part-2 .wm-theme-row{ display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }#s-corners .part-2 .wm-theme-row > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }#s-corners .part-2 .wm-theme-stack > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }@media (pointer: coarse){#s-corners .part-2 .wm-theme-stack > :first-child{ min-block-size: 33px; }#s-corners .part-2 .wm-theme-stack > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }#s-corners .part-2 .wm-theme-row{ min-block-size: 33px; }#s-corners .part-2 .wm-theme-row > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
   }
 }@layer wm.icon{@media (pointer: coarse){#s-corners .part-2 :is(.wm-theme-stack,#s-corners .part-2 .wm-theme-row) > .wm-theme .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
   }
@@ -4149,7 +4152,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     color: var(--text-muted, rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62)));
     background: var(--surface, transparent);
     border: 1px solid var(--border, currentColor);
-    border-radius: var(--radius, 6px);
+    border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     cursor: pointer;
     white-space: nowrap;
@@ -4193,7 +4196,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     color: var(--text-muted, rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62)));
     background: transparent;
     border: 0;
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     cursor: pointer;
     white-space: nowrap;
@@ -4253,7 +4256,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     display: flex;
     padding: var(--tick, 3px);
     gap: var(--tick, 3px);
-    border-radius: calc(var(--radius, 8px) + var(--tick, 3px));
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1) + var(--tick, 3px));   
     corner-shape: superellipse(var(--corner-k, 1.2));
     background: color-mix(in oklab, var(--bg, #0f0f0f) 70%, black);
   }#s-corners .part-2 .wm-menu-seg > .wm-menu{ flex: 1 1 0; min-height: 30px; }#s-corners .part-2 .wm-field{
@@ -4262,7 +4265,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     box-sizing: border-box;
     min-height: 36px;
     width: 100%;
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     overflow: hidden;
     font-family: var(--ui-font, system-ui, sans-serif);
@@ -4615,7 +4618,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   }#s-controls .slider-row--boxed .slider-number{
     background: var(--bg-elevated, var(--surface));
     border: 1px solid var(--border);
-    border-radius: var(--radius, 6px);
+    border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     padding: 4px 6px;
     text-decoration: none;
@@ -4703,7 +4706,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
       var(--track-empty, var(--surface-hi)) var(--locked-pct, 100%),
       var(--track-empty, var(--surface-hi)) 100%
     );
-    border-radius: 1px;
+    border-radius: calc(1px * var(--corner-scale, 1));
   }#s-controls .slider-track-wrap input[type="range"]::-webkit-slider-thumb{
     -webkit-appearance: none;
     width: var(--dial-thumb, 14px); height: var(--dial-thumb, 14px); border-radius: 50%;
@@ -4718,7 +4721,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
       var(--track-empty, var(--surface-hi)) var(--locked-pct, 100%),
       var(--track-empty, var(--surface-hi)) 100%
     );
-    border-radius: 1px;
+    border-radius: calc(1px * var(--corner-scale, 1));
   }#s-controls .slider-track-wrap input[type="range"]::-moz-range-thumb{
     width: var(--dial-thumb, 14px); height: var(--dial-thumb, 14px); border-radius: 50%;
     background: var(--text); border: none; cursor: pointer;
@@ -4728,27 +4731,27 @@ html,body{margin:0;padding:0;background:var(--bg)}
     color: var(--text);
     background: var(--bg-elevated, var(--surface));
     border: 1px solid var(--border);
-    border-radius: var(--radius, 6px);
+    border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
     padding: var(--spacing-01, 4px) var(--spacing-03, 8px);
     pointer-events: none;
     z-index: 1000;
     white-space: nowrap;
     animation: hint-fade var(--dur-hint, 3s) forwards;
   }@keyframes hint-fade{ 0% { opacity: 1; } 60% { opacity: 1; } 100% { opacity: 0; } }#s-controls .slider-row--diamond input[type="range"]::-webkit-slider-thumb{
-    width: 12px; height: 12px; border-radius: 2px;
+    width: 12px; height: 12px; border-radius: calc(2px * var(--corner-scale, 1));
     background: var(--marker-default, var(--accent, var(--signal)));
     transform: rotate(45deg);
     box-shadow: 0 0 0 1px var(--bg);
     
     margin-top: calc((2px - 12px) / 2);
   }#s-controls .slider-row--diamond input[type="range"]::-moz-range-thumb{
-    width: 12px; height: 12px; border-radius: 2px;
+    width: 12px; height: 12px; border-radius: calc(2px * var(--corner-scale, 1));
     background: var(--marker-default, var(--accent, var(--signal)));
     transform: rotate(45deg);
     box-shadow: 0 0 0 1px var(--bg);
   }#s-controls .slider-ref{
     position: absolute; top: 12px; width: 8px; height: 8px; margin-left: -4px;
-    border-radius: 1px; background: var(--text-muted); opacity: 0.28;
+    border-radius: calc(1px * var(--corner-scale, 1)); background: var(--text-muted); opacity: 0.28;
     transform: translateY(-50%) rotate(45deg); 
     pointer-events: none; z-index: 0;
   }#s-controls .slider-row--skeletal input[type="range"]::-webkit-slider-thumb{ width: 10px; height: 10px; margin-top: -4px; }#s-controls .slider-row--skeletal input[type="range"]::-moz-range-thumb{ width: 10px; height: 10px; }#s-controls .slider-suffix{
@@ -4763,7 +4766,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     position: relative; z-index: 1;
     pointer-events: none;                     
     min-height: 30px; padding: 0 var(--spacing-04, 12px);
-    border-radius: var(--radius, 6px);
+    border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     background:
       linear-gradient(to right,
@@ -4774,7 +4777,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   }#s-controls .slider-row--track .slider-number,#s-controls .slider-row--track .slider-step,#s-controls .slider-row--track .slider-auto{ pointer-events: auto; }#s-controls .slider-row--track .slider-track-wrap input[type="range"]:focus-visible{
     outline: 2px solid var(--signal-ink, var(--accent, currentColor));
     outline-offset: 2px;
-    border-radius: var(--radius, 6px);
+    border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
   }#s-controls .slider-number::selection{ background: var(--accent, var(--signal)); color: var(--bg, var(--surface)); }#s-controls .slider-row--track .slider-label{ user-select: none; }#s-controls .slider-row--track .slider-number{ user-select: text; }@media (pointer: coarse){#s-controls .slider-row--track{ min-height: 48px; justify-content: center; }#s-controls .slider-row--track .slider-label{
       min-height: 30px;
       transition: min-height var(--dur-fast, .12s) ease;
@@ -4804,7 +4807,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     border-bottom: calc(var(--ref-w) / 2) solid rgba(var(--text-rgb, 232, 232, 232), .55);
     border-top: 0;
     opacity: 1;
-  }#s-controls .slider-row--track{ --grip-w: 4px; --grip-c: var(--text-dim); --grip-in: 6px; --grip-v: 4px; --name-c: color-mix(in srgb, var(--text) calc(var(--a-2, .62) * 100%), var(--surface)); --fill-r: var(--radius, 6px); --fill-c: var(--surface-hi); }#s-controls .slider-row--track:hover,#s-controls .slider-row--track.slider-row--engaged,#s-controls .slider-row--track:focus-within{ --grip-w: 6px; --grip-c: var(--accent, var(--signal)); --fill-c: color-mix(in srgb, var(--surface-hi), var(--text) 8%); }#s-controls .slider-row--track .slider-label{ isolation: isolate; }#s-controls .slider-row--track .slider-label-text{ color: var(--name-c); }#s-controls .slider-row--track .slider-label::after{
+  }#s-controls .slider-row--track{ --grip-w: 4px; --grip-c: var(--text-dim); --grip-in: 6px; --grip-v: 4px; --name-c: color-mix(in srgb, var(--text) calc(var(--a-2, .62) * 100%), var(--surface)); --fill-r: calc(var(--radius, 6px) * var(--corner-scale, 1)); --fill-c: var(--surface-hi); }#s-controls .slider-row--track:hover,#s-controls .slider-row--track.slider-row--engaged,#s-controls .slider-row--track:focus-within{ --grip-w: 6px; --grip-c: var(--accent, var(--signal)); --fill-c: color-mix(in srgb, var(--surface-hi), var(--text) 8%); }#s-controls .slider-row--track .slider-label{ isolation: isolate; }#s-controls .slider-row--track .slider-label-text{ color: var(--name-c); }#s-controls .slider-row--track .slider-label::after{
     content: '';
     position: absolute; z-index: -1;
     top: var(--grip-v); bottom: var(--grip-v);
@@ -4904,7 +4907,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
   text-decoration-color: var(--text-muted, currentColor);
-}#s-controls .triplet-num:focus{ outline: none; }#s-controls .triplet-f:focus-within .triplet-num{
+}#s-controls .triplet-num:focus:not(:focus-visible){ outline: none; }#s-controls .triplet-num:focus-visible{ outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }#s-controls .triplet-f:focus-within .triplet-num{
   color: var(--signal-ink, var(--accent, currentColor));
   text-decoration-color: var(--signal-ink, var(--accent, currentColor));
   text-decoration-thickness: 2px;
@@ -5122,7 +5125,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     grid-template-columns: max-content;
     justify-items: stretch;
     row-gap: var(--spacing-02, 6px);
-  }#s-controls .wm-theme-stack > :first-child{ justify-content: flex-end; min-block-size: 27px; }#s-controls .wm-theme-stack > .wm-zoom[data-collapse]{ justify-self: end; }#s-controls .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]){ justify-self: stretch; }#s-controls .wm-theme-row{ display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }#s-controls .wm-theme-row > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }#s-controls .wm-theme-stack > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }@media (pointer: coarse){#s-controls .wm-theme-stack > :first-child{ min-block-size: 33px; }#s-controls .wm-theme-stack > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }#s-controls .wm-theme-row{ min-block-size: 33px; }#s-controls .wm-theme-row > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
+  }#s-controls .wm-theme-stack > :first-child{ justify-content: flex-end; min-block-size: 27px; }#s-controls .wm-theme-stack > .wm-zoom[data-collapse]{ justify-self: end; }#s-controls .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]){ justify-self: stretch; }#s-controls .wm-theme .wm-icon-btn:focus-visible{ outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }#s-controls .wm-theme-row{ display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }#s-controls .wm-theme-row > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }#s-controls .wm-theme-stack > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }@media (pointer: coarse){#s-controls .wm-theme-stack > :first-child{ min-block-size: 33px; }#s-controls .wm-theme-stack > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }#s-controls .wm-theme-row{ min-block-size: 33px; }#s-controls .wm-theme-row > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
   }
 }@layer wm.icon{@media (pointer: coarse){#s-controls :is(.wm-theme-stack,#s-controls .wm-theme-row) > .wm-theme .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
   }
@@ -5147,7 +5150,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     block-size: 27px;   
     font-family: var(--ui-font, system-ui, sans-serif);
     color: var(--text-muted, rgba(232, 232, 232, .62));
-  }#s-controls .wm-zoom-box{ display: flex; align-items: center; justify-content: flex-end; flex: 1 1 auto; min-inline-size: 0; block-size: 100%; }#s-controls .wm-zoom .wm-icon-btn{
+  }#s-controls .wm-zoom .wm-icon-btn:focus-visible{ outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }#s-controls .wm-zoom .wm-hd-rail:focus-visible{ outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }#s-controls .wm-zoom-box{ display: flex; align-items: center; justify-content: flex-end; flex: 1 1 auto; min-inline-size: 0; block-size: 100%; }#s-controls .wm-zoom .wm-icon-btn{
     --icon-btn-pad: 0;   
     flex: none;
     inline-size: 27px;
@@ -5470,7 +5473,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     color: var(--text-muted, rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62)));
     background: transparent;
     border: 0;
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     cursor: pointer;
     white-space: nowrap;
@@ -5530,7 +5533,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     display: flex;
     padding: var(--tick, 3px);
     gap: var(--tick, 3px);
-    border-radius: calc(var(--radius, 8px) + var(--tick, 3px));
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1) + var(--tick, 3px));   
     corner-shape: superellipse(var(--corner-k, 1.2));
     background: color-mix(in oklab, var(--bg, #0f0f0f) 70%, black);
   }#s-controls .part-1 .wm-menu-seg > .wm-menu{ flex: 1 1 0; min-height: 30px; }#s-controls .part-1 .wm-field{
@@ -5539,7 +5542,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     box-sizing: border-box;
     min-height: 36px;
     width: 100%;
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     overflow: hidden;
     font-family: var(--ui-font, system-ui, sans-serif);
@@ -6020,7 +6023,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     color: var(--text-muted, rgba(var(--text-rgb, 232, 232, 232), var(--ink-quiet, .62)));
     background: transparent;
     border: 0;
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     cursor: pointer;
     white-space: nowrap;
@@ -6080,7 +6083,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     display: flex;
     padding: var(--tick, 3px);
     gap: var(--tick, 3px);
-    border-radius: calc(var(--radius, 8px) + var(--tick, 3px));
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1) + var(--tick, 3px));   
     corner-shape: superellipse(var(--corner-k, 1.2));
     background: color-mix(in oklab, var(--bg, #0f0f0f) 70%, black);
   }#s-controls .part-2 .wm-menu-seg > .wm-menu{ flex: 1 1 0; min-height: 30px; }#s-controls .part-2 .wm-field{
@@ -6089,7 +6092,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     box-sizing: border-box;
     min-height: 36px;
     width: 100%;
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     overflow: hidden;
     font-family: var(--ui-font, system-ui, sans-serif);
@@ -6199,7 +6202,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     color: var(--text, inherit);
     background: var(--surface-hi, var(--surface));
     border: 1px solid var(--border);
-    border-radius: var(--radius, 8px);
+    border-radius: calc(var(--radius, 8px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     filter: var(--toast-shadow);
     transition: opacity var(--dur-med, 240ms) var(--ease, ease), translate var(--dur-med, 240ms) var(--ease, ease);
@@ -6220,7 +6223,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     font-size: var(--type-ui-size, 0.75rem);
     line-height: var(--type-ui-lead, 15px);
     color: var(--text-muted, currentColor);
-  }#s-controls .part-2 .wm-toast > .wm-menu{ flex: 0 0 auto; }#s-controls .part-2 .wm-toast > .wm-menu--mark{ padding: 0 var(--spacing-03, 8px); }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .part-2 .wm-toast{
+  }#s-controls .part-2 .wm-toast :is(button,#s-controls .part-2 [tabindex]):focus-visible{ outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }#s-controls .part-2 .wm-toast > .wm-menu{ flex: 0 0 auto; }#s-controls .part-2 .wm-toast > .wm-menu--mark{ padding: 0 var(--spacing-03, 8px); }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .part-2 .wm-toast{
       --toast-shadow: drop-shadow(0 1px 2px rgb(0 0 0 / .10)) drop-shadow(0 9px 24px rgb(0 0 0 / .14));
     }
   }:root[data-theme="light"] #s-controls .part-2 .wm-toast{
@@ -6264,7 +6267,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   font-weight: 700;
 }#s-controls .part-3 .wm-accent[data-shape="chip"]{
   block-size: 32px; padding: 0 var(--spacing-04, 12px);
-  border-radius: 8px;                                          
+  border-radius: calc(8px * var(--corner-scale, 1));                                          
   corner-shape: superellipse(var(--corner-k, 1.2));
 }#s-controls .part-3 .wm-accent[data-look="q5"][data-shape="pill"]{ inline-size: 225px; block-size: 32px; }#s-controls .part-3 .wm-accent[data-look="q5"]{ --ab-mt: 14px; --ab-mb: 62px; --ab-mx: 52px; --ab-oy: 47px; }#s-controls .part-3 .wm-accent[data-look="q5"][data-shape="chip"]{ --ab-mb: 46px; --ab-oy: 46px; }#s-controls .part-3 .wm-accent[data-look="q5"],#s-controls .part-3 .wm-accent[data-look="q5"]:hover:not(:disabled),#s-controls .part-3 .wm-accent[data-look="q5"]:active:not(:disabled){
   background:
@@ -6292,7 +6295,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
   border-color: var(--ab-off-line);
   color: var(--ab-off-ink); -webkit-text-fill-color: var(--ab-off-ink);
 }#s-controls .part-3 .wm-accent[data-look="q5"]:disabled::before,#s-controls .part-3 .wm-accent[data-look="q5"]:disabled::after{ display: none; }#s-controls .part-3 .wm-accent[data-look="q5"] .wm-accent__lab::before{ position: absolute; z-index: -1; pointer-events: none; inset: -1px 0 0 0; }#s-controls .part-3 .wm-accent[data-look="q5"][data-shape="pill"] .wm-accent__lab::before{ border-radius: 999px; corner-shape: round; }#s-controls .part-3 .wm-accent[data-look="q5"][data-shape="chip"] .wm-accent__lab::before{
-  border-radius: 8px; corner-shape: superellipse(var(--corner-k, 1.2));
+  border-radius: calc(8px * var(--corner-scale, 1)); corner-shape: superellipse(var(--corner-k, 1.2));
   border: 0 solid transparent; border-image-slice: 0 52 0 52 fill; border-image-width: 0 26px 0 26px; border-image-repeat: stretch;
 }@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #s-controls .part-3 .wm-accent[data-look="q5"]{
     --ab-face: #161616;                                          
@@ -7918,7 +7921,7 @@ html,body{margin:0;padding:0;background:var(--bg)}
     grid-template-columns: max-content;
     justify-items: stretch;
     row-gap: var(--spacing-02, 6px);
-  }#s-color .wm-theme-stack > :first-child{ justify-content: flex-end; min-block-size: 27px; }#s-color .wm-theme-stack > .wm-zoom[data-collapse]{ justify-self: end; }#s-color .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]){ justify-self: stretch; }#s-color .wm-theme-row{ display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }#s-color .wm-theme-row > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }#s-color .wm-theme-stack > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }@media (pointer: coarse){#s-color .wm-theme-stack > :first-child{ min-block-size: 33px; }#s-color .wm-theme-stack > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }#s-color .wm-theme-row{ min-block-size: 33px; }#s-color .wm-theme-row > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
+  }#s-color .wm-theme-stack > :first-child{ justify-content: flex-end; min-block-size: 27px; }#s-color .wm-theme-stack > .wm-zoom[data-collapse]{ justify-self: end; }#s-color .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]){ justify-self: stretch; }#s-color .wm-theme .wm-icon-btn:focus-visible{ outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }#s-color .wm-theme-row{ display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }#s-color .wm-theme-row > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }#s-color .wm-theme-stack > .wm-theme .wm-icon-btn{ --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }@media (pointer: coarse){#s-color .wm-theme-stack > :first-child{ min-block-size: 33px; }#s-color .wm-theme-stack > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }#s-color .wm-theme-row{ min-block-size: 33px; }#s-color .wm-theme-row > .wm-theme .wm-icon-btn{ inline-size: 33px; block-size: 33px; }
   }
 }@layer wm.icon{@media (pointer: coarse){#s-color :is(.wm-theme-stack,#s-color .wm-theme-row) > .wm-theme .wm-icon-btn{ min-inline-size: 0; min-block-size: 0; }
   }
@@ -8988,6 +8991,11 @@ of 168 corners, <b>87</b> take the law, 13 are circles carved out, and 32 sit in
 <code>App.css</code>. Live surface: <b>42</b>.</p>
 <div class="bar"><b>k</b><button data-k="1">1 round</button><button data-k="1.1">1.1</button><button data-k="1.2" class="on">1.2</button>
  <button data-k="1.5">1.5</button><button data-k="2">2</button></div>
+<div class="bar"><b>Law</b><button data-law="" class="on">Today</button><button data-law="eased">Eased (flag)</button></div>
+<p class="lede lede--sub">Eased is the flag <code>&lt;html data-corners="eased"&gt;</code> (corners.css, corners.js): every
+radius &times;1.125 under <code>superellipse(1.2)</code>, and every pill gets an eased cap with the round cap's
+depth and a tighter choke: the curve leaves the straight 1.2 &times; h/2 from the end, at every height. It flips the
+whole page, so every chapter's primitives can be compared. <code>?corners=eased</code> opens the page with it on.</p>
 
 <h2 id="corners-c1" class="wm-h2">The 5 pills <span>999px in situ &mdash; k comes from the toggle</span></h2>
 <div class="grid g3"><div class="c"><div class="c-name">zone-chip<span class="c-src">shell.css</span></div>
@@ -11096,9 +11104,16 @@ stack&#8217;s stow is a translate, the confirm a custom property that only paint
 
 })();
 (function(){var ROOT=document.getElementById('s-corners');if(!ROOT)return;
-ROOT.querySelectorAll('.bar button').forEach(b=>b.onclick=()=>{
- ROOT.querySelectorAll('.bar button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+ROOT.querySelectorAll('.bar [data-k]').forEach(b=>b.onclick=()=>{
+ ROOT.querySelectorAll('.bar [data-k]').forEach(x=>x.classList.remove('on'));b.classList.add('on');
  document.documentElement.style.setProperty('--k',b.dataset.k);});
+const lawBtns=ROOT.querySelectorAll('.bar [data-law]');
+const lawShow=()=>lawBtns.forEach(x=>x.classList.toggle('on',(document.documentElement.dataset.corners||'')===x.dataset.law));
+lawBtns.forEach(b=>b.onclick=()=>{
+ const r=document.documentElement; if(b.dataset.law) r.dataset.corners=b.dataset.law; else delete r.dataset.corners;
+ const u=new URL(location.href); if(b.dataset.law) u.searchParams.set('corners',b.dataset.law); else u.searchParams.delete('corners');
+ history.replaceState(null,'',u); lawShow();});
+lawShow();
 
 const b=document.body;
 document.getElementById('corners-bOff').onclick=e=>{b.removeAttribute('data-force');e.target.classList.add('on');bOn.classList.remove('on')};
@@ -13301,7 +13316,8 @@ ctl('dither', v => {
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
 })();
 </script>
-<script>/* confirm.js -- wmConfirm(el): the receipt for a press that worked (GESTURES.md \u00A714).
+<script>(function(){var c=new URLSearchParams(location.search).get('corners');if(c)document.documentElement.dataset.corners=c})();
+/* confirm.js -- wmConfirm(el): the receipt for a press that worked (GESTURES.md \u00A714).
  *
  * Adds .wm-confirm to el; motion.css runs the one keyframe set (80ms press look OFF, 80ms
  * ON) and this takes the class off on its animationend, with a timeout in case the
@@ -14193,6 +14209,300 @@ if (typeof window !== 'undefined') window.wmJxl = wmJxl;
 // The semicolon matters: the docs shell concatenates plain scripts, and a bare `wmJxl()` before a line that opens
 // with `(` is called again with that line as its argument.
 wmJxl();
+
+/* corners.js -- the eased corner law's one piece of JS (CHROME.md, "Corners").
+ *
+ * The law itself is CSS (corners.css). What CSS cannot do is know which elements are PILLS:
+ * a pill is a shape decision made by numbers (radius >= half the short side), not by a class,
+ * and the eased cap's clip-path needs the pill's short side as a length, because shape()
+ * resolves x percentages against the width. So this file, and only while
+ * <html data-corners="eased"> is set:
+ *
+ *   - finds every element whose four corners are all at least half its short side, on a box
+ *     that is not square (a circle stays a circle), and marks it data-wm-pill="x" | "y" with
+ *     --pill-s: <short side>px and --pill-clip: the clip-path shape() for its height (below).
+ *     A pill ::before / ::after is marked on its host as data-wm-pill-b / data-wm-pill-a with
+ *     --pill-s-b / --pill-s-a and --pill-clip-b / --pill-clip-a;
+ *   - keeps the marks true: a ResizeObserver on every rounded element, and a MutationObserver
+ *     for added nodes and class changes (a class can change a radius). Style-attribute writes
+ *     are ignored on purpose -- sliders write --pct every frame, and so does this file;
+ *   - takes every mark off again when the attribute goes.
+ *
+ * The clip only removes the sliver between the round cap and the eased one (at most 0.003 h, at
+ * a 1.2 choke), so a size that is a frame stale moves an almost invisible sliver; the observers
+ * re-measure before the next paint.
+ *
+ * Pills under 8px on the short side are left round (MIN_S, below). An element, a subtree or a
+ * single ::before / ::after opts out with --pill-ease: off. Plain script, no imports: build.py
+ * inlines it in the system page's shell (its `export` stripped) and a page without a bundler
+ * loads it as a module. Also on window.wmCorners. Starts itself when a document is present. */
+
+const MARK = 'data-wm-pill'
+const PSEUDO = [['::before', 'data-wm-pill-b', '--pill-s-b', '--pill-clip-b'], ['::after', 'data-wm-pill-a', '--pill-s-a', '--pill-clip-a']]
+// The curve leaves the straight L = ratio/2 x s from each end, so a pill shorter than ratio x s (1.2 s)
+// would have its two caps cross: it stays round.
+// Below 8px the eased cap is within 0.03px of round (0.003 h), so a clip would change nothing a
+// screen can show. Skipping them is not only economy: the dial's 4-6px grip sits under its shade
+// layer (AxisSlider.css, .slider-grip-shade: clip-path + drop-shadow), and Chrome 153 composited the
+// shade's light cast through a clipped grip as two white discs at its ends.
+const MIN_S = 8
+// shape() is Chrome 135, Safari 18.4, Firefox 148. Without it a pill is not marked at all and keeps today's
+// corner: the clip below is a var(), valid at parse time, so an unsupported engine would not drop it.
+const SHAPE_OK = typeof CSS !== 'undefined' && CSS.supports('clip-path', 'shape(from 0px 0px, line to 1px 1px, close)')
+
+// \u2500\u2500 The cap \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// Mark's rule (CHROME.md "Corners"): the cap is chosen by its CHOKE, L : (h/2), where L is the
+// distance from the pill's end to where the curve leaves the straight. A round cap is 1:1. The
+// depth never changes -- the nose touches the end, the cap is h/2 deep, CSS radius stays h/2 --
+// only the choke moves. Mark's call is one choke for every pill: 1.2, at every height. (A
+// 1.3 -> 1.15 ramp with height was built and replaced; pillRatio stays the one place a height
+// could matter again, and the shape cache is keyed by ratio.)
+const RATIO = 1.2
+
+/** The choke ratio L : (h/2) for a pill h px tall: 1.2 at every height. */
+function pillRatio(h) { return RATIO }
+
+// One quarter of the cap, walked from the straight to the nose: straight -> curvature ramps
+// linearly from 0 over length T -> a circular arc of radius 1 -> the nose, G2 throughout.
+// The heading is analytic in arc length; positions integrate it by the midpoint rule.
+// Returns the points (x along the pill, y across) and each one's heading, for unit R.
+function walk(T, n) {
+  const S = T + Math.PI / 2 - T / 2, ds = S / n
+  const th = s => s < T ? s * s / (2 * T) : T / 2 + (s - T)
+  const x = [0], y = [0], t = [0]
+  for (let i = 0; i < n; i++) {
+    const m = th((i + 0.5) * ds)
+    x.push(x[i] + Math.cos(m) * ds); y.push(y[i] + Math.sin(m) * ds); t.push(th((i + 1) * ds))
+  }
+  return { x, y, t, n, S }
+}
+
+// Bisect the ramp length T so the quarter's end has x / y = ratio (T = 0 is the circle, 1:1)
+function solveRamp(ratio) {
+  let lo = 0, hi = Math.PI
+  for (let i = 0; i < 44; i++) {
+    const m = (lo + hi) / 2, q = walk(m, 400)
+    q.x[400] / q.y[400] < ratio ? lo = m : hi = m
+  }
+  return (lo + hi) / 2
+}
+
+// The cap, scaled so the nose is h/2 deep: points in units of h, `a` = distance from the pill's
+// end along it, `c` = distance in from the side. The curve leaves the straight at a = L.
+const FIT_N = 1200
+function capPoints(ratio) {
+  const q = walk(solveRamp(ratio), FIT_N), k = 0.5 / q.y[FIT_N], L = q.x[FIT_N] * k
+  return { a: q.x.map(v => L - v * k), c: q.y.map(v => v * k), t: q.t, L, n: FIT_N }
+}
+
+// Knots of the three cubics per quarter, as fractions of the quarter's arc length. Tuned (see
+// scripts/gen-pill-shape.mjs --check) so the worst fit error over every ratio is 0.00014 h (0.014px on a 96px pill).
+const KNOTS = [0, 0.22, 0.42, 1]
+
+// Hermite cubic through P0..P3 with the known tangents at both ends, handles solved by least
+// squares against the dense points between them (linear in the two handle lengths).
+function cubic(cap, i0, i1) {
+  const { a, c, t } = cap
+  const P0 = [a[i0], c[i0]], P3 = [a[i1], c[i1]]
+  // the cap is walked from the straight; `a` falls toward the end, so the heading's a-component is negative
+  const d0 = [-Math.cos(t[i0]), Math.sin(t[i0])], d3 = [-Math.cos(t[i1]), Math.sin(t[i1])]
+  // chord-length parameter of each sample, refined twice against the fitted curve
+  const idx = []; for (let i = i0; i <= i1; i += Math.max(1, ((i1 - i0) / 80) | 0)) idx.push(i)
+  if (idx[idx.length - 1] !== i1) idx.push(i1)
+  let ts = idx.map(i => (i - i0) / (i1 - i0)), H = [0, 0]
+  for (let pass = 0; pass < 3; pass++) {
+    let m00 = 0, m01 = 0, m11 = 0, r0 = 0, r1 = 0
+    idx.forEach((i, j) => {
+      const u = ts[j], v = 1 - u
+      const b0 = v * v * v, b1 = 3 * v * v * u, b2 = 3 * v * u * u, b3 = u * u * u
+      const q = [a[i] - (P0[0] * (b0 + b1) + P3[0] * (b2 + b3)), c[i] - (P0[1] * (b0 + b1) + P3[1] * (b2 + b3))]
+      const e0 = [d0[0] * b1, d0[1] * b1], e1 = [-d3[0] * b2, -d3[1] * b2]
+      m00 += e0[0] * e0[0] + e0[1] * e0[1]; m01 += e0[0] * e1[0] + e0[1] * e1[1]; m11 += e1[0] * e1[0] + e1[1] * e1[1]
+      r0 += e0[0] * q[0] + e0[1] * q[1]; r1 += e1[0] * q[0] + e1[1] * q[1]
+    })
+    const det = m00 * m11 - m01 * m01
+    H = [(r0 * m11 - r1 * m01) / det, (m00 * r1 - m01 * r0) / det]
+    // re-parameterize: nearest point on the fitted cubic by a few Newton-free scans
+    const B = u => { const v = 1 - u, b0 = v * v * v, b1 = 3 * v * v * u, b2 = 3 * v * u * u, b3 = u * u * u
+      return [P0[0] * b0 + (P0[0] + H[0] * d0[0]) * b1 + (P3[0] - H[1] * d3[0]) * b2 + P3[0] * b3,
+              P0[1] * b0 + (P0[1] + H[0] * d0[1]) * b1 + (P3[1] - H[1] * d3[1]) * b2 + P3[1] * b3] }
+    ts = idx.map((i, j) => {
+      let best = ts[j], bd = Infinity
+      for (let w = 0.12, c0 = ts[j]; w > 1e-4; w /= 3) {
+        for (let k = -3; k <= 3; k++) {
+          const u = Math.min(1, Math.max(0, c0 + k * w / 3)), p = B(u), d = (p[0] - a[i]) ** 2 + (p[1] - c[i]) ** 2
+          if (d < bd) { bd = d; best = u }
+        }
+        c0 = best
+      }
+      return best
+    })
+  }
+  return [[P0[0] + H[0] * d0[0], P0[1] + H[0] * d0[1]], [P3[0] - H[1] * d3[0], P3[1] - H[1] * d3[1]], P3]
+}
+
+/** The cap's three cubics for a ratio, from the straight to the nose: [[c1, c2, end]...] with every
+ *  point [a, c] in units of h (a from the pill's end, c from the side), plus its L (also in h). */
+function pillCap(ratio) {
+  const cap = capPoints(ratio), segs = []
+  for (let j = 0; j < KNOTS.length - 1; j++) segs.push(cubic(cap, Math.round(KNOTS[j] * cap.n), Math.round(KNOTS[j + 1] * cap.n)))
+  return { L: cap.L, start: [cap.L, 0], segs, dense: cap }
+}
+
+const SHAPE_B = '4000px'   // the outside box's reach past the element: shadows, spills, focus rings
+const shapeCache = new Map()
+const num = v => +v.toFixed(6)
+
+/** The clip-path shape() string for a pill of this choke ratio: EVERYTHING except the sliver between
+ *  the round stadium and the eased one (evenodd: a big box, minus the round stadium, plus the eased
+ *  one). axis 'x' = caps left and right, 'y' = top and bottom. Every number is a fraction of the
+ *  short side, held in the custom property `size` (--pill-s, --pill-s-b or --pill-s-a). */
+function pillShape(ratio, axis, size = '--pill-s') {
+  const key = ratio + axis + size
+  let out = shapeCache.get(key)
+  if (out) return out
+  const { L, start, segs } = pillCap(ratio)
+  const s = `var(${size})`
+  // k from the near edge, or (far) from the far edge
+  const at = (k, far) => k === 0 ? (far ? '100%' : '0px')
+    : far ? `calc(100% - ${s} * ${num(k)})` : `calc(${s} * ${num(k)})`
+  const P = (a, far, c) => axis === 'x' ? `${at(a, far)} ${at(c, false)}` : `${at(c, false)} ${at(a, far)}`
+  const seg = (far, [c1, c2, e]) => `curve to ${P(e[0], far, e[1])} with ${P(c1[0], far, c1[1])} / ${P(c2[0], far, c2[1])}`
+  // a quarter walked backwards, or mirrored across the pill (c -> 1 - c)
+  const flip = q => q.map(g => g.map(p => [p[0], 1 - p[1]]))
+  const back = (q, from) => {
+    const pts = [from]; for (const g of q) pts.push(...g)
+    const r = []; for (let i = pts.length - 1; i > 0; i -= 3) r.push([pts[i - 1], pts[i - 2], pts[i - 3]])
+    return r
+  }
+  const top = segs, topBack = back(segs, start), r = `calc(${s} * 0.5)`, sw = axis === 'x' ? 'cw' : 'ccw'
+  const B = SHAPE_B
+  const parts = [
+    `from -${B} -${B}`, `line to calc(100% + ${B}) -${B}`, `line to calc(100% + ${B}) calc(100% + ${B})`,
+    `line to -${B} calc(100% + ${B})`, 'close',
+    `move to ${P(0.5, false, 0)}`, `line to ${P(0.5, true, 0)}`,
+    `arc to ${P(0.5, true, 1)} of ${r} ${sw}`, `line to ${P(0.5, false, 1)}`, `arc to ${P(0.5, false, 0)} of ${r} ${sw}`, 'close',
+    `move to ${P(L, false, 0)}`, `line to ${P(L, true, 0)}`,
+    ...top.map(g => seg(true, g)), ...flip(topBack).map(g => seg(true, g)),
+    `line to ${P(L, false, 1)}`,
+    ...flip(top).map(g => seg(false, g)), ...topBack.map(g => seg(false, g)),
+    'close',
+  ]
+  out = `shape(evenodd ${parts.join(', ')})`
+  shapeCache.set(key, out)
+  return out
+}
+
+let doc = null, live = false, ro = null, mo = null, queued = new Set(), raf = 0
+const marked = new Set()   // elements carrying any mark, so turning the law off is exact
+
+function px(v) { const n = parseFloat(v); return Number.isFinite(n) ? n : 0 }
+
+// 'x' | 'y' | null, the short side and its choke ratio, for a computed style on a border box w x h
+function pillOf(cs, w, h) {
+  if (!SHAPE_OK || !(w > 0 && h > 0)) return null
+  const s = Math.min(w, h), l = Math.max(w, h), ratio = pillRatio(s)
+  if (s < MIN_S || l < s * ratio + 1) return null
+  for (const c of ['borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomRightRadius', 'borderBottomLeftRadius']) {
+    const v = cs[c]
+    if (!v || v.includes('%')) return null          // a % radius is an ellipse on a non-square box, not a pill
+    if (px(v) < s / 2 - 0.5) return null
+  }
+  return { axis: w >= h ? 'x' : 'y', s, ratio }
+}
+
+// the border box of a pseudo-element, from its resolved width/height (used values when rendered)
+function pseudoBox(cs) {
+  if (cs.content === 'none' || cs.content === 'normal' || cs.display === 'none') return [0, 0]
+  let w = px(cs.width), h = px(cs.height)
+  if (cs.boxSizing !== 'border-box') {
+    w += px(cs.paddingLeft) + px(cs.paddingRight) + px(cs.borderLeftWidth) + px(cs.borderRightWidth)
+    h += px(cs.paddingTop) + px(cs.paddingBottom) + px(cs.borderTopWidth) + px(cs.borderBottomWidth)
+  }
+  return [w, h]
+}
+
+function set(el, attr, prop, clip, p) {
+  if (p) {
+    const v = p.s.toFixed(2) + 'px', c = pillShape(p.ratio, p.axis, prop)
+    if (el.getAttribute(attr) !== p.axis) el.setAttribute(attr, p.axis)
+    if (el.style.getPropertyValue(prop) !== v) el.style.setProperty(prop, v)
+    if (el.style.getPropertyValue(clip) !== c) el.style.setProperty(clip, c)
+    marked.add(el)
+  } else if (el.hasAttribute(attr)) {
+    el.removeAttribute(attr); el.style.removeProperty(prop); el.style.removeProperty(clip)
+  }
+}
+
+function classify(el) {
+  if (!el.isConnected || !(el instanceof doc.defaultView.HTMLElement)) return
+  const win = doc.defaultView
+  const cs = win.getComputedStyle(el)
+  const off = cs.getPropertyValue('--pill-ease').trim() === 'off'
+  const rounded = px(cs.borderTopLeftRadius) > 0 || px(cs.borderBottomRightRadius) > 0
+  if (rounded) ro.observe(el)
+  set(el, MARK, '--pill-s', '--pill-clip', !off && rounded ? pillOf(cs, el.offsetWidth, el.offsetHeight) : null)
+  for (const [pe, attr, prop, clip] of PSEUDO) {
+    const pcs = win.getComputedStyle(el, pe)
+    const pr = !off && pcs.content !== 'none' && px(pcs.borderTopLeftRadius) > 0 && pcs.getPropertyValue('--pill-ease').trim() !== 'off'
+    if (pr) ro.observe(el)   // a pseudo follows its host's size, so the host's resize re-reads it
+    set(el, attr, prop, clip, pr ? pillOf(pcs, ...pseudoBox(pcs)) : null)
+  }
+}
+
+function scan(root) {
+  if (root.nodeType !== 1) return
+  classify(root)
+  for (const el of root.querySelectorAll('*')) classify(el)
+}
+
+function flush() {
+  raf = 0
+  if (!live) { queued.clear(); return }
+  const q = [...queued]; queued.clear()
+  for (const n of q) scan(n)
+}
+function queue(n) { queued.add(n); if (!raf) raf = doc.defaultView.requestAnimationFrame(flush) }
+
+function on() {
+  if (live) return
+  live = true
+  ro = new doc.defaultView.ResizeObserver(entries => { for (const e of entries) classify(e.target) })
+  mo = new doc.defaultView.MutationObserver(recs => {
+    for (const r of recs) {
+      if (r.type === 'childList') r.addedNodes.forEach(n => { if (n.nodeType === 1) queue(n) })
+      else if (r.target.nodeType === 1) queue(r.target)
+    }
+  })
+  mo.observe(doc.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'data-shape', 'hidden'] })
+  scan(doc.documentElement)
+}
+
+function off() {
+  if (!live) return
+  live = false
+  ro.disconnect(); mo.disconnect(); ro = mo = null
+  for (const el of marked) {
+    el.removeAttribute(MARK); el.style.removeProperty('--pill-s'); el.style.removeProperty('--pill-clip')
+    for (const [, attr, prop, clip] of PSEUDO) { el.removeAttribute(attr); el.style.removeProperty(prop); el.style.removeProperty(clip) }
+  }
+  marked.clear()
+}
+
+function sync() { doc.documentElement.getAttribute('data-corners') === 'eased' ? on() : off() }
+
+/** Start following <html data-corners>. Idempotent; called on load. Returns a function that
+ *  re-reads every element now (for a host that changed sizes without a resize or class change). */
+function wmCorners(d) {
+  if (!doc) {
+    doc = d || document
+    new doc.defaultView.MutationObserver(sync).observe(doc.documentElement, { attributes: true, attributeFilter: ['data-corners'] })
+    sync()
+  }
+  return () => { if (live) scan(doc.documentElement) }
+}
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') { window.wmCorners = wmCorners; wmCorners(document) }
 
 
 

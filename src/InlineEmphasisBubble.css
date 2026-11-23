@@ -11,7 +11,7 @@
   padding: var(--hair, 1px);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: calc(8px * var(--corner-scale, 1));
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   animation: emph-pop var(--dur-fast, 140ms) ease;
 }

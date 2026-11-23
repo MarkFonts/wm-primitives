@@ -10,7 +10,8 @@
     "./src/zoomControl.js",
     "./src/themeStack.js",
     "./src/jxl.js",
-    "./src/confirm.js"
+    "./src/confirm.js",
+    "./src/corners.js"
   ],
   "peerDependencies": {
     "@use-gesture/react": ">=10",

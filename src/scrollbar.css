@@ -15,7 +15,7 @@
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb, var(--border));
-  border-radius: 3px;
+  border-radius: calc(3px * var(--corner-scale, 1));
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover, var(--text-dim));

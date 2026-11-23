@@ -149,6 +149,12 @@ export type {
 // outcomes; an app calls it on its own successes. Also on window for plain scripts.
 export { wmConfirm } from './src/confirm.js'
 
+// wmCorners -- the eased corner law's pill finder (CHROME.md "Corners"). The law is CSS
+// (corners.css) behind <html data-corners="eased">; this marks every element (or ::before /
+// ::after) whose radius is at least half its short side, so its eased cap can be clipped.
+// Starts itself on import and does nothing until the flag is set. Also on window.
+export { wmCorners } from './src/corners.js'
+
 // toast -- one line of news in a corner, with at most one thing to do: Plate, --surface-hi,
 // the hairline, the house corner, a 06 Menu action and a 06 mark to dismiss. Top right on a
 // desktop, the bottom on a phone (CSS, not an option; --toast-top / --toast-bottom clear the

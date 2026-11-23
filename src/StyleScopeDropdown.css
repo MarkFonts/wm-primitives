@@ -14,7 +14,7 @@
   padding: var(--spacing-03, 8px) var(--spacing-04, 12px);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: calc(8px * var(--corner-scale, 1));
   color: var(--text);
   font: inherit;
   font-size: var(--type-ui-size, 0.75rem);
@@ -40,7 +40,7 @@
   padding: var(--spacing-01, 4px);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: calc(10px * var(--corner-scale, 1));
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
 }
 .ssd-list--multi { max-height: 340px; overflow: auto; }
@@ -63,7 +63,7 @@
   padding: var(--spacing-03, 8px);
   background: none;
   border: 0;
-  border-radius: 7px;
+  border-radius: calc(7px * var(--corner-scale, 1));
   color: var(--text);
   font: inherit;
   text-align: left;

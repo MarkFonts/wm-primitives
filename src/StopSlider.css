@@ -29,7 +29,7 @@
   position: absolute; inset: 0 34px 0 0;
   display: flex; gap: 2px; padding: 2px;
   border: 1px solid var(--border, rgba(232, 232, 232, .14));
-  border-radius: var(--radius-sm, 6px);
+  border-radius: calc(var(--radius-sm, 6px) * var(--corner-scale, 1));
   corner-shape: superellipse(var(--corner-k, 1.2));
   background: var(--bg, #0f0f0f);
   transition: opacity var(--dur-med, .22s);
@@ -40,7 +40,7 @@
   flex: 1; min-width: 0; border: 0; background: none; font: inherit;
   font-size: var(--type-ui-size, .75rem);
   color: var(--text-muted, rgba(232, 232, 232, .62));
-  border-radius: var(--radius-sm, 6px);
+  border-radius: calc(var(--radius-sm, 6px) * var(--corner-scale, 1));
   corner-shape: superellipse(var(--corner-k, 1.2));
   cursor: pointer; white-space: nowrap;
   transition: background var(--dur-fast, .12s), color var(--dur-fast, .12s);
@@ -61,7 +61,7 @@
 /* The rail grows out of the right-hand edge, where the grip is parked. */
 .wm-stops-rail {
   position: absolute; top: 50%; left: 0; height: 2px; width: 0;
-  background: var(--border, rgba(232, 232, 232, .14)); border-radius: 1px; opacity: 0;
+  background: var(--border, rgba(232, 232, 232, .14)); border-radius: calc(1px * var(--corner-scale, 1)); opacity: 0;
   transform: translate(calc(100% + 12px), -50%);
   transition: width var(--dur-layout, .28s) cubic-bezier(.2,.7,.3,1), opacity var(--dur-med, .2s),
               transform var(--dur-layout, .28s) cubic-bezier(.2,.7,.3,1);
@@ -72,7 +72,7 @@
    the rail rather than a second control appearing under the first. */
 .wm-stops-knob {
   position: absolute; top: 50%; left: 0;
-  width: 6px; height: 16px; border-radius: 3px;
+  width: 6px; height: 16px; border-radius: calc(3px * var(--corner-scale, 1));
   background: var(--text-muted, rgba(232, 232, 232, .62));
   transform: translate(0, -50%); /* overridden inline by the knob's x */
   cursor: pointer; z-index: 2; touch-action: pan-y;
@@ -82,7 +82,7 @@
               transform var(--dur-layout, .28s) cubic-bezier(.2,.7,.3,1);
 }
 .wm-stops.is-free .wm-stops-knob {
-  width: 20px; height: 20px; border-radius: 10px;
+  width: 20px; height: 20px; border-radius: calc(10px * var(--corner-scale, 1));
   background: var(--text, #e8e8e8); cursor: ew-resize;
 }
 /* No transition while a pointer is driving it: the thumb must track the finger, not chase
@@ -93,7 +93,7 @@
 /* The two dashes that say drag me, gone once it is a thumb. */
 .wm-stops-knob::before, .wm-stops-knob::after {
   content: ''; position: absolute; top: 50%; width: 5px; height: 1.5px;
-  background: var(--text-muted, rgba(232, 232, 232, .62)); border-radius: 1px;
+  background: var(--text-muted, rgba(232, 232, 232, .62)); border-radius: calc(1px * var(--corner-scale, 1));
   opacity: 1; transform: translateY(-50%); transition: opacity var(--dur-fast, .18s);
 }
 .wm-stops-knob::before { left: -7px; }

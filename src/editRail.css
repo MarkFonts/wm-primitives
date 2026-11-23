@@ -21,7 +21,7 @@
   top: 0;
   bottom: 0;
   width: 3px;
-  border-radius: 2px;
+  border-radius: calc(2px * var(--corner-scale, 1));
   background: var(--edit-rail, rgba(255, 255, 255, 0.28));
   opacity: 0;
   transition: opacity var(--dur-fast, 140ms) ease, background var(--dur-fast, 140ms) ease;

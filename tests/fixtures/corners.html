@@ -1,0 +1,72 @@
+<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><title>eased corners contract</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The eased corner law (CHROME.md "Corners", src/corners.css + src/corners.js). ?corners=eased
+     turns the flag on; ?theme=light flips the root. A 28px chip, a 200px-tall pill, an 8px
+     button, the real primitives (chip, seg, 06 Menu, the lozenge, the accent pill) and a vertical
+     pill. tests/behaviour/corners.spec.ts and the PR's renders. -->
+<script>
+  const q = new URLSearchParams(location.search)
+  document.documentElement.dataset.theme = q.get('theme') || 'dark'
+  if (q.get('corners')) document.documentElement.dataset.corners = q.get('corners')
+</script>
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css">
+<link rel="stylesheet" href="/dial/shared/src/motion.css"><link rel="stylesheet" href="/dial/shared/src/space.css">
+<link rel="stylesheet" href="/dial/shared/src/corners.css"><link rel="stylesheet" href="/dial/shared/src/icon.css">
+<link rel="stylesheet" href="/dial/shared/src/chip.css"><link rel="stylesheet" href="/dial/shared/src/button.css">
+<link rel="stylesheet" href="/dial/shared/src/button-sets.css"><link rel="stylesheet" href="/dial/shared/src/toggleGroup.css">
+<link rel="stylesheet" href="/dial/shared/src/dialHandle.css"><link rel="stylesheet" href="/dial/shared/src/accentButton.css">
+<style>
+  @font-face { font-family: 'Cal Sans'; src: url('/dial/shared/fonts/CalSansVF.woff2') format('woff2'); font-weight: 100 900; font-display: block; }
+  :root{ --ui-font: 'Cal Sans'; --text-rgb: 232,232,232; --accent: #eeff41; --radius: 8px; }
+  :root[data-theme="light"]{ --text-rgb: 22,22,22; --accent: #5c6b00; }
+  body{ background: var(--bg); color: var(--text); margin: 0; font-family: 'Cal Sans'; }
+  .stage{ padding: 24px; display: flex; flex-direction: column; gap: 24px; align-items: flex-start; }
+  .row{ display: flex; align-items: center; gap: 16px; }
+  /* the three specimens: a 28px chip, a 200px pill, an 8px button, each with the house ring */
+  .spec{ border: 1px solid var(--text-muted); color: var(--text); background: var(--surface-hi); font: inherit;
+    font-size: var(--type-ui-size); padding: 0 14px; cursor: pointer; }
+  .spec:focus-visible{ outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }
+  #chip28{ height: 28px; border-radius: 999px; }
+  #pill200{ height: 200px; width: 520px; border-radius: 999px; font-size: 40px; }
+  #btn8{ height: 32px; border-radius: calc(8px * var(--corner-scale, 1)); }
+  #vpill{ width: 10px; height: 48px; border-radius: 999px; background: var(--text); }
+  /* the heights: pills of 24, 32, 48, 96 and 160px tall, four heights wide */
+  .ramp{ border: 0; padding: 0; background: var(--text); }
+  #h24{ height: 24px; width: 96px; } #h32{ height: 32px; width: 128px; } #h48{ height: 48px; width: 192px; }
+  #h96{ height: 96px; width: 384px; } #h160{ height: 160px; width: 640px; }
+  .ramp{ border-radius: 999px; }
+  #pseudo{ position: relative; width: 60px; height: 40px; }
+  #pseudo::after{ content: ''; position: absolute; left: 10px; top: 4px; width: 40px; height: 16px; border-radius: 999px; background: var(--text-muted); }
+  .wm-hd-rail{ position: relative; width: 200px; height: 40px; --hd-inset: 40px; }
+</style>
+</head><body>
+<div class="stage">
+  <div class="row">
+    <button type="button" class="spec" id="chip28">Chip 28</button>
+    <button type="button" class="spec" id="btn8">Button 8</button>
+    <div id="vpill"></div>
+    <div id="pseudo"></div>
+  </div>
+  <button type="button" class="spec" id="pill200">Pill 200</button>
+  <div class="row" style="align-items:flex-end">
+    <div class="ramp" id="h24"></div><div class="ramp" id="h32"></div><div class="ramp" id="h48"></div>
+  </div>
+  <div class="row" style="align-items:flex-end"><div class="ramp" id="h96"></div><div class="ramp" id="h160"></div></div>
+  <div class="row">
+    <button type="button" class="wm-chip" id="chip">Text</button>
+    <button type="button" class="wm-chip on" aria-pressed="true">Display</button>
+    <div class="ui-seg" id="seg"><button type="button" class="on">One</button><button type="button">Two</button></div>
+    <button type="button" class="wm-btn" id="wmbtn">Save</button>
+    <button type="button" class="wm-menu" id="menu">Menu</button>
+  </div>
+  <div class="row">
+    <div class="wm-hd-rail" tabindex="0"><span class="wm-hd-pill" id="lozenge" style="--p:.5">42</span></div>
+    <button type="button" class="wm-accent" data-shape="pill" data-look="q5" id="accent"><span class="wm-accent__lab">Get started</span></button>
+  </div>
+</div>
+<script type="module">
+  import { wmCorners } from '/dial/shared/src/corners.js'
+  wmCorners(document)
+  requestAnimationFrame(() => requestAnimationFrame(() => { window.ready = true }))
+</script>
+</body></html>

@@ -2040,6 +2040,11 @@ of 168 corners, <b>87</b> take the law, 13 are circles carved out, and 32 sit in
 <code>App.css</code>. Live surface: <b>42</b>.</p>
 <div class="bar"><b>k</b><button data-k="1">1 round</button><button data-k="1.1">1.1</button><button data-k="1.2" class="on">1.2</button>
  <button data-k="1.5">1.5</button><button data-k="2">2</button></div>
+<div class="bar"><b>Law</b><button data-law="" class="on">Today</button><button data-law="eased">Eased (flag)</button></div>
+<p class="lede lede--sub">Eased is the flag <code>&lt;html data-corners="eased"&gt;</code> (corners.css, corners.js): every
+radius &times;1.125 under <code>superellipse(1.2)</code>, and every pill gets an eased cap with the round cap's
+depth and a tighter choke: the curve leaves the straight 1.2 &times; h/2 from the end, at every height. It flips the
+whole page, so every chapter's primitives can be compared. <code>?corners=eased</code> opens the page with it on.</p>
 
 <h2>The 5 pills <span>999px in situ &mdash; k comes from the toggle</span></h2>
 <div class="grid g3"><div class="c"><div class="c-name">zone-chip<span class="c-src">shell.css</span></div>
@@ -2088,6 +2093,13 @@ of 168 corners, <b>87</b> take the law, 13 are circles carved out, and 32 sit in
   <div class="sw wide" style="border-radius:0 8px 8px 0;corner-shape:superellipse(var(--k,1.2))"></div></div></div><div class="lad"><div class="lad-r">4px 4px 0 0<span>tab top</span></div>
   <div class="lad-pair"><div class="sw wide" style="border-radius:4px 4px 0 0;corner-shape:round"></div>
   <div class="sw wide" style="border-radius:4px 4px 0 0;corner-shape:superellipse(var(--k,1.2))"></div></div></div></div>
-<script>document.querySelectorAll('.bar button').forEach(b=>b.onclick=()=>{
- document.querySelectorAll('.bar button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
- document.documentElement.style.setProperty('--k',b.dataset.k);});</script>
+<script>document.querySelectorAll('.bar [data-k]').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.bar [data-k]').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+ document.documentElement.style.setProperty('--k',b.dataset.k);});
+const lawBtns=document.querySelectorAll('.bar [data-law]');
+const lawShow=()=>lawBtns.forEach(x=>x.classList.toggle('on',(document.documentElement.dataset.corners||'')===x.dataset.law));
+lawBtns.forEach(b=>b.onclick=()=>{
+ const r=document.documentElement; if(b.dataset.law) r.dataset.corners=b.dataset.law; else delete r.dataset.corners;
+ const u=new URL(location.href); if(b.dataset.law) u.searchParams.set('corners',b.dataset.law); else u.searchParams.delete('corners');
+ history.replaceState(null,'',u); lawShow();});
+lawShow();</script>

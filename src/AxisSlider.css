@@ -156,7 +156,7 @@
   .slider-row--boxed .slider-number {
     background: var(--bg-elevated, var(--surface));
     border: 1px solid var(--border);
-    border-radius: var(--radius, 6px);
+    border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     padding: 4px 6px;
     text-decoration: none;
@@ -442,7 +442,7 @@
       var(--track-empty, var(--surface-hi)) var(--locked-pct, 100%),
       var(--track-empty, var(--surface-hi)) 100%
     );
-    border-radius: 1px;
+    border-radius: calc(1px * var(--corner-scale, 1));
   }
   /* THE THUMB CENTRES ITSELF ON THE TRACK, whatever size it is. -webkit- puts the thumb's
      top at the track's top, so centring is a margin -- and that margin is arithmetic on
@@ -466,7 +466,7 @@
       var(--track-empty, var(--surface-hi)) var(--locked-pct, 100%),
       var(--track-empty, var(--surface-hi)) 100%
     );
-    border-radius: 1px;
+    border-radius: calc(1px * var(--corner-scale, 1));
   }
   /* Firefox centres the thumb on the track for us -- no margin, and none wanted. */
   .slider-track-wrap input[type="range"]::-moz-range-thumb {
@@ -480,7 +480,7 @@
     color: var(--text);
     background: var(--bg-elevated, var(--surface));
     border: 1px solid var(--border);
-    border-radius: var(--radius, 6px);
+    border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
     padding: var(--spacing-01, 4px) var(--spacing-03, 8px);
     pointer-events: none;
     z-index: 1000;
@@ -492,7 +492,7 @@
   /* ── variant: diamond — rotate-45 marker-default thumb (Type-Matrix style), for
      default-editing rails. Pairs with `reference` to burn the stock value behind it. */
   .slider-row--diamond input[type="range"]::-webkit-slider-thumb {
-    width: 12px; height: 12px; border-radius: 2px;
+    width: 12px; height: 12px; border-radius: calc(2px * var(--corner-scale, 1));
     background: var(--marker-default, var(--accent, var(--signal)));
     transform: rotate(45deg);
     box-shadow: 0 0 0 1px var(--bg);
@@ -501,7 +501,7 @@
     margin-top: calc((2px - 12px) / 2);
   }
   .slider-row--diamond input[type="range"]::-moz-range-thumb {
-    width: 12px; height: 12px; border-radius: 2px;
+    width: 12px; height: 12px; border-radius: calc(2px * var(--corner-scale, 1));
     background: var(--marker-default, var(--accent, var(--signal)));
     transform: rotate(45deg);
     box-shadow: 0 0 0 1px var(--bg);
@@ -510,7 +510,7 @@
   /* Burned stock reference — a faint ghost dot at the shipped value, behind the thumb. */
   .slider-ref {
     position: absolute; top: 12px; width: 8px; height: 8px; margin-left: -4px;
-    border-radius: 1px; background: var(--text-muted); opacity: 0.28;
+    border-radius: calc(1px * var(--corner-scale, 1)); background: var(--text-muted); opacity: 0.28;
     transform: translateY(-50%) rotate(45deg); /* rhombus, mirrors the thumb */
     pointer-events: none; z-index: 0;
   }
@@ -567,7 +567,7 @@
     position: relative; z-index: 1;
     pointer-events: none;                     /* the bar underneath owns the press */
     min-height: 30px; padding: 0 var(--spacing-04, 12px);
-    border-radius: var(--radius, 6px);
+    border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
     corner-shape: superellipse(var(--corner-k, 1.2));
     background:
       linear-gradient(to right,
@@ -591,7 +591,7 @@
   .slider-row--track .slider-track-wrap input[type="range"]:focus-visible {
     outline: 2px solid var(--signal-ink, var(--accent, currentColor));
     outline-offset: 2px;
-    border-radius: var(--radius, 6px);
+    border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
   }
 
   /* The selection highlight is the browser's, not ours -- it arrives in the OS accent,
@@ -764,7 +764,7 @@
      by the whole name, so the neighbouring letter leaked a dark band into the grip.) No inversion, no halo.
      The locked-above overlay that used to live on ::before is a background layer of the label
      now. No hit area is added: the range input owns the pointer. */
-  .slider-row--track { --grip-w: 4px; --grip-c: var(--text-dim); --grip-in: 6px; --grip-v: 4px; --name-c: color-mix(in srgb, var(--text) calc(var(--a-2, .62) * 100%), var(--surface)); --fill-r: var(--radius, 6px); --fill-c: var(--surface-hi); }
+  .slider-row--track { --grip-w: 4px; --grip-c: var(--text-dim); --grip-in: 6px; --grip-v: 4px; --name-c: color-mix(in srgb, var(--text) calc(var(--a-2, .62) * 100%), var(--surface)); --fill-r: calc(var(--radius, 6px) * var(--corner-scale, 1)); --fill-c: var(--surface-hi); }
   .slider-row--track:hover,
   .slider-row--track.slider-row--engaged,
   .slider-row--track:focus-within { --grip-w: 6px; --grip-c: var(--accent, var(--signal)); --fill-c: color-mix(in srgb, var(--surface-hi), var(--text) 8%); }

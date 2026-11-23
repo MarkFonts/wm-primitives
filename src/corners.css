@@ -13,14 +13,40 @@
  * the intended degradation: the corner every app shipped before this file. Nothing regresses.
  * Do not reach for a clip-path polyfill at this scale; clip-path also clips shadows, focus
  * rings and overflow.
+ *
+ * THE EASED LAW (opt-in, :root[data-corners="eased"]; CHROME.md "Corners"). Off by default:
+ * without the attribute nothing below changes a pixel.
+ *   - Rects keep superellipse(1.2) and every radius grows by 1.125 (--corner-scale; 8px -> 9px,
+ *     6px -> 6.75px). That puts the 45-degree point back on the original circle and moves the
+ *     tangent nodes inward: the curve eases into the original corner depth instead of a squircle
+ *     bulging into the same box. Each primitive's radius is written
+ *     calc(<r> * var(--corner-scale, 1)), so this file is the only switch.
+ *   - Pills cannot be done with corner-shape (any superellipse above 1 flattens the nose:
+ *     curvature 0 at the extreme). They get an eased cap, drawn as a clip-path shape() -- and the
+ *     clip is NOT the pill: it is everything except the hair-thin sliver between the round cap and
+ *     the eased one (at most 0.003 h). So focus rings, shadows, spills and overhanging children
+ *     are never clipped, and the engine still draws the border and the press ring. The cap keeps
+ *     the round one's depth (nose at the end, h/2 deep) and chokes the curve in: it leaves the
+ *     straight 1.2 x (h/2) from the end, at every height.
+ *     That depends on the height, so corners.js (radius >= half the short side, any element or its
+ *     ::before/::after) builds each pill's shape() and writes it, with the short side, to
+ *     --pill-clip and --pill-s.
+ *   This is the clip-path the paragraph above warns about, made safe by clipping only the sliver.
  */
 
 :root {
   --corner-k: 1.2;
+  --corner-scale: 1;
+  /* declared, unset: corners.js writes them inline on each pill (its short side, and the clip-path
+     shape() for its height); declared here so a consumer's token lint does not fail on a runtime-set
+     var (as --hd-chars in dialHandle.css) */
+  --pill-s: initial; --pill-s-a: initial; --pill-s-b: initial;
+  --pill-clip: initial; --pill-clip-a: initial; --pill-clip-b: initial;
   --stroke-hover: 1.2px;
   --stroke-press: 1.8px;
 
 }
+:root[data-corners="eased"] { --corner-scale: 1.125; }
 
 *, *::before, *::after { corner-shape: superellipse(var(--corner-k, 1.2)); }
 
@@ -49,7 +75,7 @@ input[type="radio"], input[type="radio"]:checked::after {
    exist to look like Cal.com and Coss, so the house corner is exactly the signature they
    must not carry — a squircle there is a wrong answer, not a house style. Namespace-wide,
    because the replicas grow and nobody should have to remember to add each new part. */
-[class*="calcom-"], [class*="coss-"] { corner-shape: round; }
+[class*="calcom-"], [class*="coss-"] { corner-shape: round; --pill-ease: off; }
 
 input[type="range"]::-webkit-slider-thumb { corner-shape: round; }
 input[type="range"]::-moz-range-thumb { corner-shape: round; }
@@ -78,3 +104,25 @@ input[type="range"]::-moz-range-thumb { corner-shape: round; }
   transition: none;
   box-shadow: inset 0 0 0 calc(var(--stroke-press, 1.8px) * (1 - var(--confirm-off, 0))) currentColor;
 }
+
+/* ── The eased pill (opt-in) ──────────────────────────────────────────────────────
+   corners.js marks a pill with data-wm-pill="x" (horizontal) or "y" (vertical), writes its short
+   side to --pill-s and the shape() built for its height to --pill-clip; a pill ::before / ::after
+   is marked on its host as data-wm-pill-b / data-wm-pill-a, with --pill-s-b / --pill-clip-b (and
+   -a). The shape is built per pill because it is cached by choke ratio and a pill's own size is
+   a number the clip is written against (the choke is 1.2 x h/2 at every height). The cap underneath must be the round one, because the clip
+   only removes what lies between round and eased -- a superellipse nose would survive it -- so
+   corner-shape is forced round. !important because pills declare their own corner-shape at every
+   specificity (chip, seg, grip, lozenge), and accentButton's ::before inherits.
+
+   An element or subtree opts out with --pill-ease: off (the mimics above do). Without corners.js
+   the attributes never appear and a pill keeps today's corner: the fallback is the current look.
+   Without shape() support (before Chrome 135, Safari 18.4, Firefox 148) corners.js marks nothing,
+   because a var() clip-path is valid at parse time and would blank a clip a component sets
+   itself: the pill keeps today's corner, the accepted fallback. */
+:root[data-corners="eased"] [data-wm-pill],
+:root[data-corners="eased"] [data-wm-pill-b]::before,
+:root[data-corners="eased"] [data-wm-pill-a]::after { corner-shape: round !important; }
+:root[data-corners="eased"] [data-wm-pill] { clip-path: var(--pill-clip) !important; }
+:root[data-corners="eased"] [data-wm-pill-b]::before { clip-path: var(--pill-clip-b) !important; }
+:root[data-corners="eased"] [data-wm-pill-a]::after { clip-path: var(--pill-clip-a) !important; }

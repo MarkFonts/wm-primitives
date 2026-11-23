@@ -224,7 +224,7 @@
   height: 16px;
   flex: 0 0 auto;
   border: 1px solid var(--border, rgba(232, 232, 232, .14));
-  border-radius: var(--radius-sm, 3px);
+  border-radius: calc(var(--radius-sm, 3px) * var(--corner-scale, 1));
   /* The value is set as this element's background so the BROWSER resolves it. A swatch
      that parses the token itself is the colophon bug (see color.css). */
 }
@@ -258,7 +258,7 @@
   color: var(--text-muted, rgba(232, 232, 232, .62));
   background: none;
   border: 1px solid var(--border, rgba(232, 232, 232, .14));
-  border-radius: var(--radius, 6px);
+  border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
   cursor: pointer;
   transition: color var(--dur-fast, 140ms), border-color var(--dur-fast, 140ms);
 }
@@ -273,7 +273,7 @@
   color: var(--bg, #0f0f0f);
   background: var(--text, #e8e8e8);
   border: none;
-  border-radius: var(--radius, 6px);
+  border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
   cursor: pointer;
 }
 .grad-copy:hover { opacity: .85; }
@@ -288,7 +288,7 @@
   overflow: hidden;
   background: var(--bg, #0f0f0f);
   border: 1px solid var(--border, rgba(232, 232, 232, .14));
-  border-radius: var(--radius, 6px);
+  border-radius: calc(var(--radius, 6px) * var(--corner-scale, 1));
 }
 
 .grad-preview-body {
