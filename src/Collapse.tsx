@@ -33,6 +33,7 @@ export interface CollapseProps {
 }
 
 export function Collapse({ open, children, className = '', clipMargin = 12 }: CollapseProps) {
+  const box = useRef<HTMLDivElement>(null)
   const inner = useRef<HTMLDivElement>(null)
   // `null` means "no cap" — the settled open state. A number is a live max-height, in px.
   const [maxHeight, setMaxHeight] = useState<number | null>(open ? null : 0)
@@ -83,8 +84,18 @@ export function Collapse({ open, children, className = '', clipMargin = 12 }: Co
 
   useEffect(() => () => clearTimeout(settle.current), [])
 
+  useLayoutEffect(() => {
+    if (box.current) (box.current as HTMLElement & { inert: boolean }).inert = !open
+  }, [open])
+
   return (
     <div
+      ref={box}
+      /* Shut means unreachable: max-height 0 + overflow hidden hides the pixels, not the tab
+         stops. `inert` (set imperatively below, since React 18 and 19 disagree on the prop)
+         takes focus with it; aria-hidden covers engines without inert. Both follow the
+         `open` prop, not the animating height. */
+      aria-hidden={open ? undefined : true}
       className={`wm-collapse${open ? ' wm-collapse--open' : ''}${className ? ' ' + className : ''}`}
       style={{
         maxHeight: maxHeight === null ? 'none' : maxHeight,

@@ -103,6 +103,8 @@
     line-height: var(--type-ui-lead, 15px);
     color: var(--text-muted, currentColor);
   }
+  /* The ring, keyboard only, inside the plate: the action and the dismiss are its controls. */
+  .wm-toast :is(button, [tabindex]):focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }
   .wm-toast > .wm-menu { flex: 0 0 auto; }
   .wm-toast > .wm-menu--mark { padding: 0 var(--spacing-03, 8px); }
 
