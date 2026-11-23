@@ -10,8 +10,8 @@
 // arrives as CSS on the root so axis changes re-render nothing; optional cmap ranges
 // filter unsupported chars; optional `metrics` prop (from real font data) draws the
 // rules — without it the specimen just centers.
-import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react'
-import type { CSSProperties } from 'react'
+import { memo, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react'
+import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { isSupported, type CmapRanges } from './glyphset'
 import { loadNamePages, algorithmicName } from './glyphNames'
 import { Icon } from './Icon'
@@ -135,26 +135,94 @@ const cellId = (c: GlyphPickerCell) => c.key ?? `${c.ch}|${c.ffs ?? ''}`
 
 // Memoized so selecting a glyph re-renders only the two cells whose `active` flips —
 // not the whole (potentially ~2,500-cell) grid. `state` (flash etc) is compared by
-// identity, so only cells whose state entry changed re-render.
-const Cell = memo(function Cell({ cell, active, state, name, onPick }: {
-  cell: GlyphPickerCell; active: boolean
+// identity, so only cells whose state entry changed re-render. The same holds for the
+// roving tabindex: an arrow press flips `tabbable` on two cells and nothing else.
+const Cell = memo(function Cell({ cell, active, tabbable, idx, state, name, label, onPick }: {
+  cell: GlyphPickerCell; active: boolean; tabbable: boolean; idx: number
   state?: { className?: string; style?: CSSProperties; nonce?: number; onAnimationEnd?: () => void }
   name?: string
+  label: string
   onPick: (cell: GlyphPickerCell) => void
 }) {
   return (
     <button
       key={state?.nonce}
+      type="button"
+      role="gridcell"
+      aria-selected={active}
+      aria-label={label}
+      tabIndex={tabbable ? 0 : -1}
+      data-gp-i={idx}
       className={`gp-cell${active ? ' gp-cell--active' : ''}${isInvisible(cell.ch) ? ' gp-cell--invisible' : ''}${name !== undefined ? ' gp-cell--named' : ''}${state?.className ? ' ' + state.className : ''}`}
       style={cell.ffs || state?.style ? { ...(cell.ffs ? { fontFeatureSettings: cell.ffs } : null), ...state?.style } : undefined}
       onClick={() => onPick(cell)}
       onAnimationEnd={state?.onAnimationEnd}
       title={`U+${hex(cell.ch)}${cell.note ? ' · ' + cell.note : ''}${name ? ' · ' + name : ''}`}>
-      <span className="gp-cell-ch">{display(cell.ch)}</span>
-      {name !== undefined && <span className="gp-cell-name">{name || '\u00a0'}</span>}
+      <span className="gp-cell-ch" aria-hidden="true">{display(cell.ch)}</span>
+      {name !== undefined && <span className="gp-cell-name" aria-hidden="true">{name || '\u00a0'}</span>}
     </button>
   )
 })
+
+// Split a group's cells into the rows the CSS grid draws, so role=grid has real rows.
+// The rows are `display: contents`: the cells still lay out in .gp-grid's own columns,
+// and the look is untouched. `cols` is read from the rendered grid (gridTemplateColumns
+// resolves auto-fill to its tracks); 0 means "not measured" and gives one row per group.
+function chunk<T>(list: T[], cols: number): T[][] {
+  if (cols <= 0) return [list]
+  const rows: T[][] = []
+  for (let i = 0; i < list.length; i += cols) rows.push(list.slice(i, i + cols))
+  return rows
+}
+
+// Keyboard movement through the grid (GESTURES.md G133). `groups` is the cell count of each
+// visible group, in order, and every group shares one column count -- one container, one
+// auto-fill track list. Returns the flat index to move to, or null for "not a grid key".
+function nextIndex(
+  e: { key: string; ctrlKey: boolean; metaKey: boolean },
+  flat: number, groups: number[], cols: number, pageRows: number,
+): number | null {
+  const total = groups.reduce((a, n) => a + n, 0)
+  if (!total) return null
+  // Locate the cell: its group, its index inside the group, its row and column.
+  let g = 0, start = 0
+  while (g < groups.length - 1 && flat >= start + groups[g]) { start += groups[g]; g++ }
+  const c = Math.max(1, cols)
+  const local = flat - start
+  const col = local % c
+  const down = (from: number) => {
+    let gi = 0, s = 0
+    while (gi < groups.length - 1 && from >= s + groups[gi]) { s += groups[gi]; gi++ }
+    const l = from - s
+    if (l + c < groups[gi]) return from + c                          // same group, next row
+    const lastRowStart = Math.floor((groups[gi] - 1) / c) * c
+    if (l < lastRowStart) return s + groups[gi] - 1                   // short last row: its end
+    if (gi === groups.length - 1) return from                         // bottom of the grid
+    return s + groups[gi] + Math.min(l % c, groups[gi + 1] - 1)       // next group, first row
+  }
+  const up = (from: number) => {
+    let gi = 0, s = 0
+    while (gi < groups.length - 1 && from >= s + groups[gi]) { s += groups[gi]; gi++ }
+    const l = from - s
+    if (l - c >= 0) return from - c
+    if (gi === 0) return from
+    const prev = groups[gi - 1], ps = s - prev
+    const lastRowStart = Math.floor((prev - 1) / c) * c
+    return ps + Math.min(lastRowStart + (l % c), prev - 1)            // previous group, last row
+  }
+  const mod = e.ctrlKey || e.metaKey
+  switch (e.key) {
+    case 'ArrowRight': return Math.min(flat + 1, total - 1)
+    case 'ArrowLeft':  return Math.max(flat - 1, 0)
+    case 'ArrowDown':  return down(flat)
+    case 'ArrowUp':    return up(flat)
+    case 'Home': return mod ? 0 : flat - col
+    case 'End':  return mod ? total - 1 : Math.min(flat - col + c - 1, start + groups[g] - 1)
+    case 'PageDown': { let f = flat; for (let i = 0; i < pageRows; i++) f = down(f); return f }
+    case 'PageUp':   { let f = flat; for (let i = 0; i < pageRows; i++) f = up(f); return f }
+  }
+  return null
+}
 
 // Copy affordance (from the house CopyButton): copy icon → checkmark, 2s revert.
 //
@@ -295,8 +363,19 @@ export function GlyphPicker({
   cellState, names, onSelect, className, style,
 }: GlyphPickerProps) {
   const [active, setActive] = useState<GlyphPickerCell>({ ch: 'A' })
+  const uid = useId()
   const [query, setQuery] = useState('')
   const [copied, setCopied] = useState(false)
+  // What the polite live region says. Copy is otherwise silent: the mark fills and turns
+  // into a check, which a screen reader never sees (G135).
+  const [announce, setAnnounce] = useState('')
+  // The roving tabindex: the one cell that takes Tab, by id, plus its flat position so a
+  // char that sits in two groups does not make two Tab stops (G132).
+  const [focusAt, setFocusAt] = useState<{ id: string; flat: number } | null>(null)
+  // null until the first layout read. The cells wait for it, so they mount once, already in
+  // their rows -- not once flat and again when the rows arrive.
+  const [cols, setCols] = useState<number | null>(null)
+  const groupsRef = useRef<HTMLDivElement | null>(null)
 
   const pick = useCallback((cell: GlyphPickerCell) => {
     setActive(cell)
@@ -308,14 +387,19 @@ export function GlyphPicker({
     navigator.clipboard?.writeText(active.ch).then(() => {
       setCopied(true)
       wmConfirm(btn)
+      // Cleared first so copying the same glyph twice is announced twice.
+      setAnnounce('')
+      requestAnimationFrame(() => setAnnounce(`Copied ${display(active.ch)}, U+${hex(active.ch)}`))
       setTimeout(() => setCopied(false), 2000)
     }).catch(() => {})
   }, [active.ch])
 
-  // Lazy name data: load only the pages covering the codepoints actually present.
+  // Lazy name data: load only the pages covering the codepoints actually present. Loaded
+  // whether or not captions are on -- every cell's accessible name carries its glyph name
+  // (G134). Search still matches names only when `names` asks for them.
   const [nameData, setNameData] = useState<Map<number, [string | 0, string | 0]> | null>(null)
+  const searchNames = names && typeof names !== 'function' ? nameData : null
   useEffect(() => {
-    if (!names || typeof names === 'function') { setNameData(null); return }
     let alive = true
     const cps = new Set<number>()
     for (const g of groups) {
@@ -324,7 +408,7 @@ export function GlyphPicker({
     }
     loadNamePages(cps).then(m => { if (alive) setNameData(m) })
     return () => { alive = false }
-  }, [names, groups])
+  }, [groups])
 
   // Resolve each group to cells: `chars` shorthand gets cmap-filtered; explicit
   // `cells` are pre-scoped. Group ffs applies unless the cell has its own. Then the
@@ -341,13 +425,13 @@ export function GlyphPicker({
               .map(ch => ({ ch, ffs: g.ffs }))
         if (q) list = list.filter(c => {
           if (c.ch.toLowerCase() === q || hex(c.ch).toLowerCase().includes(q)) return true
-          const e = nameData?.get(codeOf(c.ch))
+          const e = searchNames?.get(codeOf(c.ch))
           return !!e && [e[0], e[1]].some(n => n && loose(n).includes(qLoose))
         })
         return { label: g.label, list }
       })
       .filter(g => g.list.length > 0)
-  }, [groups, ranges, query, nameData])
+  }, [groups, ranges, query, searchNames])
 
   // Caption for a cell (short form) + full name line for the console.
   const nameParts = useCallback((cell: GlyphPickerCell): { nice?: string; uni?: string } => {
@@ -364,6 +448,67 @@ export function GlyphPicker({
     const luni = uni?.toLowerCase()
     return (names === 'unicode' ? luni ?? nice : nice ?? luni) ?? ''
   }, [names, nameParts])
+  // The cell's accessible name: the character, then its glyph name, then the code -- "é,
+  // eacute, U+00E9". A name that only repeats the character ("A") is dropped. The visual
+  // caption and the title stay as they were; the label is what a screen reader reads.
+  const labelFor = (cell: GlyphPickerCell, caption?: string) => {
+    const { nice, uni } = nameParts(cell)
+    const nm = (typeof names === 'function' ? caption : undefined) ?? nice ?? uni?.toLowerCase()
+    const shown = isInvisible(cell.ch) ? '' : display(cell.ch)
+    return [shown, nm && nm !== shown ? nm : '', `U+${hex(cell.ch)}`, cell.note ?? '']
+      .filter(Boolean).join(', ')
+  }
+
+  // Column count, read from the grid the browser laid out. One read per resize, never per
+  // render or per key. Unresolvable (picker hidden: the value comes back as the authored
+  // repeat(...)) means 0, which renders one row per group until it is visible.
+  useLayoutEffect(() => {
+    const box = groupsRef.current
+    if (!box) return
+    const measure = () => {
+      const grid = box.querySelector('.gp-grid')
+      const tpl = grid ? getComputedStyle(grid).gridTemplateColumns : ''
+      const n = tpl && !tpl.includes('(') && tpl !== 'none' ? tpl.trim().split(/\s+/).length : 0
+      setCols(prev => (prev === n ? prev : n))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(box)
+    return () => ro.disconnect()
+  }, [visibleGroups.length > 0])
+
+  // Flat order of every visible cell, for the roving tabindex and the arrow keys.
+  const flatIds = useMemo(() => visibleGroups.flatMap(g => g.list.map(cellId)), [visibleGroups])
+  const groupSizes = useMemo(() => visibleGroups.map(g => g.list.length), [visibleGroups])
+  // The Tab stop: the cell last moved to if it is still there (same place first, then the
+  // same id anywhere, since a search reshuffles places), else the selected glyph, else the
+  // first cell.
+  const tabStop = (() => {
+    if (focusAt) {
+      if (flatIds[focusAt.flat] === focusAt.id) return focusAt.flat
+      const i = flatIds.indexOf(focusAt.id)
+      if (i >= 0) return i
+    }
+    const a = flatIds.indexOf(cellId(active))
+    return a >= 0 ? a : 0
+  })()
+
+  const onGridKey = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    const el = (e.target as HTMLElement).closest?.('[data-gp-i]') as HTMLElement | null
+    if (!el || !groupsRef.current?.contains(el)) return
+    const flat = Number(el.dataset.gpI)
+    // A page is the rows that fit in what the reader can see of the grid.
+    const box = groupsRef.current
+    const cellH = el.getBoundingClientRect().height || 1
+    const seen = Math.min(box.clientHeight || Infinity, window.innerHeight)
+    const pageRows = Math.max(1, Math.floor(seen / cellH) - 1)
+    const to = nextIndex(e, flat, groupSizes, cols || flatIds.length, pageRows)
+    if (to == null) return
+    e.preventDefault()
+    if (to === flat) return
+    setFocusAt({ id: flatIds[to], flat: to })
+    ;(box.querySelector(`[data-gp-i="${to}"]`) as HTMLElement | null)?.focus()
+  }
 
   // The specimen font travels as CSS custom props consumed ONLY by glyph-bearing
   // elements (.gp-specimen / .gp-cell) — inherited font-variation-settings on the
@@ -407,22 +552,49 @@ export function GlyphPicker({
   return (
     <div className={`gp gp--${layout}${className ? ' ' + className : ''}`} style={{ ...specimen, ...style }}>
       {layout === 'side' && side}
-      <div className="gp-groups">
-        {visibleGroups.map(g => (
-          <div key={g.label} className="gp-group">
-            <div className="gp-group-label">{g.label}</div>
-            <div className="gp-grid">
-              {g.list.map((c, i) => (
-                <Cell key={c.key ?? i} cell={c}
-                  active={cellId(active) === cellId(c)}
-                  state={cellState?.(c)}
-                  name={captionFor(c)}
-                  onPick={pick} />
-              ))}
-            </div>
-          </div>
-        ))}
+      {/* One Tab stop for the whole set, however many groups (G132). Each group is its own
+          labelled grid; the arrow keys cross from one to the next as if they were one. */}
+      <div className="gp-groups" ref={groupsRef} onKeyDown={onGridKey}
+        onFocus={e => {
+          const el = (e.target as HTMLElement).closest?.('[data-gp-i]') as HTMLElement | null
+          if (!el) return
+          const flat = Number(el.dataset.gpI)
+          if (flatIds[flat] && (focusAt?.flat !== flat || focusAt?.id !== flatIds[flat])) setFocusAt({ id: flatIds[flat], flat })
+        }}>
+        {(() => {
+          let base = 0
+          return visibleGroups.map((g, gi) => {
+            const start = base
+            base += g.list.length
+            const labelId = `${uid}-g${gi}`
+            return (
+              <div key={g.label} className="gp-group">
+                <div className="gp-group-label" id={labelId}>{g.label}</div>
+                <div className="gp-grid" role="grid" aria-labelledby={labelId}>
+                  {cols !== null && chunk(g.list.map((c, i) => ({ c, i })), cols).map((row, ri) => (
+                    <div key={ri} role="row" className="gp-row">
+                      {row.map(({ c, i }) => {
+                        const caption = captionFor(c)
+                        return (
+                          <Cell key={c.key ?? i} cell={c}
+                            idx={start + i}
+                            active={cellId(active) === cellId(c)}
+                            tabbable={start + i === tabStop}
+                            state={cellState?.(c)}
+                            name={caption}
+                            label={labelFor(c, caption)}
+                            onPick={pick} />
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })
+        })()}
       </div>
+      <span className="gp-live" role="status" aria-live="polite">{announce}</span>
       {layout === 'bottom' && side}
     </div>
   )

@@ -134,6 +134,8 @@
   cursor: pointer;
 }
 .gp-copy:hover { color: var(--text); }
+/* The house ring (button.css .wm-btn), keyboard focus only. */
+.gp-copy:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }
 .gp-code {
   font-size: var(--type-ui-size);
   letter-spacing: 0;             /* a U+ readout is a code, not a caps run */
@@ -203,6 +205,25 @@
 .gp-cell--active {
   box-shadow: inset 0 0 0 1.5px var(--signal-ink, var(--accent, #e8e8e8));
   background: var(--surface-hi);
+}
+/* Keyboard focus: the house ring, OUTSIDE the cell, so it never reads as the selected
+   cell's inset ring -- the cell you are on and the glyph you picked are two things and an
+   arrow press moves only the first. Offset 1px, not the usual 2: the cells are 4px apart,
+   and 2 + 2 would touch the neighbour. */
+.gp-cell:focus { outline: none; }
+.gp-cell:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 1px; }
+/* role=row wrappers for the grid's accessibility tree. `contents` takes them out of
+   layout, so the cells still sit in .gp-grid's own auto-fill columns. */
+.gp-row { display: contents; }
+/* The copy announcement: read, never seen. */
+.gp-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 /* names mode: the square glyph area keeps its feel; a caption hangs beneath */
