@@ -163,7 +163,8 @@
   text-decoration-color: var(--text-muted, currentColor);
 }
 /* Active colours the number AND its rule, on focus-within so stepping counts too. */
-.triplet-num:focus { outline: none; }
+.triplet-num:focus:not(:focus-visible) { outline: none; }
+.triplet-num:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }
 .triplet-f:focus-within .triplet-num {
   color: var(--signal-ink, var(--accent, currentColor));
   text-decoration-color: var(--signal-ink, var(--accent, currentColor));

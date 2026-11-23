@@ -360,7 +360,19 @@ put back. A page with viewport-sized blocks above an editable has to hold those 
 | G100 | a quick tap with `caret: true` on an unfocused contenteditable | `touchend` prevented, focus with `preventScroll`, caret placed at the tap. Left to iOS: a drag, a press over 400ms, an element already focused, a textarea | ios-focus-guard |
 | G101 | the guarded element is replaced during the focus (`EditableTextBlock`'s key) | the hold carries on, and the replacement's guard takes over the touchmove. With no guard left, the hold stops | ios-focus-guard |
 
-## 16 · Overlays: popover, menu, dialog
+## 16 · Accessibility one-offs
+
+Five gaps from the accessibility audit. Tested in `tests/behaviour/a11y-oneoffs.spec.ts`.
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G102 | `AxisSlider` is read by a screen reader | the range and the field are both named by the label (`aria-labelledby` on the label span); `aria-valuetext` carries the unit (`16 px`) and says `auto, 14` while auto. `AxisTriplet` fields keep their `label min / des / max` names and speak the unit | a11y-oneoffs |
+| G103 | a `Collapse` is shut | `inert` and `aria-hidden`: nothing inside is focusable or announced. Open removes both. The animation is untouched | a11y-oneoffs |
+| G104 | the `InlineEmphasisBubble` | `role="toolbar"` ("Text emphasis") of two real buttons with `aria-pressed` for what the selection already is. A mouse press still acts on mousedown and keeps the selection; Enter / Space acts on the click (`detail` 0), so one press never fires twice. Pressing again takes the marker off, and the selection stays on the same words | a11y-oneoffs |
+| G105 | Cmd+I / Cmd+B (Ctrl on non-Mac) in an `EditableTextBlock` with `emphasis` | the same toggle as the bubble (`src/emphasis.ts`), written as `*` / `**` text, never the browser's `<i>` / `<b>`. `***x***` is both. No selection: the key is swallowed and nothing is written. Without the `emphasis` prop the keys are the browser's | a11y-oneoffs |
+| G106 | keyboard focus on the toggle group, theme marks, zoom control, toast, and the triplet field | the house 2px ring (`--signal-ink`), by `:focus-visible` only: a click never draws it | a11y-oneoffs |
+
+## 17 · Overlays: popover, menu, dialog
 
 `src/overlays.tsx`: `usePopoverTrigger`, `Popover` (or the `usePopoverPanel` hook, for a panel
 that renders its own root), `Menu` + `MenuItem`, `Dialog`, `useOverlayClose`. Behavior only:
@@ -370,8 +382,7 @@ positioning, no style). Built on React Aria's low-level hooks (`useOverlay`, `us
 `react-aria` and `react-stately` installed. Tested in `tests/behaviour/overlays.spec.ts` on
 `tests/fixtures/overlays.html`, the page bundled from `tests/fixtures/overlays-entry.tsx`.
 
-**Ids G102–G111 are left free** for the Cmd+I / Cmd+B rows another branch is writing; this
-section starts at G112 so neither renumbers the other.
+**G107–G111 are unused**: this section was written beside §16 and started at G112 so neither renumbered the other.
 
 | id | gesture | promise | commit |
 | --- | --- | --- | --- |
@@ -389,7 +400,7 @@ section starts at G112 so neither renumbers the other.
 | G123 | the dial and the iOS focus guard | a dial inside a panel drags and takes Escape (G117) without closing it, even when the drag ends outside. A non-modal panel adds no touch listener: under `iosFocusGuard` (§15) a tap into an editable outside closes the panel by its blur, and focus stays in the text. The modal's scroll lock is React Aria's own iOS handling; a guarded editable inside an open modal is not promised | overlays |
 | G124 | `prefers-reduced-motion: reduce`, or not | the primitive has no motion: open and close are immediate, and every focus move is `preventScroll` (an item brought into view jumps, `block: nearest`). A host that animates its panel does it in its own CSS, behind `prefers-reduced-motion: no-preference` | overlays |
 
-**Not promised (§16).** Positioning: the panel sits where the host's CSS puts it, and keeping it
+**Not promised (§17).** Positioning: the panel sits where the host's CSS puts it, and keeping it
 inside a box (ReCal's `useKeepInside`) stays the host's. Typeahead in menus. Submenus. The
 VoiceOver re-announce React Aria's `useDialog` does on iOS (it is not used: its focus runs once
 on mount, and a hook-form panel mounts closed).

@@ -3,7 +3,7 @@
  * An audit found about twelve hand-rolled popovers across the apps: no Escape on some, no
  * aria-expanded or aria-haspopup on most, focus never moved in and never came back to the
  * trigger. Each app wrote its own outside-click listener, and each got a different corner
- * of it wrong. This is the one copy. GESTURES.md §16 (G112–G124) is the promise.
+ * of it wrong. This is the one copy. GESTURES.md §17 (G112–G124) is the promise.
  *
  *   const pop = usePopoverTrigger()                       // { type: 'menu' | 'listbox' | 'dialog' }
  *   <button className="align-btn" ref={pop.triggerRef} {...pop.triggerProps}>…</button>

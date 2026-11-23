@@ -12,6 +12,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode, FormEvent, KeyboardEvent } from 'react'
 import { placeCaretAtOffset, caretCharOffset } from './caret'
 import { iosFocusGuard } from './iosFocusGuard.js'
+import { DEFAULT_MARKERS, emphasisKey, toggleEmphasis, type EmphasisMarkers } from './emphasis'
 
 export interface EditableTextBlockProps {
   value: string
@@ -27,13 +28,18 @@ export interface EditableTextBlockProps {
   liveCommit?: boolean
   onInput?: (e: FormEvent<HTMLDivElement>) => void
   onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void
+  /** Where emphasis is supported (the same `*` / `**` markup InlineEmphasisBubble writes):
+   *  Cmd/Ctrl+I and Cmd/Ctrl+B toggle it on the selection, through the same path as the
+   *  bubble. `true` = the default markers. Off by default: a block with no emphasis leaves
+   *  the keys to the browser. */
+  emphasis?: boolean | EmphasisMarkers
   /** Access to the element (e.g. a parent ref map for cross-block operations). */
   innerRef?: (el: HTMLDivElement | null) => void
 }
 
 export function EditableTextBlock({
   value, onCommit, render, className, style,
-  focused: focusedProp, onFocusChange, liveCommit, onInput, onKeyDown, innerRef,
+  focused: focusedProp, onFocusChange, liveCommit, onInput, onKeyDown, innerRef, emphasis,
 }: EditableTextBlockProps) {
   const controlled = focusedProp !== undefined
   const [focusedState, setFocusedState] = useState(false)
@@ -90,7 +96,16 @@ export function EditableTextBlock({
         onFocusChange?.(false)
       }}
       onInput={e => { if (liveCommit && focused) onCommit(e.currentTarget.textContent ?? ''); onInput?.(e) }}
-      onKeyDown={onKeyDown}
+      onKeyDown={e => {
+        const kind = emphasis && focused ? emphasisKey(e) : null
+        if (kind) {
+          // Never the browser's own <i>/<b>: that would put markup in the raw text.
+          e.preventDefault()
+          toggleEmphasis(e.currentTarget, kind, emphasis === true ? DEFAULT_MARKERS : emphasis as EmphasisMarkers)
+          return
+        }
+        onKeyDown?.(e)
+      }}
     >
       {/* NOTHING but the text lives in here. A sibling node inside a contentEditable is
           counted by every caret helper that walks children -- placeCaretAtOffset threw

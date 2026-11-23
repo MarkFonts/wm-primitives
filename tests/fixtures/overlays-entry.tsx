@@ -1,4 +1,4 @@
-/* GESTURES.md §16 -- the page tests/behaviour/overlays.spec.ts drives. Bundled by the spec
+/* GESTURES.md §17 -- the page tests/behaviour/overlays.spec.ts drives. Bundled by the spec
    with esbuild (write: false) and added to tests/fixtures/overlays.html as a script tag, the
    way ios-focus-guard.spec.ts mounts EditableTextBlock. No house look: the primitives have
    none, and what is asserted is focus, ARIA and who closes what. */

@@ -24,6 +24,18 @@ Newest first.
 
 **Not in `index.ts`.** `react-aria` and `react-stately` are optional peer dependencies no consumer has installed yet, and font-proofer and ReCal import the barrel, so a re-export there would break both builds. Apps import the file by path after `npm i react-aria react-stately`. No consumer is migrated here; `dist/dial.js` is unchanged (231.6KB), because the dial does not import it.
 
+## 2026-11-23 -- five accessibility one-offs
+
+**`AxisSlider`'s range and field are now named.** The label is a `<span>`, so neither input had a name; both point at it with `aria-labelledby`, and `aria-valuetext` says the unit (`16 px`) and `auto, 14` while auto. `AxisTriplet` already named its fields and now speaks the unit too. Its `.triplet-num:focus { outline: none }` is now `:focus:not(:focus-visible)` plus the house ring, so a keyboard user sees where they are.
+
+**A shut `Collapse` is `inert` and `aria-hidden`.** Max-height 0 hid the pixels and left every control inside a tab stop. `inert` is set from a layout effect rather than as a prop, because React 18 and 19 disagree on it and the peer range is `>=18`.
+
+**The emphasis bubble is a toolbar of real buttons, and it toggles.** `role="toolbar"`, `type="button"`, `aria-pressed`. It acted on mousedown only; that stays (it keeps the selection alive), and a keyboard press, which arrives as a click with `detail` 0, now acts too, so nothing fires twice. For `aria-pressed` to mean something the press had to become a toggle: it takes the marker off if the selection already has it, and the selection stays on the same words (it used to collapse and the bubble vanished). Cost: the bubble stays after a press.
+
+**Cmd/Ctrl+I and +B, in `EditableTextBlock`, behind a new `emphasis` prop.** The toggle lives in `src/emphasis.ts` and the bubble and the shortcut both call it, so there is one path and it writes `*` / `**` text, never `<i>` / `<b>`. It is opt-in because the block has no other idea of what markup its host supports; a host that mounts the bubble passes `emphasis`. The old markdown typing (`*word*`) is unchanged, and the toggle reads it back: `***x***` is both.
+
+**Focus rings, keyboard only.** `toggleGroup.css`, `themeSwitch.css`, `zoomControl.css`, and `toast.css` get the house ring (2px `--signal-ink`, as `button.css` and `icon.css`), inset where the control is clipped. GESTURES.md G102-G106.
+
 ---
 
 ## 2026-11-19 -- `forum` and `key` join the face

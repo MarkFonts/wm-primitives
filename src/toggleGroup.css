@@ -54,6 +54,10 @@
   transition: background var(--dur-fast, 140ms), color var(--dur-fast, 140ms);
 }
 
+/* The house ring, on keyboard focus only. Inset: the pill's own 2px padding is all the room
+   there is, and an outset ring would be cut by whatever clips the control. */
+.ui-seg > button:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }
+
 .ui-seg > button:hover:not(.active) { color: var(--ink, #fff); }
 
 /* Background, not an inset ring: see the press note at the top. */

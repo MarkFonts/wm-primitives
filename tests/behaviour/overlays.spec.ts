@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test'
 import { build } from 'esbuild'
 import { fileURLToPath } from 'node:url'
 
-/* GESTURES.md §16 -- src/overlays.tsx on tests/fixtures/overlays.html, with the page bundled
+/* GESTURES.md §17 -- src/overlays.tsx on tests/fixtures/overlays.html, with the page bundled
    from tests/fixtures/overlays-entry.tsx here (no committed build). What is asserted is the
    behavior the audit found missing -- Escape, the outside press, focus in and back, the ARIA on
    the trigger, the modal's inert page and trap -- and that none of it gets in the way of the
