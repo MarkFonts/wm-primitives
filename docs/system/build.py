@@ -2421,7 +2421,7 @@ _corners = re.sub(r'/\*.*?\*/', '', (HERE.parent.parent / "src" / "corners.css")
 EASED_CSS = ":root{--corner-scale:1}" + "".join(
     r.strip() + "}" for r in _corners.split("}") if 'data-corners' in r.split("{")[0])
 EASED_CSS = re.sub(r'\s+', ' ', EASED_CSS)
-assert "clip-path: shape(" in EASED_CSS and "--corner-scale: 1.125" in EASED_CSS, "corners.css lost its eased rules"
+assert "var(--pill-clip)" in EASED_CSS and "--corner-scale: 1.125" in EASED_CSS, "corners.css lost its eased rules"
 # ?corners=eased opens the page with the flag on (the corner law's Law toggle writes it back).
 CORNERS_BOOT = "(function(){var c=new URLSearchParams(location.search).get('corners');if(c)document.documentElement.dataset.corners=c})();"
 

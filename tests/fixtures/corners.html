@@ -30,6 +30,11 @@
   #pill200{ height: 200px; width: 520px; border-radius: 999px; font-size: 40px; }
   #btn8{ height: 32px; border-radius: calc(8px * var(--corner-scale, 1)); }
   #vpill{ width: 10px; height: 48px; border-radius: 999px; background: var(--text); }
+  /* the height ramp: pills of 24, 32, 48, 96 and 160px tall, four heights wide */
+  .ramp{ border: 0; padding: 0; background: var(--text); }
+  #h24{ height: 24px; width: 96px; } #h32{ height: 32px; width: 128px; } #h48{ height: 48px; width: 192px; }
+  #h96{ height: 96px; width: 384px; } #h160{ height: 160px; width: 640px; }
+  .ramp{ border-radius: 999px; }
   #pseudo{ position: relative; width: 60px; height: 40px; }
   #pseudo::after{ content: ''; position: absolute; left: 10px; top: 4px; width: 40px; height: 16px; border-radius: 999px; background: var(--text-muted); }
   .wm-hd-rail{ position: relative; width: 200px; height: 40px; --hd-inset: 40px; }
@@ -43,6 +48,10 @@
     <div id="pseudo"></div>
   </div>
   <button type="button" class="spec" id="pill200">Pill 200</button>
+  <div class="row" style="align-items:flex-end">
+    <div class="ramp" id="h24"></div><div class="ramp" id="h32"></div><div class="ramp" id="h48"></div>
+  </div>
+  <div class="row" style="align-items:flex-end"><div class="ramp" id="h96"></div><div class="ramp" id="h160"></div></div>
   <div class="row">
     <button type="button" class="wm-chip" id="chip">Text</button>
     <button type="button" class="wm-chip on" aria-pressed="true">Display</button>

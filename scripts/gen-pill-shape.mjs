@@ -1,105 +1,60 @@
 #!/usr/bin/env node
-/* Writes the eased pill cap into src/corners.css, between the GENERATED markers.
+/* The eased pill cap's audit and printer. The cap itself is built at runtime by src/corners.js
+ * (pillRatio, pillCap, pillShape): the choke depends on the pill's height, so one fixed shape
+ * scaled by --pill-s no longer serves every size, and there is nothing left to GENERATE into
+ * corners.css. This file imports the same solver and answers two questions about it.
  *
- * The cap is a clothoid-eased half-turn: curvature ramps from 0 at the straight to a peak at
- * the nose and back, so the side meets the cap with no curvature break (G2), and the nose is
- * still round. e = 15%: the tangent node sits 0.15 r into the straight (at 0.575 h from the
- * end, against a circle's 0.5 h); the extreme and the height are the circle's. Fitted with
- * six cubics per cap (knots at the arc-length fractions of the audit's fit; see the PR that
- * added this file for the geometry and the renders). Every number below is a fraction of the
- * pill's SHORT side, so one string serves every size: corners.js measures the side and writes
- * it to --pill-s.
+ *   node scripts/gen-pill-shape.mjs            table, per ratio: L, nose radius, fit error at
+ *                                              96px, and how far the eased cap lies inside the
+ *                                              round one (the sliver the clip removes)
+ *   node scripts/gen-pill-shape.mjs --check    the same, and exit 1 if any fit is over 0.05px
+ *                                              at 96px tall, or any cap leaves the round one
+ *   node scripts/gen-pill-shape.mjs --shape 1.28 x     print one shape() string
  *
- * The clip is not the pill. It is EVERYTHING except the sliver between the round cap and the
- * eased one (evenodd: a big box, minus the round stadium, plus the eased stadium). The eased
- * cap lies inside the round one everywhere -- by at most 0.0035 r, at the tangent end -- so
- * the clip only ever removes that sliver of the element's own round-painted fill and border,
- * and every paint OUTSIDE the box survives: the focus ring, a box-shadow, a spill, a child
- * that overhangs. See the corners section of CHROME.md.
- *
- *   node scripts/gen-pill-shape.mjs        (rewrites src/corners.css in place)
- */
-import { readFileSync, writeFileSync } from 'node:fs'
+ * Fit error is the worst distance from the cubics to the exact curve (a clothoid ramp into an
+ * arc, ratio solved by bisection; CHROME.md "Corners"), measured against 1200 samples per quarter. */
+import { pillRatio, pillCap, pillShape } from '../src/corners.js'
 
-// Top quarter of the LEFT cap, from the tangent node on the top straight to the extreme.
-// [x, y] as fractions of the short side s (the pill's height). From the 28px fit / 28.
-const T = 0.575
-const Q = [
-  // c1, c2, end
-  [[0.523607, 0], [0.472036, 0], [0.421286, 0.007929]],
-  [[0.303929, 0.02625], [0.196964, 0.085893], [0.119714, 0.176107]],
-  [[0.042464, 0.266357], [0, 0.381214], [0, 0.5]],
-]
-const B = '4000px'   // the outside box's reach past the element: shadows, spills, focus rings
-const n = v => +v.toFixed(6)
+const args = process.argv.slice(2)
+if (args[0] === '--shape') { console.log(pillShape(+args[1], args[2] || 'x')); process.exit(0) }
 
-// s * k, measured from the near edge or (far = true) from the far edge (100%)
-const at = (k, far) => k === 0 ? (far ? '100%' : '0px')
-  : far ? `calc(100% - var(--pill-s) * ${n(k)})` : `calc(var(--pill-s) * ${n(k)})`
+const LIMIT_PX = 0.05, AT = 96
+const bez = (p0, [c1, c2, e], u) => { const v = 1 - u
+  return [0, 1].map(k => p0[k] * v * v * v + c1[k] * 3 * v * v * u + c2[k] * 3 * v * u * u + e[k] * u * u * u) }
 
-// Walk a quarter backwards: [c1, c2, end] triples from its end back to its start.
-function rev(segs, start) {
-  const pts = [start]; for (const s of segs) pts.push(...s)
-  const out = []; for (let i = pts.length - 1; i > 0; i -= 3) out.push([pts[i - 1], pts[i - 2], pts[i - 3]])
-  return out
-}
-const mirror = segs => segs.map(s => s.map(p => [p[0], 1 - p[1]]))
-
-// One eased stadium, horizontal (axis 'x', caps left and right) or vertical ('y', caps top and
-// bottom). Coordinates are (along, across) fractions; along is measured from the cap's own end.
-function stadium(axis) {
-  const P = (a, aFar, c) => axis === 'x' ? `${at(a, aFar)} ${at(c)}` : `${at(c)} ${at(a, aFar)}`
-  const seg = (far, [c1, c2, e]) => `curve to ${P(e[0], far, e[1])} with ${P(c1[0], far, c1[1])} / ${P(c2[0], far, c2[1])}`
-  const top = Q, topBack = rev(Q, [T, 0])
-  return [
-    `move to ${P(T, false, 0)}`,
-    `line to ${P(T, true, 0)}`,
-    ...top.map(s => seg(true, s)),                  // far cap, upper quarter: tangent -> extreme
-    ...mirror(topBack).map(s => seg(true, s)),      // far cap, lower quarter: extreme -> tangent
-    `line to ${P(T, false, 1)}`,
-    ...mirror(top).map(s => seg(false, s)),         // near cap, lower quarter: tangent -> extreme
-    ...topBack.map(s => seg(false, s)),             // near cap, upper quarter: extreme -> tangent
-    'close',
-  ]
+function audit(ratio) {
+  const { L, start, segs, dense } = pillCap(ratio), { a, c } = dense
+  let err = 0, p0 = start
+  for (const g of segs) {
+    for (let i = 0; i <= 200; i++) {
+      const p = bez(p0, g, i / 200)
+      let best = Infinity
+      for (let j = 0; j < a.length - 1; j++) {   // distance to the dense polyline
+        const dx = a[j + 1] - a[j], dy = c[j + 1] - c[j], l2 = dx * dx + dy * dy
+        const t = Math.max(0, Math.min(1, ((p[0] - a[j]) * dx + (p[1] - c[j]) * dy) / l2))
+        best = Math.min(best, Math.hypot(p[0] - a[j] - t * dx, p[1] - c[j] - t * dy))
+      }
+      err = Math.max(err, best)
+    }
+    p0 = g[2]
+  }
+  // inside the round cap: for points within h/2 of the end, the distance to the round center (0.5, 0.5) <= 0.5
+  let sliver = 0, out = 0
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] >= 0.5) continue
+    const d = Math.hypot(a[i] - 0.5, c[i] - 0.5)
+    sliver = Math.max(sliver, 0.5 - d); out = Math.max(out, d - 0.5)
+  }
+  return { ratio, L, err, sliver, out }
 }
 
-function round(axis) {
-  const P = (a, aFar, c) => axis === 'x' ? `${at(a, aFar)} ${at(c)}` : `${at(c)} ${at(a, aFar)}`
-  const r = 'calc(var(--pill-s) * 0.5)'
-  // Transposing x and y mirrors the turn: the vertical stadium's arcs sweep the other way.
-  const sw = axis === 'x' ? 'cw' : 'ccw'
-  return [
-    `move to ${P(0.5, false, 0)}`,
-    `line to ${P(0.5, true, 0)}`,
-    `arc to ${P(0.5, true, 1)} of ${r} ${sw}`,
-    `line to ${P(0.5, false, 1)}`,
-    `arc to ${P(0.5, false, 0)} of ${r} ${sw}`,
-    'close',
-  ]
+let bad = 0
+console.log('ratio   L/h     fit err @96px   sliver @32px   sliver @96px')
+for (let r = 1.15; r <= 1.3001; r += 0.01) {
+  const q = audit(+r.toFixed(2)), px = q.err * AT
+  const flag = px > LIMIT_PX || q.out > 1e-6
+  if (flag) bad++
+  console.log(`${q.ratio.toFixed(2)}   ${q.L.toFixed(4)}   ${px.toFixed(4)}px         ${(q.sliver * 32).toFixed(3)}px        ${(q.sliver * 96).toFixed(3)}px${flag ? '   <-- FAIL' : ''}`)
 }
-
-function shape(axis) {
-  const box = [`from -${B} -${B}`, `line to calc(100% + ${B}) -${B}`, `line to calc(100% + ${B}) calc(100% + ${B})`,
-    `line to -${B} calc(100% + ${B})`, 'close']
-  return `shape(evenodd ${[...box, ...round(axis), ...stadium(axis)].join(',\n    ')})`
-}
-
-const css = `/* GENERATED by scripts/gen-pill-shape.mjs -- do not edit by hand. */
-:root[data-corners="eased"] [data-wm-pill="x"],
-:root[data-corners="eased"] [data-wm-pill-b="x"]::before,
-:root[data-corners="eased"] [data-wm-pill-a="x"]::after {
-  clip-path: ${shape('x')} !important;
-}
-:root[data-corners="eased"] [data-wm-pill="y"],
-:root[data-corners="eased"] [data-wm-pill-b="y"]::before,
-:root[data-corners="eased"] [data-wm-pill-a="y"]::after {
-  clip-path: ${shape('y')} !important;
-}
-/* END GENERATED */`
-
-const file = new URL('../src/corners.css', import.meta.url)
-const src = readFileSync(file, 'utf8')
-const re = /\/\* GENERATED by scripts\/gen-pill-shape\.mjs[\s\S]*?\/\* END GENERATED \*\//
-if (!re.test(src)) { console.error('corners.css has no GENERATED block'); process.exit(1) }
-writeFileSync(file, src.replace(re, css))
-console.log('src/corners.css: pill shapes written')
+console.log(`ramp: 24px ${pillRatio(24)}, 32px ${pillRatio(32)}, 48px ${pillRatio(48)}, 96px ${pillRatio(96)}, 160px ${pillRatio(160)}`)
+if (args.includes('--check') && bad) { console.error(`${bad} ratio(s) out of tolerance`); process.exit(1) }
