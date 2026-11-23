@@ -21,6 +21,8 @@
   cursor: pointer;
 }
 .ssd-btn:hover { border-color: var(--text-muted); }
+/* The house ring (button.css .wm-btn), keyboard focus only: a click never draws it. */
+.ssd-btn:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }
 .ssd-btn-label { margin-right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* The caret is an Icon now, so it carries its own ink and size from icon.css; all that is
    left here is that it must not stretch. font-size is deliberately NOT set: Icon takes a
@@ -69,6 +71,11 @@
 }
 .ssd-row:hover,
 .ssd-row.on { background: var(--surface-hi); }
+/* Inset, like .wm-menu: rows sit 4px apart inside the list box, so an outside ring would
+   run into the neighbour and the box edge. The list itself never shows one -- it takes
+   focus only to hand it to a row. */
+.ssd-row:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }
+.ssd-list:focus { outline: none; }
 
 /* THE CONFIRM (motion.css, GESTURES.md §14): the chosen row's fill, off 80ms, on 80ms -- its
    mark blinks with it (icon.css). The trigger blinks its press ring (corners.css). */

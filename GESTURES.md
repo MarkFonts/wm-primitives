@@ -359,3 +359,44 @@ put back. A page with viewport-sized blocks above an editable has to hold those 
 | G99 | a focus with no tap behind it, or over 500ms after the finger lifted, or a tap already spent by a focus | no hold: Enter moving to the next block never pulls the page back | ios-focus-guard |
 | G100 | a quick tap with `caret: true` on an unfocused contenteditable | `touchend` prevented, focus with `preventScroll`, caret placed at the tap. Left to iOS: a drag, a press over 400ms, an element already focused, a textarea | ios-focus-guard |
 | G101 | the guarded element is replaced during the focus (`EditableTextBlock`'s key) | the hold carries on, and the replacement's guard takes over the touchmove. With no guard left, the hold stops | ios-focus-guard |
+
+## 16 · Collections from the keyboard
+
+`StyleScopeList` / `StyleScopeDropdown` (`src/StyleScopeDropdown.tsx`) and `GlyphPicker`
+(`src/GlyphPicker.tsx`). Tested in `tests/behaviour/collections.spec.ts` against
+`tests/fixtures/collections.html`, whose picker holds every codepoint Cal Sans encodes
+(1,072 cells), so "one Tab stop" is measured at the real size.
+
+**Ids start at G126, not G102.** Three branches added rows at once (2026-11-23: this one,
+`overlays`, and the toggle-group/zoom/toast pass), so each started 25 past the highest id
+then on main (G101) times its slot. G102–G125 belong to whichever of the others lands; ids
+stay permanent either way.
+
+**The list is React Aria, the grid is not.** The list uses `useListBox` / `useOption`
+(`react-aria`, `react-stately`, peer dependencies from this change). The grid is a roving
+tabindex written here. Measured on the fixture's set in Chromium, production build, keydown
+or pointerdown to the frame after it, median of 7 interleaved loads, at 1,072 cells (Cal Sans)
+and 3,216 (the set three times): a `useGridList` prototype cost 62 / 185ms per pick and
+31 / 93ms per arrow press, because every item re-renders when the selection manager changes.
+The hand-rolled grid costs 17 / 17ms per pick, the same as main (one frame is the floor of the
+measure), and 12 / 12ms per arrow, because an arrow flips `tabbable` on two memoized cells and
+nothing else. Mount: 124 / 146ms, against main's 235 / 233 and the prototype's 112 / 315.
+
+**Selection stays the host's.** `rows[].selected` is the truth. React Aria is never allowed to
+change it: every pick, from a press or the keyboard, becomes the one call the hosts already
+handle, `onSelect(id, event)`, with the real event, so font-proofer's shift-click range and its
+"click the active role to clear it" keep working.
+
+| id | gesture | promise | commit |
+| --- | --- | --- | --- |
+| G126 | a list opens from the keyboard (`autoFocus`, which `StyleScopeDropdown` always passes) | focus lands on the selected row, or the first row if none is selected | collections-keyboard |
+| G127 | Tab into a `StyleScopeList`; ↑ ↓, Home, End, or typing a label's first letters | one Tab stop for the whole list (roving tabindex); the keys move focus and never pick. Space or Enter picks the focused row, exactly as a click does. `mode="multi"` is `aria-multiselectable`; every row carries `aria-selected`. React Aria's own extras (Shift+Arrow range, Mod+A, Escape clears) reach nothing | collections-keyboard |
+| G128 | a pointer pick, mouse or touch | unchanged: one `onSelect(id, e)` per press, `e` the click with its modifier keys, then the confirm blink on that row | collections-keyboard |
+| G129 | `StyleScopeDropdown`'s trigger | `aria-haspopup="listbox"`, `aria-expanded`, and `aria-controls` naming the open list; the list is labelled by the trigger. ↓ or ↑ on a closed trigger opens it | collections-keyboard |
+| G130 | Escape inside an open dropdown | it closes and focus returns to the trigger. Tabbing out closes it without moving focus back | collections-keyboard |
+| G131 | a `mode="single"` pick in the dropdown | the list closes and focus returns to the trigger, which now shows the new name | collections-keyboard |
+| G132 | Tab through a `GlyphPicker` | the whole set of cells, every group, is ONE Tab stop: the cell last moved to, else the selected glyph, else the first. A char that sits in two groups is still one stop | collections-keyboard |
+| G133 | arrow keys in the picker | ← → move one cell, crossing group ends; ↑ ↓ move one row in the same column, crossing into the next or previous group's nearest row (a short last row lands on its last cell); Home / End go to the row's ends, Ctrl/⌘+Home / End to the first and last cell; PageUp / PageDown move by the rows that fit in the visible grid. Moving never picks: Enter or Space does | collections-keyboard |
+| G134 | a screen reader on a cell | each group is a `role="grid"` labelled by its group label, with `role="row"`s (`display: contents`, so the CSS grid is untouched) of `role="gridcell"`s. A cell is named by its character, its glyph name and its code ("Ä, Adieresis, U+00C4"; a name that only repeats the character is dropped), whether or not captions are on. The picked glyph is `aria-selected` | collections-keyboard |
+| G135 | copy succeeds | "Copied ß, U+00DF" is announced in a polite live region inside the picker, read and never seen; copying the same glyph twice announces twice. Not the toast: a toast would be a new thing on screen | collections-keyboard |
+| G136 | keyboard focus on a row, a cell, a trigger, or the copy button | the house ring (`button.css`: 2px `--signal-ink`), on `:focus-visible` only, so a click never draws it. A glyph cell's ring sits outside the cell (offset 1px) so it never reads as the selected cell's inset ring; a list row's sits inside (offset −2px), like 06 Menu | collections-keyboard |
