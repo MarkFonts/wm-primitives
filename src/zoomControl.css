@@ -22,6 +22,10 @@
   }
   /* the box is what grows; it packs to the END, so shut it shows the mark at its right and
      clips the rest off its left */
+  /* The ring, keyboard only: the buttons and the rail. Inside the box (-2px) because the
+     shut control clips to 27px. */
+  .wm-zoom .wm-icon-btn:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }
+  .wm-zoom .wm-hd-rail:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: 2px; }
   .wm-zoom-box { display: flex; align-items: center; justify-content: flex-end; flex: 1 1 auto; min-inline-size: 0; block-size: 100%; }
   .wm-zoom .wm-icon-btn {
     --icon-btn-pad: 0;   /* icon.css's knob: the target is the square below, not padding round the mark */

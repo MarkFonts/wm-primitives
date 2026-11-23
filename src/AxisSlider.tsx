@@ -24,7 +24,7 @@
 //   • onRangePointerDown — hook on the range thumb (e.g. drag-to-flash a zone)
 //   • disabled — dim/lock the control (e.g. a frozen axis)
 import { wmConfirm } from './confirm.js'
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from 'react'
+import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { nbMinus } from './format'
 import { CHEVRON, chevronPath } from './chevronGeometry'
@@ -88,6 +88,9 @@ export function AxisSlider({
   variant = 'default', field = 'underline', reference, suffix, showRange,
 }: AxisSliderProps) {
   const [numFocused, setNumFocused] = useState(false)
+  // The label is a <span>, so neither input can be named by a <label for>. Both point at
+  // it by id instead (the shade copy under a track variant is aria-hidden and carries none).
+  const nameId = useId()
 
   // No scroll-to-adjust. Hovering a control while scrolling the panel is the common
   // case, and a wheel that edits values turns a scroll into an unnoticed edit — a
@@ -161,6 +164,11 @@ export function AxisSlider({
   const [draft, setDraft] = useState<string | null>(null)
   const committed = nbMinus(display != null ? String(display) : String(value))
   const numberValue = draft ?? committed
+  // Spoken value: the unit, and `auto` named as such -- the bare number reads as a choice.
+  const sfx = suffix ? ` ${suffix}` : ''
+  const valueText = isAuto
+    ? `auto, ${nbMinus(String(display ?? autoValue ?? (min + max) / 2))}${sfx}`
+    : suffix || display != null ? `${committed}${sfx}` : undefined
 
   /* TOUCH DRAG, DRIVEN HERE RATHER THAN LEFT TO THE INPUT -- and the direction judged
      rather than declared. touch-action can only state one answer before anyone has moved:
@@ -460,7 +468,7 @@ export function AxisSlider({
         )}
         <span className="slider-label-left">
           <span className={`slider-label-text${tag ? ' slider-label-text--tagged' : ''}`}>
-            <span className="slider-label-name">{label}</span>
+            <span className="slider-label-name" id={nameId}>{label}</span>
             {allowAuto && autoButton && !disabled && (
             /* Beside the label, not in the value group. A keystroke cannot be the only
                way to reach a state — `a` needs a letter key, and no keypad this field
@@ -501,6 +509,8 @@ export function AxisSlider({
             autoComplete="off"
             spellCheck={false}
             role="spinbutton"
+            aria-labelledby={nameId}
+            aria-valuetext={valueText}
             aria-valuenow={typeof value === 'number' ? value : undefined}
             aria-valuemin={min}
             aria-valuemax={max}
@@ -653,6 +663,8 @@ export function AxisSlider({
         <input
           ref={rangeRef}
           type="range"
+          aria-labelledby={nameId}
+          aria-valuetext={valueText}
           min={min}
           max={max}
           step={step}

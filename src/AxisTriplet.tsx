@@ -148,6 +148,7 @@ export function AxisTriplet({
                 role="spinbutton"
                 aria-label={`${label} ${k}`}
                 aria-valuenow={shown(k)}
+                aria-valuetext={unit ? `${shown(k)} ${unit}` : undefined}
                 disabled={disabled}
                 value={draft && draft.k === k ? draft.text : nbMinus(String(shown(k)))}
                 onBlur={() => {
