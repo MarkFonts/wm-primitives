@@ -1,0 +1,17 @@
+<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><title>overlays contract</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/dial/shared/src/color.css"><link rel="stylesheet" href="/dial/shared/src/type.css"><link rel="stylesheet" href="/dial/shared/src/motion.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  :root{--ui-font:system-ui;--text-rgb:232,232,232}
+  body{background:var(--bg);color:var(--text);margin:0;padding:24px;font:14px/18px system-ui}
+  .row{position:relative;margin:0 0 12px;display:flex;gap:8px;align-items:center}
+  .row > [role=dialog],.row > [role=menu],.row > [role=listbox]{position:absolute;top:100%;left:0;z-index:2;background:#222;padding:8px;display:flex;flex-direction:column;gap:4px;width:300px}
+  .modal-scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:10}
+  .modal{background:#222;padding:16px;display:flex;gap:8px}
+</style>
+</head><body>
+<!-- GESTURES.md §16 (G112-G124). Empty until tests/behaviour/overlays.spec.ts adds the bundle it
+     builds from tests/fixtures/overlays-entry.tsx. -->
+<div id="root"></div>
+</body></html>
