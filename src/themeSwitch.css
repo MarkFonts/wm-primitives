@@ -34,6 +34,10 @@
   .wm-theme-stack > .wm-zoom[data-collapse] { justify-self: end; }
   .wm-theme-stack > .wm-zoom[data-open="true"]:not([data-moving]) { justify-self: stretch; }
   /* THE ROW: the other placement. The zoom (.wm-zoom--left) before the switch, on its line. */
+  /* The house ring on a keyboard press, here as well as in icon.css: the marks sit in 27px
+     targets that a host may clip, so the ring is drawn inside the box. */
+  .wm-theme .wm-icon-btn:focus-visible { outline: 2px solid var(--signal-ink, var(--accent, currentColor)); outline-offset: -2px; }
+
   .wm-theme-row { display: inline-flex; align-items: center; gap: var(--spacing-02, 6px); min-block-size: 27px; }
   .wm-theme-row > .wm-theme .wm-icon-btn { --icon-btn-pad: 0; inline-size: 27px; block-size: 27px; }
   /* the marks at the row's 27, as the zoom row's are: a 20px drawing in a target that draws nothing */

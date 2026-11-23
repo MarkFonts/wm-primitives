@@ -9,6 +9,7 @@
 import { useState, useEffect, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { Icon } from './Icon'
+import { toggleEmphasis, emphasisState, type EmphasisKind } from './emphasis'
 import './InlineEmphasisBubble.css'
 
 export interface InlineEmphasisBubbleProps {
@@ -31,7 +32,7 @@ export function InlineEmphasisBubble({
   boldLabelStyle,
   markers = { italic: '*', bold: '**' },
 }: InlineEmphasisBubbleProps) {
-  const [menu, setMenu] = useState<{ top: number; left: number; flip: boolean } | null>(null)
+  const [menu, setMenu] = useState<{ top: number; left: number; flip: boolean; block: HTMLElement; italic: boolean; bold: boolean } | null>(null)
 
   useEffect(() => {
     const onSel = () => {
@@ -46,24 +47,21 @@ export function InlineEmphasisBubble({
       // No room on the right → tuck at the top-LEFT corner instead. Bubble sits
       // above-and-out so it never lands between lines (keeps the leading readable).
       const flip = r.right + 4 + 120 > window.innerWidth - 8
-      setMenu({ top: r.top, left: flip ? r.left - 4 : r.right + 4, flip })
+      setMenu({ top: r.top, left: flip ? r.left - 4 : r.right + 4, flip, block: block as HTMLElement, ...emphasisState(block as HTMLElement, markers) })
     }
     document.addEventListener('selectionchange', onSel)
     return () => document.removeEventListener('selectionchange', onSel)
-  }, [selector])
+  }, [selector, markers.italic, markers.bold])
 
-  // Wrap the current selection in markup; renders styled on blur via the app's renderInline.
-  const apply = (marker: string) => {
-    const sel = window.getSelection()
-    if (!sel || sel.isCollapsed) return
-    const text = sel.toString()
-    document.execCommand('insertText', false, `${marker}${text}${marker}`)
-    setMenu(null)
-  }
+  // Toggle the marker on the current selection (emphasis.ts, shared with Cmd/Ctrl+I/B). The
+  // selection stays on the same words, so the bubble stays and its pressed state updates.
+  const apply = (kind: EmphasisKind) => { if (menu) toggleEmphasis(menu.block, kind, markers) }
 
   if (!menu) return null
   return createPortal(
     <div
+      role="toolbar"
+      aria-label="Text emphasis"
       className={`inline-emph-menu${menu.flip ? ' inline-emph-menu--left' : ''}`}
       style={{ top: menu.top, left: menu.left }}
     >
@@ -93,16 +91,24 @@ export function InlineEmphasisBubble({
       <button
         className="inline-emph-btn wm-icon-btn"
         title={`Wrap selection in ${markers.italic}italic${markers.italic}`}
+        type="button"
         aria-label="Italic"
-        onMouseDown={e => { e.preventDefault(); apply(markers.italic) }}
+        aria-pressed={menu.italic}
+        /* mousedown keeps the text selection alive; a keyboard press has no mousedown, and
+           arrives as a click with detail 0, so the two never both fire. */
+        onMouseDown={e => { e.preventDefault(); apply('italic') }}
+        onClick={e => { if (e.detail === 0) apply('italic') }}
       >
         <Icon name="format_italic" size={18} />
       </button>
       <button
         className="inline-emph-btn wm-icon-btn"
         title={`Wrap selection in ${markers.bold}bold${markers.bold}`}
+        type="button"
         aria-label="Bold"
-        onMouseDown={e => { e.preventDefault(); apply(markers.bold) }}
+        aria-pressed={menu.bold}
+        onMouseDown={e => { e.preventDefault(); apply('bold') }}
+        onClick={e => { if (e.detail === 0) apply('bold') }}
       >
         <Icon name="format_bold" size={18} />
       </button>

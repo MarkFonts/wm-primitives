@@ -28,6 +28,30 @@ Newest first.
 
 **Tests:** `tests/behaviour/collections.spec.ts` runs on `tests/fixtures/collections.html`. That fixture is a React page bundled by `tests/build-fixture.mjs` into a gitignored `.build/`, and its picker holds every codepoint Cal Sans encodes. The spec covers the keyboard paths, the Tab count (the picker is exactly one stop), roles and names, the live region, ring visibility, and a tap on the two touch profiles.
 
+## 2026-11-23 -- overlays: the behavior under every popover, menu, and modal
+
+**`src/overlays.tsx`: `usePopoverTrigger`, `Popover` / `usePopoverPanel`, `Menu` + `MenuItem`, `Dialog`, and `useOverlayClose`.** An audit counted about twelve hand-rolled popovers across the apps. Some had no Escape, most had no `aria-expanded` or `aria-haspopup`, and none moved focus in or brought it back to the trigger. Each app wrote its own outside-click listener and got a different corner of it wrong. This is one copy of the behavior and none of the look: every element is the host's, with the host's class, rendered where the host renders it, with no portal, no positioning, and no inline style. A panel that renders its own root (StyleScopeList) takes the hook's props instead of a wrapper. GESTURES.md §16 is the promise (G112–G124; G102–G111 are left free for the Cmd+I / Cmd+B rows on another branch), and `tests/behaviour/overlays.spec.ts` covers it, on React 19 here and checked once on React 18, which the consumers run.
+
+**React Aria underneath, the low-level hooks only, measured first.** esbuild, minified, React external, gzip -9: `usePopover` + `useOverlayTrigger` + `Overlay` is 21.4KB, `useMenu` + `useMenuTrigger` + the tree state 30.8KB, and everything the brief named 42.3KB, about what React and React DOM cost together (45.5KB). Two were dropped. `usePopover` positions the panel (inline top, left, and maxHeight from `useOverlayPosition`), which would move every panel off its house anchor. `useMenu` needs every menu rebuilt as a react-stately collection of `<Item>`s and adds 27KB, 6KB of it the menu strings in 34 languages. Arrow keys over `[role=menuitem*|option]` are thirty lines. What ships is `useOverlay`, `useOverlayTrigger`, `useModalOverlay`, `FocusScope`, `mergeProps`, and `useOverlayTriggerState`: **14.9KB gzipped for all of it, 6.8KB for a popover and a menu without the dialog** (the modal's scroll lock and focus trap tree-shake away).
+
+**Two places it parts from React Aria's defaults.** A non-modal panel is not React Aria's "dismissable" overlay, because that cancels the outside pointerdown but not the click or the focus, so the press half lands: a dial under it never starts its drag, but the button under it still clicks. Here the outside press closes the panel and lands whole (G113), which is also what every hand-rolled copy did. And the trigger of a panel carries `aria-haspopup="dialog"`, which React Aria leaves off on purpose (screen readers read any value as "menu"); the audit asked for it on every trigger.
+
+**Focus never lands on a field when a panel opens**, only on the panel itself or a menu's chosen item, because on a phone a field raises the keyboard. Escape in a field that answered it (the dial's value field blurs; the triplet prevents the key) keeps the panel open and the next Escape closes it, so a dial in a panel never loses the panel to the Escape that dropped its draft (G117). The iOS focus guard is untouched: a non-modal panel adds no touch listener, and a tap into a guarded editable closes it by the blur and leaves focus in the text (G123).
+
+**Not in `index.ts`.** `react-aria` and `react-stately` are optional peer dependencies no consumer has installed yet, and font-proofer and ReCal import the barrel, so a re-export there would break both builds. Apps import the file by path after `npm i react-aria react-stately`. No consumer is migrated here; `dist/dial.js` is unchanged (231.6KB), because the dial does not import it.
+
+## 2026-11-23 -- five accessibility one-offs
+
+**`AxisSlider`'s range and field are now named.** The label is a `<span>`, so neither input had a name; both point at it with `aria-labelledby`, and `aria-valuetext` says the unit (`16 px`) and `auto, 14` while auto. `AxisTriplet` already named its fields and now speaks the unit too. Its `.triplet-num:focus { outline: none }` is now `:focus:not(:focus-visible)` plus the house ring, so a keyboard user sees where they are.
+
+**A shut `Collapse` is `inert` and `aria-hidden`.** Max-height 0 hid the pixels and left every control inside a tab stop. `inert` is set from a layout effect rather than as a prop, because React 18 and 19 disagree on it and the peer range is `>=18`.
+
+**The emphasis bubble is a toolbar of real buttons, and it toggles.** `role="toolbar"`, `type="button"`, `aria-pressed`. It acted on mousedown only; that stays (it keeps the selection alive), and a keyboard press, which arrives as a click with `detail` 0, now acts too, so nothing fires twice. For `aria-pressed` to mean something the press had to become a toggle: it takes the marker off if the selection already has it, and the selection stays on the same words (it used to collapse and the bubble vanished). Cost: the bubble stays after a press.
+
+**Cmd/Ctrl+I and +B, in `EditableTextBlock`, behind a new `emphasis` prop.** The toggle lives in `src/emphasis.ts` and the bubble and the shortcut both call it, so there is one path and it writes `*` / `**` text, never `<i>` / `<b>`. It is opt-in because the block has no other idea of what markup its host supports; a host that mounts the bubble passes `emphasis`. The old markdown typing (`*word*`) is unchanged, and the toggle reads it back: `***x***` is both.
+
+**Focus rings, keyboard only.** `toggleGroup.css`, `themeSwitch.css`, `zoomControl.css`, and `toast.css` get the house ring (2px `--signal-ink`, as `button.css` and `icon.css`), inset where the control is clipped. GESTURES.md G102-G106.
+
 ---
 
 ## 2026-11-19 -- `forum` and `key` join the face

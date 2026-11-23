@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import { build } from '../build-fixture.mjs'
 
-/* Collections from the keyboard (GESTURES.md §16, G126-G136): StyleScopeList and
+/* Collections from the keyboard (GESTURES.md §18, G126-G136): StyleScopeList and
    StyleScopeDropdown (React Aria listbox) and GlyphPicker (a roving-tabindex grid), on
    tests/fixtures/collections.html (/dial/collections.html) -- the picker holds every
    codepoint Cal Sans encodes, so "one Tab stop" is measured against ~1,000 cells, not ten.
