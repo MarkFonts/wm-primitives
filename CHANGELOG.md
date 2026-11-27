@@ -28,7 +28,9 @@ The Cal Sans press-to-italic is opt-in, `data-scrollover="ital"`, and that rule 
 with the attribute doubled: layered, or at one attribute's specificity, it lost to the host's own
 `.pill { font-variation-settings }` and the attribute did nothing (the behaviour spec caught both). `wmScrollover.mount`
 sets the attribute on an element that lacks it, for the same reason -- without it the track is built and lies unstyled
-in the flow. `tests/fixtures/scrollover.html` is the fixture and the page to look at; `scrollover.spec.ts` holds the
+in the flow. The rest position is measured from rects, not `offsetLeft`: offsets are whole pixels, and a label
+centred in a wide box rested up to 0.75px off its anchor copy (CI's linux run found it; the site version has it too).
+`tests/fixtures/scrollover.html` is the fixture and the page to look at; `scrollover.spec.ts` holds the
 box, the accessible name, the rest position, the run, the landing and reduced motion. wordmark.nyc moves onto it in its
 own PR once its `shared/` pin includes this.
 

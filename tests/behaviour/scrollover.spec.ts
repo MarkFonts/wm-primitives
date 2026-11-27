@@ -36,7 +36,7 @@ test.describe('the scrollover', () => {
   test('at rest the anchor copy sits exactly on the label, and nothing runs', async ({ page }) => {
     for (const id of ['#a', '#b', '#c', '#d', '#e', '#f']) {
       const d = Math.abs(await mid(page, `${id} .so-anchor`) - await mid(page, `${id} .so-lab`))
-      expect(d, id).toBeLessThan(0.75)
+      expect(d, id).toBeLessThan(0.1)
       const state = await page.locator(`${id} .so-track`).evaluate(e => getComputedStyle(e).animationPlayState)
       expect(state, id).toBe('paused')
     }
@@ -63,7 +63,7 @@ test.describe('the scrollover', () => {
       await page.waitForTimeout(250)   // past the reset
       await expect(el).not.toHaveClass(/is-on|is-out/)
       const d = Math.abs(await mid(page, `${id} .so-anchor`) - await mid(page, `${id} .so-lab`))
-      expect(d, id).toBeLessThan(0.75)
+      expect(d, id).toBeLessThan(0.1)
     }
   })
 

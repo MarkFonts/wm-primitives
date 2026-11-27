@@ -111,8 +111,13 @@
   function measureOne(el) {
     const s = el.__wmScrollover; if (!s) return
     const a = s.track.querySelector('.so-anchor'), run = s.track.querySelector('.so-run')
-    const labMid = s.lab.offsetLeft + s.lab.offsetWidth / 2, aMid = a.offsetLeft + a.offsetWidth / 2
-    el.style.setProperty('--so-x0', (labMid - aMid).toFixed(2) + 'px')
+    if (el.classList.contains('is-on') || el.classList.contains('is-out')) return   // mid-run: the next rest measures
+    // Rects, not offsetLeft: offsets are whole pixels, and a label centred in a wide box sits
+    // on a fraction -- the anchor came to rest up to 0.75px off it (caught by CI, not by eye).
+    // The anchor's rect already includes the track's current translate, so add that back.
+    const tx = new DOMMatrixReadOnly(getComputedStyle(s.track).transform).m41
+    const lr = s.lab.getBoundingClientRect(), ar = a.getBoundingClientRect()
+    el.style.setProperty('--so-x0', (tx + (lr.left + lr.width / 2) - (ar.left + ar.width / 2)).toFixed(3) + 'px')
     el.style.setProperty('--so-runw', run.getBoundingClientRect().width.toFixed(2) + 'px')
   }
   function measure(el) {
