@@ -22,6 +22,8 @@ const HOSTS = {
   '/dial':         { root: resolve('tests/fixtures'), spa: false, shared: resolve('.') },
 }
 const PORT = Number(process.env.PORT ?? 4173)
+// <script async src="https://www.googletagmanager.com/gtag/js?id=..."></script>, any attribute order
+const GTAG = /<script\b[^>]*\bsrc=["']https:\/\/www\.googletagmanager\.com\/[^"']*["'][^>]*>\s*<\/script>/gi
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
   '.ttf': 'font/ttf', '.woff2': 'font/woff2', '.woff': 'font/woff', '.png': 'image/png', '.svg': 'image/svg+xml',
   '.avif': 'image/avif', '.txt': 'text/plain', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon' }
@@ -39,7 +41,14 @@ createServer(async (req, res) => {
     if (s.isDirectory()) file = join(file, 'index.html')
   } catch { if (spa) file = join(root, 'index.html') }      // SPA fallback
   try {
-    const body = await readFile(file)
+    let body = await readFile(file)
+    // NO ANALYTICS FROM TESTS. The hosts ship their Google tag in the HTML, so every test
+    // page load used to count as a visitor in the live GA properties: in the week to
+    // 2026-11-11 about a third of wordmark.nyc's users were these runs (/font-proofer/,
+    // /wordmark/..., one view each, 0s). Dropping the loader script is enough -- the inline
+    // gtag() stub only queues into dataLayer and sends nothing without it -- and it has no
+    // effect on layout or paint, so what the tests see is still what ships.
+    if (extname(file) === '.html') body = Buffer.from(String(body).replace(GTAG, '<!-- gtag.js removed by tests/serve.mjs -->'))
     res.writeHead(200, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream', 'cache-control': 'no-store' })
     res.end(body)
   } catch { res.writeHead(404); res.end() }
