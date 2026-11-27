@@ -131,6 +131,14 @@ export type {
 // fixed top right, no ground; the zoom inside opens down (.wm-zoom--down). Dismissal is
 // src/themeStack.js, a plain script (data-hide="scroll swipe", wmThemeStack.mount(el)).
 // The host puts the class on under its own phone rule. GESTURES.md §13.
+// The scrollover (src/scrollover.css -- no JS to export, and src/scrollover.js, a plain script
+// like zoomControl.js): a rollover that scrolls the control's own label. Any element with
+// data-scrollover -- a pill, a .wm-btn, a link -- is mounted at DOMContentLoaded, or
+// wmScrollover.mount(el); a child with data-scrollover-sep (an arrow) rides between the
+// repeats; data-scrollover="ital" adds Cal Sans's press-to-italic; --so-dur / --so-dir /
+// --so-gap are the knobs. The element keeps its own look and never changes width. The whole
+// recipe is the header of scrollover.css; the page to look at is tests/fixtures/scrollover.html.
+// Born on wordmark.nyc's pills as css/marquee.css (2026-11-11).
 // The house chip (src/chip.css -- no JS to export): one of a set, every option visible,
 // the chosen one filled. .wm-chip / .wm-chip-row, --small, --switch, --chip-color. A chip
 // chooses; .wm-btn does. Kernpare's context dial and font-proofer's preset bar draw it.

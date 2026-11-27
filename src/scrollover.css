@@ -1,0 +1,109 @@
+/* scrollover.css -- the scrollover: a rollover that scrolls the control's own label.
+ *
+ * THE WHOLE RECIPE, for the next session:
+ *
+ *   <link rel="stylesheet" href="shared/src/scrollover.css">
+ *   <a class="pill" data-scrollover href="…">Explore Cal Sans <span data-scrollover-sep>→</span></a>
+ *   <script src="shared/src/scrollover.js" defer></script>
+ *
+ * That is all of it. Any element takes the attribute -- a pill, a .wm-btn, a link, a
+ * nameplate -- and scrollover.js mounts every [data-scrollover] at DOMContentLoaded
+ * (wmScrollover.mount(el) for one added later). The element keeps its own look: this
+ * file draws no ground, no border, no radius, and sets no colour.
+ *
+ * WHAT IT DOES (Mark, 2026-11-11, on wordmark.nyc's pills, where it was css/marquee.css):
+ * the label stays put as one copy in a track of copies. At rest the track sits so its
+ * anchor copy is exactly where the label is, the other copies invisible. On hover the
+ * track starts moving FROM there, slow, and the neighbours snap in on both sides already
+ * moving at the same speed. On leave the copy nearest the spot slides into it (the one
+ * that just passed comes back; one approaching within 10% of the pitch finishes forward),
+ * stays lit while the others fade, and the track resets silently under the label.
+ * The element never changes width, and idle costs nothing: the animation is paused.
+ *
+ * THE KNOBS, all optional, all on the element (or any ancestor):
+ *
+ *   --so-dur: 6s     the time one run of copies takes to pass. Slow is the design.
+ *   --so-dir: 1      1 = left to right, -1 = right to left
+ *   --so-gap: 1em    the space between repeats
+ *
+ *   data-scrollover-sep   on a child (an arrow, a mark): it rides between the repeats.
+ *                         A child with class .arrow is taken as the sep too, which is
+ *                         what wordmark.nyc's pills already carry.
+ *   data-scrollover="ital"   Cal Sans only: a press slides the letters to the ital axis.
+ *                         Set --so-wght and --so-geom (700 / 50 by default) to the
+ *                         element's own weight and GEOM: font-variation-settings is one
+ *                         declaration and has to restate every axis it is not changing.
+ *
+ * WHAT THE HOST OWNS. If the element has a hover of its own (wordmark's pill dims and
+ * nudges its arrow), the host switches that off for [data-scrollover] -- the scrollover
+ * IS the hover, and two hovers on one control is one too many:
+ *
+ *   .pill[data-scrollover]:hover { opacity: 1; }
+ *   .pill[data-scrollover]:hover .arrow { transform: none; }
+ *
+ * THE TRACK INHERITS THE ELEMENT'S PADDING, never a hard-coded lift: a pill whose text
+ * sits 1px high by its own padding keeps its copies 1px high (the case-study pill dipped
+ * when this was a number).
+ *
+ * No touch, no reduced motion: on (hover: none) the track is not drawn at all, and under
+ * prefers-reduced-motion it does not run. The label is the accessible text; the track is
+ * aria-hidden.
+ *
+ * @layer wm.controls, like the dial and the button, so a host's plain rule always wins. */
+@layer wm.controls {
+  [data-scrollover] {
+    position: relative;
+    overflow: clip;
+    --so-dur: 6s;
+    --so-dir: 1;
+    --so-gap: 1em;
+    --so-x0: 0px;          /* js: the translate that puts the anchor on the label */
+    --so-runw: 0px;        /* js: one run's width */
+  }
+  [data-scrollover] .so-lab { display: inline-flex; align-items: center; gap: .3em; }
+  [data-scrollover] .so-track {
+    position: absolute; inset: 0;
+    box-sizing: border-box;
+    padding: inherit;          /* the element's own box, lift included */
+    padding-inline: 0;
+    display: flex; align-items: center;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateX(var(--so-x0));
+    animation: so-run var(--so-dur) linear infinite paused;
+  }
+  [data-scrollover] .so-run { display: flex; align-items: center; gap: var(--so-gap); padding-inline-end: var(--so-gap); flex: none; }
+  [data-scrollover] .so-run > span { display: inline-flex; align-items: center; gap: .3em; opacity: 0;
+    /* token-lint: allow -- 500ms on a steep ease: the neighbours SNAP in and the tail is the settle; no scale step is this curve */
+    transition: opacity .5s cubic-bezier(0, .95, .1, 1); }
+  [data-scrollover] .so-run > span.so-anchor { opacity: 0; transition: none; }
+
+  [data-scrollover].is-on .so-lab,
+  [data-scrollover].is-out .so-lab { visibility: hidden; }
+  [data-scrollover].is-on .so-track { animation-play-state: running; }
+  [data-scrollover].is-on .so-run > span { opacity: 1; }
+  [data-scrollover].is-out .so-run > span { transition: opacity var(--dur-layout, 300ms) ease-out; }
+  [data-scrollover].is-out .so-run > span.so-landing { opacity: 1; transition: none; }
+
+  @media (prefers-reduced-motion: reduce) { [data-scrollover] .so-track { animation: none; } }
+  @media (hover: none) { [data-scrollover] .so-track { display: none; } }
+}
+/* OUTSIDE THE LAYER, on purpose. Everything above is structure a host is welcome to
+   overrule. This is not: data-scrollover="ital" is the host ASKING for the press, and a
+   layered rule would lose to the host's own unlayered `font-variation-settings` on the same
+   element (wordmark's .pill sets one) -- the attribute would be there and nothing would
+   happen. One declaration, so it restates wght and GEOM (--so-wght, --so-geom); `transition` likewise restates
+   opacity, which is the one a pill is likely to have had. */
+[data-scrollover][data-scrollover~="ital"] {   /* the attribute twice: one class more than a host's `.pill`, whatever the load order */
+  --so-ital: 0;
+  --so-wght: 700; --so-geom: 50;
+  font-variation-settings: 'wght' var(--so-wght), 'GEOM' var(--so-geom), 'ital' var(--so-ital);
+  transition: opacity var(--dur-fast, 140ms), font-variation-settings var(--dur-med, 240ms);
+}
+[data-scrollover][data-scrollover~="ital"]:active { --so-ital: 1; }
+
+/* Also outside: @keyframes are not style rules and layers do not order them. */
+@keyframes so-run {
+  from { transform: translateX(var(--so-x0)); }
+  to   { transform: translateX(calc(var(--so-x0) + var(--so-dir) * var(--so-runw))); }
+}
