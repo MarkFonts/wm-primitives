@@ -12,6 +12,30 @@ Newest first.
 
 ---
 
+## 2026-11-26 -- the scrollover: wordmark.nyc's marquee hover becomes a primitive
+
+The pill hover from wordmark.nyc (`css/marquee.css` + `js/marquee.js`, 2026-11-11) is now `src/scrollover.css` +
+`src/scrollover.js`, named by Mark. Same design -- the label is the anchor copy of a track of copies, hover runs the
+track from the label's own position, leave lands the nearest copy and resets silently -- with the three things that
+tied it to that site taken out so the next session does not have to read the code to use it:
+
+- **Any element, not `.pill`.** The selector is `[data-scrollover]`; the file draws no ground and sets no colour.
+- **Clones, not `textContent`.** The copies are clones of the label's nodes, so a mark or an icon repeats; the
+  separator is `[data-scrollover-sep]` (`.arrow` still counts, which is what the site's pills carry).
+- **As many copies as the box needs.** It was five, which a two-letter label in a wide button did not fill.
+
+The Cal Sans press-to-italic is opt-in, `data-scrollover="ital"`, and that rule alone sits OUTSIDE `@layer wm.controls`
+with the attribute doubled: layered, or at one attribute's specificity, it lost to the host's own
+`.pill { font-variation-settings }` and the attribute did nothing (the behaviour spec caught both). `wmScrollover.mount`
+sets the attribute on an element that lacks it, for the same reason -- without it the track is built and lies unstyled
+in the flow. The rest position is measured from rects, not `offsetLeft`: offsets are whole pixels, and a label
+centred in a wide box rested up to 0.75px off its anchor copy (CI's linux run found it; the site version has it too).
+`tests/fixtures/scrollover.html` is the fixture and the page to look at; `scrollover.spec.ts` holds the
+box, the accessible name, the rest position, the run, the landing and reduced motion. wordmark.nyc moves onto it in its
+own PR once its `shared/` pin includes this.
+
+---
+
 ## 2026-11-23 -- the eased corner law, behind a flag
 
 **A second corner law, `<html data-corners="eased">`, off by default. Rects keep `superellipse(1.2)` with every radius ×1.125; pills get an eased cap with a fixed 1.2:1 choke at every height, drawn with `clip-path: shape()`.** Mark chose it from the rendered G2 audit and the live corner bench: the squircle bulges into the box of the radius it was given, and on a pill any superellipse above 1 flattens the nose. The spec is CHROME.md "Corners". Without the attribute, nothing changes a pixel.

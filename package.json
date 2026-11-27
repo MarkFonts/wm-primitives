@@ -9,6 +9,7 @@
     "*.css",
     "./src/zoomControl.js",
     "./src/themeStack.js",
+    "./src/scrollover.js",
     "./src/jxl.js",
     "./src/confirm.js",
     "./src/corners.js"
