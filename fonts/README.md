@@ -73,3 +73,14 @@ FeatureVariations did not survive the build, or if this checkout is dirty or off
 `--varonly` stops before the statics, so it warns that any static it would publish is
 from an earlier run. Don't hand-copy: the point of the flag is that the version is
 guaranteed by git rather than asserted by whoever remembered to drag the file across.
+
+## Spectral VF (work in progress)
+
+`SpectralVF[wght].ttf` and `SpectralVF-Italic[wght].ttf`: Production Type's Spectral
+(OFL) joined into variable fonts, wght 200-800, from its own three masters per style.
+Named "Spectral VF" for now so it cannot be mistaken for the released Spectral. Here for
+wordproof.app/wordmark/spectralvf; not a house face and not published by calbuild.
+
+Built from MarkFonts/Spectral, branch `spectral-vf-build` (c7353107), with gftools
+builder. Advance widths equal the 2.005 statics at every named weight. This build has no
+capital sharp s (U+1E9E, still two S's in the source) and no small-cap fonts.
